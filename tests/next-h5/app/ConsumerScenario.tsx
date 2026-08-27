@@ -14,8 +14,8 @@ import {
   MeuFormTextInput,
   useMeuForm
 } from "@meu/form-react";
-import { MeuIconCheck } from "@meu/icons-react";
-import { Button, Checkbox, ConfigProvider, Radio, SearchField } from "@meu/mobile";
+import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
+import { Button, Cell, Checkbox, ConfigProvider, List, Radio, SearchField } from "@meu/mobile";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -41,6 +41,7 @@ export function ConsumerScenario() {
   const [savedAdvanced, setSavedAdvanced] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedFor, setSearchedFor] = useState("");
+  const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -84,6 +85,26 @@ export function ConsumerScenario() {
           <output aria-live="polite">
             {searchedFor ? `正在搜索：${searchedFor}` : "等待搜索"}
           </output>
+        </div>
+
+        <div className="integration-list">
+          <List header="店铺入口" footer="用于验证原生按钮、链接与列表语义" mode="card">
+            <Cell
+              title="商品搜索"
+              description="按名称或货号查找"
+              prefix={<MeuIconSearch size={22} />}
+              onClick={() => setSelectedEntry("已打开商品搜索")}
+            />
+            <Cell title="订单中心" extra="3 个待处理" href="#orders" />
+            <Cell
+              title="实名认证"
+              prefix={<MeuIconCheck size={22} />}
+              extra="已完成"
+              arrow={false}
+            />
+            <Cell title="停用店铺" disabled onClick={() => setSelectedEntry("不应触发")} />
+          </List>
+          <output aria-live="polite">{selectedEntry}</output>
         </div>
 
         <MeuForm

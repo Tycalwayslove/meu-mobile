@@ -48,6 +48,19 @@ test("searches and clears with the SearchField contract", async ({ page }) => {
   await expect(search).toBeFocused();
 });
 
+test("keeps Cell actions, links and List semantics native", async ({ page }) => {
+  const list = page.getByRole("list", { name: "店铺入口" });
+  await expect(list).toBeVisible();
+  await expect(list.getByRole("listitem")).toHaveCount(4);
+
+  const action = list.getByRole("button", { name: /商品搜索/ });
+  await action.click();
+  await expect(page.getByText("已打开商品搜索")).toBeVisible();
+
+  await expect(list.getByRole("link", { name: /订单中心/ })).toHaveAttribute("href", "#orders");
+  await expect(list.getByRole("button", { name: "停用店铺" })).toBeDisabled();
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
@@ -97,7 +110,7 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
 
   const controlHeights = await page
     .locator(
-      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"], [data-meu-component="stepper"], [data-meu-component="slider"], [data-meu-component="rate"], [data-meu-component="selector"]'
+      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"], [data-meu-component="stepper"], [data-meu-component="slider"], [data-meu-component="rate"], [data-meu-component="selector"], [data-meu-component="cell"]'
     )
     .evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
   expect(controlHeights.every((height) => height >= 44)).toBe(true);

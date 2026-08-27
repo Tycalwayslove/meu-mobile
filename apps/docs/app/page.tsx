@@ -2,6 +2,7 @@ import { ConfigProvider } from "@meu/mobile";
 
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
 import { FormDemo } from "./FormDemo";
+import { InformationDemo } from "./InformationDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import styles from "./page.module.css";
 
@@ -36,6 +37,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>数值、评分与卡片选择绑定</h2>
           <AdvancedEntryDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>信息行与分组列表</h2>
+          <InformationDemo />
         </section>
       </main>
     </ConfigProvider>

@@ -25,6 +25,9 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Rate 组件集：[Meu/Rate（57:197）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=57-197)，15 个 variants
 - Selector 组件集：[Meu/Selector（58:66）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=58-66)，16 个 variants
 - Batch 2C 验证展板：[Core combinations（59:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=59-2)、[Dark mode（59:66）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=59-66)；可见 fill / stroke 的变量绑定缺口为 0
+- Batch 3A Cell 页面：[页面（67:214）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=67-214)、[Meu/Cell（67:482）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=67-482)，24 个 `Interactive × Description × Prefix × State` variants
+- Batch 3A List 页面：[页面（70:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=70-2)、[Meu/List（70:589）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=70-589)，12 个 `Mode × Divider × Header` variants
+- Batch 3A 明暗主题展板：[Cell Light / Dark（67:483 / 67:501）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=67-483)、[List Light / Dark（70:590 / 70:632）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=70-590)；组件树硬编码 paint 为 0，代码映射候选为 `packages/mobile/src/List/Cell.tsx` 与 `packages/mobile/src/List/List.tsx`
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

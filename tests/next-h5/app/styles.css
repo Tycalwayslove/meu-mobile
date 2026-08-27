@@ -95,6 +95,18 @@ textarea {
   font-size: 12px;
 }
 
+.integration-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.integration-list output {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-result {
   display: block;
   min-height: 20px;
