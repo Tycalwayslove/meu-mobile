@@ -43,6 +43,7 @@ import {
   NavBar,
   PaginationDots,
   Progress,
+  PullToRefresh,
   Popover,
   Popup,
   Radio,
@@ -206,6 +207,7 @@ export function ConsumerScenario() {
   const [contentTab, setContentTab] = useState("overview");
   const [primarySection, setPrimarySection] = useState("home");
   const [feedbackProgress, setFeedbackProgress] = useState(64);
+  const [refreshCount, setRefreshCount] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -268,6 +270,20 @@ export function ConsumerScenario() {
             {searchedFor ? `正在搜索：${searchedFor}` : "等待搜索"}
           </output>
         </div>
+
+        <section className="integration-refresh" aria-label="下拉刷新">
+          <PullToRefresh
+            actionLabel="刷新订单数据"
+            canPull={() => true}
+            onRefresh={async () => {
+              await new Promise<void>((resolve) => window.setTimeout(resolve, 100));
+              setRefreshCount((current) => current + 1);
+            }}
+          >
+            <strong>可刷新订单摘要</strong>
+            <p>刷新次数：{refreshCount}</p>
+          </PullToRefresh>
+        </section>
 
         <section className="integration-navigation" aria-label="导航组件">
           <NavBar

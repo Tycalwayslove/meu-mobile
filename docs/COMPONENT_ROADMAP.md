@@ -64,7 +64,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 ## Batch 6：手势、高成本与业务验证组件
 
-- PullToRefresh、InfiniteList、Carousel、SwipeActions、FloatingPanel
+- PullToRefresh（已完成）、InfiniteList、Carousel、SwipeActions、FloatingPanel
 - ImageViewer、ImageUploader、NumberKeyboard、PasscodeInput、TreeSelect、VirtualList、Watermark
 
 重点：只有完成 iOS Safari、Android Chrome、性能和替代操作路径验证后才能进入稳定 API。

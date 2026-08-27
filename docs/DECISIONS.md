@@ -96,3 +96,15 @@ draft：首次点按产生同日草稿但保持 `complete=false`，第二次点�
 快捷范围只替换 draft，不自动确认；取消、遮罩和 Escape 丢弃 draft，确认才提交。核心组件接受
 `DateAdapter<TDate>` 并保持日期库、业务时区、路由与接口中立。`MeuFormDateRangePicker` 组合 Field 与
 PickerTrigger，只在确认时写入 `readonly [TDate, TDate] | null`，因此取消不触发 dirty，校验焦点回到原生触发按钮。
+
+## ADR-015：PullToRefresh 增强现有滚动边界，不拥有滚动容器
+
+PullToRefresh 包裹内容但不设置固定高度或 `overflow`，默认向上查找最近的可滚动祖先，并且只在其
+`scrollTop <= 0` 时开始下拉。复杂宿主可以提供平台中立的 `canPull()`，无需把 HTMLElement 或 Window 泄漏到
+公开契约。确认纵向手势后才用 non-passive touchmove 阻止原生滚动；横向手势、向上移动和未越过阈值的下拉
+均不触发刷新。
+
+公开状态为 idle / pulling / ready / refreshing / complete。越过 threshold 后松手只调用一次 `onRefresh`，
+Promise 完成后短暂显示 complete，失败通过 `onRefreshError` 报告并复位。内容与 indicator 仅使用 transform，
+reduced-motion 下缩短复位动画。组件同时提供获得焦点时显现的原生刷新按钮和 `aria-busy` / live status，确保
+触摸手势不是唯一操作路径；请求缓存、错误 Toast 和业务空状态仍由调用方负责。

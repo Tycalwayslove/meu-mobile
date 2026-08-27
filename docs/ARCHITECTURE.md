@@ -38,6 +38,8 @@ icons-core ─> icons-react            │
   它不依赖 Popup、日期库或业务时区。
 - DateRangePicker 组合 Calendar 的范围算法与 Popup 的模态边界，仅新增 draft、快捷范围和确认/回滚；
   表单触发器留在 `form-react`，核心组件不读取业务表单、路由或接口状态。
+- PullToRefresh 不制造滚动容器，只在最近滚动边界到顶后接管纵向下拉；异步刷新、状态播报和键盘按钮
+  属于 React 适配层，`canPull()`、阈值与状态契约可被未来平台实现复用。
 
 ## Next.js 边界
 

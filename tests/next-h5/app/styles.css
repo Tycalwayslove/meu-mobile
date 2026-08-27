@@ -95,6 +95,29 @@ textarea {
   font-size: 12px;
 }
 
+.integration-refresh {
+  margin-bottom: 24px;
+  overflow: hidden;
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-refresh [data-meu-component="pull-to-refresh"] > div:last-child {
+  min-height: 112px;
+  padding: 20px;
+  background: var(--meu-color-subtle);
+}
+
+.integration-refresh strong,
+.integration-refresh p {
+  margin: 0;
+}
+
+.integration-refresh p {
+  margin-top: 8px;
+  color: var(--meu-color-muted);
+}
+
 .integration-list {
   display: grid;
   gap: 8px;

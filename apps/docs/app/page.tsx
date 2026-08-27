@@ -13,6 +13,7 @@ import { InformationDemo } from "./InformationDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { OverlayDemo } from "./OverlayDemo";
 import { PickerDemo } from "./PickerDemo";
+import { PullToRefreshDemo } from "./PullToRefreshDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import { TimePickerDemo } from "./TimePickerDemo";
 import styles from "./page.module.css";
@@ -72,6 +73,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>平台无关日历与即时表单绑定</h2>
           <CalendarDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>下拉刷新与键盘等价操作</h2>
+          <PullToRefreshDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

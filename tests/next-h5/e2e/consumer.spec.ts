@@ -48,6 +48,31 @@ test("searches and clears with the SearchField contract", async ({ page }) => {
   await expect(search).toBeFocused();
 });
 
+test("refreshes through pull and keyboard-equivalent paths", async ({ page }) => {
+  const section = page.getByRole("region", { name: "下拉刷新" });
+  const root = section.locator('[data-meu-component="pull-to-refresh"]');
+  await root.evaluate((node) => {
+    const dispatch = (type: string, y: number, touching: boolean) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "touches", {
+        value: touching ? [{ clientX: 20, clientY: y }] : []
+      });
+      node.dispatchEvent(event);
+    };
+    dispatch("touchstart", 20, true);
+    dispatch("touchmove", 220, true);
+    dispatch("touchend", 220, false);
+  });
+  await expect(root).toHaveAttribute("data-status", /refreshing|complete|idle/);
+  await expect(section.getByText("刷新次数：1")).toBeVisible();
+
+  const keyboardAction = section.getByRole("button", { name: "刷新订单数据" });
+  await keyboardAction.focus();
+  await keyboardAction.press("Enter");
+  await expect(root).toHaveAttribute("aria-busy", "true");
+  await expect(section.getByText("刷新次数：2")).toBeVisible();
+});
+
 test("keeps Cell actions, links and List semantics native", async ({ page }) => {
   const list = page.getByRole("list", { name: "店铺入口" });
   await expect(list).toBeVisible();
