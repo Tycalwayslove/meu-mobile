@@ -259,6 +259,44 @@ test("snaps and drag-dismisses an accessible modal BottomSheet", async ({ page }
   await expect(section.getByText("BottomSheet 已关闭：drag")).toBeVisible();
 });
 
+test("runs ActionMenu actions with danger confirmation", async ({ page }) => {
+  const section = page.getByRole("region", { name: "浮层基础组件" });
+  const trigger = section.getByRole("button", { name: "打开订单操作菜单" });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+
+  const menu = page.getByRole("dialog", { name: "订单操作" });
+  const copyAction = menu.getByRole("button", { name: /复制订单号/ });
+  await expect(menu).toBeVisible();
+  await expect(menu).toHaveAttribute("aria-modal", "true");
+  await expect(menu).toHaveAttribute("aria-describedby");
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await expect(copyAction).toBeFocused();
+  await expect(menu.locator('[data-action-group="neutral"]')).toBeVisible();
+  await expect(menu.locator('[data-action-group="danger"]')).toBeVisible();
+  await expect(menu.locator('[data-action-group="cancel"]')).toBeVisible();
+
+  await copyAction.click();
+  await expect(menu).toHaveAttribute("aria-busy", "true");
+  await expect(menu.getByRole("button", { name: "取消" })).toBeDisabled();
+  await expect(section.getByText("ActionMenu 操作：已复制订单号")).toBeVisible();
+  await expect(menu).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+
+  await trigger.click();
+  await menu.getByRole("button", { name: "永久删除订单" }).click();
+  const confirmation = page.getByRole("alertdialog", { name: "删除测试订单？" });
+  await expect(confirmation).toBeVisible();
+  await expect(confirmation.getByRole("button", { name: "取消" })).toBeFocused();
+  await expect(menu.getByRole("button", { name: "永久删除订单" })).toBeDisabled();
+  await confirmation.getByRole("button", { name: "永久删除" }).click();
+  await expect(section.getByText("ActionMenu 操作：已删除订单")).toBeVisible();
+  await expect(confirmation).toBeHidden();
+  await expect(menu).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
 test("positions and dismisses a non-modal Popover without locking scroll", async ({
   browserName,
   page

@@ -23,6 +23,8 @@ icons-core ─> icons-react            │
 - 禁止组件跨目录导入另一个组件的私有文件。
 - Portal 浮层若嵌套在 Dialog 或 Popup 中，必须声明为外层焦点域的合法分支，避免焦点被错误拉回。
 - BottomSheet 的拖拽只绑定 44 px 手柄，snap 动画只更新 transform，不与可滚动内容争抢手势。
+- ActionMenu 复用 Popup 的模态边界，操作项保持原生 button 语义；危险操作通过嵌套 Dialog 二次确认，
+  两层浮层依赖焦点栈与引用计数滚动锁协同。
 
 ## Next.js 边界
 

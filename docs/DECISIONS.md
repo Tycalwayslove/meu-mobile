@@ -34,3 +34,11 @@ BottomSheet 复用现有 Portal、Mask、滚动锁和焦点圈定，自持仅由
 不采用已停止维护且不支持 React 19 的 `react-spring-bottom-sheet`；不采用官方已声明不维护的 Vaul；
 也不采用仍有 React StrictMode 动画问题、默认缺少可访问性且要求 Motion peer 的 `react-modal-sheet`。
 Meu 公开数字比例与 `content` snap 语义、键盘等价路径和关闭原因，未来 uni-app 按平台重新实现手势层。
+
+## ADR-008：ActionMenu 使用模态 Dialog 语义和原生按钮
+
+ActionMenu 是由明确用户意图触发的底部操作面板，组合 Popup 的 Portal、Mask、焦点圈定、滚动锁和安全区，
+不复用 BottomSheet 的拖拽与 snap 引擎。容器使用 `role="dialog"`，各操作使用原生 button；不采用需要
+方向键漫游焦点的桌面式 `menu/menuitem` 语义，也不承载选择、勾选和子菜单。危险操作始终移入独立分组并
+通过 Dialog 二次确认，异步执行期间同时锁定动作与关闭入口。命令式 API 由 Provider 保留当前 React tree
+的主题、语言和 Portal 上下文，未来 uni-app 复用动作顺序、分组、确认和关闭原因契约。

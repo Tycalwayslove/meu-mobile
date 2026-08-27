@@ -1,4 +1,4 @@
-import { ConfigProvider, DialogProvider, ToastProvider } from "@meu/mobile";
+import { ActionMenuProvider, ConfigProvider, DialogProvider, ToastProvider } from "@meu/mobile";
 
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
 import { ContainerDemo } from "./ContainerDemo";
@@ -64,10 +64,12 @@ export default function HomePage() {
           <FeedbackDemo />
         </section>
         <section className={styles.formSection}>
-          <h2>遮罩、基础浮层、BottomSheet、Popover、Dialog 与 Toast</h2>
+          <h2>遮罩、基础浮层、BottomSheet、ActionMenu、Popover、Dialog 与 Toast</h2>
           <ToastProvider>
             <DialogProvider>
-              <OverlayDemo />
+              <ActionMenuProvider>
+                <OverlayDemo />
+              </ActionMenuProvider>
             </DialogProvider>
           </ToastProvider>
         </section>

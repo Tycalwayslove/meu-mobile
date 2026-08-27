@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActionMenu,
   BottomSheet,
   Button,
   Dialog,
@@ -9,6 +10,7 @@ import {
   Popup,
   Space,
   useDialog,
+  useActionMenu,
   useToast
 } from "@meu/mobile";
 import { useRef, useState } from "react";
@@ -18,12 +20,15 @@ export function OverlayDemo() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("等待 Dialog 操作");
   const dialog = useDialog();
+  const actionMenu = useActionMenu();
   const toast = useToast();
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
   const sheetTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
+  const actionMenuTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div style={{ display: "grid", gap: 20 }}>
@@ -89,6 +94,33 @@ export function OverlayDemo() {
           onClick={() => setDialogOpen(true)}
         >
           打开删除确认
+        </Button>
+        <Button
+          ref={actionMenuTriggerRef}
+          tone="neutral"
+          variant="outline"
+          onClick={() => setActionMenuOpen(true)}
+        >
+          打开订单操作
+        </Button>
+        <Button
+          tone="neutral"
+          variant="outline"
+          onClick={() =>
+            actionMenu.show({
+              title: "分享商品",
+              actions: [
+                {
+                  key: "copy",
+                  label: "复制链接",
+                  onPress: () => setDialogMessage("已复制商品链接")
+                },
+                { key: "system", label: "系统分享" }
+              ]
+            })
+          }
+        >
+          命令式操作菜单
         </Button>
         <Button
           tone="neutral"
@@ -182,6 +214,41 @@ export function OverlayDemo() {
           </Button>
         </div>
       </BottomSheet>
+      <ActionMenu
+        open={actionMenuOpen}
+        title="订单操作"
+        description="选择一个操作继续"
+        returnFocusRef={actionMenuTriggerRef}
+        actions={[
+          {
+            key: "copy",
+            label: "复制订单号",
+            description: "MEU-2026-0828",
+            onPress: async () => {
+              await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+              setDialogMessage("已复制演示订单号");
+            }
+          },
+          { key: "share", label: "分享订单" },
+          {
+            key: "delete",
+            label: "永久删除",
+            tone: "danger",
+            confirmation: {
+              title: "删除订单？",
+              description: "订单及关联记录将被永久删除，此操作无法撤销。",
+              confirmText: "永久删除"
+            },
+            onPress: () => setDialogMessage("已从操作菜单删除演示订单")
+          }
+        ]}
+        onOpenChange={(nextOpen, details) => {
+          setActionMenuOpen(nextOpen);
+          if (!nextOpen && details.reason !== "action") {
+            setDialogMessage(`操作菜单已关闭：${details.reason}`);
+          }
+        }}
+      />
       <Dialog
         open={dialogOpen}
         title="删除订单？"

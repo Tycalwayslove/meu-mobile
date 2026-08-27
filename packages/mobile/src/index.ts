@@ -138,6 +138,19 @@ export type {
   DialogProviderProps,
   DialogShowOptions
 } from "./Dialog";
+export { ActionMenu, ActionMenuProvider, useActionMenu } from "./ActionMenu";
+export type {
+  ActionMenuAction,
+  ActionMenuActionTone,
+  ActionMenuApi,
+  ActionMenuCloseDetails,
+  ActionMenuConfirmation,
+  ActionMenuController,
+  ActionMenuOpenChangeDetails,
+  ActionMenuProps,
+  ActionMenuProviderProps,
+  ActionMenuShowOptions
+} from "./ActionMenu";
 export { Toast, ToastProvider, useToast } from "./Toast";
 export type {
   ToastAction,
