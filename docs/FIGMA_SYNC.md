@@ -54,6 +54,8 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4C Toast QA：Default / Entering 两套组件均覆盖 neutral、success、warning、danger，top、center、bottom 以及 message / action；Entering 以 0.72 opacity 静态表达内部进入动效，不虚构公开 state API。两套组件共 288 个可见 paint 变量绑定，未绑定为 0，重复 variant 为 0，操作目标高度为 44 px；Light / Dark 预览、默认 3 秒、Undo 至少 5 秒、读屏播报与不抢焦点说明均已验证
 - Batch 4D Popover 页面：[Popover（172:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-2)；文档与画布为 [172:7](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-7) / [172:35](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-35)，组件集为 [Meu/Popover（172:264）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-264)
 - Batch 4D Popover QA：24 个 `Placement × Arrow` variants 覆盖四方向的 center / start / end 与箭头开关；216 个可见 paint 全部绑定 Foundation 变量，未绑定、重复 variant、未命名层与小于 44 px 的锚点均为 0，24 个浮层均应用阴影。Light / Dark 预览为 `172:61`；open、trigger、dismiss reason、Portal、collision、focus 与非模态限制仅作为运行时契约记录，不虚构为视觉 variant
+- Batch 4D BottomSheet 页面：[BottomSheet（176:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=176-2)；文档、画布与主题预览为 [176:7](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=176-7) / [176:32](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=176-32) / [176:58](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=176-58)，组件集为 [Meu/BottomSheet（178:102）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=178-102)
+- Batch 4D BottomSheet QA：8 个 `Title × Height` variants 覆盖有无标题与 Content / Peek / Half / Full 代表性高度；120 个可见 paint 全部绑定 Foundation 变量，未绑定、重复 variant、未命名层与小于 44 px 的拖拽手柄均为 0，8 个浮层均应用阴影。受控/非受控可见性、snapPoints 归一化、无障碍命名、handle-only 拖拽与键盘等价操作、dismiss reasons、Portal / Mask / 滚动锁 / 焦点恢复 / safe area / forceMount 均记录为运行时契约，不虚构为视觉 variant
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程
@@ -69,4 +71,4 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 Figma 套餐、席位与 Library 发布状态，不能用 npm 发布替代。
 
 发生冲突时，以 `meu-design` 和代码中的可审查契约为准，并在 Governance 页面记录差异，不做静默覆盖。
-当前待办只剩：具备相应席位后发布 Library 并重跑 Code Connect；Button 的 pressed 状态待代码契约定稿后补入。
+Figma 治理待办为：具备相应席位后发布 Library 并重跑 Code Connect；Button 的 pressed 状态待代码契约定稿后补入。后续组件继续按路线图逐批同步。

@@ -1,16 +1,28 @@
 "use client";
 
-import { Button, Dialog, Mask, Popover, Popup, Space, useDialog, useToast } from "@meu/mobile";
+import {
+  BottomSheet,
+  Button,
+  Dialog,
+  Mask,
+  Popover,
+  Popup,
+  Space,
+  useDialog,
+  useToast
+} from "@meu/mobile";
 import { useRef, useState } from "react";
 
 export function OverlayDemo() {
   const [popupOpen, setPopupOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("等待 Dialog 操作");
   const dialog = useDialog();
   const toast = useToast();
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
+  const sheetTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -36,6 +48,14 @@ export function OverlayDemo() {
       <Space wrap gap={2}>
         <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
           打开配送浮层
+        </Button>
+        <Button
+          ref={sheetTriggerRef}
+          tone="neutral"
+          variant="outline"
+          onClick={() => setSheetOpen(true)}
+        >
+          打开筛选面板
         </Button>
         <Popover
           aria-label="订单快捷操作"
@@ -137,6 +157,31 @@ export function OverlayDemo() {
           </Space>
         </div>
       </Popup>
+      <BottomSheet
+        open={sheetOpen}
+        title="筛选条件"
+        showCloseButton
+        snapPoints={[0.35, 0.6, 0.9]}
+        returnFocusRef={sheetTriggerRef}
+        onOpenChange={(nextOpen, details) => {
+          setSheetOpen(nextOpen);
+          if (!nextOpen) setDialogMessage(`筛选面板已关闭：${details.reason}`);
+        }}
+      >
+        <div style={{ display: "grid", gap: 16, padding: 20 }}>
+          <p style={{ margin: 0, color: "var(--meu-color-muted)", lineHeight: 1.6 }}>
+            可拖动手柄，或使用方向键、Home 与 End 调整面板高度。
+          </p>
+          <Button
+            onClick={() => {
+              setSheetOpen(false);
+              setDialogMessage("已应用演示筛选");
+            }}
+          >
+            应用筛选
+          </Button>
+        </div>
+      </BottomSheet>
       <Dialog
         open={dialogOpen}
         title="删除订单？"

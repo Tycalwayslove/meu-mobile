@@ -99,6 +99,15 @@ export { Result } from "./Result";
 export type { ResultProps, ResultStatus } from "./Result";
 export { Mask } from "./Mask";
 export type { MaskOpacity, MaskProps } from "./Mask";
+export { BottomSheet } from "./BottomSheet";
+export type {
+  BottomSheetOpenChangeDetails,
+  BottomSheetOpenChangeReason,
+  BottomSheetProps,
+  BottomSheetSnapChangeDetails,
+  BottomSheetSnapChangeReason,
+  BottomSheetSnapPoint
+} from "./BottomSheet";
 export { Popup } from "./Popup";
 export type { PopupPosition, PopupProps } from "./Popup";
 export { Popover } from "./Popover";

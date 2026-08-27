@@ -22,6 +22,7 @@ icons-core ─> icons-react            │
 - `tests/next-h5` 是仓库内的独立 Next 消费者，不接触 MeuMall 业务仓库。
 - 禁止组件跨目录导入另一个组件的私有文件。
 - Portal 浮层若嵌套在 Dialog 或 Popup 中，必须声明为外层焦点域的合法分支，避免焦点被错误拉回。
+- BottomSheet 的拖拽只绑定 44 px 手柄，snap 动画只更新 transform，不与可滚动内容争抢手势。
 
 ## Next.js 边界
 

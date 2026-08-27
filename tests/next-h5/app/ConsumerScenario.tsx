@@ -19,6 +19,7 @@ import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
 import {
   Avatar,
   Badge,
+  BottomSheet,
   Button,
   Card,
   Cell,
@@ -142,10 +143,12 @@ export function ConsumerScenario() {
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [overlayMessage, setOverlayMessage] = useState("等待浮层操作");
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
+  const sheetTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
   const form = useMeuForm<FormValues>({
     schema,
@@ -422,6 +425,14 @@ export function ConsumerScenario() {
               <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
                 打开配送浮层
               </Button>
+              <Button
+                ref={sheetTriggerRef}
+                tone="neutral"
+                variant="outline"
+                onClick={() => setSheetOpen(true)}
+              >
+                打开筛选面板
+              </Button>
               <Popover
                 aria-label="订单快捷操作"
                 open={popoverOpen}
@@ -485,6 +496,29 @@ export function ConsumerScenario() {
                   </Button>
                 </div>
               </Popup>
+              <BottomSheet
+                open={sheetOpen}
+                title="订单筛选"
+                showCloseButton
+                snapPoints={[0.35, 0.6, 0.9]}
+                returnFocusRef={sheetTriggerRef}
+                onOpenChange={(nextOpen, details) => {
+                  setSheetOpen(nextOpen);
+                  if (!nextOpen) setOverlayMessage(`BottomSheet 已关闭：${details.reason}`);
+                }}
+              >
+                <div className="integration-popup-content">
+                  <p>拖动手柄或使用键盘调整可见高度。</p>
+                  <Button
+                    onClick={() => {
+                      setSheetOpen(false);
+                      setOverlayMessage("BottomSheet 操作：已应用筛选");
+                    }}
+                  >
+                    应用库存筛选
+                  </Button>
+                </div>
+              </BottomSheet>
               <Dialog
                 open={dialogOpen}
                 title="删除测试订单？"

@@ -212,6 +212,53 @@ test("locks scroll, contains focus and restores the Popup trigger", async ({ pag
   await expect(page.getByText("浮层已关闭：mask")).toBeVisible();
 });
 
+test("snaps and drag-dismisses an accessible modal BottomSheet", async ({ page }) => {
+  const section = page.getByRole("region", { name: "浮层基础组件" });
+  const trigger = section.getByRole("button", { name: "打开筛选面板" });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+
+  const sheet = page.getByRole("dialog", { name: "订单筛选" });
+  const handle = page.getByRole("button", { name: "调整面板高度" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toHaveAttribute("aria-modal", "true");
+  await expect(sheet).toHaveAttribute("data-snap-point", "0.9");
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await expect(handle).toBeFocused();
+
+  await page.keyboard.press("Home");
+  await expect(sheet).toHaveAttribute("data-snap-point", "0.35");
+  await page.keyboard.press("End");
+  await expect(sheet).toHaveAttribute("data-snap-point", "0.9");
+  await page.keyboard.press("Home");
+  await expect(sheet).toHaveAttribute("data-snap-point", "0.35");
+  await page.waitForTimeout(250);
+  await handle.hover();
+
+  const viewport = page.viewportSize();
+  const sheetBox = await sheet.boundingBox();
+  const handleBox = await handle.boundingBox();
+  if (!viewport || !sheetBox || !handleBox) throw new Error("Expected BottomSheet bounds");
+  expect(sheetBox.x).toBeGreaterThanOrEqual(0);
+  expect(sheetBox.width).toBeLessThanOrEqual(viewport.width);
+  expect(sheetBox.y).toBeGreaterThanOrEqual(0);
+  expect(sheetBox.y).toBeLessThan(viewport.height);
+  expect(handleBox.y).toBeGreaterThanOrEqual(0);
+  expect(handleBox.y + handleBox.height).toBeLessThanOrEqual(viewport.height + 1);
+
+  const startX = handleBox.x + handleBox.width / 2;
+  const startY = handleBox.y + handleBox.height / 2;
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(startX, Math.min(viewport.height - 8, startY + 240), { steps: 5 });
+  await page.mouse.up();
+
+  await expect(sheet).toBeHidden();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+  await expect(trigger).toBeFocused();
+  await expect(section.getByText("BottomSheet 已关闭：drag")).toBeVisible();
+});
+
 test("positions and dismisses a non-modal Popover without locking scroll", async ({
   browserName,
   page
