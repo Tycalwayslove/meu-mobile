@@ -123,6 +123,43 @@ test("virtualizes ten thousand dynamic rows and retains the focused item", async
   await expect(list.locator('[aria-posinset="1"]')).toHaveCount(0);
 });
 
+test("binds a non-modal number keyboard without owning the form value", async ({ page }) => {
+  const section = page.getByRole("region", { name: "数字键盘表单集成" });
+  const trigger = section.getByRole("button", { name: "交易金额" });
+
+  await trigger.focus();
+  await trigger.click();
+
+  const keyboard = page.getByRole("group", { name: "交易金额" });
+  await expect(keyboard).toBeVisible();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
+  await expect(page.getByRole("dialog", { name: "交易金额" })).toHaveCount(0);
+
+  await keyboard.getByRole("button", { name: "1", exact: true }).click();
+  await keyboard.getByRole("button", { name: "小数点" }).click();
+  await keyboard.getByRole("button", { name: "小数点" }).click();
+  await keyboard.getByRole("button", { name: "2", exact: true }).click();
+  await keyboard.getByRole("button", { name: "3", exact: true }).click();
+  await keyboard.getByRole("button", { name: "4", exact: true }).click();
+  await expect(trigger).toContainText("¥ 1.23");
+
+  await keyboard.getByRole("button", { name: "删除上一位" }).click();
+  await expect(trigger).toContainText("¥ 1.2");
+  await keyboard.getByRole("button", { name: "完成金额输入" }).click();
+  await expect(keyboard).toHaveCount(0);
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(section.getByText("金额确认：1.2")).toBeVisible();
+  await expect(section.getByText("键盘关闭：confirm")).toBeVisible();
+
+  await trigger.click();
+  await expect(page.getByRole("group", { name: "交易金额" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("group", { name: "交易金额" })).toHaveCount(0);
+  await expect(section.getByText("键盘关闭：escape")).toBeVisible();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
+});
+
 test("runs the controlled carousel with native alternatives and focus isolation", async ({
   page
 }) => {

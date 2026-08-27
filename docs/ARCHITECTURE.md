@@ -54,6 +54,10 @@ icons-core ─> icons-react            │
 - VirtualList 固定为组件自身的纵向滚动容器，Meu 持有 items、稳定 key、估算、范围与命令式定位契约；
   React Web 使用 TanStack Virtual 处理窗口化、动态测量和 iOS WebKit 滚动修正。公开 API 不泄漏引擎类型，
   已聚焦行在离开常规窗口后继续挂载，未来 uni-app 替换平台引擎而复用同一数据与范围契约。
+- NumberKeyboard 是非模态底部 Portal，只发布 input / delete / confirm 意图并以 open 控制显示；它不持有金额、
+  密码或表单值，也不使用 Mask、滚动锁和焦点圈定。`NumberKeyboardTrigger` 保持原生 button 语义，
+  `MeuFormNumberKeyboard` 在 `form-react` 中负责值变换、dirty / touched、校验和确认回调。未来 uni-app 复用
+  事件、显示状态、连续删除节奏与布局契约，替换 Portal、Safe Area 和 DOM 事件实现。
 
 ## Next.js 边界
 

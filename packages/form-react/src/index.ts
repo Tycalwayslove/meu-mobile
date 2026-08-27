@@ -6,6 +6,11 @@ export { MeuForm } from "./MeuForm";
 export type { MeuFormProps } from "./MeuForm";
 export { MeuFormTextInput } from "./MeuFormTextInput";
 export type { MeuFormTextInputProps } from "./MeuFormTextInput";
+export { MeuFormNumberKeyboard } from "./MeuFormNumberKeyboard";
+export type {
+  MeuFormNumberKeyboardOpenChangeDetails,
+  MeuFormNumberKeyboardProps
+} from "./MeuFormNumberKeyboard";
 export { MeuFormTextArea } from "./MeuFormTextArea";
 export type { MeuFormTextAreaProps } from "./MeuFormTextArea";
 export { MeuFormSearchField } from "./MeuFormSearchField";

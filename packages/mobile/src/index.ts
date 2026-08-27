@@ -142,6 +142,20 @@ export type {
   VirtualListScrollOptions,
   VirtualListScrollToIndexOptions
 } from "./VirtualList";
+export { NumberKeyboard } from "./NumberKeyboard";
+export { NumberKeyboardTrigger } from "./NumberKeyboard";
+export type {
+  NumberKeyboardDeleteDetails,
+  NumberKeyboardExtraKey,
+  NumberKeyboardInputDetails,
+  NumberKeyboardInputSource,
+  NumberKeyboardMode,
+  NumberKeyboardOpenChangeDetails,
+  NumberKeyboardOpenChangeReason,
+  NumberKeyboardProps,
+  NumberKeyboardTriggerProps,
+  NumberKeyboardTriggerStatus
+} from "./NumberKeyboard";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";

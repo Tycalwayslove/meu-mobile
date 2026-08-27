@@ -8,6 +8,7 @@ import {
   MeuFormCascadePicker,
   MeuFormDatePicker,
   MeuFormDateRangePicker,
+  MeuFormNumberKeyboard,
   MeuFormPicker,
   MeuFormRate,
   MeuFormRadioGroup,
@@ -64,7 +65,11 @@ import {
   useDialog,
   useToast
 } from "@meu/mobile";
-import type { VirtualListRange, VirtualListRef } from "@meu/mobile";
+import type {
+  NumberKeyboardInputDetails,
+  VirtualListRange,
+  VirtualListRef
+} from "@meu/mobile";
 import { useRef, useState } from "react";
 import { z } from "zod";
 
@@ -80,6 +85,9 @@ const schema = z.object({
     second: z.number().int().min(0).max(59)
   }),
   notifications: z.boolean(),
+  paymentAmount: z
+    .string()
+    .refine((value) => value === "" || /^\d+(\.\d{1,2})?$/.test(value), "请输入有效金额"),
   region: z.array(z.string()).length(3, "请选择完整配送地区"),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
   appointment: z.array(z.union([z.string(), z.number(), z.null()])).length(2, "请选择完整预约时间"),
@@ -151,6 +159,20 @@ function formatLocalDate(value: Date) {
 
 function formatLocalTime(value: { hour: number; minute: number; second: number }) {
   return `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}`;
+}
+
+function appendPaymentAmount(
+  current: string,
+  input: string,
+  details: NumberKeyboardInputDetails
+) {
+  if (details.source === "decimal") {
+    if (current.indexOf(".") >= 0) return current;
+    return current ? `${current}.` : "0.";
+  }
+  const decimalIndex = current.indexOf(".");
+  if (decimalIndex >= 0 && current.length - decimalIndex > 2) return current;
+  return `${current}${input}`;
 }
 
 function DialogCommandDemo({ onResult }: { onResult: (message: string) => void }) {
@@ -229,6 +251,8 @@ export function ConsumerScenario() {
   const [swipeMessage, setSwipeMessage] = useState("等待滑动操作");
   const [floatingPanelHeight, setFloatingPanelHeight] = useState(160);
   const [virtualRange, setVirtualRange] = useState<VirtualListRange | null>(null);
+  const [numberKeyboardResult, setNumberKeyboardResult] = useState("等待数字键盘输入");
+  const [numberKeyboardClose, setNumberKeyboardClose] = useState("键盘尚未关闭");
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -253,6 +277,7 @@ export function ConsumerScenario() {
       deliveryTime: { hour: 10, minute: 30, second: 0 },
       fulfillment: ["standard"],
       notifications: true,
+      paymentAmount: "",
       quantity: 1,
       rating: 3,
       region: ["zhejiang", "hangzhou", "xihu"],
@@ -954,6 +979,24 @@ export function ConsumerScenario() {
             formatValue={(value) => `${value}%`}
           />
           <MeuFormRate<FormValues> name="rating" label="服务评分" />
+          <section className="integration-number-keyboard" aria-label="数字键盘表单集成">
+            <MeuFormNumberKeyboard<FormValues>
+              name="paymentAmount"
+              label="交易金额"
+              description="值、dirty、校验和提交由表单层持有；键盘不锁滚动或转移鼠标焦点。"
+              mode="decimal"
+              maxLength={8}
+              confirmLabel="完成金额输入"
+              transformInput={appendPaymentAmount}
+              formatValue={(value) => (value ? `¥ ${value}` : undefined)}
+              onConfirm={(value) => setNumberKeyboardResult(`金额确认：${value}`)}
+              onOpenChange={(nextOpen, details) => {
+                if (!nextOpen) setNumberKeyboardClose(`键盘关闭：${details.reason}`);
+              }}
+            />
+            <output aria-live="polite">{numberKeyboardResult}</output>
+            <output aria-live="polite">{numberKeyboardClose}</output>
+          </section>
           <MeuFormPicker<FormValues>
             name="appointment"
             label="预约时间"

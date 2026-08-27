@@ -14,6 +14,7 @@ import { FloatingPanelDemo } from "./FloatingPanelDemo";
 import { InformationDemo } from "./InformationDemo";
 import { InfiniteListDemo } from "./InfiniteListDemo";
 import { NavigationDemo } from "./NavigationDemo";
+import { NumberKeyboardDemo } from "./NumberKeyboardDemo";
 import { OverlayDemo } from "./OverlayDemo";
 import { PickerDemo } from "./PickerDemo";
 import { PullToRefreshDemo } from "./PullToRefreshDemo";
@@ -102,6 +103,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>一万条动态高度数据与可访问窗口化</h2>
           <VirtualListDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>数字键盘、外置值与完整表单绑定</h2>
+          <NumberKeyboardDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

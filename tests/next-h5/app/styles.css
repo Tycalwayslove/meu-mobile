@@ -83,6 +83,21 @@ textarea {
   margin-top: 20px;
 }
 
+.integration-number-keyboard {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-number-keyboard output {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-search {
   display: grid;
   gap: 8px;

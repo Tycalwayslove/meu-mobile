@@ -177,3 +177,17 @@ iOS 13 的语法基线。
 `aria-setsize`。range callback 报告可见与常规 overscan 边界。焦点所在行会由自定义 range extractor 强制保留，
 但不会被计入连续 overscan 范围；焦点离开列表后恢复常规卸载。未来 uni-app 复用数据、key、范围与定位契约，
 替换 Web 引擎。
+
+## ADR-021：NumberKeyboard 只控制显示并发布输入意图
+
+NumberKeyboard 用于金额、验证码和身份证号等确实需要自定义数字布局的场景，不替代系统原生键盘，也不持有
+业务值。`open / defaultOpen / onOpenChange` 只表达显示状态；数字、小数点、自定义键、删除与确认通过回调发布，
+长度、小数位、格式、校验和提交由调用方负责。`randomOrder` 只做运行时视觉重排，不作为密码学保护。
+
+React Web 端使用非模态底部 Portal，不创建 Mask、页面滚动锁或焦点圈定。鼠标按下按键时保留当前触发器焦点，
+但每个按键仍是可 Tab、Enter 和 Space 操作的原生 button；Escape、收起和确认分别公开关闭原因。删除键默认在
+600ms 后以 120ms 间隔连续触发，Safe Area 与至少 44px 的操作目标属于 Web 适配层。
+
+`NumberKeyboardTrigger` 是不会唤起系统软键盘的原生 button。完整表单绑定放在 `form-react` 的
+`MeuFormNumberKeyboard`：它持有字段值变换、dirty / touched、错误关联和校验焦点，核心组件继续可脱离
+React Hook Form 使用。未来 uni-app 复用事件、显示状态、连续删除节奏和布局契约，替换 Portal 与 DOM 事件。
