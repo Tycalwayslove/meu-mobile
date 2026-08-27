@@ -178,6 +178,28 @@ export type {
   DatePickerSelectDetails,
   DatePrecision
 } from "./DatePicker";
+export {
+  formatTimeValue,
+  isValidTimeValue,
+  TimePicker,
+  timePickerColumns,
+  timePickerPrecisions
+} from "./TimePicker";
+export type {
+  FormatTimeValueOptions,
+  TimePickerColumn,
+  TimePickerColumnValue,
+  TimePickerFilter,
+  TimePickerFilterDetails,
+  TimePickerHourCycle,
+  TimePickerLabelDetails,
+  TimePickerOpenChangeDetails,
+  TimePickerPeriod,
+  TimePickerPrecision,
+  TimePickerProps,
+  TimePickerSelectDetails,
+  TimeValue
+} from "./TimePicker";
 export { Toast, ToastProvider, useToast } from "./Toast";
 export type {
   ToastAction,

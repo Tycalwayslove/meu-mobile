@@ -12,6 +12,7 @@ import { NavigationDemo } from "./NavigationDemo";
 import { OverlayDemo } from "./OverlayDemo";
 import { PickerDemo } from "./PickerDemo";
 import { SelectionDemo } from "./SelectionDemo";
+import { TimePickerDemo } from "./TimePickerDemo";
 import styles from "./page.module.css";
 
 export default function HomePage() {
@@ -57,6 +58,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>日期时间选择与 DateAdapter 表单绑定</h2>
           <DatePickerDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>平台无关时间选择与确认式表单绑定</h2>
+          <TimePickerDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

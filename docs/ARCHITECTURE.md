@@ -32,6 +32,8 @@ icons-core ─> icons-react            │
   归一化，不复制 Popup、滚轮、焦点或表单提交实现。
 - DatePicker 通过平台无关的 `DateAdapter<TDate>` 生成日期列、比较边界和验证民用时间；默认 Native adapter
   使用宿主本地时间，自定义日期类型或时区必须提供自己的 adapter。视觉、Popup 和交互继续复用 Picker。
+- TimePicker 使用可序列化的 `{ hour, minute, second }` 表达一天内时间；12 小时制只改变列表示，
+  表单值始终保持 0–23 小时，不附带虚构日期、日期库或时区。
 
 ## Next.js 边界
 

@@ -67,3 +67,12 @@ Day.js、date-fns。`date-adapter` v2 提供 parts 往返、日期比较、月�
 非法日期直接禁用。低于当前 precision 的字段归一化到单位起点，父级变化把过期日夹紧到目标月末。
 组件继续沿用 Picker 的 draft、确认提交、取消回滚、listbox、Popup、焦点和原生滚动；
 `MeuFormDatePicker` 只在确认时写入表单字段。
+
+## ADR-012：TimePicker 使用纯 TimeValue，不复用虚构日期
+
+TimePicker 的公开值固定为 `{ hour, minute, second }`，不返回绑定今日日期的 `Date`，也不要求业务引入
+Day.js 等日期库。`hourCycle="h12"` 只增加 AM/PM 表示列，回调仍输出规范化的 24 小时值。上下界按当前
+精度前缀比较，`min > max` 视为矛盾约束；跨午夜营业区间由业务拆分或使用 filter 明确表达，不做隐式环绕。
+
+组件复用 Picker 的 Popup、滚轮、键盘、焦点、滚动锁、确认式 draft 和取消回滚；`MeuFormTimePicker`
+仅在确认时写入 `TimeValue | null`。

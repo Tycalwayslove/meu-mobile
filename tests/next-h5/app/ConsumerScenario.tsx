@@ -16,6 +16,7 @@ import {
   MeuFormSwitch,
   MeuFormTextArea,
   MeuFormTextInput,
+  MeuFormTimePicker,
   useMeuForm
 } from "@meu/form-react";
 import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
@@ -62,6 +63,11 @@ const schema = z.object({
   agreement: z.boolean().refine((value) => value, "请同意服务协议"),
   description: z.string().min(6, "店铺介绍至少输入 6 个字符"),
   deliveryDate: z.date(),
+  deliveryTime: z.object({
+    hour: z.number().int().min(0).max(23),
+    minute: z.number().int().min(0).max(59),
+    second: z.number().int().min(0).max(59)
+  }),
   notifications: z.boolean(),
   region: z.array(z.string()).length(3, "请选择完整配送地区"),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
@@ -122,6 +128,10 @@ function formatLocalDate(value: Date) {
   const month = String(value.getMonth() + 1).padStart(2, "0");
   const day = String(value.getDate()).padStart(2, "0");
   return `${value.getFullYear()}-${month}-${day}`;
+}
+
+function formatLocalTime(value: { hour: number; minute: number; second: number }) {
+  return `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}`;
 }
 
 function DialogCommandDemo({ onResult }: { onResult: (message: string) => void }) {
@@ -210,6 +220,7 @@ export function ConsumerScenario() {
       appointment: ["today", 9],
       description: "",
       deliveryDate: new Date(2026, 7, 28),
+      deliveryTime: { hour: 10, minute: 30, second: 0 },
       fulfillment: ["standard"],
       notifications: true,
       quantity: 1,
@@ -656,7 +667,7 @@ export function ConsumerScenario() {
               `${values.services.join(",")} / ${values.shipping} / notifications:${values.notifications ? "true" : "false"} / agreement:${values.agreement ? "true" : "false"}`
             );
             setSavedAdvanced(
-              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
+              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / time:${formatLocalTime(values.deliveryTime)} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
           }}
         >
@@ -748,6 +759,16 @@ export function ConsumerScenario() {
             max={new Date(2026, 8, 30, 23, 59, 59, 999)}
             required
             triggerProps={{ placeholder: "选择送达日期" }}
+          />
+          <MeuFormTimePicker<FormValues>
+            name="deliveryTime"
+            label="送达时间"
+            description="时间值不绑定日期或时区，确定后才提交选择。"
+            min={{ hour: 9, minute: 0, second: 0 }}
+            max={{ hour: 18, minute: 0, second: 0 }}
+            minuteStep={15}
+            required
+            triggerProps={{ placeholder: "选择送达时间" }}
           />
           <MeuFormSelector<FormValues, string>
             name="fulfillment"

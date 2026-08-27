@@ -401,6 +401,34 @@ test("normalizes DatePicker dates and commits only the confirmed draft", async (
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
 });
 
+test("maps TimePicker values and commits only the confirmed draft", async ({ page }) => {
+  const trigger = page.getByRole("button", { name: "送达时间" });
+  await expect(trigger).toContainText("10:30");
+  await trigger.click();
+
+  let picker = page.getByRole("dialog", { name: "送达时间" });
+  await expect(picker.getByRole("listbox")).toHaveCount(2);
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await picker.getByRole("option", { name: "45分" }).click();
+  await picker.getByRole("button", { name: "取消" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("10:30");
+
+  await trigger.click();
+  picker = page.getByRole("dialog", { name: "送达时间" });
+  await expect(picker.getByRole("option", { name: "30分" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await picker.getByRole("option", { name: "45分" }).click();
+  await picker.getByRole("button", { name: "确定" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("10:45");
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+});
+
 test("positions and dismisses a non-modal Popover without locking scroll", async ({
   browserName,
   page
@@ -558,7 +586,7 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
     page.getByText(
-      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / date:2026-08-28 / selector:fast / segmented:card"
+      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / date:2026-08-28 / time:10:30 / selector:fast / segmented:card"
     )
   ).toBeVisible();
 });
