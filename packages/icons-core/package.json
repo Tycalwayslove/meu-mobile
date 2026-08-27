@@ -1,0 +1,20 @@
+{
+  "name": "@meu/icons-core",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": ["dist", "THIRD_PARTY_NOTICES.md", "licenses"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./manifest": "./dist/icons.manifest.json"
+  },
+  "scripts": {
+    "build": "rollup -c && tsc -p tsconfig.build.json --emitDeclarationOnly && cp src/icons.manifest.json dist/icons.manifest.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --maxWorkers=1"
+  }
+}

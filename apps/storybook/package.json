@@ -1,0 +1,28 @@
+{
+  "name": "@meu/storybook",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests --maxWorkers=1"
+  },
+  "dependencies": {
+    "@meu/mobile": "workspace:*",
+    "@meu/tokens": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.5.10",
+    "@storybook/addon-docs": "10.5.10",
+    "@storybook/react-vite": "10.5.10",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vanilla-extract/vite-plugin": "5.2.6",
+    "storybook": "10.5.10",
+    "vite": "8.2.2"
+  }
+}

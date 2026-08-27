@@ -1,0 +1,23 @@
+{
+  "name": "@meu/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist"],
+  "sideEffects": ["**/*.css"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css": "./dist/theme.css",
+    "./figma": "./dist/figma.json",
+    "./tokens-lock": "./dist/tokens.lock.json"
+  },
+  "scripts": {
+    "sync": "tsx scripts/generate.ts",
+    "build": "pnpm sync && tsc -p tsconfig.build.json && cp src/theme.css dist/theme.css && cp src/figma.generated.json dist/figma.json && cp src/tokens.lock.json dist/tokens.lock.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --maxWorkers=1"
+  }
+}

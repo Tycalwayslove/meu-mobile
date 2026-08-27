@@ -1,0 +1,11 @@
+node_modules/
+.turbo/
+dist/
+coverage/
+.next/
+storybook-static/
+.test-results/
+playwright-report/
+*.tsbuildinfo
+*.tgz
+.DS_Store

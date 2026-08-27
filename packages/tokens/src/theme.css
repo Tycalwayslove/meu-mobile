@@ -1,0 +1,87 @@
+:root, [data-meu-theme='light'], [data-meu-theme='system'] {
+  --meu-space-1: 4px;
+  --meu-space-2: 8px;
+  --meu-space-3: 12px;
+  --meu-space-4: 16px;
+  --meu-space-5: 20px;
+  --meu-space-6: 24px;
+  --meu-space-8: 32px;
+  --meu-space-10: 40px;
+  --meu-space-12: 48px;
+  --meu-radius-control: 10px;
+  --meu-radius-surface: 14px;
+  --meu-radius-sheet: 20px;
+  --meu-radius-round: 9999px;
+  --meu-size-control-compact: 32px;
+  --meu-size-control-small: 36px;
+  --meu-size-control-medium: 44px;
+  --meu-size-control-large: 52px;
+  --meu-size-navbar: 56px;
+  --meu-size-tabbar: 56px;
+  --meu-font-ui: Geist, "Noto Sans SC", "PingFang SC", sans-serif;
+  --meu-font-mono: "Geist Mono", SFMono-Regular, monospace;
+  --meu-font-display-font-family: Geist, "Noto Sans SC", "PingFang SC", sans-serif;
+  --meu-font-display-font-size: 24px;
+  --meu-font-display-font-weight: 600;
+  --meu-font-display-line-height: 30px;
+  --meu-font-display-letter-spacing: 0em;
+  --meu-font-title-font-family: Geist, "Noto Sans SC", "PingFang SC", sans-serif;
+  --meu-font-title-font-size: 20px;
+  --meu-font-title-font-weight: 600;
+  --meu-font-title-line-height: 28px;
+  --meu-font-title-letter-spacing: 0em;
+  --meu-font-body-font-family: Geist, "Noto Sans SC", "PingFang SC", sans-serif;
+  --meu-font-body-font-size: 16px;
+  --meu-font-body-font-weight: 400;
+  --meu-font-body-line-height: 24px;
+  --meu-font-body-letter-spacing: 0em;
+  --meu-font-label-font-family: Geist, "Noto Sans SC", "PingFang SC", sans-serif;
+  --meu-font-label-font-size: 14px;
+  --meu-font-label-font-weight: 500;
+  --meu-font-label-line-height: 20px;
+  --meu-font-label-letter-spacing: 0em;
+  --meu-font-meta-font-family: Geist, "Noto Sans SC", "PingFang SC", sans-serif;
+  --meu-font-meta-font-size: 12px;
+  --meu-font-meta-font-weight: 400;
+  --meu-font-meta-line-height: 16px;
+  --meu-font-meta-letter-spacing: 0em;
+  --meu-motion-enter: 180ms;
+  --meu-motion-exit: 140ms;
+  --meu-motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --meu-shadow-floating: 0px 12px 32px 0px #18201A29;
+  --meu-color-canvas: #F8F7F3;
+  --meu-color-surface: #FFFFFF;
+  --meu-color-ink: #1E2420;
+  --meu-color-muted: #5B625D;
+  --meu-color-border: #CDD1CC;
+  --meu-color-subtle: #EAECE7;
+  --meu-color-accent: #176B5B;
+  --meu-color-accent-pressed: #115244;
+  --meu-color-success: #287A52;
+  --meu-color-warning: #A45C13;
+  --meu-color-danger: #B63A36;
+}
+
+[data-meu-theme='dark'] {
+  --meu-color-canvas: #161A17;
+  --meu-color-surface: #202620;
+  --meu-color-ink: #F0F2EC;
+  --meu-color-muted: #B7BDB5;
+  --meu-color-border: #3A423B;
+  --meu-color-subtle: #2B322C;
+  --meu-color-accent: #62B89D;
+  --meu-color-accent-pressed: #8DD0BB;
+}
+
+@media (prefers-color-scheme: dark) {
+    [data-meu-theme='system'] {
+    --meu-color-canvas: #161A17;
+    --meu-color-surface: #202620;
+    --meu-color-ink: #F0F2EC;
+    --meu-color-muted: #B7BDB5;
+    --meu-color-border: #3A423B;
+    --meu-color-subtle: #2B322C;
+    --meu-color-accent: #62B89D;
+    --meu-color-accent-pressed: #8DD0BB;
+  }
+}

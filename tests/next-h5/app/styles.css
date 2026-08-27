@@ -1,0 +1,91 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  color: var(--meu-color-ink);
+  background: var(--meu-color-canvas);
+  font-family: var(--meu-font-ui);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.integration-shell {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.integration-header {
+  margin-bottom: 24px;
+}
+
+.integration-header h1,
+.integration-header p,
+.integration-toolbar p {
+  margin: 0;
+}
+
+.integration-header h1 {
+  margin-top: 8px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.integration-header > p:last-child {
+  margin-top: 12px;
+  color: var(--meu-color-muted);
+  line-height: 1.6;
+}
+
+.integration-eyebrow {
+  color: var(--meu-color-accent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-meu-component="config-provider"] {
+  color: var(--meu-color-ink);
+  background: var(--meu-color-canvas);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-card {
+  padding: 20px;
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+  box-shadow: var(--meu-shadow-floating);
+}
+
+.integration-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.integration-form > * + * {
+  margin-top: 20px;
+}
+
+.integration-result {
+  display: block;
+  min-height: 20px;
+  margin-top: 20px;
+  color: var(--meu-color-success);
+  font-size: 14px;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@meu/next-h5-integration",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack -p 3020",
+    "build": "next build",
+    "start": "next start -p 3020",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests --maxWorkers=1 --exclude 'e2e/**'",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@meu/form-react": "workspace:*",
+    "@meu/icons-react": "workspace:*",
+    "@meu/mobile": "workspace:*",
+    "@meu/tokens": "workspace:*",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-hook-form": "7.86.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5"
+  }
+}

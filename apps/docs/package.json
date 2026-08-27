@@ -1,0 +1,27 @@
+{
+  "name": "@meu/docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack -p 3010",
+    "build": "next build",
+    "start": "next start -p 3010",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests --maxWorkers=1"
+  },
+  "dependencies": {
+    "@meu/form-react": "workspace:*",
+    "@meu/icons-react": "workspace:*",
+    "@meu/mobile": "workspace:*",
+    "@meu/tokens": "workspace:*",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-hook-form": "7.86.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5"
+  }
+}
