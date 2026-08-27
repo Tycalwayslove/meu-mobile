@@ -38,6 +38,7 @@ import {
   DialogProvider,
   Ellipsis,
   Empty,
+  FloatingPanel,
   Image,
   InfiniteList,
   List,
@@ -216,6 +217,7 @@ export function ConsumerScenario() {
   const [swipeOpenSide, setSwipeOpenSide] = useState<"left" | "right" | null>(null);
   const [swipeMenuOpen, setSwipeMenuOpen] = useState(false);
   const [swipeMessage, setSwipeMessage] = useState("等待滑动操作");
+  const [floatingPanelHeight, setFloatingPanelHeight] = useState(160);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -417,6 +419,26 @@ export function ConsumerScenario() {
             ]}
             onOpenChange={setSwipeMenuOpen}
           />
+        </section>
+
+        <section className="integration-floating-panel" aria-label="浮动面板">
+          <div className="integration-floating-panel-map" aria-label="本地地图占位">
+            页面背景保持可见
+          </div>
+          <FloatingPanel
+            anchors={[160, 300, 480]}
+            height={floatingPanelHeight}
+            onHeightChange={setFloatingPanelHeight}
+            style={{ position: "absolute" }}
+          >
+            <List header="附近行程">
+              <Cell title="安静早晨路线" description="2.8 km · 预计 35 分钟" />
+              <Cell title="城市散步路线" description="4.2 km · 预计 52 分钟" />
+              <Cell title="完整路线详情" suffix={<Button size="small">查看</Button>} />
+            </List>
+            <p>最高点后内容区域恢复原生滚动。</p>
+          </FloatingPanel>
+          <output aria-live="polite">面板高度：{floatingPanelHeight}px</output>
         </section>
 
         <section className="integration-navigation" aria-label="导航组件">

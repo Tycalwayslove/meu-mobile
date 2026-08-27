@@ -1,0 +1,218 @@
+// @vitest-environment jsdom
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ConfigProvider } from "../ConfigProvider";
+import { FloatingPanel } from "./FloatingPanel";
+import type { FloatingPanelRef } from "./types";
+
+function setViewportHeight(height: number) {
+  Object.defineProperty(window, "innerHeight", { configurable: true, value: height });
+}
+
+function root(container: HTMLElement) {
+  const node = container.querySelector<HTMLElement>('[data-meu-component="floating-panel"]');
+  if (!node) throw new Error("Expected FloatingPanel root");
+  return node;
+}
+
+function preparePointerCapture(node: HTMLElement) {
+  Object.defineProperties(node, {
+    hasPointerCapture: { configurable: true, value: () => true },
+    releasePointerCapture: { configurable: true, value: vi.fn() },
+    setPointerCapture: { configurable: true, value: vi.fn() }
+  });
+}
+
+function drag(node: HTMLElement, fromY: number, toY: number, fromX = 30, toX = 30) {
+  preparePointerCapture(node);
+  fireEvent.pointerDown(node, {
+    button: 0,
+    clientX: fromX,
+    clientY: fromY,
+    isPrimary: true,
+    pointerId: 1,
+    timeStamp: 0
+  });
+  fireEvent.pointerMove(node, {
+    clientX: toX,
+    clientY: toY,
+    isPrimary: true,
+    pointerId: 1,
+    timeStamp: 200
+  });
+  fireEvent.pointerUp(node, {
+    clientX: toX,
+    clientY: toY,
+    isPrimary: true,
+    pointerId: 1,
+    timeStamp: 240
+  });
+}
+
+beforeEach(() => setViewportHeight(800));
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
+
+describe("FloatingPanel", () => {
+  it("normalizes pixel anchors and starts from the lowest available height", () => {
+    const { container } = render(
+      <FloatingPanel anchors={[0, 20, 20.4, 300, 2000, Number.POSITIVE_INFINITY]}>
+        地图详情
+      </FloatingPanel>
+    );
+    const panel = root(container);
+    expect(panel.getAttribute("data-current-height")).toBe("44");
+    expect(panel.getAttribute("data-anchor-index")).toBe("0");
+    expect(panel.style.height).toBe("800px");
+    expect(panel.style.getPropertyValue("--meu-floating-panel-translate")).toBe("756px");
+  });
+
+  it("cycles with the native handle and exposes the full keyboard path", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel anchors={[200, 400, 700]} onHeightChange={onHeightChange}>
+        行程详情
+      </FloatingPanel>
+    );
+    const panel = root(container);
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+
+    fireEvent.click(handle);
+    expect(panel.getAttribute("data-current-height")).toBe("400");
+    expect(onHeightChange).toHaveBeenLastCalledWith(400, { index: 1, reason: "handle" });
+
+    fireEvent.keyDown(handle, { key: "End" });
+    expect(panel.getAttribute("data-current-height")).toBe("700");
+    fireEvent.keyDown(handle, { key: "ArrowDown" });
+    expect(panel.getAttribute("data-current-height")).toBe("400");
+    fireEvent.keyDown(handle, { key: "Home" });
+    expect(panel.getAttribute("data-current-height")).toBe("200");
+    fireEvent.keyDown(handle, { key: "PageUp" });
+    expect(onHeightChange).toHaveBeenLastCalledWith(400, { index: 1, reason: "keyboard" });
+  });
+
+  it("reverses physical arrow direction for top placement", () => {
+    const { container } = render(
+      <FloatingPanel placement="top" anchors={[160, 320, 640]} defaultHeight={320}>
+        顶部详情
+      </FloatingPanel>
+    );
+    const panel = root(container);
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+
+    expect(panel.style.getPropertyValue("--meu-floating-panel-translate")).toBe("-320px");
+    fireEvent.keyDown(handle, { key: "ArrowDown" });
+    expect(panel.getAttribute("data-current-height")).toBe("640");
+    fireEvent.keyDown(handle, { key: "ArrowUp" });
+    expect(panel.getAttribute("data-current-height")).toBe("320");
+  });
+
+  it("reports controlled requests without replacing the authoritative height", () => {
+    const onHeightChange = vi.fn();
+    const { container, rerender } = render(
+      <FloatingPanel anchors={[200, 400, 600]} height={400} onHeightChange={onHeightChange}>
+        受控内容
+      </FloatingPanel>
+    );
+    const panel = root(container);
+    fireEvent.keyDown(screen.getByRole("button", { name: "调整浮动面板高度" }), { key: "End" });
+    expect(onHeightChange).toHaveBeenCalledWith(600, { index: 2, reason: "keyboard" });
+    expect(panel.getAttribute("data-current-height")).toBe("400");
+
+    rerender(
+      <FloatingPanel anchors={[200, 400, 600]} height={600} onHeightChange={onHeightChange}>
+        受控内容
+      </FloatingPanel>
+    );
+    expect(panel.getAttribute("data-current-height")).toBe("600");
+  });
+
+  it("snaps a handle drag using distance and reports a drag reason", () => {
+    const onHeightChange = vi.fn();
+    render(
+      <FloatingPanel anchors={[200, 400, 600]} defaultHeight={400} onHeightChange={onHeightChange}>
+        拖拽内容
+      </FloatingPanel>
+    );
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+    drag(handle, 300, 80);
+    expect(onHeightChange).toHaveBeenLastCalledWith(600, { index: 2, reason: "drag" });
+  });
+
+  it("lets non-interactive content expand the panel before native scrolling takes over", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel anchors={[200, 400, 600]} inertiaFactor={0} onHeightChange={onHeightChange}>
+        <button type="button">内容操作</button>
+        <p>可拖拽说明</p>
+      </FloatingPanel>
+    );
+    const panel = root(container);
+    const content = container.querySelector<HTMLElement>("[data-content-drag='true']");
+    if (!content) throw new Error("Expected draggable content");
+
+    drag(screen.getByRole("button", { name: "内容操作" }), 300, 80);
+    expect(onHeightChange).not.toHaveBeenCalled();
+
+    drag(content, 300, 80);
+    expect(panel.getAttribute("data-current-height")).toBe("400");
+    expect(onHeightChange).toHaveBeenLastCalledWith(400, { index: 1, reason: "drag" });
+
+    fireEvent.keyDown(screen.getByRole("button", { name: "调整浮动面板高度" }), { key: "End" });
+    expect(container.querySelector("[data-content-drag='true']")).toBeNull();
+  });
+
+  it("ignores horizontal content movement after direction lock", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel anchors={[200, 400]} onHeightChange={onHeightChange}>
+        可横向操作内容
+      </FloatingPanel>
+    );
+    const content = container.querySelector<HTMLElement>("[data-content-drag='true']");
+    if (!content) throw new Error("Expected draggable content");
+    drag(content, 100, 103, 20, 120);
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
+
+  it("maps imperative requests to the nearest anchor and can skip animation", async () => {
+    const panelRef = { current: null as FloatingPanelRef | null };
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel ref={panelRef} anchors={[200, 400, 600]} onHeightChange={onHeightChange}>
+        命令式内容
+      </FloatingPanel>
+    );
+    act(() => panelRef.current!.setHeight(550, { immediate: true }));
+    expect(root(container).getAttribute("data-current-height")).toBe("600");
+    expect(root(container).getAttribute("data-immediate")).toBe("true");
+    expect(panelRef.current!.nativeElement).toBe(root(container));
+    expect(onHeightChange).toHaveBeenCalledWith(600, { index: 2, reason: "imperative" });
+
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(root(container).getAttribute("data-immediate")).toBeNull();
+  });
+
+  it("localizes the handle and disables every adjustment path", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <ConfigProvider locale="en-US">
+        <FloatingPanel disabled anchors={[200, 600]} onHeightChange={onHeightChange}>
+          Disabled content
+        </FloatingPanel>
+      </ConfigProvider>
+    );
+    const handle = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Adjust floating panel height"
+    });
+    expect(handle.disabled).toBe(true);
+    expect(root(container).getAttribute("data-disabled")).toBe("true");
+    fireEvent.click(handle);
+    drag(handle, 300, 50);
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
+});

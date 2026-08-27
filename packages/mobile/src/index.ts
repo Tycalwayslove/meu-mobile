@@ -123,6 +123,15 @@ export type {
   SwipeActionsProps,
   SwipeActionsSide
 } from "./SwipeActions";
+export { FloatingPanel } from "./FloatingPanel";
+export type {
+  FloatingPanelHeightChangeDetails,
+  FloatingPanelHeightChangeReason,
+  FloatingPanelPlacement,
+  FloatingPanelProps,
+  FloatingPanelRef,
+  FloatingPanelSetHeightOptions
+} from "./FloatingPanel";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";

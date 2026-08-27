@@ -175,6 +175,50 @@ test("runs controlled swipe actions and preserves a non-gesture action menu", as
   await expect(section.getByText("更多菜单：已归档")).toBeVisible();
 });
 
+test("snaps a non-modal floating panel and returns content to native scrolling", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "浮动面板" });
+  const panel = section.locator('[data-meu-component="floating-panel"]');
+  const handle = section.getByRole("button", { name: "调整浮动面板高度" });
+
+  await expect(panel).toHaveAttribute("data-current-height", "160");
+  await expect(section.getByText("页面背景保持可见")).toBeVisible();
+  await handle.focus();
+  await page.keyboard.press("ArrowUp");
+  await expect(panel).toHaveAttribute("data-current-height", "300");
+  await expect(section.getByText("面板高度：300px")).toBeVisible();
+
+  await handle.evaluate((node) => {
+    const dispatch = (type: string, clientY: number) => {
+      node.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          cancelable: true,
+          clientX: 180,
+          clientY,
+          isPrimary: true,
+          pointerId: 9,
+          pointerType: "touch"
+        })
+      );
+    };
+    dispatch("pointerdown", 520);
+    dispatch("pointermove", 250);
+    dispatch("pointerup", 250);
+  });
+  await expect(panel).toHaveAttribute("data-current-height", "480");
+  await expect(panel.locator("[data-content-drag='true']")).toHaveCount(0);
+  await expect(section.getByRole("button", { name: "查看" })).toBeVisible();
+
+  await handle.focus();
+  await page.keyboard.press("Home");
+  await expect(panel).toHaveAttribute("data-current-height", "160");
+  await expect(panel.locator("[data-content-drag='true']")).toHaveCount(1);
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
+});
+
 test("keeps Cell actions, links and List semantics native", async ({ page }) => {
   const list = page.getByRole("list", { name: "店铺入口" });
   await expect(list).toBeVisible();

@@ -149,6 +149,42 @@ textarea {
   padding: 0 16px 12px;
 }
 
+.integration-floating-panel {
+  position: relative;
+  min-height: 540px;
+  overflow: hidden;
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-large);
+}
+
+.integration-floating-panel-map {
+  display: grid;
+  min-height: 540px;
+  place-items: center;
+  color: var(--meu-color-muted);
+  background-color: var(--meu-color-surface-muted);
+  background-image:
+    linear-gradient(var(--meu-color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--meu-color-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.integration-floating-panel [data-meu-component="floating-panel"] p {
+  margin: 0;
+  padding: 16px;
+  color: var(--meu-color-muted);
+}
+
+.integration-floating-panel > output {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 10px;
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-small);
+}
+
 .integration-navigation {
   display: grid;
   gap: 16px;

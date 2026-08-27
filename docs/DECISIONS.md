@@ -145,3 +145,19 @@ Pointer Events。
 动作保留原生 button、44px 最小目标和同步/异步结果。异步期间锁定全部动作；返回 `false` 或失败保持展开，
 失败只通过 `onActionError` 上报。隐藏轨道不进入 Tab 顺序，每侧提供获得焦点时显现的原生打开按钮；列表调用方
 仍需在 Cell 更多菜单中复制同一动作，确保触摸手势不是发现和执行操作的唯一方式。
+
+## ADR-019：FloatingPanel 与模态 BottomSheet 分离
+
+FloatingPanel 用于地图、行程和筛选等需要同时保留页面背景上下文的常驻面板。它不使用 Portal、Mask、页面
+滚动锁或焦点圈定，也没有 open / dismiss 状态；需要这些能力时继续使用 BottomSheet。公开 anchors 统一为正
+像素高度并归一化到 44px–可视视口高度，`height / defaultHeight / onHeightChange` 保持受控状态范式，Top 与
+Bottom placement 只改变物理增高方向。
+
+React Web 使用 Pointer Events、CSS transform 和有限的速度投影，不引入通用手势或弹簧依赖。44px 原生
+handle 提供拖拽、点击、方向键、PageUp / PageDown、Home / End 路径；受控调用方未提交请求高度时视图保持
+权威 height。内容区只在未达到最高 anchor 且起点不是交互元素时辅助拖动；最高点完全交回原生纵向滚动，
+收起始终可通过 handle 完成，避免 iOS WebKit 的滚动争抢。
+
+命令式 `setHeight()` 只请求最近 anchor，并通过 `imperative` 原因进入同一状态通道，不绕过受控事实源。
+未来 uni-app 复用 anchors、height、placement、惯性与 drag / handle / keyboard / imperative 原因，替换
+Pointer Events、visualViewport 与 transform。

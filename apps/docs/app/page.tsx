@@ -10,6 +10,7 @@ import { DateRangePickerDemo } from "./DateRangePickerDemo";
 import { DisplayDemo } from "./DisplayDemo";
 import { FormDemo } from "./FormDemo";
 import { FeedbackDemo } from "./FeedbackDemo";
+import { FloatingPanelDemo } from "./FloatingPanelDemo";
 import { InformationDemo } from "./InformationDemo";
 import { InfiniteListDemo } from "./InfiniteListDemo";
 import { NavigationDemo } from "./NavigationDemo";
@@ -92,6 +93,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>列表滑动操作与常驻等价入口</h2>
           <SwipeActionsDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>页面内常驻浮动面板与原生滚动接管</h2>
+          <FloatingPanelDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

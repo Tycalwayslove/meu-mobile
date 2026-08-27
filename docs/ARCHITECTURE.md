@@ -48,6 +48,9 @@ icons-core ─> icons-react            │
 - SwipeActions 不拥有 Cell、列表数据或业务确认；Meu 持有左右展开状态、方向锁、阈值、动作结果和关闭原因。
   React Web 适配层使用原生 Pointer Events、ResizeObserver 与 transform，未来 uni-app 替换手势驱动但复用
   同一状态机。获得焦点时显现的打开按钮与 Cell 更多菜单确保滑动不是唯一入口。
+- FloatingPanel 是页面内常驻、非模态的可变高度容器，不复用 Portal、Mask、滚动锁或焦点圈定。Meu 持有
+  pixel anchors、height、placement、惯性与变更原因；React Web 使用 Pointer Events 和 transform，最高
+  anchor 时内容区交还原生滚动，未来 uni-app 只替换手势和布局适配层。
 
 ## Next.js 边界
 
