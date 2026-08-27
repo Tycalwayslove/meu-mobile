@@ -54,6 +54,7 @@ import {
   SegmentedControl,
   Skeleton,
   Steps,
+  SwipeActions,
   TabBar,
   Tabs,
   Tag,
@@ -212,6 +213,9 @@ export function ConsumerScenario() {
   const [refreshCount, setRefreshCount] = useState(0);
   const [infinitePage, setInfinitePage] = useState(1);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [swipeOpenSide, setSwipeOpenSide] = useState<"left" | "right" | null>(null);
+  const [swipeMenuOpen, setSwipeMenuOpen] = useState(false);
+  const [swipeMessage, setSwipeMessage] = useState("等待滑动操作");
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -347,6 +351,72 @@ export function ConsumerScenario() {
             onIndexChange={setCarouselIndex}
           />
           <output aria-live="polite">当前轮播：{carouselIndex + 1}</output>
+        </section>
+
+        <section className="integration-swipe-actions" aria-label="滑动操作">
+          <SwipeActions
+            openSide={swipeOpenSide}
+            onOpenSideChange={setSwipeOpenSide}
+            leftActions={[
+              {
+                key: "pin",
+                label: "置顶",
+                tone: "accent",
+                onPress: () => setSwipeMessage("滑动操作：已置顶")
+              }
+            ]}
+            rightActions={[
+              {
+                key: "archive",
+                label: "归档",
+                onPress: () => setSwipeMessage("滑动操作：已归档")
+              },
+              {
+                key: "delete",
+                label: "删除",
+                tone: "danger",
+                onPress: async () => {
+                  await new Promise<void>((resolve) => window.setTimeout(resolve, 100));
+                  setSwipeMessage("滑动操作：已删除");
+                }
+              }
+            ]}
+          >
+            <Cell
+              title="订单 MEU-0828"
+              description="横向滑动显示操作"
+              suffix={
+                <Button
+                  size="small"
+                  variant="text"
+                  tone="neutral"
+                  onClick={() => setSwipeMenuOpen(true)}
+                >
+                  更多操作
+                </Button>
+              }
+            />
+          </SwipeActions>
+          <output aria-live="polite">{swipeMessage}</output>
+          <ActionMenu
+            open={swipeMenuOpen}
+            title="滑动操作的等价菜单"
+            description="不使用手势也能完成相同操作"
+            actions={[
+              {
+                key: "archive",
+                label: "归档",
+                onPress: () => setSwipeMessage("更多菜单：已归档")
+              },
+              {
+                key: "delete",
+                label: "删除",
+                tone: "danger",
+                onPress: () => setSwipeMessage("更多菜单：已删除")
+              }
+            ]}
+            onOpenChange={setSwipeMenuOpen}
+          />
         </section>
 
         <section className="integration-navigation" aria-label="导航组件">

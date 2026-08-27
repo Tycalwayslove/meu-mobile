@@ -121,6 +121,60 @@ test("runs the controlled carousel with native alternatives and focus isolation"
   await expect(carousel).toHaveAttribute("data-index", "0");
 });
 
+test("runs controlled swipe actions and preserves a non-gesture action menu", async ({ page }) => {
+  const section = page.getByRole("region", { name: "滑动操作" });
+  const root = section.locator('[data-meu-component="swipe-actions"]');
+  await expect(root).toHaveAttribute("data-open-side", "none");
+
+  const reveal = section.getByRole("button", { name: "显示右侧操作" });
+  await reveal.focus();
+  await page.keyboard.press("Enter");
+  await expect(root).toHaveAttribute("data-open-side", "right");
+  await expect(section.getByRole("button", { name: "归档" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(root).toHaveAttribute("data-open-side", "none");
+  await expect(section.getByText("滑动操作：已归档")).toBeVisible();
+
+  const box = await root.boundingBox();
+  if (!box) throw new Error("Expected SwipeActions bounds");
+  const startX = box.x + box.width - 24;
+  const y = box.y + box.height / 2;
+  await root.evaluate(
+    (node, position) => {
+      const dispatch = (type: string, clientX: number) => {
+        node.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            button: 0,
+            cancelable: true,
+            clientX,
+            clientY: position.y,
+            isPrimary: true,
+            pointerId: 7,
+            pointerType: "touch"
+          })
+        );
+      };
+      dispatch("pointerdown", position.startX);
+      dispatch("pointermove", position.startX - 150);
+      dispatch("pointerup", position.startX - 150);
+    },
+    { startX, y }
+  );
+  await expect(root).toHaveAttribute("data-open-side", "right");
+  await expect(root).toHaveAttribute("data-offset", /^-\d+$/);
+
+  await section.getByRole("button", { name: "删除" }).click();
+  await expect(root).toHaveAttribute("data-open-side", "none");
+  await expect(section.getByText("滑动操作：已删除")).toBeVisible();
+
+  await section.getByRole("button", { name: "更多操作" }).click();
+  const menu = page.getByRole("dialog", { name: "滑动操作的等价菜单" });
+  await expect(menu).toBeVisible();
+  await menu.getByRole("button", { name: "归档" }).click();
+  await expect(section.getByText("更多菜单：已归档")).toBeVisible();
+});
+
 test("keeps Cell actions, links and List semantics native", async ({ page }) => {
   const list = page.getByRole("list", { name: "店铺入口" });
   await expect(list).toBeVisible();

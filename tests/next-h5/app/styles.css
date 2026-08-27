@@ -137,6 +137,18 @@ textarea {
   margin-bottom: 24px;
 }
 
+.integration-swipe-actions {
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-swipe-actions > output {
+  padding: 0 16px 12px;
+}
+
 .integration-navigation {
   display: grid;
   gap: 16px;

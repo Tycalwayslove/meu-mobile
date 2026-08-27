@@ -17,6 +17,7 @@ import { OverlayDemo } from "./OverlayDemo";
 import { PickerDemo } from "./PickerDemo";
 import { PullToRefreshDemo } from "./PullToRefreshDemo";
 import { SelectionDemo } from "./SelectionDemo";
+import { SwipeActionsDemo } from "./SwipeActionsDemo";
 import { TimePickerDemo } from "./TimePickerDemo";
 import styles from "./page.module.css";
 
@@ -87,6 +88,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>内容轮播、原生控制与无障碍暂停</h2>
           <CarouselDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>列表滑动操作与常驻等价入口</h2>
+          <SwipeActionsDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

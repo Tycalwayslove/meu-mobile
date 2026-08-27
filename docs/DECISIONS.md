@@ -130,3 +130,18 @@ Meu 自己实现原生 44px 前后按钮、只读 PaginationDots、轮播与幻�
 控制。自动播放默认关闭；启用后提供排在首个 Tab 位置的暂停/播放按钮，焦点进入或拖拽后保持停止，悬停与
 页面隐藏只临时暂停。`prefers-reduced-motion` 下不自动启动，只有用户显式播放后才允许用即时切换继续。
 自动播放时 live region 为 `off`，停止后为 `polite`。未来 uni-app 复用同一状态和回调契约，替换 Web 手势层。
+
+## ADR-018：SwipeActions 以受控 side 为事实源，Web 手势保持轻量
+
+SwipeActions 只负责把任意内容沿水平方向移动并显露左右动作轨道，不拥有 Cell、列表数据、路由、确认弹窗或
+业务 Toast。公开状态固定为 `left | right | null`，同时提供受控与非受控模式；受控调用方没有提交新 side 时，
+视觉位移在下一帧恢复到权威状态。关闭回调明确区分 swipe、keyboard、content、outside、escape 和 action。
+
+React Web 适配层直接使用 Pointer Events、ResizeObserver 与 CSS transform，不增加通用手势依赖。移动超过
+6px 后才锁定方向，纵向意图交还原生滚动；默认打开阈值为动作轨道宽度的 35%，快速横扫可越过距离阈值。
+位移始终限制在已测量轨道内。未来 uni-app 复用 side、方向锁、阈值、动作结果和关闭原因，替换 DOM 测量与
+Pointer Events。
+
+动作保留原生 button、44px 最小目标和同步/异步结果。异步期间锁定全部动作；返回 `false` 或失败保持展开，
+失败只通过 `onActionError` 上报。隐藏轨道不进入 Tab 顺序，每侧提供获得焦点时显现的原生打开按钮；列表调用方
+仍需在 Cell 更多菜单中复制同一动作，确保触摸手势不是发现和执行操作的唯一方式。

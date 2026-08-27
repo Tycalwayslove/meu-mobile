@@ -1,7 +1,7 @@
 # Meu Mobile
 
 Meu Mobile 是面向移动 Web、PWA 与 Hybrid WebView 的 React 组件库。设计契约来自相邻的
-`../meu-design`，首个真实消费者是 MeuMall Next.js H5。
+`../meu-design`，目标消费者包含 MeuMall Next.js H5；当前开发只在仓库内的隔离消费者验证，不接入业务工程。
 
 ## 工程基线
 

@@ -125,6 +125,7 @@ export const prefix = style({
 export const content = style({ flex: "1 1 auto", minWidth: 0 });
 
 export const title = style({
+  display: "block",
   minWidth: 0,
   fontSize: 16,
   fontWeight: 500,
@@ -133,6 +134,7 @@ export const title = style({
 });
 
 export const description = style({
+  display: "block",
   minWidth: 0,
   marginTop: 2,
   color: "var(--meu-color-muted)",

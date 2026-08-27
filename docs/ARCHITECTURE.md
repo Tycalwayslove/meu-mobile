@@ -45,6 +45,9 @@ icons-core ─> icons-react            │
 - Carousel 由 Meu 持有受控索引、自动播放、暂停规则、无障碍与视觉契约；React Web 适配层使用 Embla
   处理拖拽、snap 与无克隆循环，不向公开 API 泄漏引擎类型。未来 uni-app 复用 items、索引、变更原因、
   循环和暂停契约，并按目标平台替换手势实现。
+- SwipeActions 不拥有 Cell、列表数据或业务确认；Meu 持有左右展开状态、方向锁、阈值、动作结果和关闭原因。
+  React Web 适配层使用原生 Pointer Events、ResizeObserver 与 transform，未来 uni-app 替换手势驱动但复用
+  同一状态机。获得焦点时显现的打开按钮与 Cell 更多菜单确保滑动不是唯一入口。
 
 ## Next.js 边界
 

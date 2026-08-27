@@ -113,6 +113,16 @@ export type {
   CarouselItem,
   CarouselProps
 } from "./Carousel";
+export { SwipeActions } from "./SwipeActions";
+export type {
+  SwipeActionsAction,
+  SwipeActionsActionPressDetails,
+  SwipeActionsActionResult,
+  SwipeActionsActionTone,
+  SwipeActionsOpenChangeDetails,
+  SwipeActionsProps,
+  SwipeActionsSide
+} from "./SwipeActions";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";
