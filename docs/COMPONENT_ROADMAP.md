@@ -29,11 +29,11 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 - 路径化服务端错误映射与首次错误聚焦
 - Storybook 集成示例和 React 测试覆盖
 
-## Batch 2：基础信息录入（进行中）
+## Batch 2：基础信息录入（已完成）
 
 - Batch 2A：TextArea、SearchField（已完成）
 - Batch 2B：Checkbox、CheckboxGroup、Radio、RadioGroup、Switch（已完成）
-- Batch 2C：Stepper、Slider、Rate、Selector
+- Batch 2C：Stepper、Slider、Rate、Selector（已完成）
 
 重点：受控/非受控契约、键盘和读屏语义、Field/Form 集成、错误与禁用态。
 

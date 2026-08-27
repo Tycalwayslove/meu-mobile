@@ -1,5 +1,6 @@
 import { ConfigProvider } from "@meu/mobile";
 
+import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
 import { FormDemo } from "./FormDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import styles from "./page.module.css";
@@ -31,6 +32,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>选择控件与布尔值绑定</h2>
           <SelectionDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>数值、评分与卡片选择绑定</h2>
+          <AdvancedEntryDemo />
         </section>
       </main>
     </ConfigProvider>

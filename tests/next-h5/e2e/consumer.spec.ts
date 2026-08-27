@@ -66,6 +66,25 @@ test("binds checkbox arrays, radio keyboard selection and switch booleans", asyn
   ).toBeVisible();
 });
 
+test("binds stepper, slider, rate and selector values", async ({ page }) => {
+  await page.getByLabel("店铺名称").fill("喵呜体验店");
+  await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
+
+  await page.getByRole("button", { name: "增加" }).click();
+  const volume = page.getByRole("slider", { name: "提示音量" });
+  await volume.focus();
+  await page.keyboard.press("ArrowRight");
+  const rating = page.getByRole("slider", { name: "服务评分" });
+  await rating.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.getByText("优先配送", { exact: true }).click();
+
+  await page.getByRole("button", { name: "保存店铺" }).click();
+  await expect(
+    page.getByText("已保存录入：quantity:2 / volume:41 / rating:4 / selector:fast")
+  ).toBeVisible();
+});
+
 test("switches theme and preserves mobile touch targets", async ({ page }) => {
   const provider = page.locator('[data-meu-component="config-provider"]');
   await page.getByRole("button", { name: "切换主题" }).click();
@@ -78,7 +97,7 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
 
   const controlHeights = await page
     .locator(
-      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"]'
+      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"], [data-meu-component="stepper"], [data-meu-component="slider"], [data-meu-component="rate"], [data-meu-component="selector"]'
     )
     .evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
   expect(controlHeights.every((height) => height >= 44)).toBe(true);

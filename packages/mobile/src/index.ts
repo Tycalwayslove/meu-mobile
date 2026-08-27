@@ -37,3 +37,17 @@ export { Radio, RadioGroup } from "./Radio";
 export type { RadioGroupProps, RadioProps, RadioSize, RadioStatus, RadioValue } from "./Radio";
 export { Switch } from "./Switch";
 export type { SwitchProps, SwitchSize, SwitchStatus } from "./Switch";
+export { Stepper } from "./Stepper";
+export type { StepperProps, StepperSize, StepperStatus } from "./Stepper";
+export { Slider } from "./Slider";
+export type { SliderMark, SliderProps, SliderSize, SliderStatus } from "./Slider";
+export { Rate } from "./Rate";
+export type { RateProps, RateSize, RateStatus } from "./Rate";
+export { Selector } from "./Selector";
+export type {
+  SelectorOption,
+  SelectorProps,
+  SelectorSize,
+  SelectorStatus,
+  SelectorValue
+} from "./Selector";

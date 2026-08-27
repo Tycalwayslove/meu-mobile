@@ -19,6 +19,12 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Radio 组件集：[small（50:224）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-224)、[medium（50:263）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-263)、[large（50:302）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-302)，共 24 个 variants
 - Switch 组件集：[small（50:359）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-359)、[medium（50:414）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-414)、[large（50:469）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-469)，共 30 个 variants
 - 组合展板：[CheckboxGroup（50:471）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-471)、[RadioGroup（50:501）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-501)
+- Batch 2C 页面：[Stepper-Slider-Rate-Selector（53:8）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=53-8)，共 79 个 variants
+- Stepper 组件集：[Default（54:74）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=54-74)、[Min（54:147）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=54-147)、[Max（54:220）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=54-220)，共 36 个 variants
+- Slider 组件集：[Meu/Slider（56:134）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=56-134)，12 个 variants
+- Rate 组件集：[Meu/Rate（57:197）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=57-197)，15 个 variants
+- Selector 组件集：[Meu/Selector（58:66）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=58-66)，16 个 variants
+- Batch 2C 验证展板：[Core combinations（59:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=59-2)、[Dark mode（59:66）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=59-66)；可见 fill / stroke 的变量绑定缺口为 0
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程
