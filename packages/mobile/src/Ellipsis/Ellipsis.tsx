@@ -1,8 +1,9 @@
 "use client";
 
-import { VisuallyHidden } from "@meu/primitives-react";
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+
+import { VisuallyHidden } from "../internal/VisuallyHidden";
 
 import {
   action,

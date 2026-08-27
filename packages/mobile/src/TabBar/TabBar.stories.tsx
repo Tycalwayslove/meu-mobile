@@ -1,0 +1,23 @@
+import { MeuIconCheck, MeuIconPlus, MeuIconSearch } from "@meu/icons-react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+
+import { TabBar } from "./TabBar";
+
+const items = [
+  { key: "home", label: "首页", icon: <MeuIconCheck size={22} />, href: "#home" },
+  { key: "search", label: "发现", icon: <MeuIconSearch size={22} />, href: "#search" },
+  { key: "create", label: "发布", icon: <MeuIconPlus size={22} /> },
+  { key: "orders", label: "订单", icon: <MeuIconCheck size={22} />, badge: 3 }
+];
+
+const meta = {
+  title: "Navigation/TabBar",
+  component: TabBar,
+  args: { items, "aria-label": "店铺主导航" }
+} satisfies Meta<typeof TabBar>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
+export const WithSafeArea: Story = { args: { safeArea: true } };

@@ -69,6 +69,7 @@ test("renders atomic display components with native actions and fallbacks", asyn
   await expect(section.getByRole("img", { name: "林夏" })).toBeVisible();
 
   const media = section.getByRole("img", { name: "绿色植物与商品包装插画" });
+  await media.scrollIntoViewIfNeeded();
   await expect(media).toBeVisible();
   await expect(media.locator("xpath=..")).toHaveAttribute("data-state", "loaded");
 
@@ -119,6 +120,37 @@ test("uses native navigation actions, radio segments and read-only page dots", a
   await expect(dots.getByRole("button")).toHaveCount(0);
   await section.getByRole("button", { name: "下一页" }).click();
   await expect(section.getByRole("img", { name: "第 3 页，共 4 页" })).toBeVisible();
+});
+
+test("connects tab panels, primary navigation and read-only progress semantics", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "导航组件" });
+  const tabList = section.getByRole("tablist", { name: "订单内容" });
+  const overview = tabList.getByRole("tab", { name: "概览" });
+  const settings = tabList.getByRole("tab", { name: "设置" });
+  await expect(overview).toHaveAttribute("aria-selected", "true");
+  await overview.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(settings).toBeFocused();
+  await expect(settings).toHaveAttribute("aria-selected", "true");
+  await expect(section.getByRole("tabpanel", { name: "设置" })).toContainText("订单设置");
+
+  const progress = section.getByRole("list", { name: "进度" });
+  await expect(progress.locator("li")).toHaveCount(3);
+  await expect(progress.locator('li[aria-current="step"]')).toContainText("商家发货");
+  const statusPrefix = progress.getByText("进行中：", { exact: true });
+  await expect(statusPrefix).toHaveCSS("position", "absolute");
+  await expect(statusPrefix).toHaveCSS("width", "1px");
+
+  const primary = section.getByRole("navigation", { name: "底部主导航" });
+  await expect(primary.getByRole("link", { name: "首页" })).toHaveAttribute("href", "#home");
+  await primary.getByRole("button", { name: /订单/ }).click();
+  await expect(primary.getByRole("button", { name: /订单/ })).toHaveAttribute(
+    "aria-current",
+    "page"
+  );
+  await expect(primary.getByRole("button", { name: "我的" })).toBeDisabled();
 });
 
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
@@ -178,6 +210,11 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
     )
     .evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
   expect(controlHeights.every((height) => height >= 44)).toBe(true);
+
+  const navigationTargetHeights = await page
+    .locator('[data-meu-component="tab-bar"] a, [role="tab"]')
+    .evaluateAll((targets) => targets.map((target) => target.getBoundingClientRect().height));
+  expect(navigationTargetHeights.every((height) => height >= 44)).toBe(true);
 
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth

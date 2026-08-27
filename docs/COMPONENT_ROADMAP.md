@@ -37,13 +37,13 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 重点：受控/非受控契约、键盘和读屏语义、Field/Form 集成、错误与禁用态。
 
-## Batch 3：信息展示与导航（进行中）
+## Batch 3：信息展示与导航（已完成）
 
 - Batch 3A：Cell、List（已完成）
 - Batch 3B1：Tag、Badge、Avatar、Image、Ellipsis（已完成）
 - Batch 3B2：Card、Collapse（已完成）
 - Batch 3C1：NavBar、SegmentedControl、PaginationDots（已完成）
-- Batch 3C2：Tabs、TabBar、Steps
+- Batch 3C2：Tabs、TabBar、Steps（已完成）
 
 重点：先完成 Cell/List，再基于它们组装导航与列表型组件。
 

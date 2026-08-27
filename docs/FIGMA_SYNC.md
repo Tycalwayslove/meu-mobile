@@ -39,6 +39,9 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 3C1 页面：[NavBar（110:5）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=110-5)、[SegmentedControl（110:657）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=110-657)、[PaginationDots（110:661）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=110-661)
 - Batch 3C1 组件集：[Meu/NavBar（111:673）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=111-673)，2 个 Back variants；[Meu/SegmentedControl（114:112）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=114-112)，12 个 `Size × Status × State` variants；[Meu/PaginationDots（116:28）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=116-28)，4 个 `Direction × Variant` variants
 - Batch 3C1 QA：Light/Dark Foundation 绑定、命名、metadata 与代码 API 对齐；组件树硬编码可见 paint 和未命名节点均为 0。NavBar / SegmentedControl 交互目标不小于 44 px，PaginationDots 保持只读，不伪造点击目标
+- Batch 3C2 页面：[Tabs（120:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=120-2)、[TabBar（123:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=123-2)、[Steps（124:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=124-2)
+- Batch 3C2 组件集：[Meu/Tabs（122:794）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=122-794)，8 个 `Activation × Stretch × DestroyInactive` variants；[Meu/TabBar（123:767）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=123-767)，6 个 `State × SafeArea` variants；[Meu/Steps（124:1080）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=124-1080)，24 个 `Direction × Current × Status` variants
+- Batch 3C2 QA：组件树硬编码可见 paint 和未命名节点均为 0；Tabs 的交互目标高度为 44 px，TabBar 为 56 px，Steps 保持只读有序列表语义。Tabs 同时覆盖自动/手动激活、拉伸与按需销毁内容，且默认保留面板内部状态
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

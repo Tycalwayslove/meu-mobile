@@ -19,7 +19,6 @@
   },
   "dependencies": {
     "@meu/icons-react": "workspace:*",
-    "@meu/primitives-react": "workspace:*",
     "@meu/tokens": "workspace:*",
     "@vanilla-extract/recipes": "0.5.7"
   },

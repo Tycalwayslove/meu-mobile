@@ -11,6 +11,8 @@ export default tseslint.config(
       "**/storybook-static/**",
       "**/coverage/**",
       "**/node_modules/**",
+      "**/.test-results/**",
+      "**/playwright-report/**",
       "packages/tokens/src/generated.ts"
     ]
   },

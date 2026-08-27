@@ -54,7 +54,7 @@ export default function HomePage() {
           <ContainerDemo />
         </section>
         <section className={styles.formSection}>
-          <h2>页面导航与视图切换</h2>
+          <h2>页面导航、标签与流程状态</h2>
           <NavigationDemo />
         </section>
       </main>

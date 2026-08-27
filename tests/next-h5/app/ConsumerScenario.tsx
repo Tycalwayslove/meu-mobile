@@ -33,6 +33,9 @@ import {
   Radio,
   SearchField,
   SegmentedControl,
+  Steps,
+  TabBar,
+  Tabs,
   Tag
 } from "@meu/mobile";
 import { useState } from "react";
@@ -70,6 +73,8 @@ export function ConsumerScenario() {
   const [navigationMessage, setNavigationMessage] = useState("等待导航操作");
   const [previewMode, setPreviewMode] = useState<"summary" | "detail">("summary");
   const [previewPage, setPreviewPage] = useState(1);
+  const [contentTab, setContentTab] = useState("overview");
+  const [primarySection, setPrimarySection] = useState("home");
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -132,6 +137,24 @@ export function ConsumerScenario() {
             value={previewMode}
             onChange={setPreviewMode}
           />
+          <Tabs
+            aria-label="订单内容"
+            value={contentTab}
+            onChange={setContentTab}
+            items={[
+              { key: "overview", label: "概览", content: "订单经营概览" },
+              { key: "activity", label: "动态", content: "订单动态", disabled: true },
+              { key: "settings", label: "设置", content: "订单设置" }
+            ]}
+          />
+          <Steps
+            current={1}
+            items={[
+              { title: "提交订单", description: "08:30" },
+              { title: "商家发货", description: "处理中" },
+              { title: "确认收货" }
+            ]}
+          />
           <div className="integration-pagination">
             <Button
               size="small"
@@ -154,6 +177,16 @@ export function ConsumerScenario() {
           <output aria-live="polite">
             {navigationMessage} / {previewMode === "summary" ? "摘要" : "详情"}
           </output>
+          <TabBar
+            aria-label="底部主导航"
+            value={primarySection}
+            onChange={setPrimarySection}
+            items={[
+              { key: "home", label: "首页", icon: <MeuIconCheck size={22} />, href: "#home" },
+              { key: "orders", label: "订单", icon: <MeuIconSearch size={22} />, badge: 3 },
+              { key: "profile", label: "我的", icon: <MeuIconCheck size={22} />, disabled: true }
+            ]}
+          />
         </section>
 
         <div className="integration-list">

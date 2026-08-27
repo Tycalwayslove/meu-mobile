@@ -83,3 +83,9 @@ export type {
   PaginationDotsProps,
   PaginationDotsVariant
 } from "./PaginationDots";
+export { Tabs } from "./Tabs";
+export type { TabsActivationMode, TabsItem, TabsProps } from "./Tabs";
+export { TabBar } from "./TabBar";
+export type { TabBarItem, TabBarProps } from "./TabBar";
+export { Steps } from "./Steps";
+export type { StepItem, StepStatus, StepsDirection, StepsProps } from "./Steps";
