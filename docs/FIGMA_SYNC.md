@@ -50,6 +50,8 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4B QA：新增 `color/overlay` Light/Dark 语义变量并提供 Web syntax，Mask 与 Popup 未绑定 solid fill 和未命名节点均为 0；Popup 四方向、遮罩、关闭按钮和安全区均有覆盖，关闭目标为 44 × 44 px。代码同时验证引用计数滚动锁、最上层 Escape/Tab、焦点恢复和 Portal SSR 边界
 - Batch 4C Dialog 页面：[Dialog（154:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=154-2)；组件集：[Meu/Dialog（156:1019）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=156-1019)，27 个 `Tone × Actions × State` variants
 - Batch 4C Dialog QA：Light / Dark 预览为 `157:5 / 157:14`，Title、Description 与三项 Action 均为文本属性；未命名节点、重复 variant、未绑定 fill / stroke 和 44 px 触控失败均为 0，108 个圆角全部绑定 Foundation 变量。`actionLayout=auto | horizontal | vertical` 写入组件说明，三操作样例按 auto 规则纵排；Figma 的 `Tone` 是设计场景轴，映射代码 `actions[].tone` 与主操作样式，不是 `Dialog.tone` 顶层 API
+- Batch 4C Toast 页面：[Toast（164:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=164-2)；组件集：[Meu/Toast（165:812）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=165-812) 与 [Meu/Toast / Entering（167:816）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=167-816)，分别包含 24 个 `Tone × Position × Content` variants
+- Batch 4C Toast QA：Default / Entering 两套组件均覆盖 neutral、success、warning、danger，top、center、bottom 以及 message / action；Entering 以 0.72 opacity 静态表达内部进入动效，不虚构公开 state API。两套组件共 288 个可见 paint 变量绑定，未绑定为 0，重复 variant 为 0，操作目标高度为 44 px；Light / Dark 预览、默认 3 秒、Undo 至少 5 秒、读屏播报与不抢焦点说明均已验证
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

@@ -68,8 +68,10 @@ export function Mask({
         style={resolvedStyle}
         hidden={hidden}
         aria-hidden="true"
+        lang={config.locale}
         data-dismissible={dismissible ? "true" : "false"}
         data-meu-component="mask"
+        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <button

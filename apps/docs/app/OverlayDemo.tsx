@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog, Mask, Popup, Space, useDialog } from "@meu/mobile";
+import { Button, Dialog, Mask, Popup, Space, useDialog, useToast } from "@meu/mobile";
 import { useRef, useState } from "react";
 
 export function OverlayDemo() {
@@ -8,6 +8,7 @@ export function OverlayDemo() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("等待 Dialog 操作");
   const dialog = useDialog();
+  const toast = useToast();
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -56,6 +57,29 @@ export function OverlayDemo() {
           }}
         >
           命令式确认
+        </Button>
+        <Button
+          tone="neutral"
+          variant="outline"
+          onClick={() => toast.success({ message: "订单已保存", position: "top" })}
+        >
+          成功 Toast
+        </Button>
+        <Button
+          tone="neutral"
+          variant="outline"
+          onClick={() => {
+            toast.warning({
+              action: {
+                label: "撤销",
+                onPress: () => setDialogMessage("已撤销库存调整")
+              },
+              message: "库存不足，已调整购买数量",
+              position: "bottom"
+            });
+          }}
+        >
+          操作 Toast
         </Button>
       </Space>
       <output aria-live="polite">{dialogMessage}</output>

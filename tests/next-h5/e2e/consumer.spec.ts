@@ -242,6 +242,42 @@ test("runs accessible declarative and provider-scoped Dialog flows", async ({ pa
   await expect(commandTrigger).toBeFocused();
 });
 
+test("queues accessible Toast messages without trapping focus or scroll", async ({ page }) => {
+  const section = page.getByRole("region", { name: "浮层基础组件" });
+  const trigger = section.getByRole("button", { name: "显示 Toast 队列" });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+
+  const firstToast = page.locator('[data-meu-component="toast"]');
+  await expect(firstToast).toHaveAttribute("data-tone", "warning");
+  await expect(firstToast.locator('[role="alert"]')).toHaveText("库存不足，已调整购买数量");
+  await expect(firstToast.locator("xpath=..")).toHaveAttribute("data-position", "bottom");
+  const viewportSize = page.viewportSize();
+  const firstToastBox = await firstToast.boundingBox();
+  if (!viewportSize || !firstToastBox) throw new Error("Expected Toast viewport bounds");
+  expect(firstToastBox.y).toBeGreaterThan(viewportSize.height / 2);
+  await expect(trigger).toBeFocused();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+  await expect(page.getByText("队列中的第二条消息")).toHaveCount(0);
+
+  const undo = firstToast.getByRole("button", { name: "撤销调整" });
+  const undoBox = await undo.boundingBox();
+  if (!undoBox) throw new Error("Expected Toast action bounds");
+  expect(undoBox.width).toBeGreaterThanOrEqual(44);
+  expect(undoBox.height).toBeGreaterThanOrEqual(44);
+  await undo.click();
+  await expect(section.getByText("Toast 操作：已撤销")).toBeVisible();
+
+  const secondToast = page.locator('[data-meu-component="toast"]');
+  await expect(secondToast.locator('[role="status"]')).toHaveText("队列中的第二条消息");
+  await expect(secondToast).toHaveAttribute("data-tone", "success");
+  const secondToastBox = await secondToast.boundingBox();
+  if (!secondToastBox) throw new Error("Expected queued Toast bounds");
+  expect(secondToastBox.y).toBeLessThan(viewportSize.height / 2);
+  await section.getByRole("button", { name: "清空 Toast" }).click();
+  await expect(page.locator('[data-meu-component="toast"]')).toBeHidden();
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

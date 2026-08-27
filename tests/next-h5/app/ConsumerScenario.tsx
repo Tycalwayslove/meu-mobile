@@ -45,7 +45,9 @@ import {
   TabBar,
   Tabs,
   Tag,
-  useDialog
+  ToastProvider,
+  useDialog,
+  useToast
 } from "@meu/mobile";
 import { useRef, useState } from "react";
 import { z } from "zod";
@@ -89,6 +91,35 @@ function DialogCommandDemo({ onResult }: { onResult: (message: string) => void }
     >
       命令式确认订单
     </Button>
+  );
+}
+
+function ToastCommandDemo({ onResult }: { onResult: (message: string) => void }) {
+  const toast = useToast();
+  return (
+    <>
+      <Button
+        variant="outline"
+        tone="neutral"
+        onClick={() => {
+          toast.warning({
+            action: {
+              label: "撤销调整",
+              onPress: () => onResult("Toast 操作：已撤销")
+            },
+            duration: 0,
+            message: "库存不足，已调整购买数量",
+            position: "bottom"
+          });
+          toast.success({ duration: 0, message: "队列中的第二条消息", position: "top" });
+        }}
+      >
+        显示 Toast 队列
+      </Button>
+      <Button variant="outline" tone="neutral" onClick={toast.clear}>
+        清空 Toast
+      </Button>
+    </>
   );
 }
 
@@ -373,82 +404,85 @@ export function ConsumerScenario() {
           <output aria-live="polite">{feedbackMessage}</output>
         </section>
 
-        <DialogProvider>
-          <section className="integration-overlays" aria-label="浮层基础组件">
-            <div className="integration-mask-preview">
-              <Mask
-                container={null}
-                lockScroll={false}
-                opacity="thin"
-                style={{ position: "absolute", zIndex: 0 }}
-              >
-                <span className="integration-mask-label">Mask 预览</span>
-              </Mask>
-            </div>
-            <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
-              打开配送浮层
-            </Button>
-            <Button
-              ref={dialogTriggerRef}
-              tone="danger"
-              variant="outline"
-              onClick={() => setDialogOpen(true)}
-            >
-              打开删除确认
-            </Button>
-            <DialogCommandDemo onResult={setOverlayMessage} />
-            <output aria-live="polite">{overlayMessage}</output>
-            <Popup
-              aria-label="配送方式"
-              open={popupOpen}
-              closeOnMaskClick
-              showCloseButton
-              returnFocusRef={popupTriggerRef}
-              onOpenChange={(nextOpen, details) => {
-                setPopupOpen(nextOpen);
-                if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
-              }}
-            >
-              <div className="integration-popup-content">
-                <h2>配送方式</h2>
-                <p>选择适合当前订单的配送方式。</p>
-                <Button
-                  onClick={() => {
-                    setPopupOpen(false);
-                    setOverlayMessage("已确认标准配送");
-                  }}
+        <ToastProvider>
+          <DialogProvider>
+            <section className="integration-overlays" aria-label="浮层基础组件">
+              <div className="integration-mask-preview">
+                <Mask
+                  container={null}
+                  lockScroll={false}
+                  opacity="thin"
+                  style={{ position: "absolute", zIndex: 0 }}
                 >
-                  确认标准配送
-                </Button>
+                  <span className="integration-mask-label">Mask 预览</span>
+                </Mask>
               </div>
-            </Popup>
-            <Dialog
-              open={dialogOpen}
-              title="删除测试订单？"
-              description="订单及关联记录将被永久删除，此操作无法撤销。"
-              returnFocusRef={dialogTriggerRef}
-              actions={[
-                { autoFocus: true, key: "cancel", label: "取消" },
-                {
-                  key: "delete",
-                  label: "永久删除",
-                  tone: "danger",
-                  onPress: async () => {
-                    await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
-                    setOverlayMessage("已删除测试订单");
+              <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
+                打开配送浮层
+              </Button>
+              <Button
+                ref={dialogTriggerRef}
+                tone="danger"
+                variant="outline"
+                onClick={() => setDialogOpen(true)}
+              >
+                打开删除确认
+              </Button>
+              <DialogCommandDemo onResult={setOverlayMessage} />
+              <ToastCommandDemo onResult={setOverlayMessage} />
+              <output aria-live="polite">{overlayMessage}</output>
+              <Popup
+                aria-label="配送方式"
+                open={popupOpen}
+                closeOnMaskClick
+                showCloseButton
+                returnFocusRef={popupTriggerRef}
+                onOpenChange={(nextOpen, details) => {
+                  setPopupOpen(nextOpen);
+                  if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
+                }}
+              >
+                <div className="integration-popup-content">
+                  <h2>配送方式</h2>
+                  <p>选择适合当前订单的配送方式。</p>
+                  <Button
+                    onClick={() => {
+                      setPopupOpen(false);
+                      setOverlayMessage("已确认标准配送");
+                    }}
+                  >
+                    确认标准配送
+                  </Button>
+                </div>
+              </Popup>
+              <Dialog
+                open={dialogOpen}
+                title="删除测试订单？"
+                description="订单及关联记录将被永久删除，此操作无法撤销。"
+                returnFocusRef={dialogTriggerRef}
+                actions={[
+                  { autoFocus: true, key: "cancel", label: "取消" },
+                  {
+                    key: "delete",
+                    label: "永久删除",
+                    tone: "danger",
+                    onPress: async () => {
+                      await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+                      setOverlayMessage("已删除测试订单");
+                    }
                   }
-                }
-              ]}
-              onOpenChange={(nextOpen, details) => {
-                setDialogOpen(nextOpen);
-                if (details.reason === "escape") setOverlayMessage("Dialog 已关闭：escape");
-                if (details.reason === "action" && details.actionKey === "cancel") {
-                  setOverlayMessage("Dialog 已取消");
-                }
-              }}
-            />
-          </section>
-        </DialogProvider>
+                ]}
+                onOpenChange={(nextOpen, details) => {
+                  setDialogOpen(nextOpen);
+                  if (details.reason === "escape") setOverlayMessage("Dialog 已关闭：escape");
+                  if (details.reason === "action" && details.actionKey === "cancel") {
+                    setOverlayMessage("Dialog 已取消");
+                  }
+                }}
+              />
+            </section>
+          </DialogProvider>
+        </ToastProvider>
 
         <MeuForm
           className="integration-form"

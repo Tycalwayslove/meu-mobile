@@ -123,7 +123,9 @@ export function Dialog({
         className={layer({ state: visualState })}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
+        lang={config.locale}
         data-meu-overlay-layer="dialog"
+        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <Mask

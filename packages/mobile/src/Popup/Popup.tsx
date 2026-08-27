@@ -74,7 +74,9 @@ export function Popup({
         className={layer({ state: visualState })}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
+        lang={config.locale}
         data-meu-overlay-layer="popup"
+        data-meu-theme={config.theme}
         data-state={visualState}
       >
         {mask ? (
