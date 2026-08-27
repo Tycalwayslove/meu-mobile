@@ -1,0 +1,53 @@
+"use client";
+
+import { useFieldContext } from "../Field/FieldContext";
+import { indicator, placeholderText, trigger, valueText } from "./PickerTrigger.css";
+import type { PickerTriggerProps } from "./types";
+
+export function PickerTrigger({
+  "aria-describedby": ariaDescribedBy,
+  "aria-invalid": ariaInvalid,
+  className,
+  disabled = false,
+  id,
+  open = false,
+  placeholder = "请选择",
+  ref,
+  status = "default",
+  type = "button",
+  value,
+  ...props
+}: PickerTriggerProps) {
+  const fieldContext = useFieldContext();
+  const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
+  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const invalid =
+    ariaInvalid === true ||
+    ariaInvalid === "true" ||
+    status === "error" ||
+    Boolean(fieldContext && fieldContext.invalid);
+  const hasValue = value !== undefined && value !== null && value !== "";
+  const classes = trigger({ status: invalid ? "error" : status });
+
+  return (
+    <button
+      {...props}
+      ref={ref}
+      id={resolvedId}
+      type={type}
+      className={className ? `${classes} ${className}` : classes}
+      disabled={disabled}
+      aria-describedby={describedBy}
+      aria-expanded={open}
+      aria-haspopup="dialog"
+      data-invalid={invalid || undefined}
+      data-meu-component="picker-trigger"
+      data-state={disabled ? "disabled" : invalid ? "error" : open ? "open" : "default"}
+    >
+      <span className={`${valueText}${hasValue ? "" : ` ${placeholderText}`}`}>
+        {hasValue ? value : placeholder}
+      </span>
+      <span className={indicator({ open })} aria-hidden="true" />
+    </button>
+  );
+}

@@ -42,3 +42,10 @@ ActionMenu 是由明确用户意图触发的底部操作面板，组合 Popup �
 方向键漫游焦点的桌面式 `menu/menuitem` 语义，也不承载选择、勾选和子菜单。危险操作始终移入独立分组并
 通过 Dialog 二次确认，异步执行期间同时锁定动作与关闭入口。命令式 API 由 Provider 保留当前 React tree
 的主题、语言和 Portal 上下文，未来 uni-app 复用动作顺序、分组、确认和关闭原因契约。
+
+## ADR-009：Picker 使用原生滚动与 listbox 草稿模型
+
+Picker 复用 Popup 的模态边界，每列使用单选 `listbox` 与 `aria-activedescendant`，并保留原生纵向滚动和
+CSS scroll snap，不引入独立手势引擎。打开时从已提交值创建 draft；键盘、点按和滚动只更新 draft，确定
+才提交，取消类关闭全部回滚。这样既保留移动 WebView 的原生滚动物理，也让键盘、读屏和表单 dirty 状态
+拥有确定的等价路径。日期类组件后续只组合该选择模型与 `DateAdapter`，核心包不绑定具体日期库或时区。

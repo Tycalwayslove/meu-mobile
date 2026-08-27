@@ -25,6 +25,8 @@ icons-core ─> icons-react            │
 - BottomSheet 的拖拽只绑定 44 px 手柄，snap 动画只更新 transform，不与可滚动内容争抢手势。
 - ActionMenu 复用 Popup 的模态边界，操作项保持原生 button 语义；危险操作通过嵌套 Dialog 二次确认，
   两层浮层依赖焦点栈与引用计数滚动锁协同。
+- Picker 复用 Popup 的模态边界，每列保持原生滚动与 CSS scroll snap，并以 listbox、
+  `aria-activedescendant` 和确认式 draft 提供触摸、键盘、读屏与表单的一致选择路径。
 
 ## Next.js 边界
 

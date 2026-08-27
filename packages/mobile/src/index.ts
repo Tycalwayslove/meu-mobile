@@ -151,6 +151,19 @@ export type {
   ActionMenuProviderProps,
   ActionMenuShowOptions
 } from "./ActionMenu";
+export { Picker, PickerTrigger } from "./Picker";
+export type {
+  PickerColumn,
+  PickerOpenChangeDetails,
+  PickerOpenChangeReason,
+  PickerOption,
+  PickerProps,
+  PickerSelectDetails,
+  PickerSelectReason,
+  PickerTriggerProps,
+  PickerTriggerStatus,
+  PickerValue
+} from "./Picker";
 export { Toast, ToastProvider, useToast } from "./Toast";
 export type {
   ToastAction,

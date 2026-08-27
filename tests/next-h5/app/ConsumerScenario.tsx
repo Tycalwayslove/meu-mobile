@@ -4,6 +4,7 @@ import {
   MeuForm,
   MeuFormCheckbox,
   MeuFormCheckboxGroup,
+  MeuFormPicker,
   MeuFormRate,
   MeuFormRadioGroup,
   MeuFormSegmentedControl,
@@ -60,6 +61,7 @@ const schema = z.object({
   description: z.string().min(6, "店铺介绍至少输入 6 个字符"),
   notifications: z.boolean(),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
+  appointment: z.array(z.union([z.string(), z.number(), z.null()])).length(2, "请选择完整预约时间"),
   quantity: z.number().min(1).max(5),
   rating: z.number().min(1, "请完成评分"),
   services: z.array(z.string()).min(1, "至少选择一项服务"),
@@ -157,6 +159,7 @@ export function ConsumerScenario() {
     schema,
     defaultValues: {
       agreement: true,
+      appointment: ["today", 9],
       description: "",
       fulfillment: ["standard"],
       notifications: true,
@@ -603,7 +606,7 @@ export function ConsumerScenario() {
               `${values.services.join(",")} / ${values.shipping} / notifications:${values.notifications ? "true" : "false"} / agreement:${values.agreement ? "true" : "false"}`
             );
             setSavedAdvanced(
-              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
+              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
           }}
         >
@@ -654,6 +657,30 @@ export function ConsumerScenario() {
             formatValue={(value) => `${value}%`}
           />
           <MeuFormRate<FormValues> name="rating" label="服务评分" />
+          <MeuFormPicker<FormValues>
+            name="appointment"
+            label="预约时间"
+            description="取消不修改表单，确定后才提交选择。"
+            columnLabels={["日期", "时段"]}
+            columns={[
+              [
+                { label: "今天", value: "today" },
+                { label: "明天", value: "tomorrow" },
+                { label: "后天", value: "after-tomorrow" },
+                { label: "周六", value: "saturday" },
+                { label: "周日", value: "sunday" }
+              ],
+              [
+                { label: "09:00", value: 9 },
+                { label: "10:00", value: 10 },
+                { disabled: true, label: "11:00（约满）", value: 11 },
+                { label: "12:00", value: 12 },
+                { label: "13:00", value: 13 }
+              ]
+            ]}
+            required
+            triggerProps={{ placeholder: "选择日期和时段" }}
+          />
           <MeuFormSelector<FormValues, string>
             name="fulfillment"
             label="履约方案"

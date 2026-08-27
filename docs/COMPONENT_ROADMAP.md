@@ -47,7 +47,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 重点：先完成 Cell/List，再基于它们组装导航与列表型组件。
 
-## Batch 4：反馈与浮层（进行中）
+## Batch 4：反馈与浮层（已完成）
 
 - Batch 4A：Progress、Skeleton、Empty、Result（已完成）
 - Batch 4B：浮层基础设施、Mask、Popup（已完成）
@@ -58,7 +58,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 ## Batch 5：选择器与复合输入
 
-- Picker、CascadePicker、DatePicker、TimePicker、Calendar、DateRangePicker
+- Picker（已完成）、CascadePicker、DatePicker、TimePicker、Calendar、DateRangePicker
 
 重点：复用 `date-adapter`，核心包不绑定具体日期库和业务时区。
 

@@ -58,6 +58,8 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4D BottomSheet QA：8 个 `Title × Height` variants 覆盖有无标题与 Content / Peek / Half / Full 代表性高度；120 个可见 paint 全部绑定 Foundation 变量，未绑定、重复 variant、未命名层与小于 44 px 的拖拽手柄均为 0，8 个浮层均应用阴影。受控/非受控可见性、snapPoints 归一化、无障碍命名、handle-only 拖拽与键盘等价操作、dismiss reasons、Portal / Mask / 滚动锁 / 焦点恢复 / safe area / forceMount 均记录为运行时契约，不虚构为视觉 variant
 - Batch 4D ActionMenu 页面：[ActionMenu（184:4）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=184-4)；Light / Dark 主题预览为 [186:5](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=186-5) / [186:22](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=186-22)，组件集为 [Meu/ActionMenu（187:123）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=187-123)
 - Batch 4D ActionMenu QA：8 个 `Header × Groups × Emphasis` variants 覆盖有无标题、单组/多组与 neutral/danger；138/138 个相关 paint 绑定 Foundation 变量，Neutral 使用 `color/ink`、Danger 使用 `color/danger`，40 个动作行均不小于 44 px，未命名节点和重复直接子节点均为 0。模态 dialog、原生 button、危险操作 Dialog 确认、异步关闭锁、dismiss reasons、Provider 和焦点恢复均记录为运行时契约；Code Connect 因当前权限状态保持未连接，不虚构映射
+- Batch 5 Picker 页面：[Picker（199:175）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=199-175)；组件集：[Meu/Picker（199:92）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=199-92)；Light / Dark 预览为 [199:109 / 199:150](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=199-109)
+- Batch 5 Picker QA：4 个 `Columns × Header` variants 覆盖单列/三列代表布局与有无标题栏；86/86 个 paint 绑定 Foundation 变量，未绑定、未命名和重复 variant 均为 0；4 个取消/确定按钮均为 84×44px。滚轮固定 5×48px，跨列连续选中窗、上下 fade 和 disabled 内容示例齐全；draft、confirm/cancel、listbox、Portal、focus、scroll/snap 等仅记录为运行时契约，不伪造视觉状态轴
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

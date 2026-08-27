@@ -8,6 +8,7 @@ import { FeedbackDemo } from "./FeedbackDemo";
 import { InformationDemo } from "./InformationDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { OverlayDemo } from "./OverlayDemo";
+import { PickerDemo } from "./PickerDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import styles from "./page.module.css";
 
@@ -42,6 +43,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>数值、评分与卡片选择绑定</h2>
           <AdvancedEntryDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>滚轮选择器与确认式表单绑定</h2>
+          <PickerDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

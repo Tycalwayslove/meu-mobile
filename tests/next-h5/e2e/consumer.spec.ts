@@ -297,6 +297,46 @@ test("runs ActionMenu actions with danger confirmation", async ({ page }) => {
   await expect(trigger).toBeFocused();
 });
 
+test("keeps Picker drafts isolated until confirmation and restores trigger focus", async ({
+  page
+}) => {
+  const trigger = page.getByRole("button", { name: "预约时间" });
+  await expect(trigger).toContainText("今天 / 09:00");
+  await trigger.click();
+
+  let picker = page.getByRole("dialog", { name: "预约时间" });
+  const dateWheel = picker.getByRole("listbox", { name: "日期" });
+  const timeWheel = picker.getByRole("listbox", { name: "时段" });
+  await expect(picker).toBeVisible();
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await dateWheel.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(picker.getByRole("option", { name: "明天" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await timeWheel.focus();
+  await page.keyboard.press("ArrowDown");
+  await picker.getByRole("button", { name: "取消" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("今天 / 09:00");
+
+  await trigger.click();
+  picker = page.getByRole("dialog", { name: "预约时间" });
+  await expect(picker.getByRole("option", { name: "今天" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await picker.getByRole("option", { name: "明天" }).click();
+  await picker.getByRole("option", { name: "10:00" }).click();
+  await picker.getByRole("button", { name: "确定" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("明天 / 10:00");
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+});
+
 test("positions and dismisses a non-modal Popover without locking scroll", async ({
   browserName,
   page
@@ -453,7 +493,9 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
 
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
-    page.getByText("已保存录入：quantity:2 / volume:41 / rating:4 / selector:fast / segmented:card")
+    page.getByText(
+      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / selector:fast / segmented:card"
+    )
   ).toBeVisible();
 });
 
