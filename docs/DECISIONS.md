@@ -49,3 +49,11 @@ Picker 复用 Popup 的模态边界，每列使用单选 `listbox` 与 `aria-act
 CSS scroll snap，不引入独立手势引擎。打开时从已提交值创建 draft；键盘、点按和滚动只更新 draft，确定
 才提交，取消类关闭全部回滚。这样既保留移动 WebView 的原生滚动物理，也让键盘、读屏和表单 dirty 状态
 拥有确定的等价路径。日期类组件后续只组合该选择模型与 `DateAdapter`，核心包不绑定具体日期库或时区。
+
+## ADR-010：CascadePicker 是 Picker 的无视觉分叉数据适配层
+
+CascadePicker 接收树形 options，并通过纯解析函数生成当前路径对应的 Picker columns、值和选项；Popup、
+滚轮、listbox、键盘、焦点、滚动锁和 safe area 全部复用 Picker。父级变化时只保留变化列及其以前的值，
+丢弃旧后缀后逐级选择新分支的首个可用项。`children: undefined` 表示叶子，显式 `children: []` 表示
+存在但暂为空的下一级并阻止确认，使调用方可通过更新 options 完成异步加载而无需把 Promise 或请求状态
+引入基础组件。动态数据归一化保持静默，不伪造用户选择事件；表单仍只在确认时写入完整路径。

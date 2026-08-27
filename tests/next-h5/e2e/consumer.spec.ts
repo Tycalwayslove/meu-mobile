@@ -337,6 +337,42 @@ test("keeps Picker drafts isolated until confirmation and restores trigger focus
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
 });
 
+test("rebuilds CascadePicker paths and commits only the confirmed branch", async ({ page }) => {
+  const trigger = page.getByRole("button", { name: "配送地区" });
+  await expect(trigger).toContainText("浙江省 / 杭州市 / 西湖区");
+  await trigger.click();
+
+  let picker = page.getByRole("dialog", { name: "配送地区" });
+  await expect(picker.getByRole("listbox")).toHaveCount(3);
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await picker.getByRole("option", { name: "江苏省" }).click();
+  await expect(picker.getByRole("option", { name: "南京市" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await expect(picker.getByRole("option", { name: "玄武区" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await picker.getByRole("button", { name: "取消" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("浙江省 / 杭州市 / 西湖区");
+
+  await trigger.click();
+  picker = page.getByRole("dialog", { name: "配送地区" });
+  await expect(picker.getByRole("option", { name: "浙江省" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await picker.getByRole("option", { name: "江苏省" }).click();
+  await picker.getByRole("button", { name: "确定" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("江苏省 / 南京市 / 玄武区");
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+});
+
 test("positions and dismisses a non-modal Popover without locking scroll", async ({
   browserName,
   page
@@ -494,7 +530,7 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
     page.getByText(
-      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / selector:fast / segmented:card"
+      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / selector:fast / segmented:card"
     )
   ).toBeVisible();
 });

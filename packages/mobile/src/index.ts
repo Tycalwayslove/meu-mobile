@@ -164,6 +164,8 @@ export type {
   PickerTriggerStatus,
   PickerValue
 } from "./Picker";
+export { CascadePicker } from "./CascadePicker";
+export type { CascadePickerOption, CascadePickerProps } from "./CascadePicker";
 export { Toast, ToastProvider, useToast } from "./Toast";
 export type {
   ToastAction,

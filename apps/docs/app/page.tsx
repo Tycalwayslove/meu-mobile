@@ -1,6 +1,7 @@
 import { ActionMenuProvider, ConfigProvider, DialogProvider, ToastProvider } from "@meu/mobile";
 
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
+import { CascadePickerDemo } from "./CascadePickerDemo";
 import { ContainerDemo } from "./ContainerDemo";
 import { DisplayDemo } from "./DisplayDemo";
 import { FormDemo } from "./FormDemo";
@@ -47,6 +48,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>滚轮选择器与确认式表单绑定</h2>
           <PickerDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>级联路径选择与确认式表单绑定</h2>
+          <CascadePickerDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

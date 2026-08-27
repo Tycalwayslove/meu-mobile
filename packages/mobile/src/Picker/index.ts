@@ -1,6 +1,8 @@
 export { Picker } from "./Picker";
 export { PickerTrigger } from "./PickerTrigger";
 export type {
+  PickerAccessibleName,
+  PickerBaseProps,
   PickerColumn,
   PickerOpenChangeDetails,
   PickerOpenChangeReason,

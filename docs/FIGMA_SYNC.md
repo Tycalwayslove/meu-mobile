@@ -60,6 +60,8 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4D ActionMenu QA：8 个 `Header × Groups × Emphasis` variants 覆盖有无标题、单组/多组与 neutral/danger；138/138 个相关 paint 绑定 Foundation 变量，Neutral 使用 `color/ink`、Danger 使用 `color/danger`，40 个动作行均不小于 44 px，未命名节点和重复直接子节点均为 0。模态 dialog、原生 button、危险操作 Dialog 确认、异步关闭锁、dismiss reasons、Provider 和焦点恢复均记录为运行时契约；Code Connect 因当前权限状态保持未连接，不虚构映射
 - Batch 5 Picker 页面：[Picker（199:175）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=199-175)；组件集：[Meu/Picker（199:92）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=199-92)；Light / Dark 预览为 [199:109 / 199:150](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=199-109)
 - Batch 5 Picker QA：4 个 `Columns × Header` variants 覆盖单列/三列代表布局与有无标题栏；86/86 个 paint 绑定 Foundation 变量，未绑定、未命名和重复 variant 均为 0；4 个取消/确定按钮均为 84×44px。滚轮固定 5×48px，跨列连续选中窗、上下 fade 和 disabled 内容示例齐全；draft、confirm/cancel、listbox、Portal、focus、scroll/snap 等仅记录为运行时契约，不伪造视觉状态轴
+- Batch 5 CascadePicker 页面：[CascadePicker（210:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=210-2)；组件集：[Meu/CascadePicker（212:100）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=212-100)；文档与 Light / Dark 预览为 [223:2 / 223:30 / 223:64](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=223-2)
+- Batch 5 CascadePicker QA：4 个 `Depth × State` variants 覆盖二级/三级 Ready 与显式空子级；84/84 个 variant paint 绑定 Foundation 变量，未绑定、未命名和重复 variant 均为 0，取消/确定目标均为 84×44px。滚轮复用 48px 行、连续选中窗和上下 fade；Ready 示例使用有效的“浙江省 → 杭州市 → 西湖区”路径，`children: []` 的末列真实空白并禁用确定，不伪造占位 option。父级换支、静默归一化、确认式 draft 和表单 adapter 仅记录为运行时契约
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

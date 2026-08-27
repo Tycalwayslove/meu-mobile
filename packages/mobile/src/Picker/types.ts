@@ -29,7 +29,7 @@ export type PickerSelectDetails = {
   reason: PickerSelectReason;
 };
 
-type PickerAccessibleName =
+export type PickerAccessibleName =
   | {
       title: ReactNode;
       "aria-label"?: string;
@@ -46,10 +46,11 @@ type PickerAccessibleName =
       "aria-labelledby": string;
     };
 
-type PickerBaseProps<TValue extends PickerValue> = Omit<
+export type PickerBaseProps<TValue extends PickerValue> = Omit<
   HTMLAttributes<HTMLDivElement>,
-  "aria-label" | "aria-labelledby" | "children" | "defaultValue" | "title"
+  "aria-label" | "aria-labelledby" | "children" | "defaultValue" | "onSelect" | "title"
 > & {
+  "data-meu-component"?: string;
   cancelText?: ReactNode;
   closeOnEscape?: boolean;
   closeOnMaskClick?: boolean;

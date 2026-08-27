@@ -28,6 +28,8 @@ export { MeuFormSelector } from "./MeuFormSelector";
 export type { MeuFormSelectorProps } from "./MeuFormSelector";
 export { MeuFormPicker } from "./MeuFormPicker";
 export type { MeuFormPickerProps } from "./MeuFormPicker";
+export { MeuFormCascadePicker } from "./MeuFormCascadePicker";
+export type { MeuFormCascadePickerProps } from "./MeuFormCascadePicker";
 export { MeuFormSegmentedControl } from "./MeuFormSegmentedControl";
 export type { MeuFormSegmentedControlProps } from "./MeuFormSegmentedControl";
 export { useMeuForm } from "./useMeuForm";

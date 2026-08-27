@@ -73,6 +73,7 @@ type PickerState<TValue extends PickerValue> = {
 export function Picker<TValue extends PickerValue = PickerValue>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  "data-meu-component": componentName = "picker",
   cancelText,
   className,
   closeOnEscape = true,
@@ -212,7 +213,7 @@ export function Picker<TValue extends PickerValue = PickerValue>({
         {...props}
         ref={ref}
         className={className ? `${root} ${className}` : root}
-        data-meu-component="picker"
+        data-meu-component={componentName}
       >
         <div className={header}>
           <Button

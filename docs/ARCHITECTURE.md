@@ -27,6 +27,8 @@ icons-core ─> icons-react            │
   两层浮层依赖焦点栈与引用计数滚动锁协同。
 - Picker 复用 Popup 的模态边界，每列保持原生滚动与 CSS scroll snap，并以 listbox、
   `aria-activedescendant` 和确认式 draft 提供触摸、键盘、读屏与表单的一致选择路径。
+- CascadePicker 只负责把树形路径解析为 Picker columns；父级变化、动态 options 与空子级由纯数据解析层
+  归一化，不复制 Popup、滚轮、焦点或表单提交实现。
 
 ## Next.js 边界
 

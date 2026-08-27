@@ -4,6 +4,7 @@ import {
   MeuForm,
   MeuFormCheckbox,
   MeuFormCheckboxGroup,
+  MeuFormCascadePicker,
   MeuFormPicker,
   MeuFormRate,
   MeuFormRadioGroup,
@@ -60,6 +61,7 @@ const schema = z.object({
   agreement: z.boolean().refine((value) => value, "请同意服务协议"),
   description: z.string().min(6, "店铺介绍至少输入 6 个字符"),
   notifications: z.boolean(),
+  region: z.array(z.string()).length(3, "请选择完整配送地区"),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
   appointment: z.array(z.union([z.string(), z.number(), z.null()])).length(2, "请选择完整预约时间"),
   quantity: z.number().min(1).max(5),
@@ -75,6 +77,44 @@ type FormValues = z.infer<typeof schema>;
 
 const displayDescription =
   "Meu Mobile 面向 Next.js 移动网页提供稳定的设计令牌、原生交互语义、图片回退和完整表单集成，同时为后续 uni-app 适配保留清晰边界。";
+
+const regions = [
+  {
+    label: "浙江省",
+    value: "zhejiang",
+    children: [
+      {
+        label: "杭州市",
+        value: "hangzhou",
+        children: [
+          { label: "西湖区", value: "xihu" },
+          { label: "滨江区", value: "binjiang" }
+        ]
+      },
+      {
+        label: "宁波市",
+        value: "ningbo",
+        children: [{ label: "海曙区", value: "haishu" }]
+      }
+    ]
+  },
+  {
+    label: "江苏省",
+    value: "jiangsu",
+    children: [
+      {
+        label: "南京市",
+        value: "nanjing",
+        children: [{ label: "玄武区", value: "xuanwu" }]
+      },
+      {
+        label: "苏州市",
+        value: "suzhou",
+        children: [{ label: "姑苏区", value: "gusu" }]
+      }
+    ]
+  }
+] as const;
 
 function DialogCommandDemo({ onResult }: { onResult: (message: string) => void }) {
   const dialog = useDialog();
@@ -165,6 +205,7 @@ export function ConsumerScenario() {
       notifications: true,
       quantity: 1,
       rating: 3,
+      region: ["zhejiang", "hangzhou", "xihu"],
       services: ["delivery"],
       shipping: "standard",
       storeName: "",
@@ -606,7 +647,7 @@ export function ConsumerScenario() {
               `${values.services.join(",")} / ${values.shipping} / notifications:${values.notifications ? "true" : "false"} / agreement:${values.agreement ? "true" : "false"}`
             );
             setSavedAdvanced(
-              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
+              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
           }}
         >
@@ -680,6 +721,15 @@ export function ConsumerScenario() {
             ]}
             required
             triggerProps={{ placeholder: "选择日期和时段" }}
+          />
+          <MeuFormCascadePicker<FormValues, string>
+            name="region"
+            label="配送地区"
+            description="父级变化会重建后续路径，确定后才提交选择。"
+            columnLabels={["省份", "城市", "区县"]}
+            options={regions}
+            required
+            triggerProps={{ placeholder: "选择省市区" }}
           />
           <MeuFormSelector<FormValues, string>
             name="fulfillment"
