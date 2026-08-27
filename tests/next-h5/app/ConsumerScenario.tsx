@@ -38,6 +38,7 @@ import {
   Ellipsis,
   Empty,
   Image,
+  InfiniteList,
   List,
   Mask,
   NavBar,
@@ -208,6 +209,7 @@ export function ConsumerScenario() {
   const [primarySection, setPrimarySection] = useState("home");
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [refreshCount, setRefreshCount] = useState(0);
+  const [infinitePage, setInfinitePage] = useState(1);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -283,6 +285,24 @@ export function ConsumerScenario() {
             <strong>可刷新订单摘要</strong>
             <p>刷新次数：{refreshCount}</p>
           </PullToRefresh>
+        </section>
+
+        <section className="integration-infinite-list" aria-label="无限列表">
+          <div role="list" aria-label="分页订单">
+            {Array.from({ length: infinitePage * 2 }, (_, index) => (
+              <div role="listitem" key={index}>
+                分页订单 {index + 1}
+              </div>
+            ))}
+          </div>
+          <InfiniteList
+            autoLoad={false}
+            hasMore={infinitePage < 3}
+            loadMore={async () => {
+              await new Promise<void>((resolve) => window.setTimeout(resolve, 100));
+              setInfinitePage((current) => current + 1);
+            }}
+          />
         </section>
 
         <section className="integration-navigation" aria-label="导航组件">

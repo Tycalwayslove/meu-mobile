@@ -40,6 +40,8 @@ icons-core ─> icons-react            │
   表单触发器留在 `form-react`，核心组件不读取业务表单、路由或接口状态。
 - PullToRefresh 不制造滚动容器，只在最近滚动边界到顶后接管纵向下拉；异步刷新、状态播报和键盘按钮
   属于 React 适配层，`canPull()`、阈值与状态契约可被未来平台实现复用。
+- InfiniteList 只渲染列表尾部状态并锁定异步加载，不持有分页数据或滚动容器；Web 端的
+  IntersectionObserver、最近滚动祖先发现和原生按钮降级留在 React 适配层。
 
 ## Next.js 边界
 

@@ -73,6 +73,29 @@ test("refreshes through pull and keyboard-equivalent paths", async ({ page }) =>
   await expect(section.getByText("刷新次数：2")).toBeVisible();
 });
 
+test("loads infinite pages manually, locks each request and reaches completion", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "无限列表" });
+  const list = section.getByRole("list", { name: "分页订单" });
+  const root = section.locator('[data-meu-component="infinite-list"]');
+  await expect(list.getByRole("listitem")).toHaveCount(2);
+
+  const firstLoad = section.getByRole("button", { name: "加载更多" });
+  await firstLoad.evaluate((button) => {
+    (button as HTMLButtonElement).click();
+    (button as HTMLButtonElement).click();
+  });
+  await expect(root).toHaveAttribute("aria-busy", "true");
+  await expect(list.getByRole("listitem")).toHaveCount(4);
+
+  await section.getByRole("button", { name: "加载更多" }).click();
+  await expect(list.getByRole("listitem")).toHaveCount(6);
+  await expect(root).toHaveAttribute("data-status", "complete");
+  await expect(section.getByText("没有更多内容了").last()).toBeVisible();
+  await expect(section.getByRole("button")).toHaveCount(0);
+});
+
 test("keeps Cell actions, links and List semantics native", async ({ page }) => {
   const list = page.getByRole("list", { name: "店铺入口" });
   await expect(list).toBeVisible();

@@ -102,6 +102,19 @@ textarea {
   border-radius: var(--meu-radius-surface);
 }
 
+.integration-infinite-list {
+  margin-bottom: 24px;
+  overflow: hidden;
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-infinite-list [role="listitem"] {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--meu-color-border);
+}
+
 .integration-refresh [data-meu-component="pull-to-refresh"] > div:last-child {
   min-height: 112px;
   padding: 20px;

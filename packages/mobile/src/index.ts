@@ -99,6 +99,13 @@ export type {
   PullToRefreshStatusChangeDetails,
   PullToRefreshTrigger
 } from "./PullToRefresh";
+export { InfiniteList } from "./InfiniteList";
+export type {
+  InfiniteListProps,
+  InfiniteListStatus,
+  InfiniteListStatusChangeDetails,
+  InfiniteListTrigger
+} from "./InfiniteList";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";

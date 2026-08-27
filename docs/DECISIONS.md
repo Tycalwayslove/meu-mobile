@@ -108,3 +108,14 @@ PullToRefresh 包裹内容但不设置固定高度或 `overflow`，默认向上�
 Promise 完成后短暂显示 complete，失败通过 `onRefreshError` 报告并复位。内容与 indicator 仅使用 transform，
 reduced-motion 下缩短复位动画。组件同时提供获得焦点时显现的原生刷新按钮和 `aria-busy` / live status，确保
 触摸手势不是唯一操作路径；请求缓存、错误 Toast 和业务空状态仍由调用方负责。
+
+## ADR-016：InfiniteList 以 hasMore 为完成事实源，并保留原生手动入口
+
+InfiniteList 是列表尾部状态与触发器，不拥有列表数据、游标或滚动容器。Web 端默认使用
+IntersectionObserver，在 sentinel 进入最近滚动祖先底部 250px 预取区时调用 `loadMore()`；不使用较新的
+`scrollMargin`，以保持 iOS 13 与 Chrome / WebView 70+ 兼容。Observer 不可用或 `autoLoad=false` 时，原生
+44px“加载更多”按钮仍能完成同一操作。
+
+同步 ref 在状态更新前锁定 Observer、手动按钮和重试入口，确保每轮最多一个 Promise。拒绝后进入 error 且
+停止自动重试，由用户显式点击“重试”再次调用同一函数；`hasMore=false` 是唯一 complete 事实源，不根据返回
+条数猜测。默认状态通过 live region 与 `aria-busy` 公布；分页数据、请求缓存、错误 Toast 与空状态归调用方。
