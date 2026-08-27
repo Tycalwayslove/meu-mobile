@@ -63,3 +63,7 @@ export { Avatar } from "./Avatar";
 export type { AvatarFit, AvatarProps, AvatarShape, AvatarSize } from "./Avatar";
 export { Ellipsis } from "./Ellipsis";
 export type { EllipsisDirection, EllipsisProps } from "./Ellipsis";
+export { Card } from "./Card";
+export type { CardPadding, CardProps, CardVariant } from "./Card";
+export { Collapse } from "./Collapse";
+export type { CollapseArrow, CollapseItem, CollapseProps, CollapseVariant } from "./Collapse";

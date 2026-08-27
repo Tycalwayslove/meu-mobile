@@ -33,6 +33,9 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Badge / Avatar 组件集：[Meu/Badge（81:52）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=81-52)，20 个 variants；[Meu/Avatar（83:88）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=83-88)，27 个 variants
 - Image / Ellipsis 组件集：[Meu/Image（85:90）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=85-90)，24 个 variants；[Meu/Ellipsis（87:74）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=87-74)，18 个 variants
 - Batch 3B1 QA：共 179 个 variants、1677 个变量绑定字段、253 个组件属性引用、18 个 44 px 交互示例；硬编码可见 paint 与未命名节点均为 0。新增 `color/accent-contrast` Light/Dark 语义变量（`var(--meu-color-accent-contrast)`）并重绑 accent solid 前景色
+- Batch 3B2 页面：[Card（101:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=101-2)、[Collapse（106:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=106-2)
+- Batch 3B2 组件集：[Meu/Card（102:110）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=102-110)，12 个 `Variant × Padding` variants；[Meu/Collapse（106:34）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=106-34)，4 个 `Variant × State` variants
+- Batch 3B2 QA：Light/Dark 显式模式、Foundation 变量绑定、PascalCase 命名、metadata、截图与 44 px 触控目标均通过；组件 variants 内可见 fill / stroke 硬编码为 0。Card 保持非交互，Collapse 的视觉状态对应原生 button 与 ARIA 代码契约
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

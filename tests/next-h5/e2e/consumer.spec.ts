@@ -84,6 +84,30 @@ test("renders atomic display components with native actions and fallbacks", asyn
   );
 });
 
+test("composes Card slots and controls accessible Collapse panels", async ({ page }) => {
+  const section = page.getByRole("region", { name: "卡片与折叠内容" });
+  await expect(section.locator('[data-meu-component="card"]')).toContainText("履约摘要");
+  await expect(section.locator("[data-meu-card-body]")).toContainText("2 至 3 个工作日");
+
+  await section.getByRole("button", { name: "查看详情" }).click();
+  await expect(page.getByText("已查看履约详情")).toBeVisible();
+
+  const delivery = section.getByRole("button", { name: /配送范围/ });
+  const returns = section.getByRole("button", { name: "退换规则" });
+  const invoice = section.getByRole("button", { name: "发票服务" });
+  await expect(delivery).toHaveAttribute("aria-expanded", "true");
+  await expect(invoice).toBeDisabled();
+
+  await returns.click();
+  await expect(delivery).toHaveAttribute("aria-expanded", "false");
+  await expect(returns).toHaveAttribute("aria-expanded", "true");
+  await expect(section.getByText("已展开：returns")).toBeVisible();
+
+  const controlledPanel = section.getByRole("region", { name: "退换规则" });
+  await expect(controlledPanel).toHaveAttribute("role", "region");
+  await expect(controlledPanel).toHaveAttribute("aria-hidden", "false");
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

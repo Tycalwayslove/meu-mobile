@@ -135,6 +135,27 @@ textarea {
   font-size: 12px;
 }
 
+.integration-containers {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-containers h2 {
+  margin: 0;
+  font: inherit;
+}
+
+.integration-containers output {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-result {
   display: block;
   min-height: 20px;

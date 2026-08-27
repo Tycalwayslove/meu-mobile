@@ -19,8 +19,10 @@ import {
   Avatar,
   Badge,
   Button,
+  Card,
   Cell,
   Checkbox,
+  Collapse,
   ConfigProvider,
   Ellipsis,
   Image,
@@ -59,6 +61,7 @@ export function ConsumerScenario() {
   const [searchedFor, setSearchedFor] = useState("");
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
+  const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -155,6 +158,55 @@ export function ConsumerScenario() {
           />
           <Ellipsis content={displayDescription} rows={2} />
           <output aria-live="polite">{displayAction}</output>
+        </section>
+
+        <section className="integration-containers" aria-label="卡片与折叠内容">
+          <Card
+            title={<h2>履约摘要</h2>}
+            description="使用明确的内容槽位"
+            extra={<Tag tone="success">可配送</Tag>}
+            footer={
+              <Button
+                size="small"
+                variant="outline"
+                tone="neutral"
+                onClick={() => setDisplayAction("已查看履约详情")}
+              >
+                查看详情
+              </Button>
+            }
+          >
+            标准配送预计 2 至 3 个工作日送达。
+          </Card>
+          <Collapse
+            aria-label="履约帮助"
+            variant="card"
+            accordion
+            value={openHelp}
+            onChange={setOpenHelp}
+            items={[
+              {
+                value: "delivery",
+                title: "配送范围",
+                content: "支持中国大陆大部分城市配送。",
+                extra: "全国"
+              },
+              {
+                value: "returns",
+                title: "退换规则",
+                content: "签收后 7 天内可申请退换。"
+              },
+              {
+                value: "invoice",
+                title: "发票服务",
+                content: "暂不支持纸质发票。",
+                disabled: true
+              }
+            ]}
+          />
+          <output aria-live="polite">
+            {openHelp.length ? `已展开：${openHelp.join(",")}` : "全部收起"}
+          </output>
         </section>
 
         <MeuForm
