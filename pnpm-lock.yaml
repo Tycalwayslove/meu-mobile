@@ -187,6 +187,9 @@ importers:
       '@hookform/resolvers':
         specifier: 5.9.1
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv@8.20.0)(react-hook-form@7.86.0(react@19.2.8))(zod@4.4.3)
+      '@meu/date-adapter':
+        specifier: workspace:*
+        version: link:../date-adapter
       '@meu/mobile':
         specifier: workspace:*
         version: link:../mobile
@@ -251,6 +254,9 @@ importers:
       '@floating-ui/react':
         specifier: 0.27.20
         version: 0.27.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@meu/date-adapter':
+        specifier: workspace:*
+        version: link:../date-adapter
       '@meu/icons-react':
         specifier: workspace:*
         version: link:../icons-react

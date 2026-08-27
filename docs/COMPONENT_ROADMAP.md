@@ -58,7 +58,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 ## Batch 5：选择器与复合输入
 
-- Picker（已完成）、CascadePicker（已完成）、DatePicker、TimePicker、Calendar、DateRangePicker
+- Picker（已完成）、CascadePicker（已完成）、DatePicker（已完成）、TimePicker、Calendar、DateRangePicker
 
 重点：复用 `date-adapter`，核心包不绑定具体日期库和业务时区。
 

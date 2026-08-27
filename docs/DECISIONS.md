@@ -57,3 +57,13 @@ CascadePicker 接收树形 options，并通过纯解析函数生成当前路径�
 丢弃旧后缀后逐级选择新分支的首个可用项。`children: undefined` 表示叶子，显式 `children: []` 表示
 存在但暂为空的下一级并阻止确认，使调用方可通过更新 options 完成异步加载而无需把 Promise 或请求状态
 引入基础组件。动态数据归一化保持静默，不伪造用户选择事件；表单仍只在确认时写入完整路径。
+
+## ADR-011：DatePicker 使用 DateAdapter 与精度前缀约束
+
+DatePicker 只把年、月、日、时、分、秒转换为 Picker columns，不在 React 组件里直接调用 `Date` 或绑定
+Day.js、date-fns。`date-adapter` v2 提供 parts 往返、日期比较、月份天数、星期、加法、起点、解析和格式化；
+默认 `nativeDateAdapter` 使用宿主环境的本地民用时间，自定义日期类型和时区实现显式注入同一契约。
+`min / max` 按当前精度比较前缀，使月份、日期和时间列能够逐级禁用；无法从 parts 往返的 DST 跳时和
+非法日期直接禁用。低于当前 precision 的字段归一化到单位起点，父级变化把过期日夹紧到目标月末。
+组件继续沿用 Picker 的 draft、确认提交、取消回滚、listbox、Popup、焦点和原生滚动；
+`MeuFormDatePicker` 只在确认时写入表单字段。

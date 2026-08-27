@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "0.27.20",
+    "@meu/date-adapter": "workspace:*",
     "@meu/icons-react": "workspace:*",
     "@meu/primitives-react": "workspace:*",
     "@meu/tokens": "workspace:*",

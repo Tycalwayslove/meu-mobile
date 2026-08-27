@@ -166,6 +166,18 @@ export type {
 } from "./Picker";
 export { CascadePicker } from "./CascadePicker";
 export type { CascadePickerOption, CascadePickerProps } from "./CascadePicker";
+export { DatePicker, datePickerPrecisions } from "./DatePicker";
+export type {
+  DateAdapter,
+  DateParts,
+  DatePickerFilter,
+  DatePickerFilterDetails,
+  DatePickerLabelDetails,
+  DatePickerOpenChangeDetails,
+  DatePickerProps,
+  DatePickerSelectDetails,
+  DatePrecision
+} from "./DatePicker";
 export { Toast, ToastProvider, useToast } from "./Toast";
 export type {
   ToastAction,

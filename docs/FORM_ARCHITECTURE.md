@@ -16,6 +16,8 @@ reset/watch/trigger、服务端字段错误及首次错误聚焦。
 - `MeuFormPicker` 映射多列值数组；滚轮只修改 Picker draft，确定后才调用字段 `onChange`，取消不会产生 dirty，校验错误和首次错误焦点落在原生 button 触发器。
 - `MeuFormCascadePicker` 映射从根到叶子的级联值数组；父级变化只更新弹层 draft，确定后一次性写入
   完整归一化路径，取消不产生 dirty，错误关联和首次错误焦点仍落在原生 button 触发器。
+- `MeuFormDatePicker` 映射 `TDate | null`，通过同一 `DateAdapter<TDate>` 格式化触发器与生成日期列；
+  只有确定才写入字段，取消不产生 dirty，错误聚焦到原生 button 触发器。
 - Zod 通过 `schema` 便捷参数接入；也可传任意 React Hook Form `resolver`，二者同时存在时 `schema` 优先。
 - `applyMeuFormErrors` 接收路径化字段错误，例如 `profile.name`、`items.0.title`，默认聚焦第一个有效错误字段。
 - `MeuForm` 保留原生 `<form>` 语义并默认 `noValidate`，首次客户端校验失败沿用 React Hook Form 的聚焦策略。
