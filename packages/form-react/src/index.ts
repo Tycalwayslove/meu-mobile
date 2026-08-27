@@ -32,6 +32,8 @@ export { MeuFormCascadePicker } from "./MeuFormCascadePicker";
 export type { MeuFormCascadePickerProps } from "./MeuFormCascadePicker";
 export { MeuFormDatePicker } from "./MeuFormDatePicker";
 export type { MeuFormDatePickerProps } from "./MeuFormDatePicker";
+export { MeuFormCalendar } from "./MeuFormCalendar";
+export type { MeuFormCalendarProps } from "./MeuFormCalendar";
 export { MeuFormTimePicker } from "./MeuFormTimePicker";
 export type { MeuFormTimePickerProps } from "./MeuFormTimePicker";
 export { MeuFormSegmentedControl } from "./MeuFormSegmentedControl";

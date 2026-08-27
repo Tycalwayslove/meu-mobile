@@ -1,6 +1,7 @@
 import { ActionMenuProvider, ConfigProvider, DialogProvider, ToastProvider } from "@meu/mobile";
 
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
+import { CalendarDemo } from "./CalendarDemo";
 import { CascadePickerDemo } from "./CascadePickerDemo";
 import { ContainerDemo } from "./ContainerDemo";
 import { DatePickerDemo } from "./DatePickerDemo";
@@ -62,6 +63,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>平台无关时间选择与确认式表单绑定</h2>
           <TimePickerDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>平台无关日历与即时表单绑定</h2>
+          <CalendarDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

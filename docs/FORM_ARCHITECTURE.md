@@ -20,6 +20,9 @@ reset/watch/trigger、服务端字段错误及首次错误聚焦。
   只有确定才写入字段，取消不产生 dirty，错误聚焦到原生 button 触发器。
 - `MeuFormTimePicker` 映射平台无关的 `TimeValue | null`；12/24 小时制只影响展示，只有确定才写入字段，
   取消不产生 dirty，错误聚焦到原生 button 触发器。
+- `MeuFormCalendar` 按模式精确映射 `TDate | null`、`ReadonlyArray<TDate>` 或
+  `readonly [TDate, TDate] | null`。内联选择立即写入字段；范围首个日期写入同日范围并携带
+  `details.complete=false`，第二个日期完成范围。校验错误聚焦到当前可操作的真实日期按钮。
 - Zod 通过 `schema` 便捷参数接入；也可传任意 React Hook Form `resolver`，二者同时存在时 `schema` 优先。
 - `applyMeuFormErrors` 接收路径化字段错误，例如 `profile.name`、`items.0.title`，默认聚焦第一个有效错误字段。
 - `MeuForm` 保留原生 `<form>` 语义并默认 `noValidate`，首次客户端校验失败沿用 React Hook Form 的聚焦策略。

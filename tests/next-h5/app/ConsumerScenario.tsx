@@ -2,6 +2,7 @@
 
 import {
   MeuForm,
+  MeuFormCalendar,
   MeuFormCheckbox,
   MeuFormCheckboxGroup,
   MeuFormCascadePicker,
@@ -61,6 +62,7 @@ import { z } from "zod";
 
 const schema = z.object({
   agreement: z.boolean().refine((value) => value, "请同意服务协议"),
+  campaignDates: z.array(z.date()).min(1, "请至少选择一个活动日期"),
   description: z.string().min(6, "店铺介绍至少输入 6 个字符"),
   deliveryDate: z.date(),
   deliveryTime: z.object({
@@ -218,6 +220,7 @@ export function ConsumerScenario() {
     defaultValues: {
       agreement: true,
       appointment: ["today", 9],
+      campaignDates: [new Date(2026, 7, 8), new Date(2026, 7, 18)],
       description: "",
       deliveryDate: new Date(2026, 7, 28),
       deliveryTime: { hour: 10, minute: 30, second: 0 },
@@ -667,7 +670,7 @@ export function ConsumerScenario() {
               `${values.services.join(",")} / ${values.shipping} / notifications:${values.notifications ? "true" : "false"} / agreement:${values.agreement ? "true" : "false"}`
             );
             setSavedAdvanced(
-              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / time:${formatLocalTime(values.deliveryTime)} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
+              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / time:${formatLocalTime(values.deliveryTime)} / calendar:${values.campaignDates.map(formatLocalDate).join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
           }}
         >
@@ -769,6 +772,16 @@ export function ConsumerScenario() {
             minuteStep={15}
             required
             triggerProps={{ placeholder: "选择送达时间" }}
+          />
+          <MeuFormCalendar<FormValues>
+            name="campaignDates"
+            label="活动日期"
+            description="直接选择多个日期；键盘方向键可以跨日期和月份移动。"
+            selectionMode="multiple"
+            defaultMonth={new Date(2026, 7, 1)}
+            min={new Date(2026, 7, 3)}
+            max={new Date(2026, 8, 30)}
+            required
           />
           <MeuFormSelector<FormValues, string>
             name="fulfillment"

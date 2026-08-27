@@ -429,6 +429,27 @@ test("maps TimePicker values and commits only the confirmed draft", async ({ pag
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
 });
 
+test("binds Calendar multiple dates and preserves roving keyboard focus", async ({ page }) => {
+  const calendar = page.getByRole("group", { name: "活动日期" });
+  const august8 = calendar.getByRole("button", { name: /^2026-08-08/ });
+  const august10 = calendar.getByRole("button", { name: /^2026-08-10/ });
+  const august11 = calendar.getByRole("button", { name: /^2026-08-11/ });
+
+  await expect(calendar).toHaveAttribute("data-selection-mode", "multiple");
+  await expect(calendar.getByRole("gridcell")).toHaveCount(42);
+  await expect(august8).toHaveAttribute("aria-pressed", "true");
+  await expect(august10).toHaveAttribute("aria-pressed", "false");
+
+  await august10.click();
+  await expect(august10).toHaveAttribute("aria-pressed", "true");
+  await august8.click();
+  await expect(august8).toHaveAttribute("aria-pressed", "false");
+
+  await august10.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(august11).toBeFocused();
+});
+
 test("positions and dismisses a non-modal Popover without locking scroll", async ({
   browserName,
   page
@@ -586,7 +607,7 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
     page.getByText(
-      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / date:2026-08-28 / time:10:30 / selector:fast / segmented:card"
+      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / date:2026-08-28 / time:10:30 / calendar:2026-08-08,2026-08-18 / selector:fast / segmented:card"
     )
   ).toBeVisible();
 });

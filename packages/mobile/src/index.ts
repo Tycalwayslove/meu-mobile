@@ -179,6 +179,34 @@ export type {
   DatePrecision
 } from "./DatePicker";
 export {
+  Calendar,
+  calendarDayKey,
+  calendarRange,
+  compareCalendarDays,
+  createCalendarGrid,
+  normalizeCalendarDay,
+  normalizeCalendarMonth,
+  sameCalendarDay,
+  sameCalendarMonth
+} from "./Calendar";
+export type {
+  CalendarBaseProps,
+  CalendarChangeDetails,
+  CalendarDayDetails,
+  CalendarDisabledDateDetails,
+  CalendarMonthChangeDetails,
+  CalendarMonthChangeReason,
+  CalendarMultipleProps,
+  CalendarProps,
+  CalendarRange,
+  CalendarRangeProps,
+  CalendarRef,
+  CalendarSelectionMode,
+  CalendarSingleProps,
+  CalendarValue,
+  CalendarWeekStartsOn
+} from "./Calendar";
+export {
   formatTimeValue,
   isValidTimeValue,
   TimePicker,

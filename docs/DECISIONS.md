@@ -76,3 +76,13 @@ Day.js 等日期库。`hourCycle="h12"` 只增加 AM/PM 表示列，回调仍输
 
 组件复用 Picker 的 Popup、滚轮、键盘、焦点、滚动锁、确认式 draft 和取消回滚；`MeuFormTimePicker`
 仅在确认时写入 `TimeValue | null`。
+
+## ADR-013：Calendar 保持内联、平台中立并即时提交选择
+
+Calendar 是内联月视图，不内置触发器、Popup、确认栏或业务快捷范围。它通过 `DateAdapter<TDate>` 生成
+固定六周网格、比较边界和规范化日期，公开单选、多选与范围三种互斥值类型。范围第一次点按立即返回
+`[date, date]` 并标记 `details.complete=false`，第二次点按自动排序端点并标记完成；同日范围保持合法。
+
+日期按钮采用原生 button 和 roving tabindex，方向键、Home / End、PageUp / PageDown 与按年移动拥有触摸
+等价路径。`MeuFormCalendar` 每次选择都立即写入表单，并把校验焦点落到真实日期按钮。需要确认/取消、
+快捷范围和浮层触发器的流程由后续 DateRangePicker 组合 Calendar 与 Popup，避免污染基础月历契约。
