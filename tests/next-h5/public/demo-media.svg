@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title description">
+  <title id="title">绿色植物与商品包装插画</title>
+  <desc id="description">Meu Mobile 隔离测试使用的本地示例图片</desc>
+  <rect width="640" height="360" fill="#EAECE7"/>
+  <circle cx="112" cy="82" r="52" fill="#62B89D"/>
+  <path d="M0 302C126 230 210 260 318 202C428 144 526 170 640 92V360H0Z" fill="#176B5B"/>
+  <path d="M0 330C136 278 252 318 370 254C458 206 546 220 640 178V360H0Z" fill="#115244"/>
+  <rect x="392" y="88" width="132" height="162" rx="18" fill="#FFFFFF"/>
+  <rect x="414" y="120" width="88" height="12" rx="6" fill="#176B5B"/>
+  <rect x="414" y="148" width="62" height="8" rx="4" fill="#CDD1CC"/>
+  <circle cx="458" cy="202" r="24" fill="#EAECE7"/>
+</svg>

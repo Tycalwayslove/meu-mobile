@@ -15,7 +15,20 @@ import {
   useMeuForm
 } from "@meu/form-react";
 import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
-import { Button, Cell, Checkbox, ConfigProvider, List, Radio, SearchField } from "@meu/mobile";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Cell,
+  Checkbox,
+  ConfigProvider,
+  Ellipsis,
+  Image,
+  List,
+  Radio,
+  SearchField,
+  Tag
+} from "@meu/mobile";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -34,6 +47,9 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+const displayDescription =
+  "Meu Mobile 面向 Next.js 移动网页提供稳定的设计令牌、原生交互语义、图片回退和完整表单集成，同时为后续 uni-app 适配保留清晰边界。";
+
 export function ConsumerScenario() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [savedName, setSavedName] = useState("");
@@ -42,6 +58,7 @@ export function ConsumerScenario() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedFor, setSearchedFor] = useState("");
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
+  const [displayAction, setDisplayAction] = useState("等待展示组件操作");
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -106,6 +123,39 @@ export function ConsumerScenario() {
           </List>
           <output aria-live="polite">{selectedEntry}</output>
         </div>
+
+        <section className="integration-display" aria-label="信息展示组件">
+          <div className="integration-tags">
+            <Tag tone="accent" variant="solid">
+              新品
+            </Tag>
+            <Tag tone="success">已上架</Tag>
+            <Tag tone="warning" variant="outline">
+              库存偏低
+            </Tag>
+            <Tag tone="danger" rounded onClick={() => setDisplayAction("已筛选待处理商品")}>
+              仅看待处理
+            </Tag>
+          </div>
+          <div className="integration-avatars">
+            <Badge content={128} max={99} bordered>
+              <Avatar src="/demo-avatar.svg" alt="Meu 示例店铺" size="large" />
+            </Badge>
+            <Badge dot tone="success" label="店铺在线">
+              <Avatar src="" alt="林夏" />
+            </Badge>
+          </div>
+          <Image
+            src="/demo-media.svg"
+            alt="绿色植物与商品包装插画"
+            width="100%"
+            height={160}
+            radius="surface"
+            loading="lazy"
+          />
+          <Ellipsis content={displayDescription} rows={2} />
+          <output aria-live="polite">{displayAction}</output>
+        </section>
 
         <MeuForm
           className="integration-form"

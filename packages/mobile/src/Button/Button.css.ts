@@ -66,7 +66,7 @@ export const button = recipe({
   compoundVariants: [
     {
       variants: { variant: "solid", tone: "accent" },
-      style: { color: "white", background: "var(--meu-color-accent)" }
+      style: { color: "var(--meu-color-accent-contrast)", background: "var(--meu-color-accent)" }
     },
     {
       variants: { variant: "solid", tone: "neutral" },

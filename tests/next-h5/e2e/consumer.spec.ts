@@ -61,6 +61,29 @@ test("keeps Cell actions, links and List semantics native", async ({ page }) => 
   await expect(list.getByRole("button", { name: "停用店铺" })).toBeDisabled();
 });
 
+test("renders atomic display components with native actions and fallbacks", async ({ page }) => {
+  const section = page.getByRole("region", { name: "信息展示组件" });
+  await expect(section).toBeVisible();
+  await expect(section.getByText("99+")).toBeVisible();
+  await expect(section.getByLabel("店铺在线")).toBeVisible();
+  await expect(section.getByRole("img", { name: "林夏" })).toBeVisible();
+
+  const media = section.getByRole("img", { name: "绿色植物与商品包装插画" });
+  await expect(media).toBeVisible();
+  await expect(media.locator("xpath=..")).toHaveAttribute("data-state", "loaded");
+
+  await section.getByRole("button", { name: "仅看待处理" }).click();
+  await expect(section.getByText("已筛选待处理商品")).toBeVisible();
+
+  const expand = section.getByRole("button", { name: "展开" });
+  await expect(expand).toBeVisible();
+  await expand.click();
+  await expect(section.getByRole("button", { name: "收起" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

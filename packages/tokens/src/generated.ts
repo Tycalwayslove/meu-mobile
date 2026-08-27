@@ -34,6 +34,10 @@ export const meuTokens = {
         "$type": "color",
         "$value": "#115244"
       },
+      "accent-contrast": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
       "success": {
         "$type": "color",
         "$value": "#287A52"
@@ -79,6 +83,10 @@ export const meuTokens = {
       "accent-pressed": {
         "$type": "color",
         "$value": "#8DD0BB"
+      },
+      "accent-contrast": {
+        "$type": "color",
+        "$value": "#161A17"
       }
     }
   },

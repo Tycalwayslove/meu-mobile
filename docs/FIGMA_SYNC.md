@@ -28,6 +28,11 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 3A Cell 页面：[页面（67:214）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=67-214)、[Meu/Cell（67:482）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=67-482)，24 个 `Interactive × Description × Prefix × State` variants
 - Batch 3A List 页面：[页面（70:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=70-2)、[Meu/List（70:589）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=70-589)，12 个 `Mode × Divider × Header` variants
 - Batch 3A 明暗主题展板：[Cell Light / Dark（67:483 / 67:501）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=67-483)、[List Light / Dark（70:590 / 70:632）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=70-590)；组件树硬编码 paint 为 0，代码映射候选为 `packages/mobile/src/List/Cell.tsx` 与 `packages/mobile/src/List/List.tsx`
+- Batch 3B1 页面：[Tag（77:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=77-2)、[Badge（77:3）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=77-3)、[Avatar（77:4）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=77-4)、[Image（77:5）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=77-5)、[Ellipsis（77:6）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=77-6)
+- Tag 组件集：[small（79:62）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=79-62)、[medium（79:123）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=79-123)、[large（79:184）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=79-184)，共 90 个 variants
+- Badge / Avatar 组件集：[Meu/Badge（81:52）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=81-52)，20 个 variants；[Meu/Avatar（83:88）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=83-88)，27 个 variants
+- Image / Ellipsis 组件集：[Meu/Image（85:90）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=85-90)，24 个 variants；[Meu/Ellipsis（87:74）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=87-74)，18 个 variants
+- Batch 3B1 QA：共 179 个 variants、1677 个变量绑定字段、253 个组件属性引用、18 个 44 px 交互示例；硬编码可见 paint 与未命名节点均为 0。新增 `color/accent-contrast` Light/Dark 语义变量（`var(--meu-color-accent-contrast)`）并重绑 accent solid 前景色
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

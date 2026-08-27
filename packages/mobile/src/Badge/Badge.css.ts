@@ -1,0 +1,66 @@
+import { style } from "@vanilla-extract/css";
+import { recipe } from "@vanilla-extract/recipes";
+
+export const badgeWrapper = style({
+  position: "relative",
+  display: "inline-flex",
+  maxWidth: "100%",
+  verticalAlign: "middle"
+});
+
+export const badge = recipe({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxSizing: "border-box",
+    minWidth: 18,
+    height: 18,
+    paddingInline: 5,
+    color: "white",
+    borderRadius: "var(--meu-radius-round)",
+    fontFamily: "var(--meu-font-ui)",
+    fontSize: 11,
+    fontWeight: 600,
+    lineHeight: 1,
+    fontVariantNumeric: "tabular-nums",
+    whiteSpace: "nowrap"
+  },
+  variants: {
+    bordered: {
+      true: { boxShadow: "0 0 0 2px var(--meu-color-surface)" },
+      false: {}
+    },
+    dot: {
+      true: { width: 8, minWidth: 8, height: 8, paddingInline: 0 },
+      false: {}
+    },
+    fixed: {
+      true: {
+        position: "absolute",
+        zIndex: 1,
+        top: "var(--meu-badge-offset-y, 0px)",
+        right: "var(--meu-badge-offset-x, 0px)",
+        transform: "translate(50%, -50%)"
+      },
+      false: {}
+    },
+    tone: {
+      neutral: { background: "var(--meu-color-ink)" },
+      accent: {
+        color: "var(--meu-color-accent-contrast)",
+        background: "var(--meu-color-accent)"
+      },
+      success: { background: "var(--meu-color-success)" },
+      warning: { background: "var(--meu-color-warning)" },
+      danger: { background: "var(--meu-color-danger)" }
+    }
+  },
+  defaultVariants: { bordered: false, dot: false, fixed: false, tone: "danger" }
+});
+
+export const badgeContent = style({
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+});

@@ -1,6 +1,7 @@
 import { ConfigProvider } from "@meu/mobile";
 
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
+import { DisplayDemo } from "./DisplayDemo";
 import { FormDemo } from "./FormDemo";
 import { InformationDemo } from "./InformationDemo";
 import { SelectionDemo } from "./SelectionDemo";
@@ -41,6 +42,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>
           <InformationDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>标签、徽标与媒体展示</h2>
+          <DisplayDemo />
         </section>
       </main>
     </ConfigProvider>

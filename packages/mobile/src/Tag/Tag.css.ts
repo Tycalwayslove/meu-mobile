@@ -1,0 +1,145 @@
+import { style } from "@vanilla-extract/css";
+import { recipe } from "@vanilla-extract/recipes";
+
+export const tagRoot = recipe({
+  base: {
+    position: "relative",
+    display: "inline-grid",
+    placeItems: "center",
+    boxSizing: "border-box",
+    padding: 0,
+    color: "inherit",
+    background: "transparent",
+    border: 0,
+    font: "inherit",
+    verticalAlign: "middle",
+    WebkitTapHighlightColor: "transparent"
+  },
+  variants: {
+    disabled: {
+      true: { cursor: "not-allowed", opacity: 0.55 },
+      false: {}
+    },
+    interactive: {
+      true: {
+        minWidth: 44,
+        minHeight: 44,
+        cursor: "pointer",
+        selectors: {
+          "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 1 },
+          "&:active:not(:disabled)": { transform: "scale(0.98)" }
+        },
+        transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)"
+      },
+      false: {}
+    }
+  },
+  defaultVariants: { disabled: false, interactive: false }
+});
+
+export const tagChip = recipe({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxSizing: "border-box",
+    maxWidth: "100%",
+    border: "1px solid transparent",
+    fontFamily: "var(--meu-font-ui)",
+    fontWeight: 500,
+    lineHeight: 1,
+    whiteSpace: "nowrap"
+  },
+  variants: {
+    rounded: {
+      true: { borderRadius: "var(--meu-radius-round)" },
+      false: { borderRadius: 6 }
+    },
+    size: {
+      small: { minHeight: 22, padding: "2px 7px", fontSize: 11 },
+      medium: { minHeight: 26, padding: "3px 9px", fontSize: 12 },
+      large: { minHeight: 30, padding: "4px 11px", fontSize: 14 }
+    },
+    tone: {
+      neutral: {},
+      accent: {},
+      success: {},
+      warning: {},
+      danger: {}
+    },
+    variant: {
+      solid: {},
+      soft: { background: "var(--meu-color-subtle)" },
+      outline: { background: "transparent" }
+    }
+  },
+  compoundVariants: [
+    {
+      variants: { tone: "neutral", variant: "solid" },
+      style: { color: "var(--meu-color-surface)", background: "var(--meu-color-ink)" }
+    },
+    {
+      variants: { tone: "accent", variant: "solid" },
+      style: { color: "var(--meu-color-accent-contrast)", background: "var(--meu-color-accent)" }
+    },
+    {
+      variants: { tone: "success", variant: "solid" },
+      style: { color: "white", background: "var(--meu-color-success)" }
+    },
+    {
+      variants: { tone: "warning", variant: "solid" },
+      style: { color: "white", background: "var(--meu-color-warning)" }
+    },
+    {
+      variants: { tone: "danger", variant: "solid" },
+      style: { color: "white", background: "var(--meu-color-danger)" }
+    },
+    {
+      variants: { tone: "neutral", variant: "soft" },
+      style: { color: "var(--meu-color-ink)" }
+    },
+    {
+      variants: { tone: "accent", variant: "soft" },
+      style: { color: "var(--meu-color-accent)" }
+    },
+    {
+      variants: { tone: "success", variant: "soft" },
+      style: { color: "var(--meu-color-success)" }
+    },
+    {
+      variants: { tone: "warning", variant: "soft" },
+      style: { color: "var(--meu-color-warning)" }
+    },
+    {
+      variants: { tone: "danger", variant: "soft" },
+      style: { color: "var(--meu-color-danger)" }
+    },
+    {
+      variants: { tone: "neutral", variant: "outline" },
+      style: { color: "var(--meu-color-ink)", borderColor: "var(--meu-color-border)" }
+    },
+    {
+      variants: { tone: "accent", variant: "outline" },
+      style: { color: "var(--meu-color-accent)", borderColor: "var(--meu-color-accent)" }
+    },
+    {
+      variants: { tone: "success", variant: "outline" },
+      style: { color: "var(--meu-color-success)", borderColor: "var(--meu-color-success)" }
+    },
+    {
+      variants: { tone: "warning", variant: "outline" },
+      style: { color: "var(--meu-color-warning)", borderColor: "var(--meu-color-warning)" }
+    },
+    {
+      variants: { tone: "danger", variant: "outline" },
+      style: { color: "var(--meu-color-danger)", borderColor: "var(--meu-color-danger)" }
+    }
+  ],
+  defaultVariants: { rounded: false, size: "medium", tone: "neutral", variant: "soft" }
+});
+
+export const tagContent = style({
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis"
+});

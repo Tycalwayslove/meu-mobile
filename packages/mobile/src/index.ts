@@ -53,3 +53,13 @@ export type {
 } from "./Selector";
 export { Cell, List } from "./List";
 export type { CellProps, CellRef, ListDivider, ListMode, ListProps } from "./List";
+export { Tag } from "./Tag";
+export type { TagProps, TagRef, TagSize, TagTone, TagVariant } from "./Tag";
+export { Badge } from "./Badge";
+export type { BadgeProps, BadgeTone } from "./Badge";
+export { Image } from "./Image";
+export type { ImageFit, ImageProps, ImageRadius, ImageState } from "./Image";
+export { Avatar } from "./Avatar";
+export type { AvatarFit, AvatarProps, AvatarShape, AvatarSize } from "./Avatar";
+export { Ellipsis } from "./Ellipsis";
+export type { EllipsisDirection, EllipsisProps } from "./Ellipsis";
