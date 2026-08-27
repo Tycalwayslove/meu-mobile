@@ -7,6 +7,7 @@ import { MeuForm } from "./MeuForm";
 import { MeuFormCheckbox } from "./MeuFormCheckbox";
 import { MeuFormCheckboxGroup } from "./MeuFormCheckboxGroup";
 import { MeuFormRadioGroup } from "./MeuFormRadioGroup";
+import { MeuFormSegmentedControl } from "./MeuFormSegmentedControl";
 import { MeuFormSwitch } from "./MeuFormSwitch";
 import { useMeuForm } from "./useMeuForm";
 
@@ -15,11 +16,18 @@ type Values = {
   notifications: boolean;
   services: string[];
   shipping: string;
+  viewMode: string;
 };
 
 function SelectionForm({ onSubmit }: { onSubmit: (values: Values) => void }) {
   const form = useMeuForm<Values>({
-    defaultValues: { agreement: false, notifications: false, services: [], shipping: "" }
+    defaultValues: {
+      agreement: false,
+      notifications: false,
+      services: [],
+      shipping: "",
+      viewMode: ""
+    }
   });
 
   return (
@@ -43,6 +51,16 @@ function SelectionForm({ onSubmit }: { onSubmit: (values: Values) => void }) {
         <Radio value="express">急速配送</Radio>
       </MeuFormRadioGroup>
       <MeuFormSwitch<Values> name="notifications" label="消息通知" />
+      <MeuFormSegmentedControl<Values, string>
+        name="viewMode"
+        label="展示方式"
+        block
+        options={[
+          { label: "列表", value: "list" },
+          { label: "卡片", value: "card" }
+        ]}
+        rules={{ required: "请选择展示方式" }}
+      />
       <MeuFormCheckbox<Values>
         name="agreement"
         rules={{ validate: (value) => value === true || "请同意服务协议" }}
@@ -60,12 +78,13 @@ describe("MeuForm selection adapters", () => {
     render(<SelectionForm onSubmit={onSubmit} />);
 
     fireEvent.click(screen.getByRole("button", { name: "提交选择" }));
-    await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(3));
+    await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(4));
     expect(document.activeElement).toBe(screen.getByRole("group", { name: "服务范围" }));
 
     fireEvent.click(screen.getByRole("checkbox", { name: "配送" }));
     fireEvent.click(screen.getByRole("radio", { name: "急速配送" }));
     fireEvent.click(screen.getByRole("switch", { name: "消息通知" }));
+    fireEvent.click(screen.getByRole("radio", { name: "卡片" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "同意服务协议" }));
     fireEvent.click(screen.getByRole("button", { name: "提交选择" }));
 
@@ -75,7 +94,8 @@ describe("MeuForm selection adapters", () => {
           agreement: true,
           notifications: true,
           services: ["delivery"],
-          shipping: "express"
+          shipping: "express",
+          viewMode: "card"
         },
         expect.anything()
       )

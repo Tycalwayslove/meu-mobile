@@ -36,6 +36,9 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 3B2 页面：[Card（101:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=101-2)、[Collapse（106:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=106-2)
 - Batch 3B2 组件集：[Meu/Card（102:110）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=102-110)，12 个 `Variant × Padding` variants；[Meu/Collapse（106:34）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=106-34)，4 个 `Variant × State` variants
 - Batch 3B2 QA：Light/Dark 显式模式、Foundation 变量绑定、PascalCase 命名、metadata、截图与 44 px 触控目标均通过；组件 variants 内可见 fill / stroke 硬编码为 0。Card 保持非交互，Collapse 的视觉状态对应原生 button 与 ARIA 代码契约
+- Batch 3C1 页面：[NavBar（110:5）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=110-5)、[SegmentedControl（110:657）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=110-657)、[PaginationDots（110:661）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=110-661)
+- Batch 3C1 组件集：[Meu/NavBar（111:673）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=111-673)，2 个 Back variants；[Meu/SegmentedControl（114:112）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=114-112)，12 个 `Size × Status × State` variants；[Meu/PaginationDots（116:28）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=116-28)，4 个 `Direction × Variant` variants
+- Batch 3C1 QA：Light/Dark Foundation 绑定、命名、metadata 与代码 API 对齐；组件树硬编码可见 paint 和未命名节点均为 0。NavBar / SegmentedControl 交互目标不小于 44 px，PaginationDots 保持只读，不伪造点击目标
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

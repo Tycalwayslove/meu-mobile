@@ -42,7 +42,8 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 - Batch 3A：Cell、List（已完成）
 - Batch 3B1：Tag、Badge、Avatar、Image、Ellipsis（已完成）
 - Batch 3B2：Card、Collapse（已完成）
-- NavBar、Tabs、SegmentedControl、TabBar、Steps、PaginationDots
+- Batch 3C1：NavBar、SegmentedControl、PaginationDots（已完成）
+- Batch 3C2：Tabs、TabBar、Steps
 
 重点：先完成 Cell/List，再基于它们组装导航与列表型组件。
 

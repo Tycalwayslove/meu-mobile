@@ -5,6 +5,7 @@ import { ContainerDemo } from "./ContainerDemo";
 import { DisplayDemo } from "./DisplayDemo";
 import { FormDemo } from "./FormDemo";
 import { InformationDemo } from "./InformationDemo";
+import { NavigationDemo } from "./NavigationDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import styles from "./page.module.css";
 
@@ -51,6 +52,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>卡片与折叠内容</h2>
           <ContainerDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>页面导航与视图切换</h2>
+          <NavigationDemo />
         </section>
       </main>
     </ConfigProvider>

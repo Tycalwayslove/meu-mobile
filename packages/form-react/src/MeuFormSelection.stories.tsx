@@ -7,6 +7,7 @@ import { MeuForm } from "./MeuForm";
 import { MeuFormCheckbox } from "./MeuFormCheckbox";
 import { MeuFormCheckboxGroup } from "./MeuFormCheckboxGroup";
 import { MeuFormRadioGroup } from "./MeuFormRadioGroup";
+import { MeuFormSegmentedControl } from "./MeuFormSegmentedControl";
 import { MeuFormSwitch } from "./MeuFormSwitch";
 import { useMeuForm } from "./useMeuForm";
 
@@ -14,7 +15,8 @@ const schema = z.object({
   agreement: z.boolean().refine((value) => value, "请同意服务协议"),
   notifications: z.boolean(),
   services: z.array(z.string()).min(1, "至少选择一项服务"),
-  shipping: z.string().min(1, "请选择配送方式")
+  shipping: z.string().min(1, "请选择配送方式"),
+  viewMode: z.string().min(1, "请选择展示方式")
 });
 type Values = z.infer<typeof schema>;
 
@@ -22,7 +24,13 @@ function SelectionExample() {
   const [result, setResult] = useState("尚未提交");
   const form = useMeuForm<Values>({
     schema,
-    defaultValues: { agreement: false, notifications: true, services: [], shipping: "" }
+    defaultValues: {
+      agreement: false,
+      notifications: true,
+      services: [],
+      shipping: "",
+      viewMode: "list"
+    }
   });
 
   return (
@@ -40,6 +48,15 @@ function SelectionExample() {
         <Radio value="express">急速配送</Radio>
       </MeuFormRadioGroup>
       <MeuFormSwitch<Values> name="notifications" label="消息通知" />
+      <MeuFormSegmentedControl<Values, string>
+        name="viewMode"
+        label="展示方式"
+        block
+        options={[
+          { label: "列表", value: "list" },
+          { label: "卡片", value: "card" }
+        ]}
+      />
       <MeuFormCheckbox<Values> name="agreement">同意服务协议</MeuFormCheckbox>
       <Button type="submit">保存设置</Button>
       <output aria-live="polite">{result}</output>

@@ -108,6 +108,19 @@ test("composes Card slots and controls accessible Collapse panels", async ({ pag
   await expect(controlledPanel).toHaveAttribute("aria-hidden", "false");
 });
 
+test("uses native navigation actions, radio segments and read-only page dots", async ({ page }) => {
+  const section = page.getByRole("region", { name: "导航组件" });
+  await section.getByRole("button", { name: "返回" }).click();
+  await section.getByText("详情", { exact: true }).click();
+  await expect(section.getByText("已触发返回 / 详情")).toBeVisible();
+
+  const dots = section.getByRole("img", { name: "第 2 页，共 4 页" });
+  await expect(dots).toHaveAttribute("data-variant", "line");
+  await expect(dots.getByRole("button")).toHaveCount(0);
+  await section.getByRole("button", { name: "下一页" }).click();
+  await expect(section.getByRole("img", { name: "第 3 页，共 4 页" })).toBeVisible();
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
@@ -138,10 +151,14 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
   await rating.focus();
   await page.keyboard.press("ArrowRight");
   await page.getByText("优先配送", { exact: true }).click();
+  await page
+    .getByRole("radiogroup", { name: "列表布局" })
+    .getByText("卡片", { exact: true })
+    .click();
 
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
-    page.getByText("已保存录入：quantity:2 / volume:41 / rating:4 / selector:fast")
+    page.getByText("已保存录入：quantity:2 / volume:41 / rating:4 / selector:fast / segmented:card")
   ).toBeVisible();
 });
 
@@ -157,7 +174,7 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
 
   const controlHeights = await page
     .locator(
-      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"], [data-meu-component="stepper"], [data-meu-component="slider"], [data-meu-component="rate"], [data-meu-component="selector"], [data-meu-component="cell"]'
+      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"], [data-meu-component="stepper"], [data-meu-component="slider"], [data-meu-component="rate"], [data-meu-component="selector"], [data-meu-component="segmented-control"], [data-meu-component="cell"]'
     )
     .evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
   expect(controlHeights.every((height) => height >= 44)).toBe(true);

@@ -67,3 +67,19 @@ export { Card } from "./Card";
 export type { CardPadding, CardProps, CardVariant } from "./Card";
 export { Collapse } from "./Collapse";
 export type { CollapseArrow, CollapseItem, CollapseProps, CollapseVariant } from "./Collapse";
+export { NavBar } from "./NavBar";
+export type { NavBarProps } from "./NavBar";
+export { SegmentedControl } from "./SegmentedControl";
+export type {
+  SegmentedControlOption,
+  SegmentedControlProps,
+  SegmentedControlSize,
+  SegmentedControlStatus,
+  SegmentedControlValue
+} from "./SegmentedControl";
+export { PaginationDots } from "./PaginationDots";
+export type {
+  PaginationDotsDirection,
+  PaginationDotsProps,
+  PaginationDotsVariant
+} from "./PaginationDots";

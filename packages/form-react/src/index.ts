@@ -26,6 +26,8 @@ export { MeuFormRate } from "./MeuFormRate";
 export type { MeuFormRateProps } from "./MeuFormRate";
 export { MeuFormSelector } from "./MeuFormSelector";
 export type { MeuFormSelectorProps } from "./MeuFormSelector";
+export { MeuFormSegmentedControl } from "./MeuFormSegmentedControl";
+export type { MeuFormSegmentedControlProps } from "./MeuFormSegmentedControl";
 export { useMeuForm } from "./useMeuForm";
 export type { MeuUseFormProps } from "./useMeuForm";
 export * from "react-hook-form";

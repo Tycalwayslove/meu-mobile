@@ -6,6 +6,7 @@ import {
   MeuFormCheckboxGroup,
   MeuFormRate,
   MeuFormRadioGroup,
+  MeuFormSegmentedControl,
   MeuFormSelector,
   MeuFormSlider,
   MeuFormStepper,
@@ -27,8 +28,11 @@ import {
   Ellipsis,
   Image,
   List,
+  NavBar,
+  PaginationDots,
   Radio,
   SearchField,
+  SegmentedControl,
   Tag
 } from "@meu/mobile";
 import { useState } from "react";
@@ -44,7 +48,8 @@ const schema = z.object({
   services: z.array(z.string()).min(1, "至少选择一项服务"),
   shipping: z.string().min(1, "请选择配送方式"),
   storeName: z.string().min(2, "店铺名称至少输入 2 个字符"),
-  volume: z.number().min(0).max(100)
+  volume: z.number().min(0).max(100),
+  viewMode: z.string().min(1, "请选择展示方式")
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -62,6 +67,9 @@ export function ConsumerScenario() {
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
   const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
+  const [navigationMessage, setNavigationMessage] = useState("等待导航操作");
+  const [previewMode, setPreviewMode] = useState<"summary" | "detail">("summary");
+  const [previewPage, setPreviewPage] = useState(1);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -74,7 +82,8 @@ export function ConsumerScenario() {
       services: ["delivery"],
       shipping: "standard",
       storeName: "",
-      volume: 40
+      volume: 40,
+      viewMode: "list"
     },
     mode: "onSubmit"
   });
@@ -106,6 +115,46 @@ export function ConsumerScenario() {
             {searchedFor ? `正在搜索：${searchedFor}` : "等待搜索"}
           </output>
         </div>
+
+        <section className="integration-navigation" aria-label="导航组件">
+          <NavBar
+            title="订单中心"
+            onBack={() => setNavigationMessage("已触发返回")}
+            right={<span>帮助</span>}
+          />
+          <SegmentedControl
+            aria-label="预览内容"
+            block
+            options={[
+              { label: "摘要", value: "summary" },
+              { label: "详情", value: "detail" }
+            ]}
+            value={previewMode}
+            onChange={setPreviewMode}
+          />
+          <div className="integration-pagination">
+            <Button
+              size="small"
+              variant="outline"
+              tone="neutral"
+              onClick={() => setPreviewPage((current) => Math.max(0, current - 1))}
+            >
+              上一页
+            </Button>
+            <PaginationDots count={4} activeIndex={previewPage} variant="line" />
+            <Button
+              size="small"
+              variant="outline"
+              tone="neutral"
+              onClick={() => setPreviewPage((current) => Math.min(3, current + 1))}
+            >
+              下一页
+            </Button>
+          </div>
+          <output aria-live="polite">
+            {navigationMessage} / {previewMode === "summary" ? "摘要" : "详情"}
+          </output>
+        </section>
 
         <div className="integration-list">
           <List header="店铺入口" footer="用于验证原生按钮、链接与列表语义" mode="card">
@@ -218,7 +267,7 @@ export function ConsumerScenario() {
               `${values.services.join(",")} / ${values.shipping} / notifications:${values.notifications ? "true" : "false"} / agreement:${values.agreement ? "true" : "false"}`
             );
             setSavedAdvanced(
-              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / selector:${values.fulfillment.join(",")}`
+              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
           }}
         >
@@ -275,6 +324,15 @@ export function ConsumerScenario() {
             options={[
               { value: "standard", label: "经济配送" },
               { value: "fast", label: "优先配送" }
+            ]}
+          />
+          <MeuFormSegmentedControl<FormValues, string>
+            name="viewMode"
+            label="列表布局"
+            block
+            options={[
+              { value: "list", label: "列表" },
+              { value: "card", label: "卡片" }
             ]}
           />
           <Button type="submit" block leadingIcon={<MeuIconCheck size={18} />}>

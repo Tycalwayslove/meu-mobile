@@ -101,6 +101,36 @@ textarea {
   margin-bottom: 24px;
 }
 
+.integration-navigation {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-navigation > [data-meu-component="segmented-control"],
+.integration-navigation > output {
+  margin-inline: 16px;
+}
+
+.integration-navigation > output {
+  min-height: 16px;
+  margin-bottom: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
+.integration-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-inline: 16px;
+}
+
 .integration-list output {
   min-height: 16px;
   color: var(--meu-color-muted);
