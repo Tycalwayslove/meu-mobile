@@ -3,6 +3,7 @@ import { ActionMenuProvider, ConfigProvider, DialogProvider, ToastProvider } fro
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
 import { CalendarDemo } from "./CalendarDemo";
 import { CascadePickerDemo } from "./CascadePickerDemo";
+import { CarouselDemo } from "./CarouselDemo";
 import { ContainerDemo } from "./ContainerDemo";
 import { DatePickerDemo } from "./DatePickerDemo";
 import { DateRangePickerDemo } from "./DateRangePickerDemo";
@@ -82,6 +83,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>无限列表、并发锁与手动降级</h2>
           <InfiniteListDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>内容轮播、原生控制与无障碍暂停</h2>
+          <CarouselDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

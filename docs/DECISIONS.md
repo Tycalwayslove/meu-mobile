@@ -119,3 +119,14 @@ IntersectionObserver，在 sentinel 进入最近滚动祖先底部 250px 预取�
 同步 ref 在状态更新前锁定 Observer、手动按钮和重试入口，确保每轮最多一个 Promise。拒绝后进入 error 且
 停止自动重试，由用户显式点击“重试”再次调用同一函数；`hasMore=false` 是唯一 complete 事实源，不根据返回
 条数猜测。默认状态通过 live region 与 `aria-busy` 公布；分页数据、请求缓存、错误 Toast 与空状态归调用方。
+
+## ADR-017：Carousel 使用 Embla 作为 Web 手势引擎，Meu 持有行为契约
+
+Carousel 的 React Web 适配层使用 Embla Carousel 8.6.0 处理横向拖拽、snap 和无克隆循环。Embla 采用
+MIT 许可，由 David Jerleke 维护；它作为普通运行时依赖保持外置，不被 Rollup 复制进 Meu 产物。公开 API
+只暴露 `items`、受控/非受控索引、变更原因、循环、拖拽、自动播放和本地化标签，不暴露 Embla 实例或类型。
+
+Meu 自己实现原生 44px 前后按钮、只读 PaginationDots、轮播与幻灯片语义、失活内容焦点隔离以及自动播放
+控制。自动播放默认关闭；启用后提供排在首个 Tab 位置的暂停/播放按钮，焦点进入或拖拽后保持停止，悬停与
+页面隐藏只临时暂停。`prefers-reduced-motion` 下不自动启动，只有用户显式播放后才允许用即时切换继续。
+自动播放时 live region 为 `off`，停止后为 `polite`。未来 uni-app 复用同一状态和回调契约，替换 Web 手势层。

@@ -42,6 +42,9 @@ icons-core ─> icons-react            │
   属于 React 适配层，`canPull()`、阈值与状态契约可被未来平台实现复用。
 - InfiniteList 只渲染列表尾部状态并锁定异步加载，不持有分页数据或滚动容器；Web 端的
   IntersectionObserver、最近滚动祖先发现和原生按钮降级留在 React 适配层。
+- Carousel 由 Meu 持有受控索引、自动播放、暂停规则、无障碍与视觉契约；React Web 适配层使用 Embla
+  处理拖拽、snap 与无克隆循环，不向公开 API 泄漏引擎类型。未来 uni-app 复用 items、索引、变更原因、
+  循环和暂停契约，并按目标平台替换手势实现。
 
 ## Next.js 边界
 

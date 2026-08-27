@@ -106,6 +106,13 @@ export type {
   InfiniteListStatusChangeDetails,
   InfiniteListTrigger
 } from "./InfiniteList";
+export { Carousel } from "./Carousel";
+export type {
+  CarouselIndexChangeDetails,
+  CarouselIndexChangeReason,
+  CarouselItem,
+  CarouselProps
+} from "./Carousel";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";

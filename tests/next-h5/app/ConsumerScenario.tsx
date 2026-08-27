@@ -29,6 +29,7 @@ import {
   BottomSheet,
   Button,
   Card,
+  Carousel,
   Cell,
   Checkbox,
   Collapse,
@@ -210,6 +211,7 @@ export function ConsumerScenario() {
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [refreshCount, setRefreshCount] = useState(0);
   const [infinitePage, setInfinitePage] = useState(1);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -303,6 +305,48 @@ export function ConsumerScenario() {
               setInfinitePage((current) => current + 1);
             }}
           />
+        </section>
+
+        <section className="integration-carousel" aria-label="内容轮播">
+          <Carousel
+            aria-label="推荐活动"
+            index={carouselIndex}
+            items={[
+              {
+                key: "new",
+                ariaLabel: "本周新品",
+                content: (
+                  <Button variant="outline" tone="neutral">
+                    查看本周新品
+                  </Button>
+                )
+              },
+              {
+                key: "member",
+                ariaLabel: "会员礼遇",
+                content: (
+                  <a
+                    href="#member-offer"
+                    style={{ display: "inline-flex", minHeight: 44, alignItems: "center" }}
+                  >
+                    查看会员礼遇
+                  </a>
+                )
+              },
+              {
+                key: "weekend",
+                ariaLabel: "周末活动",
+                content: (
+                  <Button variant="outline" tone="neutral">
+                    查看周末活动
+                  </Button>
+                )
+              }
+            ]}
+            loop
+            onIndexChange={setCarouselIndex}
+          />
+          <output aria-live="polite">当前轮播：{carouselIndex + 1}</output>
         </section>
 
         <section className="integration-navigation" aria-label="导航组件">

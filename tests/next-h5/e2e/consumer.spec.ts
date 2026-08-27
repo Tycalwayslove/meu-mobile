@@ -96,6 +96,31 @@ test("loads infinite pages manually, locks each request and reaches completion",
   await expect(section.getByRole("button")).toHaveCount(0);
 });
 
+test("runs the controlled carousel with native alternatives and focus isolation", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "内容轮播" });
+  const carousel = section.getByRole("group", { name: "推荐活动" });
+  await expect(carousel).toHaveAttribute("data-index", "0");
+  await expect(section.getByText("当前轮播：1")).toBeVisible();
+  await expect(section.getByRole("img", { name: "第 1 页，共 3 页" })).toBeVisible();
+
+  await section.getByRole("button", { name: "下一张" }).click();
+  await expect(carousel).toHaveAttribute("data-index", "1");
+  await expect(section.getByText("当前轮播：2")).toBeVisible();
+  await expect(section.getByRole("img", { name: "第 2 页，共 3 页" })).toBeVisible();
+  await expect(
+    section.getByRole("button", { name: "查看本周新品", includeHidden: true })
+  ).toHaveAttribute("tabindex", "-1");
+  await expect(section.getByRole("link", { name: "查看会员礼遇" })).not.toHaveAttribute(
+    "tabindex",
+    "-1"
+  );
+
+  await section.getByRole("button", { name: "上一张" }).click();
+  await expect(carousel).toHaveAttribute("data-index", "0");
+});
+
 test("keeps Cell actions, links and List semantics native", async ({ page }) => {
   const list = page.getByRole("list", { name: "店铺入口" });
   await expect(list).toBeVisible();

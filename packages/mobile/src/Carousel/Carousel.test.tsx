@@ -1,0 +1,279 @@
+// @vitest-environment jsdom
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ConfigProvider } from "../ConfigProvider";
+import { Carousel } from "./Carousel";
+
+const embla = vi.hoisted(() => {
+  type Listener = () => void;
+  const listeners = new Map<string, Set<Listener>>();
+  let initialized = false;
+  let options: { loop?: boolean; startIndex?: number } = {};
+  let selected = 0;
+  let slideCount = 0;
+
+  const emit = (event: string) => {
+    const eventListeners = listeners.get(event);
+    if (eventListeners) eventListeners.forEach((listener) => listener());
+  };
+  const select = (nextIndex: number) => {
+    if (slideCount <= 0) selected = 0;
+    else if (options.loop) selected = (nextIndex + slideCount) % slideCount;
+    else selected = Math.min(Math.max(nextIndex, 0), slideCount - 1);
+    emit("select");
+  };
+  const api = {
+    off: vi.fn((event: string, listener: Listener) => {
+      const eventListeners = listeners.get(event);
+      if (eventListeners) eventListeners.delete(listener);
+      return api;
+    }),
+    on: vi.fn((event: string, listener: Listener) => {
+      const eventListeners = listeners.get(event) || new Set<Listener>();
+      eventListeners.add(listener);
+      listeners.set(event, eventListeners);
+      return api;
+    }),
+    scrollNext: vi.fn((jump?: boolean) => {
+      void jump;
+      select(selected + 1);
+    }),
+    scrollPrev: vi.fn((jump?: boolean) => {
+      void jump;
+      select(selected - 1);
+    }),
+    scrollTo: vi.fn((nextIndex: number, jump?: boolean) => {
+      void jump;
+      select(nextIndex);
+    }),
+    selectedScrollSnap: vi.fn(() => selected)
+  };
+
+  return {
+    api,
+    emit,
+    initialize(nextOptions: typeof options) {
+      options = nextOptions;
+      if (initialized) return;
+      initialized = true;
+      selected = nextOptions.startIndex || 0;
+    },
+    reset() {
+      initialized = false;
+      listeners.clear();
+      options = {};
+      selected = 0;
+      slideCount = 0;
+      Object.values(api).forEach((method) => method.mockClear());
+    },
+    setSlideCount(count: number) {
+      slideCount = count;
+    }
+  };
+});
+
+vi.mock("embla-carousel-react", () => ({
+  default: (options: { loop?: boolean; startIndex?: number }) => {
+    embla.initialize(options);
+    return [vi.fn(), embla.api] as const;
+  }
+}));
+
+const items = [
+  { key: "one", ariaLabel: "春季新品", content: <button type="button">查看春季新品</button> },
+  { key: "two", ariaLabel: "会员礼遇", content: <a href="#member">查看会员礼遇</a> },
+  { key: "three", ariaLabel: "周末活动", content: <button type="button">查看周末活动</button> }
+] as const;
+
+function stubMotionPreference(matches: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({
+      addEventListener: vi.fn(),
+      addListener: vi.fn(),
+      matches,
+      media: "(prefers-reduced-motion: reduce)",
+      onchange: null,
+      removeEventListener: vi.fn(),
+      removeListener: vi.fn()
+    }))
+  );
+}
+
+beforeEach(() => {
+  embla.reset();
+  embla.setSlideCount(items.length);
+  stubMotionPreference(false);
+  Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    callback(0);
+    return 1;
+  });
+});
+
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});
+
+describe("Carousel", () => {
+  it("renders localized carousel semantics and removes inactive descendants from tab order", async () => {
+    const { container } = render(<Carousel aria-label="营销内容" items={items} />);
+    const carousel = screen.getByRole("group", { name: "营销内容" });
+    expect(carousel.getAttribute("aria-roledescription")).toBe("轮播");
+    expect(carousel.querySelectorAll("[data-meu-carousel-slide]")).toHaveLength(3);
+    expect(screen.getByRole("group", { name: "春季新品" }).getAttribute("aria-hidden")).toBeNull();
+    expect(screen.getByRole("img", { name: "第 1 页，共 3 页" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "上一张" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "下一张" }).hasAttribute("disabled")).toBe(false);
+
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: "查看会员礼遇", hidden: true }).tabIndex).toBe(-1);
+    });
+    expect(screen.getByRole("button", { name: "查看春季新品" }).hasAttribute("tabindex")).toBe(
+      false
+    );
+    const track = container.querySelector("[data-meu-carousel-track]");
+    expect(track && track.getAttribute("aria-live")).toBe("polite");
+  });
+
+  it("changes an uncontrolled index through native previous and next buttons", async () => {
+    const onIndexChange = vi.fn();
+    render(<Carousel items={items} onIndexChange={onIndexChange} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "下一张" }));
+    await waitFor(() => {
+      expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("1");
+    });
+    expect(onIndexChange).toHaveBeenLastCalledWith(1, { reason: "next" });
+    expect(screen.getByRole("button", { name: "查看春季新品", hidden: true }).tabIndex).toBe(-1);
+    expect(screen.getByRole("link", { name: "查看会员礼遇" }).hasAttribute("tabindex")).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "上一张" }));
+    await waitFor(() => expect(onIndexChange).toHaveBeenLastCalledWith(0, { reason: "previous" }));
+  });
+
+  it("requests controlled changes and restores the authoritative index when it is unchanged", () => {
+    const onIndexChange = vi.fn();
+    render(<Carousel index={0} items={items} onIndexChange={onIndexChange} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "下一张" }));
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "next" });
+    expect(embla.api.scrollTo).toHaveBeenCalledWith(0, true);
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("0");
+  });
+
+  it("autoplays, permanently pauses on focus and can be explicitly restarted", () => {
+    vi.useFakeTimers();
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel autoplay autoplayInterval={1000} items={items} loop onIndexChange={onIndexChange} />
+    );
+    const carousel = screen.getByRole("group", { name: "推荐内容" });
+    expect(carousel.getAttribute("data-rotating")).toBe("true");
+    const track = carousel.querySelector("[data-meu-carousel-track]");
+    expect(track && track.getAttribute("aria-live")).toBe("off");
+
+    void act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onIndexChange).toHaveBeenLastCalledWith(1, { reason: "autoplay" });
+
+    fireEvent.focus(screen.getByRole("link", { name: "查看会员礼遇" }));
+    expect(screen.getByRole("button", { name: "播放轮播" })).toBeTruthy();
+    void act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(onIndexChange).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "播放轮播" }));
+    void act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onIndexChange).toHaveBeenLastCalledWith(2, { reason: "autoplay" });
+  });
+
+  it("respects reduced motion until the user explicitly starts rotation", () => {
+    vi.useFakeTimers();
+    stubMotionPreference(true);
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel autoplay autoplayInterval={1000} items={items} loop onIndexChange={onIndexChange} />
+    );
+
+    expect(screen.getByRole("button", { name: "播放轮播" })).toBeTruthy();
+    void act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(onIndexChange).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "播放轮播" }));
+    void act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(embla.api.scrollNext).toHaveBeenLastCalledWith(true);
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "autoplay" });
+  });
+
+  it("reports drag selection and keeps rotation paused after pointer interaction", () => {
+    vi.useFakeTimers();
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel autoplay autoplayInterval={1000} items={items} loop onIndexChange={onIndexChange} />
+    );
+
+    void act(() => {
+      embla.emit("pointerDown");
+      embla.api.scrollNext(false);
+    });
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "drag" });
+    expect(screen.getByRole("button", { name: "播放轮播" })).toBeTruthy();
+    void act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(onIndexChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("pauses in a hidden page and resumes only after the page becomes visible", () => {
+    vi.useFakeTimers();
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel autoplay autoplayInterval={1000} items={items} loop onIndexChange={onIndexChange} />
+    );
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-rotating")).toBe(
+      "false"
+    );
+    void act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(onIndexChange).not.toHaveBeenCalled();
+
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    fireEvent(document, new Event("visibilitychange"));
+    void act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "autoplay" });
+  });
+
+  it("supports disabled, empty, custom indicator and English labels", () => {
+    const { rerender } = render(<Carousel disabled items={items} indicator={() => <b>1 / 3</b>} />);
+    expect(screen.getByText("1 / 3")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "下一张" }).hasAttribute("disabled")).toBe(true);
+
+    embla.setSlideCount(0);
+    rerender(
+      <ConfigProvider locale="en-US">
+        <Carousel items={[]} indicator={false} />
+      </ConfigProvider>
+    );
+    expect(screen.getByRole("group", { name: "Featured content" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Previous slide" }).hasAttribute("disabled")).toBe(
+      true
+    );
+    expect(screen.queryByRole("img")).toBeNull();
+  });
+});

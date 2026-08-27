@@ -27,7 +27,8 @@
     "@meu/icons-react": "workspace:*",
     "@meu/primitives-react": "workspace:*",
     "@meu/tokens": "workspace:*",
-    "@vanilla-extract/recipes": "0.5.7"
+    "@vanilla-extract/recipes": "0.5.7",
+    "embla-carousel-react": "8.6.0"
   },
   "peerDependencies": {
     "react": ">=19.0.0 <20.0.0",
