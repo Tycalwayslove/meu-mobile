@@ -15,7 +15,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -80,6 +81,18 @@ input {
 
 .integration-form > * + * {
   margin-top: 20px;
+}
+
+.integration-search {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.integration-search output {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
 }
 
 .integration-result {

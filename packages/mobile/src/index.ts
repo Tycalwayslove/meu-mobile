@@ -21,3 +21,7 @@ export { Field } from "./Field";
 export type { FieldProps } from "./Field";
 export { TextInput } from "./TextInput";
 export type { TextInputProps } from "./TextInput";
+export { TextArea } from "./TextArea";
+export type { TextAreaAutoSize, TextAreaProps, TextAreaSize, TextAreaStatus } from "./TextArea";
+export { SearchField } from "./SearchField";
+export type { SearchFieldProps, SearchFieldSize, SearchFieldStatus } from "./SearchField";

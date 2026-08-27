@@ -10,6 +10,7 @@ reset/watch/trigger、服务端字段错误及首次错误聚焦。
 
 - `useMeuForm` 返回完整 React Hook Form 实例；`useFieldArray`、`useWatch` 等能力从包入口继续导出。
 - `MeuFormTextInput` 使用 `Controller` 连接基础 `Field` 与 `TextInput`，不在 UI 组件中保存表单状态。
+- `MeuFormTextArea` 与 `MeuFormSearchField` 沿用同一 Controller 契约；多行输入、搜索提交等交互仍由基础组件负责。
 - Zod 通过 `schema` 便捷参数接入；也可传任意 React Hook Form `resolver`，二者同时存在时 `schema` 优先。
 - `applyMeuFormErrors` 接收路径化字段错误，例如 `profile.name`、`items.0.title`，默认聚焦第一个有效错误字段。
 - `MeuForm` 保留原生 `<form>` 语义并默认 `noValidate`，首次客户端校验失败沿用 React Hook Form 的聚焦策略。

@@ -23,9 +23,8 @@ test("binds validation, clear action and successful submission", async ({ page }
   const input = page.getByLabel("店铺名称");
   await page.getByRole("button", { name: "保存店铺" }).click();
 
-  await expect(
-    page.locator('[data-meu-component="field"] [role="alert"]')
-  ).toHaveText("店铺名称至少输入 2 个字符");
+  await expect(page.getByText("店铺名称至少输入 2 个字符")).toBeVisible();
+  await expect(page.getByText("店铺介绍至少输入 6 个字符")).toBeVisible();
   await expect(input).toHaveAttribute("aria-invalid", "true");
 
   await input.fill("喵呜体验店");
@@ -33,8 +32,20 @@ test("binds validation, clear action and successful submission", async ({ page }
   await expect(input).toHaveValue("");
 
   await input.fill("喵呜体验店");
+  await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(page.getByText("已保存：喵呜体验店")).toBeVisible();
+});
+
+test("searches and clears with the SearchField contract", async ({ page }) => {
+  const search = page.getByRole("searchbox", { name: "搜索组件" });
+  await search.fill("TextArea");
+  await search.press("Enter");
+  await expect(page.getByText("正在搜索：TextArea")).toBeVisible();
+
+  await page.getByRole("button", { name: "清除搜索" }).click();
+  await expect(search).toHaveValue("");
+  await expect(search).toBeFocused();
 });
 
 test("switches theme and preserves mobile touch targets", async ({ page }) => {
@@ -42,9 +53,9 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
   await page.getByRole("button", { name: "切换主题" }).click();
   await expect(provider).toHaveAttribute("data-meu-theme", "dark");
 
-  const buttonHeights = await page.locator("button").evaluateAll((buttons) =>
-    buttons.map((button) => button.getBoundingClientRect().height)
-  );
+  const buttonHeights = await page
+    .locator("button")
+    .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
   expect(buttonHeights.every((height) => height >= 44)).toBe(true);
 
   const hasHorizontalOverflow = await page.evaluate(
