@@ -20,6 +20,7 @@ import { PullToRefreshDemo } from "./PullToRefreshDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import { SwipeActionsDemo } from "./SwipeActionsDemo";
 import { TimePickerDemo } from "./TimePickerDemo";
+import { VirtualListDemo } from "./VirtualListDemo";
 import styles from "./page.module.css";
 
 export default function HomePage() {
@@ -97,6 +98,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>页面内常驻浮动面板与原生滚动接管</h2>
           <FloatingPanelDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>一万条动态高度数据与可访问窗口化</h2>
+          <VirtualListDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

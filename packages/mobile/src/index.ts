@@ -132,6 +132,16 @@ export type {
   FloatingPanelRef,
   FloatingPanelSetHeightOptions
 } from "./FloatingPanel";
+export { VirtualList } from "./VirtualList";
+export type {
+  VirtualListAlign,
+  VirtualListProps,
+  VirtualListRange,
+  VirtualListRef,
+  VirtualListScrollBehavior,
+  VirtualListScrollOptions,
+  VirtualListScrollToIndexOptions
+} from "./VirtualList";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";

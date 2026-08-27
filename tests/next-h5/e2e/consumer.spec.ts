@@ -96,6 +96,33 @@ test("loads infinite pages manually, locks each request and reaches completion",
   await expect(section.getByRole("button")).toHaveCount(0);
 });
 
+test("virtualizes ten thousand dynamic rows and retains the focused item", async ({ page }) => {
+  const section = page.getByRole("region", { name: "虚拟列表" });
+  const list = section.getByRole("list", { name: "万条虚拟订单" });
+  const firstAction = list.getByRole("button", { name: "查看虚拟订单 1" });
+
+  await expect(firstAction).toBeVisible();
+  const initialRows = await list.getByRole("listitem").count();
+  expect(initialRows).toBeGreaterThan(4);
+  expect(initialRows).toBeLessThan(20);
+  await expect(list.getByRole("listitem").first()).toHaveAttribute("aria-setsize", "10000");
+  await expect(list.getByRole("listitem").first()).toHaveAttribute("aria-posinset", "1");
+
+  await firstAction.focus();
+  await expect(firstAction).toBeFocused();
+  await section.getByRole("button", { name: "跳到第 9001 项" }).evaluate((button) => {
+    (button as HTMLButtonElement).click();
+  });
+
+  await expect(list.locator('[aria-posinset="9001"]')).toBeVisible();
+  await expect(firstAction).toBeAttached();
+  await expect(firstAction).toBeFocused();
+  await expect(section.getByText(/虚拟范围：/)).toContainText("9001");
+
+  await section.getByRole("button", { name: "跳到第 9001 项" }).focus();
+  await expect(list.locator('[aria-posinset="1"]')).toHaveCount(0);
+});
+
 test("runs the controlled carousel with native alternatives and focus isolation", async ({
   page
 }) => {

@@ -161,3 +161,19 @@ handle 提供拖拽、点击、方向键、PageUp / PageDown、Home / End 路径
 命令式 `setHeight()` 只请求最近 anchor，并通过 `imperative` 原因进入同一状态通道，不绕过受控事实源。
 未来 uni-app 复用 anchors、height、placement、惯性与 drag / handle / keyboard / imperative 原因，替换
 Pointer Events、visualViewport 与 transform。
+
+## ADR-020：VirtualList 使用 TanStack Virtual，公开平台中立契约
+
+VirtualList 首版只支持组件自身的纵向滚动容器，不同时承诺横向、网格、瀑布流或 window scroll。公开 API
+固定为 items、稳定 `getItemKey`、像素 height、尺寸估算、overscan、范围回调和命令式定位；分页、选择、树结构、
+请求与业务空状态都留给调用方。明确的 height、initialOffset 与 estimateSize 生成确定的 SSR 初始窗口。
+
+React Web 适配层使用 MIT 许可的 `@tanstack/react-virtual` 3.14.10，其 core 依赖为 3.17.8。它负责滚动观察、
+动态测量、滚动锚定和 iOS WebKit 的延迟尺寸修正，但任何 TanStack 实例或类型都不进入 Meu 公共 API。Next
+消费者必须 transpile React Virtual 与 Virtual Core，保证其外置 ESM 依赖不会越过 Chrome/WebView 70+、
+iOS 13 的语法基线。
+
+外层固定为带可访问名称的 `role=list`；挂载行使用 `role=listitem`、1-based `aria-posinset` 与完整
+`aria-setsize`。range callback 报告可见与常规 overscan 边界。焦点所在行会由自定义 range extractor 强制保留，
+但不会被计入连续 overscan 范围；焦点离开列表后恢复常规卸载。未来 uni-app 复用数据、key、范围与定位契约，
+替换 Web 引擎。

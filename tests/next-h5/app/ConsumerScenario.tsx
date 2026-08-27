@@ -60,9 +60,11 @@ import {
   Tabs,
   Tag,
   ToastProvider,
+  VirtualList,
   useDialog,
   useToast
 } from "@meu/mobile";
+import type { VirtualListRange, VirtualListRef } from "@meu/mobile";
 import { useRef, useState } from "react";
 import { z } from "zod";
 
@@ -132,6 +134,14 @@ const regions = [
     ]
   }
 ] as const;
+
+const virtualOrders = Array.from({ length: 10_000 }, (_, index) => ({
+  description:
+    index % 8 === 0
+      ? "动态高度配送说明会在真实 DOM 挂载后重新测量。"
+      : `预计 ${15 + (index % 30)} 分钟送达`,
+  id: `VIRTUAL-${String(index + 1).padStart(5, "0")}`
+}));
 
 function formatLocalDate(value: Date) {
   const month = String(value.getMonth() + 1).padStart(2, "0");
@@ -218,6 +228,7 @@ export function ConsumerScenario() {
   const [swipeMenuOpen, setSwipeMenuOpen] = useState(false);
   const [swipeMessage, setSwipeMessage] = useState("等待滑动操作");
   const [floatingPanelHeight, setFloatingPanelHeight] = useState(160);
+  const [virtualRange, setVirtualRange] = useState<VirtualListRange | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -229,6 +240,7 @@ export function ConsumerScenario() {
   const sheetTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
   const actionMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const virtualListRef = useRef<VirtualListRef>(null);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -311,6 +323,52 @@ export function ConsumerScenario() {
               setInfinitePage((current) => current + 1);
             }}
           />
+        </section>
+
+        <section className="integration-virtual-list" aria-label="虚拟列表">
+          <div className="integration-virtual-list-toolbar">
+            <strong>10,000 条本地订单</strong>
+            <Button
+              size="small"
+              variant="outline"
+              tone="neutral"
+              onClick={() => {
+                const list = virtualListRef.current;
+                if (list) list.scrollToIndex(9_000, { align: "start" });
+              }}
+            >
+              跳到第 9001 项
+            </Button>
+          </div>
+          <VirtualList
+            ref={virtualListRef}
+            aria-label="万条虚拟订单"
+            estimateSize={(order) => (order.description.length > 24 ? 72 : 56)}
+            getItemKey={(order) => order.id}
+            height={320}
+            items={virtualOrders}
+            onRangeChange={setVirtualRange}
+            overscan={3}
+            renderItem={(order, index) => (
+              <div
+                className="integration-virtual-list-row"
+                style={{ minHeight: index % 8 === 0 ? 72 : 56 }}
+              >
+                <div>
+                  <strong>{order.id}</strong>
+                  <span>{order.description}</span>
+                </div>
+                <Button size="small" variant="text" tone="neutral">
+                  查看虚拟订单 {index + 1}
+                </Button>
+              </div>
+            )}
+          />
+          <output aria-live="polite">
+            {virtualRange
+              ? `虚拟范围：${virtualRange.visibleStartIndex + 1}-${virtualRange.visibleEndIndex + 1}`
+              : "虚拟范围：计算中"}
+          </output>
         </section>
 
         <section className="integration-carousel" aria-label="内容轮播">

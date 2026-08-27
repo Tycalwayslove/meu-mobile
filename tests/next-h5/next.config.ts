@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
     "@meu/form-react",
     "@meu/icons-react",
     "@meu/mobile",
-    "@meu/primitives-react"
+    "@meu/primitives-react",
+    "@tanstack/react-virtual",
+    "@tanstack/virtual-core"
   ]
 };
 

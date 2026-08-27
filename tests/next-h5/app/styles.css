@@ -115,6 +115,46 @@ textarea {
   border-bottom: 1px solid var(--meu-color-border);
 }
 
+.integration-virtual-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.integration-virtual-list-toolbar,
+.integration-virtual-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.integration-virtual-list [data-meu-component="virtual-list"] {
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-virtual-list-row {
+  box-sizing: border-box;
+  padding: 8px 10px 8px 16px;
+  border-bottom: 1px solid var(--meu-color-border);
+}
+
+.integration-virtual-list-row > div {
+  min-width: 0;
+}
+
+.integration-virtual-list-row strong,
+.integration-virtual-list-row span {
+  display: block;
+}
+
+.integration-virtual-list-row span,
+.integration-virtual-list > output {
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-refresh [data-meu-component="pull-to-refresh"] > div:last-child {
   min-height: 112px;
   padding: 20px;

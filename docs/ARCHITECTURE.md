@@ -51,11 +51,16 @@ icons-core ─> icons-react            │
 - FloatingPanel 是页面内常驻、非模态的可变高度容器，不复用 Portal、Mask、滚动锁或焦点圈定。Meu 持有
   pixel anchors、height、placement、惯性与变更原因；React Web 使用 Pointer Events 和 transform，最高
   anchor 时内容区交还原生滚动，未来 uni-app 只替换手势和布局适配层。
+- VirtualList 固定为组件自身的纵向滚动容器，Meu 持有 items、稳定 key、估算、范围与命令式定位契约；
+  React Web 使用 TanStack Virtual 处理窗口化、动态测量和 iOS WebKit 滚动修正。公开 API 不泄漏引擎类型，
+  已聚焦行在离开常规窗口后继续挂载，未来 uni-app 替换平台引擎而复用同一数据与范围契约。
 
 ## Next.js 边界
 
 交互组件保留 `use client` 指令；tokens、类型和平台无关数据保持服务端安全。模块顶层不得访问
 `window` 或 `document`。React、React DOM 和 React Hook Form必须作为 peer dependency。
+Next 消费者同时 transpile `@tanstack/react-virtual` 与 `@tanstack/virtual-core`，避免第三方 ESM 语法越过旧
+WebView 构建基线。
 
 ## 旧 WebView
 

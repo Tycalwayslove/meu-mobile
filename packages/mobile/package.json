@@ -27,6 +27,7 @@
     "@meu/icons-react": "workspace:*",
     "@meu/primitives-react": "workspace:*",
     "@meu/tokens": "workspace:*",
+    "@tanstack/react-virtual": "3.14.10",
     "@vanilla-extract/recipes": "0.5.7",
     "embla-carousel-react": "8.6.0"
   },
