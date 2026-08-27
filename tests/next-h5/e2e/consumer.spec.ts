@@ -401,6 +401,36 @@ test("normalizes DatePicker dates and commits only the confirmed draft", async (
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
 });
 
+test("rolls back DateRangePicker drafts and commits a complete preset", async ({ page }) => {
+  const trigger = page.getByRole("button", { name: "配送日期范围" });
+  await expect(trigger).toContainText("2026-08-08 – 2026-08-18");
+  await trigger.click();
+
+  let picker = page.getByRole("dialog", { name: "配送日期范围" });
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await picker.getByRole("button", { name: /^2026-08-12/ }).click();
+  await expect(picker.getByRole("button", { name: "确定" })).toBeDisabled();
+  await picker.getByRole("button", { name: /^2026-08-15/ }).click();
+  await expect(picker.getByRole("button", { name: "确定" })).toBeEnabled();
+  await picker.getByRole("button", { name: "取消" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("2026-08-08 – 2026-08-18");
+
+  await trigger.click();
+  picker = page.getByRole("dialog", { name: "配送日期范围" });
+  await picker.getByRole("button", { name: "未来 7 天" }).click();
+  await expect(picker.getByRole("button", { name: /^2026-08-10/ })).toHaveAttribute(
+    "data-range-start",
+    "true"
+  );
+  await picker.getByRole("button", { name: "确定" }).click();
+  await expect(picker).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toContainText("2026-08-10 – 2026-08-16");
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+});
+
 test("maps TimePicker values and commits only the confirmed draft", async ({ page }) => {
   const trigger = page.getByRole("button", { name: "送达时间" });
   await expect(trigger).toContainText("10:30");
@@ -607,7 +637,7 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
     page.getByText(
-      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / date:2026-08-28 / time:10:30 / calendar:2026-08-08,2026-08-18 / selector:fast / segmented:card"
+      "已保存录入：quantity:2 / volume:41 / rating:4 / picker:today,9 / cascade:zhejiang,hangzhou,xihu / date:2026-08-28 / range:2026-08-08–2026-08-18 / time:10:30 / calendar:2026-08-08,2026-08-18 / selector:fast / segmented:card"
     )
   ).toBeVisible();
 });

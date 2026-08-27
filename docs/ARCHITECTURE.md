@@ -35,7 +35,9 @@ icons-core ─> icons-react            │
 - TimePicker 使用可序列化的 `{ hour, minute, second }` 表达一天内时间；12 小时制只改变列表示，
   表单值始终保持 0–23 小时，不附带虚构日期、日期库或时区。
 - Calendar 通过同一 `DateAdapter<TDate>` 生成稳定的月视图，并把单选、多选和范围选择保留为纯数据契约；
-  它不依赖 Popup、日期库或业务时区，后续 DateRangePicker 只组合触发器、草稿和确认式浮层。
+  它不依赖 Popup、日期库或业务时区。
+- DateRangePicker 组合 Calendar 的范围算法与 Popup 的模态边界，仅新增 draft、快捷范围和确认/回滚；
+  表单触发器留在 `form-react`，核心组件不读取业务表单、路由或接口状态。
 
 ## Next.js 边界
 

@@ -207,6 +207,21 @@ export type {
   CalendarWeekStartsOn
 } from "./Calendar";
 export {
+  dateRangeIsSelectable,
+  DateRangePicker,
+  normalizeDateRange,
+  sameDateRange
+} from "./DateRangePicker";
+export type {
+  DateRangePickerCalendarSelectDetails,
+  DateRangePickerOpenChangeDetails,
+  DateRangePickerOpenChangeReason,
+  DateRangePickerPreset,
+  DateRangePickerPresetSelectDetails,
+  DateRangePickerProps,
+  DateRangePickerSelectDetails
+} from "./DateRangePicker";
+export {
   formatTimeValue,
   isValidTimeValue,
   TimePicker,

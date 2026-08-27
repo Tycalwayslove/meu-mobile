@@ -5,6 +5,7 @@ import { CalendarDemo } from "./CalendarDemo";
 import { CascadePickerDemo } from "./CascadePickerDemo";
 import { ContainerDemo } from "./ContainerDemo";
 import { DatePickerDemo } from "./DatePickerDemo";
+import { DateRangePickerDemo } from "./DateRangePickerDemo";
 import { DisplayDemo } from "./DisplayDemo";
 import { FormDemo } from "./FormDemo";
 import { FeedbackDemo } from "./FeedbackDemo";
@@ -59,6 +60,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>日期时间选择与 DateAdapter 表单绑定</h2>
           <DatePickerDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>日期范围草稿与确认式表单绑定</h2>
+          <DateRangePickerDemo />
         </section>
         <section className={styles.formSection}>
           <h2>平台无关时间选择与确认式表单绑定</h2>

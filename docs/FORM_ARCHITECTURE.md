@@ -18,6 +18,8 @@ reset/watch/trigger、服务端字段错误及首次错误聚焦。
   完整归一化路径，取消不产生 dirty，错误关联和首次错误焦点仍落在原生 button 触发器。
 - `MeuFormDatePicker` 映射 `TDate | null`，通过同一 `DateAdapter<TDate>` 格式化触发器与生成日期列；
   只有确定才写入字段，取消不产生 dirty，错误聚焦到原生 button 触发器。
+- `MeuFormDateRangePicker` 精确映射 `readonly [TDate, TDate] | null`；Calendar 只更新弹层 draft，第二次
+  选择完成范围后确定按钮才可用，只有确定才写入字段。取消、遮罩与 Escape 不产生 dirty，错误聚焦触发器。
 - `MeuFormTimePicker` 映射平台无关的 `TimeValue | null`；12/24 小时制只影响展示，只有确定才写入字段，
   取消不产生 dirty，错误聚焦到原生 button 触发器。
 - `MeuFormCalendar` 按模式精确映射 `TDate | null`、`ReadonlyArray<TDate>` 或

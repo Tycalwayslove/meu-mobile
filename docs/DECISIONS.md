@@ -85,4 +85,14 @@ Calendar 是内联月视图，不内置触发器、Popup、确认栏或业务快
 
 日期按钮采用原生 button 和 roving tabindex，方向键、Home / End、PageUp / PageDown 与按年移动拥有触摸
 等价路径。`MeuFormCalendar` 每次选择都立即写入表单，并把校验焦点落到真实日期按钮。需要确认/取消、
-快捷范围和浮层触发器的流程由后续 DateRangePicker 组合 Calendar 与 Popup，避免污染基础月历契约。
+快捷范围和浮层触发器的流程由 DateRangePicker 组合 Calendar 与 Popup，避免污染基础月历契约。
+
+## ADR-014：DateRangePicker 只提交完整、已确认的范围
+
+DateRangePicker 组合 Calendar 的 range 模式与 Popup，不复制日期网格或浮层基础设施。打开时从已提交值建立
+draft：首次点按产生同日草稿但保持 `complete=false`，第二次点按自动排序并完成；即使选择同日，也必须完成
+第二次点按。确定按钮只在范围完整且端点满足边界与禁用约束时可用。
+
+快捷范围只替换 draft，不自动确认；取消、遮罩和 Escape 丢弃 draft，确认才提交。核心组件接受
+`DateAdapter<TDate>` 并保持日期库、业务时区、路由与接口中立。`MeuFormDateRangePicker` 组合 Field 与
+PickerTrigger，只在确认时写入 `readonly [TDate, TDate] | null`，因此取消不触发 dirty，校验焦点回到原生触发按钮。

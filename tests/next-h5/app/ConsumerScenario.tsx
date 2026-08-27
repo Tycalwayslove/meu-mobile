@@ -7,6 +7,7 @@ import {
   MeuFormCheckboxGroup,
   MeuFormCascadePicker,
   MeuFormDatePicker,
+  MeuFormDateRangePicker,
   MeuFormPicker,
   MeuFormRate,
   MeuFormRadioGroup,
@@ -65,6 +66,7 @@ const schema = z.object({
   campaignDates: z.array(z.date()).min(1, "请至少选择一个活动日期"),
   description: z.string().min(6, "店铺介绍至少输入 6 个字符"),
   deliveryDate: z.date(),
+  deliveryWindow: z.tuple([z.date(), z.date()]),
   deliveryTime: z.object({
     hour: z.number().int().min(0).max(23),
     minute: z.number().int().min(0).max(59),
@@ -223,6 +225,7 @@ export function ConsumerScenario() {
       campaignDates: [new Date(2026, 7, 8), new Date(2026, 7, 18)],
       description: "",
       deliveryDate: new Date(2026, 7, 28),
+      deliveryWindow: [new Date(2026, 7, 8), new Date(2026, 7, 18)],
       deliveryTime: { hour: 10, minute: 30, second: 0 },
       fulfillment: ["standard"],
       notifications: true,
@@ -670,7 +673,7 @@ export function ConsumerScenario() {
               `${values.services.join(",")} / ${values.shipping} / notifications:${values.notifications ? "true" : "false"} / agreement:${values.agreement ? "true" : "false"}`
             );
             setSavedAdvanced(
-              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / time:${formatLocalTime(values.deliveryTime)} / calendar:${values.campaignDates.map(formatLocalDate).join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
+              `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / range:${values.deliveryWindow.map(formatLocalDate).join("–")} / time:${formatLocalTime(values.deliveryTime)} / calendar:${values.campaignDates.map(formatLocalDate).join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
           }}
         >
@@ -762,6 +765,23 @@ export function ConsumerScenario() {
             max={new Date(2026, 8, 30, 23, 59, 59, 999)}
             required
             triggerProps={{ placeholder: "选择送达日期" }}
+          />
+          <MeuFormDateRangePicker<FormValues>
+            name="deliveryWindow"
+            label="配送日期范围"
+            description="取消丢弃草稿，确定后才提交完整范围。"
+            defaultMonth={new Date(2026, 7, 1)}
+            min={new Date(2026, 7, 1)}
+            max={new Date(2026, 7, 31)}
+            presets={[
+              {
+                key: "week",
+                label: "未来 7 天",
+                value: [new Date(2026, 7, 10), new Date(2026, 7, 16)]
+              }
+            ]}
+            required
+            triggerProps={{ placeholder: "选择配送日期范围" }}
           />
           <MeuFormTimePicker<FormValues>
             name="deliveryTime"
