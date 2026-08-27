@@ -3,7 +3,13 @@
 import { useId } from "react";
 import type { ReactNode } from "react";
 
-import { description as descriptionClass, error as errorClass, field, label, required as requiredClass } from "./Field.css";
+import {
+  description as descriptionClass,
+  error as errorClass,
+  field,
+  label,
+  required as requiredClass
+} from "./Field.css";
 import { FieldContext } from "./FieldContext";
 
 export type FieldProps = {
@@ -25,15 +31,16 @@ export function Field({
 }: FieldProps) {
   const generatedId = useId();
   const controlId = `meu-field-${generatedId}`;
+  const labelId = labelContent ? `${controlId}-label` : undefined;
   const descriptionId = description ? `${controlId}-description` : undefined;
   const errorId = error ? `${controlId}-error` : undefined;
   const describedBy = [descriptionId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <FieldContext.Provider value={{ controlId, describedBy, invalid: Boolean(error) }}>
+    <FieldContext.Provider value={{ controlId, describedBy, invalid: Boolean(error), labelId }}>
       <div className={className ? `${field} ${className}` : field} data-meu-component="field">
         {labelContent ? (
-          <label className={label} htmlFor={controlId}>
+          <label className={label} htmlFor={controlId} id={labelId}>
             {labelContent}
             {required ? (
               <span className={requiredClass} aria-hidden="true">

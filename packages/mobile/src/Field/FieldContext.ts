@@ -4,6 +4,7 @@ export type FieldContextValue = {
   controlId: string;
   describedBy: string | undefined;
   invalid: boolean;
+  labelId: string | undefined;
 };
 
 export const FieldContext = createContext<FieldContextValue | null>(null);

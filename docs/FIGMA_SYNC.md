@@ -14,6 +14,11 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 2A 页面：[Components/TextArea-SearchField](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v/Meu-Mobile-Design-System?node-id=42-6)
 - TextArea 组件集：[Meu/TextArea（44:71）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v/Meu-Mobile-Design-System?node-id=44-71)，24 个 variants
 - SearchField 组件集：[Meu/SearchField（45:89）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v/Meu-Mobile-Design-System?node-id=45-89)，30 个 variants
+- Batch 2B：Checkbox、Radio、Switch 共 90 个 atomic variants，覆盖三档尺寸、选择状态、focus/error/disabled 与 loading。
+- Checkbox 组件集：[small（50:65）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-65)、[medium（50:125）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-125)、[large（50:185）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-185)，共 36 个 variants
+- Radio 组件集：[small（50:224）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-224)、[medium（50:263）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-263)、[large（50:302）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-302)，共 24 个 variants
+- Switch 组件集：[small（50:359）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-359)、[medium（50:414）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-414)、[large（50:469）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-469)，共 30 个 variants
+- 组合展板：[CheckboxGroup（50:471）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-471)、[RadioGroup（50:501）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=50-501)
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

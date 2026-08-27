@@ -1,6 +1,7 @@
 import { ConfigProvider } from "@meu/mobile";
 
 import { FormDemo } from "./FormDemo";
+import { SelectionDemo } from "./SelectionDemo";
 import styles from "./page.module.css";
 
 export default function HomePage() {
@@ -10,7 +11,8 @@ export default function HomePage() {
         <p className={styles.eyebrow}>Meu Mobile / Engineering Preview</p>
         <h1 className={styles.title}>安静、可靠的移动组件。</h1>
         <p className={styles.intro}>
-          这个站点同时是正式文档入口和 Next.js 集成测试。组件在这里经过 SSR、hydration、主题和表单绑定验证。
+          这个站点同时是正式文档入口和 Next.js 集成测试。组件在这里经过
+          SSR、hydration、主题和表单绑定验证。
         </p>
         <section className={styles.grid}>
           <article className={styles.card}>
@@ -25,6 +27,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>表单集成验证</h2>
           <FormDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>选择控件与布尔值绑定</h2>
+          <SelectionDemo />
         </section>
       </main>
     </ConfigProvider>

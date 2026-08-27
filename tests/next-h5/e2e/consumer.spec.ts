@@ -48,6 +48,24 @@ test("searches and clears with the SearchField contract", async ({ page }) => {
   await expect(search).toBeFocused();
 });
 
+test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
+  await page.getByLabel("店铺名称").fill("喵呜体验店");
+  await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
+
+  await page.getByText("到店自提", { exact: true }).click();
+  const standard = page.getByRole("radio", { name: "标准配送" });
+  const express = page.getByRole("radio", { name: "急速配送" });
+  await standard.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(express).toBeChecked();
+  await page.getByRole("switch", { name: "消息通知" }).click();
+
+  await page.getByRole("button", { name: "保存店铺" }).click();
+  await expect(
+    page.getByText("已保存设置：delivery,pickup / express / notifications:false / agreement:true")
+  ).toBeVisible();
+});
+
 test("switches theme and preserves mobile touch targets", async ({ page }) => {
   const provider = page.locator('[data-meu-component="config-provider"]');
   await page.getByRole("button", { name: "切换主题" }).click();
@@ -57,6 +75,13 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
     .locator("button")
     .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
   expect(buttonHeights.every((height) => height >= 44)).toBe(true);
+
+  const controlHeights = await page
+    .locator(
+      '[data-meu-component="checkbox"], [data-meu-component="radio"], [data-meu-component="switch"]'
+    )
+    .evaluateAll((controls) => controls.map((control) => control.getBoundingClientRect().height));
+  expect(controlHeights.every((height) => height >= 44)).toBe(true);
 
   const hasHorizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth
