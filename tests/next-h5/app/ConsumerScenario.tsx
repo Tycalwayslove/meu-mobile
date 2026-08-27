@@ -26,13 +26,17 @@ import {
   Collapse,
   ConfigProvider,
   Ellipsis,
+  Empty,
   Image,
   List,
   NavBar,
   PaginationDots,
+  Progress,
   Radio,
+  Result,
   SearchField,
   SegmentedControl,
+  Skeleton,
   Steps,
   TabBar,
   Tabs,
@@ -75,6 +79,8 @@ export function ConsumerScenario() {
   const [previewPage, setPreviewPage] = useState(1);
   const [contentTab, setContentTab] = useState("overview");
   const [primarySection, setPrimarySection] = useState("home");
+  const [feedbackProgress, setFeedbackProgress] = useState(64);
+  const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -289,6 +295,49 @@ export function ConsumerScenario() {
           <output aria-live="polite">
             {openHelp.length ? `已展开：${openHelp.join(",")}` : "全部收起"}
           </output>
+        </section>
+
+        <section className="integration-feedback" aria-label="反馈状态组件">
+          <div className="integration-progress-demo">
+            <Progress label="资料上传" value={feedbackProgress} showValue />
+            <Button
+              size="small"
+              variant="outline"
+              tone="neutral"
+              onClick={() => setFeedbackProgress((current) => Math.min(100, current + 12))}
+            >
+              推进上传
+            </Button>
+          </div>
+          <div className="integration-loading" aria-label="订单摘要加载中" aria-busy="true">
+            <Skeleton variant="rectangle" height={88} animated />
+            <Skeleton lines={3} lineWidths={["100%", "86%", "58%"]} animated />
+          </div>
+          <Empty
+            title="没有待处理订单"
+            description="当前筛选条件下没有可处理的订单。"
+            action={
+              <Button
+                size="small"
+                variant="outline"
+                tone="neutral"
+                onClick={() => setFeedbackMessage("已清除订单筛选")}
+              >
+                清除筛选
+              </Button>
+            }
+          />
+          <Result
+            status="success"
+            title="订单提交成功"
+            description="订单编号 MEU-2026-0827 已进入履约流程。"
+            actions={
+              <Button size="small" onClick={() => setFeedbackMessage("已打开订单详情")}>
+                查看订单
+              </Button>
+            }
+          />
+          <output aria-live="polite">{feedbackMessage}</output>
         </section>
 
         <MeuForm

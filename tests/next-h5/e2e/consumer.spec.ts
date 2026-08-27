@@ -153,6 +153,31 @@ test("connects tab panels, primary navigation and read-only progress semantics",
   await expect(primary.getByRole("button", { name: "我的" })).toBeDisabled();
 });
 
+test("renders progress, skeleton, empty and result feedback contracts", async ({ page }) => {
+  const section = page.getByRole("region", { name: "反馈状态组件" });
+  const progress = section.getByRole("progressbar", { name: "资料上传" });
+  await expect(progress).toHaveAttribute("aria-valuenow", "64");
+  await section.getByRole("button", { name: "推进上传" }).click();
+  await expect(progress).toHaveAttribute("aria-valuenow", "76");
+
+  const loading = section.getByLabel("订单摘要加载中");
+  await expect(loading).toHaveAttribute("aria-busy", "true");
+  const skeletons = loading.locator('[data-meu-component="skeleton"]');
+  await expect(skeletons).toHaveCount(2);
+  await expect(skeletons.nth(0)).toHaveAttribute("aria-hidden", "true");
+  await expect(skeletons.nth(1)).toHaveAttribute("aria-hidden", "true");
+
+  const empty = section.getByRole("group", { name: "没有待处理订单" });
+  await expect(empty).toContainText("当前筛选条件下没有可处理的订单。");
+  await empty.getByRole("button", { name: "清除筛选" }).click();
+  await expect(section.getByText("已清除订单筛选")).toBeVisible();
+
+  const result = section.getByRole("status", { name: "订单提交成功" });
+  await expect(result).toContainText("MEU-2026-0827");
+  await result.getByRole("button", { name: "查看订单" }).click();
+  await expect(section.getByText("已打开订单详情")).toBeVisible();
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

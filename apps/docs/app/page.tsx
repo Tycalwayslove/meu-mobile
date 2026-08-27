@@ -4,6 +4,7 @@ import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
 import { ContainerDemo } from "./ContainerDemo";
 import { DisplayDemo } from "./DisplayDemo";
 import { FormDemo } from "./FormDemo";
+import { FeedbackDemo } from "./FeedbackDemo";
 import { InformationDemo } from "./InformationDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { SelectionDemo } from "./SelectionDemo";
@@ -56,6 +57,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>页面导航、标签与流程状态</h2>
           <NavigationDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>加载、空状态与流程结果</h2>
+          <FeedbackDemo />
         </section>
       </main>
     </ConfigProvider>

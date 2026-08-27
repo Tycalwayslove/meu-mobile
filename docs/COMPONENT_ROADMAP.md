@@ -47,10 +47,12 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 重点：先完成 Cell/List，再基于它们组装导航与列表型组件。
 
-## Batch 4：反馈与浮层
+## Batch 4：反馈与浮层（进行中）
 
-- Mask、Popup、Toast、Dialog、ActionMenu、BottomSheet、Popover
-- Progress、Skeleton、Empty、Result
+- Batch 4A：Progress、Skeleton、Empty、Result（已完成）
+- Batch 4B：浮层基础设施、Mask、Popup
+- Batch 4C：Toast、Dialog
+- Batch 4D：Popover、BottomSheet、ActionMenu
 
 重点：统一 Portal、焦点捕获与恢复、滚动锁、Escape、reduced motion 和命令式 helper 的可替换性。
 
