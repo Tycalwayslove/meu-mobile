@@ -101,6 +101,15 @@ export { Mask } from "./Mask";
 export type { MaskOpacity, MaskProps } from "./Mask";
 export { Popup } from "./Popup";
 export type { PopupPosition, PopupProps } from "./Popup";
+export { Popover } from "./Popover";
+export type {
+  PopoverOpenChangeDetails,
+  PopoverOpenChangeReason,
+  PopoverPlacement,
+  PopoverProps,
+  PopoverTrigger,
+  PopoverTriggerElement
+} from "./Popover";
 export type {
   OverlayContainer,
   OverlayDismissReason,

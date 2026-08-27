@@ -52,6 +52,8 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4C Dialog QA：Light / Dark 预览为 `157:5 / 157:14`，Title、Description 与三项 Action 均为文本属性；未命名节点、重复 variant、未绑定 fill / stroke 和 44 px 触控失败均为 0，108 个圆角全部绑定 Foundation 变量。`actionLayout=auto | horizontal | vertical` 写入组件说明，三操作样例按 auto 规则纵排；Figma 的 `Tone` 是设计场景轴，映射代码 `actions[].tone` 与主操作样式，不是 `Dialog.tone` 顶层 API
 - Batch 4C Toast 页面：[Toast（164:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=164-2)；组件集：[Meu/Toast（165:812）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=165-812) 与 [Meu/Toast / Entering（167:816）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=167-816)，分别包含 24 个 `Tone × Position × Content` variants
 - Batch 4C Toast QA：Default / Entering 两套组件均覆盖 neutral、success、warning、danger，top、center、bottom 以及 message / action；Entering 以 0.72 opacity 静态表达内部进入动效，不虚构公开 state API。两套组件共 288 个可见 paint 变量绑定，未绑定为 0，重复 variant 为 0，操作目标高度为 44 px；Light / Dark 预览、默认 3 秒、Undo 至少 5 秒、读屏播报与不抢焦点说明均已验证
+- Batch 4D Popover 页面：[Popover（172:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-2)；文档与画布为 [172:7](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-7) / [172:35](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-35)，组件集为 [Meu/Popover（172:264）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=172-264)
+- Batch 4D Popover QA：24 个 `Placement × Arrow` variants 覆盖四方向的 center / start / end 与箭头开关；216 个可见 paint 全部绑定 Foundation 变量，未绑定、重复 variant、未命名层与小于 44 px 的锚点均为 0，24 个浮层均应用阴影。Light / Dark 预览为 `172:61`；open、trigger、dismiss reason、Portal、collision、focus 与非模态限制仅作为运行时契约记录，不虚构为视觉 variant
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

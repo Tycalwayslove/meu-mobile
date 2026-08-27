@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Dialog, Mask, Popup, Space, useDialog, useToast } from "@meu/mobile";
+import { Button, Dialog, Mask, Popover, Popup, Space, useDialog, useToast } from "@meu/mobile";
 import { useRef, useState } from "react";
 
 export function OverlayDemo() {
   const [popupOpen, setPopupOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("等待 Dialog 操作");
   const dialog = useDialog();
@@ -36,6 +37,31 @@ export function OverlayDemo() {
         <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
           打开配送浮层
         </Button>
+        <Popover
+          aria-label="订单快捷操作"
+          open={popoverOpen}
+          placement="bottom-start"
+          content={
+            <div style={{ display: "grid", gap: 8, minWidth: 180 }}>
+              <strong>订单快捷操作</strong>
+              <span style={{ color: "var(--meu-color-muted)" }}>自动避开视口边缘。</span>
+              <Button
+                size="small"
+                onClick={() => {
+                  setPopoverOpen(false);
+                  setDialogMessage("已复制演示订单号");
+                }}
+              >
+                复制订单号
+              </Button>
+            </div>
+          }
+          onOpenChange={setPopoverOpen}
+        >
+          <Button tone="neutral" variant="outline">
+            打开快捷操作
+          </Button>
+        </Popover>
         <Button
           ref={dialogTriggerRef}
           tone="danger"

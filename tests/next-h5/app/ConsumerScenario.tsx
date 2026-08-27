@@ -35,6 +35,7 @@ import {
   NavBar,
   PaginationDots,
   Progress,
+  Popover,
   Popup,
   Radio,
   Result,
@@ -141,6 +142,7 @@ export function ConsumerScenario() {
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [overlayMessage, setOverlayMessage] = useState("等待浮层操作");
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
@@ -420,6 +422,34 @@ export function ConsumerScenario() {
               <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
                 打开配送浮层
               </Button>
+              <Popover
+                aria-label="订单快捷操作"
+                open={popoverOpen}
+                placement="bottom-end"
+                content={
+                  <div style={{ display: "grid", gap: 8, minWidth: 176 }}>
+                    <strong>订单快捷操作</strong>
+                    <span>浮层会自动避开视口边缘。</span>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        setPopoverOpen(false);
+                        setOverlayMessage("Popover 操作：已复制订单号");
+                      }}
+                    >
+                      复制订单号
+                    </Button>
+                  </div>
+                }
+                onOpenChange={(nextOpen, details) => {
+                  setPopoverOpen(nextOpen);
+                  if (!nextOpen) setOverlayMessage(`Popover 已关闭：${details.reason}`);
+                }}
+              >
+                <Button tone="neutral" variant="outline">
+                  打开订单快捷操作
+                </Button>
+              </Popover>
               <Button
                 ref={dialogTriggerRef}
                 tone="danger"

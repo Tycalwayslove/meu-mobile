@@ -22,6 +22,7 @@
     "test": "vitest run --maxWorkers=1"
   },
   "dependencies": {
+    "@floating-ui/react": "0.27.20",
     "@meu/icons-react": "workspace:*",
     "@meu/primitives-react": "workspace:*",
     "@meu/tokens": "workspace:*",

@@ -64,7 +64,7 @@ export default function HomePage() {
           <FeedbackDemo />
         </section>
         <section className={styles.formSection}>
-          <h2>遮罩、基础浮层、Dialog 与 Toast</h2>
+          <h2>遮罩、基础浮层、Popover、Dialog 与 Toast</h2>
           <ToastProvider>
             <DialogProvider>
               <OverlayDemo />

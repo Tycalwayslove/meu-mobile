@@ -34,6 +34,16 @@ function getFocusableElements(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(focusableSelector)).filter(isVisible);
 }
 
+function isFocusBranchForContainer(container: HTMLElement, target: EventTarget | null) {
+  if (!(target instanceof Element)) return false;
+  const branch = target.closest<HTMLElement>("[data-meu-focus-branch]");
+  if (!branch) return false;
+  const referenceId = branch.getAttribute("data-meu-focus-branch");
+  if (!referenceId) return false;
+  const reference = document.getElementById(referenceId);
+  return reference ? container.contains(reference) : false;
+}
+
 function isTopTrap(token: symbol) {
   const top = trapStack[trapStack.length - 1];
   return top !== undefined && top.token === token;
@@ -75,6 +85,7 @@ export function useFocusTrap({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (!container || !isTopTrap(token)) return;
+      if (isFocusBranchForContainer(container, document.activeElement)) return;
       if (event.key === "Escape" && escapeRef.current) {
         event.preventDefault();
         event.stopPropagation();
@@ -104,7 +115,13 @@ export function useFocusTrap({
     };
 
     const onFocusIn = (event: FocusEvent) => {
-      if (!container || !isTopTrap(token) || container.contains(event.target as Node)) return;
+      if (
+        !container ||
+        !isTopTrap(token) ||
+        container.contains(event.target as Node) ||
+        isFocusBranchForContainer(container, event.target)
+      )
+        return;
       focusFirst();
     };
 

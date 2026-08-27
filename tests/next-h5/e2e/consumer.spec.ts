@@ -212,6 +212,59 @@ test("locks scroll, contains focus and restores the Popup trigger", async ({ pag
   await expect(page.getByText("浮层已关闭：mask")).toBeVisible();
 });
 
+test("positions and dismisses a non-modal Popover without locking scroll", async ({
+  browserName,
+  page
+}) => {
+  const section = page.getByRole("region", { name: "浮层基础组件" });
+  const trigger = section.getByRole("button", { name: "打开订单快捷操作" });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+
+  const popover = page.getByRole("dialog", { name: "订单快捷操作" });
+  await expect(popover).toBeVisible();
+  await expect(popover).not.toHaveAttribute("aria-modal");
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+  await expect(popover).toBeFocused();
+  await expect(popover.locator("svg")).toHaveCount(1);
+
+  const viewport = page.viewportSize();
+  const triggerBox = await trigger.boundingBox();
+  const popoverBox = await popover.boundingBox();
+  if (!viewport || !triggerBox || !popoverBox) throw new Error("Expected Popover bounds");
+  expect(popoverBox.x).toBeGreaterThanOrEqual(0);
+  expect(popoverBox.y).toBeGreaterThanOrEqual(0);
+  expect(popoverBox.x + popoverBox.width).toBeLessThanOrEqual(viewport.width);
+  expect(popoverBox.y + popoverBox.height).toBeLessThanOrEqual(viewport.height);
+  const actualPlacement = await popover.getAttribute("data-placement");
+  if (!actualPlacement) throw new Error("Expected resolved Popover placement");
+  if (actualPlacement.startsWith("bottom")) {
+    expect(popoverBox.y).toBeGreaterThanOrEqual(triggerBox.y + triggerBox.height);
+  } else if (actualPlacement.startsWith("top")) {
+    expect(popoverBox.y + popoverBox.height).toBeLessThanOrEqual(triggerBox.y);
+  }
+
+  const action = popover.getByRole("button", { name: "复制订单号" });
+  if (browserName === "webkit") {
+    // Mobile WebKit does not include buttons in sequential Tab navigation by default.
+    await action.focus();
+  } else {
+    await page.keyboard.press("Tab");
+  }
+  await expect(action).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(popover).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(section.getByText("Popover 已关闭：escape")).toBeVisible();
+
+  await trigger.click();
+  await expect(popover).toBeVisible();
+  await page.getByRole("heading", { name: "Next H5 集成测试" }).click();
+  await expect(popover).toBeHidden();
+  await expect(section.getByText("Popover 已关闭：outside")).toBeVisible();
+});
+
 test("runs accessible declarative and provider-scoped Dialog flows", async ({ page }) => {
   const section = page.getByRole("region", { name: "浮层基础组件" });
   const deleteTrigger = section.getByRole("button", { name: "打开删除确认" });
