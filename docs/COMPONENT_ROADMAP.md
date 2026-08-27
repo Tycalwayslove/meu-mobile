@@ -13,7 +13,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 - React Hook Form + Zod 集成
 - Storybook、独立文档站、隔离 Next H5 测试
 
-## Batch 1：通用与布局（进行中）
+## Batch 1：通用与布局（已完成）
 
 - IconButton
 - Space
@@ -21,6 +21,13 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 - SafeArea
 
 完成标准：公开类型、Vanilla Extract 样式、单测、Storybook、README、深色主题与 44 px 触控区域。
+
+## 表单集成加固（已完成）
+
+- 嵌套字段与动态数组字段
+- 同步/异步校验、dirty/touched/submitting、reset/watch/trigger
+- 路径化服务端错误映射与首次错误聚焦
+- Storybook 集成示例和 React 测试覆盖
 
 ## Batch 2：基础信息录入
 

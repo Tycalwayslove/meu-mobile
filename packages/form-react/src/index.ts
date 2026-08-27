@@ -1,7 +1,7 @@
 "use client";
 
 export { applyMeuFormErrors } from "./server-errors";
-export type { MeuFormServerErrors } from "./server-errors";
+export type { ApplyMeuFormErrorsOptions, MeuFormServerErrors } from "./server-errors";
 export { MeuForm } from "./MeuForm";
 export type { MeuFormProps } from "./MeuForm";
 export { MeuFormTextInput } from "./MeuFormTextInput";

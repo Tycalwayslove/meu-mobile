@@ -6,4 +6,21 @@
 首发覆盖：字段注册、受控组件、嵌套字段、数组字段、同步/异步校验、dirty/touched/submitting、
 reset/watch/trigger、服务端字段错误及首次错误聚焦。
 
+## 集成边界
+
+- `useMeuForm` 返回完整 React Hook Form 实例；`useFieldArray`、`useWatch` 等能力从包入口继续导出。
+- `MeuFormTextInput` 使用 `Controller` 连接基础 `Field` 与 `TextInput`，不在 UI 组件中保存表单状态。
+- Zod 通过 `schema` 便捷参数接入；也可传任意 React Hook Form `resolver`，二者同时存在时 `schema` 优先。
+- `applyMeuFormErrors` 接收路径化字段错误，例如 `profile.name`、`items.0.title`，默认聚焦第一个有效错误字段。
+- `MeuForm` 保留原生 `<form>` 语义并默认 `noValidate`，首次客户端校验失败沿用 React Hook Form 的聚焦策略。
+
+```tsx
+const form = useMeuForm<FormValues>({ schema, defaultValues });
+
+applyMeuFormErrors(form, {
+  "profile.name": "店铺名称已存在",
+  "items.0.title": "第一项标题不可用"
+});
+```
+
 不在组件库中实现 API 请求、业务 DTO 映射或 JSON 配置驱动的自动表单生成器。
