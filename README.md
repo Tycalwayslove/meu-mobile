@@ -42,3 +42,6 @@ SSR/hydration、主题、表单绑定、移动布局和触控目标。
 
 当前设计文件：[Meu Mobile Design System](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v)。同步与治理规则见
 [`docs/FIGMA_SYNC.md`](docs/FIGMA_SYNC.md)。
+
+组件按“通用与布局 → 信息录入 → 展示与导航 → 反馈与浮层 → 选择器 → 手势与高成本组件”分批交付，
+详见 [`docs/COMPONENT_ROADMAP.md`](docs/COMPONENT_ROADMAP.md)。
