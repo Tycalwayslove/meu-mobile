@@ -106,3 +106,17 @@ export type {
   OverlayDismissReason,
   OverlayOpenChangeDetails
 } from "./overlayTypes";
+export { Dialog, DialogProvider, useDialog } from "./Dialog";
+export type {
+  DialogAction,
+  DialogActionLayout,
+  DialogActionTone,
+  DialogAlertOptions,
+  DialogApi,
+  DialogConfirmOptions,
+  DialogController,
+  DialogOpenChangeDetails,
+  DialogProps,
+  DialogProviderProps,
+  DialogShowOptions
+} from "./Dialog";

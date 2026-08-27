@@ -212,6 +212,36 @@ test("locks scroll, contains focus and restores the Popup trigger", async ({ pag
   await expect(page.getByText("浮层已关闭：mask")).toBeVisible();
 });
 
+test("runs accessible declarative and provider-scoped Dialog flows", async ({ page }) => {
+  const section = page.getByRole("region", { name: "浮层基础组件" });
+  const deleteTrigger = section.getByRole("button", { name: "打开删除确认" });
+  await deleteTrigger.click();
+  const deleteDialog = page.getByRole("alertdialog", { name: "删除测试订单？" });
+  await expect(deleteDialog).toBeVisible();
+  await expect(deleteDialog).toHaveAttribute("aria-modal", "true");
+  await expect(deleteDialog).toContainText("订单及关联记录将被永久删除");
+  await expect(deleteDialog.getByRole("button", { name: "取消" })).toBeFocused();
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+
+  const deleteAction = deleteDialog.getByRole("button", { name: "永久删除" });
+  await deleteAction.click();
+  await expect(deleteAction).toHaveAttribute("aria-busy", "true");
+  await expect(deleteDialog.getByRole("button", { name: "取消" })).toBeDisabled();
+  await expect(section.getByText("已删除测试订单")).toBeVisible();
+  await expect(deleteDialog).toBeHidden();
+  await expect(deleteTrigger).toBeFocused();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+
+  const commandTrigger = section.getByRole("button", { name: "命令式确认订单" });
+  await commandTrigger.click();
+  const commandDialog = page.getByRole("alertdialog", { name: "确认提交订单？" });
+  await expect(commandDialog.getByRole("button", { name: "取消" })).toBeFocused();
+  await commandDialog.getByRole("button", { name: "确认" }).click();
+  await expect(section.getByText("命令式确认：已提交")).toBeVisible();
+  await expect(commandDialog).toBeHidden();
+  await expect(commandTrigger).toBeFocused();
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

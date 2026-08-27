@@ -1,4 +1,4 @@
-import { ConfigProvider } from "@meu/mobile";
+import { ConfigProvider, DialogProvider } from "@meu/mobile";
 
 import { AdvancedEntryDemo } from "./AdvancedEntryDemo";
 import { ContainerDemo } from "./ContainerDemo";
@@ -64,8 +64,10 @@ export default function HomePage() {
           <FeedbackDemo />
         </section>
         <section className={styles.formSection}>
-          <h2>遮罩与基础浮层</h2>
-          <OverlayDemo />
+          <h2>遮罩、基础浮层与 Dialog</h2>
+          <DialogProvider>
+            <OverlayDemo />
+          </DialogProvider>
         </section>
       </main>
     </ConfigProvider>

@@ -25,6 +25,8 @@ import {
   Checkbox,
   Collapse,
   ConfigProvider,
+  Dialog,
+  DialogProvider,
   Ellipsis,
   Empty,
   Image,
@@ -42,7 +44,8 @@ import {
   Steps,
   TabBar,
   Tabs,
-  Tag
+  Tag,
+  useDialog
 } from "@meu/mobile";
 import { useRef, useState } from "react";
 import { z } from "zod";
@@ -66,6 +69,29 @@ type FormValues = z.infer<typeof schema>;
 const displayDescription =
   "Meu Mobile 面向 Next.js 移动网页提供稳定的设计令牌、原生交互语义、图片回退和完整表单集成，同时为后续 uni-app 适配保留清晰边界。";
 
+function DialogCommandDemo({ onResult }: { onResult: (message: string) => void }) {
+  const dialog = useDialog();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  return (
+    <Button
+      ref={triggerRef}
+      variant="outline"
+      tone="neutral"
+      onClick={() => {
+        void dialog
+          .confirm({
+            title: "确认提交订单？",
+            description: "确认后订单将进入履约流程。",
+            returnFocusRef: triggerRef
+          })
+          .then((confirmed) => onResult(confirmed ? "命令式确认：已提交" : "命令式确认：已取消"));
+      }}
+    >
+      命令式确认订单
+    </Button>
+  );
+}
+
 export function ConsumerScenario() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [savedName, setSavedName] = useState("");
@@ -84,8 +110,10 @@ export function ConsumerScenario() {
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [overlayMessage, setOverlayMessage] = useState("等待浮层操作");
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
+  const dialogTriggerRef = useRef<HTMLButtonElement>(null);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -345,46 +373,82 @@ export function ConsumerScenario() {
           <output aria-live="polite">{feedbackMessage}</output>
         </section>
 
-        <section className="integration-overlays" aria-label="浮层基础组件">
-          <div className="integration-mask-preview">
-            <Mask
-              container={null}
-              lockScroll={false}
-              opacity="thin"
-              style={{ position: "absolute", zIndex: 0 }}
-            >
-              <span className="integration-mask-label">Mask 预览</span>
-            </Mask>
-          </div>
-          <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
-            打开配送浮层
-          </Button>
-          <output aria-live="polite">{overlayMessage}</output>
-          <Popup
-            aria-label="配送方式"
-            open={popupOpen}
-            closeOnMaskClick
-            showCloseButton
-            returnFocusRef={popupTriggerRef}
-            onOpenChange={(nextOpen, details) => {
-              setPopupOpen(nextOpen);
-              if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
-            }}
-          >
-            <div className="integration-popup-content">
-              <h2>配送方式</h2>
-              <p>选择适合当前订单的配送方式。</p>
-              <Button
-                onClick={() => {
-                  setPopupOpen(false);
-                  setOverlayMessage("已确认标准配送");
-                }}
+        <DialogProvider>
+          <section className="integration-overlays" aria-label="浮层基础组件">
+            <div className="integration-mask-preview">
+              <Mask
+                container={null}
+                lockScroll={false}
+                opacity="thin"
+                style={{ position: "absolute", zIndex: 0 }}
               >
-                确认标准配送
-              </Button>
+                <span className="integration-mask-label">Mask 预览</span>
+              </Mask>
             </div>
-          </Popup>
-        </section>
+            <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
+              打开配送浮层
+            </Button>
+            <Button
+              ref={dialogTriggerRef}
+              tone="danger"
+              variant="outline"
+              onClick={() => setDialogOpen(true)}
+            >
+              打开删除确认
+            </Button>
+            <DialogCommandDemo onResult={setOverlayMessage} />
+            <output aria-live="polite">{overlayMessage}</output>
+            <Popup
+              aria-label="配送方式"
+              open={popupOpen}
+              closeOnMaskClick
+              showCloseButton
+              returnFocusRef={popupTriggerRef}
+              onOpenChange={(nextOpen, details) => {
+                setPopupOpen(nextOpen);
+                if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
+              }}
+            >
+              <div className="integration-popup-content">
+                <h2>配送方式</h2>
+                <p>选择适合当前订单的配送方式。</p>
+                <Button
+                  onClick={() => {
+                    setPopupOpen(false);
+                    setOverlayMessage("已确认标准配送");
+                  }}
+                >
+                  确认标准配送
+                </Button>
+              </div>
+            </Popup>
+            <Dialog
+              open={dialogOpen}
+              title="删除测试订单？"
+              description="订单及关联记录将被永久删除，此操作无法撤销。"
+              returnFocusRef={dialogTriggerRef}
+              actions={[
+                { autoFocus: true, key: "cancel", label: "取消" },
+                {
+                  key: "delete",
+                  label: "永久删除",
+                  tone: "danger",
+                  onPress: async () => {
+                    await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+                    setOverlayMessage("已删除测试订单");
+                  }
+                }
+              ]}
+              onOpenChange={(nextOpen, details) => {
+                setDialogOpen(nextOpen);
+                if (details.reason === "escape") setOverlayMessage("Dialog 已关闭：escape");
+                if (details.reason === "action" && details.actionKey === "cancel") {
+                  setOverlayMessage("Dialog 已取消");
+                }
+              }}
+            />
+          </section>
+        </DialogProvider>
 
         <MeuForm
           className="integration-form"

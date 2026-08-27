@@ -1,20 +1,22 @@
 import { useCallback, useState } from "react";
 
-import type { OverlayOpenChangeDetails } from "../overlayTypes";
-
-type ControllableOpenOptions = {
+type ControllableOpenOptions<TDetails> = {
   defaultOpen: boolean;
-  onOpenChange?: ((open: boolean, details: OverlayOpenChangeDetails) => void) | undefined;
+  onOpenChange?: ((open: boolean, details: TDetails) => void) | undefined;
   open?: boolean | undefined;
 };
 
-export function useControllableOpen({ defaultOpen, onOpenChange, open }: ControllableOpenOptions) {
+export function useControllableOpen<TDetails>({
+  defaultOpen,
+  onOpenChange,
+  open
+}: ControllableOpenOptions<TDetails>) {
   const controlled = open !== undefined;
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const resolvedOpen = controlled ? open : uncontrolledOpen;
 
   const requestOpenChange = useCallback(
-    (nextOpen: boolean, details: OverlayOpenChangeDetails) => {
+    (nextOpen: boolean, details: TDetails) => {
       if (resolvedOpen === nextOpen) return;
       if (!controlled) setUncontrolledOpen(nextOpen);
       if (onOpenChange) onOpenChange(nextOpen, details);

@@ -48,6 +48,8 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4B 页面：[Mask（144:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=144-2)、[Popup（145:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=145-2)
 - Batch 4B 组件集：[Meu/Mask（149:47）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=149-47)，6 个 `Opacity × Dismissible` variants；[Meu/Popup（151:724）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=151-724)，8 个精选 `Position × Mask × CloseButton × SafeArea` variants
 - Batch 4B QA：新增 `color/overlay` Light/Dark 语义变量并提供 Web syntax，Mask 与 Popup 未绑定 solid fill 和未命名节点均为 0；Popup 四方向、遮罩、关闭按钮和安全区均有覆盖，关闭目标为 44 × 44 px。代码同时验证引用计数滚动锁、最上层 Escape/Tab、焦点恢复和 Portal SSR 边界
+- Batch 4C Dialog 页面：[Dialog（154:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=154-2)；组件集：[Meu/Dialog（156:1019）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=156-1019)，27 个 `Tone × Actions × State` variants
+- Batch 4C Dialog QA：Light / Dark 预览为 `157:5 / 157:14`，Title、Description 与三项 Action 均为文本属性；未命名节点、重复 variant、未绑定 fill / stroke 和 44 px 触控失败均为 0，108 个圆角全部绑定 Foundation 变量。`actionLayout=auto | horizontal | vertical` 写入组件说明，三操作样例按 auto 规则纵排；Figma 的 `Tone` 是设计场景轴，映射代码 `actions[].tone` 与主操作样式，不是 `Dialog.tone` 顶层 API
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程

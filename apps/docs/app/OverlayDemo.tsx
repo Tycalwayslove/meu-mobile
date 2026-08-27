@@ -1,11 +1,15 @@
 "use client";
 
-import { Button, Mask, Popup, Space } from "@meu/mobile";
+import { Button, Dialog, Mask, Popup, Space, useDialog } from "@meu/mobile";
 import { useRef, useState } from "react";
 
 export function OverlayDemo() {
   const [popupOpen, setPopupOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("等待 Dialog 操作");
+  const dialog = useDialog();
   const popupTriggerRef = useRef<HTMLButtonElement>(null);
+  const dialogTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <div style={{ display: "grid", gap: 20 }}>
@@ -27,13 +31,34 @@ export function OverlayDemo() {
           <span style={{ color: "white", fontSize: 14, fontWeight: 600 }}>Mask 预览</span>
         </Mask>
       </div>
-      <Button
-        ref={popupTriggerRef}
-        style={{ justifySelf: "start" }}
-        onClick={() => setPopupOpen(true)}
-      >
-        打开配送浮层
-      </Button>
+      <Space wrap gap={2}>
+        <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
+          打开配送浮层
+        </Button>
+        <Button
+          ref={dialogTriggerRef}
+          tone="danger"
+          variant="outline"
+          onClick={() => setDialogOpen(true)}
+        >
+          打开删除确认
+        </Button>
+        <Button
+          tone="neutral"
+          variant="outline"
+          onClick={() => {
+            void dialog
+              .confirm({
+                title: "确认提交订单？",
+                description: "确认后订单将进入履约流程。"
+              })
+              .then((confirmed) => setDialogMessage(confirmed ? "已确认提交" : "已取消提交"));
+          }}
+        >
+          命令式确认
+        </Button>
+      </Space>
+      <output aria-live="polite">{dialogMessage}</output>
       <Popup
         aria-label="配送方式"
         open={popupOpen}
@@ -62,6 +87,25 @@ export function OverlayDemo() {
           </Space>
         </div>
       </Popup>
+      <Dialog
+        open={dialogOpen}
+        title="删除订单？"
+        description="订单及关联记录将被永久删除，此操作无法撤销。"
+        returnFocusRef={dialogTriggerRef}
+        actions={[
+          { autoFocus: true, key: "cancel", label: "取消" },
+          {
+            key: "delete",
+            label: "永久删除",
+            tone: "danger",
+            onPress: async () => {
+              await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+              setDialogMessage("已删除演示订单");
+            }
+          }
+        ]}
+        onOpenChange={(nextOpen) => setDialogOpen(nextOpen)}
+      />
     </div>
   );
 }
