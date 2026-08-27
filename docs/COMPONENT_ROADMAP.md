@@ -50,7 +50,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 ## Batch 4：反馈与浮层（进行中）
 
 - Batch 4A：Progress、Skeleton、Empty、Result（已完成）
-- Batch 4B：浮层基础设施、Mask、Popup
+- Batch 4B：浮层基础设施、Mask、Popup（已完成）
 - Batch 4C：Toast、Dialog
 - Batch 4D：Popover、BottomSheet、ActionMenu
 

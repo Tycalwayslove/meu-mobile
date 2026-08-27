@@ -29,9 +29,11 @@ import {
   Empty,
   Image,
   List,
+  Mask,
   NavBar,
   PaginationDots,
   Progress,
+  Popup,
   Radio,
   Result,
   SearchField,
@@ -42,7 +44,7 @@ import {
   Tabs,
   Tag
 } from "@meu/mobile";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 
 const schema = z.object({
@@ -81,6 +83,9 @@ export function ConsumerScenario() {
   const [primarySection, setPrimarySection] = useState("home");
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [overlayMessage, setOverlayMessage] = useState("等待浮层操作");
+  const popupTriggerRef = useRef<HTMLButtonElement>(null);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -338,6 +343,47 @@ export function ConsumerScenario() {
             }
           />
           <output aria-live="polite">{feedbackMessage}</output>
+        </section>
+
+        <section className="integration-overlays" aria-label="浮层基础组件">
+          <div className="integration-mask-preview">
+            <Mask
+              container={null}
+              lockScroll={false}
+              opacity="thin"
+              style={{ position: "absolute", zIndex: 0 }}
+            >
+              <span className="integration-mask-label">Mask 预览</span>
+            </Mask>
+          </div>
+          <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
+            打开配送浮层
+          </Button>
+          <output aria-live="polite">{overlayMessage}</output>
+          <Popup
+            aria-label="配送方式"
+            open={popupOpen}
+            closeOnMaskClick
+            showCloseButton
+            returnFocusRef={popupTriggerRef}
+            onOpenChange={(nextOpen, details) => {
+              setPopupOpen(nextOpen);
+              if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
+            }}
+          >
+            <div className="integration-popup-content">
+              <h2>配送方式</h2>
+              <p>选择适合当前订单的配送方式。</p>
+              <Button
+                onClick={() => {
+                  setPopupOpen(false);
+                  setOverlayMessage("已确认标准配送");
+                }}
+              >
+                确认标准配送
+              </Button>
+            </div>
+          </Popup>
         </section>
 
         <MeuForm

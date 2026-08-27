@@ -38,6 +38,10 @@ export const meuTokens = {
         "$type": "color",
         "$value": "#FFFFFF"
       },
+      "overlay": {
+        "$type": "color",
+        "$value": "#000000"
+      },
       "success": {
         "$type": "color",
         "$value": "#287A52"
@@ -87,6 +91,10 @@ export const meuTokens = {
       "accent-contrast": {
         "$type": "color",
         "$value": "#161A17"
+      },
+      "overlay": {
+        "$type": "color",
+        "$value": "#000000"
       }
     }
   },

@@ -251,6 +251,9 @@ importers:
       '@meu/icons-react':
         specifier: workspace:*
         version: link:../icons-react
+      '@meu/primitives-react':
+        specifier: workspace:*
+        version: link:../primitives-react
       '@meu/tokens':
         specifier: workspace:*
         version: link:../tokens

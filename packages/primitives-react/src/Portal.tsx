@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 
 export type PortalProps = {
   children: ReactNode;
-  container?: HTMLElement | (() => HTMLElement) | null;
+  container?: HTMLElement | (() => HTMLElement) | null | undefined;
 };
 
 const subscribe = () => () => undefined;

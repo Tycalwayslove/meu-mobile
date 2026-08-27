@@ -12,6 +12,7 @@
         "accent": { "$type": "color", "$value": "#176B5B" },
         "accent-pressed": { "$type": "color", "$value": "#115244" },
         "accent-contrast": { "$type": "color", "$value": "#FFFFFF" },
+        "overlay": { "$type": "color", "$value": "#000000" },
         "success": { "$type": "color", "$value": "#287A52" },
         "warning": { "$type": "color", "$value": "#A45C13" },
         "danger": { "$type": "color", "$value": "#B63A36" }
@@ -25,7 +26,8 @@
         "subtle": { "$type": "color", "$value": "#2B322C" },
         "accent": { "$type": "color", "$value": "#62B89D" },
         "accent-pressed": { "$type": "color", "$value": "#8DD0BB" },
-        "accent-contrast": { "$type": "color", "$value": "#161A17" }
+        "accent-contrast": { "$type": "color", "$value": "#161A17" },
+        "overlay": { "$type": "color", "$value": "#000000" }
       }
     },
     "space": {

@@ -97,3 +97,12 @@ export { Empty } from "./Empty";
 export type { EmptyProps } from "./Empty";
 export { Result } from "./Result";
 export type { ResultProps, ResultStatus } from "./Result";
+export { Mask } from "./Mask";
+export type { MaskOpacity, MaskProps } from "./Mask";
+export { Popup } from "./Popup";
+export type { PopupPosition, PopupProps } from "./Popup";
+export type {
+  OverlayContainer,
+  OverlayDismissReason,
+  OverlayOpenChangeDetails
+} from "./overlayTypes";

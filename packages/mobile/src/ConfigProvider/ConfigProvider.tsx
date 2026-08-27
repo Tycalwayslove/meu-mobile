@@ -9,7 +9,7 @@ export type MeuTheme = "light" | "dark" | "system";
 export type MeuConfig = {
   locale: MeuLocale;
   theme: MeuTheme;
-  portalContainer: HTMLElement | (() => HTMLElement) | null;
+  portalContainer: HTMLElement | (() => HTMLElement) | null | undefined;
 };
 
 export type ConfigProviderProps = {
@@ -24,7 +24,7 @@ export type ConfigProviderProps = {
 const defaultConfig: MeuConfig = {
   locale: "zh-CN",
   theme: "system",
-  portalContainer: null
+  portalContainer: undefined
 };
 
 const MeuConfigContext = createContext<MeuConfig>(defaultConfig);
@@ -33,7 +33,7 @@ export function ConfigProvider({
   children,
   className,
   locale = "zh-CN",
-  portalContainer = null,
+  portalContainer,
   style,
   theme = "system"
 }: ConfigProviderProps) {

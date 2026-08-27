@@ -7,6 +7,7 @@ import { FormDemo } from "./FormDemo";
 import { FeedbackDemo } from "./FeedbackDemo";
 import { InformationDemo } from "./InformationDemo";
 import { NavigationDemo } from "./NavigationDemo";
+import { OverlayDemo } from "./OverlayDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import styles from "./page.module.css";
 
@@ -61,6 +62,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>加载、空状态与流程结果</h2>
           <FeedbackDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>遮罩与基础浮层</h2>
+          <OverlayDemo />
         </section>
       </main>
     </ConfigProvider>

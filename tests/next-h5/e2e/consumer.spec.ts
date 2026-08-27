@@ -178,6 +178,40 @@ test("renders progress, skeleton, empty and result feedback contracts", async ({
   await expect(section.getByText("已打开订单详情")).toBeVisible();
 });
 
+test("locks scroll, contains focus and restores the Popup trigger", async ({ page }) => {
+  const section = page.getByRole("region", { name: "浮层基础组件" });
+  const previewMask = section.locator('[data-meu-component="mask"]');
+  await expect(previewMask).toHaveAttribute("aria-hidden", "true");
+  await expect(previewMask).toHaveCSS("position", "absolute");
+
+  const trigger = section.getByRole("button", { name: "打开配送浮层" });
+  await trigger.click();
+  const popup = page.getByRole("dialog", { name: "配送方式" });
+  await expect(popup).toBeVisible();
+  await expect(popup).toHaveAttribute("aria-modal", "true");
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+
+  const close = popup.getByRole("button", { name: "关闭" });
+  const confirm = popup.getByRole("button", { name: "确认标准配送" });
+  await expect(close).toBeFocused();
+  await confirm.focus();
+  await page.keyboard.press("Tab");
+  await expect(close).toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(page.getByText("浮层已关闭：escape")).toBeVisible();
+  await expect(trigger).toBeFocused();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
+
+  await trigger.click();
+  const popupMask = page.locator('[data-meu-overlay-layer="popup"] [data-meu-component="mask"]');
+  await popupMask
+    .locator(":scope > button")
+    .first()
+    .click({ position: { x: 8, y: 8 } });
+  await expect(page.getByText("浮层已关闭：mask")).toBeVisible();
+});
+
 test("binds checkbox arrays, radio keyboard selection and switch booleans", async ({ page }) => {
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

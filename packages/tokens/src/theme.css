@@ -58,6 +58,7 @@
   --meu-color-accent: #176B5B;
   --meu-color-accent-pressed: #115244;
   --meu-color-accent-contrast: #FFFFFF;
+  --meu-color-overlay: #000000;
   --meu-color-success: #287A52;
   --meu-color-warning: #A45C13;
   --meu-color-danger: #B63A36;
@@ -73,6 +74,7 @@
   --meu-color-accent: #62B89D;
   --meu-color-accent-pressed: #8DD0BB;
   --meu-color-accent-contrast: #161A17;
+  --meu-color-overlay: #000000;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -86,5 +88,6 @@
     --meu-color-accent: #62B89D;
     --meu-color-accent-pressed: #8DD0BB;
     --meu-color-accent-contrast: #161A17;
+    --meu-color-overlay: #000000;
   }
 }

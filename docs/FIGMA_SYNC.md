@@ -45,6 +45,9 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 - Batch 4A 页面：[Progress（128:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=128-2)、[Skeleton（130:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=130-2)、[Empty（131:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=131-2)、[Result（132:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=132-2)
 - Batch 4A 组件集：[Meu/Progress（129:170）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=129-170)，24 个 `Size × Tone × State` variants；[Meu/Skeleton（130:23）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=130-23)，6 个 `Variant × Animated` variants；[Meu/Empty（131:25）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=131-25)，2 个 Illustration variants；[Meu/Result（133:112）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=133-112)，10 个 `Status × Actions` variants
 - Batch 4A QA：四个组件的属性、变体矩阵、Light/Dark Foundations 绑定和页面说明均通过；组件树硬编码可见 fill 与未绑定 stroke 均为 0。Progress 明确 determinate/indeterminate 语义，Skeleton 保持装饰性并由调用方设置 `aria-busy`，Empty 强制原因与下一步操作，Result 不内置路由、重试或自动跳转
+- Batch 4B 页面：[Mask（144:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=144-2)、[Popup（145:2）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=145-2)
+- Batch 4B 组件集：[Meu/Mask（149:47）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=149-47)，6 个 `Opacity × Dismissible` variants；[Meu/Popup（151:724）](https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v?node-id=151-724)，8 个精选 `Position × Mask × CloseButton × SafeArea` variants
+- Batch 4B QA：新增 `color/overlay` Light/Dark 语义变量并提供 Web syntax，Mask 与 Popup 未绑定 solid fill 和未命名节点均为 0；Popup 四方向、遮罩、关闭按钮和安全区均有覆盖，关闭目标为 44 × 44 px。代码同时验证引用计数滚动锁、最上层 Escape/Tab、焦点恢复和 Portal SSR 边界
 - 代码事实源：`packages/tokens`、`packages/mobile`、`packages/form-react`、`packages/icons-*`
 
 ## 后续同步流程
