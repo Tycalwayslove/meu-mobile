@@ -198,6 +198,47 @@ test("binds passcode cells to one real form input and a non-modal keyboard", asy
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
 });
 
+test("binds image upload tasks to serializable form values and native input focus", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "图片上传表单集成" });
+  const uploader = section.locator('[data-meu-component="image-uploader"]');
+  const input = section.getByLabel(/商品图片/);
+  const existingPreview = section.getByRole("button", { name: "已有商品主图，预览" });
+  await expect(existingPreview).toBeVisible();
+  await expect(input).toHaveAttribute("type", "file");
+  await expect(input).toHaveAttribute("accept", "image/*");
+
+  const addButton = section.getByRole("button", { name: "添加图片" });
+  const addBox = await addButton.boundingBox();
+  expect(addBox).not.toBeNull();
+  expect(addBox ? addBox.width : 0).toBeGreaterThanOrEqual(44);
+  expect(addBox ? addBox.height : 0).toBeGreaterThanOrEqual(44);
+
+  await section.getByRole("button", { name: "删除 已有商品主图" }).click();
+  await expect(section.getByText(/图片已删除：已有商品主图；当前 0 张/)).toBeVisible();
+  await page.getByLabel("店铺名称").fill("喵呜体验店");
+  await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
+  await page.getByRole("button", { name: "保存店铺" }).click();
+  await expect(page.getByText("请至少上传一张商品图片")).toBeVisible();
+  await expect(input).toBeFocused();
+  await expect(input).toHaveAttribute("aria-invalid", "true");
+
+  await input.setInputFiles({
+    name: "uploaded-product.jpg",
+    mimeType: "image/jpeg",
+    buffer: Buffer.from("local image fixture")
+  });
+  await expect(uploader.locator('[data-state="uploading"]')).toBeVisible();
+  await expect(section.getByText("35%")).toBeVisible();
+  await expect(section.getByRole("button", { name: "uploaded-product.jpg，预览" })).toBeVisible();
+  await expect(section.getByText(/图片上传完成：uploaded-product.jpg；当前 1 张/)).toBeVisible();
+  await expect(page.getByText("请至少上传一张商品图片")).toHaveCount(0);
+
+  await page.getByRole("button", { name: "保存店铺" }).click();
+  await expect(page.getByText("已保存图片：1")).toBeVisible();
+});
+
 test("runs the controlled carousel with native alternatives and focus isolation", async ({
   page
 }) => {

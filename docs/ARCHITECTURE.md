@@ -64,6 +64,9 @@ icons-core ─> icons-react            │
 - ImageViewer 是模态全屏媒体查看器，统一单图与画廊的 images、index、loop 和缩放契约；Web 端组合 Portal、
   thick Mask、滚动锁、焦点圈定、Carousel 与 Image，缩放后暂停画廊拖拽。它不绑定表单，未来 uni-app 复用
   媒体、索引、倍率与变更原因，替换 DOM、Portal 和手势适配层。
+- ImageUploader 把可序列化成功项与 Web 上传任务分离：调用方注入 transport，组件只管理选择、校验、进度、
+  abort、失败重试和 object URL 生命周期，并组合 Image 与 ImageViewer。`MeuFormImageUploader` 负责数组值、
+  dirty / touched、错误关联与失败聚焦；未来 uni-app 复用成功项、任务状态和拒绝原因，替换文件与 DOM 适配层。
 
 ## Next.js 边界
 

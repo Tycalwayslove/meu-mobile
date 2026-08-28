@@ -13,6 +13,8 @@ export type {
 } from "./MeuFormNumberKeyboard";
 export { MeuFormPasscodeInput } from "./MeuFormPasscodeInput";
 export type { MeuFormPasscodeInputProps } from "./MeuFormPasscodeInput";
+export { MeuFormImageUploader } from "./MeuFormImageUploader";
+export type { MeuFormImageUploaderProps } from "./MeuFormImageUploader";
 export { MeuFormTextArea } from "./MeuFormTextArea";
 export type { MeuFormTextAreaProps } from "./MeuFormTextArea";
 export { MeuFormSearchField } from "./MeuFormSearchField";

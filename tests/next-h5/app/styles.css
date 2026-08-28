@@ -85,6 +85,7 @@ textarea {
 
 .integration-number-keyboard,
 .integration-passcode-input,
+.integration-image-uploader,
 .integration-image-viewer {
   display: grid;
   gap: 8px;
@@ -96,6 +97,7 @@ textarea {
 
 .integration-number-keyboard output,
 .integration-passcode-input output,
+.integration-image-uploader output,
 .integration-image-viewer output {
   min-height: 16px;
   color: var(--meu-color-muted);

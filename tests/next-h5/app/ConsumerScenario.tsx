@@ -8,6 +8,7 @@ import {
   MeuFormCascadePicker,
   MeuFormDatePicker,
   MeuFormDateRangePicker,
+  MeuFormImageUploader,
   MeuFormNumberKeyboard,
   MeuFormPasscodeInput,
   MeuFormPicker,
@@ -89,6 +90,9 @@ const schema = z.object({
   verificationCode: z
     .string()
     .refine((value) => value === "" || /^\d{4}$/.test(value), "请输入 4 位验证码"),
+  productImages: z
+    .array(z.object({ alt: z.string(), url: z.string() }))
+    .min(1, "请至少上传一张商品图片"),
   region: z.array(z.string()).length(3, "请选择完整配送地区"),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
   appointment: z.array(z.union([z.string(), z.number(), z.null()])).length(2, "请选择完整预约时间"),
@@ -254,6 +258,8 @@ export function ConsumerScenario() {
   const [numberKeyboardResult, setNumberKeyboardResult] = useState("等待数字键盘输入");
   const [numberKeyboardClose, setNumberKeyboardClose] = useState("键盘尚未关闭");
   const [passcodeResult, setPasscodeResult] = useState("等待验证码输入");
+  const [imageUploadResult, setImageUploadResult] = useState("图片上传尚未操作");
+  const [savedImages, setSavedImages] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -280,6 +286,7 @@ export function ConsumerScenario() {
       fulfillment: ["standard"],
       notifications: true,
       paymentAmount: "",
+      productImages: [{ alt: "已有商品主图", url: "/demo-media.svg" }],
       quantity: 1,
       rating: 3,
       region: ["zhejiang", "hangzhou", "xihu"],
@@ -962,6 +969,7 @@ export function ConsumerScenario() {
             setSavedAdvanced(
               `quantity:${values.quantity} / volume:${values.volume} / rating:${values.rating} / picker:${values.appointment.join(",")} / cascade:${values.region.join(",")} / date:${formatLocalDate(values.deliveryDate)} / range:${values.deliveryWindow.map(formatLocalDate).join("–")} / time:${formatLocalTime(values.deliveryTime)} / calendar:${values.campaignDates.map(formatLocalDate).join(",")} / selector:${values.fulfillment.join(",")} / segmented:${values.viewMode}`
             );
+            setSavedImages(`已保存图片：${values.productImages.length}`);
           }}
         >
           <MeuFormTextInput<FormValues>
@@ -1040,6 +1048,33 @@ export function ConsumerScenario() {
               onComplete={(value) => setPasscodeResult(`验证码完成：${value}`)}
             />
             <output aria-live="polite">{passcodeResult}</output>
+          </section>
+          <section className="integration-image-uploader" aria-label="图片上传表单集成">
+            <MeuFormImageUploader<FormValues>
+              name="productImages"
+              label="商品图片"
+              description="成功元数据归表单持有；File、进度、失败与取消只属于本地 Web 上传任务。"
+              maxCount={2}
+              required
+              upload={async (file, context) => {
+                context.onProgress(35);
+                await new Promise<void>((resolve) => window.setTimeout(resolve, 180));
+                context.onProgress(82);
+                await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+                return {
+                  alt: file.name,
+                  key: `${file.name}-${file.lastModified}`,
+                  name: file.name,
+                  url: "/demo-media.svg"
+                };
+              }}
+              onChange={(items, details) => {
+                setImageUploadResult(
+                  `${details.reason === "upload" ? "图片上传完成" : "图片已删除"}：${details.item.alt}；当前 ${items.length} 张`
+                );
+              }}
+            />
+            <output aria-live="polite">{imageUploadResult}</output>
           </section>
           <MeuFormPicker<FormValues>
             name="appointment"
@@ -1150,6 +1185,9 @@ export function ConsumerScenario() {
         </output>
         <output className="integration-result" aria-live="polite">
           {savedAdvanced ? `已保存录入：${savedAdvanced}` : "等待录入提交"}
+        </output>
+        <output className="integration-result" aria-live="polite">
+          {savedImages || "等待图片提交"}
         </output>
       </section>
     </ConfigProvider>

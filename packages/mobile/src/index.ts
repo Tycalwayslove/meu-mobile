@@ -72,6 +72,20 @@ export type {
   ImageViewerScaleChangeDetails,
   ImageViewerScaleChangeReason
 } from "./ImageViewer";
+export { ImageUploader } from "./ImageUploader";
+export type {
+  ImageUploaderChangeDetails,
+  ImageUploaderChangeReason,
+  ImageUploaderItem,
+  ImageUploaderProps,
+  ImageUploaderRef,
+  ImageUploaderRejectDetails,
+  ImageUploaderRejectReason,
+  ImageUploaderStatus,
+  ImageUploaderTask,
+  ImageUploaderTaskStatus,
+  ImageUploaderUploadContext
+} from "./ImageUploader";
 export { Avatar } from "./Avatar";
 export type { AvatarFit, AvatarProps, AvatarShape, AvatarSize } from "./Avatar";
 export { Ellipsis } from "./Ellipsis";

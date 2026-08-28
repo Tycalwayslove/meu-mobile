@@ -14,6 +14,7 @@ import { FloatingPanelDemo } from "./FloatingPanelDemo";
 import { InformationDemo } from "./InformationDemo";
 import { InfiniteListDemo } from "./InfiniteListDemo";
 import { ImageViewerDemo } from "./ImageViewerDemo";
+import { ImageUploaderDemo } from "./ImageUploaderDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { NumberKeyboardDemo } from "./NumberKeyboardDemo";
 import { OverlayDemo } from "./OverlayDemo";
@@ -97,6 +98,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>全屏图片预览、缩放与画廊导航</h2>
           <ImageViewerDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>图片上传任务、失败重试与完整表单绑定</h2>
+          <ImageUploaderDemo />
         </section>
         <section className={styles.formSection}>
           <h2>列表滑动操作与常驻等价入口</h2>

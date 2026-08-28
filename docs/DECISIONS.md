@@ -213,3 +213,15 @@ React Web 端使用 Portal、thick Mask、页面滚动锁、模态焦点圈定�
 双击与双指缩放，默认 maxZoom=3、doubleTapZoom=2；倍率大于 1 时关闭画廊拖拽，把手势交给当前图片平移。
 Mask 和图片点击不关闭，避免与双击缩放冲突。组件只展示媒体，不存在表单 adapter；未来 uni-app 复用媒体、
 索引、倍率与原因，替换 DOM、Portal 和触摸实现。
+
+## ADR-024：ImageUploader 分离可序列化成功值与平台上传任务
+
+ImageUploader 的 `value / defaultValue / onChange` 只保存带 url 和 alt 的成功图片项，不把 Web `File`、object URL、
+AbortSignal、上传进度或异常对象写入业务值。调用方通过 `upload(file, { signal, onProgress, taskId })` 注入 fetch、
+XHR、预签名 URL 或业务 SDK；组件不持有 HTTP client，也不猜测接口、鉴权和响应结构。
+
+真实 file input 负责选择、capture、焦点与可访问名称。组件在调用 transport 前统一执行 accept、maxSize、
+beforeUpload 与 maxCount，失败原因分别上报；临时任务使用 pending / uploading / error 状态，删除或卸载时 abort
+并回收 object URL，失败任务保留显式 retry / remove。成功图片复用 Image，预览复用 ImageViewer，删除支持异步
+veto。`MeuFormImageUploader` 把成功数组绑定 React Hook Form，负责 dirty / touched、schema 错误关联和校验失败
+聚焦；未来 uni-app 复用成功项、任务状态、拒绝原因和回调语义，替换文件选择、上传取消与 DOM 实现。
