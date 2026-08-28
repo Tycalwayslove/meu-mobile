@@ -1,0 +1,130 @@
+---
+name: DateRangePicker
+slug: date-range-picker
+package: "@meu/mobile"
+exports: [DateRangePicker, dateRangeIsSelectable, normalizeDateRange, sameDateRange]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "270:676"
+storyIds: [data-entry-daterangepicker--default, data-entry-daterangepicker--open-with-presets]
+source: packages/mobile/src/DateRangePicker
+---
+
+# DateRangePicker
+
+## 当前能力
+
+Popup + Calendar(range) 的确认式日期范围组件，支持 DateAdapter、受控/非受控 open 与 value、草稿回滚、同日二次选择、排序、快捷范围、边界/禁用端点、月份控制、自定义日/摘要、Portal、Mask、焦点、滚动锁和安全区。
+
+## 何时使用
+
+用于配送窗口、入住/离店、报表区间等必须先完成两个端点再确认的移动端流程。
+
+## 何时不要使用
+
+单日用 DatePicker/Calendar；无需确认的内联范围用 Calendar range；时间范围、跨时区 instant 和中间每一天都必须可用的业务规则应由专用业务层验证。
+
+## 结构与状态
+
+Popup dialog → header(cancel/title/confirm) → live summary → optional preset list → Calendar。内部维护 committed range、draft range、draftComplete、calendarVersion、open 和 controlled snapshot。
+
+## 基础用法
+
+```tsx
+<DateRangePicker
+  open={open}
+  title="配送日期"
+  value={range}
+  presets={presets}
+  onConfirm={setRange}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+open/defaultOpen 控制显示，value/defaultValue 控制已提交值。打开从权威值重建 draft；取消、Mask、Escape 丢弃，确认才更新非受控 committed。受控值改变时同步草稿；切到非受控继承最新受控范围，不回退到首次值。
+
+## 表单集成
+
+使用 MeuFormDateRangePicker 绑定 readonly [TDate,TDate] | null；只有 onConfirm 写字段，取消不触发 dirty。错误焦点返回 PickerTrigger。组件不创建输入或序列化格式。
+
+## Props
+
+adapter 默认 Native；min/max/disabledDate 约束端点；presets key 必须稳定唯一且只替换 draft；month/defaultMonth/onMonthChange 转发 Calendar；renderDay/renderLabel/renderRangeLabel 只定制展示。closeOnEscape/Mask、lockScroll、restoreFocus、safeArea 默认开启。
+
+## Events
+
+onSelect 区分 calendar（含 date/complete）与 preset（含 presetKey）；onConfirm 只返回完整且可选的排序范围。onCancel 原因为 cancel/mask/escape；onOpenChange 还包含 confirm/trigger。
+
+## Ref 与命令式方法
+
+ref 指向内容根 HTMLDivElement；没有命令式选值。使用受控 open 控制显示，returnFocusRef 指向触发器，container 控制 Portal 目标。
+
+## 键盘操作
+
+Tab 在 modal 内循环，首次聚焦安全的取消按钮；Calendar 支持完整 grid 键盘；原生按钮支持 Enter/Space；Escape 按取消路径结算。
+
+## 触摸与手势
+
+日期与快捷按钮均至少 44px，不引入底部拖拽。内容超高时使用 iOS momentum 垂直滚动；Mask 点击默认取消。
+
+## 无障碍
+
+dialog 必须由 title、aria-label 或 aria-labelledby 命名；Calendar 和 presets 各有独立名称，摘要为 polite live region，未完整或非法范围禁用确定。
+
+## 动效
+
+复用 Popup/Mask 的进入退出与 reduced-motion；Calendar 本身无破坏焦点的月份位移动画。
+
+## 主题与定制
+
+使用 surface/border/ink/muted/accent/Button tokens；长摘要可换行并提供旧内核 word-break 回退。forced-colors 与 RTL 主要由 Popup、Button、Calendar 保证。
+
+## SSR 与 Next.js
+
+声明 use client，open=true 能 SSR 输出完整 dialog 和 Calendar；useId 保证 title 关系稳定。Native adapter 的 now/defaultMonth 在跨午夜 SSR 时可能不同，关键首屏应显式提供 defaultMonth/value。
+
+## RTL 与国际化
+
+内建取消、确定、摘要、Calendar 和 presets 的 zh-CN/en-US 文案；header 使用逻辑布局，Calendar 负责 RTL 箭头、键盘和范围端点。日期格式由 adapter.format 及 locale 决定。
+
+## 浏览器与 WebView
+
+兼容 Chrome/WebView 70+、iOS 13+ 静态语法；长内容采用 vh 和 momentum scroll，不要求 dvh。Portal、focus trap 与滚动锁的真机组合留待最终矩阵。
+
+## 边界情况与已知限制
+
+首次选择 [start,start] 仍不完整，同日需要第二次点击。disabledDate 只校验端点，允许跨过中间禁用日；若业务禁止，必须在提交前另行验证。min>max、非法 adapter 值或不可用 preset 会禁用确认/按钮。
+
+## 性能预算
+
+每次渲染为 O(42 + presets)，每个 preset 只规范化和验证两个端点。disabledDate/render 回调保持纯且稳定；大量快捷范围应转业务列表而非横向堆叠。
+
+## 测试证据
+
+- Unit：范围排序、falsy adapter、首次/同日二次选择、取消回滚、preset、escape、受控显示、最新受控值迁移。
+- SSR：DateRangePicker.ssr.test.tsx 覆盖 dialog、摘要、Calendar grid。
+- Figma：Meu/DateRangePicker 270:676；Empty/Start/Complete/Disabled、44px targets、Light/Dark QA。
+- Axe、Chromium/WebKit、Chromatic、真机焦点/滚动：最终统一门禁。
+
+## V2 优化记录
+
+### 待优化
+
+补跨月超长内容、业务中间禁用日示例、移动 WebKit 焦点/滚动和读屏证据。
+
+### 已完成
+
+固化确认式范围、同日二次选择、preset、动态受控值迁移、长文本、RTL/i18n、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                               | 迁移说明    |
+| ---------- | ------ | --------- | ---------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | hardening | 范围状态、生命周期、兼容与文档加固 | 无 API 破坏 |

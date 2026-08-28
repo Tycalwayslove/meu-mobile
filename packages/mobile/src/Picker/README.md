@@ -23,10 +23,11 @@ const [value, setValue] = useState<ReadonlyArray<string | null>>([]);
 ```
 
 - 每列是单选 `listbox`，焦点保留在列上，并通过 `aria-activedescendant` 暴露当前项。
-- 支持方向键、Home / End、字符查找、点按，以及原生触摸/触控板滚动与 scroll snap；禁用项不可成为当前值。
+- 支持方向键、Home / End、PageUp / PageDown、字符查找、点按，以及原生触摸/触控板滚动与 scroll snap；禁用项不可成为当前值。
 - 复合 React 标签必须提供稳定的 `textValue`。多列通过 `columnLabels` 提供各列名称。
 - 打开时创建 draft。`onSelect` 只报告 draft；确定才提交，取消、遮罩和 Escape 均丢弃 draft。
 - 非法或禁用值回退到该列首个可用项；空列为 `null`，且禁用确认按钮。
 - 默认显示五行，每行 48px，并复用 Popup 的 Portal、遮罩、滚动锁、焦点圈定/恢复和安全区。
+- 空列或全禁用列不进入 Tab 顺序，并会禁用确认；columns 应通过不可变数组更新。
 - `PickerTrigger` 是读取 Field 上下文的原生按钮，会合并 label/description/error 的关联；button 不支持 `aria-required`，因此该属性从 Trigger 类型中排除，必填事实由 Field 的本地化隐藏说明和确认后的校验错误表达。
 - React Hook Form 场景使用 `@meu/form-react` 的 `MeuFormPicker`，表单值只在确定时更新，并通过 hidden successful controls 进入 FormData。

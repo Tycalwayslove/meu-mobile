@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
+import { ConfigProvider } from "../ConfigProvider";
 import { Picker } from "./Picker";
 import { PickerTrigger } from "./PickerTrigger";
 
@@ -75,6 +76,16 @@ describe("Picker", () => {
       columnIndex: 0,
       reason: "keyboard"
     });
+    fireEvent.keyDown(wheel, { key: "PageDown" });
+    expect(onSelect).toHaveBeenLastCalledWith(["locker"], [deliveryColumn[4]], {
+      columnIndex: 0,
+      reason: "keyboard"
+    });
+    fireEvent.keyDown(wheel, { key: "PageUp" });
+    expect(onSelect).toHaveBeenLastCalledWith(["standard"], [deliveryColumn[0]], {
+      columnIndex: 0,
+      reason: "keyboard"
+    });
   });
 
   it("reports pointer and settled scroll selection without selecting disabled rows", async () => {
@@ -92,6 +103,7 @@ describe("Picker", () => {
     fireEvent.click(screen.getByRole("option", { name: "次日达" }));
     expect(onSelect).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("option", { name: "当日达" }));
+    expect(document.activeElement).toBe(screen.getByRole("listbox"));
     expect(onSelect).toHaveBeenLastCalledWith(["same-day"], [deliveryColumn[2]], {
       columnIndex: 0,
       reason: "pointer"
@@ -196,6 +208,9 @@ describe("Picker", () => {
       "true"
     );
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(true);
+    const emptyWheel = screen.getAllByRole("listbox")[1]!;
+    expect(emptyWheel.tabIndex).toBe(-1);
+    expect(emptyWheel.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("renormalizes changing columns without reporting a user selection", () => {
@@ -268,6 +283,21 @@ describe("Picker", () => {
     expect(picker).toBeTruthy();
     const layer = picker && picker.closest('[data-meu-overlay-layer="popup"]');
     expect(layer && layer.hasAttribute("hidden")).toBe(true);
+  });
+
+  it("inherits locale, direction, theme and reduced motion through its body portal", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <Picker open aria-label="Delivery" columns={[deliveryColumn]} />
+      </ConfigProvider>
+    );
+    const layer = document.body.querySelector('[data-meu-overlay-layer="popup"]');
+    if (!(layer instanceof HTMLElement)) throw new Error("Expected Picker popup layer");
+    expect(layer.dir).toBe("rtl");
+    expect(layer.lang).toBe("en-US");
+    expect(layer.getAttribute("data-meu-theme")).toBe("dark");
+    expect(layer.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeTruthy();
   });
 });
 

@@ -62,6 +62,13 @@ export const action = style({
       background: "var(--meu-color-subtle)",
       cursor: "not-allowed"
     }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      borderColor: "ButtonText",
+      color: "ButtonText",
+      forcedColorAdjust: "auto"
+    }
   }
 });
 

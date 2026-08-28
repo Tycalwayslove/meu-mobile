@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
 import { createDateParts, nativeDateAdapter } from "@meu/date-adapter";
+import type { DateAdapter } from "@meu/date-adapter";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
 import { DatePicker } from "./DatePicker";
+import { resolveDatePickerBounds } from "./resolveDatePicker";
 
 function date(parts: Parameters<typeof createDateParts>[0]) {
   return nativeDateAdapter.fromParts(createDateParts(parts))!;
@@ -16,6 +18,19 @@ function expectParts(value: Date, parts: Partial<ReturnType<typeof nativeDateAda
 }
 
 describe("DatePicker", () => {
+  it("preserves valid falsy custom date bounds and nullish adapter results", () => {
+    const add = vi.fn(() => 999);
+    const adapter = {
+      add,
+      fromParts: vi.fn(() => 0),
+      getParts: () => createDateParts({ year: 2026 }),
+      isValid: (value: number) => Number.isFinite(value)
+    } as unknown as DateAdapter<number>;
+
+    expect(resolveDatePickerBounds(adapter, 10, 0, 20)).toEqual({ min: 0, max: 20 });
+    expect(resolveDatePickerBounds(adapter, 10, undefined, undefined)).toEqual({ min: 0, max: 0 });
+    expect(add).not.toHaveBeenCalled();
+  });
   it("renders named date columns and normalizes hidden units", () => {
     const onConfirm = vi.fn();
     render(
@@ -199,6 +214,21 @@ describe("DatePicker", () => {
     expectParts(onConfirm.mock.calls[0]![0] as Date, { day: 29, month: 8, year: 2026 });
     expect(onOpenChange).toHaveBeenLastCalledWith(false, { reason: "confirm" });
     expect(screen.getByRole("dialog", { name: "日期" })).toBeTruthy();
+  });
+
+  it("seeds uncontrolled state from the latest controlled value", () => {
+    const min = date({ year: 2026 });
+    const max = date({ day: 31, month: 12, year: 2026 });
+    const initial = date({ day: 28, month: 8, year: 2026 });
+    const controlled = date({ day: 29, month: 8, year: 2026 });
+    const { rerender } = render(
+      <DatePicker open aria-label="日期" min={min} max={max} value={initial} />
+    );
+    rerender(<DatePicker open aria-label="日期" min={min} max={max} value={controlled} />);
+    expect(screen.getByRole("option", { name: "29日" }).getAttribute("aria-selected")).toBe("true");
+
+    rerender(<DatePicker open aria-label="日期" min={min} max={max} />);
+    expect(screen.getByRole("option", { name: "29日" }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("treats defaultValue as initialization rather than a live input", () => {

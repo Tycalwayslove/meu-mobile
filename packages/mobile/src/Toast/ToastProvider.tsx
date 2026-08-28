@@ -10,6 +10,7 @@ import {
   useState
 } from "react";
 
+import { useMeuConfig } from "../ConfigProvider";
 import { Toast } from "./Toast";
 import type {
   ToastApi,
@@ -28,10 +29,12 @@ type ToastRecord = {
   options: ToastShowOptions;
 };
 
-const exitDuration = 180;
+const exitDuration = 160;
 const ToastContext = createContext<ToastApi | null>(null);
 
+/** Provides a scoped FIFO queue for command-driven Toast feedback. */
 export function ToastProvider({ children }: ToastProviderProps) {
+  const config = useMeuConfig();
   const [records, setRecords] = useState<ToastRecord[]>([]);
   const activeKeysRef = useRef(new Set<number>());
   const idToKeyRef = useRef(new Map<string, number>());
@@ -40,14 +43,20 @@ export function ToastProvider({ children }: ToastProviderProps) {
   const optionsRef = useRef(new Map<number, ToastShowOptions>());
   const removeTimersRef = useRef(new Map<number, number>());
 
-  const removeRecordLater = useCallback((key: number) => {
-    if (removeTimersRef.current.has(key)) return;
-    const timer = window.setTimeout(() => {
-      removeTimersRef.current.delete(key);
-      setRecords((currentRecords) => currentRecords.filter((record) => record.key !== key));
-    }, exitDuration);
-    removeTimersRef.current.set(key, timer);
-  }, []);
+  const removeRecordLater = useCallback(
+    (key: number) => {
+      if (removeTimersRef.current.has(key)) return;
+      const timer = window.setTimeout(
+        () => {
+          removeTimersRef.current.delete(key);
+          setRecords((currentRecords) => currentRecords.filter((record) => record.key !== key));
+        },
+        config.motion === "reduced" ? 0 : exitDuration
+      );
+      removeTimersRef.current.set(key, timer);
+    },
+    [config.motion]
+  );
 
   const closeRecord = useCallback(
     (key: number, details: ToastCloseDetails) => {
@@ -60,12 +69,11 @@ export function ToastProvider({ children }: ToastProviderProps) {
       const id = keyToIdRef.current.get(key);
       keyToIdRef.current.delete(key);
       if (id !== undefined) idToKeyRef.current.delete(id);
-      if (onClose) onClose(details);
-
       setRecords((currentRecords) =>
         currentRecords.map((record) => (record.key === key ? { ...record, open: false } : record))
       );
       removeRecordLater(key);
+      if (onClose) onClose(details);
     },
     [removeRecordLater]
   );
@@ -186,6 +194,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
   );
 }
 
+/** Returns the FIFO Toast command API from the nearest {@link ToastProvider}. */
 export function useToast() {
   const toast = useContext(ToastContext);
   if (!toast) throw new Error("useToast must be used within a ToastProvider");

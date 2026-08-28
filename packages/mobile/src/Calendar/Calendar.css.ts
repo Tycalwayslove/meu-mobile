@@ -10,7 +10,12 @@ export const root = recipe({
     background: "var(--meu-color-surface)",
     border: "1px solid transparent",
     borderRadius: "var(--meu-radius-surface)",
-    fontFamily: "var(--meu-font-ui)"
+    fontFamily: "var(--meu-font-ui)",
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "CanvasText"
+      }
+    }
   },
   variants: {
     invalid: {
@@ -57,6 +62,12 @@ export const navigationButton = style({
   selectors: {
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
     "&:disabled": { color: "var(--meu-color-muted)", cursor: "not-allowed", opacity: 0.45 }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      border: "1px solid ButtonText"
+    }
   }
 });
 
@@ -112,9 +123,42 @@ export const dayCell = recipe({
         borderBottomLeftRadius: "var(--meu-radius-round)"
       },
       false: {}
+    },
+    rtl: {
+      true: {},
+      false: {}
     }
   },
-  defaultVariants: { inRange: false, rangeEnd: false, rangeStart: false }
+  compoundVariants: [
+    {
+      variants: { rangeStart: true, rtl: true },
+      style: {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        borderTopRightRadius: "var(--meu-radius-round)",
+        borderBottomRightRadius: "var(--meu-radius-round)"
+      }
+    },
+    {
+      variants: { rangeEnd: true, rtl: true },
+      style: {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+        borderTopLeftRadius: "var(--meu-radius-round)",
+        borderBottomLeftRadius: "var(--meu-radius-round)"
+      }
+    },
+    {
+      variants: { rangeEnd: true, rangeStart: true, rtl: true },
+      style: {
+        borderTopLeftRadius: "var(--meu-radius-round)",
+        borderBottomLeftRadius: "var(--meu-radius-round)",
+        borderTopRightRadius: "var(--meu-radius-round)",
+        borderBottomRightRadius: "var(--meu-radius-round)"
+      }
+    }
+  ],
+  defaultVariants: { inRange: false, rangeEnd: false, rangeStart: false, rtl: false }
 });
 
 export const emptyDay = style({ width: "100%", minHeight: 48 });
@@ -151,7 +195,10 @@ export const dayButton = recipe({
       "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
       "&:disabled": { cursor: "not-allowed" }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { border: "1px solid ButtonText" }
+    }
   },
   variants: {
     disabled: {
@@ -165,12 +212,21 @@ export const dayButton = recipe({
     selected: {
       true: {
         color: "var(--meu-color-accent-contrast)",
-        background: "var(--meu-color-accent)"
+        background: "var(--meu-color-accent)",
+        "@media": {
+          "(forced-colors: active)": {
+            color: "HighlightText",
+            background: "Highlight"
+          }
+        }
       },
       false: {}
     },
     today: {
-      true: { boxShadow: "inset 0 0 0 1px var(--meu-color-accent)" },
+      true: {
+        boxShadow: "inset 0 0 0 1px var(--meu-color-accent)",
+        "@media": { "(forced-colors: active)": { boxShadow: "inset 0 0 0 2px ButtonText" } }
+      },
       false: {}
     }
   },

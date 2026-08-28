@@ -1,5 +1,7 @@
 # IndexList
 
+完整 V2 契约、边界与验证证据见 [`IndexList.docs.mdx`](./IndexList.docs.mdx)。
+
 用于按稳定索引分组展示长列表，并通过右侧索引快速定位内容。组件只管理自己的有界滚动视口，不监听或
 接管页面滚动；调用方应通过 `style.height` 或外层布局提供明确高度。
 

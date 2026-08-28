@@ -4,6 +4,7 @@ import { useFieldContext } from "../Field/FieldContext";
 import { indicator, placeholderText, trigger, valueText } from "./PickerTrigger.css";
 import type { PickerTriggerProps } from "./types";
 
+/** Field-aware native button for opening Picker-family dialogs. @public */
 export function PickerTrigger({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,

@@ -1,0 +1,140 @@
+---
+name: CascadePicker
+slug: cascade-picker
+package: "@meu/mobile"
+exports: [CascadePicker]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "212:100"
+storyIds: [data-entry-cascadepicker--region-path, data-entry-cascadepicker--explicit-empty-child]
+source: packages/mobile/src/CascadePicker
+---
+
+# CascadePicker
+
+## 当前能力
+
+将不可变树 options 解析为一至多列 Picker，支持受控/非受控确认式路径、父级换支、disabled、显式空子级、动态/异步 options 更新，以及 Picker 的滚轮、Portal、焦点、主题和键盘能力。
+
+## 何时使用
+
+适合省市区、商品固定分类和组织路径等逐级依赖、每一级选项有限且无需搜索的单路径选择。
+
+## 何时不要使用
+
+同级独立多列使用 Picker；需要搜索、跨层级浏览、多选、懒加载状态或数百节点时使用 TreeSelect。组件不负责远程请求和缓存。
+
+## 结构与状态
+
+纯 `resolveCascadePath` 从根开始逐级生成 columns/options/values，渲染完全复用 Picker。`children: undefined` 是叶子；`children: []` 保留一个显式无有效值的末列。
+
+## 基础用法
+
+```tsx
+<CascadePicker
+  open={open}
+  title="配送地区"
+  options={regions}
+  value={value}
+  columnLabels={["省份", "城市", "区县"]}
+  onConfirm={setValue}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+value/open 可分别受控，defaultValue/defaultOpen 提供非受控初值。打开时从已提交路径建立 draft；options 或外部 value 更新时静默重建合法路径，受控调用方拒绝更新则保持外部已提交值。
+
+## 表单集成
+
+使用 `MeuFormCascadePicker`。adapter 只在确认时写入完整路径，取消不产生 dirty；PickerTrigger 承担 Field 错误关联、touched 后展示和首次错误焦点。
+
+## Props
+
+`CascadePickerProps<TValue>` 继承 Picker 的弹层、文案、列名和显示 Props，以 options 替代 columns。renderOption 接收当前级节点；兄弟节点 value 必须唯一，复杂 label 需 textValue。
+
+## Events
+
+- `onSelect(values, options, details)`：报告规范化 draft 和发生变化的 columnIndex/reason。
+- `onConfirm(values, options)`：只报告完整有效路径。
+- `onCancel/onOpenChange`：与 Picker 相同，取消原因包含 cancel、mask、escape。
+
+## Ref 与命令式方法
+
+ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路或关闭方法；远程数据由业务层写回 options。
+
+## 键盘操作
+
+完全继承 Picker：方向键、Home/End、PageUp/PageDown、type-ahead、Tab 和 Escape。父列选择后，后续列立即切换到新分支的首个 enabled 路径。
+
+## 触摸与手势
+
+每级是 48px 原生滚动 wheel；父列 settle 后重建后缀列。手势可中断，禁用项和空列不会产生选择事件。
+
+## 无障碍
+
+每级为具名 listbox；通过 columnLabels 描述省/市/区等业务含义。完整面板为具名 dialog；动态换支不会伪造用户事件，读屏从新的 active descendant 获取路径。
+
+## 动效
+
+只复用 Picker/Popup 的进入退出和指示器过渡；列换支同步更新，不做横向飞入。reduced motion 由 ConfigProvider 传播。
+
+## 主题与定制
+
+视觉完全复用 Picker Token、Light/Dark、forced-colors 与安全区；不建立单独视觉分叉。renderOption 只能定制非交互内容。
+
+## SSR 与 Next.js
+
+服务端可确定性输出完整规范化路径；纯解析器不访问 window/document。Next 首屏 options/value 必须与客户端一致，异步子级应先以 `children: []` 表达 pending 空列，再不可变写回数据。
+
+## RTL 与国际化
+
+继承 ConfigProvider 的 dir/lang 与 zh-CN/en-US action 回退。路径数据顺序始终由根到叶，不因 RTL 颠倒；列视觉按 DOM 顺序由浏览器方向排布。
+
+## 浏览器与 WebView
+
+运行边界与 Picker 相同。纯树解析只依赖 ES2015 Set 和数组操作；Chrome 70/iOS 13 目标构建通过静态兼容检查。
+
+## 边界情况与已知限制
+
+- 选中父级后旧后缀全部丢弃，新分支逐级采用首个 enabled 节点。
+- `children: []` 会产生空列并禁用确认；不要伪造“加载中” option。
+- 循环对象引用会被截断；业务仍应提供无环树和稳定 sibling value。
+- 视觉建议不超过五级；深树在窄屏会使每列过窄。
+
+## 性能预算
+
+解析只遍历当前选中路径和每级候选；渲染成本等于当前路径各列 option 总数。频繁远程写回时应复用未变化分支引用。
+
+## 测试证据
+
+- Unit: 路径归一、换支丢弃后缀、叶子缩短、取消回滚、受控确认、显式空子级与动态加载
+- Story interaction: 待补
+- Axe: 待 CI
+- SSR/hydration: `CascadePicker.ssr.test.tsx`
+- RTL/Reduced motion: 继承 Picker 单元与 Story 证据
+- Mobile Chromium/WebKit E2E: next-h5 已覆盖换支、确认和回滚
+- Chromatic Light/Dark: Figma 已验收，统一发布批次再运行
+- Real device: 待补多列惯性滚动和读屏路径
+
+## V2 优化记录
+
+### 待优化
+
+补五级窄屏、异步快速换支、axe、hydration 和真机滚轮组合验证。
+
+### 已完成
+
+冻结 leaf/explicit-empty 语义、动态 options 静默归一、循环保护、确认式提交、Picker 商用兼容继承和 SSR 留存证据。
+
+## 变更记录
+
+| 日期       | 版本   | 类型 | 内容                               | 迁移说明 |
+| ---------- | ------ | ---- | ---------------------------------- | -------- |
+| 2026-08-29 | 未发布 | V2   | 动态路径、兼容、SSR 与永久文档加固 | API 兼容 |

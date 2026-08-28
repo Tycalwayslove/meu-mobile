@@ -9,13 +9,21 @@ export type TreeSelectSelectionMode = "any" | "leaf";
 export type TreeSelectInteractionReason = "keyboard" | "pointer";
 export type TreeSelectOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
+/** One immutable node in a TreeSelect data source. Values must be globally unique. */
 export type TreeSelectOption<TValue extends TreeSelectValue = TreeSelectValue> = {
+  /** Loaded children. Omit while an async branch has not loaded. */
   children?: ReadonlyArray<TreeSelectOption<TValue>>;
+  /** Secondary visible content. */
   description?: ReactNode;
+  /** Prevents expansion and selection while retaining navigation semantics. */
   disabled?: boolean;
+  /** Set to `false` for an async expandable branch whose children are not loaded yet. */
   isLeaf?: boolean;
+  /** Visible node content. Rich content should also provide `textValue`. */
   label: ReactNode;
+  /** Prevents selection while still allowing an enabled branch to expand. */
   selectable?: boolean;
+  /** Search and type-ahead text for non-plain labels. */
   textValue?: string;
   value: TValue;
 };
@@ -77,6 +85,10 @@ type TreeSelectBaseProps<TValue extends TreeSelectValue> = Omit<
     option: TreeSelectOption<TValue>,
     context: TreeSelectLoadContext
   ) => Promise<void>;
+  /** Accessible text exposed while an async branch is loading. */
+  loadingText?: string;
+  /** Accessible text exposed after an async branch load rejects. */
+  loadErrorText?: string;
   lockScroll?: boolean;
   maskOpacity?: MaskOpacity;
   maxCount?: number;
@@ -99,6 +111,7 @@ type TreeSelectBaseProps<TValue extends TreeSelectValue> = Omit<
     details: TreeSelectChangeDetails<TValue>
   ) => void;
   open?: boolean;
+  /** Immutable tree data. Replace affected arrays after async loading or business updates. */
   options: ReadonlyArray<TreeSelectOption<TValue>>;
   overscan?: number;
   readOnly?: boolean;
@@ -122,6 +135,7 @@ type TreeSelectBaseProps<TValue extends TreeSelectValue> = Omit<
   status?: TreeSelectStatus;
   treeAriaLabel?: string;
   treeHeight?: number;
+  /** Controlled committed selection; in-panel selection remains a draft until confirm. */
   value?: ReadonlyArray<TValue>;
   virtual?: boolean;
 };

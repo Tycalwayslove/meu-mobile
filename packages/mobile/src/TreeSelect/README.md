@@ -29,13 +29,14 @@ const triggerRef = useRef<HTMLButtonElement>(null);
 
 - `searchValue/defaultSearchValue/onSearchValueChange` 和 `expandedValues/defaultExpandedValues/onExpandedValuesChange` 都支持受控与非受控模式。
 - 搜索会保留命中节点的祖先路径，但不会改写调用方的展开状态；非文本 `label` 应提供 `textValue`。
-- `isLeaf={false}` 表示节点仍可加载。首次展开会调用 `loadChildren(option, { signal })`，同一 pending 请求不会重复发起；数据仍由调用方写回 `options`。
+- `isLeaf={false}` 表示节点仍可加载。展开会调用 `loadChildren(option, { signal })`；收起、禁用、节点移除和卸载会 abort pending 请求，失败后可收起再展开重试。数据仍由调用方不可变写回 `options`。
 - `virtual` 默认开启，基于扁平可见节点窗口化；每个虚拟节点显式提供 `aria-level/posinset/setsize`。
 
 ## 无障碍与表单
 
-- 使用 WAI-ARIA Tree View 的 `tree/treeitem` 语义。方向键移动与展开，Home/End 跳转，Enter/Space 选择，并支持短时 type-ahead。
+- 使用 WAI-ARIA Tree View 的 `tree/treeitem` 语义。方向键移动与展开，Home/End 跳转，Enter/Space 选择，并支持短时 type-ahead；RTL 时左右键镜像。
 - 单选使用 `aria-selected`，多选使用 `aria-checked`；焦点与选中状态彼此独立。
+- async loading/error 通过 `aria-busy`、`role=status`、旋转/感叹号形状与本地化文案共同表达。
 - Popup 复用统一的遮罩、滚动锁、Escape、焦点恢复和安全区行为；触发器复用 `PickerTrigger`。
 - React Hook Form 使用 `@meu/form-react` 的 `MeuFormTreeSelect`。确认会执行 change + blur，使 dirty、touched 与校验状态同步更新。
 

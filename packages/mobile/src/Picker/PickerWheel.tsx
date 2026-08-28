@@ -50,6 +50,21 @@ function edgeEnabledIndex<TValue extends PickerValue>(
   return -1;
 }
 
+function advanceEnabledIndex<TValue extends PickerValue>(
+  column: PickerColumn<TValue>,
+  fromIndex: number,
+  direction: -1 | 1,
+  steps: number
+) {
+  let index = fromIndex;
+  for (let step = 0; step < steps; step += 1) {
+    const next = nextEnabledIndex(column, index, direction);
+    if (next === index) break;
+    index = next;
+  }
+  return index;
+}
+
 function nearestEnabledIndex<TValue extends PickerValue>(
   column: PickerColumn<TValue>,
   requestedIndex: number
@@ -135,6 +150,16 @@ export function PickerWheel<TValue extends PickerValue>({
     if (wheel) wheel.scrollTop = index * itemHeight;
   };
 
+  const focusWheel = () => {
+    const wheel = wheelRef.current;
+    if (!wheel) return;
+    try {
+      wheel.focus({ preventScroll: true });
+    } catch {
+      wheel.focus();
+    }
+  };
+
   const handleScroll = (event: UIEvent<HTMLUListElement>) => {
     if (suppressScrollRef.current) return;
     const wheel = event.currentTarget;
@@ -158,6 +183,10 @@ export function PickerWheel<TValue extends PickerValue>({
       nextIndex = edgeEnabledIndex(column, 1);
     } else if (event.key === "End") {
       nextIndex = edgeEnabledIndex(column, -1);
+    } else if (event.key === "PageDown") {
+      nextIndex = advanceEnabledIndex(column, activeIndex, 1, 5);
+    } else if (event.key === "PageUp") {
+      nextIndex = advanceEnabledIndex(column, activeIndex, -1, 5);
     } else if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
       typeaheadRef.current += event.key.toLocaleLowerCase();
       window.clearTimeout(typeaheadTimerRef.current);
@@ -187,8 +216,9 @@ export function PickerWheel<TValue extends PickerValue>({
       ref={wheelRef}
       className={columnStyle}
       role="listbox"
-      tabIndex={0}
+      tabIndex={activeIndex < 0 ? -1 : 0}
       aria-activedescendant={activeId}
+      aria-disabled={activeIndex < 0 || undefined}
       aria-label={label}
       aria-orientation="vertical"
       data-column-index={columnIndex}
@@ -213,6 +243,7 @@ export function PickerWheel<TValue extends PickerValue>({
               aria-selected={selected}
               onClick={() => {
                 if (candidate.disabled) return;
+                focusWheel();
                 scrollToIndex(index);
                 commitIndex(index, "pointer");
               }}

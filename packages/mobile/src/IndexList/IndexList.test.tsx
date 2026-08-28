@@ -94,4 +94,50 @@ describe("IndexList", () => {
     expect(screen.getByRole("button", { name: "A" }).getAttribute("aria-current")).toBe("location");
     expect(screen.getByRole("button", { name: "A" }).tabIndex).toBe(0);
   });
+
+  it("slides across the touch index and uses caller-owned accessible labels", () => {
+    const onIndexChange = vi.fn();
+    render(
+      <IndexList
+        sections={sections.map((section) =>
+          section.key === "B" ? { ...section, ariaLabel: "B 分组" } : section
+        )}
+        onIndexChange={onIndexChange}
+      />
+    );
+    const buttons = [
+      screen.getByRole("button", { name: "A" }),
+      screen.getByRole("button", { name: "B 分组" }),
+      screen.getByRole("button", { name: "C" })
+    ];
+    buttons.forEach((button, index) => {
+      vi.spyOn(button, "getBoundingClientRect").mockReturnValue({
+        bottom: (index + 1) * 44,
+        height: 44,
+        left: 0,
+        right: 44,
+        top: index * 44,
+        width: 44,
+        x: 0,
+        y: index * 44,
+        toJSON: () => ({})
+      });
+    });
+    const rail = screen.getByRole("navigation");
+    fireEvent.pointerDown(rail, { button: 0, clientY: 48, isPrimary: true, pointerId: 7 });
+    fireEvent.pointerMove(rail, { clientY: 100, isPrimary: true, pointerId: 7 });
+    fireEvent.pointerUp(rail, { clientY: 100, isPrimary: true, pointerId: 7 });
+
+    expect(onIndexChange).toHaveBeenNthCalledWith(
+      1,
+      "B",
+      expect.objectContaining({ source: "index" })
+    );
+    expect(onIndexChange).toHaveBeenNthCalledWith(
+      2,
+      "C",
+      expect.objectContaining({ source: "index" })
+    );
+    expect(screen.getByRole("button", { name: "C" }).getAttribute("aria-current")).toBe("location");
+  });
 });

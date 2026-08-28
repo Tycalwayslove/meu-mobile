@@ -1,0 +1,151 @@
+---
+name: Toast
+slug: toast
+package: "@meu/mobile"
+exports: [Toast, ToastProvider, useToast]
+status: audit
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "165:812"
+storyIds:
+  [
+    feedback-toast--neutral,
+    feedback-toast--success,
+    feedback-toast--warning-with-action,
+    feedback-toast--danger,
+    feedback-toast--provider-queue
+  ]
+source: packages/mobile/src/Toast
+---
+
+# Toast
+
+## 当前能力
+
+- 声明式受控/非受控 Toast 与 scoped `ToastProvider/useToast` FIFO 队列，同一 id 原位更新。
+- neutral/success polite status，warning/danger assertive alert；action 在 live region 外且不会移动焦点。
+- 默认 3s、action 至少 5s、duration=0 常驻；hover/focus/async action 暂停，false/reject 保持打开。
+- Portal 继承 ConfigProvider container、locale、dir、theme、motion；支持 safe area、RTL、reduced-motion、forced-colors。
+- provider/controller 支持 show/success/warning/danger/update/close/clear，关闭原因完整且卸载回收 timer。
+
+## 何时使用
+
+用于短暂、非阻断、无需用户立即确认的操作反馈。重要失败可以提供一个短重试或撤销 action。
+
+## 何时不要使用
+
+需要确认、输入、长说明或不可逆后果时用 Dialog/BottomSheet；字段错误用 Field；持续后台任务用 Progress/状态页。
+
+## 结构与状态
+
+Portal viewport 不接管 pointer；内部 toast 包含 tone marker、icon、live message 和可选原生 action。Provider 只挂载队首，队首 exit 后先进先出。
+
+## 基础用法
+
+```tsx
+<ToastProvider>
+  <Checkout />
+</ToastProvider>;
+
+function Checkout() {
+  const toast = useToast();
+  return <Button onClick={() => toast.success({ message: "订单已保存" })}>保存</Button>;
+}
+```
+
+## 受控与非受控
+
+`open` 存在即受控，`onOpenChange` 只报告 timeout/action 关闭意图；省略时使用 `defaultOpen`。Provider record 由命令 API 管理，不混用 declarative open。
+
+## 表单集成
+
+不作为字段或 validation fact。表单提交成功/失败后可由业务调用 toast；action 固定 `type=button`，不会提交祖先 form。
+
+## Props
+
+API 由 `ToastProps`、`ToastShowOptions` 与相关类型生成。message 应简短；duration 非有限回退 3000、负值夹为 0；action 有效时长最少 5000。
+
+## Events
+
+`onOpenChange` reason 为 timeout/action。Provider `onClose` 另含 programmatic/clear，且每条 active record 只调用一次。action reject 调用 `onActionError`（若提供）并保持展示；根同时输出 `data-action-error=true`，因此未提供回调时错误仍可观察且不产生未处理 Promise rejection。
+
+## Ref 与命令式方法
+
+声明式 ref 指向 toast root。provider controller 的 `update` 不改变队列位置，`close` 关闭自己的 active/queued record；stale controller 不会影响同 id 后续新记录。
+
+## 键盘操作
+
+| 按键          | 行为                                               |
+| ------------- | -------------------------------------------------- |
+| Tab           | 仅当有 action 时按页面自然顺序进入按钮，并暂停计时 |
+| Enter / Space | 执行 action；pending 时按钮 disabled               |
+
+Toast 不捕获 Escape、不创建 focus trap，也不恢复/移动焦点。
+
+## 触摸与手势
+
+无 swipe dismiss；action 是至少 44px 原生按钮。viewport `pointer-events:none`，只有 toast/action 区域响应 pointer，不遮挡页面。
+
+## 无障碍
+
+普通/成功使用 polite status，警告/危险使用 assertive alert。action 不嵌入 live region以免重复播报；action pending 使用 `aria-busy`。不要连续发大量 danger toast。
+
+## 动效
+
+open/closed 使用 opacity+小幅 transform Token。ConfigProvider `motion=reduced` 将 Portal 时长归零，系统 reduced-motion 取消 transition；provider reduced 模式不等待 exit 队列间隔。
+
+## 主题与定制
+
+tone、position、icon、action、container、class/style 是稳定入口。Portal boundary 携带 theme/motion class 与 data 属性；forced-colors 使用 Canvas/ButtonText 并移除 shadow。
+
+## SSR 与 Next.js
+
+组件为 client component，但 closed Toast 与空 Provider 可安全 SSR。open Portal 在服务端不应依赖 body；首屏反馈应在 hydration 后由应用状态发出，避免重复公告。
+
+## RTL 与国际化
+
+Portal 显式复制 `dir/lang`；icon/action 间距为 logical margin，safe-area 同时处理左右 inset。组件无内置消息文案，业务负责 locale。
+
+## 浏览器与 WebView
+
+依赖 Portal、Promise、requestAnimationFrame、CSS variables 与 safe-area env。Chrome/WebView 70 和 iOS 13 静态语法可用；宿主需提供全局 Token CSS。
+
+## 边界情况与已知限制
+
+- FIFO 一次只显示一条，队列不设硬上限；高频事件应使用稳定 id 合并。
+- 异步 action 不注入 AbortSignal；关闭/卸载会让 run 失效并禁止跨生命周期回写。
+- 不支持 swipe dismiss、堆叠、多 action、手动 close icon 或全局模块级 singleton。
+- message 为 ReactNode，但长交互内容不应放入 Toast。
+
+## 性能预算
+
+Provider 只挂载一个 toast；每个 active/queued record 为小对象和至多一个 exit timer，消息 timeout 仅为当前项。用 id 聚合进度更新，避免无界队列。
+
+## 测试证据
+
+- Unit: `Toast.test.tsx` 覆盖 live role、focus、timeout/pause、action minimum/false/reject、Portal locale/dir/theme/motion。
+- Provider unit: `ToastProvider.test.tsx` 覆盖 FIFO、stable id/controller update、close reason、clear 与 provider guard。
+- Story interaction / Axe: stories 已建立，runner/axe 待补。
+- SSR/hydration: `Toast.ssr.test.tsx` 覆盖 closed/provider；open Portal hydration 待补。
+- RTL/reduced-motion/forced-colors: config 与 CSS 完成，视觉证据待补。
+- Mobile Chromium/WebKit、Chromatic Light/Dark、real device: 待发布批次统一验证。
+
+## V2 优化记录
+
+### 待优化
+
+- 补连续公告节流策略评审、screen reader 实测、系统 reduced-motion 队列、safe-area 和 Portal 宿主 E2E。
+
+### 已完成
+
+- 完成 Portal config boundary、RTL logical CSS、reduced-motion/forced-colors、异步 action 生命周期、FIFO 清理、TSDoc、SSR 与完整契约文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                                                    | 迁移说明 |
+| ---------- | ------ | --------- | ------------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | hardening | 完成队列、Portal 配置、异步 action 与跨平台可访问性加固 | API 兼容 |

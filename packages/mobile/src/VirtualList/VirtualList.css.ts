@@ -7,6 +7,7 @@ export const root = style({
   boxSizing: "border-box",
   overflowX: "hidden",
   overflowY: "auto",
+  overscrollBehavior: "contain",
   WebkitOverflowScrolling: "touch",
   color: "var(--meu-color-ink)",
   background: "var(--meu-color-surface)",
@@ -33,7 +34,13 @@ export const item = style({
   width: "100%",
   minWidth: 0,
   boxSizing: "border-box",
-  willChange: "transform"
+  willChange: "transform",
+  "@media": {
+    "(forced-colors: active)": {
+      borderBlockEnd: "1px solid CanvasText",
+      forcedColorAdjust: "auto"
+    }
+  }
 });
 
 export const empty = style({

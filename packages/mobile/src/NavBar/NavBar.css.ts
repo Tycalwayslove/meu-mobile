@@ -57,7 +57,7 @@ export const back = style({
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus-visible": {
+    "&:focus": {
       outline: "2px solid var(--meu-color-accent)",
       outlineOffset: 1
     }
@@ -97,12 +97,15 @@ export const title = style({
   lineHeight: 1.4
 });
 
-globalStyle(`${title} > :is(h1, h2, h3, h4, h5, h6)`, {
-  margin: 0,
-  overflow: "inherit",
-  color: "inherit",
-  font: "inherit",
-  fontWeight: "inherit",
-  textOverflow: "inherit",
-  whiteSpace: "inherit"
-});
+globalStyle(
+  `${title} > h1, ${title} > h2, ${title} > h3, ${title} > h4, ${title} > h5, ${title} > h6`,
+  {
+    margin: 0,
+    overflow: "inherit",
+    color: "inherit",
+    font: "inherit",
+    fontWeight: "inherit",
+    textOverflow: "inherit",
+    whiteSpace: "inherit"
+  }
+);

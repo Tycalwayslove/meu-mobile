@@ -55,6 +55,8 @@ Popup 不持有表单值。关闭前是否丢弃草稿由组合组件决定；�
 
 API 由 `PopupProps` 生成。调用方必须二选一提供 `aria-label` 或 `aria-labelledby`；重要行为 Props 包括 container、mask、lockScroll、closeOnEscape、closeOnMaskClick、restoreFocus、initialFocusRef、returnFocusRef、forceMount 和 safeArea。
 
+共享 `OverlayContainer`、`OverlayDismissReason` 与 `OverlayOpenChangeDetails` 类型由本页归档；具体组件可以扩展 reason，但不得改写基础 `mask | escape | close-button` 含义。
+
 ## Events
 
 `onOpenChange(open, details)` 仅在组件请求变化时调用。当前关闭 reason 为 `mask`、`escape`、`close-button`；程序化 open 变化不反向发事件。

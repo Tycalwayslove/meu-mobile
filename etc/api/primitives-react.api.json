@@ -419,7 +419,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/primitives-react!useBodyScrollLock:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Reference-counted body scroll lock for modal overlays.\n *\n * The first active caller snapshots body styles and scroll position; the final caller restores them. Scrollbar compensation follows the document direction.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -464,7 +464,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/primitives-react!useFocusTrap:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Traps focus inside the topmost active modal while allowing registered non-modal focus branches.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

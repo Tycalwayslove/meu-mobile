@@ -17,6 +17,7 @@ export type DateRangePickerOpenChangeDetails = {
   reason: DateRangePickerOpenChangeReason;
 };
 
+/** A stable, precomputed range offered as a draft shortcut. @public */
 export type DateRangePickerPreset<TDate> = {
   disabled?: boolean;
   key: string;
@@ -107,6 +108,7 @@ type DateRangePickerBaseProps<TDate> = Omit<
   weekStartsOn?: CalendarWeekStartsOn;
 };
 
+/** Props for the modal confirmation-based range picker. @public */
 export type DateRangePickerProps<TDate = Date> = DateRangePickerBaseProps<TDate> &
   DateRangePickerAccessibleName;
 

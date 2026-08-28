@@ -54,7 +54,7 @@ export const trigger = recipe({
     transition: "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
     selectors: {
       "&:active:not(:disabled)": { background: "var(--meu-color-subtle)" },
-      "&:focus-visible": {
+      "&:focus": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3

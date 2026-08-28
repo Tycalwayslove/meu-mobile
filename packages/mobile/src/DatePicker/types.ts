@@ -14,6 +14,7 @@ export type DatePickerFilterDetails<TDate> = {
   precision: DatePrecision;
 };
 
+/** Per-precision option predicates evaluated with the candidate date. @public */
 export type DatePickerFilter<TDate> = Partial<
   Record<DatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>
 >;
@@ -49,6 +50,7 @@ type DatePickerBaseProps<TDate> = Omit<
   value?: TDate | null;
 };
 
+/** Props for an adapter-driven, confirmation-based date wheel. @public */
 export type DatePickerProps<TDate = Date> = DatePickerBaseProps<TDate> & PickerAccessibleName;
 
 export type DatePickerOpenChangeDetails = PickerOpenChangeDetails;

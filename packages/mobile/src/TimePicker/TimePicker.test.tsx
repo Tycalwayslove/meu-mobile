@@ -191,6 +191,29 @@ describe("TimePicker", () => {
     expect(screen.getByRole("dialog", { name: "时间" })).toBeTruthy();
   });
 
+  it("seeds uncontrolled state from the latest controlled value", () => {
+    const { rerender } = render(
+      <TimePicker
+        open
+        aria-label="时间"
+        minuteStep={15}
+        value={{ hour: 10, minute: 30, second: 0 }}
+      />
+    );
+    rerender(
+      <TimePicker
+        open
+        aria-label="时间"
+        minuteStep={15}
+        value={{ hour: 10, minute: 45, second: 0 }}
+      />
+    );
+    expect(screen.getByRole("option", { name: "45分" }).getAttribute("aria-selected")).toBe("true");
+
+    rerender(<TimePicker open aria-label="时间" minuteStep={15} />);
+    expect(screen.getByRole("option", { name: "45分" }).getAttribute("aria-selected")).toBe("true");
+  });
+
   it("treats defaultValue as initialization rather than a live input", () => {
     const { rerender } = render(
       <TimePicker open aria-label="时间" defaultValue={{ hour: 10, minute: 30, second: 0 }} />

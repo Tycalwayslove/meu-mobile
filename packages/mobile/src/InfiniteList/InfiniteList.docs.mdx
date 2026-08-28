@@ -1,0 +1,140 @@
+---
+name: InfiniteList
+slug: infinite-list
+package: "@meu/mobile"
+exports: [InfiniteList]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "295:46"
+storyIds:
+  [
+    collections-infinitelist--default,
+    collections-infinitelist--manual,
+    collections-infinitelist--complete,
+    collections-infinitelist--error-and-retry
+  ]
+source: packages/mobile/src/InfiniteList
+---
+
+# InfiniteList
+
+## 当前能力
+
+- 最近滚动祖先的 IntersectionObserver 预加载、始终可用的手动入口、失败重试和完成状态。
+- 同步并发锁保证 observer/按钮不会重复请求；`hasMore=false` 会使在途结果失效，卸载后不回写状态。
+- error 不自动重试，disabled 同时关闭 auto/manual/retry；无 Observer 时原生按钮降级仍可用。
+- 中英文 live status、`aria-busy`、reduced-motion spinner 与 forced-colors 按钮边界已覆盖。
+
+## 何时使用
+
+放在调用方列表尾部，用于游标或页码分页的“加载下一页”触发和状态表达。
+
+## 何时不要使用
+
+首屏加载、查询缓存、刷新和空状态不属于 InfiniteList；分别使用 Skeleton/Result、数据层、PullToRefresh 和 Empty。
+
+## 结构与状态
+
+状态为 idle/loading/error/complete。`hasMore=false` 是唯一 complete 事实源；内部 request id、mounted flag 和同步 loading lock 只管理并发与陈旧结果。
+
+## 基础用法
+
+```tsx
+<List>{items.map(renderItem)}</List>
+<InfiniteList hasMore={pageInfo.hasNextPage} loadMore={loadNextPage} />
+```
+
+## 受控与非受控
+
+`hasMore` 受调用方控制；request 状态内部维护。组件不持有 items、cursor、页码、错误缓存或请求取消器。
+
+## 表单集成
+
+不适用。所有按钮固定为 `type=button`，不会提交父表单。
+
+## Props
+
+API 由 `InfiniteListProps` 生成。`threshold` 接受非负有限像素，异常值回退 250；`renderContent` 只替换视觉，原生加载/重试路径继续存在。
+
+## Events
+
+`onStatusChange` 报告去重状态和 `auto/manual/retry` trigger；外部完成不带 trigger。当前有效请求 reject 才调用 `onLoadError`，完成后到达的陈旧 rejection 会被忽略。
+
+## Ref 与命令式方法
+
+ref 指向根 div；不公开命令式 load，避免绕过并发锁。业务主动加载应复用自己的数据层命令。
+
+## 键盘操作
+
+| 按键          | 行为                         |
+| ------------- | ---------------------------- |
+| Tab           | 进入当前可用的加载或重试按钮 |
+| Enter / Space | 发起一次受锁保护的请求       |
+
+## 触摸与手势
+
+不识别手势；原生 120×44 按钮承担触摸入口，Observer 仅是预加载增强。
+
+## 无障碍
+
+loading 期间根使用 `aria-busy`，状态通过 atomic polite live region 公布。error 仍提供可操作 retry；disabled 同时设置原生 disabled 和 `aria-disabled`。
+
+## 动效
+
+仅 loading spinner 旋转；`prefers-reduced-motion` 下静止，状态变化无自定义过场。
+
+## 主题与定制
+
+状态 slots、labels、`renderContent` 与根 class/style 是稳定入口。颜色、圆角、间距使用 Token；forced-colors 保留按钮。
+
+## SSR 与 Next.js
+
+SSR 输出 idle 手动降级或 complete 状态，不创建 Observer。客户端挂载后才发现最近滚动祖先并观察 sentinel，结构可 hydration。
+
+## RTL 与国际化
+
+布局居中且无物理方向；内置中文和英文文案来自 ConfigProvider，可用各 label/content prop 覆盖。
+
+## 浏览器与 WebView
+
+IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrome/WebView 70 与 iOS 13 基线支持 Promise、Observer 和 CSS；真实宿主滚动容器仍需复验。
+
+## 边界情况与已知限制
+
+- `loadMore` 必须返回 Promise；组件不猜测返回条数。
+- disabled 不取消已经发出的网络请求，只阻止新入口；卸载/完成仅忽略本地陈旧结果。
+- error 必须由用户重试，不会形成 observer 重试风暴。
+- 找不到可滚动祖先时 Observer 以 viewport 为 root。
+
+## 性能预算
+
+常数 DOM 和最多一个 Observer；每次只允许一个请求。数据渲染成本属于调用方列表。
+
+## 测试证据
+
+- Unit: `InfiniteList.test.tsx` 覆盖 root discovery、并发锁、失败/重试、完成、Observer 降级、disabled、自定义视觉和陈旧 rejection。
+- Story interaction / Axe: 待执行/待补。
+- SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖 idle/complete；Observer hydration 待补。
+- Reduced motion/forced-colors/RTL: CSS 或无方向契约完成，视觉证据待补。
+- Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。
+
+## V2 优化记录
+
+### 待优化
+
+- 补嵌套 scroll root E2E、慢网/离线重试、axe 和 Light/Dark 视觉基线。
+
+### 已完成
+
+- 固化并发、在途完成竞态、卸载安全、disabled retry、Observer 降级、i18n、SSR、reduced-motion 与 forced-colors。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                                   | 迁移说明 |
+| ---------- | ------ | --------- | -------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | hardening | 完成请求竞态、完成事实源与降级入口加固 | API 兼容 |

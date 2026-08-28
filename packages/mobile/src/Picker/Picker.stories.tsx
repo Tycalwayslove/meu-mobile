@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
 import { Field } from "../Field";
+import { ConfigProvider } from "../ConfigProvider";
 import { Picker } from "./Picker";
 import { PickerTrigger } from "./PickerTrigger";
 import type { PickerOption, PickerProps, PickerValue } from "./types";
@@ -110,4 +111,24 @@ export const WithoutVisibleTitle: Story = {
     "aria-label": "配送方案",
     columns: [deliveryColumn]
   }
+};
+
+export const LongLabelsRTL: Story = {
+  args: {
+    title: "Choose the delivery arrangement for this order",
+    columns: [
+      [
+        {
+          label: "Collect from the nearest participating service counter",
+          value: "counter"
+        },
+        { label: "Deliver to the recipient's registered address", value: "address" }
+      ]
+    ]
+  },
+  render: (args) => (
+    <ConfigProvider dir="rtl" locale="en-US">
+      <PickerPreview {...args} />
+    </ConfigProvider>
+  )
 };

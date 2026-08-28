@@ -1,0 +1,137 @@
+---
+name: TimePicker
+slug: time-picker
+package: "@meu/mobile"
+exports: [TimePicker, formatTimeValue, isValidTimeValue, timePickerColumns, timePickerPrecisions]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "245:2"
+storyIds:
+  [
+    data-entry-timepicker--default,
+    data-entry-timepicker--twelve-hour,
+    data-entry-timepicker--seconds-and-filter
+  ]
+source: packages/mobile/src/TimePicker
+---
+
+# TimePicker
+
+## 当前能力
+
+确认式移动时间滚轮，值为无日期/时区的 {hour,minute,second}；支持 hour/minute/second 精度、24/12 小时制、AM/PM、边界、各列步长、上下文 filter、自定义标签、中英文、受控/非受控 draft 及公开验证/格式化 helpers。
+
+## 何时使用
+
+用于营业时间、送达时刻、预约时分秒等“一天内民用时间”字段；需要日期关联时用 DatePicker。
+
+## 何时不要使用
+
+不要表达 instant、时区、日期、时长、倒计时或跨午夜区间。min 大于 max 不会自动解释为跨日，业务应拆分范围或用 filter 明示。
+
+## 结构与状态
+
+结构复用 Popup → Picker header + hour/minute/second/period listbox。内部状态分 committed 与 draft，并跟踪 open、hourCycle、precision、steps、bounds/filter 和 controlled snapshot。
+
+## 基础用法
+
+```tsx
+<TimePicker
+  open={open}
+  title="送达时间"
+  min={{ hour: 9, minute: 0, second: 0 }}
+  max={{ hour: 18, minute: 0, second: 0 }}
+  minuteStep={15}
+  value={value}
+  onConfirm={setValue}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+value 存在即受控；defaultValue 只初始化。打开从 committed 建 draft，取消回滚，确认才更新非受控值。动态 precision/hourCycle/steps/bounds/filter 会静默规范化，受控切非受控继承最新外部值。
+
+## 表单集成
+
+MeuFormTimePicker 精确绑定 TimeValue | null，确认才写字段与触发校验，取消不触发 dirty；PickerTrigger 是可聚焦错误控制。组件不创建 hidden input。
+
+## Props
+
+precision 默认为 minute；hourCycle 默认为 h23，h12 只改变列与展示，回调仍为 0–23。hourStep 夹紧 1–23，minute/secondStep 夹紧 1–59；filter 按规范化 24h 值禁用；columnLabels/renderLabel 只改呈现。
+
+## Events
+
+onSelect 返回规范化 TimeValue 及 columnIndex/reason/column；onConfirm 返回最终值。onCancel/onOpenChange 与 trigger/cancel/confirm/mask/escape 原因继承 Picker。
+
+## Ref 与命令式方法
+
+ref 指向 Picker 内容根 HTMLDivElement；不公开命令式滚轮。程序化显示使用 open/onOpenChange，焦点恢复使用 returnFocusRef。
+
+## 键盘操作
+
+listbox 支持方向键、Home/End、PageUp/PageDown、Enter/Space；Tab 在 modal 中循环；Escape 取消。AM/PM 是正常可选 option。
+
+## 触摸与手势
+
+五行滚轮使用原生 momentum scroll 与 48px snap option；点击、滚动都只更新 draft，确定才提交。
+
+## 无障碍
+
+dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴露 selected/disabled。非文本自定义 label 自动保留默认 textValue；确认不可用时禁用原生按钮。
+
+## 动效
+
+复用 Picker/Popup motion tokens，ConfigProvider motion=reduced 和系统 reduced-motion 统一降级，不添加逐列弹跳。
+
+## 主题与定制
+
+复用 Picker 的 Light/Dark、safe area、surface/subtle/accent 和 forced-colors；稳定定制入口是 label/filter/columnLabels 和全局 tokens。
+
+## SSR 与 Next.js
+
+声明 use client；open=true 可 SSR 输出稳定列，无 Date/now 或浏览器时区读取，因此 TimeValue hydration 是确定的。Portal 在客户端接管。
+
+## RTL 与国际化
+
+数值时间列顺序保持 hour→minute→second→period，不因 RTL 反转；Picker 继承 dir。内建 zh-CN/en-US 的时/分/秒/时段、AM/PM，可覆盖列和选项标签。
+
+## 浏览器与 WebView
+
+兼容 Chrome/WebView 70+、iOS 13+；纯解析仅用 Number.isInteger/有限数组，不依赖 Temporal/Intl。滚轮退化行为由 Picker 的滚动与键盘入口保证。
+
+## 边界情况与已知限制
+
+非法字段、矛盾 bounds、filter 禁用所有路径都会禁用确定。步长从 0 对齐，不保证包含边界末值；h12 的 hourStep 同样基于规范化 0/12 起点。formatTimeValue 只格式化有效 TimeValue，不做时区换算。
+
+## 性能预算
+
+每次解析最多 24+60+60+2 项，为 O(options)；filter/renderLabel 应保持纯、快速和稳定 identity。
+
+## 测试证据
+
+- Unit：隐藏位归零、bounds/steps/filter、12h/period、seconds、自定义 label、取消/确认、受控、动态受控模式、矛盾边界、格式化。
+- SSR：TimePicker.ssr.test.tsx 覆盖稳定 dialog/listbox 与 AM/PM。
+- Figma：Meu/TimePicker 245:2；8 variants、48px options、12/24h Light/Dark QA。
+- Axe、双引擎、Chromatic、真机滚轮/读屏：最终统一门禁。
+
+## V2 优化记录
+
+### 待优化
+
+补移动 WebKit 滚动、TalkBack/VoiceOver period 列、极端 filter 及视觉回归证据。
+
+### 已完成
+
+固化平台无关 TimeValue、12/24h、步长/边界、确认式 draft、最新受控值迁移、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                              | 迁移说明    |
+| ---------- | ------ | --------- | --------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | hardening | 时间状态、12h、兼容与文档完整加固 | 无 API 破坏 |

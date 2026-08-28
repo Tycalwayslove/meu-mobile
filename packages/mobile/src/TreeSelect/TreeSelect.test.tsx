@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TreeSelect } from "./TreeSelect";
+import { ConfigProvider } from "../ConfigProvider";
 import type { TreeSelectOption } from "./types";
 
 const categories = [
@@ -233,7 +234,7 @@ describe("TreeSelect", () => {
     );
   });
 
-  it("loads async branches once per pending expansion and reports failures", async () => {
+  it("replaces an aborted async load when the branch is expanded again", async () => {
     let resolveLoad: (() => void) | undefined;
     const loadChildren = vi.fn(
       () =>
@@ -255,11 +256,197 @@ describe("TreeSelect", () => {
     fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
     fireEvent.keyDown(remote, { key: "ArrowLeft" });
     fireEvent.keyDown(remote, { key: "ArrowRight" });
-    expect(loadChildren).toHaveBeenCalledTimes(1);
+    expect(loadChildren).toHaveBeenCalledTimes(2);
     await act(async () => {
       if (resolveLoad) resolveLoad();
       await Promise.resolve();
     });
+  });
+
+  it("aborts a collapsed async branch and allows a clean retry", () => {
+    const signals: AbortSignal[] = [];
+    const loadChildren = vi.fn(
+      (_option: TreeSelectOption, context: { signal: AbortSignal }) =>
+        new Promise<void>(() => {
+          signals.push(context.signal);
+        })
+    );
+    render(
+      <TreeSelect
+        open
+        aria-label="异步类目"
+        options={[{ isLeaf: false, label: "远程类目", value: "remote" }]}
+        loadChildren={loadChildren}
+        virtual={false}
+      />
+    );
+
+    const remote = screen.getByRole("treeitem", { name: /远程类目/ });
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    expect(remote.getAttribute("aria-busy")).toBe("true");
+    expect(screen.getByRole("status", { name: "正在加载子选项" })).toBeTruthy();
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    expect(signals[0] && signals[0].aborted).toBe(true);
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    expect(loadChildren).toHaveBeenCalledTimes(2);
+    expect(signals[1] && signals[1].aborted).toBe(false);
+  });
+
+  it("announces async failures and retries after collapse and expand", async () => {
+    const onLoadError = vi.fn();
+    const loadChildren = vi.fn().mockRejectedValue(new Error("offline"));
+    render(
+      <TreeSelect
+        open
+        aria-label="异步类目"
+        options={[{ isLeaf: false, label: "远程类目", value: "remote" }]}
+        loadChildren={loadChildren}
+        virtual={false}
+        onLoadError={onLoadError}
+      />
+    );
+    const remote = screen.getByRole("treeitem", { name: /远程类目/ });
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    await waitFor(() => expect(onLoadError).toHaveBeenCalledOnce());
+    expect(screen.getByRole("status", { name: "子选项加载失败，请收起后重新展开" })).toBeTruthy();
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(2));
+  });
+
+  it("routes a synchronous loader failure through the async error contract", async () => {
+    const error = new Error("synchronous loader failure");
+    const onLoadError = vi.fn();
+    render(
+      <TreeSelect
+        open
+        aria-label="异步类目"
+        options={[{ isLeaf: false, label: "远程类目", value: "remote" }]}
+        loadChildren={() => {
+          throw error;
+        }}
+        virtual={false}
+        onLoadError={onLoadError}
+      />
+    );
+    const remote = screen.getByRole("treeitem", { name: "远程类目" });
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    await waitFor(() => expect(onLoadError).toHaveBeenCalledWith(error, expect.any(Object)));
+    expect(screen.getByRole("status", { name: /加载失败/ })).toBeTruthy();
+  });
+
+  it("does not expand or load a disabled async branch", () => {
+    const loadChildren = vi.fn(() => Promise.resolve());
+    render(
+      <TreeSelect
+        open
+        aria-label="禁用类目"
+        defaultExpandedValues={["remote"]}
+        options={[{ disabled: true, isLeaf: false, label: "远程类目", value: "remote" }]}
+        loadChildren={loadChildren}
+        virtual={false}
+      />
+    );
+    const remote = screen.getByRole("treeitem", { name: "远程类目" });
+    fireEvent.click(remote);
+    fireEvent.keyDown(remote, { key: "ArrowRight" });
+    expect(loadChildren).not.toHaveBeenCalled();
+    expect(remote.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("mirrors expand and collapse arrow keys in RTL", async () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US">
+        <TreeSelect open aria-label="Categories" options={categories} virtual={false} />
+      </ConfigProvider>
+    );
+    const digital = screen.getByRole("treeitem", { name: "数码家电" });
+    fireEvent.keyDown(digital, { key: "ArrowLeft" });
+    expect(digital.getAttribute("aria-expanded")).toBe("true");
+    fireEvent.keyDown(digital, { key: "ArrowRight" });
+    await waitFor(() => expect(digital.getAttribute("aria-expanded")).toBe("false"));
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeTruthy();
+  });
+
+  it("marks validation status for assistive technology", () => {
+    render(
+      <TreeSelect open title="商品类目" options={categories} status="error" virtual={false} />
+    );
+    expect(screen.getByRole("tree").getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("permanently normalizes an uncontrolled value when options disappear", () => {
+    const onConfirm = vi.fn();
+    const { rerender } = render(
+      <TreeSelect
+        open
+        aria-label="动态类目"
+        options={categories}
+        defaultValue={["smartphone"]}
+        defaultExpandedValues={["digital", "phone"]}
+        virtual={false}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(screen.getByRole("treeitem", { name: "智能手机" }).getAttribute("aria-selected")).toBe(
+      "true"
+    );
+    rerender(
+      <TreeSelect
+        open
+        aria-label="动态类目"
+        options={[categories[1]]}
+        defaultExpandedValues={["home"]}
+        virtual={false}
+        onConfirm={onConfirm}
+      />
+    );
+    rerender(
+      <TreeSelect
+        open
+        aria-label="动态类目"
+        options={categories}
+        defaultExpandedValues={["digital", "phone"]}
+        virtual={false}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(screen.getByRole("treeitem", { name: "智能手机" }).getAttribute("aria-selected")).toBe(
+      "false"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "确定" }));
+    expect(onConfirm).toHaveBeenCalledWith([], []);
+  });
+
+  it("aborts loading when a dynamic option is removed", async () => {
+    let signal: AbortSignal | undefined;
+    const loadChildren = vi.fn(
+      (_option: TreeSelectOption, context: { signal: AbortSignal }) =>
+        new Promise<void>(() => {
+          signal = context.signal;
+        })
+    );
+    const { rerender } = render(
+      <TreeSelect
+        open
+        aria-label="动态异步类目"
+        options={[{ isLeaf: false, label: "远程类目", value: "remote" }]}
+        loadChildren={loadChildren}
+        virtual={false}
+      />
+    );
+    const remote = screen.getByRole("treeitem", { name: "远程类目" });
+    fireEvent.click(remote.querySelector("[data-meu-tree-expand]")!);
+    rerender(
+      <TreeSelect
+        open
+        aria-label="动态异步类目"
+        options={[]}
+        loadChildren={loadChildren}
+        virtual={false}
+      />
+    );
+    await waitFor(() => expect(signal && signal.aborted).toBe(true));
   });
 
   it("virtualizes large roots while preserving total tree semantics", async () => {

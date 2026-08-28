@@ -156,4 +156,89 @@ describe("InfiniteList", () => {
     fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
     await waitFor(() => expect(loadMore).toHaveBeenCalledTimes(1));
   });
+
+  it("disables retry and ignores a stale rejection after external completion", async () => {
+    let rejectLoad!: (error: unknown) => void;
+    const error = new Error("stale offline response");
+    const loadMore = vi.fn(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          rejectLoad = reject;
+        })
+    );
+    const onLoadError = vi.fn();
+    const onStatusChange = vi.fn();
+    const { rerender } = render(
+      <InfiniteList
+        autoLoad={false}
+        hasMore
+        loadMore={loadMore}
+        onLoadError={onLoadError}
+        onStatusChange={onStatusChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
+    rerender(
+      <InfiniteList
+        autoLoad={false}
+        hasMore={false}
+        loadMore={loadMore}
+        onLoadError={onLoadError}
+        onStatusChange={onStatusChange}
+      />
+    );
+    await act(async () => {
+      rejectLoad(error);
+      await Promise.resolve();
+    });
+
+    expect(onLoadError).not.toHaveBeenCalled();
+    expect(document.querySelector('[data-status="complete"]')).not.toBeNull();
+
+    rerender(
+      <InfiniteList autoLoad={false} disabled hasMore loadMore={() => Promise.reject(error)} />
+    );
+    expect(screen.getByRole("button", { name: "加载更多" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("allows a new pagination generation after completion invalidates a stuck request", async () => {
+    const firstLoad = vi.fn(() => new Promise<void>(() => undefined));
+    const secondLoad = vi.fn(() => Promise.resolve());
+    const { rerender } = render(<InfiniteList autoLoad={false} hasMore loadMore={firstLoad} />);
+    fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
+    expect(firstLoad).toHaveBeenCalledTimes(1);
+
+    rerender(<InfiniteList autoLoad={false} hasMore={false} loadMore={firstLoad} />);
+    rerender(<InfiniteList autoLoad={false} hasMore loadMore={secondLoad} />);
+    fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
+
+    await waitFor(() => expect(secondLoad).toHaveBeenCalledTimes(1));
+  });
+
+  it("does not revive an old error after hasMore completes and later reopens", async () => {
+    const error = new Error("offline");
+    const loadMore = vi.fn(() => Promise.reject(error));
+    const { rerender } = render(
+      <InfiniteList autoLoad={false} hasMore loadMore={loadMore} onLoadError={() => undefined} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "重试" })).toBeTruthy());
+
+    rerender(
+      <InfiniteList
+        autoLoad={false}
+        hasMore={false}
+        loadMore={loadMore}
+        onLoadError={() => undefined}
+      />
+    );
+    rerender(
+      <InfiniteList autoLoad={false} hasMore loadMore={loadMore} onLoadError={() => undefined} />
+    );
+
+    expect(screen.queryByRole("button", { name: "重试" })).toBeNull();
+    expect(screen.getByRole("button", { name: "加载更多" })).toBeTruthy();
+    expect(document.querySelector('[data-status="idle"]')).not.toBeNull();
+  });
 });

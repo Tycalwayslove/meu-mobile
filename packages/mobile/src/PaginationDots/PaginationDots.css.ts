@@ -82,7 +82,7 @@ export const button = style({
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 }
+    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 }
   },
   "@media": {
     "(forced-colors: active)": { color: "CanvasText" }

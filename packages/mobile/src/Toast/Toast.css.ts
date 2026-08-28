@@ -65,7 +65,8 @@ export const toast = recipe({
         alignSelf: "stretch",
         flex: "0 0 3px",
         minHeight: 28,
-        margin: "var(--meu-space-2) var(--meu-space-3) var(--meu-space-2) 0",
+        marginBlock: "var(--meu-space-2)",
+        marginInlineEnd: "var(--meu-space-3)",
         background: toneColor,
         borderRadius: "var(--meu-radius-round)"
       }
@@ -76,7 +77,14 @@ export const toast = recipe({
     ].join(", "),
     "@media": {
       "(max-width: 479px)": { maxWidth: "calc(100vw - 32px)" },
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transition: "none" },
+      "(forced-colors: active)": {
+        color: "CanvasText",
+        background: "Canvas",
+        borderColor: "CanvasText",
+        boxShadow: "none",
+        forcedColorAdjust: "auto"
+      }
     }
   },
   variants: {
@@ -104,7 +112,7 @@ export const icon = style({
   flex: "0 0 auto",
   width: 24,
   height: 24,
-  marginRight: "var(--meu-space-2)",
+  marginInlineEnd: "var(--meu-space-2)",
   color: toneColor,
   fontSize: 17,
   fontWeight: 700,
@@ -123,7 +131,7 @@ export const action = style({
   flex: "0 0 auto",
   minWidth: 44,
   minHeight: 44,
-  marginLeft: "var(--meu-space-2)",
+  marginInlineStart: "var(--meu-space-2)",
   padding: "0 var(--meu-space-3)",
   color: toneColor,
   background: "transparent",
@@ -137,5 +145,12 @@ export const action = style({
     "&:focus": { outline: "2px solid currentcolor", outlineOffset: 2 },
     "&:active:not(:disabled)": { background: "var(--meu-color-subtle)" },
     "&:disabled": { cursor: "wait", opacity: 0.72 }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      border: "1px solid ButtonText",
+      color: "ButtonText",
+      forcedColorAdjust: "auto"
+    }
   }
 });

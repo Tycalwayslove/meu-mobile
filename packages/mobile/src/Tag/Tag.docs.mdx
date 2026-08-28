@@ -118,7 +118,7 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 
 ## 浏览器与 WebView
 
-依赖原生 button、inline-flex 和 CSS 自定义属性，兼容 Chrome/WebView 70、iOS 13 语法基线。焦点增强使用 `:focus-visible`；不支持该伪类的旧 WebView 仍保留原生焦点行为，需在目标壳复验视觉。
+依赖原生 button、inline-flex 和 CSS 自定义属性，兼容 Chrome/WebView 70、iOS 13 语法基线。焦点增强使用旧内核可执行的 `:focus`；触摸/鼠标也可能显示焦点环，这是保留旧 WebView 键盘可见性的兼容取舍。
 
 ## 边界情况与已知限制
 

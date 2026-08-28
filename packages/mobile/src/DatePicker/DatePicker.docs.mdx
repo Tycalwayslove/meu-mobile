@@ -1,0 +1,138 @@
+---
+name: DatePicker
+slug: date-picker
+package: "@meu/mobile"
+exports: [DatePicker, datePickerPrecisions]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "231:1047"
+storyIds:
+  [
+    data-entry-datepicker--default-date,
+    data-entry-datepicker--date-and-time,
+    data-entry-datepicker--bounded-and-filtered
+  ]
+source: packages/mobile/src/DatePicker
+---
+
+# DatePicker
+
+## 当前能力
+
+基于 Picker 的确认式日期滚轮，通过 DateAdapter 支持 year 到 second 的连续精度、动态边界、月末夹紧、步长、按列 filter、自定义标签、中英文、受控/非受控值与显示状态。公开值始终是调用方日期类型，而不是内部列数组。
+
+## 何时使用
+
+用于 H5 中需要滚轮确认的生日、预约日期或本地民用日期时间；复杂月视图用 Calendar，纯一天内时间用 TimePicker。
+
+## 何时不要使用
+
+不要用 Native adapter 表达 UTC/固定业务时区；不要用于自然语言日期、日期范围或跨时区 instant。无法由 DateAdapter.fromParts 往返的值会被禁用。
+
+## 结构与状态
+
+结构复用 Popup → Picker header + 3–6 个 listbox wheel。内部区分 committed value 与本次打开的 draft；状态含 open、precision、bounds、step/filter、controlled snapshot。
+
+## 基础用法
+
+```tsx
+<DatePicker
+  open={open}
+  title="预约时间"
+  precision="minute"
+  min={min}
+  max={max}
+  minuteStep={15}
+  value={value}
+  onConfirm={setValue}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+value 存在时受控，否则 defaultValue 只初始化 committed value。打开时从权威 committed value 建 draft，取消回滚，确定才更新非受控值。动态 adapter/min/max/precision/filter/step 会静默重算；从受控切到非受控时继承最新受控值。
+
+## 表单集成
+
+使用 MeuFormDatePicker；确认时才写字段并触发 dirty/validation，取消不写入，错误焦点回到 PickerTrigger。组件本身不持有 name/hidden input。
+
+## Props
+
+precision 支持 year/month/day/hour/minute/second，默认 day；低位归零，年/月变化夹紧日。未传边界时以首次渲染 anchor 前后十年构造范围。minuteStep/secondStep 夹紧到 1–59。columnLabels、renderLabel 只改展示，filter 决定 option disabled。datePickerPrecisions 是公开稳定顺序。
+
+## Events
+
+onSelect 在 draft 列变化时返回完整规范化 TDate 及 columnIndex/reason/precision；onConfirm 返回最终 TDate。onCancel/onOpenChange、mask/escape/trigger/confirm 原因继承 Picker。
+
+## Ref 与命令式方法
+
+ref 指向 Picker 内容根 HTMLDivElement；不暴露命令式选值。程序化开合使用 open/onOpenChange，并把 returnFocusRef 指向原生触发按钮。
+
+## 键盘操作
+
+Tab 在 modal 内循环；各 listbox 支持方向键、Home/End、PageUp/PageDown、Enter/Space；Escape 取消并恢复焦点。确定/取消是原生按钮。
+
+## 触摸与手势
+
+每列为原生纵向滚动和 scroll snap，固定五行、48px option；tap 与滚动结束均选择 draft，不阻断横向页面以外的 Pointer API。
+
+## 无障碍
+
+Popup 为有名称的 modal dialog，每列为有名称 listbox，option 暴露 selected/disabled；自定义非文本 renderLabel 会使用默认 label 作为 textValue，避免失去读屏名称。
+
+## 动效
+
+弹层、Mask 与 wheel 行为由 Picker/Popup tokens 驱动；reduced-motion 由 ConfigProvider 与系统偏好统一降级。
+
+## 主题与定制
+
+继承 Picker 的 surface/subtle/accent/ink/muted、safe area、Dark 与 forced-colors。业务可定制列名与 label 内容，但不应依赖内部 class。
+
+## SSR 与 Next.js
+
+声明 use client；open=true 可 SSR 输出 dialog/listbox，未打开时无 Portal 内容。默认十年范围锚定 adapter.now，关键首屏要提供稳定 min/max/defaultValue 以避免跨午夜 hydration 差异。
+
+## RTL 与国际化
+
+列的时间精度顺序保持 year→second，不随 RTL 反转；Picker 的逻辑布局、焦点与 Portal 继承 dir。内建 zh-CN/en-US 列名和数值标签，可逐项覆盖。
+
+## 浏览器与 WebView
+
+依赖 Picker 的 Chrome/WebView 70+、iOS 13+ 滚动回退；核心解析不依赖 Intl、Temporal 或新数组 API。有效 falsy 自定义日期值（例如数值 0）不会被当成缺省值。
+
+## 边界情况与已知限制
+
+min 大于 max、所有 option 被 filter、DST 不存在时间都会禁用确定。step 不要求整除 60，尾部不额外补 59。filter 在渲染解析期执行，必须无副作用且快速。跨午夜属于日期的下一天，不在单日列中隐式环绕。
+
+## 性能预算
+
+默认最多约 21 年 × 12 × 31 × 24 × 60 × 60 的候选并非笛卡尔积；每次只生成各列一维 options，最多约 21+12+31+24+60+60 项。保持 adapter/filter/renderLabel identity 稳定可减少重算。
+
+## 测试证据
+
+- Unit：精度、月末、bounds/step/filter、DST null、locales、取消/确认、受控、动态 adapter、动态受控模式、矛盾边界、falsy adapter 值。
+- SSR：DatePicker.ssr.test.tsx 覆盖 dialog、列名与选中值。
+- Figma：Meu/DatePicker 231:1047；6 variants、48px options、Light/Dark token QA。
+- Axe、双引擎、Chromatic、真机滚轮/读屏：最终统一门禁。
+
+## V2 优化记录
+
+### 待优化
+
+补 DST 自定义 adapter E2E、跨午夜 hydration、TalkBack/VoiceOver 滚轮和视觉基线。
+
+### 已完成
+
+固化日期类型中立、确认式 draft、动态输入、最新受控值迁移、falsy date 边界、列语义、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                                   | 迁移说明    |
+| ---------- | ------ | --------- | -------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | hardening | 日期状态、adapter 边界、兼容与文档加固 | 无 API 破坏 |

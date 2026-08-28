@@ -3,10 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CodeBlock } from "../../_components/CodeBlock";
+import { ApiReference } from "../../_components/ApiReference";
 import { ComponentDocument } from "../../_components/ComponentDocument";
 import { ComponentPreview } from "../../_components/ComponentPreview";
 import { ComponentSidebar } from "../../_components/ComponentSidebar";
 import { getComponentDocument, getComponentManifestProduct } from "../../_data/component-document";
+import { getComponentApiReference } from "../../_data/api-reference";
 import {
   componentDocs,
   getAdjacentComponents,
@@ -38,6 +40,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
   if (!component) notFound();
 
   const manifestProduct = getComponentManifestProduct(component.slug);
+  const apiReference = manifestProduct ? getComponentApiReference(manifestProduct) : [];
   const v2Document = getComponentDocument(component.slug);
   const category = getCategory(component.category);
   const adjacent = getAdjacentComponents(component.slug);
@@ -118,6 +121,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
             </section>
           </>
         )}
+
+        <ApiReference entries={apiReference} packageName={component.packageName} />
 
         <section className="component-section" aria-labelledby="resources-title">
           <h2 id="resources-title">设计与源码</h2>

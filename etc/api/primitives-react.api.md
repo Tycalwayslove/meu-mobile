@@ -31,10 +31,10 @@ export type PortalProps = {
     container?: PortalContainer | (() => PortalContainer | null | undefined) | null | undefined;
 };
 
-// @public (undocumented)
+// @public
 export function useBodyScrollLock(locked: boolean): void;
 
-// @public (undocumented)
+// @public
 export function useFocusTrap(input: FocusTrapOptions): void;
 
 // @public

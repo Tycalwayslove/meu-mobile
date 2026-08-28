@@ -16,7 +16,8 @@ export const header = style({
   gridTemplateColumns: "minmax(72px, 1fr) minmax(0, 2fr) minmax(72px, 1fr)",
   alignItems: "center",
   minHeight: 52,
-  borderBottom: "1px solid var(--meu-color-border)"
+  borderBottom: "1px solid var(--meu-color-border)",
+  "@media": { "(forced-colors: active)": { borderBottomColor: "CanvasText" } }
 });
 
 export const headerButton = style({
@@ -31,20 +32,21 @@ export const confirmButton = style({ justifySelf: "end" });
 
 export const title = style({
   margin: 0,
-  overflow: "hidden",
+  minWidth: 0,
   color: "var(--meu-color-ink)",
   fontSize: 16,
   fontWeight: 700,
   lineHeight: 1.35,
+  overflowWrap: "anywhere",
   textAlign: "center",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap"
+  whiteSpace: "normal"
 });
 
 export const search = style({
   display: "block",
   padding: "var(--meu-space-3) var(--meu-space-4)",
-  borderBottom: "1px solid var(--meu-color-border)"
+  borderBottom: "1px solid var(--meu-color-border)",
+  "@media": { "(forced-colors: active)": { borderBottomColor: "CanvasText" } }
 });
 
 export const tree = style({
@@ -54,11 +56,19 @@ export const tree = style({
   boxSizing: "border-box",
   overflowX: "hidden",
   overflowY: "auto",
+  overscrollBehaviorY: "contain",
   WebkitOverflowScrolling: "touch",
   outline: "none",
   selectors: {
     '&[data-status="error"]': {
       boxShadow: "inset 0 0 0 1px var(--meu-color-danger)"
+    }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      selectors: {
+        '&[data-status="error"]': { boxShadow: "inset 0 0 0 2px Mark" }
+      }
     }
   }
 });
@@ -101,6 +111,20 @@ export const row = style({
     '&[aria-disabled="true"]': { cursor: "default", opacity: 0.48 },
     '&[data-selected="true"]': { background: "var(--meu-color-subtle)" },
     '&[data-readonly="true"]': { cursor: "default" }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      borderBottomColor: "CanvasText",
+      selectors: {
+        "&:focus": { outlineColor: "Highlight" },
+        '&[aria-disabled="true"]': { color: "GrayText", opacity: 1 },
+        '&[data-selected="true"]': {
+          forcedColorAdjust: "none",
+          color: "HighlightText",
+          background: "Highlight"
+        }
+      }
+    }
   }
 });
 
@@ -117,7 +141,11 @@ export const chevron = style({
   placeItems: "center",
   transition: "transform var(--meu-motion-exit)",
   transform: "rotate(180deg)",
-  selectors: { '&[data-expanded="true"]': { transform: "rotate(270deg)" } },
+  selectors: {
+    '&[data-expanded="true"]': { transform: "rotate(270deg)" },
+    '&[data-direction="rtl"]': { transform: "rotate(0deg)" },
+    '&[data-direction="rtl"][data-expanded="true"]': { transform: "rotate(90deg)" }
+  },
   "@media": { "(prefers-reduced-motion: reduce)": { transition: "none" } }
 });
 
@@ -161,6 +189,19 @@ export const selection = style({
       background: "var(--meu-color-accent)"
     },
     '&[data-selectable="false"]': { visibility: "hidden" }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      borderColor: "CanvasText",
+      selectors: {
+        '&[data-selected="true"]': {
+          forcedColorAdjust: "none",
+          borderColor: "Highlight",
+          color: "HighlightText",
+          background: "Highlight"
+        }
+      }
+    }
   }
 });
 
@@ -173,7 +214,26 @@ export const loading = style({
   borderTopColor: "var(--meu-color-accent)",
   borderRadius: "var(--meu-radius-round)",
   animation: `${spin} 700ms linear infinite`,
-  "@media": { "(prefers-reduced-motion: reduce)": { animation: "none" } }
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { animation: "none" },
+    "(forced-colors: active)": { borderColor: "CanvasText", borderTopColor: "Highlight" }
+  }
+});
+
+export const loadError = style({
+  display: "grid",
+  width: 20,
+  height: 20,
+  placeItems: "center",
+  justifySelf: "end",
+  boxSizing: "border-box",
+  border: "1px solid var(--meu-color-danger)",
+  borderRadius: "var(--meu-radius-round)",
+  color: "var(--meu-color-danger)",
+  fontSize: 13,
+  fontWeight: 700,
+  lineHeight: 1,
+  "@media": { "(forced-colors: active)": { borderColor: "Mark", color: "Mark" } }
 });
 
 export const empty = style({

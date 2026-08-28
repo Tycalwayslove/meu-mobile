@@ -1,0 +1,159 @@
+---
+name: Picker
+slug: picker
+package: "@meu/mobile"
+exports: [Picker, PickerTrigger]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "199:92"
+storyIds:
+  [
+    data-entry-picker--single-column,
+    data-entry-picker--multiple-columns,
+    data-entry-picker--without-visible-title,
+    data-entry-picker--long-labels-rtl
+  ]
+source: packages/mobile/src/Picker
+---
+
+# Picker
+
+## 当前能力
+
+一至多列确认式移动滚轮，支持受控/非受控 open 与 value、独立 draft、禁用项、动态 columns、原生惯性滚动、scroll snap、键盘/type-ahead、Portal、安全区和 Field-aware PickerTrigger。
+
+## 何时使用
+
+适合顺序稳定、无需搜索、每列选项数量有限的离散值，例如配送方式、预约时段和规格组合。多列之间没有依赖时直接使用 Picker。
+
+## 何时不要使用
+
+少量平铺选项用 RadioGroup 或 Selector；父子级联用 CascadePicker；大量可搜索层级数据用 TreeSelect。自由文本、日期算法和远程分页不属于 Picker。
+
+## 结构与状态
+
+`Popup → header(cancel/title/confirm) → wheels → listbox/option`。公开 value 是已提交值；打开后建立 draft，列内选中只修改 draft，确认后才提交。
+
+## 基础用法
+
+```tsx
+const triggerRef = useRef<HTMLButtonElement>(null);
+
+<PickerTrigger ref={triggerRef} open={open} value={value[0]} onClick={() => setOpen(true)} />
+<Picker
+  open={open}
+  title="配送方式"
+  columns={[[{ label: "普通配送", value: "standard" }]]}
+  value={value}
+  returnFocusRef={triggerRef}
+  onConfirm={setValue}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+`open/onOpenChange` 与 `value/onConfirm` 可分别受控；`defaultOpen/defaultValue` 只用于首次非受控状态。受控调用方拒绝更新时界面保持外部值。columns、value 或模式变化会静默归一，不伪造 onSelect。
+
+## 表单集成
+
+使用 `MeuFormPicker` 绑定 React Hook Form。adapter 只在确认时写字段，取消不会制造 dirty；hidden successful controls 进入 FormData，错误与首次错误焦点落在原生 PickerTrigger。
+
+## Props
+
+API 由 `PickerProps<TValue>` 与 `PickerTriggerProps` 生成。核心 Props 为 columns、value/defaultValue、open/defaultOpen、columnLabels、renderOption、Portal/Popup 配置和本地化 action 文案。复杂 label 必须提供 textValue；同列 value 必须唯一。
+
+## Events
+
+- `onSelect(value, options, { columnIndex, reason })`：draft 变化，reason 为 keyboard、pointer 或 scroll。
+- `onConfirm(value, options)`：确认有效 draft。
+- `onCancel({ reason })`：cancel、mask 或 escape 丢弃 draft。
+- `onOpenChange(open, { reason })`：报告可见性意图；受控调用方决定是否关闭。
+
+## Ref 与命令式方法
+
+Picker ref 指向 panel 内根 div，PickerTrigger ref 指向原生 button。组件不公开命令式选择、滚动或关闭方法，业务状态通过 Props 管理。
+
+## 键盘操作
+
+| 按键                | 行为                               |
+| ------------------- | ---------------------------------- |
+| ArrowUp / ArrowDown | 移动到上/下一个 enabled option     |
+| Home / End          | 移动到首个/末个 enabled option     |
+| PageUp / PageDown   | 最多跨越五个 enabled option        |
+| 可打印字符          | 700ms 缓冲的前缀查找               |
+| Tab / Shift+Tab     | 在取消、有效滚轮与确定按钮之间移动 |
+| Escape              | closeOnEscape 时取消并请求关闭     |
+
+## 触摸与手势
+
+每行 48px，整行可点；滚轮使用原生 pan-y、惯性滚动与 scroll snap，停止 80ms 后发布 settled scroll。空列或全禁用列不进入 Tab 顺序，并禁用确认。
+
+## 无障碍
+
+Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activedescendant 暴露当前 option。disabled、selected 和空列均有程序化状态。PickerTrigger 是原生 button，合并 Field 的 label、description 和 error。
+
+## 动效
+
+浮层进出复用 Popup 的 180/140ms Token；滚轮不制造额外装饰动画。ConfigProvider motion=reduced 与 prefers-reduced-motion 会缩短浮层和指示器过渡。
+
+## 主题与定制
+
+使用 surface、ink、muted、border、subtle、accent Token；Light/Dark 由 ConfigProvider 传播到 body Portal。forced-colors 隐藏渐隐层并保留选中窗、焦点和禁用状态。内部 class 不是 API。
+
+## SSR 与 Next.js
+
+组件标记 `use client`，但 open/closed 首屏均可安全 renderToString；useId 保证标题和 option 关系稳定。Next 页面应让服务端与首次客户端的 open、columns、value 一致，通常服务端保持关闭并由原生 Trigger 打开。
+
+## RTL 与国际化
+
+内置 zh-CN/en-US 的 action 和列名回退；可逐项覆盖。Portal 继承 dir、lang、theme 和 motion；布局、文本对齐与间距使用逻辑方向。滚轮顺序不因 RTL 反转。
+
+## 浏览器与 WebView
+
+目标为 Chrome 70、iOS 13 及后续 WebView。scroll snap、原生滚动和 WebkitOverflowScrolling 可增强触摸体验；不支持的滚动条/overscroll 属性只视觉降级，不影响选择与确认。
+
+## 边界情况与已知限制
+
+- 非法、缺失或 disabled 值归一到该列首个 enabled option；空列归一为 null。
+- 组件不虚拟化单列选项，单列数百项应改用搜索列表。
+- 调用方必须不可变更新 columns；原地修改数组不保证触发状态同步。
+- renderOption 不能嵌套 button、link 或输入控件。
+
+## 性能预算
+
+渲染成本为所有可见 columns 的 option 总数；滚动事件仅在 80ms settle 后发布选择。计时器、requestAnimationFrame、焦点圈定和滚动锁在关闭/卸载时清理。
+
+## 测试证据
+
+- Unit: draft 回滚/确认、受控意图、动态列、disabled/empty、pointer/scroll/type-ahead/Page 键、Portal 配置与 Field 语义
+- Story interaction: 待补 play function
+- Axe: 待 CI
+- SSR/hydration: `Picker.ssr.test.tsx`；真实 Next hydration 由隔离 H5 站覆盖基础路径
+- RTL: LongLabelsRTL Story 与 Portal unit
+- Reduced motion: ConfigProvider Portal unit；视觉时长待浏览器矩阵
+- Mobile Chromium/WebKit E2E: next-h5 已覆盖 draft、确认与焦点恢复
+- Chromatic Light/Dark: Figma 已验收，统一发布批次再运行
+- Real device: 待补 iOS VoiceOver 与 Android TalkBack/惯性滚动
+
+## V2 优化记录
+
+### 待优化
+
+补 axe、hydration 专测、双引擎滚动 settle、真机读屏与 200% 字号证据；发布前验证超长本地化 action 文案。
+
+### 已完成
+
+冻结确认式状态契约；补 Page 键、点击后焦点连续性、空列 Tab 边界、动态列归一、Portal 配置传播、强制色彩、长标题、SSR 和完整留存文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                      | 迁移说明 |
+| ---------- | ------ | -------- | ----------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | behavior | V2 键盘、动态数据、视觉兼容与 SSR 加固    | API 兼容 |
+| 2026-08-29 | 未发布 | docs     | 建立 Picker 与 PickerTrigger 共置永久文档 | 无       |

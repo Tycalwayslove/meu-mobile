@@ -64,6 +64,11 @@ type TimePickerState = {
   valueSnapshot: TimeValue | null | undefined;
 };
 
+/**
+ * Renders a confirmation-based time-of-day wheel with 12- or 24-hour presentation.
+ *
+ * @public
+ */
 export function TimePicker({
   columnLabels,
   defaultOpen = false,
@@ -161,6 +166,9 @@ export function TimePicker({
     let committedValue = pickerState.committedValue;
     let draftValue = pickerState.draftValue;
     if (inputsChanged) committedValue = resolve(controlledValue ? value : committedValue).time;
+    if (controlledValue && (controlledValueChanged || inputsChanged)) {
+      committedValue = resolve(value).time;
+    }
     if (resolvedOpen) {
       if (!pickerState.open || valueModeChanged || controlledValueChanged) {
         draftValue = resolve(controlledValue ? value : committedValue).time;

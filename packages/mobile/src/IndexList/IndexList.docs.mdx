@@ -1,0 +1,148 @@
+---
+name: IndexList
+slug: index-list
+package: "@meu/mobile"
+exports: [IndexList]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "409:2"
+storyIds:
+  [
+    navigation-indexlist--default,
+    navigation-indexlist--custom-brief,
+    navigation-indexlist--non-sticky
+  ]
+source: packages/mobile/src/IndexList
+---
+
+# IndexList
+
+## 当前能力
+
+- 在组件自己的有界纵向视口内渲染稳定分组、sticky 标题和 44×44 索引按钮。
+- 原生按钮支持 roving tab stop、ArrowUp/ArrowDown、Home/End、点击和沿索引栏连续触摸定位。
+- `onIndexChange` 区分 `index`/`scroll`，`ref.scrollTo` 支持自动/平滑定位和可选焦点移动。
+- 动态删除当前分组时视觉与 Tab stop 回退首个现存分组；RTL、forced-colors 与 i18n 内置文案已处理。
+
+状态为 `audit`；浏览器交互、视觉和真机证据仍需在发布批次统一执行。
+
+## 何时使用
+
+用于联系人、城市、品牌等按稳定短索引分组、且内容足够长需要快速跳转的集合。
+
+## 何时不要使用
+
+少量分组用 List/Collapse；页面级目录用 SideNav；远程大数据先分页或虚拟化，不把全部数据塞入 IndexList。
+
+## 结构与状态
+
+根网格包含 owned scroll body 与 `nav` rail；每个 section 由可见 heading 标记。状态只有当前 active key 与 programmatic-scroll 抑制窗口，业务数据仍由调用方持有。
+
+## 基础用法
+
+```tsx
+<IndexList
+  aria-label="城市"
+  sections={groups}
+  onIndexChange={(key, details) => analytics.track(key, details.source)}
+  style={{ height: 520 }}
+/>
+```
+
+## 受控与非受控
+
+不提供受控 active key。active 由索引操作和组件自身滚动派生；业务需要定位时调用 `ref.scrollTo`。`sections` 是外部事实源。
+
+## 表单集成
+
+不适用。IndexList 不是输入控件；分组内表单控件由各自 adapter 管理。
+
+## Props
+
+API 由 `IndexListProps`/`IndexListSection` 生成。`key` 必须稳定唯一；非展示型 key 用 `ariaLabel` 提供按钮名称；`brief` 只改变短视觉，`title` 只改变可见 heading。
+
+## Events
+
+`onIndexChange(key, details)` 仅在 active key 真正变化时通知。rail 的点击、键盘和 pointer 滑动为 `source=index`；body 滚动为 `source=scroll`。
+
+## Ref 与命令式方法
+
+`scrollTo(key, { behavior, focusIndex })` 找到目标返回 true，否则返回 false；平滑滚动使用浏览器原生行为。
+
+## 键盘操作
+
+| 按键                | 行为                       |
+| ------------------- | -------------------------- |
+| Tab                 | 只进入当前 active 索引按钮 |
+| ArrowDown / ArrowUp | 循环到下一/上一分组并定位  |
+| Home / End          | 定位首/末分组              |
+| Enter / Space       | 原生按钮定位当前分组       |
+
+## 触摸与手势
+
+在 44px rail 上按下并上下滑动会连续定位最近按钮，主 pointer 结束或取消后释放 capture。rail 使用 `touch-action:none`，只在窄索引区域认领手势；主内容保持原生纵向滚动。
+
+## 无障碍
+
+rail 是具名 navigation，section 由可见 heading 标记，active button 使用 `aria-current=location`。`brief` 为图形或数字时必须提供可理解的 `ariaLabel`。
+
+## 动效
+
+组件不创建自定义动画；仅 `behavior=smooth` 使用平台滚动。reduced-motion 场景由调用方改用 `auto`，组件不会偷偷覆盖明确请求。
+
+## 主题与定制
+
+颜色、边界、圆角和字号来自 Meu Token。稳定入口为 `sticky`、section slots、根 `className/style` 与 data attributes；forced-colors 保留按钮边界。
+
+## SSR 与 Next.js
+
+服务端输出完整稳定结构和首个 active 语义，不访问 window；定位、offset 与 pointer 行为只在 hydration 后启用。必须给视口明确高度。
+
+## RTL 与国际化
+
+rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-end 列视觉边界；内置 rail 名称支持中英文，也可用 `indexAriaLabel` 覆盖。
+
+## 浏览器与 WebView
+
+依赖 sticky、Pointer Events、scrollTo options 与逻辑 CSS。Chrome/WebView 70、iOS 13 可运行；早期 iOS 13 pointer 支持不完整时仍保留点击和键盘路径。
+
+## 边界情况与已知限制
+
+- 不验证重复 key；重复 identity 属于调用方错误。
+- 只拥有内部滚动，不监听 window 或任意外部 scroller。
+- programmatic smooth 完成使用保守时间窗抑制滚动回报，不提供 scrollend 事件。
+- 分组非常多时 rail 自身可滚动；不提供拼音、搜索或分组生成。
+
+## 性能预算
+
+渲染成本与全部 section 内容线性相关，不做窗口化。大数据组合应由业务分页；需要 1k+ 同质行使用 VirtualList。
+
+## 测试证据
+
+- Unit: `IndexList.test.tsx` 覆盖语义、ref、键盘、滚动、动态删除、pointer 滑动和 ariaLabel。
+- Story interaction: stories 已提供，runner 待执行。
+- Axe: 待补。
+- SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构；hydration 专测待补。
+- RTL / Reduced motion / forced-colors: CSS 与契约完成，视觉矩阵待补。
+- Mobile Chromium/WebKit E2E、Chromatic Light/Dark、real device: 待发布批次统一验证。
+
+## V2 优化记录
+
+### 待优化
+
+- 补 rail 连续滑动与页面滚动竞争的 iOS/Android 真机证据、axe 和主题视觉基线。
+
+### 已完成
+
+- 增加连续 pointer 索引、稳定可访问名称、RTL 逻辑边界、forced-colors、TSDoc、SSR 与动态数据测试。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                                   | 迁移说明                                    |
+| ---------- | ------ | --------- | -------------------------------------- | ------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening | 完成索引触摸、动态分组与跨平台语义加固 | 新增可选 `section.ariaLabel`，其余 API 兼容 |

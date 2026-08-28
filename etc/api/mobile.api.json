@@ -762,7 +762,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ alt, className, fallback, fit, imageRef, loading, onError, onLoad, ref, shape, size, src, style, ...props }",
+              "parameterName": "{ alt, className, fallback, fit, imageRef, initials, loading, onError, onLoad, ref, shape, size, src, style, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -872,7 +872,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    imageRef?: "
+              "text": ";\n    initials?: string;\n    imageRef?: "
             },
             {
               "kind": "Reference",
@@ -1792,7 +1792,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!Calendar:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders an adapter-driven inline month grid with single, multiple, or range selection.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2367,7 +2367,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Discriminated props whose value and callback types follow selectionMode.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2527,7 +2527,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarRange:type",
-          "docComment": "",
+          "docComment": "/**\n * A normalized inclusive pair of calendar-day endpoints.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2646,7 +2646,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarRef:type",
-          "docComment": "",
+          "docComment": "/**\n * Imperative focus and month-navigation surface exposed by Calendar.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2685,7 +2685,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarSelectionMode:type",
-          "docComment": "",
+          "docComment": "/**\n * Selection models supported by {@link Calendar}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2764,7 +2764,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarValue:type",
-          "docComment": "",
+          "docComment": "/**\n * Runtime union used by Calendar helper functions.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2821,7 +2821,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarWeekStartsOn:type",
-          "docComment": "",
+          "docComment": "/**\n * JavaScript weekday index used as the first grid column.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2885,7 +2885,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, className, description, extra, footer, leading, media, padding, ref, title, variant, ...props }",
+              "parameterName": "{ children, className, description, extra, footer, footerLayout, leading, media, mediaAspectRatio, padding, ref, title, variant, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -2999,6 +2999,15 @@
             },
             {
               "kind": "Content",
+              "text": ";\n    footerLayout?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CardFooterLayout",
+              "canonicalReference": "@meu/mobile!~CardFooterLayout:type"
+            },
+            {
+              "kind": "Content",
               "text": ";\n    leading?: "
             },
             {
@@ -3017,7 +3026,16 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    padding?: "
+              "text": ";\n    mediaAspectRatio?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CSSProperties",
+              "canonicalReference": "@types/react!React.CSSProperties:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"aspectRatio\"];\n    padding?: "
             },
             {
               "kind": "Reference",
@@ -3074,7 +3092,7 @@
           "name": "CardProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 29
+            "endIndex": 33
           }
         },
         {
@@ -3427,7 +3445,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!CascadePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Tree-to-wheel adapter that commits one normalized root-to-leaf path.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3521,7 +3539,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CascadePickerOption:type",
-          "docComment": "",
+          "docComment": "/**\n * Tree option consumed by {@link CascadePicker}. Sibling values must be unique.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3727,7 +3745,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CellProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a semantic information row. The rendered root depends on `href` and interaction props.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4559,7 +4577,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CollapseItem:type",
-          "docComment": "",
+          "docComment": "/**\n * One disclosure item. `value` must be unique and stable within the group.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4612,7 +4630,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CollapseProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a disclosure group or single-open accordion.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5101,7 +5119,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!DatePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders a confirmation-based date wheel backed by a pluggable DateAdapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5186,7 +5204,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DatePickerFilter:type",
-          "docComment": "",
+          "docComment": "/**\n * Per-precision option predicates evaluated with the candidate date.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5408,7 +5426,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DatePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for an adapter-driven, confirmation-based date wheel.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5615,7 +5633,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!DateRangePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders a modal, confirmation-based date range flow composed from Calendar and Popup.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5800,7 +5818,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DateRangePickerPreset:type",
-          "docComment": "",
+          "docComment": "/**\n * A stable, precomputed range offered as a draft shortcut.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5883,7 +5901,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DateRangePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the modal confirmation-based range picker.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6106,7 +6124,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DialogActionLayout:type",
-          "docComment": "",
+          "docComment": "/**\n * Dialog action arrangement. `auto` stacks three or more actions.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6132,7 +6150,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DialogActionTone:type",
-          "docComment": "",
+          "docComment": "/**\n * Semantic and visual emphasis for a dialog action.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6805,7 +6823,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!EllipsisProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for measured, accessible multi-line text truncation.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6955,7 +6973,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedby, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, action, className, description, illustration, ref, role, title, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedby, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, action, className, description, illustration, reason, ref, role, secondaryAction, title, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -6976,7 +6994,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!EmptyProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for an empty-state explanation and optional recovery actions.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7007,7 +7025,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"title\"> & {\n    action: "
+              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"title\"> & {\n    action?: "
             },
             {
               "kind": "Reference",
@@ -7034,7 +7052,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    ref?: "
+              "text": ";\n    reason?: \"no-data\" | \"no-results\" | \"not-configured\";\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -7052,7 +7070,16 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    title: "
+              "text": ">;\n    secondaryAction?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    title: "
             },
             {
               "kind": "Reference",
@@ -7073,7 +7100,7 @@
           "name": "EmptyProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 19
+            "endIndex": 21
           }
         },
         {
@@ -7398,7 +7425,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!FloatingPanelHeightChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Metadata emitted with a height request.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7433,7 +7460,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!FloatingPanelHeightChangeReason:type",
-          "docComment": "",
+          "docComment": "/**\n * Source that requested an anchor change.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7459,7 +7486,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!FloatingPanelPlacement:type",
-          "docComment": "",
+          "docComment": "/**\n * Physical edge where the modeless panel is attached.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7485,7 +7512,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!FloatingPanelProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a persistent, modeless, anchored floating panel.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7588,7 +7615,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!FloatingPanelRef:type",
-          "docComment": "",
+          "docComment": "/**\n * Imperative FloatingPanel handle.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7632,7 +7659,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!FloatingPanelSetHeightOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Options accepted by {@link FloatingPanelRef.setHeight}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9684,7 +9711,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!IndexList:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders a bounded, sectioned list with an accessible keyboard and touch index rail.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9743,7 +9770,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IndexListChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Details reported with an active-section change.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9787,6 +9814,24 @@
             },
             {
               "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "PointerEvent",
+              "canonicalReference": "@types/react!React.PointerEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
               "text": ">;\n    source: "
             },
             {
@@ -9808,13 +9853,13 @@
           "name": "IndexListChangeDetails",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 12
+            "endIndex": 16
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IndexListChangeSource:type",
-          "docComment": "",
+          "docComment": "/**\n * Origin of an active-section change.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9840,7 +9885,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IndexListProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for {@link IndexList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9925,7 +9970,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IndexListRef:type",
-          "docComment": "",
+          "docComment": "/**\n * Imperative handle exposed by {@link IndexList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9960,7 +10005,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IndexListScrollOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Options for {@link IndexListRef.scrollTo}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -9995,7 +10040,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IndexListSection:type",
-          "docComment": "",
+          "docComment": "/**\n * A stable, addressable section rendered by {@link IndexList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10003,7 +10048,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    brief?: "
+              "text": "{\n    ariaLabel?: string;\n    brief?: "
             },
             {
               "kind": "Reference",
@@ -10048,7 +10093,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!InfiniteList:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders a concurrency-safe pagination sentinel with automatic and manual request paths.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10107,7 +10152,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!InfiniteListProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for {@link InfiniteList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10246,7 +10291,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!InfiniteListStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual and request state exposed by {@link InfiniteList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10272,7 +10317,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!InfiniteListStatusChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Details reported with an {@link InfiniteListStatus} transition.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10307,7 +10352,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!InfiniteListTrigger:type",
-          "docComment": "",
+          "docComment": "/**\n * Entry point that initiated a pagination request.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10504,7 +10549,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ListProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a semantic group of Cell rows.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10679,7 +10724,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!MaskOpacity:type",
-          "docComment": "",
+          "docComment": "/**\n * Preset or custom backdrop opacity. Numeric values are clamped to 0–1.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10960,7 +11005,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ backAriaLabel, backHref, backIcon, backLabel, bordered, className, left, onBack, ref, right, title, ...props }",
+              "parameterName": "{ backAriaLabel, backHref, backIcon, backLabel, bordered, className, left, onBack, ref, right, safeArea, title, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -10981,7 +11026,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!NavBarProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a route-agnostic mobile page header.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -11084,7 +11129,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    title?: "
+              "text": ";\n    safeArea?: boolean;\n    title?: "
             },
             {
               "kind": "Reference",
@@ -12069,7 +12114,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, activeIndex, className, count, direction, ref, variant, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, activeIndex, className, count, direction, getPageLabel, interactive, maxVisible, onChange, ref, variant, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -12147,7 +12192,25 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    ref?: "
+              "text": ";\n    getPageLabel?: (index: number, count: number) => string;\n    interactive?: boolean;\n    maxVisible?: number;\n    onChange?: (index: number, event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -12186,7 +12249,7 @@
           "name": "PaginationDotsProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 13
+            "endIndex": 17
           }
         },
         {
@@ -12640,7 +12703,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!Picker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Confirmation-based mobile wheel picker with isolated draft state.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12734,7 +12797,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PickerColumn:type",
-          "docComment": "",
+          "docComment": "/**\n * Ordered options rendered as one independently scrollable wheel.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12866,7 +12929,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PickerOption:type",
-          "docComment": "",
+          "docComment": "/**\n * One immutable option in a {@link PickerColumn}. Values must be unique within the column.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13060,7 +13123,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!PickerTrigger:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Field-aware native button for opening Picker-family dialogs.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13239,7 +13302,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PickerValue:type",
-          "docComment": "",
+          "docComment": "/**\n * Primitive value supported by picker options.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13685,7 +13748,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, className, formatValue, indeterminate, label, ref, showValue, size, style, tone, value, ...props }",
+              "parameterName": "{ \"aria-atomic\": ariaAtomic, \"aria-label\": ariaLabel, \"aria-live\": ariaLive, \"aria-valuetext\": ariaValueText, announce, className, formatValue, indeterminate, label, ref, showValue, size, style, tone, value, valueText, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -13706,7 +13769,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ProgressProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a determinate or indeterminate progress indicator.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13737,7 +13800,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\"> & {\n    formatValue?: (value: number) => "
+              "text": ">, \"children\"> & {\n    announce?: boolean;\n    formatValue?: (value: number) => "
             },
             {
               "kind": "Reference",
@@ -13791,7 +13854,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    value?: number;\n}"
+              "text": ";\n    value?: number;\n    valueText?: string;\n}"
             },
             {
               "kind": "Content",
@@ -13809,7 +13872,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ProgressSize:type",
-          "docComment": "",
+          "docComment": "/**\n * Progress track thickness.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13835,7 +13898,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ProgressTone:type",
-          "docComment": "",
+          "docComment": "/**\n * Semantic color treatment. Do not rely on color alone to communicate state.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13920,7 +13983,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PullToRefreshIndicatorDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Values passed to a custom indicator renderer.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -13946,7 +14009,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PullToRefreshProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a scroll-boundary-aware pull-to-refresh enhancement.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14076,7 +14139,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PullToRefreshStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Pull-to-refresh lifecycle state.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14102,7 +14165,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PullToRefreshStatusChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Metadata emitted with a lifecycle transition.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14146,7 +14209,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PullToRefreshTrigger:type",
-          "docComment": "",
+          "docComment": "/**\n * Input path that started a refresh.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14982,7 +15045,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedby, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, actions, className, description, icon, ref, role, status, title, ...props }",
+              "parameterName": "{ \"aria-atomic\": ariaAtomic, \"aria-describedby\": ariaDescribedby, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, \"aria-live\": ariaLive, actions, className, description, headingLevel, icon, ref, role, status, title, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -15003,7 +15066,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ResultProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a terminal or pending operation outcome.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15052,7 +15115,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    icon?: "
+              "text": ";\n    headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;\n    icon?: "
             },
             {
               "kind": "Reference",
@@ -15115,7 +15178,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ResultStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Semantic result state. `waiting` remains as a compatibility alias for `pending`.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15123,7 +15186,7 @@
             },
             {
               "kind": "Content",
-              "text": "\"success\" | \"error\" | \"info\" | \"warning\" | \"waiting\""
+              "text": "\"success\" | \"error\" | \"info\" | \"warning\" | \"pending\" | \"waiting\""
             },
             {
               "kind": "Content",
@@ -16117,7 +16180,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, block, className, defaultValue, disabled, form, focusRef, id, name, onChange, onFocus, options, ref, required, size, status, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, block, className, defaultValue, disabled, form, id, name, onChange, onFocus, options, ref, required, size, status, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -16275,25 +16338,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    block?: boolean;\n    defaultValue?: TValue;\n    disabled?: boolean;\n    form?: string;\n    focusRef?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "Ref",
-              "canonicalReference": "@types/react!React.Ref:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLInputElement",
-              "canonicalReference": "!HTMLInputElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">;\n    name?: string;\n    onChange?: (value: TValue, event: "
+              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    block?: boolean;\n    defaultValue?: TValue;\n    disabled?: boolean;\n    form?: string;\n    name?: string;\n    onChange?: (value: TValue, event: "
             },
             {
               "kind": "Reference",
@@ -16381,7 +16426,7 @@
           ],
           "typeTokenRange": {
             "startIndex": 5,
-            "endIndex": 29
+            "endIndex": 25
           }
         },
         {
@@ -16525,7 +16570,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, allowClear, className, columns, defaultValue, disabled, form, focusRef, id, multiple, name, onChange, onFocus, options, ref, required, showCheckMark, size, status, style, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, allowClear, className, columns, defaultValue, disabled, form, id, multiple, name, onChange, onFocus, options, ref, required, showCheckMark, size, status, style, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -16785,25 +16830,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    allowClear?: boolean;\n    columns?: number;\n    defaultValue?: TValue[];\n    disabled?: boolean;\n    form?: string;\n    focusRef?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "Ref",
-              "canonicalReference": "@types/react!React.Ref:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLInputElement",
-              "canonicalReference": "!HTMLInputElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">;\n    multiple?: boolean;\n    name?: string;\n    onChange?: (value: TValue[], options: "
+              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    allowClear?: boolean;\n    columns?: number;\n    defaultValue?: TValue[];\n    disabled?: boolean;\n    form?: string;\n    multiple?: boolean;\n    name?: string;\n    onChange?: (value: TValue[], options: "
             },
             {
               "kind": "Reference",
@@ -16891,7 +16918,7 @@
           ],
           "typeTokenRange": {
             "startIndex": 5,
-            "endIndex": 29
+            "endIndex": 25
           }
         },
         {
@@ -17060,7 +17087,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SideNavItem:type",
-          "docComment": "",
+          "docComment": "/**\n * One side-navigation destination. Keys must be unique and stable.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17077,7 +17104,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    content?: "
+              "text": ";\n    badgeLabel?: string;\n    content?: "
             },
             {
               "kind": "Reference",
@@ -17113,7 +17140,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SideNavProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for route-agnostic vertical tabs or a side navigation rail.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17272,7 +17299,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ animated, className, height, lines, lineWidths, ref, style, variant, width, ...props }",
+              "parameterName": "{ animated, aspectRatio, className, height, lines, lineWidths, ref, style, variant, width, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -17293,7 +17320,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SkeletonProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a decorative, layout-reserving loading placeholder.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17324,7 +17351,16 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\"> & {\n    animated?: boolean;\n    height?: "
+              "text": ">, \"children\"> & {\n    animated?: boolean;\n    aspectRatio?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CSSProperties",
+              "canonicalReference": "@types/react!React.CSSProperties:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"aspectRatio\"];\n    height?: "
             },
             {
               "kind": "Reference",
@@ -17399,13 +17435,13 @@
           "name": "SkeletonProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 21
+            "endIndex": 23
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SkeletonVariant:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual placeholder shape.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18441,7 +18477,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, className, closeOnAction, closeOnOutsidePress, defaultOpenSide, disabled, leftActions, leftActionsLabel, onAction, onActionError, onClickCapture, onKeyDownCapture, onOpenSideChange, onPointerCancel, onPointerDown, onPointerMove, onPointerUp, openSide, openThreshold, ref, revealLeftLabel, revealRightLabel, rightActions, rightActionsLabel, style, ...props }",
+              "parameterName": "{ children, className, closeOnAction, closeOnOutsidePress, defaultOpenSide, disabled, leftActions, leftActionsLabel, onAction, onActionError, onClickCapture, onKeyDownCapture, onLostPointerCapture, onOpenSideChange, onPointerCancel, onPointerDown, onPointerMove, onPointerUp, openSide, openThreshold, ref, revealLeftLabel, revealRightLabel, rightActions, rightActionsLabel, style, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -18462,7 +18498,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsAction:type",
-          "docComment": "",
+          "docComment": "/**\n * Native-button action displayed in a rail. Keys must be unique across that rail.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18533,7 +18569,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsActionPressDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Location of a pressed action.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18568,7 +18604,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsActionResult:type",
-          "docComment": "",
+          "docComment": "/**\n * Returning false vetoes automatic close.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18603,7 +18639,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsActionTone:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual action emphasis.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18629,7 +18665,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsOpenChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Why a rail-open state request occurred.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18664,7 +18700,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for horizontal swipe action rails with native keyboard alternatives.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18695,7 +18731,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"defaultValue\" | \"onChange\" | \"onClickCapture\" | \"onKeyDownCapture\" | \"onPointerCancel\" | \"onPointerDown\" | \"onPointerMove\" | \"onPointerUp\"> & {\n    children: "
+              "text": ">, \"children\" | \"defaultValue\" | \"onChange\" | \"onClickCapture\" | \"onKeyDownCapture\" | \"onLostPointerCapture\" | \"onPointerCancel\" | \"onPointerDown\" | \"onPointerMove\" | \"onPointerUp\"> & {\n    children: "
             },
             {
               "kind": "Reference",
@@ -18791,6 +18827,24 @@
               "kind": "Reference",
               "text": "React.KeyboardEvent",
               "canonicalReference": "@types/react!React.KeyboardEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLDivElement",
+              "canonicalReference": "!HTMLDivElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    onLostPointerCapture?: (event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactPointerEvent",
+              "canonicalReference": "@types/react!React.PointerEvent:interface"
             },
             {
               "kind": "Content",
@@ -18950,13 +19004,13 @@
           "name": "SwipeActionsProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 61
+            "endIndex": 65
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwipeActionsSide:type",
-          "docComment": "",
+          "docComment": "/**\n * Physical action rail.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19299,7 +19353,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    badge?: "
+              "text": "{\n    ariaLabel?: string;\n    badge?: "
             },
             {
               "kind": "Reference",
@@ -19308,7 +19362,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    disabled?: boolean;\n    href?: string;\n    icon: "
+              "text": ";\n    badgeLabel?: string;\n    disabled?: boolean;\n    href?: string;\n    icon: "
             },
             {
               "kind": "Reference",
@@ -19512,7 +19566,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, activationMode, className, defaultValue, destroyInactive, items, onChange, ref, stretch, value, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, activationMode, className, defaultValue, destroyInactive, items, lazy, onChange, ref, stretch, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -19652,7 +19706,7 @@
             },
             {
               "kind": "Content",
-              "text": "[];\n    onChange?: (key: string, event: "
+              "text": "[];\n    lazy?: boolean;\n    onChange?: (key: string, event: "
             },
             {
               "kind": "Reference",
@@ -19762,7 +19816,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, className, disabled, onClick, ref, rounded, size, tone, variant, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, children, className, closeAriaLabel, disabled, onClick, onClose, ref, rounded, selected, size, tone, variant, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -19823,7 +19877,25 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    disabled?: boolean;\n    onClick?: "
+              "text": ";\n    closeAriaLabel?: string;\n    disabled?: boolean;\n    onClick?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEventHandler",
+              "canonicalReference": "@types/react!React.MouseEventHandler:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    onClose?: "
             },
             {
               "kind": "Reference",
@@ -19859,7 +19931,7 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    rounded?: boolean;\n    size?: "
+              "text": ">;\n    rounded?: boolean;\n    selected?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -19898,7 +19970,7 @@
           "name": "TagProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 23
+            "endIndex": 27
           }
         },
         {
@@ -20430,7 +20502,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!TimePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders a confirmation-based time-of-day wheel with 12- or 24-hour presentation.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -20628,7 +20700,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TimePickerFilter:type",
-          "docComment": "",
+          "docComment": "/**\n * Per-column option predicates evaluated with a canonical 24-hour candidate.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -20920,7 +20992,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TimePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the confirmation-based time-of-day wheel.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -20996,7 +21068,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TimeValue:type",
-          "docComment": "",
+          "docComment": "/**\n * A date- and timezone-independent time of day using canonical 24-hour fields.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21036,7 +21108,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!Toast:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders one declarative non-modal feedback message in a context-preserving Portal.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21099,7 +21171,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastAction:type",
-          "docComment": "",
+          "docComment": "/**\n * Optional action rendered beside a Toast message.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21143,7 +21215,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastApi:type",
-          "docComment": "",
+          "docComment": "/**\n * FIFO command API exposed by {@link ToastProvider}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21241,7 +21313,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastCloseDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Reasons emitted by provider-owned Toast records.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21272,7 +21344,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastController:type",
-          "docComment": "",
+          "docComment": "/**\n * Controller for one provider-owned Toast record.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21307,7 +21379,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastOpenChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Reasons emitted by a declarative Toast close request.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21333,7 +21405,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastPosition:type",
-          "docComment": "",
+          "docComment": "/**\n * Viewport placement for Toast.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21359,7 +21431,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Properties accepted by one declarative Toast component.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21489,7 +21561,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!ToastProvider:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Provides a scoped FIFO queue for command-driven Toast feedback.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21548,7 +21620,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastProviderProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for {@link ToastProvider}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21583,7 +21655,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastShowOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Options accepted by {@link ToastApi.show}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21632,7 +21704,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastTone:type",
-          "docComment": "",
+          "docComment": "/**\n * Semantic visual tone and live-region urgency for Toast.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21658,7 +21730,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastToneOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Tone-specific show options.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21698,7 +21770,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ToastUpdateOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Partial update accepted by a {@link ToastController}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21747,7 +21819,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!TreeSelect:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Searchable, virtualizable, confirmation-based mobile tree selector.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21807,7 +21879,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, allowClear, cancelText, className, clearSearchOnClose, closeOnEscape, closeOnMaskClick, confirmText, container, defaultExpandedValues, defaultOpen, defaultSearchValue, defaultValue, disabled, emptyContent, expandedValues, filterOption, forceMount, loadChildren, lockScroll, maskOpacity, maxCount, multiple, onCancel, onConfirm, onExpandedValuesChange, onLoadError, onOpenChange, onSearchValueChange, onSelect, open, options, overscan, readOnly, ref, renderOption, restoreFocus, returnFocusRef, safeArea, searchPlaceholder, searchable, searchValue, selectionMode, status, title, treeAriaLabel, treeHeight, value, virtual, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, allowClear, cancelText, className, clearSearchOnClose, closeOnEscape, closeOnMaskClick, confirmText, container, defaultExpandedValues, defaultOpen, defaultSearchValue, defaultValue, disabled, emptyContent, expandedValues, filterOption, forceMount, loadChildren, loadingText, loadErrorText, lockScroll, maskOpacity, maxCount, multiple, onCancel, onConfirm, onExpandedValuesChange, onLoadError, onOpenChange, onSearchValueChange, onSelect, open, options, overscan, readOnly, ref, renderOption, restoreFocus, returnFocusRef, safeArea, searchPlaceholder, searchable, searchValue, selectionMode, status, title, treeAriaLabel, treeHeight, value, virtual, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -22171,7 +22243,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TreeSelectOption:type",
-          "docComment": "",
+          "docComment": "/**\n * One immutable node in a TreeSelect data source. Values must be globally unique.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22567,7 +22639,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!useToast:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Returns the FIFO Toast command API from the nearest {@link ToastProvider}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22596,7 +22668,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!VirtualList:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders a vertical, dynamically measured window over a caller-owned item collection.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22672,7 +22744,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListAlign:type",
-          "docComment": "",
+          "docComment": "/**\n * Alignment used by {@link VirtualListRef.scrollToIndex}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22698,7 +22770,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the vertical-only {@link VirtualList}. A list accessible name is required.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22747,7 +22819,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListRange:type",
-          "docComment": "",
+          "docComment": "/**\n * Visible and mounted window reported by {@link VirtualList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22773,7 +22845,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListRef:type",
-          "docComment": "",
+          "docComment": "/**\n * Imperative handle exposed by {@link VirtualList}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22826,7 +22898,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListScrollBehavior:type",
-          "docComment": "",
+          "docComment": "/**\n * Native scroll behavior supported by VirtualList imperative methods.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22852,7 +22924,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListScrollOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Options shared by VirtualList imperative scrolling methods.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -22887,7 +22959,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!VirtualListScrollToIndexOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Options for {@link VirtualListRef.scrollToIndex}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

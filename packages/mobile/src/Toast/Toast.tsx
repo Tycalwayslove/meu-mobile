@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FocusEvent, MouseEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useControllableOpen } from "../internal/useControllableOpen";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import {
@@ -95,6 +96,7 @@ function usePausableTimer({
   return { pause, resume };
 }
 
+/** Renders one declarative non-modal feedback message in a context-preserving Portal. */
 export function Toast({
   action,
   className,
@@ -117,7 +119,11 @@ export function Toast({
   ...props
 }: ToastProps) {
   const config = useMeuConfig();
+  const configBoundary = getConfigBoundaryProps(config);
   const [pending, setPending] = useState(false);
+  const [actionFailed, setActionFailed] = useState(false);
+  const mountedRef = useRef(true);
+  const actionRunRef = useRef(0);
   const [resolvedOpen, requestOpenChange] = useControllableOpen<ToastOpenChangeDetails>({
     defaultOpen,
     onOpenChange,
@@ -134,26 +140,50 @@ export function Toast({
     open: resolvedOpen
   });
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      actionRunRef.current += 1;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!resolvedOpen) {
+      actionRunRef.current += 1;
+      setPending(false);
+      setActionFailed(false);
+    }
+  }, [resolvedOpen]);
+
   if (!shouldRender) return null;
 
   const runAction = async () => {
     if (!action || pending) return;
     pause("action");
     setPending(true);
+    setActionFailed(false);
+    actionRunRef.current += 1;
+    const actionRun = actionRunRef.current;
     let result: boolean | void;
     try {
       result = action.onPress ? await action.onPress() : undefined;
     } catch (error) {
-      if (onActionError) {
-        onActionError(error);
-        return;
-      }
-      throw error;
+      if (mountedRef.current && actionRunRef.current === actionRun) setActionFailed(true);
+      if (onActionError) onActionError(error);
+      return;
     } finally {
-      setPending(false);
-      resume("action");
+      if (mountedRef.current && actionRunRef.current === actionRun) {
+        setPending(false);
+        resume("action");
+      }
     }
-    if (result !== false && action.closeOnPress !== false) {
+    if (
+      mountedRef.current &&
+      actionRunRef.current === actionRun &&
+      result !== false &&
+      action.closeOnPress !== false
+    ) {
       requestOpenChange(false, { reason: "action" });
     }
   };
@@ -161,13 +191,12 @@ export function Toast({
   return (
     <Portal container={portalContainer}>
       <div
-        className={viewport({ position })}
+        {...configBoundary}
+        className={`${viewport({ position })} ${configBoundary.className}`}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
-        lang={config.locale}
         data-meu-overlay-layer="toast"
         data-position={position}
-        data-meu-theme={config.theme}
       >
         <div
           {...props}
@@ -178,6 +207,7 @@ export function Toast({
               : toastStyle({ state: visualState, tone })
           }
           aria-busy={pending ? "true" : undefined}
+          data-action-error={actionFailed ? "true" : undefined}
           data-meu-component="toast"
           data-state={visualState}
           data-tone={tone}

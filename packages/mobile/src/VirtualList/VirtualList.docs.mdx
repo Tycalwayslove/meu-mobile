@@ -1,0 +1,147 @@
+---
+name: VirtualList
+slug: virtual-list
+package: "@meu/mobile"
+exports: [VirtualList]
+status: audit
+priority: P2
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "351:176"
+storyIds:
+  [
+    collections-virtuallist--ten-thousand-rows,
+    collections-virtuallist--initial-middle,
+    collections-virtuallist--empty
+  ]
+source: packages/mobile/src/VirtualList
+---
+
+# VirtualList
+
+## 当前能力
+
+- 纵向 owned viewport、10k+ 数据窗口化、overscan、动态高度 DOM 测量和稳定 SSR 初始窗口。
+- `getItemKey` 驱动 identity；焦点后代对应的稳定 key 在滚远、排序后仍保持挂载，删除后安全释放。
+- 完整 `role=list/listitem`、`aria-setsize/posinset`，必需 accessible name 和去重 range 回报。
+- `scrollToIndex/scrollToOffset/measure`、异常数值归一、RTL 逻辑定位、forced-colors 与滚动 containment 已实现。
+
+## 何时使用
+
+用于同一纵向视口内数百至数万条、行可动态变高且只需挂载可见窗口的业务集合。
+
+## 何时不要使用
+
+少量内容用 List；分页状态用 InfiniteList；树、网格、瀑布流、横向或 window scroll 需要专用实现。
+
+## 结构与状态
+
+根是有高度的 scrollable list，内部 sizer 表示总高度，可见行绝对定位。状态包含虚拟范围、测量缓存和 focused stable key；items 与业务状态始终外置。
+
+## 基础用法
+
+```tsx
+<VirtualList
+  aria-label="订单"
+  items={orders}
+  height={480}
+  estimateSize={(order) => (order.detail ? 76 : 56)}
+  getItemKey={(order) => order.id}
+  renderItem={(order) => <OrderCell order={order} />}
+/>
+```
+
+## 受控与非受控
+
+items 完全受调用方控制；滚动位置由原生视口维护，可通过 ref 发出定位命令。`initialOffset` 只决定 SSR/首次挂载起点，不是受控 scrollTop。
+
+## 表单集成
+
+VirtualList 不是字段。若行含表单控件，卸载行会卸载其 DOM；字段值必须存于外部 form state，不能只存本地组件 state。
+
+## Props
+
+API 由泛型 `VirtualListProps<T>` 生成。`height/estimateSize/gap/initialOffset/overscan` 会归一有限范围；`getItemKey` 必须稳定唯一，禁止把排序下标当业务 identity。
+
+## Events
+
+`onRangeChange` 仅在可见或常规 overscan 边界变化时通知，可用于预取但不是分页完成事实源。原生 scroll/focus/blur props 继续透传。
+
+## Ref 与命令式方法
+
+`nativeElement` 返回 owned viewport；`scrollToIndex` 夹紧有限下标，`scrollToOffset` 夹紧非负值，`measure` 在字体/密度/布局整体变化后重测挂载行。
+
+## 键盘操作
+
+| 按键                     | 行为                                                    |
+| ------------------------ | ------------------------------------------------------- |
+| Tab                      | 进入 list viewport，再按 DOM 顺序进入已挂载行控件       |
+| PageUp/PageDown/Home/End | 浏览器对 scrollable viewport 的原生行为；行控件自行定义 |
+
+组件不伪造 roving focus；长列表若需要逐行箭头导航，应在上层建立选择模型。
+
+## 触摸与手势
+
+使用原生惯性纵向滚动，不拦截 pointer/touch；`overscroll-behavior:contain` 防止到边界后把滚动链传给祖先。
+
+## 无障碍
+
+必须提供 `aria-label` 或 `aria-labelledby`。已挂载行声明在完整集合中的 1-based 位置与总数；焦点所在 stable key 超出窗口时继续挂载，避免焦点节点被回收。
+
+## 动效
+
+没有自定义动效。imperative `behavior=smooth` 使用平台滚动；动态高度测量可能在结束后校正，reduced-motion 调用方应请求 `auto`。
+
+## 主题与定制
+
+根/行结构使用 Token；每行视觉由 `renderItem` 持有。稳定入口为 height/gap/overscan、root class/style 和 slots，不依赖内部 TanStack class。
+
+## SSR 与 Next.js
+
+服务端根据 height、estimateSize、initialOffset 输出确定子集；客户端测量真实 DOM 后校正。Next 应将 `@tanstack/react-virtual` 与 `@tanstack/virtual-core` 加入 `transpilePackages`。
+
+## RTL 与国际化
+
+垂直算法不区分方向，行使用 `inset-inline-start`；业务文案和空状态由调用方提供，不内置 locale 字符串。
+
+## 浏览器与 WebView
+
+依赖 ResizeObserver（引擎内部）、position absolute、transform 和标准滚动 API。构建需转译到 Chrome/WebView 70、iOS 13；缺失 ResizeObserver 的宿主需 polyfill 或接受动态测量受限。
+
+## 边界情况与已知限制
+
+- 仅纵向、固定 viewport height；不支持 window scroll、grid、sticky section 或 reverse/chat anchoring。
+- duplicate/unstable key 会破坏测量与焦点 identity，组件不做 O(n) 重复验证。
+- `getItemKey` 在焦点保留期间会扫描 items；应是纯、快速函数。
+- 业务更新行高度后若引擎无法观察到，调用 `measure()`。
+
+## 性能预算
+
+DOM 数量约为可见行加双侧 overscan；默认 overscan=3，最大归一为 100。renderItem/getItemKey/estimateSize 应稳定且廉价，避免每帧创建昂贵子树。
+
+## 测试证据
+
+- Unit: `VirtualList.test.tsx` 覆盖窗口、完整 ARIA、动态测量、远距焦点、定位、空态和 stable-key 排序保留。
+- Story interaction / Axe: 待执行/待补。
+- SSR/hydration: `VirtualList.ssr.test.tsx` 和 unit SSR 覆盖初始子集；真实 ResizeObserver hydration 待补。
+- RTL/forced-colors/reduced-motion: 逻辑 CSS或无动画契约完成，视觉证据待补。
+- Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。
+
+## V2 优化记录
+
+### 待优化
+
+- 补真实 ResizeObserver、快速滚动、字体切换、10k 数据和含输入控件行的浏览器/真机证据。
+
+### 已完成
+
+- 将焦点保留从 mutable index 改为 stable key，补异常归一、RTL/forced-colors、TSDoc、SSR 与重排测试。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                                        | 迁移说明                              |
+| ---------- | ------ | --------- | ------------------------------------------- | ------------------------------------- |
+| 2026-08-29 | 未发布 | hardening | 稳定 identity、动态测量与跨平台虚拟窗口加固 | API 兼容；调用方必须保证 key 稳定唯一 |

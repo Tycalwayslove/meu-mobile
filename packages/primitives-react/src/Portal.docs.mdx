@@ -2,7 +2,7 @@
 name: Portal
 slug: portal
 package: "@meu/primitives-react"
-exports: [Portal]
+exports: [Portal, useBodyScrollLock, useFocusTrap]
 status: implementation
 priority: P0
 since: 0.1.0
@@ -24,6 +24,7 @@ source: packages/primitives-react/src/Portal
 - SSR 与 hydration 首帧原地输出 children，客户端可用后再移动到目标容器。
 - 目标变化或组件卸载时，由 React Portal 删除其渲染节点；组件不会删除调用方拥有的容器。
 - 容器判断基于 DOM `nodeType`，可接受 iframe 等其他 realm 的 Element，不依赖 `instanceof HTMLElement`。
+- 同页归档两个公开 Overlay Hook：`useBodyScrollLock` 使用引用计数锁定 body 并按 LTR/RTL 补偿滚动条；`useFocusTrap` 只让栈顶模态圈定焦点，支持初始焦点、Escape、焦点分支与恢复。
 
 当前状态为 `implementation`；尚未完成嵌套模态、真实 iframe、移动 WebView 与 Chromatic 全矩阵验收，不能标记为 commercial。
 
@@ -39,7 +40,7 @@ source: packages/primitives-react/src/Portal
 
 ## 结构与状态
 
-Portal 不新增包装 DOM。结构只有 React children 和解析后的目标容器。运行状态为 SSR 原地、客户端 body、自定义目标和显式原地四种；它没有视觉 disabled、loading 或 invalid 状态。
+Portal 不新增包装 DOM。结构只有 React children 和解析后的目标容器。运行状态为 SSR 原地、客户端 body、自定义目标和显式原地四种；两个 Hook 分别维护进程内 body lock token 集合与 focus-trap 栈。
 
 ## 基础用法
 
@@ -74,6 +75,8 @@ Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑�
 
 `children` 为渲染内容。`container` 未传时使用 `document.body`；传 `null` 时保持原地；回调只在客户端可用后解析。API 类型以 TSDoc/API Extractor 为准。
 
+`useBodyScrollLock(locked)` 的布尔值决定当前实例是否持有锁。`useFocusTrap(options)` 接受 `active`、`containerRef`、可选 `initialFocusRef`、`returnFocusRef`、`onEscape` 与 `restoreFocus`。
+
 ## Events
 
 不定义事件。children 的 React 事件按 React Portal 规则沿逻辑 React 树冒泡；原生事件监听仍遵循实际 DOM 树。
@@ -84,9 +87,11 @@ Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑�
 
 ## 键盘操作
 
-| 按键 | 行为                                       |
-| ---- | ------------------------------------------ |
-| 任意 | Portal 不拦截或定义键盘行为，交由 children |
+| 按键            | 行为                                                 |
+| --------------- | ---------------------------------------------------- |
+| Tab / Shift+Tab | Portal 本身不处理；`useFocusTrap` 在栈顶容器首尾循环 |
+| Escape          | Portal 本身不处理；栈顶 trap 调用最新 `onEscape`     |
+| 其他            | 交由 children                                        |
 
 ## 触摸与手势
 
@@ -94,7 +99,7 @@ Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑�
 
 ## 无障碍
 
-Portal 不提供 role、accessible name、焦点陷阱或焦点恢复。移动 DOM 不会自动修复 aria 关系；引用的 ID 必须在同一 Document 内唯一。跨 Document/iframe 时必须在目标文档单独验证读屏与焦点。
+Portal 不提供 role 或 accessible name。`useFocusTrap` 过滤 hidden、aria-hidden、inert、display:none 与 visibility:hidden 后代，容器无可聚焦项时聚焦容器；移动 DOM 不会自动修复 aria 关系，引用 ID 必须在同一 Document 内唯一。
 
 ## 动效
 
@@ -123,6 +128,7 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 - 已移出 Document 的目标不会被组件自动替换；调用方需更新 `container` 并触发 render。
 - React 只清理 Portal children，不删除或还原调用方的目标容器。
 - 跨 Document 不会自动复制样式、方向、locale 或全局事件监听。
+- `useBodyScrollLock` 和 `useFocusTrap` 使用当前 realm 的全局 document/window，不支持跨 Document 管理。
 
 ## 性能预算
 
@@ -130,7 +136,7 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 
 ## 测试证据
 
-- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理
+- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、隐藏焦点过滤与恢复
 - Story interaction: 待补
 - Axe: Storybook a11y addon 可扫描自定义容器 Story，尚无独立自动断言
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记与 hydration 后移动

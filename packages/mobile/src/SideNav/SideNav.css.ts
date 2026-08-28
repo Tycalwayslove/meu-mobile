@@ -55,7 +55,7 @@ export const item = recipe({
       "(forced-colors: active)": { borderBlockEnd: "1px solid CanvasText" }
     },
     selectors: {
-      "&:focus-visible": {
+      "&:focus": {
         zIndex: 2,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -2
@@ -128,7 +128,7 @@ export const panel = style({
   padding: "var(--meu-space-4)",
   outline: "none",
   selectors: {
-    "&:focus-visible": {
+    "&:focus": {
       outline: "2px solid var(--meu-color-accent)",
       outlineOffset: -2
     }

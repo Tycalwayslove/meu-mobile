@@ -1,5 +1,7 @@
 # InfiniteList
 
+完整 V2 契约、边界与验证证据见 [`InfiniteList.docs.mdx`](./InfiniteList.docs.mdx)。
+
 在列表尾部提供自动预加载、手动加载、失败重试与完成状态，不持有列表数据、滚动容器或请求缓存。
 
 ```tsx

@@ -70,6 +70,11 @@ type PickerState<TValue extends PickerValue> = {
   valueSnapshot: ReadonlyArray<TValue | null> | undefined;
 };
 
+/**
+ * Confirmation-based mobile wheel picker with isolated draft state.
+ *
+ * @public
+ */
 export function Picker<TValue extends PickerValue = PickerValue>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,

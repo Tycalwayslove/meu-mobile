@@ -18,7 +18,7 @@ export const trigger = recipe({
     fontFamily: "var(--meu-font-ui)",
     fontSize: 16,
     lineHeight: 1.4,
-    textAlign: "left",
+    textAlign: "start",
     cursor: "pointer",
     WebkitTapHighlightColor: "transparent",
     selectors: {
@@ -28,12 +28,24 @@ export const trigger = recipe({
         background: "var(--meu-color-subtle)",
         cursor: "not-allowed"
       }
+    },
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "ButtonText",
+        selectors: {
+          "&:focus": { outlineColor: "Highlight" },
+          "&:disabled": { color: "GrayText", borderColor: "GrayText" }
+        }
+      }
     }
   },
   variants: {
     status: {
       default: {},
-      error: { borderColor: "var(--meu-color-danger)" }
+      error: {
+        borderColor: "var(--meu-color-danger)",
+        "@media": { "(forced-colors: active)": { borderStyle: "double" } }
+      }
     }
   },
   defaultVariants: { status: "default" }

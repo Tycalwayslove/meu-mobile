@@ -71,6 +71,11 @@ type DatePickerState<TDate> = {
   valueSnapshot: TDate | null | undefined;
 };
 
+/**
+ * Renders a confirmation-based date wheel backed by a pluggable DateAdapter.
+ *
+ * @public
+ */
 export function DatePicker<TDate = Date>({
   adapter,
   columnLabels,
@@ -160,6 +165,9 @@ export function DatePicker<TDate = Date>({
     let draftValue = pickerState.draftValue;
     if (adapterChanged) {
       committedValue = resolve(controlledValue ? value : committedValue).date;
+    }
+    if (controlledValue && (controlledValueChanged || adapterChanged || inputsChanged)) {
+      committedValue = resolve(value).date;
     }
     if (resolvedOpen) {
       if (!pickerState.open || valueModeChanged || controlledValueChanged) {

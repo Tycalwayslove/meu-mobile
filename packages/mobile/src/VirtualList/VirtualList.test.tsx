@@ -198,4 +198,39 @@ describe("VirtualList", () => {
     expect(screen.getByText("暂时没有订单")).toBeTruthy();
     expect(screen.queryByRole("listitem")).toBeNull();
   });
+
+  it("retains the focused stable key when items reorder", async () => {
+    const original = items.slice(0, 30);
+    const { container, rerender } = render(
+      <VirtualList
+        aria-label="可排序订单"
+        estimateSize={50}
+        getItemKey={(entry) => entry.id}
+        height={200}
+        items={original}
+        renderItem={(entry) => <button type="button">订单 {entry.index}</button>}
+      />
+    );
+    await act(() => Promise.resolve());
+    const focused = screen.getByRole("button", { name: "订单 1" });
+    act(() => focused.focus());
+
+    const reordered = [...original.filter((entry) => entry.id !== "item-1"), original[1]!];
+    rerender(
+      <VirtualList
+        aria-label="可排序订单"
+        estimateSize={50}
+        getItemKey={(entry) => entry.id}
+        height={200}
+        items={reordered}
+        renderItem={(entry) => <button type="button">订单 {entry.index}</button>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-meu-virtual-index="29"]')).not.toBeNull();
+    });
+    expect(screen.getByRole("button", { name: "订单 1" })).toBe(focused);
+    expect(document.activeElement).toBe(focused);
+  });
 });

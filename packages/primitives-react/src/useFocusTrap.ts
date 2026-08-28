@@ -4,11 +4,17 @@ import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 
 export type FocusTrapOptions = {
+  /** Whether this trap participates in the global nested-trap stack. */
   active: boolean;
+  /** Modal container whose tabbable descendants remain reachable. */
   containerRef: RefObject<HTMLElement | null>;
+  /** Preferred initial target; falls back to the first tabbable descendant or the container. */
   initialFocusRef?: RefObject<HTMLElement | null> | undefined;
+  /** Called for Escape only while this trap is the topmost active trap. */
   onEscape?: (() => void) | undefined;
+  /** Restores focus captured when this trap activates. Defaults to `true`. */
   restoreFocus?: boolean;
+  /** Explicit restoration target; otherwise the currently focused element is captured. */
   returnFocusRef?: RefObject<HTMLElement | null> | undefined;
 };
 
@@ -21,11 +27,13 @@ const focusableSelector = [
   "input:not([disabled])",
   "select:not([disabled])",
   "textarea:not([disabled])",
+  "summary",
+  "[contenteditable]:not([contenteditable='false'])",
   "[tabindex]:not([tabindex='-1'])"
 ].join(",");
 
 function isVisible(element: HTMLElement) {
-  if (element.hidden || element.getAttribute("aria-hidden") === "true") return false;
+  if (element.closest("[hidden], [aria-hidden='true'], [inert]")) return false;
   const style = window.getComputedStyle(element);
   return style.display !== "none" && style.visibility !== "hidden";
 }
@@ -49,6 +57,11 @@ function isTopTrap(token: symbol) {
   return top !== undefined && top.token === token;
 }
 
+/**
+ * Traps focus inside the topmost active modal while allowing registered non-modal focus branches.
+ *
+ * @public
+ */
 export function useFocusTrap({
   active,
   containerRef,
@@ -79,7 +92,9 @@ export function useFocusTrap({
       const preferred = initialFocusRef ? initialFocusRef.current : null;
       const focusable = getFocusableElements(container);
       const target =
-        preferred && container.contains(preferred) ? preferred : focusable[0] || container;
+        preferred && container.contains(preferred) && isVisible(preferred)
+          ? preferred
+          : focusable[0] || container;
       target.focus({ preventScroll: true });
     };
 

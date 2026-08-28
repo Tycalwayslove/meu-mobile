@@ -167,4 +167,23 @@ describe("DateRangePicker", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false, { reason: "escape" });
     expect(screen.getByRole("dialog", { name: "日期范围" })).toBeTruthy();
   });
+
+  it("seeds uncontrolled state from the latest controlled range", () => {
+    const latest = [date(10), date(16)] as const;
+    const { rerender } = render(
+      <DateRangePicker
+        open
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        value={[date(5), date(6)]}
+      />
+    );
+    rerender(<DateRangePicker open aria-label="日期范围" defaultMonth={date(1)} value={latest} />);
+    expect(dayButton(10).getAttribute("data-range-start")).toBe("true");
+    expect(dayButton(16).getAttribute("data-range-end")).toBe("true");
+
+    rerender(<DateRangePicker open aria-label="日期范围" defaultMonth={date(1)} />);
+    expect(dayButton(10).getAttribute("data-range-start")).toBe("true");
+    expect(dayButton(16).getAttribute("data-range-end")).toBe("true");
+  });
 });

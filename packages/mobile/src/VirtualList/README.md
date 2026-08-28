@@ -1,5 +1,7 @@
 # VirtualList
 
+完整 V2 契约、边界与验证证据见 [`VirtualList.docs.mdx`](./VirtualList.docs.mdx)。
+
 纵向长列表的窗口化基础组件。它只挂载可见区与 overscan 行，并在真实 DOM 挂载后校正动态高度；分页、选择、
 请求、树结构与业务空状态继续由调用方持有。
 

@@ -101,6 +101,7 @@ function mobile(
   options: {
     priority?: "P0" | "P1" | "P2";
     sourceName?: string;
+    sourcePathPrefixes?: readonly string[];
     /** Human-readable Storybook grouping; the link itself comes from the explicit ID map. */
     storyTitle?: string;
     highlights?: readonly string[];
@@ -117,6 +118,7 @@ function mobile(
     priority: options.priority || "P0",
     slug,
     sourcePath: `packages/mobile/src/${options.sourceName || name}`,
+    ...(options.sourcePathPrefixes ? { sourcePathPrefixes: options.sourcePathPrefixes } : {}),
     ...(storyId ? { storyId } : {}),
     ...(options.storyTitle ? { storyTitle: options.storyTitle } : {})
   };
@@ -146,6 +148,10 @@ export const componentDocs: readonly ComponentDoc[] = [
     priority: "P0",
     slug: "portal",
     sourcePath: "packages/primitives-react/src/Portal",
+    sourcePathPrefixes: [
+      "packages/primitives-react/src/useBodyScrollLock",
+      "packages/primitives-react/src/useFocusTrap"
+    ],
     storyId: componentStoryIds.portal,
     storyTitle: "Foundation/Portal"
   },
@@ -206,6 +212,7 @@ export const componentDocs: readonly ComponentDoc[] = [
   }),
   mobile("Popup", "popup", "actions-feedback", "Portal、Mask、滚动锁和焦点治理的通用浮层基础。", {
     sourceName: "Popup",
+    sourcePathPrefixes: ["packages/mobile/src/overlayTypes"],
     storyTitle: "Feedback/Popup"
   }),
   mobile("Toast", "toast", "actions-feedback", "非阻塞消息队列，支持命令式与 Provider 作用域。", {

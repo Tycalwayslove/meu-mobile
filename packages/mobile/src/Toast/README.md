@@ -1,5 +1,7 @@
 # Toast
 
+完整 V2 契约、队列语义与验证证据见 [`Toast.docs.mdx`](./Toast.docs.mdx)。
+
 Toast 用于短暂反馈，不打断当前任务，也不会在出现时移动焦点。普通结果与成功消息使用 polite
 `status`，警告和错误使用 assertive `alert`。需要用户明确确认、输入或理解长内容时使用 Dialog。
 
@@ -29,4 +31,5 @@ pending.update({ message: "同步完成", duration: 3000, tone: "success" });
 ```
 
 悬停、焦点停留和异步 action 期间计时暂停。action 返回 `false` 或失败时不关闭；失败通过
-`onActionError` 交给调用方处理。Toast 不使用遮罩、焦点捕获或滚动锁。
+`onActionError` 交给调用方处理，并在根输出 `data-action-error=true`；未提供回调时仍不会产生未处理
+Promise rejection。Toast 不使用遮罩、焦点捕获或滚动锁。

@@ -65,7 +65,7 @@ export const action = style({
   verticalAlign: "middle",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
+    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
     "&:active": { color: "var(--meu-color-accent-pressed)" }
   },
   "@media": {

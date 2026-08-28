@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 type BodyStyleSnapshot = {
   left: string;
   overflow: string;
+  paddingLeft: string;
   paddingRight: string;
   position: string;
   right: string;
@@ -26,6 +27,7 @@ function acquireLock(token: symbol) {
   savedStyles = {
     left: body.style.left,
     overflow: body.style.overflow,
+    paddingLeft: body.style.paddingLeft,
     paddingRight: body.style.paddingRight,
     position: body.style.position,
     right: body.style.right,
@@ -38,8 +40,14 @@ function acquireLock(token: symbol) {
       ? 0
       : Math.max(0, window.innerWidth - document.documentElement.clientWidth);
   if (scrollbarWidth > 0) {
-    const currentPadding = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;
-    body.style.paddingRight = `${currentPadding + scrollbarWidth}px`;
+    const computedStyle = window.getComputedStyle(body);
+    if (computedStyle.direction === "rtl") {
+      const currentPadding = Number.parseFloat(computedStyle.paddingLeft) || 0;
+      body.style.paddingLeft = `${currentPadding + scrollbarWidth}px`;
+    } else {
+      const currentPadding = Number.parseFloat(computedStyle.paddingRight) || 0;
+      body.style.paddingRight = `${currentPadding + scrollbarWidth}px`;
+    }
   }
   body.style.position = "fixed";
   body.style.top = `${-savedScrollY}px`;
@@ -58,6 +66,7 @@ function releaseLock(token: symbol) {
   if (snapshot) {
     body.style.left = snapshot.left;
     body.style.overflow = snapshot.overflow;
+    body.style.paddingLeft = snapshot.paddingLeft;
     body.style.paddingRight = snapshot.paddingRight;
     body.style.position = snapshot.position;
     body.style.right = snapshot.right;
@@ -71,6 +80,14 @@ function releaseLock(token: symbol) {
   savedStyles = null;
 }
 
+/**
+ * Reference-counted body scroll lock for modal overlays.
+ *
+ * The first active caller snapshots body styles and scroll position; the final caller restores
+ * them. Scrollbar compensation follows the document direction.
+ *
+ * @public
+ */
 export function useBodyScrollLock(locked: boolean) {
   const tokenRef = useRef<symbol>(undefined);
   if (tokenRef.current === undefined) tokenRef.current = Symbol("meu-body-scroll-lock");

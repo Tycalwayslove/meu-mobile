@@ -42,6 +42,11 @@ type DateRangePickerState<TDate> = {
   valueSnapshot: CalendarRange<TDate> | null | undefined;
 };
 
+/**
+ * Renders a modal, confirmation-based date range flow composed from Calendar and Popup.
+ *
+ * @public
+ */
 export function DateRangePicker<TDate = Date>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -129,6 +134,9 @@ export function DateRangePicker<TDate = Date>({
         resolvedAdapter,
         controlledValue ? value : committedValue
       );
+    }
+    if (controlledValue && (controlledValueChanged || adapterChanged)) {
+      committedValue = normalizeDateRange(resolvedAdapter, value);
     }
     if (
       resolvedOpen &&

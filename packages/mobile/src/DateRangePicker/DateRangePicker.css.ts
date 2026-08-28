@@ -35,7 +35,8 @@ export const title = style({
   lineHeight: 1.35,
   textAlign: "center",
   textOverflow: "ellipsis",
-  whiteSpace: "nowrap"
+  whiteSpace: "nowrap",
+  wordBreak: "break-word"
 });
 
 export const content = style({
@@ -54,7 +55,9 @@ export const summary = style({
   borderBottom: "1px solid var(--meu-color-border)",
   fontSize: 13,
   lineHeight: 1.45,
-  textAlign: "center"
+  textAlign: "center",
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const presets = style({

@@ -3,7 +3,7 @@
 import { nativeDateAdapter } from "@meu/date-adapter";
 import type { DateAdapter } from "@meu/date-adapter";
 import { MeuIconChevronLeft } from "@meu/icons-react";
-import { useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
@@ -101,6 +101,11 @@ function chunks<T>(items: ReadonlyArray<T>) {
   return result;
 }
 
+/**
+ * Renders an adapter-driven inline month grid with single, multiple, or range selection.
+ *
+ * @public
+ */
 export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   const {
     "aria-describedby": ariaDescribedBy,
@@ -139,6 +144,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   void _selectionMode;
   void _value;
   const config = useMeuConfig();
+  const generatedId = useId();
   const fieldContext = useFieldContext();
   const resolvedAdapter = (adapter || nativeDateAdapter) as DateAdapter<TDate>;
   const mode = modeOf(props);
@@ -175,6 +181,9 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
     min,
     max
   );
+  if (!controlledMonth && !sameCalendarMonth(resolvedAdapter, uncontrolledMonth, currentMonth)) {
+    setUncontrolledMonth(currentMonth);
+  }
   const rangeAnchor = useRef<{ date: TDate; mode: CalendarSelectionMode } | null>(null);
   const [focusedDay, setFocusedDay] = useState<TDate | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -189,7 +198,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
   const invalid =
     ariaInvalid === true || ariaInvalid === "true" || Boolean(fieldContext && fieldContext.invalid);
-  const titleId = resolvedId ? `${resolvedId}-month` : undefined;
+  const titleId = resolvedId ? `${resolvedId}-month` : `meu-calendar-month-${generatedId}`;
   const calendarLabel = ariaLabel || (config.locale === "en-US" ? "Calendar" : "日历");
 
   function isDisabledDate(date: TDate, outside: boolean) {
@@ -328,9 +337,11 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
 
   function handleDayKeyDown(event: KeyboardEvent<HTMLButtonElement>, date: TDate) {
     let target: TDate | null = null;
-    if (event.key === "ArrowLeft") target = resolvedAdapter.add(date, -1, "day");
-    else if (event.key === "ArrowRight") target = resolvedAdapter.add(date, 1, "day");
-    else if (event.key === "ArrowUp") target = resolvedAdapter.add(date, -7, "day");
+    if (event.key === "ArrowLeft") {
+      target = resolvedAdapter.add(date, config.dir === "rtl" ? 1 : -1, "day");
+    } else if (event.key === "ArrowRight") {
+      target = resolvedAdapter.add(date, config.dir === "rtl" ? -1 : 1, "day");
+    } else if (event.key === "ArrowUp") target = resolvedAdapter.add(date, -7, "day");
     else if (event.key === "ArrowDown") target = resolvedAdapter.add(date, 7, "day");
     else if (event.key === "Home") {
       const offset = (resolvedAdapter.getDayOfWeek(date) - weekStartsOn + 7) % 7;
@@ -410,7 +421,9 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
           disabled={!canGoPrevious || disabled}
           onClick={() => requestMonth(previousMonth, "previous-month")}
         >
-          <MeuIconChevronLeft size={20} strokeWidth={2} aria-hidden="true" />
+          <span className={config.dir === "rtl" ? nextIcon : undefined}>
+            <MeuIconChevronLeft size={20} strokeWidth={2} aria-hidden="true" />
+          </span>
         </button>
         <h3 className={monthTitle} id={titleId} aria-live="polite">
           {monthLabel}
@@ -422,7 +435,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
           disabled={!canGoNext || disabled}
           onClick={() => requestMonth(nextMonth, "next-month")}
         >
-          <span className={nextIcon}>
+          <span className={config.dir === "rtl" ? undefined : nextIcon}>
             <MeuIconChevronLeft size={20} strokeWidth={2} aria-hidden="true" />
           </span>
         </button>
@@ -489,7 +502,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
 
               return (
                 <div
-                  className={dayCell({ inRange, rangeEnd, rangeStart })}
+                  className={dayCell({ inRange, rangeEnd, rangeStart, rtl: config.dir === "rtl" })}
                   role="gridcell"
                   aria-selected={semanticallySelected}
                   key={item.key}

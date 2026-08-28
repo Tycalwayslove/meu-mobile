@@ -1,0 +1,164 @@
+---
+name: TreeSelect
+slug: tree-select
+package: "@meu/mobile"
+exports: [TreeSelect]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "394:49"
+storyIds:
+  [
+    data-entry-treeselect--single,
+    data-entry-treeselect--multiple,
+    data-entry-treeselect--read-only,
+    data-entry-treeselect--empty,
+    data-entry-treeselect--validation-error,
+    data-entry-treeselect--async-branch,
+    data-entry-treeselect--right-to-left
+  ]
+source: packages/mobile/src/TreeSelect
+---
+
+# TreeSelect
+
+## 当前能力
+
+确认式移动树选择，支持 single/multiple、leaf/any、独立父子选择、maxCount、搜索、受控/非受控展开与搜索、异步子级、取消信号、错误重试提示、虚拟化、readOnly/disabled/error、RTL APG 键位和 Popup 集成。
+
+## 何时使用
+
+适合需要搜索、跨层级查看、懒加载或展示大量节点的商品类目、组织和权限选择。固定短路径优先 CascadePicker。
+
+## 何时不要使用
+
+不要用于父子联动勾选、权限级联计算或服务端分页树，当前组件的 multiple 是独立节点集合。少量平铺值使用 CheckboxGroup/RadioGroup。
+
+## 结构与状态
+
+`Popup → header → optional SearchField → tree → treeitem`。value 是已提交集合，panel 内维护 draft；expanded/search 是独立 UI 状态。虚拟化只渲染可见扁平节点，SSR 与首次 hydration 先输出完整树。
+
+## 基础用法
+
+```tsx
+<TreeSelect
+  open={open}
+  title="商品类目"
+  options={categories}
+  value={value}
+  defaultExpandedValues={["digital"]}
+  returnFocusRef={triggerRef}
+  onConfirm={setValue}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+value、open、expandedValues 和 searchValue 均可独立受控；对应 default Props 只初始化非受控状态。options/mode/maxCount 变化会静默规范化 committed/draft，非法、重复、disabled 或不符合 selectionMode 的值被移除。
+
+## 表单集成
+
+使用 `MeuFormTreeSelect`。确认执行字段 change + blur，取消不制造 dirty/touched；Field 错误通过 PickerTrigger 关联。核心组件不输出 hidden input，也不绑定表单库。
+
+## Props
+
+核心 Props：options、multiple、selectionMode、maxCount、searchable/filterOption、expandedValues、loadChildren、virtual/overscan/treeHeight、readOnly/disabled/status 及 Popup 配置。loadingText/loadErrorText 覆盖异步读屏文案。所有 value 在整棵树中必须全局唯一。
+
+## Events
+
+- `onSelect(values, options, details)`：draft 选择意图，details 含 option/path/reason/selected。
+- `onConfirm(values, options)`：提交当前规范化 draft。
+- `onExpandedValuesChange(values, details)`：展开意图，受控调用方决定 UI 是否更新。
+- `onSearchValueChange(query)`：搜索输入或关闭清空。
+- `onLoadError(error, option)`：非 abort 的 loadChildren 拒绝。
+- `onCancel/onOpenChange`：报告取消与浮层可见性原因。
+
+## Ref 与命令式方法
+
+ref 指向 panel 根 div。组件不公开命令式搜索、选择或滚动 API；异步分支由 loadChildren 接收 AbortSignal，数据仍由调用方不可变写回 options。
+
+## 键盘操作
+
+| 按键                   | LTR 行为                        |
+| ---------------------- | ------------------------------- |
+| ArrowDown / ArrowUp    | 移动到下/上一个可见节点         |
+| ArrowRight / ArrowLeft | 展开或进入子级 / 收起或返回父级 |
+| Home / End             | 首个/末个可见节点               |
+| Enter / Space          | 选择节点；不可选父节点执行展开  |
+| 可打印字符             | 500ms 缓冲的可见节点前缀查找    |
+
+RTL 时左右键镜像；上下、Home/End 不变。Tab 依次经过 cancel、search、树的单一 roving tab stop 和 confirm。
+
+## 触摸与手势
+
+每行最小 52px，展开区 44×44px；点击展开图标只切换分支，点击可选行修改 draft。树使用原生纵向惯性滚动，不拦截横向页面手势。
+
+## 无障碍
+
+遵循 APG tree/treeitem，提供 aria-level/posinset/setsize、expanded、selected/checked、disabled、busy 和 multiselectable。loading/error 同时有形状与本地化 role=status 文案；error status 在 tree 上设置 aria-invalid。
+
+## 动效
+
+Chevron 只解释展开状态，使用短 transform；loading 使用可取消 spinner。prefers-reduced-motion 时停止旋转和位移，Popup 退出仍由统一 presence 管理。
+
+## 主题与定制
+
+使用统一 surface/ink/muted/border/subtle/accent/danger Token。forced-colors 保留行边界、焦点、选中形状、加载与错误；Portal 继承 Light/Dark、direction 和 motion。renderOption 不得放交互控件。
+
+## SSR 与 Next.js
+
+服务端和首次客户端先渲染完整可见树，mount 后才启用 virtual window，避免空 SSR tree 与 hydration mismatch。useId 保证 dialog/treeitem 关系稳定；Next 首屏 options/value/search/expanded 必须确定。
+
+## RTL 与国际化
+
+内置 zh-CN/en-US 的 dialog、search、empty、loading、load-error 和 action 文案，均可覆盖。RTL 镜像 chevron、左右键和逻辑缩进；数据 path 顺序保持根到节点。
+
+## 浏览器与 WebView
+
+目标 Chrome 70/iOS 13。核心树算法为纯 TypeScript；虚拟层依赖 ResizeObserver/滚动测量的库实现，缺少现代测量能力时可 `virtual={false}` 降级。AbortController 由目标环境或宿主 polyfill 提供。
+
+## 边界情况与已知限制
+
+- disabled 节点不能展开、选择或触发加载；selectable=false 的 enabled 父节点仍可展开。
+- collapse、disabled、节点移除、加载完成和卸载会终止不再需要的 async 请求；失败后收起再展开重试。
+- loadChildren 不直接返回 children，调用方必须写回新的 options；原地突变不受支持。
+- 搜索只覆盖已加载节点，不向服务端发请求；自定义 filterOption 必须快速且无副作用。
+- maxCount 非有限或小于 1 时规范化为安全值；数千层深树仍不适用递归模型。
+
+## 性能预算
+
+扁平化为 O(已加载节点)，虚拟 DOM 约为 viewport rows + overscan，并固定保留 active row。filterOption 在每次 query/options 变化时遍历已加载树，远程或昂贵搜索应在业务层预处理。
+
+## 测试证据
+
+- Unit: single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window 与 aria-invalid
+- Story interaction: 待补 play function
+- Axe: 待 CI
+- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏；浏览器 hydration 专测待补
+- RTL: RightToLeft Story 与 unit
+- Reduced motion: CSS 静态规则；浏览器 computed-style 待补
+- Mobile Chromium/WebKit E2E: 待补搜索、虚拟焦点和 async cancel
+- Chromatic Light/Dark: Figma 已验收，统一发布批次再运行
+- Real device: 待补 VoiceOver/TalkBack 虚拟树可用性
+
+## V2 优化记录
+
+### 待优化
+
+补 axe、双引擎 hydration、读屏虚拟树、超大数据性能基准和真机异步中断；评估未来 server-search adapter，不扩展核心 filter 契约。
+
+### 已完成
+
+修复 disabled 分支仍可展开、RTL 键位、异步 collapse/节点移除/disabled 取消、旧请求清理与错误无状态；新增 loading/error i18n、SSR 首屏虚拟化延迟、forced-colors、长文案和永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                     | 迁移说明                           |
+| ---------- | ------ | -------- | ---------------------------------------- | ---------------------------------- |
+| 2026-08-29 | 未发布 | behavior | 异步取消/错误、RTL、disabled 与 SSR 加固 | 新增可选 loadingText/loadErrorText |
+| 2026-08-29 | 未发布 | docs     | 建立 TreeSelect 共置永久文档             | 无                                 |

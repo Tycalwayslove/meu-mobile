@@ -33,7 +33,7 @@ export const tagRoot = recipe({
         minHeight: 44,
         cursor: "pointer",
         selectors: {
-          "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 1 },
+          "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 1 },
           "&:active:not(:disabled)": { transform: "scale(0.98)" }
         },
         transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
@@ -190,7 +190,7 @@ export const tagClose = style({
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
+    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
     "&:active:not(:disabled)": { transform: "scale(0.94)" },
     "&:disabled": { cursor: "not-allowed", opacity: 0.55 }
   },

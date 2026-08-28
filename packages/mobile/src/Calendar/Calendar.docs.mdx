@@ -1,0 +1,141 @@
+---
+name: Calendar
+slug: calendar
+package: "@meu/mobile"
+exports:
+  [
+    Calendar,
+    calendarDayKey,
+    calendarRange,
+    compareCalendarDays,
+    createCalendarGrid,
+    normalizeCalendarDay,
+    normalizeCalendarMonth,
+    sameCalendarDay,
+    sameCalendarMonth
+  ]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "257:722"
+storyIds: [data-entry-calendar--single, data-entry-calendar--range, data-entry-calendar--multiple]
+source: packages/mobile/src/Calendar
+---
+
+# Calendar
+
+## 当前能力
+
+内联民用月历，支持 DateAdapter、单选/多选/范围、受控值与月份、边界/禁用日、相邻月日期、固定六周、日期标签、Field 语义和中英文。日期按钮最少 44×44px，网格行为包含 roving tabindex、RTL 方向映射及完整键盘月份/年份导航。
+
+## 何时使用
+
+用于页面内直接展示配送日、预约日、多日期或范围选择；需要确认式浮层和快捷范围时使用 DateRangePicker。
+
+## 何时不要使用
+
+不要用于时间、月份枚举或服务端时间戳转换；时区/历法必须由业务提供匹配的 DateAdapter，不能把 Native adapter 当作 UTC adapter。
+
+## 结构与状态
+
+结构为 group → header(nav/title/nav) + grid → row → gridcell → button。状态包含当前月、focused day、single/multiple/range value、range anchor、disabled/outside/today/selected/range-start/range-end。
+
+## 基础用法
+
+```tsx
+<Calendar
+  selectionMode="range"
+  value={range}
+  onChange={(next, details) => {
+    setRange(next);
+    if (details.complete) submit(next);
+  }}
+/>
+```
+
+## 受控与非受控
+
+value/defaultValue 控制选择，month/defaultMonth 独立控制视图月。受控操作只发布意图；非受控月被动态 min/max 夹紧后会持久归一，移除边界不会跳回旧月。运行时切换 selectionMode 或受控模式不推荐，业务应保持值类型稳定。
+
+## 表单集成
+
+使用 MeuFormCalendar 将单选、多个日期或范围即时写入字段；Field 的 label、description、error、invalid/id 会关联根和真实日期按钮。Calendar 自身不创建 hidden input。
+
+## Props
+
+adapter 默认为本地民用时间；selectionMode 决定互斥值类型；allowClear 控制再次点击；min/max/disabledDate 决定可选性；weekStartsOn 为 0–6；renderDay/renderLabel 只定制内容；weekdayLabels 必须恰好七项。公共纯函数用于 adapter 驱动的规范化、比较和网格生成。
+
+## Events
+
+onChange 返回规范化值及 complete/date/mode/reason；范围首次选择 complete=false。onMonthChange 原因包括 previous-month、next-month、outside-day、keyboard、today；受控月份拒绝更新时视图不乐观漂移。
+
+## Ref 与命令式方法
+
+CalendarRef 提供 focus、goToMonth 和 goToToday；后两者遵守 min/max，并通过 onMonthChange 报告意图。
+
+## 键盘操作
+
+方向键按日/周移动，Home/End 到周首尾，PageUp/PageDown 按月，Shift 组合按年；RTL 下水平箭头映射视觉方向。Enter/Space 由原生 button 选择。
+
+## 触摸与手势
+
+日期和导航均为至少 44px 原生按钮，不接管横向滑动，不阻断页面滚动。相邻月日期点击会同时选择并请求切月。
+
+## 无障碍
+
+始终为 grid 生成稳定 title id 和 accessible name；gridcell 暴露 aria-selected，按钮暴露 aria-current/date、aria-pressed、disabled 和完整 YYYY-MM-DD 名称；禁用全月时根可聚焦。
+
+## 动效
+
+日期颜色使用短过渡；prefers-reduced-motion 下缩短为 1ms。月份切换不做会干扰焦点的位移动画。
+
+## 主题与定制
+
+只使用 Meu color/space/radius/motion tokens；范围中段与端点、今天、invalid 均有独立语义。forced-colors 下恢复根、按钮、选中与今天边界。
+
+## SSR 与 Next.js
+
+组件声明 use client，但可 renderToString；useId 保证标题关系可 hydration。adapter.now 会参与初始 today，SSR 与客户端必须使用相同民用日期语义，关键首屏建议显式 defaultMonth/value。
+
+## RTL 与国际化
+
+ConfigProvider 提供 zh-CN/en-US 月份、星期和导航文案；RTL 反转水平键盘移动、导航图标和范围端点圆角，不反转日期时间顺序。自定义 weekdayLabels/aria labels 由调用方本地化。
+
+## 浏览器与 WebView
+
+实现保持 Chrome/WebView 70+ 与 iOS 13+ 可解析语法；不依赖 Intl、Temporal、CSS logical corner 或 Pointer Events。真机 VoiceOver/TalkBack 与 WebKit grid 仍待最终统一门禁。
+
+## 边界情况与已知限制
+
+min 大于 max 时没有可选日；disabledDate 可能被一个月内多次调用，应保持纯且廉价。自定义 adapter 必须产生唯一稳定的年月日 parts；业务若在渲染中切换 adapter 日期类型，须先迁移 value。
+
+## 性能预算
+
+每次渲染最多生成 42 日并做 O(42 × selected) 比较；大量 selected 值应保持稳定引用，disabledDate/render 回调避免请求或重计算。
+
+## 测试证据
+
+- Unit：三种选择、清除、排序、边界、动态月份、受控月份、RTL 键盘、42 格和 Field/grid 命名。
+- SSR：Calendar.ssr.test.tsx 覆盖稳定网格与 label 关系。
+- Figma：Meu/Calendar 257:722；42 个 DayCell、44×44 DayButton、Light/Dark 对比通过。
+- Axe、Chromium/WebKit E2E、Chromatic、真机读屏：最终统一门禁。
+
+## V2 优化记录
+
+### 待优化
+
+补跨时区 hydration、VoiceOver/TalkBack、移动 WebKit 键盘与视觉回归证据。
+
+### 已完成
+
+固化 DateAdapter、值模式、范围完成、受控月份、动态边界持久归一、稳定 grid label、RTL 导航/键盘/圆角、reduced-motion、forced-colors 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型      | 内容                                | 迁移说明    |
+| ---------- | ------ | --------- | ----------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | hardening | 月历状态、RTL、a11y、兼容与文档加固 | 无 API 破坏 |

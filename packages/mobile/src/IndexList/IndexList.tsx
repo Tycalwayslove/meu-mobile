@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useId, useImperativeHandle, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { body, content, heading, indexButton, rail, root, section } from "./IndexList.css";
 import type { IndexListChangeDetails, IndexListProps, IndexListScrollOptions } from "./types";
 
+/** Renders a bounded, sectioned list with an accessible keyboard and touch index rail. */
 export function IndexList({
   className,
   indexAriaLabel,
@@ -23,6 +24,7 @@ export function IndexList({
   const indexRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const programmaticKeyRef = useRef<string | null>(null);
   const programmaticTimerRef = useRef<number | null>(null);
+  const pointerIdRef = useRef<number | null>(null);
   const initialKey = sections.length > 0 && sections[0] ? sections[0].key : null;
   const activeKeyRef = useRef<string | null>(initialKey);
   const [activeKey, setActiveKey] = useState<string | null>(initialKey);
@@ -108,6 +110,45 @@ export function IndexList({
     scrollToSection(target.key, { focusIndex: true }, { event, source: "index" });
   }
 
+  function keyAtPointer(clientY: number) {
+    let nearestKey: string | null = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    for (const candidate of sections) {
+      const node = indexRefs.current[candidate.key];
+      if (!node) continue;
+      const rect = node.getBoundingClientRect();
+      const distance =
+        clientY < rect.top ? rect.top - clientY : clientY > rect.bottom ? clientY - rect.bottom : 0;
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestKey = candidate.key;
+      }
+    }
+    return nearestKey;
+  }
+
+  function selectAtPointer(event: ReactPointerEvent<HTMLElement>) {
+    const key = keyAtPointer(event.clientY);
+    if (!key || key === activeKeyRef.current) return;
+    scrollToSection(key, {}, { event, source: "index" });
+  }
+
+  function finishPointer(event: ReactPointerEvent<HTMLElement>) {
+    if (pointerIdRef.current !== event.pointerId) return;
+    pointerIdRef.current = null;
+    try {
+      if (
+        typeof event.currentTarget.hasPointerCapture === "function" &&
+        typeof event.currentTarget.releasePointerCapture === "function" &&
+        event.currentTarget.hasPointerCapture(event.pointerId)
+      ) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // Old WebViews can lose capture between the check and release.
+    }
+  }
+
   const classes = className ? `${root} ${className}` : root;
   const displayedActiveKey = sections.some((candidate) => candidate.key === activeKey)
     ? activeKey
@@ -133,7 +174,31 @@ export function IndexList({
           </section>
         ))}
       </div>
-      <nav className={rail} aria-label={resolvedIndexLabel}>
+      <nav
+        className={rail}
+        aria-label={resolvedIndexLabel}
+        onPointerDown={(event) => {
+          if ((event.pointerType && !event.isPrimary) || event.button !== 0) return;
+          pointerIdRef.current = event.pointerId;
+          try {
+            event.currentTarget.setPointerCapture(event.pointerId);
+          } catch {
+            // Pointer capture is an enhancement; buttons remain fully operable without it.
+          }
+          selectAtPointer(event);
+          event.preventDefault();
+        }}
+        onPointerMove={(event) => {
+          if (pointerIdRef.current !== event.pointerId) return;
+          selectAtPointer(event);
+          event.preventDefault();
+        }}
+        onPointerUp={finishPointer}
+        onPointerCancel={finishPointer}
+        onLostPointerCapture={(event) => {
+          if (pointerIdRef.current === event.pointerId) pointerIdRef.current = null;
+        }}
+      >
         {sections.map((candidate) => {
           const active = candidate.key === displayedActiveKey;
           return (
@@ -144,7 +209,7 @@ export function IndexList({
               type="button"
               className={indexButton({ active })}
               aria-current={active ? "location" : undefined}
-              aria-label={candidate.key}
+              aria-label={candidate.ariaLabel || candidate.key}
               tabIndex={active ? 0 : -1}
               onKeyDown={(event) => handleIndexKeyDown(event, candidate.key)}
               onClick={(event) => {

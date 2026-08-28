@@ -53,7 +53,7 @@ export const actionButton = style({
   background: "var(--meu-color-surface)",
   textAlign: "start",
   selectors: {
-    "&:focus-visible": {
+    "&:focus": {
       zIndex: 1,
       outlineOffset: -3
     },

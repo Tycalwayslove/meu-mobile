@@ -60,6 +60,9 @@ describe("Calendar", () => {
     ]);
     expect(screen.getAllByRole("gridcell")).toHaveLength(42);
     expect(screen.getByRole("group", { name: "配送日历" })).toBeTruthy();
+    const grid = screen.getByRole("grid");
+    const monthTitle = screen.getByText("2026年8月");
+    expect(grid.getAttribute("aria-labelledby")).toBe(monthTitle.id);
   });
 
   it("supports uncontrolled single selection and explicit clearing", () => {
@@ -177,6 +180,30 @@ describe("Calendar", () => {
     fireEvent.keyDown(dayButton(1, 9), { key: "PageDown" });
     expect(screen.getByText("2026年10月")).toBeTruthy();
     expect(document.activeElement).toBe(dayButton(1, 10));
+  });
+
+  it("maps horizontal keyboard movement to the visual direction in RTL", () => {
+    render(
+      <ConfigProvider dir="rtl">
+        <Calendar defaultMonth={date(1)} defaultValue={date(10)} aria-label="Calendar" />
+      </ConfigProvider>
+    );
+
+    dayButton(10).focus();
+    fireEvent.keyDown(dayButton(10), { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(dayButton(11));
+    fireEvent.keyDown(dayButton(11), { key: "ArrowRight" });
+    expect(document.activeElement).toBe(dayButton(10));
+  });
+
+  it("persists an uncontrolled month after dynamic bounds clamp it", () => {
+    const { rerender } = render(
+      <Calendar defaultMonth={date(1)} min={date(1, 9)} aria-label="Calendar" />
+    );
+    expect(screen.getByText("2026年9月")).toBeTruthy();
+
+    rerender(<Calendar defaultMonth={date(1)} aria-label="Calendar" />);
+    expect(screen.getByText("2026年9月")).toBeTruthy();
   });
 
   it("hides outside dates without removing grid cells", () => {

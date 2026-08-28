@@ -16,6 +16,7 @@ type CascadePickerState<TValue extends PickerValue> = {
   valueSnapshot: ReadonlyArray<TValue | null> | undefined;
 };
 
+/** Tree-to-wheel adapter that commits one normalized root-to-leaf path. @public */
 export function CascadePicker<TValue extends PickerValue = PickerValue>({
   defaultOpen = false,
   defaultValue = [],

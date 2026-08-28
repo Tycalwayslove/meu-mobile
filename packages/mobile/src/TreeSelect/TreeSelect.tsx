@@ -21,6 +21,7 @@ import {
   header,
   headerButton,
   label,
+  loadError,
   loading as loadingStyle,
   popupPanel,
   root,
@@ -80,6 +81,7 @@ function finiteInteger(
   return Math.min(maximum, Math.max(minimum, Math.trunc(value)));
 }
 
+/** Searchable, virtualizable, confirmation-based mobile tree selector. @public */
 export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -101,6 +103,8 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
   filterOption,
   forceMount = false,
   loadChildren,
+  loadingText,
+  loadErrorText,
   lockScroll = true,
   maskOpacity = "default",
   maxCount,
@@ -161,6 +165,8 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
   ]);
   const [uncontrolledSearch, setUncontrolledSearch] = useState(defaultSearchValue);
   const [loadingValues, setLoadingValues] = useState<Set<TValue>>(() => new Set());
+  const [loadErrorValues, setLoadErrorValues] = useState<Set<TValue>>(() => new Set());
+  const [virtualReady, setVirtualReady] = useState(false);
   const initialValue = normalizeTreeSelectValue(
     options,
     controlledValue ? value : defaultValue,
@@ -225,7 +231,24 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
 
   const currentExpanded = controlledExpanded ? expandedValues : uncontrolledExpanded;
   const currentSearch = controlledSearch ? searchValue : uncontrolledSearch;
-  const expandedSet = useMemo(() => new Set(currentExpanded), [currentExpanded]);
+  const registry = useMemo(() => collectTreeSelectOptions(options), [options]);
+  const normalizedExpanded = useMemo(() => {
+    const seen = new Set<TValue>();
+    return currentExpanded.filter((item) => {
+      const option = registry.options.get(item);
+      if (
+        seen.has(item) ||
+        !option ||
+        option.disabled ||
+        (!(option.children && option.children.length > 0) && option.isLeaf !== false)
+      ) {
+        return false;
+      }
+      seen.add(item);
+      return true;
+    });
+  }, [currentExpanded, registry]);
+  const expandedSet = useMemo(() => new Set(normalizedExpanded), [normalizedExpanded]);
   const rows = useMemo(
     () =>
       flattenTreeSelectOptions(
@@ -237,7 +260,6 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
       ),
     [currentSearch, expandedSet, filterOption, options, searchable, selectionMode]
   );
-  const registry = useMemo(() => collectTreeSelectOptions(options), [options]);
   const selectedSet = useMemo(() => new Set(valueState.draft), [valueState.draft]);
   const firstSelectedIndex = rows.findIndex((candidate) => selectedSet.has(candidate.option.value));
   const [activeIndex, setActiveIndex] = useState(firstSelectedIndex < 0 ? 0 : firstSelectedIndex);
@@ -265,13 +287,30 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
         ? "No matching options"
         : "暂无匹配选项"
       : emptyContent;
+  const localizedLoading =
+    loadingText === undefined
+      ? config.locale === "en-US"
+        ? "Loading child options"
+        : "正在加载子选项"
+      : loadingText;
+  const localizedLoadError =
+    loadErrorText === undefined
+      ? config.locale === "en-US"
+        ? "Could not load child options. Collapse and expand to retry."
+        : "子选项加载失败，请收起后重新展开"
+      : loadErrorText;
   const resolvedTreeLabel =
     treeAriaLabel || (config.locale === "en-US" ? "Selectable options" : "可选项");
   const readOnlyDescriptionId = `${generatedId}-readonly-description`;
   const searching = searchable && currentSearch.trim().length > 0;
+  const resolvedVirtual = virtual && virtualReady;
+
+  useEffect(() => {
+    if (virtual) setVirtualReady(true);
+  }, [virtual]);
 
   const virtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
-    count: virtual ? rows.length : 0,
+    count: resolvedVirtual ? rows.length : 0,
     estimateSize: () => ROW_HEIGHT,
     getItemKey: (index) => {
       const candidate = rows[index];
@@ -321,16 +360,22 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
       if (rows.length === 0) return;
       const resolvedIndex = Math.min(rows.length - 1, Math.max(0, nextIndex));
       setActiveIndex(resolvedIndex);
-      if (virtual) virtualizer.scrollToIndex(resolvedIndex, { align: "auto" });
+      if (resolvedVirtual) virtualizer.scrollToIndex(resolvedIndex, { align: "auto" });
       window.requestAnimationFrame(() => {
         const treeElement = treeRef.current;
         const element = treeElement
           ? treeElement.querySelector<HTMLElement>(`[data-meu-tree-index="${resolvedIndex}"]`)
           : null;
-        if (element) element.focus({ preventScroll: true });
+        if (element) {
+          try {
+            element.focus({ preventScroll: true });
+          } catch {
+            element.focus();
+          }
+        }
       });
     },
-    [rows.length, virtual, virtualizer]
+    [resolvedVirtual, rows.length, virtualizer]
   );
 
   function updateSearch(nextValue: string) {
@@ -342,7 +387,9 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
     (candidate: FlatTreeSelectOption<TValue>) => {
       const option = candidate.option;
       if (
+        disabled ||
         !loadChildren ||
+        option.disabled ||
         option.isLeaf !== false ||
         (option.children && option.children.length > 0) ||
         loadControllersRef.current.has(option.value)
@@ -351,21 +398,38 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
       }
       const controller = new AbortController();
       loadControllersRef.current.set(option.value, controller);
+      setLoadErrorValues((current) => {
+        if (!current.has(option.value)) return current;
+        const next = new Set(current);
+        next.delete(option.value);
+        return next;
+      });
       setLoadingValues((current) => new Set(current).add(option.value));
-      void loadChildren(option, { signal: controller.signal })
-        .catch((error: unknown) => {
-          if (!controller.signal.aborted && onLoadError) onLoadError(error, option);
-        })
-        .finally(() => {
-          loadControllersRef.current.delete(option.value);
-          setLoadingValues((current) => {
-            const next = new Set(current);
-            next.delete(option.value);
-            return next;
-          });
+      const reportLoadError = (error: unknown) => {
+        if (controller.signal.aborted) return;
+        setLoadErrorValues((current) => new Set(current).add(option.value));
+        if (onLoadError) onLoadError(error, option);
+      };
+      const finishLoad = () => {
+        if (loadControllersRef.current.get(option.value) !== controller) return;
+        loadControllersRef.current.delete(option.value);
+        setLoadingValues((current) => {
+          const next = new Set(current);
+          next.delete(option.value);
+          return next;
         });
+      };
+      let request: Promise<void>;
+      try {
+        request = loadChildren(option, { signal: controller.signal });
+      } catch (error) {
+        reportLoadError(error);
+        finishLoad();
+        return;
+      }
+      void request.catch(reportLoadError).finally(finishLoad);
     },
-    [loadChildren, onLoadError]
+    [disabled, loadChildren, onLoadError]
   );
 
   useEffect(() => {
@@ -374,16 +438,64 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
     });
   }, [beginLoad, expandedSet, rows]);
 
+  useEffect(() => {
+    const stopped: TValue[] = [];
+    loadControllersRef.current.forEach((controller, loadingValue) => {
+      const option = registry.options.get(loadingValue);
+      if (
+        !disabled &&
+        option &&
+        option.isLeaf === false &&
+        (!option.children || option.children.length === 0)
+      ) {
+        return;
+      }
+      controller.abort();
+      loadControllersRef.current.delete(loadingValue);
+      stopped.push(loadingValue);
+    });
+    if (stopped.length > 0) {
+      setLoadingValues((current) => {
+        const next = new Set(current);
+        stopped.forEach((item) => next.delete(item));
+        return next;
+      });
+    }
+    setLoadErrorValues((current) => {
+      const next = new Set(
+        [...current].filter((item) => {
+          const option = registry.options.get(item);
+          return Boolean(
+            option && option.isLeaf === false && (!option.children || option.children.length === 0)
+          );
+        })
+      );
+      return next.size === current.size ? current : next;
+    });
+  }, [disabled, registry]);
+
+  function abortLoad(optionValue: TValue) {
+    const controller = loadControllersRef.current.get(optionValue);
+    if (!controller) return;
+    controller.abort();
+    loadControllersRef.current.delete(optionValue);
+    setLoadingValues((current) => {
+      const next = new Set(current);
+      next.delete(optionValue);
+      return next;
+    });
+  }
+
   function toggleExpanded(
     candidate: FlatTreeSelectOption<TValue>,
     reason: TreeSelectInteractionReason,
     force?: boolean
   ) {
-    if (!candidate.expandable || disabled) return;
+    if (!candidate.expandable || candidate.option.disabled || disabled) return;
     const nextExpanded = force === undefined ? !expandedSet.has(candidate.option.value) : force;
     const next = nextExpanded
-      ? [...currentExpanded, candidate.option.value]
-      : currentExpanded.filter((item) => item !== candidate.option.value);
+      ? [...normalizedExpanded, candidate.option.value]
+      : normalizedExpanded.filter((item) => item !== candidate.option.value);
     if (!controlledExpanded) setUncontrolledExpanded(next);
     if (onExpandedValuesChange) {
       onExpandedValuesChange(next, {
@@ -394,6 +506,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
       });
     }
     if (nextExpanded) beginLoad(candidate);
+    else abortLoad(candidate.option.value);
   }
 
   function publishSelection(
@@ -454,7 +567,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
     } else if (event.key === "End") {
       event.preventDefault();
       focusIndex(rows.length - 1);
-    } else if (event.key === "ArrowRight") {
+    } else if (event.key === (config.dir === "rtl" ? "ArrowLeft" : "ArrowRight")) {
       event.preventDefault();
       if (candidate.expandable && !isVisiblyExpanded(candidate)) {
         toggleExpanded(candidate, "keyboard", true);
@@ -464,7 +577,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
         );
         if (childIndex >= 0) focusIndex(childIndex);
       }
-    } else if (event.key === "ArrowLeft") {
+    } else if (event.key === (config.dir === "rtl" ? "ArrowRight" : "ArrowLeft")) {
       event.preventDefault();
       if (candidate.expandable && expandedSet.has(candidate.option.value) && !searching) {
         toggleExpanded(candidate, "keyboard", false);
@@ -516,6 +629,9 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
     const loading = Boolean(
       candidate.option.isLeaf === false && loadingValues.has(candidate.option.value)
     );
+    const loadFailed = Boolean(
+      candidate.option.isLeaf === false && loadErrorValues.has(candidate.option.value)
+    );
     const rowStyle: TreeStyle = { "--meu-tree-level": candidate.level };
     return (
       <div
@@ -523,6 +639,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
         role="treeitem"
         aria-checked={multiple && candidate.selectable ? selected : undefined}
         aria-disabled={disabled || candidate.option.disabled || undefined}
+        aria-busy={loading || undefined}
         aria-expanded={candidate.expandable ? expanded : undefined}
         aria-level={candidate.level}
         aria-posinset={candidate.posInSet}
@@ -548,7 +665,11 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
       >
         <span className={expandTarget} data-meu-tree-expand aria-hidden="true">
           {candidate.expandable ? (
-            <span className={chevron} data-expanded={expanded || undefined}>
+            <span
+              className={chevron}
+              data-direction={config.dir}
+              data-expanded={expanded || undefined}
+            >
               <MeuIconChevronLeft size={18} strokeWidth={2} />
             </span>
           ) : null}
@@ -567,7 +688,11 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
           )}
         </span>
         {loading ? (
-          <span className={loadingStyle} aria-hidden="true" />
+          <span className={loadingStyle} role="status" aria-label={localizedLoading} />
+        ) : loadFailed ? (
+          <span className={loadError} role="status" aria-label={localizedLoadError}>
+            !
+          </span>
         ) : (
           <span
             className={selection}
@@ -604,7 +729,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
     requestOpenChange(false, { reason: "confirm" });
   }
 
-  const virtualItems = virtual ? virtualizer.getVirtualItems() : [];
+  const virtualItems = resolvedVirtual ? virtualizer.getVirtualItems() : [];
 
   return (
     <Popup
@@ -683,6 +808,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
           aria-busy={loadingValues.size > 0 || undefined}
           aria-describedby={readOnly ? readOnlyDescriptionId : undefined}
           aria-disabled={disabled || undefined}
+          aria-invalid={status === "error" || undefined}
           aria-label={resolvedTreeLabel}
           aria-multiselectable={multiple || undefined}
           className={tree}
@@ -692,7 +818,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
         >
           {rows.length === 0 ? (
             <div className={empty}>{localizedEmpty}</div>
-          ) : virtual ? (
+          ) : resolvedVirtual ? (
             <div
               className={sizer}
               role="presentation"

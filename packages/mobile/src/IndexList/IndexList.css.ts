@@ -61,7 +61,8 @@ export const rail = style({
   overflowX: "hidden",
   overflowY: "auto",
   background: "var(--meu-color-subtle)",
-  borderLeft: "1px solid var(--meu-color-border)",
+  borderInlineStart: "1px solid var(--meu-color-border)",
+  touchAction: "none",
   scrollbarWidth: "none",
   selectors: { "&::-webkit-scrollbar": { display: "none" } }
 });
@@ -92,6 +93,13 @@ export const indexButton = recipe({
         zIndex: 2,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -2
+      }
+    },
+    "@media": {
+      "(forced-colors: active)": {
+        border: "1px solid ButtonText",
+        color: "ButtonText",
+        forcedColorAdjust: "auto"
       }
     }
   },

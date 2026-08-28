@@ -13,6 +13,7 @@ export type TimePickerHourCycle = "h23" | "h12";
 export type TimePickerPeriod = "am" | "pm";
 export type TimePickerColumn = TimePickerPrecision | "period";
 export type TimePickerColumnValue = number | TimePickerPeriod;
+/** A date- and timezone-independent time of day using canonical 24-hour fields. @public */
 export type TimeValue = Pick<DateParts, "hour" | "minute" | "second">;
 
 export type TimePickerFilterDetails = {
@@ -21,6 +22,7 @@ export type TimePickerFilterDetails = {
   time: TimeValue | null;
 };
 
+/** Per-column option predicates evaluated with a canonical 24-hour candidate. @public */
 export type TimePickerFilter = Partial<
   Record<TimePickerPrecision, (value: number, details: TimePickerFilterDetails) => boolean>
 >;
@@ -66,5 +68,6 @@ type TimePickerBaseProps = Omit<
   value?: TimeValue | null;
 };
 
+/** Props for the confirmation-based time-of-day wheel. @public */
 export type TimePickerProps = TimePickerBaseProps & PickerAccessibleName;
 export type TimePickerOpenChangeDetails = PickerOpenChangeDetails;

@@ -85,7 +85,7 @@ export const row = recipe({
     WebkitTapHighlightColor: "transparent",
     transition: "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
     selectors: {
-      "&:focus-visible": {
+      "&:focus": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3

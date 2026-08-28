@@ -1,9 +1,13 @@
 import type { DateAdapter } from "@meu/date-adapter";
 import type { ComponentPropsWithoutRef, ReactNode, Ref } from "react";
 
+/** Selection models supported by {@link Calendar}. @public */
 export type CalendarSelectionMode = "single" | "multiple" | "range";
+/** JavaScript weekday index used as the first grid column. @public */
 export type CalendarWeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+/** A normalized inclusive pair of calendar-day endpoints. @public */
 export type CalendarRange<TDate> = readonly [TDate, TDate];
+/** Runtime union used by Calendar helper functions. @public */
 export type CalendarValue<TDate> = TDate | ReadonlyArray<TDate> | CalendarRange<TDate> | null;
 
 export type CalendarMonthChangeReason =
@@ -37,6 +41,7 @@ export type CalendarDisabledDateDetails<TDate> = {
   outside: boolean;
 };
 
+/** Imperative focus and month-navigation surface exposed by Calendar. @public */
 export type CalendarRef<TDate> = {
   focus: () => void;
   goToMonth: (month: TDate) => void;
@@ -90,6 +95,7 @@ export type CalendarRangeProps<TDate> = CalendarBaseProps<TDate> & {
   value?: CalendarRange<TDate> | null;
 };
 
+/** Discriminated props whose value and callback types follow selectionMode. @public */
 export type CalendarProps<TDate = Date> =
   CalendarSingleProps<TDate> | CalendarMultipleProps<TDate> | CalendarRangeProps<TDate>;
 

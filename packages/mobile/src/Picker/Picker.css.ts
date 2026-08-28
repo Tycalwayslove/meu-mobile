@@ -15,7 +15,10 @@ export const header = style({
   gridTemplateColumns: "minmax(72px, 1fr) minmax(0, 2fr) minmax(72px, 1fr)",
   alignItems: "center",
   minHeight: 52,
-  borderBottom: "1px solid var(--meu-color-border)"
+  borderBottom: "1px solid var(--meu-color-border)",
+  "@media": {
+    "(forced-colors: active)": { borderBottomColor: "CanvasText" }
+  }
 });
 
 export const headerButton = style({
@@ -35,14 +38,14 @@ export const confirmButton = style({
 
 export const title = style({
   margin: 0,
-  overflow: "hidden",
+  minWidth: 0,
   color: "var(--meu-color-ink)",
   fontSize: 16,
   fontWeight: 700,
   lineHeight: 1.35,
+  overflowWrap: "anywhere",
   textAlign: "center",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap"
+  whiteSpace: "normal"
 });
 
 export const wheels = style({
@@ -63,7 +66,13 @@ export const selectionWindow = style({
   background: "var(--meu-color-subtle)",
   border: "1px solid var(--meu-color-accent)",
   borderRadius: "var(--meu-radius-control)",
-  pointerEvents: "none"
+  pointerEvents: "none",
+  "@media": {
+    "(forced-colors: active)": {
+      background: "Canvas",
+      borderColor: "Highlight"
+    }
+  }
 });
 
 export const fadeTop = style({
@@ -74,7 +83,8 @@ export const fadeTop = style({
   zIndex: 2,
   height: 84,
   background: "linear-gradient(var(--meu-color-surface), transparent)",
-  pointerEvents: "none"
+  pointerEvents: "none",
+  "@media": { "(forced-colors: active)": { display: "none" } }
 });
 
 export const fadeBottom = style({
@@ -85,7 +95,8 @@ export const fadeBottom = style({
   zIndex: 2,
   height: 84,
   background: "linear-gradient(transparent, var(--meu-color-surface))",
-  pointerEvents: "none"
+  pointerEvents: "none",
+  "@media": { "(forced-colors: active)": { display: "none" } }
 });
 
 export const column = style({
@@ -101,14 +112,24 @@ export const column = style({
   boxSizing: "border-box",
   listStyle: "none",
   outline: "none",
+  overscrollBehaviorY: "contain",
   scrollSnapType: "y mandatory",
+  touchAction: "pan-y",
   WebkitOverflowScrolling: "touch",
   scrollbarWidth: "none",
   selectors: {
     "&:focus": {
       boxShadow: "inset 0 0 0 2px var(--meu-color-accent)"
     },
+    '&[aria-disabled="true"]': { cursor: "default" },
     "&::-webkit-scrollbar": { display: "none" }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      selectors: {
+        "&:focus": { boxShadow: "inset 0 0 0 2px Highlight" }
+      }
+    }
   }
 });
 
@@ -138,6 +159,14 @@ export const option = style({
       color: "var(--meu-color-muted)",
       cursor: "not-allowed",
       opacity: 0.45
+    }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      selectors: {
+        '&[aria-selected="true"]': { color: "Highlight" },
+        '&[aria-disabled="true"]': { color: "GrayText", opacity: 1 }
+      }
     }
   }
 });

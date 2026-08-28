@@ -38,6 +38,7 @@ function findScrollRoot(node: HTMLElement) {
   return null;
 }
 
+/** Renders a concurrency-safe pagination sentinel with automatic and manual request paths. */
 export function InfiniteList({
   autoLoad = true,
   className,
@@ -59,11 +60,19 @@ export function InfiniteList({
   const { locale } = useMeuConfig();
   const rootRef = useRef<HTMLDivElement>(null);
   const mountedRef = useRef(true);
-  const loadingRef = useRef(false);
+  const activeRequestIdRef = useRef<number | null>(null);
+  const requestIdRef = useRef(0);
   const hasMoreRef = useRef(hasMore);
+  const onLoadErrorRef = useRef(onLoadError);
+  const onStatusChangeRef = useRef(onStatusChange);
   const statusRef = useRef<InfiniteListRequestStatus>("idle");
   const reportedStatusRef = useRef<InfiniteListStatus>(hasMore ? "idle" : "complete");
   const [status, setStatus] = useState<InfiniteListRequestStatus>("idle");
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+    onStatusChangeRef.current = onStatusChange;
+  }, [onLoadError, onStatusChange]);
 
   const labels =
     locale === "en-US"
@@ -91,52 +100,72 @@ export function InfiniteList({
       statusRef.current = nextStatus;
       reportedStatusRef.current = nextStatus;
       setStatus(nextStatus);
-      if (onStatusChange) onStatusChange(nextStatus, details);
+      const callback = onStatusChangeRef.current;
+      if (callback) callback(nextStatus, details);
     },
-    [onStatusChange]
+    []
   );
 
   const requestLoad = useCallback(
     async (trigger: InfiniteListTrigger) => {
-      if (disabled || !hasMoreRef.current || loadingRef.current) return;
+      if (disabled || !hasMoreRef.current || activeRequestIdRef.current !== null) return;
       if (statusRef.current === "error" && trigger === "auto") return;
-      loadingRef.current = true;
+      requestIdRef.current += 1;
+      const requestId = requestIdRef.current;
+      activeRequestIdRef.current = requestId;
       publishStatus("loading", { trigger });
       try {
         await loadMore();
         if (!mountedRef.current) return;
-        loadingRef.current = false;
+        if (requestIdRef.current !== requestId || activeRequestIdRef.current !== requestId) return;
+        activeRequestIdRef.current = null;
         statusRef.current = "idle";
         setStatus("idle");
         if (hasMoreRef.current && reportedStatusRef.current !== "idle") {
           reportedStatusRef.current = "idle";
-          if (onStatusChange) onStatusChange("idle", { trigger });
+          const callback = onStatusChangeRef.current;
+          if (callback) callback("idle", { trigger });
         }
       } catch (error) {
         if (!mountedRef.current) return;
-        loadingRef.current = false;
+        if (requestIdRef.current !== requestId || activeRequestIdRef.current !== requestId) return;
+        activeRequestIdRef.current = null;
         publishStatus("error", { error, trigger });
-        if (onLoadError) onLoadError(error);
+        const callback = onLoadErrorRef.current;
+        if (callback) callback(error);
       }
     },
-    [disabled, loadMore, onLoadError, onStatusChange, publishStatus]
+    [disabled, loadMore, publishStatus]
   );
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      requestIdRef.current += 1;
+      activeRequestIdRef.current = null;
     };
   }, []);
 
   useEffect(() => {
+    const hadMore = hasMoreRef.current;
     hasMoreRef.current = hasMore;
+    if (hadMore && !hasMore) {
+      requestIdRef.current += 1;
+      activeRequestIdRef.current = null;
+      statusRef.current = "idle";
+      // External completion is a committed pagination-generation boundary. Resetting while the
+      // complete UI is rendered prevents a prior error/loading state from reviving on re-enable.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setStatus("idle");
+    }
     const resolvedStatus: InfiniteListStatus = hasMore ? statusRef.current : "complete";
     if (reportedStatusRef.current !== resolvedStatus) {
       reportedStatusRef.current = resolvedStatus;
-      if (onStatusChange) onStatusChange(resolvedStatus, {});
+      const callback = onStatusChangeRef.current;
+      if (callback) callback(resolvedStatus, {});
     }
-  }, [hasMore, onStatusChange]);
+  }, [hasMore]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -180,7 +209,7 @@ export function InfiniteList({
     ) : null;
   const defaultAction =
     resolvedStatus === "error" ? (
-      <button className={action} type="button" onClick={() => void retry()}>
+      <button className={action} type="button" disabled={disabled} onClick={() => void retry()}>
         {retryLabel || labels.retry}
       </button>
     ) : resolvedStatus === "idle" ? (
@@ -203,8 +232,10 @@ export function InfiniteList({
       }}
       className={className ? `${root} ${className}` : root}
       aria-busy={resolvedStatus === "loading" ? "true" : undefined}
+      aria-disabled={disabled ? "true" : undefined}
       data-auto-load={autoLoad ? "true" : "false"}
       data-meu-component="infinite-list"
+      data-disabled={disabled ? "true" : undefined}
       data-status={resolvedStatus}
     >
       <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">

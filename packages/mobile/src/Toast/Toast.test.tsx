@@ -56,16 +56,18 @@ describe("Toast", () => {
     expect(toast && toast.getAttribute("data-tone")).toBe("success");
   });
 
-  it("carries locale and theme tokens through the body portal", () => {
+  it("carries locale, direction, theme, and reduced motion through the body portal", () => {
     render(
-      <ConfigProvider locale="en-US" theme="dark">
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
         <Toast open duration={0} message="Saved" />
       </ConfigProvider>
     );
     const viewport = document.querySelector('[data-meu-overlay-layer="toast"]');
     if (!(viewport instanceof HTMLElement)) throw new Error("Expected Toast viewport");
     expect(viewport.getAttribute("data-meu-theme")).toBe("dark");
+    expect(viewport.getAttribute("data-meu-motion")).toBe("reduced");
     expect(viewport.getAttribute("lang")).toBe("en-US");
+    expect(viewport.getAttribute("dir")).toBe("rtl");
   });
 
   it("keeps the action outside the assertive live region", () => {
@@ -203,5 +205,72 @@ describe("Toast", () => {
     });
     expect(onActionError).toHaveBeenCalledWith(error);
     expect(screen.getByRole("status")).toBeTruthy();
+  });
+
+  it("contains an unhandled action rejection and keeps the toast open", async () => {
+    render(
+      <Toast
+        open
+        duration={0}
+        message="保存失败"
+        action={{ label: "重试", onPress: () => Promise.reject(new Error("offline")) }}
+      />
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "重试" }));
+      await Promise.resolve();
+    });
+    expect(screen.getByRole("status")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "重试" }).hasAttribute("disabled")).toBe(false);
+    const toast = screen.getByRole("status").closest("[data-meu-component='toast']");
+    expect(toast && toast.getAttribute("data-action-error")).toBe("true");
+  });
+
+  it("does not let an obsolete async action close a newly reopened toast", async () => {
+    let resolveAction!: () => void;
+    const onChange = vi.fn();
+
+    function ReopenHarness() {
+      const [open, setOpen] = useState(true);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(false)}>
+            外部关闭
+          </button>
+          <button type="button" onClick={() => setOpen(true)}>
+            重新打开
+          </button>
+          <Toast
+            open={open}
+            duration={0}
+            message="正在保存"
+            onOpenChange={(nextOpen, details) => {
+              onChange(details);
+              setOpen(nextOpen);
+            }}
+            action={{
+              label: "保存",
+              onPress: () =>
+                new Promise<void>((resolve) => {
+                  resolveAction = resolve;
+                })
+            }}
+          />
+        </>
+      );
+    }
+
+    render(<ReopenHarness />);
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "外部关闭" }));
+    fireEvent.click(screen.getByRole("button", { name: "重新打开" }));
+    await act(async () => {
+      resolveAction();
+      await Promise.resolve();
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("status").textContent).toBe("正在保存");
   });
 });

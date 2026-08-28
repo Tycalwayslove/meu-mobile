@@ -144,29 +144,31 @@ export function resolveDatePickerBounds<TDate>(
   max: TDate | undefined
 ): DatePickerBounds<TDate> {
   const anchorParts = adapter.getParts(anchor);
+  const defaultMinCandidate = adapter.fromParts({
+    day: 1,
+    hour: 0,
+    millisecond: 0,
+    minute: 0,
+    month: 1,
+    second: 0,
+    year: anchorParts.year - 10
+  });
   const defaultMin =
-    adapter.fromParts({
-      day: 1,
-      hour: 0,
-      millisecond: 0,
-      minute: 0,
-      month: 1,
-      second: 0,
-      year: anchorParts.year - 10
-    }) || adapter.add(anchor, -10, "year");
+    defaultMinCandidate === null ? adapter.add(anchor, -10, "year") : defaultMinCandidate;
+  const defaultMaxCandidate = adapter.fromParts({
+    day: 31,
+    hour: 23,
+    millisecond: 999,
+    minute: 59,
+    month: 12,
+    second: 59,
+    year: anchorParts.year + 10
+  });
   const defaultMax =
-    adapter.fromParts({
-      day: 31,
-      hour: 23,
-      millisecond: 999,
-      minute: 59,
-      month: 12,
-      second: 59,
-      year: anchorParts.year + 10
-    }) || adapter.add(anchor, 10, "year");
+    defaultMaxCandidate === null ? adapter.add(anchor, 10, "year") : defaultMaxCandidate;
   return {
-    max: max && adapter.isValid(max) ? max : defaultMax,
-    min: min && adapter.isValid(min) ? min : defaultMin
+    max: max !== undefined && adapter.isValid(max) ? max : defaultMax,
+    min: min !== undefined && adapter.isValid(min) ? min : defaultMin
   };
 }
 

@@ -103,7 +103,7 @@ describe("ToastProvider", () => {
     fireEvent.click(screen.getByRole("button", { name: "关闭首条" }));
     expect(screen.queryByRole("status")).toBeNull();
     act(() => {
-      vi.advanceTimersByTime(180);
+      vi.advanceTimersByTime(160);
     });
     expect(screen.getByRole("status").textContent).toBe("第二条消息");
   });

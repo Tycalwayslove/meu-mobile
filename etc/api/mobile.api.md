@@ -117,6 +117,7 @@ export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "da
     alt: string;
     fallback?: ReactNode;
     fit?: AvatarFit;
+    initials?: string;
     imageRef?: Ref<HTMLImageElement>;
     loading?: ImgHTMLAttributes<HTMLImageElement>["loading"];
     onError?: ReactEventHandler<HTMLImageElement>;
@@ -215,7 +216,7 @@ export type ButtonTone = "accent" | "neutral" | "danger";
 // @public (undocumented)
 export type ButtonVariant = "solid" | "outline" | "ghost" | "text";
 
-// @public (undocumented)
+// @public
 export function Calendar<TDate = Date>(props: CalendarProps<TDate>): JSX.Element;
 
 // Warning: (ae-forgotten-export) The symbol "CalendarNativeProps" needs to be exported by the entry point index.d.ts
@@ -288,10 +289,10 @@ export type CalendarMultipleProps<TDate> = CalendarBaseProps<TDate> & {
     value?: ReadonlyArray<TDate>;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarProps<TDate = Date> = CalendarSingleProps<TDate> | CalendarMultipleProps<TDate> | CalendarRangeProps<TDate>;
 
-// @public (undocumented)
+// @public
 export type CalendarRange<TDate> = readonly [TDate, TDate];
 
 // @public (undocumented)
@@ -305,14 +306,14 @@ export type CalendarRangeProps<TDate> = CalendarBaseProps<TDate> & {
     value?: CalendarRange<TDate> | null;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarRef<TDate> = {
     focus: () => void;
     goToMonth: (month: TDate) => void;
     goToToday: () => void;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarSelectionMode = "single" | "multiple" | "range";
 
 // @public (undocumented)
@@ -323,10 +324,10 @@ export type CalendarSingleProps<TDate> = CalendarBaseProps<TDate> & {
     value?: TDate | null;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarValue<TDate> = TDate | ReadonlyArray<TDate> | CalendarRange<TDate> | null;
 
-// @public (undocumented)
+// @public
 export type CalendarWeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 // @public (undocumented)
@@ -341,8 +342,10 @@ export type CardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onCli
     description?: ReactNode;
     extra?: ReactNode;
     footer?: ReactNode;
+    footerLayout?: CardFooterLayout;
     leading?: ReactNode;
     media?: ReactNode;
+    mediaAspectRatio?: CSSProperties["aspectRatio"];
     padding?: CardPadding;
     ref?: Ref<HTMLDivElement>;
     title?: ReactNode;
@@ -394,10 +397,10 @@ export type CarouselProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "d
     ref?: Ref<HTMLDivElement>;
 };
 
-// @public (undocumented)
+// @public
 export function CascadePicker<TValue extends PickerValue = PickerValue>(input: CascadePickerProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type CascadePickerOption<TValue extends PickerValue = PickerValue> = PickerOption<TValue> & {
     children?: ReadonlyArray<CascadePickerOption<TValue>>;
 };
@@ -411,7 +414,7 @@ export type CascadePickerProps<TValue extends PickerValue = PickerValue> = Casca
 // @public (undocumented)
 export function Cell(input: CellProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type CellProps = Omit<HTMLAttributes<CellRef>, "children" | "dangerouslySetInnerHTML" | "onClick" | "prefix" | "title"> & {
     arrow?: ReactNode;
     clickable?: boolean;
@@ -491,7 +494,7 @@ export function Collapse(input: CollapseProps): JSX.Element;
 // @public (undocumented)
 export type CollapseArrow = ReactNode | ((expanded: boolean) => ReactNode);
 
-// @public (undocumented)
+// @public
 export type CollapseItem = {
     content: ReactNode;
     disabled?: boolean;
@@ -500,7 +503,7 @@ export type CollapseItem = {
     value: string;
 };
 
-// @public (undocumented)
+// @public
 export type CollapseProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange"> & {
     accordion?: boolean;
     arrow?: CollapseArrow;
@@ -542,10 +545,10 @@ export { DateAdapter }
 
 export { DateParts }
 
-// @public (undocumented)
+// @public
 export function DatePicker<TDate = Date>(input: DatePickerProps<TDate>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type DatePickerFilter<TDate> = Partial<Record<DatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>;
 
 // @public (undocumented)
@@ -568,7 +571,7 @@ export const datePickerPrecisions: readonly ["year", "month", "day", "hour", "mi
 
 // Warning: (ae-forgotten-export) The symbol "DatePickerBaseProps" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type DatePickerProps<TDate = Date> = DatePickerBaseProps<TDate> & PickerAccessibleName;
 
 // @public (undocumented)
@@ -586,7 +589,7 @@ export function dateRangeIsSelectable<TDate>(adapter: DateAdapter<TDate>, value:
     min?: TDate;
 }): boolean;
 
-// @public (undocumented)
+// @public
 export function DateRangePicker<TDate = Date>(input: DateRangePickerProps<TDate>): JSX.Element;
 
 // @public (undocumented)
@@ -604,7 +607,7 @@ export type DateRangePickerOpenChangeDetails = {
 // @public (undocumented)
 export type DateRangePickerOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
-// @public (undocumented)
+// @public
 export type DateRangePickerPreset<TDate> = {
     disabled?: boolean;
     key: string;
@@ -622,7 +625,7 @@ export type DateRangePickerPresetSelectDetails = {
 // Warning: (ae-forgotten-export) The symbol "DateRangePickerBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DateRangePickerAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type DateRangePickerProps<TDate = Date> = DateRangePickerBaseProps<TDate> & DateRangePickerAccessibleName;
 
 // @public (undocumented)
@@ -642,10 +645,10 @@ export type DialogAction = {
     tone?: DialogActionTone;
 };
 
-// @public (undocumented)
+// @public
 export type DialogActionLayout = "auto" | "horizontal" | "vertical";
 
-// @public (undocumented)
+// @public
 export type DialogActionTone = "neutral" | "accent" | "danger";
 
 // Warning: (ae-forgotten-export) The symbol "DialogPromptBase" needs to be exported by the entry point index.d.ts
@@ -727,7 +730,7 @@ export function Ellipsis(input: EllipsisProps): JSX.Element;
 // @public (undocumented)
 export type EllipsisDirection = "start" | "end" | "middle";
 
-// @public (undocumented)
+// @public
 export type EllipsisProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML"> & {
     collapseText?: ReactNode;
     content: string;
@@ -744,12 +747,14 @@ export type EllipsisProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "d
 // @public (undocumented)
 export function Empty(input: EmptyProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type EmptyProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML" | "title"> & {
-    action: ReactNode;
+    action?: ReactNode;
     description: ReactNode;
     illustration?: ReactNode;
+    reason?: "no-data" | "no-results" | "not-configured";
     ref?: Ref<HTMLDivElement>;
+    secondaryAction?: ReactNode;
     title: ReactNode;
 };
 
@@ -785,19 +790,19 @@ export type FieldProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
 // @public (undocumented)
 export function FloatingPanel(input: FloatingPanelProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type FloatingPanelHeightChangeDetails = {
     index: number;
     reason: FloatingPanelHeightChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type FloatingPanelHeightChangeReason = "drag" | "handle" | "keyboard" | "imperative";
 
-// @public (undocumented)
+// @public
 export type FloatingPanelPlacement = "bottom" | "top";
 
-// @public (undocumented)
+// @public
 export type FloatingPanelProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange"> & {
     anchors: ReadonlyArray<number>;
     children: ReactNode;
@@ -813,13 +818,13 @@ export type FloatingPanelProps = Omit<HTMLAttributes<HTMLDivElement>, "children"
     safeArea?: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type FloatingPanelRef = {
     nativeElement: HTMLDivElement | null;
     setHeight: (height: number, options?: FloatingPanelSetHeightOptions) => void;
 };
 
-// @public (undocumented)
+// @public
 export type FloatingPanelSetHeightOptions = {
     immediate?: boolean;
 };
@@ -1082,19 +1087,19 @@ export type ImageViewerScaleChangeDetails = {
 // @public (undocumented)
 export type ImageViewerScaleChangeReason = "double-tap" | "pinch" | "reset" | "zoom-in" | "zoom-out";
 
-// @public (undocumented)
+// @public
 export function IndexList(input: IndexListProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type IndexListChangeDetails = {
-    event?: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement>;
+    event?: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement> | PointerEvent_2<HTMLElement>;
     source: IndexListChangeSource;
 };
 
-// @public (undocumented)
+// @public
 export type IndexListChangeSource = "index" | "scroll";
 
-// @public (undocumented)
+// @public
 export type IndexListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange"> & {
     indexAriaLabel?: string;
     onIndexChange?: (key: string, details: IndexListChangeDetails) => void;
@@ -1103,29 +1108,30 @@ export type IndexListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "
     sticky?: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type IndexListRef = {
     scrollTo: (key: string, options?: IndexListScrollOptions) => boolean;
 };
 
-// @public (undocumented)
+// @public
 export type IndexListScrollOptions = {
     behavior?: ScrollBehavior;
     focusIndex?: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type IndexListSection = {
+    ariaLabel?: string;
     brief?: ReactNode;
     content: ReactNode;
     key: string;
     title?: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export function InfiniteList(input: InfiniteListProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type InfiniteListProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     autoLoad?: boolean;
     completeContent?: ReactNode;
@@ -1143,16 +1149,16 @@ export type InfiniteListProps = Omit<HTMLAttributes<HTMLDivElement>, "children">
     threshold?: number;
 };
 
-// @public (undocumented)
+// @public
 export type InfiniteListStatus = "idle" | "loading" | "error" | "complete";
 
-// @public (undocumented)
+// @public
 export type InfiniteListStatusChangeDetails = {
     error?: unknown;
     trigger?: InfiniteListTrigger;
 };
 
-// @public (undocumented)
+// @public
 export type InfiniteListTrigger = "auto" | "manual" | "retry";
 
 // @public (undocumented)
@@ -1167,7 +1173,7 @@ export type ListDivider = "inset" | "full" | "none";
 // @public (undocumented)
 export type ListMode = "plain" | "card";
 
-// @public (undocumented)
+// @public
 export type ListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML" | "title"> & {
     children?: ReactNode;
     divider?: ListDivider;
@@ -1180,7 +1186,7 @@ export type ListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dange
 // @public (undocumented)
 export function Mask(input: MaskProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type MaskOpacity = "thin" | "default" | "thick" | number;
 
 // @public (undocumented)
@@ -1215,7 +1221,7 @@ export type MeuTheme = "light" | "dark" | "system";
 // @public (undocumented)
 export function NavBar(input: NavBarProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type NavBarProps = Omit<ComponentProps<"header">, "children" | "title"> & {
     backAriaLabel?: string;
     backHref?: string;
@@ -1226,6 +1232,7 @@ export type NavBarProps = Omit<ComponentProps<"header">, "children" | "title"> &
     onBack?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
     ref?: Ref<HTMLElement>;
     right?: ReactNode;
+    safeArea?: boolean;
     title?: ReactNode;
 };
 
@@ -1337,6 +1344,10 @@ export type PaginationDotsProps = Omit<ComponentProps<"div">, "children"> & {
     activeIndex: number;
     count: number;
     direction?: PaginationDotsDirection;
+    getPageLabel?: (index: number, count: number) => string;
+    interactive?: boolean;
+    maxVisible?: number;
+    onChange?: (index: number, event: MouseEvent_2<HTMLButtonElement>) => void;
     ref?: Ref<HTMLDivElement>;
     variant?: PaginationDotsVariant;
 };
@@ -1408,10 +1419,10 @@ export type PasscodeInputRef = {
 // @public
 export type PasscodeInputStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export function Picker<TValue extends PickerValue = PickerValue>(input: PickerProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type PickerColumn<TValue extends PickerValue = PickerValue> = ReadonlyArray<PickerOption<TValue>>;
 
 // @public (undocumented)
@@ -1422,7 +1433,7 @@ export type PickerOpenChangeDetails = {
 // @public (undocumented)
 export type PickerOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
-// @public (undocumented)
+// @public
 export type PickerOption<TValue extends PickerValue = PickerValue> = {
     disabled?: boolean;
     label: ReactNode;
@@ -1444,7 +1455,7 @@ export type PickerSelectDetails = {
 // @public (undocumented)
 export type PickerSelectReason = "keyboard" | "pointer" | "scroll";
 
-// @public (undocumented)
+// @public
 export function PickerTrigger(input: PickerTriggerProps): JSX.Element;
 
 // @public (undocumented)
@@ -1459,7 +1470,7 @@ export type PickerTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "
 // @public (undocumented)
 export type PickerTriggerStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type PickerValue = string | number;
 
 // @public (undocumented)
@@ -1507,8 +1518,9 @@ export type PopupProps = PopupBaseProps & PopupAccessibleName;
 // @public (undocumented)
 export function Progress(input: ProgressProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ProgressProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+    announce?: boolean;
     formatValue?: (value: number) => ReactNode;
     indeterminate?: boolean;
     label?: ReactNode;
@@ -1517,24 +1529,25 @@ export type ProgressProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     size?: ProgressSize;
     tone?: ProgressTone;
     value?: number;
+    valueText?: string;
 };
 
-// @public (undocumented)
+// @public
 export type ProgressSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type ProgressTone = "accent" | "success" | "warning" | "danger";
 
 // @public (undocumented)
 export function PullToRefresh(input: PullToRefreshProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type PullToRefreshIndicatorDetails = {
     distance: number;
     threshold: number;
 };
 
-// @public (undocumented)
+// @public
 export type PullToRefreshProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onTouchCancel" | "onTouchEnd" | "onTouchMove" | "onTouchStart"> & {
     actionLabel?: string;
     canPull?: () => boolean;
@@ -1551,17 +1564,17 @@ export type PullToRefreshProps = Omit<HTMLAttributes<HTMLDivElement>, "children"
     threshold?: number;
 };
 
-// @public (undocumented)
+// @public
 export type PullToRefreshStatus = "idle" | "pulling" | "ready" | "refreshing" | "complete";
 
-// @public (undocumented)
+// @public
 export type PullToRefreshStatusChangeDetails = {
     distance: number;
     status: PullToRefreshStatus;
     trigger?: PullToRefreshTrigger;
 };
 
-// @public (undocumented)
+// @public
 export type PullToRefreshTrigger = "keyboard" | "pull";
 
 // @public (undocumented)
@@ -1654,18 +1667,19 @@ export type RateStatus = "default" | "error";
 // @public (undocumented)
 export function Result(input: ResultProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ResultProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML" | "title"> & {
     actions?: ReactNode;
     description?: ReactNode;
+    headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
     icon?: ReactNode;
     ref?: Ref<HTMLDivElement>;
     status?: ResultStatus;
     title: ReactNode;
 };
 
-// @public (undocumented)
-export type ResultStatus = "success" | "error" | "info" | "warning" | "waiting";
+// @public
+export type ResultStatus = "success" | "error" | "info" | "warning" | "pending" | "waiting";
 
 // @public
 export const SafeArea: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
@@ -1766,7 +1780,6 @@ export type SegmentedControlProps<TValue extends SegmentedControlValue = Segment
     defaultValue?: TValue;
     disabled?: boolean;
     form?: string;
-    focusRef?: Ref<HTMLInputElement>;
     name?: string;
     onChange?: (value: TValue, event: ChangeEvent<HTMLInputElement>) => void;
     options: readonly SegmentedControlOption<TValue>[];
@@ -1812,7 +1825,6 @@ export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<H
     defaultValue?: TValue[];
     disabled?: boolean;
     form?: string;
-    focusRef?: Ref<HTMLInputElement>;
     multiple?: boolean;
     name?: string;
     onChange?: (value: TValue[], options: SelectorOption<TValue>[], details?: SelectorChangeDetails<TValue>) => void;
@@ -1840,16 +1852,17 @@ export function SideNav(input: SideNavProps): JSX.Element;
 // @public (undocumented)
 export type SideNavActivationMode = "automatic" | "manual";
 
-// @public (undocumented)
+// @public
 export type SideNavItem = {
     badge?: ReactNode;
+    badgeLabel?: string;
     content?: ReactNode;
     disabled?: boolean;
     key: string;
     label: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export type SideNavProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange"> & {
     activationMode?: SideNavActivationMode;
     defaultValue?: string;
@@ -1863,9 +1876,10 @@ export type SideNavProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "de
 // @public (undocumented)
 export function Skeleton(input: SkeletonProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type SkeletonProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     animated?: boolean;
+    aspectRatio?: CSSProperties["aspectRatio"];
     height?: CSSProperties["height"];
     lines?: number;
     lineWidths?: ReadonlyArray<CSSProperties["width"]>;
@@ -1874,7 +1888,7 @@ export type SkeletonProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     width?: CSSProperties["width"];
 };
 
-// @public (undocumented)
+// @public
 export type SkeletonVariant = "text" | "rectangle" | "circle";
 
 // @public
@@ -2008,7 +2022,7 @@ export type StepStatus = "wait" | "process" | "finish" | "error";
 // @public (undocumented)
 export function SwipeActions(input: SwipeActionsProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type SwipeActionsAction = {
     "aria-label"?: string;
     closeOnPress?: boolean;
@@ -2019,19 +2033,19 @@ export type SwipeActionsAction = {
     tone?: SwipeActionsActionTone;
 };
 
-// @public (undocumented)
+// @public
 export type SwipeActionsActionPressDetails = {
     index: number;
     side: SwipeActionsSide;
 };
 
-// @public (undocumented)
+// @public
 export type SwipeActionsActionResult = boolean | void | Promise<boolean | void>;
 
-// @public (undocumented)
+// @public
 export type SwipeActionsActionTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
-// @public (undocumented)
+// @public
 export type SwipeActionsOpenChangeDetails = {
     reason: "swipe" | "keyboard" | "content" | "outside" | "escape";
 } | {
@@ -2039,8 +2053,8 @@ export type SwipeActionsOpenChangeDetails = {
     reason: "action";
 };
 
-// @public (undocumented)
-export type SwipeActionsProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange" | "onClickCapture" | "onKeyDownCapture" | "onPointerCancel" | "onPointerDown" | "onPointerMove" | "onPointerUp"> & {
+// @public
+export type SwipeActionsProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange" | "onClickCapture" | "onKeyDownCapture" | "onLostPointerCapture" | "onPointerCancel" | "onPointerDown" | "onPointerMove" | "onPointerUp"> & {
     children: ReactNode;
     closeOnAction?: boolean;
     closeOnOutsidePress?: boolean;
@@ -2052,6 +2066,7 @@ export type SwipeActionsProps = Omit<HTMLAttributes<HTMLDivElement>, "children" 
     onActionError?: (error: unknown, action: SwipeActionsAction) => void;
     onClickCapture?: (event: React.MouseEvent<HTMLDivElement>) => void;
     onKeyDownCapture?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+    onLostPointerCapture?: (event: PointerEvent_2<HTMLDivElement>) => void;
     onOpenSideChange?: (side: SwipeActionsSide | null, details: SwipeActionsOpenChangeDetails) => void;
     onPointerCancel?: (event: PointerEvent_2<HTMLDivElement>) => void;
     onPointerDown?: (event: PointerEvent_2<HTMLDivElement>) => void;
@@ -2066,7 +2081,7 @@ export type SwipeActionsProps = Omit<HTMLAttributes<HTMLDivElement>, "children" 
     rightActionsLabel?: string;
 };
 
-// @public (undocumented)
+// @public
 export type SwipeActionsSide = "left" | "right";
 
 // @public (undocumented)
@@ -2102,7 +2117,9 @@ export function TabBar(input: TabBarProps): JSX.Element;
 
 // @public (undocumented)
 export type TabBarItem = {
+    ariaLabel?: string;
     badge?: ReactNode;
+    badgeLabel?: string;
     disabled?: boolean;
     href?: string;
     icon: ReactNode | ((active: boolean) => ReactNode);
@@ -2142,6 +2159,7 @@ export type TabsProps = Omit<ComponentProps<"div">, "children" | "defaultValue" 
     defaultValue?: string;
     destroyInactive?: boolean;
     items: readonly TabsItem[];
+    lazy?: boolean;
     onChange?: (key: string, event: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement>) => void;
     ref?: Ref<HTMLDivElement>;
     stretch?: boolean;
@@ -2154,10 +2172,13 @@ export function Tag(input: TagProps): JSX.Element;
 // @public (undocumented)
 export type TagProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "dangerouslySetInnerHTML" | "onClick"> & {
     children: ReactNode;
+    closeAriaLabel?: string;
     disabled?: boolean;
     onClick?: MouseEventHandler<HTMLButtonElement>;
+    onClose?: MouseEventHandler<HTMLButtonElement>;
     ref?: Ref<TagRef>;
     rounded?: boolean;
+    selected?: boolean;
     size?: TagSize;
     tone?: TagTone;
     variant?: TagVariant;
@@ -2222,7 +2243,7 @@ export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size">
 // @public
 export const ThemeProvider: typeof ConfigProvider;
 
-// @public (undocumented)
+// @public
 export function TimePicker(input: TimePickerProps): JSX.Element;
 
 // @public (undocumented)
@@ -2234,7 +2255,7 @@ export function timePickerColumns(precision: TimePickerPrecision, hourCycle: Tim
 // @public (undocumented)
 export type TimePickerColumnValue = number | TimePickerPeriod;
 
-// @public (undocumented)
+// @public
 export type TimePickerFilter = Partial<Record<TimePickerPrecision, (value: number, details: TimePickerFilterDetails) => boolean>>;
 
 // @public (undocumented)
@@ -2269,7 +2290,7 @@ export const timePickerPrecisions: readonly ["hour", "minute", "second"];
 
 // Warning: (ae-forgotten-export) The symbol "TimePickerBaseProps" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type TimePickerProps = TimePickerBaseProps & PickerAccessibleName;
 
 // @public (undocumented)
@@ -2277,20 +2298,20 @@ export type TimePickerSelectDetails = PickerSelectDetails & {
     column: TimePickerColumn;
 };
 
-// @public (undocumented)
+// @public
 export type TimeValue = Pick<DateParts, "hour" | "minute" | "second">;
 
-// @public (undocumented)
+// @public
 export function Toast(input: ToastProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type ToastAction = {
     closeOnPress?: boolean;
     label: ReactNode;
     onPress?: () => boolean | void | Promise<boolean | void>;
 };
 
-// @public (undocumented)
+// @public
 export type ToastApi = {
     clear: () => void;
     danger: (options: ToastToneOptions) => ToastController;
@@ -2299,31 +2320,31 @@ export type ToastApi = {
     warning: (options: ToastToneOptions) => ToastController;
 };
 
-// @public (undocumented)
+// @public
 export type ToastCloseDetails = ToastOpenChangeDetails | {
     reason: "programmatic";
 } | {
     reason: "clear";
 };
 
-// @public (undocumented)
+// @public
 export type ToastController = {
     close: () => void;
     id: string;
     update: (options: ToastUpdateOptions) => void;
 };
 
-// @public (undocumented)
+// @public
 export type ToastOpenChangeDetails = {
     reason: "timeout";
 } | {
     reason: "action";
 };
 
-// @public (undocumented)
+// @public
 export type ToastPosition = "top" | "center" | "bottom";
 
-// @public (undocumented)
+// @public
 export type ToastProps = Omit<HTMLAttributes<HTMLDivElement>, "aria-atomic" | "aria-live" | "children" | "dangerouslySetInnerHTML" | "role"> & {
     action?: ToastAction;
     container?: OverlayContainer;
@@ -2340,32 +2361,32 @@ export type ToastProps = Omit<HTMLAttributes<HTMLDivElement>, "aria-atomic" | "a
     tone?: ToastTone;
 };
 
-// @public (undocumented)
+// @public
 export function ToastProvider(input: ToastProviderProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ToastProviderProps = {
     children: ReactNode;
 };
 
 // Warning: (ae-forgotten-export) The symbol "WithoutOpenState_3" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type ToastShowOptions = WithoutOpenState_3<ToastProps> & {
     id?: string;
     onClose?: (details: ToastCloseDetails) => void;
 };
 
-// @public (undocumented)
+// @public
 export type ToastTone = "neutral" | "success" | "warning" | "danger";
 
-// @public (undocumented)
+// @public
 export type ToastToneOptions = Omit<ToastShowOptions, "tone">;
 
-// @public (undocumented)
+// @public
 export type ToastUpdateOptions = Partial<Omit<ToastShowOptions, "id">>;
 
-// @public (undocumented)
+// @public
 export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>(input: TreeSelectProps<TValue>): JSX.Element;
 
 // @public (undocumented)
@@ -2398,7 +2419,7 @@ export type TreeSelectLoadContext = {
 // @public (undocumented)
 export type TreeSelectOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
-// @public (undocumented)
+// @public
 export type TreeSelectOption<TValue extends TreeSelectValue = TreeSelectValue> = {
     children?: ReadonlyArray<TreeSelectOption<TValue>>;
     description?: ReactNode;
@@ -2437,22 +2458,22 @@ export function useDialog(): DialogApi;
 // @public
 export function useMeuConfig(): MeuConfig;
 
-// @public (undocumented)
+// @public
 export function useToast(): ToastApi;
 
-// @public (undocumented)
+// @public
 export function VirtualList<T>(input: VirtualListProps<T>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type VirtualListAlign = "start" | "center" | "end" | "auto";
 
 // Warning: (ae-forgotten-export) The symbol "VirtualListBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "VirtualListAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type VirtualListProps<T> = VirtualListBaseProps<T> & VirtualListAccessibleName;
 
-// @public (undocumented)
+// @public
 export type VirtualListRange = {
     overscanEndIndex: number;
     overscanStartIndex: number;
@@ -2460,7 +2481,7 @@ export type VirtualListRange = {
     visibleStartIndex: number;
 };
 
-// @public (undocumented)
+// @public
 export type VirtualListRef = {
     measure: () => void;
     nativeElement: HTMLDivElement | null;
@@ -2468,15 +2489,15 @@ export type VirtualListRef = {
     scrollToOffset: (offset: number, options?: VirtualListScrollOptions) => void;
 };
 
-// @public (undocumented)
+// @public
 export type VirtualListScrollBehavior = "auto" | "smooth";
 
-// @public (undocumented)
+// @public
 export type VirtualListScrollOptions = {
     behavior?: VirtualListScrollBehavior;
 };
 
-// @public (undocumented)
+// @public
 export type VirtualListScrollToIndexOptions = VirtualListScrollOptions & {
     align?: VirtualListAlign;
 };
@@ -2516,6 +2537,7 @@ export type WatermarkProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "
 
 // Warnings were encountered during analysis:
 //
+// src/Card/types.ts:17:3 - (ae-forgotten-export) The symbol "CardFooterLayout" needs to be exported by the entry point index.d.ts
 // src/SafeArea/SafeArea.tsx:23:22 - (ae-forgotten-export) The symbol "SafeAreaPosition" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

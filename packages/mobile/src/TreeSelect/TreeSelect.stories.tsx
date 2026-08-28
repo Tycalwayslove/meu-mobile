@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
 import { PickerTrigger } from "../Picker";
+import { ConfigProvider } from "../ConfigProvider";
 import { TreeSelect } from "./TreeSelect";
 import type { TreeSelectOption } from "./types";
 
@@ -69,6 +70,34 @@ function ControlledExample({ multiple = false, readOnly = false }) {
   );
 }
 
+function AsyncExample() {
+  const [asyncOptions, setAsyncOptions] = useState<TreeSelectOption<string>[]>([
+    { isLeaf: false, label: "远程商品类目", value: "remote" }
+  ]);
+  return (
+    <TreeSelect
+      open
+      title="异步类目"
+      options={asyncOptions}
+      virtual={false}
+      loadChildren={async (_option, { signal }) => {
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+        if (signal.aborted) return;
+        setAsyncOptions([
+          {
+            label: "远程商品类目",
+            value: "remote",
+            children: [
+              { label: "新到商品", value: "new" },
+              { label: "补货商品", value: "restocked" }
+            ]
+          }
+        ]);
+      }}
+    />
+  );
+}
+
 const meta = {
   title: "Data Entry/TreeSelect",
   component: TreeSelect,
@@ -102,4 +131,22 @@ export const ValidationError: Story = {
     defaultExpandedValues: ["digital"],
     virtual: false
   }
+};
+export const AsyncBranch: Story = {
+  args: { open: true, "aria-label": "异步类目", options: [] },
+  render: () => <AsyncExample />
+};
+export const RightToLeft: Story = {
+  args: { open: true, "aria-label": "Categories", options },
+  render: () => (
+    <ConfigProvider dir="rtl" locale="en-US">
+      <TreeSelect
+        open
+        title="Categories"
+        options={options}
+        defaultExpandedValues={["digital"]}
+        virtual={false}
+      />
+    </ConfigProvider>
+  )
 };

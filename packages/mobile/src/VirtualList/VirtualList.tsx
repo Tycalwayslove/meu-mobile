@@ -44,6 +44,7 @@ function findItemIndex(target: EventTarget | null) {
   return Number.isInteger(value) ? value : null;
 }
 
+/** Renders a vertical, dynamically measured window over a caller-owned item collection. */
 export function VirtualList<T>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -68,7 +69,7 @@ export function VirtualList<T>({
   const rootRef = useRef<HTMLDivElement>(null);
   const onRangeChangeRef = useRef(onRangeChange);
   const lastRangeRef = useRef<VirtualListRange | null>(null);
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [focusedKey, setFocusedKey] = useState<Key | null>(null);
   onRangeChangeRef.current = onRangeChange;
 
   const resolvedHeight = finiteAtLeast(height, DEFAULT_HEIGHT, 1);
@@ -79,9 +80,7 @@ export function VirtualList<T>({
   const estimateItemSize = useCallback(
     (index: number) => {
       const candidate =
-        typeof estimateSize === "function"
-          ? estimateSize(items[index] as T, index)
-          : estimateSize;
+        typeof estimateSize === "function" ? estimateSize(items[index] as T, index) : estimateSize;
       return finiteAtLeast(candidate, 44, 1);
     },
     [estimateSize, items]
@@ -91,6 +90,14 @@ export function VirtualList<T>({
     (index: number): Key => getItemKey(items[index] as T, index),
     [getItemKey, items]
   );
+
+  let focusedIndex: number | null = null;
+  if (focusedKey !== null) {
+    const matchingIndex = items.findIndex((candidate, index) =>
+      Object.is(getItemKey(candidate, index), focusedKey)
+    );
+    if (matchingIndex >= 0) focusedIndex = matchingIndex;
+  }
 
   const extractRange = useCallback(
     (range: { count: number; endIndex: number; overscan: number; startIndex: number }) => {
@@ -156,8 +163,8 @@ export function VirtualList<T>({
 
   useEffect(() => {
     if (items.length === 0) lastRangeRef.current = null;
-    if (focusedIndex !== null && focusedIndex >= items.length) setFocusedIndex(null);
-  }, [focusedIndex, items.length]);
+    if (focusedKey !== null && focusedIndex === null) setFocusedKey(null);
+  }, [focusedIndex, focusedKey, items.length]);
 
   useImperativeHandle(
     ref,
@@ -189,14 +196,14 @@ export function VirtualList<T>({
 
   const handleFocusCapture = (event: ReactFocusEvent<HTMLDivElement>) => {
     const index = findItemIndex(event.target);
-    if (index !== null) setFocusedIndex(index);
+    if (index !== null && index < items.length) setFocusedKey(getItemKey(items[index] as T, index));
     if (onFocusCapture) onFocusCapture(event);
   };
 
   const handleBlurCapture = (event: ReactFocusEvent<HTMLDivElement>) => {
     const nextTarget = event.relatedTarget;
     if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
-      setFocusedIndex(null);
+      setFocusedKey(null);
     }
     if (onBlurCapture) onBlurCapture(event);
   };
@@ -219,11 +226,7 @@ export function VirtualList<T>({
       {items.length === 0 ? (
         <div className={empty}>{emptyContent}</div>
       ) : (
-        <div
-          className={sizer}
-          role="presentation"
-          style={{ height: virtualizer.getTotalSize() }}
-        >
+        <div className={sizer} role="presentation" style={{ height: virtualizer.getTotalSize() }}>
           {virtualItems.map((virtualItem) => (
             <div
               key={virtualItem.key}

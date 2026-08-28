@@ -93,7 +93,7 @@ export const dragHandle = style({
       borderRadius: "var(--meu-radius-round)",
       transform: "translateX(-50%)"
     },
-    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
+    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
     "&:active": { cursor: "grabbing" }
   }
 });
@@ -133,7 +133,7 @@ export const closeButton = style({
   borderRadius: "var(--meu-radius-round)",
   cursor: "pointer",
   selectors: {
-    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 }
+    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 }
   },
   "@media": {
     "(hover: hover)": {

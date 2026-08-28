@@ -29,6 +29,23 @@ function InfiniteListPreview() {
   );
 }
 
+function ErrorRetryPreview() {
+  const [attempt, setAttempt] = useState(0);
+  return (
+    <InfiniteList
+      autoLoad={false}
+      hasMore
+      loadMore={() => {
+        setAttempt((current) => current + 1);
+        return attempt === 0
+          ? Promise.reject(new Error("Story offline simulation"))
+          : Promise.resolve();
+      }}
+      onLoadError={() => undefined}
+    />
+  );
+}
+
 const meta = {
   title: "Collections/InfiniteList",
   component: InfiniteList,
@@ -47,4 +64,9 @@ export const Manual: Story = {
 
 export const Complete: Story = {
   args: { hasMore: false, loadMore: () => Promise.resolve() }
+};
+
+export const ErrorAndRetry: Story = {
+  args: { hasMore: true, loadMore: () => Promise.resolve() },
+  render: () => <ErrorRetryPreview />
 };
