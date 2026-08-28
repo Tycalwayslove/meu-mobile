@@ -223,6 +223,50 @@ test("runs the controlled carousel with native alternatives and focus isolation"
   await expect(carousel).toHaveAttribute("data-index", "0");
 });
 
+test("opens a modal image gallery with zoom, keyboard navigation and focus restoration", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "图片预览" });
+  const trigger = section.getByRole("button", { name: "预览商品图片" });
+  await trigger.focus();
+  await trigger.click();
+
+  const viewer = page.getByRole("dialog", { name: "商品图片预览" });
+  const gallery = page.getByRole("group", { name: "商品图片预览" });
+  const close = viewer.getByRole("button", { name: "关闭图片预览" });
+  await expect(viewer).toBeVisible();
+  await expect(viewer).toHaveAttribute("aria-modal", "true");
+  await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
+  await expect(close).toBeFocused();
+  await expect(viewer.getByText("1 / 3")).toBeVisible();
+  await expect(viewer.getByRole("img", { name: "商品正面图片" })).toBeVisible();
+
+  const closeBox = await close.boundingBox();
+  expect(closeBox).not.toBeNull();
+  expect(closeBox ? closeBox.width : 0).toBeGreaterThanOrEqual(44);
+  expect(closeBox ? closeBox.height : 0).toBeGreaterThanOrEqual(44);
+
+  await viewer.getByRole("button", { name: "下一张图片" }).click();
+  await expect(viewer.getByText("2 / 3")).toBeVisible();
+  await expect(section.getByText(/图片切换：next/)).toBeVisible();
+
+  await viewer.getByRole("button", { name: "放大图片" }).click();
+  await expect(viewer).toHaveAttribute("data-scale", "1.5");
+  await expect(gallery).toHaveAttribute("data-drag-enabled", "false");
+  await page.keyboard.press("0");
+  await expect(viewer).toHaveAttribute("data-scale", "1");
+  await expect(gallery).toHaveAttribute("data-drag-enabled", "true");
+
+  await page.keyboard.press("ArrowRight");
+  await expect(viewer.getByText("3 / 3")).toBeVisible();
+  await expect(section.getByText(/当前图片：3 \/ 3/)).toBeVisible();
+  await close.click();
+  await expect(viewer).toHaveCount(0);
+  await expect(section.getByText(/图片预览关闭：close-button/)).toBeVisible();
+  await expect(trigger).toBeFocused();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
+});
+
 test("runs controlled swipe actions and preserves a non-gesture action menu", async ({ page }) => {
   const section = page.getByRole("region", { name: "滑动操作" });
   const root = section.locator('[data-meu-component="swipe-actions"]');
@@ -920,10 +964,19 @@ test("switches theme and preserves mobile touch targets", async ({ page }) => {
   await page.getByRole("button", { name: "切换主题" }).click();
   await expect(provider).toHaveAttribute("data-meu-theme", "dark");
 
-  const buttonHeights = await page
-    .locator("button")
-    .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
-  expect(buttonHeights.every((height) => height >= 44)).toBe(true);
+  const undersizedButtons = await page.locator("button").evaluateAll((buttons) =>
+    buttons
+      .map((button) => {
+        const text = button.textContent;
+        return {
+          height: button.getBoundingClientRect().height,
+          label: button.getAttribute("aria-label") || (text ? text.trim() : "") || "unnamed"
+        };
+      })
+      // WebKit can report a transformed 44px target as 43.999...px.
+      .filter((button) => button.height < 43.99)
+  );
+  expect(undersizedButtons).toEqual([]);
 
   const controlHeights = await page
     .locator(

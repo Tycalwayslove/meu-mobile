@@ -13,6 +13,7 @@ import { FeedbackDemo } from "./FeedbackDemo";
 import { FloatingPanelDemo } from "./FloatingPanelDemo";
 import { InformationDemo } from "./InformationDemo";
 import { InfiniteListDemo } from "./InfiniteListDemo";
+import { ImageViewerDemo } from "./ImageViewerDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { NumberKeyboardDemo } from "./NumberKeyboardDemo";
 import { OverlayDemo } from "./OverlayDemo";
@@ -92,6 +93,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>内容轮播、原生控制与无障碍暂停</h2>
           <CarouselDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>全屏图片预览、缩放与画廊导航</h2>
+          <ImageViewerDemo />
         </section>
         <section className={styles.formSection}>
           <h2>列表滑动操作与常驻等价入口</h2>

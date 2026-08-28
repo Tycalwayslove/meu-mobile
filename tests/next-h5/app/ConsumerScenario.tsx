@@ -42,6 +42,7 @@ import {
   Empty,
   FloatingPanel,
   Image,
+  ImageViewer,
   InfiniteList,
   List,
   Mask,
@@ -242,6 +243,9 @@ export function ConsumerScenario() {
   const [refreshCount, setRefreshCount] = useState(0);
   const [infinitePage, setInfinitePage] = useState(1);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
+  const [imageViewerIndex, setImageViewerIndex] = useState(0);
+  const [imageViewerResult, setImageViewerResult] = useState("图片预览尚未打开");
   const [swipeOpenSide, setSwipeOpenSide] = useState<"left" | "right" | null>(null);
   const [swipeMenuOpen, setSwipeMenuOpen] = useState(false);
   const [swipeMessage, setSwipeMessage] = useState("等待滑动操作");
@@ -261,6 +265,7 @@ export function ConsumerScenario() {
   const sheetTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
   const actionMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const imageViewerTriggerRef = useRef<HTMLButtonElement>(null);
   const virtualListRef = useRef<VirtualListRef>(null);
   const form = useMeuForm<FormValues>({
     schema,
@@ -434,6 +439,35 @@ export function ConsumerScenario() {
             onIndexChange={setCarouselIndex}
           />
           <output aria-live="polite">当前轮播：{carouselIndex + 1}</output>
+        </section>
+
+        <section className="integration-image-viewer" aria-label="图片预览">
+          <Button ref={imageViewerTriggerRef} onClick={() => setImageViewerOpen(true)}>
+            预览商品图片
+          </Button>
+          <output aria-live="polite">
+            {imageViewerResult} · 当前图片：{imageViewerIndex + 1} / 3
+          </output>
+          <ImageViewer
+            aria-label="商品图片预览"
+            images={[
+              { alt: "商品正面图片", key: "front", src: "/demo-media.svg" },
+              { alt: "商品侧面图片", key: "side", src: "/demo-media.svg" },
+              { alt: "商品场景图片", key: "scene", src: "/demo-media.svg" }
+            ]}
+            index={imageViewerIndex}
+            open={imageViewerOpen}
+            returnFocusRef={imageViewerTriggerRef}
+            renderFooter={(item) => item.alt}
+            onIndexChange={(nextIndex, details) => {
+              setImageViewerIndex(nextIndex);
+              setImageViewerResult(`图片切换：${details.reason}`);
+            }}
+            onOpenChange={(nextOpen, details) => {
+              setImageViewerOpen(nextOpen);
+              setImageViewerResult(nextOpen ? "图片预览已打开" : `图片预览关闭：${details.reason}`);
+            }}
+          />
         </section>
 
         <section className="integration-swipe-actions" aria-label="滑动操作">

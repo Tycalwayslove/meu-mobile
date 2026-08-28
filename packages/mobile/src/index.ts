@@ -59,6 +59,19 @@ export { Badge } from "./Badge";
 export type { BadgeProps, BadgeTone } from "./Badge";
 export { Image } from "./Image";
 export type { ImageFit, ImageProps, ImageRadius, ImageState } from "./Image";
+export { ImageViewer } from "./ImageViewer";
+export type {
+  ImageViewerControls,
+  ImageViewerIndexChangeDetails,
+  ImageViewerIndexChangeReason,
+  ImageViewerItem,
+  ImageViewerOpenChangeDetails,
+  ImageViewerOpenChangeReason,
+  ImageViewerProps,
+  ImageViewerRef,
+  ImageViewerScaleChangeDetails,
+  ImageViewerScaleChangeReason
+} from "./ImageViewer";
 export { Avatar } from "./Avatar";
 export type { AvatarFit, AvatarProps, AvatarShape, AvatarSize } from "./Avatar";
 export { Ellipsis } from "./Ellipsis";

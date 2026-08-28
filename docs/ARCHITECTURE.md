@@ -61,6 +61,9 @@ icons-core ─> icons-react            │
 - PasscodeInput 以一个真实原生 input 作为值、自动填充、粘贴和可访问性事实源，视觉格仅做隐藏镜像；默认优先
   系统键盘，可按需组合非模态 NumberKeyboard。`MeuFormPasscodeInput` 负责 RHF 值、dirty / touched、校验错误
   与失败聚焦。未来 uni-app 复用值、长度、完成、方向和状态契约，替换 DOM input 与键盘适配层。
+- ImageViewer 是模态全屏媒体查看器，统一单图与画廊的 images、index、loop 和缩放契约；Web 端组合 Portal、
+  thick Mask、滚动锁、焦点圈定、Carousel 与 Image，缩放后暂停画廊拖拽。它不绑定表单，未来 uni-app 复用
+  媒体、索引、倍率与变更原因，替换 DOM、Portal 和手势适配层。
 
 ## Next.js 边界
 

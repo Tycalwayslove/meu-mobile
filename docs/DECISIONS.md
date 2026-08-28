@@ -202,3 +202,14 @@ React Hook Form 生命周期。默认使用系统键盘，mask 只改变显示�
 NumberKeyboard 只发布输入和删除意图，调用方或表单仍持有唯一值。完成回调按每个完整值去重，可选完成后关闭；
 不增加 Mask、页面滚动锁或焦点圈定。`MeuFormPasscodeInput` 负责 dirty / touched、Zod 错误关联和校验失败聚焦。
 未来 uni-app 复用值、长度、完成、方向和状态契约，替换 DOM input、自动填充与 Portal 实现。
+
+## ADR-023：ImageViewer 组合 Image 与 Carousel，但持有独立模态和缩放契约
+
+ImageViewer 用一个带必填 alt 的 images 集合覆盖单图与画廊，`index / defaultIndex / onIndexChange` 是当前图片
+事实源。默认不循环；前后按钮、方向键与命令式 goTo 共用同一索引通道并公开 drag / next / previous / imperative
+原因。加载与错误视觉复用 Image，画廊 snap 与无克隆循环复用 Carousel，不重复创建媒体或轮播基础设施。
+
+React Web 端使用 Portal、thick Mask、页面滚动锁、模态焦点圈定和关闭后的焦点恢复。图片支持按钮、加减号、
+双击与双指缩放，默认 maxZoom=3、doubleTapZoom=2；倍率大于 1 时关闭画廊拖拽，把手势交给当前图片平移。
+Mask 和图片点击不关闭，避免与双击缩放冲突。组件只展示媒体，不存在表单 adapter；未来 uni-app 复用媒体、
+索引、倍率与原因，替换 DOM、Portal 和触摸实现。

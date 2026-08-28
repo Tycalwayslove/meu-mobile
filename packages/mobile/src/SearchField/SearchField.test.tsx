@@ -55,4 +55,13 @@ describe("SearchField", () => {
     expect(root && root.getAttribute("aria-busy")).toBe("true");
     expect(root && root.getAttribute("data-state")).toBe("loading");
   });
+
+  it("searches the native input value before a controlled render catches up", () => {
+    const onSearch = vi.fn();
+    render(<SearchField aria-label="即时搜索" value="" onSearch={onSearch} />);
+    const input = screen.getByRole("searchbox", { name: "即时搜索" });
+
+    fireEvent.keyDown(input, { key: "Enter", target: { value: "TextArea" } });
+    expect(onSearch).toHaveBeenCalledWith("TextArea");
+  });
 });

@@ -68,7 +68,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (onKeyDown) onKeyDown(event);
     if (event.key === "Enter" && !event.nativeEvent.isComposing && !loading && onSearch) {
-      onSearch(currentValue);
+      onSearch(event.currentTarget.value);
     }
   }
 
