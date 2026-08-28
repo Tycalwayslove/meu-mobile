@@ -76,7 +76,7 @@ export const indicator = recipe({
   variants: {
     checked: {
       true: {
-        color: "white",
+        color: "var(--meu-color-accent-contrast)",
         background: "var(--meu-color-accent)",
         borderColor: "var(--meu-color-accent)",
         selectors: {
@@ -102,7 +102,7 @@ export const indicator = recipe({
     },
     indeterminate: {
       true: {
-        color: "white",
+        color: "var(--meu-color-accent-contrast)",
         background: "var(--meu-color-accent)",
         borderColor: "var(--meu-color-accent)",
         selectors: {

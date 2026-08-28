@@ -10,7 +10,7 @@ export const root = recipe({
   },
   variants: {
     disabled: {
-      true: { color: "var(--meu-color-muted)", opacity: 0.65 },
+      true: { color: "var(--meu-color-muted)" },
       false: {}
     },
     size: {
@@ -51,7 +51,7 @@ export const input = style({
       borderRadius: "var(--meu-radius-round)",
       boxShadow: "0 0 0 2px var(--meu-color-accent)"
     },
-    "&:disabled": { cursor: "not-allowed" }
+    "&:disabled": { cursor: "not-allowed", opacity: 0.65 }
   },
   "@media": {
     "(forced-colors: active)": {

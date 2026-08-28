@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import componentManifest from "../apps/docs/app/_generated/component-manifest.json";
 import { componentDocs } from "../apps/docs/app/_data/components";
 import { componentStoryIds } from "../apps/docs/app/_data/storybook-links";
 
@@ -14,6 +15,21 @@ type StorybookIndexEntry = {
 type StorybookIndex = {
   entries?: Record<string, StorybookIndexEntry>;
 };
+
+type ManifestProduct = {
+  docsPath: string;
+  name: string;
+  slug: string;
+};
+
+function parseDocumentStoryIds(source: string) {
+  const match = source.match(/^storyIds:\s*(?:\r?\n\s*)?\[([\s\S]*?)\]/m);
+  if (!match) return [];
+  return match[1]!
+    .split(",")
+    .map((value) => value.trim().replace(/^['"]|['"]$/g, ""))
+    .filter(Boolean);
+}
 
 const indexPath = resolve(process.argv[2] || "apps/storybook/storybook-static/index.json");
 const index = JSON.parse(await readFile(indexPath, "utf8")) as StorybookIndex;
@@ -79,6 +95,22 @@ for (const component of componentDocs) {
   }
 }
 
+let documentedStoryCount = 0;
+for (const product of componentManifest.products as ManifestProduct[]) {
+  const source = await readFile(resolve(product.docsPath), "utf8");
+  const documentedStoryIds = parseDocumentStoryIds(source);
+  if (documentedStoryIds.length === 0) {
+    errors.push(`${product.slug} has no storyIds in ${product.docsPath}`);
+    continue;
+  }
+  for (const storyId of documentedStoryIds) {
+    documentedStoryCount += 1;
+    if (!storyEntries.has(storyId)) {
+      errors.push(`${product.slug} documents a missing Storybook story: ${storyId}`);
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(`Storybook link validation failed with ${errors.length} error(s):`);
   for (const error of errors) console.error(`- ${error}`);
@@ -87,6 +119,7 @@ if (errors.length > 0) {
   console.log(
     `Validated ${componentDocs.length - componentsWithoutStories.length} component links against ${storyEntries.size} stories.`
   );
+  console.log(`Validated ${documentedStoryCount} storyIds from colocated component documents.`);
   console.log(`Autodocs entries cover every linked Storybook title.`);
 }
 

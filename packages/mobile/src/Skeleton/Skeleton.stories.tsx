@@ -21,6 +21,7 @@ export const StableMediaRatio: Story = {
 export const ComposedCard: Story = {
   render: () => (
     <div
+      role="status"
       aria-busy="true"
       aria-label="正在加载商品"
       style={{ display: "grid", gap: 12, width: 280 }}

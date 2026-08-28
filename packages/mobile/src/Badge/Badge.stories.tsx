@@ -39,7 +39,11 @@ export const LightAndDark: Story = {
         <ThemeProvider
           key={theme}
           theme={theme}
-          style={{ background: "var(--meu-color-surface)", padding: 16 }}
+          style={{
+            color: "var(--meu-color-ink)",
+            background: "var(--meu-color-surface)",
+            padding: 16
+          }}
         >
           <Badge content={128} max={99} bordered>
             <span style={{ display: "grid", minWidth: 44, minHeight: 44, placeItems: "center" }}>

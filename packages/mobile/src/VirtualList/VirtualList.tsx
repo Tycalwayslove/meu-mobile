@@ -212,7 +212,7 @@ export function VirtualList<T>({
     <div
       {...props}
       ref={rootRef}
-      role="list"
+      role={items.length === 0 ? "status" : "list"}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       className={className ? `${root} ${className}` : root}

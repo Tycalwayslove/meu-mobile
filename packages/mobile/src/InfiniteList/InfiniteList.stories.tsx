@@ -7,7 +7,12 @@ function InfiniteListPreview() {
   const [page, setPage] = useState(1);
   const itemCount = page * 5;
   return (
-    <div style={{ height: 420, overflowY: "auto", border: "1px solid var(--meu-color-border)" }}>
+    <div
+      aria-label="分页商品列表"
+      role="region"
+      tabIndex={0}
+      style={{ height: 420, overflowY: "auto", border: "1px solid var(--meu-color-border)" }}
+    >
       <div style={{ display: "grid", gap: 1, background: "var(--meu-color-border)" }}>
         {Array.from({ length: itemCount }, (_, index) => (
           <div

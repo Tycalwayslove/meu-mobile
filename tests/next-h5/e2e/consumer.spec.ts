@@ -1,23 +1,74 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import axe from "axe-core";
+
+const runtimeErrorsByPage = new WeakMap<Page, string[]>();
 
 test.beforeEach(async ({ page }) => {
+  const runtimeErrors: string[] = [];
+  runtimeErrorsByPage.set(page, runtimeErrors);
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") runtimeErrors.push(message.text());
+  });
   await page.goto("/");
   await expect(page.locator('[data-hydrated="true"]')).toBeAttached();
 });
 
 test("renders the isolated Next consumer without hydration errors", async ({ page }) => {
-  const runtimeErrors: string[] = [];
-  page.on("pageerror", (error) => runtimeErrors.push(error.message));
-  page.on("console", (message) => {
-    if (message.type() === "error") runtimeErrors.push(message.text());
-  });
-
   await expect(page.getByRole("heading", { name: "Next H5 集成测试" })).toBeVisible();
   await expect(page.locator('[data-meu-component="config-provider"]')).toHaveAttribute(
     "data-meu-theme",
     "light"
   );
-  expect(runtimeErrors).toEqual([]);
+  expect(runtimeErrorsByPage.get(page)).toEqual([]);
+});
+
+test("has no WCAG A/AA violations in light and dark themes", async ({ page }) => {
+  await page.addScriptTag({ content: axe.source });
+
+  for (const theme of ["light", "dark"] as const) {
+    if (theme === "dark") {
+      await page.getByRole("button", { name: "切换主题" }).click();
+    }
+    await expect(page.locator('[data-meu-component="config-provider"]')).toHaveAttribute(
+      "data-meu-theme",
+      theme
+    );
+    await page.waitForTimeout(250);
+    const violations = await page.evaluate(async () => {
+      const axeRuntime = (
+        globalThis as typeof globalThis & {
+          axe: {
+            run: (
+              context: Document,
+              options: { runOnly: { type: "tag"; values: string[] } }
+            ) => Promise<{
+              violations: Array<{
+                id: string;
+                impact: string | null;
+                nodes: Array<{ failureSummary?: string; html: string; target: unknown }>;
+              }>;
+            }>;
+          };
+        }
+      ).axe;
+      const results = await axeRuntime.run(document, {
+        runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"] }
+      });
+      return results.violations.map((violation) => ({
+        id: violation.id,
+        impact: violation.impact,
+        nodes: violation.nodes.map((node) => ({
+          failureSummary: node.failureSummary,
+          html: node.html,
+          target: node.target
+        }))
+      }));
+    });
+
+    expect(violations, `${theme} theme accessibility violations`).toEqual([]);
+  }
 });
 
 test("renders a non-interactive watermark and restores its removed overlay", async ({ page }) => {
@@ -249,7 +300,23 @@ test("binds image upload tasks to serializable form values and native input focu
   expect(addBox ? addBox.width : 0).toBeGreaterThanOrEqual(44);
   expect(addBox ? addBox.height : 0).toBeGreaterThanOrEqual(44);
 
-  await section.getByRole("button", { name: "删除 已有商品主图" }).click();
+  const deleteButton = section.getByRole("button", { name: "删除 已有商品主图" });
+  const [previewBox, deleteBox] = await Promise.all([
+    existingPreview.boundingBox(),
+    deleteButton.boundingBox()
+  ]);
+  expect(previewBox).not.toBeNull();
+  expect(deleteBox).not.toBeNull();
+  expect(previewBox ? previewBox.height : 0).toBeGreaterThanOrEqual(44);
+  expect(deleteBox ? deleteBox.height : 0).toBeGreaterThanOrEqual(44);
+  expect(
+    previewBox && deleteBox
+      ? previewBox.y + previewBox.height <= deleteBox.y ||
+          deleteBox.y + deleteBox.height <= previewBox.y
+      : false
+  ).toBe(true);
+
+  await deleteButton.click();
   await expect(section.getByText(/图片已删除：已有商品主图；当前 0 张/)).toBeVisible();
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");

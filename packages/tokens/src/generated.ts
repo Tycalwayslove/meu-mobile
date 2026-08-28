@@ -42,17 +42,33 @@ export const meuTokens = {
         "$type": "color",
         "$value": "#000000"
       },
+      "overlay-contrast": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
       "success": {
         "$type": "color",
-        "$value": "#287A52"
+        "$value": "#24704A"
+      },
+      "success-contrast": {
+        "$type": "color",
+        "$value": "#FFFFFF"
       },
       "warning": {
         "$type": "color",
-        "$value": "#A45C13"
+        "$value": "#95540E"
+      },
+      "warning-contrast": {
+        "$type": "color",
+        "$value": "#FFFFFF"
       },
       "danger": {
         "$type": "color",
         "$value": "#B63A36"
+      },
+      "danger-contrast": {
+        "$type": "color",
+        "$value": "#FFFFFF"
       }
     },
     "dark": {
@@ -95,6 +111,34 @@ export const meuTokens = {
       "overlay": {
         "$type": "color",
         "$value": "#000000"
+      },
+      "overlay-contrast": {
+        "$type": "color",
+        "$value": "#FFFFFF"
+      },
+      "success": {
+        "$type": "color",
+        "$value": "#76D6A5"
+      },
+      "success-contrast": {
+        "$type": "color",
+        "$value": "#161A17"
+      },
+      "warning": {
+        "$type": "color",
+        "$value": "#F2B464"
+      },
+      "warning-contrast": {
+        "$type": "color",
+        "$value": "#161A17"
+      },
+      "danger": {
+        "$type": "color",
+        "$value": "#FF8F89"
+      },
+      "danger-contrast": {
+        "$type": "color",
+        "$value": "#161A17"
       }
     }
   },

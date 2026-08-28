@@ -97,7 +97,7 @@ export function Carousel({
   style,
   ...props
 }: CarouselProps) {
-  const { locale } = useMeuConfig();
+  const { dir, locale } = useMeuConfig();
   const count = items.length;
   const controlled = index !== undefined;
   const safeDefaultIndex = normalizeIndex(defaultIndex, count);
@@ -118,6 +118,7 @@ export function Carousel({
     containScroll: "trimSnaps",
     dragThreshold: 10,
     duration: reducedMotion ? 0 : 25,
+    direction: dir,
     loop: loop && count > 1,
     skipSnaps: false,
     startIndex: currentIndex,
@@ -325,7 +326,9 @@ export function Carousel({
           disabled={previousDisabled}
           onClick={() => move("previous")}
         >
-          <MeuIconChevronLeft size={22} strokeWidth={2} aria-hidden="true" />
+          <span className={dir === "rtl" ? nextIcon : undefined} aria-hidden="true">
+            <MeuIconChevronLeft size={22} strokeWidth={2} />
+          </span>
         </button>
         <button
           className={nextButton}
@@ -334,7 +337,7 @@ export function Carousel({
           disabled={nextDisabled}
           onClick={() => move("next")}
         >
-          <span className={nextIcon} aria-hidden="true">
+          <span className={dir === "rtl" ? undefined : nextIcon} aria-hidden="true">
             <MeuIconChevronLeft size={22} strokeWidth={2} />
           </span>
         </button>

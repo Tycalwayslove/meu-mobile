@@ -9,7 +9,13 @@ export const root = recipe({
     padding: 0,
     color: "var(--meu-color-ink)",
     fontFamily: "var(--meu-font-ui)",
-    listStyle: "none"
+    listStyle: "none",
+    selectors: {
+      "&:focus": {
+        outline: "2px solid var(--meu-color-accent)",
+        outlineOffset: 2
+      }
+    }
   },
   variants: {
     direction: {
@@ -119,7 +125,7 @@ export const indicator = recipe({
         borderColor: "var(--meu-color-accent)"
       },
       error: {
-        color: "white",
+        color: "var(--meu-color-danger-contrast)",
         background: "var(--meu-color-danger)",
         borderColor: "var(--meu-color-danger)",
         "@media": { "(forced-colors: active)": { borderColor: "Mark", color: "MarkText" } }

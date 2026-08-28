@@ -1,7 +1,44 @@
-import type { ComponentApiReference } from "../_data/api-reference";
+import type { ComponentApiProperty, ComponentApiReference } from "../_data/api-reference";
 import { CodeBlock } from "./CodeBlock";
 
 const kindLabels = { type: "Type", value: "Value" } as const;
+
+function PropertyTable({ entries, title }: { entries: ComponentApiProperty[]; title: string }) {
+  if (entries.length === 0) return null;
+  return (
+    <div className="api-reference__properties">
+      <h3>{title}</h3>
+      <div className="component-document__table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">名称</th>
+              <th scope="col">类型</th>
+              <th scope="col">必填</th>
+              <th scope="col">默认值</th>
+              <th scope="col">说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.map((property) => (
+              <tr key={property.name}>
+                <td>
+                  <code>{property.name}</code>
+                </td>
+                <td>
+                  <code>{property.type}</code>
+                </td>
+                <td>{property.required ? "是" : "否"}</td>
+                <td>{property.defaultValue ? <code>{property.defaultValue}</code> : "—"}</td>
+                <td>{property.description || "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 export function ApiReference({
   entries,
@@ -30,22 +67,32 @@ export function ApiReference({
         <span>{entries.length} exports</span>
       </div>
       <div className="api-reference__list">
-        {entries.map((entry, index) => (
-          <details
-            className="api-reference__entry"
-            key={`${entry.kind}-${entry.name}`}
-            open={index < 3 || entry.name.endsWith("Props")}
-          >
-            <summary>
-              <code>{entry.name}</code>
-              <span>{kindLabels[entry.kind]}</span>
-            </summary>
-            <div className="api-reference__content">
-              {entry.description ? <p>{entry.description}</p> : null}
-              <CodeBlock label="typescript">{entry.signature}</CodeBlock>
-            </div>
-          </details>
-        ))}
+        {entries.map((entry, index) =>
+          (() => {
+            const properties = entry.properties || [];
+            const events = properties.filter((property) => property.event);
+            const fields = properties.filter((property) => !property.event);
+            const fieldTitle = entry.name.endsWith("Props") ? "Props" : "字段";
+            return (
+              <details
+                className="api-reference__entry"
+                key={`${entry.kind}-${entry.name}`}
+                open={index < 3 || entry.name.endsWith("Props")}
+              >
+                <summary>
+                  <code>{entry.name}</code>
+                  <span>{kindLabels[entry.kind]}</span>
+                </summary>
+                <div className="api-reference__content">
+                  {entry.description ? <p>{entry.description}</p> : null}
+                  <CodeBlock label="typescript">{entry.signature}</CodeBlock>
+                  <PropertyTable title={fieldTitle} entries={fields} />
+                  <PropertyTable title="Events" entries={events} />
+                </div>
+              </details>
+            );
+          })()
+        )}
       </div>
     </section>
   );

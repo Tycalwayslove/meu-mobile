@@ -17,6 +17,7 @@ export const indicator = style({
   justifyContent: "center",
   height: "var(--meu-pull-to-refresh-threshold)",
   color: "var(--meu-color-muted)",
+  background: "var(--meu-color-subtle)",
   fontSize: 13,
   lineHeight: 1.4,
   pointerEvents: "none",

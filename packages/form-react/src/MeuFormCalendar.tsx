@@ -149,7 +149,6 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
           selectionMode="multiple"
           disabled={resolvedDisabled}
           value={Array.isArray(field.value) ? (field.value as ReadonlyArray<TDate>) : []}
-          aria-required={required || undefined}
           onChange={(nextValue, details) => publish(nextValue, details)}
         />
       ) : selectionMode === "range" ? (
@@ -159,7 +158,6 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
           selectionMode="range"
           disabled={resolvedDisabled}
           value={Array.isArray(field.value) && field.value.length === 2 ? field.value : null}
-          aria-required={required || undefined}
           onChange={(nextValue, details) => publish(nextValue, details)}
         />
       ) : (
@@ -169,7 +167,6 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
           selectionMode="single"
           disabled={resolvedDisabled}
           value={field.value === null || field.value === undefined ? null : field.value}
-          aria-required={required || undefined}
           onChange={(nextValue, details) => publish(nextValue, details)}
         />
       )}

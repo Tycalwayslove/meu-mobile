@@ -37,8 +37,10 @@ describe("IndexList", () => {
       "index-list"
     );
     expect(screen.getByRole("navigation", { name: "路线首字母" })).toBeTruthy();
-    expect(screen.getAllByRole("region")).toHaveLength(3);
+    expect(document.querySelectorAll("[data-index-key]")).toHaveLength(3);
     expect(screen.getByRole("button", { name: "A" }).getAttribute("aria-current")).toBe("location");
+    const scrollBody = document.querySelector<HTMLElement>("[data-meu-index-list-body]");
+    expect(scrollBody && scrollBody.tabIndex).toBe(0);
   });
 
   it("scrolls imperatively and reports index activation", () => {

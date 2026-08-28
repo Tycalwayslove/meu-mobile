@@ -60,4 +60,41 @@ describe("generated API reference integration", () => {
       new Set(product.publicExports.map((entry) => `${entry.kind}:${entry.name}`))
     );
   });
+
+  it("adds generated field, default and event metadata to public Props", () => {
+    const button = products.find((product) => product.name === "Button");
+    const bottomSheet = products.find((product) => product.name === "BottomSheet");
+    expect(button).toBeDefined();
+    expect(bottomSheet).toBeDefined();
+
+    const buttonProps = getComponentApiReference(button!).find(
+      (entry) => entry.name === "ButtonProps"
+    );
+    expect(buttonProps).toBeDefined();
+    const loadingProperty =
+      buttonProps && buttonProps.properties
+        ? buttonProps.properties.find((property) => property.name === "loading")
+        : undefined;
+    expect(loadingProperty).toBeDefined();
+    expect(loadingProperty && loadingProperty.description).toContain("busy");
+    expect(buttonProps && buttonProps.properties).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          defaultValue: "false",
+          name: "loading",
+          required: false
+        })
+      ])
+    );
+
+    const bottomSheetProps = getComponentApiReference(bottomSheet!).find(
+      (entry) => entry.name === "BottomSheetProps"
+    );
+    expect(bottomSheetProps && bottomSheetProps.properties).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ event: true, name: "onOpenChange" }),
+        expect.objectContaining({ event: false, name: "open" })
+      ])
+    );
+  });
 });

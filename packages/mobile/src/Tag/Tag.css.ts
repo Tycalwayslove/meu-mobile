@@ -103,15 +103,24 @@ export const tagChip = recipe({
     },
     {
       variants: { tone: "success", variant: "solid" },
-      style: { color: "white", background: "var(--meu-color-success)" }
+      style: {
+        color: "var(--meu-color-success-contrast)",
+        background: "var(--meu-color-success)"
+      }
     },
     {
       variants: { tone: "warning", variant: "solid" },
-      style: { color: "white", background: "var(--meu-color-warning)" }
+      style: {
+        color: "var(--meu-color-warning-contrast)",
+        background: "var(--meu-color-warning)"
+      }
     },
     {
       variants: { tone: "danger", variant: "solid" },
-      style: { color: "white", background: "var(--meu-color-danger)" }
+      style: {
+        color: "var(--meu-color-danger-contrast)",
+        background: "var(--meu-color-danger)"
+      }
     },
     {
       variants: { tone: "neutral", variant: "soft" },

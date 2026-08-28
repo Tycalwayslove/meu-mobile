@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
+import apiProperties from "../_generated/api-properties.json";
 import type { ComponentManifestExport, ComponentManifestProduct } from "./component-document";
 
 type ApiToken = { text: string };
@@ -17,7 +18,21 @@ export type ComponentApiReference = {
   description?: string;
   kind: "type" | "value";
   name: string;
+  properties?: ComponentApiProperty[];
   signature: string;
+};
+
+export type ComponentApiProperty = {
+  defaultValue?: string;
+  description?: string;
+  event: boolean;
+  name: string;
+  required: boolean;
+  type: string;
+};
+
+type ApiPropertyModel = {
+  packages: Record<string, Record<string, ComponentApiProperty[]>>;
 };
 
 const apiFiles: Record<string, string> = {
@@ -33,7 +48,7 @@ function cleanDocComment(comment: string | undefined) {
   if (!comment) return undefined;
   const cleaned = comment
     .replace(/^\/\*\*\s*/, "")
-    .replace(/\s*\*\/$/, "")
+    .replace(/\s*\*\/\s*$/, "")
     .split(/\r?\n/)
     .map((line) => line.replace(/^\s*\*\s?/, "").trim())
     .filter((line) => line && !line.startsWith("@"))
@@ -116,5 +131,11 @@ function readApiModel(packageName: string) {
 
 export function getComponentApiReference(product: ComponentManifestProduct) {
   const model = readApiModel(product.packageName);
-  return model ? parseApiReferenceModel(model, product.publicExports, product.name) : [];
+  if (!model) return [];
+  const references = parseApiReferenceModel(model, product.publicExports, product.name);
+  const packageProperties = (apiProperties as ApiPropertyModel).packages[product.packageName] || {};
+  return references.map((reference) => {
+    const properties = packageProperties[reference.name];
+    return properties && properties.length > 0 ? { ...reference, properties } : reference;
+  });
 }

@@ -112,6 +112,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
     "aria-invalid": ariaInvalid,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledBy,
+    "aria-required": _ariaRequired,
     adapter,
     allowClear = true,
     className,
@@ -198,6 +199,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
   const invalid =
     ariaInvalid === true || ariaInvalid === "true" || Boolean(fieldContext && fieldContext.invalid);
+  void _ariaRequired;
   const titleId = resolvedId ? `${resolvedId}-month` : `meu-calendar-month-${generatedId}`;
   const calendarLabel = ariaLabel || (config.locale === "en-US" ? "Calendar" : "日历");
 

@@ -594,7 +594,7 @@ export function ConsumerScenario() {
         </section>
 
         <section className="integration-floating-panel" aria-label="浮动面板">
-          <div className="integration-floating-panel-map" aria-label="本地地图占位">
+          <div className="integration-floating-panel-map" role="img" aria-label="本地地图占位">
             页面背景保持可见
           </div>
           <FloatingPanel
@@ -870,7 +870,12 @@ export function ConsumerScenario() {
               推进上传
             </Button>
           </div>
-          <div className="integration-loading" aria-label="订单摘要加载中" aria-busy="true">
+          <div
+            className="integration-loading"
+            role="status"
+            aria-label="订单摘要加载中"
+            aria-busy="true"
+          >
             <Skeleton variant="rectangle" height={88} animated />
             <Skeleton lines={3} lineWidths={["100%", "86%", "58%"]} animated />
           </div>

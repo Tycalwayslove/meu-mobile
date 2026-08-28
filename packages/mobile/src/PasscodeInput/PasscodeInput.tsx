@@ -351,7 +351,7 @@ export const PasscodeInput = forwardRef<PasscodeInputRef, PasscodeInputProps>(
           aria-labelledby={labelledBy}
           aria-describedby={describedBy}
           aria-invalid={invalid || undefined}
-          aria-controls={keyboard ? keyboardId : undefined}
+          aria-controls={keyboard && keyboardOpen ? keyboardId : undefined}
           onChange={handleNativeChange}
           onFocus={(event) => {
             if (!readOnly) event.currentTarget.readOnly = false;

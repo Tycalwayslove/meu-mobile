@@ -73,7 +73,7 @@ const controlBase = {
 export const previousButton = style({
   ...controlBase,
   top: "50%",
-  left: "var(--meu-space-3)",
+  insetInlineStart: "var(--meu-space-3)",
   transform: "translateY(-50%)",
   selectors: {
     ...controlBase.selectors,
@@ -84,7 +84,7 @@ export const previousButton = style({
 export const nextButton = style({
   ...controlBase,
   top: "50%",
-  right: "var(--meu-space-3)",
+  insetInlineEnd: "var(--meu-space-3)",
   transform: "translateY(-50%)",
   selectors: {
     ...controlBase.selectors,
@@ -97,7 +97,7 @@ export const nextIcon = style({ transform: "rotate(180deg)" });
 export const rotationButton = style({
   ...controlBase,
   top: "var(--meu-space-3)",
-  right: "var(--meu-space-3)",
+  insetInlineEnd: "var(--meu-space-3)",
   fontSize: 13,
   fontWeight: 700,
   lineHeight: 1
@@ -105,9 +105,9 @@ export const rotationButton = style({
 
 export const indicator = style({
   position: "absolute",
-  right: 64,
+  insetInlineEnd: 64,
   bottom: "var(--meu-space-3)",
-  left: 64,
+  insetInlineStart: 64,
   zIndex: 1,
   display: "flex",
   justifyContent: "center",

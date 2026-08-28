@@ -30,7 +30,7 @@ describe("Badge", () => {
         <span>消息</span>
       </Badge>
     );
-    expect(screen.getByLabelText("有新消息")).toBeTruthy();
+    expect(screen.getByRole("img", { name: "有新消息" })).toBeTruthy();
   });
 
   it("uses text or an explicit label instead of color alone", () => {

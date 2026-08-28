@@ -242,7 +242,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           aria-invalid={invalid || undefined}
         />
         {showValue ? (
-          <output className={valueText} htmlFor={resolvedId}>
+          <output className={valueText} htmlFor={resolvedId} aria-hidden="true">
             {formatValue ? formatValue(currentValue) : currentValue}
           </output>
         ) : null}

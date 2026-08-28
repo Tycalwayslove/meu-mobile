@@ -156,7 +156,15 @@ export function IndexList({
 
   return (
     <div {...props} className={classes} data-meu-component="index-list">
-      <div ref={bodyRef} className={body} onScroll={handleScroll} data-meu-index-list-body>
+      <div
+        ref={bodyRef}
+        className={body}
+        aria-label="索引内容"
+        role="region"
+        tabIndex={0}
+        onScroll={handleScroll}
+        data-meu-index-list-body
+      >
         {sections.map((candidate, index) => (
           <section
             ref={(node) => {

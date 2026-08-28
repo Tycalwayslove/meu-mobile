@@ -27,6 +27,7 @@ pnpm storybook
 ```sh
 pnpm check
 pnpm storybook:check-links
+pnpm test:storybook:a11y
 ```
 
 ## Vercel
@@ -50,7 +51,7 @@ pnpm storybook:check-links
 ## 统一发布顺序
 
 1. 确认待发布代码已经合并到 `main`，工作树无未提交变更。
-2. 本地运行 `pnpm check` 和 `pnpm storybook:check-links`。
+2. 本地运行 `pnpm check`、`pnpm storybook:check-links` 和 `pnpm test:storybook:a11y`；最后一项会在 390×844 视口逐一扫描全部 Story 的 Light / Dark WCAG A/AA，不会上传 Chromatic。
 3. 确认 GitHub 的 `Quality` workflow 全部通过。
 4. 手动运行 `Publish Storybook`，检查 Chromatic 构建并处理需要人工确认的视觉差异。
 5. Chromatic 地址稳定后，触发 Vercel 的 `Release Meu Mobile Docs` Deploy Hook。

@@ -25,6 +25,7 @@ jobs:
       - run: pnpm docs:manifest:verify
       - run: pnpm build:packages
       - run: pnpm api:extract
+      - run: pnpm api:properties:check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test

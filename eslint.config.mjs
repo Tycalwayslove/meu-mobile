@@ -33,6 +33,7 @@ export default tseslint.config(
     rules: {
       ...jsxA11y.flatConfigs.recommended.rules,
       ...reactHooks.configs.flat.recommended.rules,
+      "jsx-a11y/no-noninteractive-tabindex": ["error", { roles: ["tabpanel", "region"] }],
       "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports" }],
       "@typescript-eslint/no-restricted-types": "off",
       "no-restricted-syntax": [

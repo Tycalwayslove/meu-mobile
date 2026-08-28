@@ -6,7 +6,12 @@ import { PullToRefresh } from "./PullToRefresh";
 function PullToRefreshPreview() {
   const [version, setVersion] = useState(1);
   return (
-    <div style={{ height: 420, overflowY: "auto", border: "1px solid var(--meu-color-border)" }}>
+    <div
+      aria-label="下拉刷新商品列表"
+      role="region"
+      tabIndex={0}
+      style={{ height: 420, overflowY: "auto", border: "1px solid var(--meu-color-border)" }}
+    >
       <PullToRefresh
         actionLabel="刷新订单列表"
         canPull={() => true}

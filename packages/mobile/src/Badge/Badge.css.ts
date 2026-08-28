@@ -17,7 +17,6 @@ export const badge = recipe({
     minWidth: 18,
     height: 18,
     paddingInline: 5,
-    color: "white",
     borderRadius: "var(--meu-radius-round)",
     fontFamily: "var(--meu-font-ui)",
     fontSize: 11,
@@ -55,14 +54,23 @@ export const badge = recipe({
       false: {}
     },
     tone: {
-      neutral: { background: "var(--meu-color-ink)" },
+      neutral: { color: "var(--meu-color-surface)", background: "var(--meu-color-ink)" },
       accent: {
         color: "var(--meu-color-accent-contrast)",
         background: "var(--meu-color-accent)"
       },
-      success: { background: "var(--meu-color-success)" },
-      warning: { background: "var(--meu-color-warning)" },
-      danger: { background: "var(--meu-color-danger)" }
+      success: {
+        color: "var(--meu-color-success-contrast)",
+        background: "var(--meu-color-success)"
+      },
+      warning: {
+        color: "var(--meu-color-warning-contrast)",
+        background: "var(--meu-color-warning)"
+      },
+      danger: {
+        color: "var(--meu-color-danger-contrast)",
+        background: "var(--meu-color-danger)"
+      }
     }
   },
   defaultVariants: { bordered: false, dot: false, fixed: false, tone: "danger" }

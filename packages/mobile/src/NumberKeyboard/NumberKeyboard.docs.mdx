@@ -131,20 +131,20 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 - Unit: `NumberKeyboard.test.tsx`
 - Story interaction: 待补
-- Axe: 待补
-- SSR/hydration: 待补组件级证明
+- Axe: 本地 Storybook Light/Dark 全量门禁覆盖；仍需补交互后状态扫描
+- SSR/hydration: Unit 已覆盖服务端渲染；开放 Portal hydration 仍待专门证明
 - RTL: 待补
 - Reduced motion: 待补
-- Mobile Chromium/WebKit E2E: 待补焦点与长按路径
-- Chromatic Light/Dark: Figma 已验收，Story 待建立显式矩阵
+- Mobile Chromium/WebKit E2E: 已覆盖输入、删除、完成、非模态滚动与焦点基本路径；长按路径由 Unit 覆盖
+- Chromatic Light/Dark: Storybook 已建立显式主题矩阵；线上发布按里程碑延后
 - Real device: 待补
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补长按/pointer cancel、焦点保持、SSR、RTL、axe 与真机测试。
-- 完整验证 form adapter 的 dirty/touched/error/reset 行为。
+- 补 pointer cancel、开放 Portal hydration、RTL、交互后 axe 与真机测试。
+- 补齐 form adapter 的 touched/error/reset 组合证明；dirty、输入、删除、长度和确认已有 Unit。
 - 明确触摸设备与系统软键盘共存限制，并提供降级示例。
 
 ### 已完成

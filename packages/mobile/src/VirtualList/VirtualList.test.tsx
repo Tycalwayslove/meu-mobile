@@ -196,6 +196,8 @@ describe("VirtualList", () => {
       />
     );
     expect(screen.getByText("暂时没有订单")).toBeTruthy();
+    expect(screen.getByRole("status", { name: "可定位列表" })).toBeTruthy();
+    expect(screen.queryByRole("list", { name: "可定位列表" })).toBeNull();
     expect(screen.queryByRole("listitem")).toBeNull();
   });
 

@@ -29,7 +29,7 @@ describe("Slider", () => {
     expect(slider).toHaveProperty("value", "35");
     expect(onChange).toHaveBeenCalledWith(35, expect.anything());
     expect(onChangeComplete).toHaveBeenCalledWith(35, expect.anything());
-    expect(screen.getByText("35")).toBeTruthy();
+    expect(screen.getByText("35").getAttribute("aria-hidden")).toBe("true");
   });
 
   it("inherits Field semantics and renders marks as presentation", () => {

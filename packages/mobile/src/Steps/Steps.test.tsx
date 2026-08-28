@@ -15,6 +15,7 @@ describe("Steps", () => {
   it("derives statuses in an ordered list and marks the current step", () => {
     render(<Steps items={items} current={1} />);
     const list = screen.getByRole("list", { name: "进度" });
+    expect(list.tabIndex).toBe(0);
     const listItems = list.querySelectorAll("li");
     expect(listItems).toHaveLength(3);
     expect(listItems.item(0).getAttribute("data-status")).toBe("finish");
@@ -35,6 +36,7 @@ describe("Steps", () => {
     );
     const list = screen.getByRole("list", { name: "进度" });
     expect(list.getAttribute("data-direction")).toBe("vertical");
+    expect(list.getAttribute("tabindex")).toBeNull();
     expect(list.querySelectorAll("li").item(1).getAttribute("data-status")).toBe("error");
     expect(screen.getByText(/有错误/)).toBeTruthy();
   });

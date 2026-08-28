@@ -447,6 +447,8 @@ describe("TreeSelect", () => {
       />
     );
     await waitFor(() => expect(signal && signal.aborted).toBe(true));
+    expect(screen.getByRole("status", { name: "可选项" })).toBeTruthy();
+    expect(screen.queryByRole("tree", { name: "动态异步类目" })).toBeNull();
   });
 
   it("virtualizes large roots while preserving total tree semantics", async () => {

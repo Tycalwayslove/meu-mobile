@@ -413,7 +413,10 @@ textarea {
 }
 
 .integration-mask-label {
+  padding: 4px 8px;
   color: white;
+  background: rgb(0 0 0 / 72%);
+  border-radius: var(--meu-radius-control);
   font-size: 14px;
   font-weight: 600;
 }

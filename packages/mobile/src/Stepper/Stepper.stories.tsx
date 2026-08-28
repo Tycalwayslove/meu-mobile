@@ -39,7 +39,7 @@ export const InField: Story = {
 
 function ControlledStepper() {
   const [value, setValue] = useState<number | null>(1);
-  return <Stepper value={value} onChange={setValue} allowEmpty />;
+  return <Stepper aria-label="商品数量" value={value} onChange={setValue} allowEmpty />;
 }
 
 export const Controlled: Story = {

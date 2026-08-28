@@ -59,9 +59,13 @@
   --meu-color-accent-pressed: #115244;
   --meu-color-accent-contrast: #FFFFFF;
   --meu-color-overlay: #000000;
-  --meu-color-success: #287A52;
-  --meu-color-warning: #A45C13;
+  --meu-color-overlay-contrast: #FFFFFF;
+  --meu-color-success: #24704A;
+  --meu-color-success-contrast: #FFFFFF;
+  --meu-color-warning: #95540E;
+  --meu-color-warning-contrast: #FFFFFF;
   --meu-color-danger: #B63A36;
+  --meu-color-danger-contrast: #FFFFFF;
 }
 
 [data-meu-theme='dark'] {
@@ -75,6 +79,13 @@
   --meu-color-accent-pressed: #8DD0BB;
   --meu-color-accent-contrast: #161A17;
   --meu-color-overlay: #000000;
+  --meu-color-overlay-contrast: #FFFFFF;
+  --meu-color-success: #76D6A5;
+  --meu-color-success-contrast: #161A17;
+  --meu-color-warning: #F2B464;
+  --meu-color-warning-contrast: #161A17;
+  --meu-color-danger: #FF8F89;
+  --meu-color-danger-contrast: #161A17;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -89,5 +100,12 @@
     --meu-color-accent-pressed: #8DD0BB;
     --meu-color-accent-contrast: #161A17;
     --meu-color-overlay: #000000;
+    --meu-color-overlay-contrast: #FFFFFF;
+    --meu-color-success: #76D6A5;
+    --meu-color-success-contrast: #161A17;
+    --meu-color-warning: #F2B464;
+    --meu-color-warning-contrast: #161A17;
+    --meu-color-danger: #FF8F89;
+    --meu-color-danger-contrast: #161A17;
   }
 }

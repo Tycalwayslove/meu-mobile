@@ -20,6 +20,7 @@ import {
   actionButton,
   cell,
   cellContent,
+  media,
   nativeInput,
   previewButton,
   progressFill,
@@ -442,27 +443,35 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                 radius="control"
               />
             );
+            const hasAction = deletable && !disabled && !readOnly;
             const originNode = (
-              <div key={itemKey(item, index)} className={cell} data-state="success">
+              <div
+                key={itemKey(item, index)}
+                className={cell}
+                data-state="success"
+                data-has-action={hasAction ? "true" : undefined}
+              >
                 <div className={cellContent}>
-                  {preview ? (
-                    <button
-                      type="button"
-                      className={previewButton}
-                      aria-label={`${item.alt}，${config.locale === "en-US" ? "Preview" : "预览"}`}
-                      disabled={disabled}
-                      onClick={() => {
-                        setPreviewIndex(index);
-                        setViewerOpen(true);
-                        if (onPreview) onPreview(item, index);
-                      }}
-                    >
-                      {imageNode}
-                    </button>
-                  ) : (
-                    <div className={staticPreview}>{imageNode}</div>
-                  )}
-                  {deletable && !disabled && !readOnly ? (
+                  <div className={media}>
+                    {preview ? (
+                      <button
+                        type="button"
+                        className={previewButton}
+                        aria-label={`${item.alt}，${config.locale === "en-US" ? "Preview" : "预览"}`}
+                        disabled={disabled}
+                        onClick={() => {
+                          setPreviewIndex(index);
+                          setViewerOpen(true);
+                          if (onPreview) onPreview(item, index);
+                        }}
+                      >
+                        {imageNode}
+                      </button>
+                    ) : (
+                      <div className={staticPreview}>{imageNode}</div>
+                    )}
+                  </div>
+                  {hasAction ? (
                     <button
                       type="button"
                       className={actionButton}
@@ -496,46 +505,49 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                 className={cell}
                 data-state={task.status}
                 data-disabled={disabled || readOnly || undefined}
+                data-has-action={!disabled && !readOnly ? "true" : undefined}
               >
                 <div className={cellContent}>
-                  {task.previewUrl ? (
-                    <div className={staticPreview}>
-                      <Image
-                        src={task.previewUrl}
-                        alt={task.name}
-                        fit={imageFit}
-                        width="100%"
-                        height="100%"
-                        radius="control"
-                      />
-                    </div>
-                  ) : null}
-                  <div className={taskMask}>
-                    {task.status === "error" ? (
-                      <button
-                        type="button"
-                        className={retryButton}
-                        disabled={disabled || readOnly}
-                        onClick={() => retryTask(task.id)}
-                      >
-                        {localizedRetryLabel}
-                      </button>
-                    ) : (
-                      <>
-                        <span
-                          role="progressbar"
-                          aria-label={task.name}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                          aria-valuenow={Math.round(task.progress)}
+                  <div className={media}>
+                    {task.previewUrl ? (
+                      <div className={staticPreview}>
+                        <Image
+                          src={task.previewUrl}
+                          alt={task.name}
+                          fit={imageFit}
+                          width="100%"
+                          height="100%"
+                          radius="control"
+                        />
+                      </div>
+                    ) : null}
+                    <div className={taskMask}>
+                      {task.status === "error" ? (
+                        <button
+                          type="button"
+                          className={retryButton}
+                          disabled={disabled || readOnly}
+                          onClick={() => retryTask(task.id)}
                         >
-                          {Math.round(task.progress)}%
-                        </span>
-                        <span className={progressTrack} aria-hidden="true">
-                          <span className={progressFill} style={progressStyle} />
-                        </span>
-                      </>
-                    )}
+                          {localizedRetryLabel}
+                        </button>
+                      ) : (
+                        <>
+                          <span
+                            role="progressbar"
+                            aria-label={task.name}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={Math.round(task.progress)}
+                          >
+                            {Math.round(task.progress)}%
+                          </span>
+                          <span className={progressTrack} aria-hidden="true">
+                            <span className={progressFill} style={progressStyle} />
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   {!disabled && !readOnly ? (
                     <button

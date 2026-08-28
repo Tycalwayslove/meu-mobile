@@ -45,7 +45,7 @@ export const InField: Story = {
 
 function ControlledSlider() {
   const [value, setValue] = useState(40);
-  return <Slider value={value} onChange={setValue} showValue />;
+  return <Slider aria-label="完成度" value={value} onChange={setValue} showValue />;
 }
 
 export const Controlled: Story = {

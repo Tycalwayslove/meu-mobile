@@ -20,6 +20,7 @@ export const cell = style({
   borderRadius: "var(--meu-radius-control)",
   selectors: {
     "&::before": { content: "", display: "block", paddingTop: "100%" },
+    '&[data-has-action="true"]::before': { paddingTop: "calc(100% + 44px)" },
     '&[data-state="error"]': { borderColor: "var(--meu-color-danger)" },
     '&[data-disabled="true"]': { opacity: 0.56 }
   }
@@ -34,7 +35,22 @@ export const cellContent = style({
   display: "grid",
   minWidth: 0,
   minHeight: 0,
-  placeItems: "center"
+  placeItems: "center",
+  selectors: {
+    [`${cell}[data-has-action="true"] &`]: {
+      gridTemplateRows: "minmax(0, 1fr) 44px"
+    }
+  }
+});
+
+export const media = style({
+  position: "relative",
+  width: "100%",
+  height: "100%",
+  minWidth: 0,
+  minHeight: 0,
+  overflow: "hidden",
+  borderRadius: "inherit"
 });
 
 export const previewButton = style({
@@ -69,43 +85,33 @@ export const staticPreview = style({
   left: 0
 });
 
-globalStyle(
-  `${previewButton} [data-meu-component="image"], ${staticPreview} [data-meu-component="image"]`,
-  {
-    width: "100%",
-    height: "100%",
-    borderRadius: "inherit"
-  }
-);
+globalStyle(`${media} [data-meu-component="image"]`, {
+  width: "100%",
+  height: "100%",
+  borderRadius: "inherit"
+});
 
 export const actionButton = style({
-  position: "absolute",
-  zIndex: 3,
-  top: 0,
-  right: 0,
-  insetInlineEnd: 0,
   display: "grid",
-  width: 44,
+  width: "100%",
   height: 44,
+  minWidth: 44,
+  minHeight: 44,
   margin: 0,
   padding: 0,
   placeItems: "center",
-  color: "var(--meu-color-accent-contrast)",
-  background: "rgba(0, 0, 0, 0.72)",
+  color: "var(--meu-color-danger)",
+  background: "var(--meu-color-surface)",
   border: 0,
-  borderRadius: "0 var(--meu-radius-control) 0 var(--meu-radius-control)",
+  borderTop: "1px solid var(--meu-color-border)",
+  borderRadius: "0 0 var(--meu-radius-control) var(--meu-radius-control)",
   font: "inherit",
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
-    "&:active": { background: "var(--meu-color-overlay)" },
-    "&:disabled": { cursor: "wait", opacity: 0.72 },
-    "[dir='rtl'] &": {
-      right: "auto",
-      left: 0,
-      borderRadius: "var(--meu-radius-control) 0 var(--meu-radius-control) 0"
-    }
+    "&:active": { background: "var(--meu-color-subtle)" },
+    "&:disabled": { cursor: "wait", opacity: 0.72 }
   },
   "@media": {
     "(forced-colors: active)": { border: "1px solid ButtonText" }

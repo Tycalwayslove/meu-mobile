@@ -75,9 +75,18 @@ export const actionButton = recipe({
         color: "var(--meu-color-accent-contrast)",
         background: "var(--meu-color-accent)"
       },
-      success: { color: "white", background: "var(--meu-color-success)" },
-      warning: { color: "white", background: "var(--meu-color-warning)" },
-      danger: { color: "white", background: "var(--meu-color-danger)" }
+      success: {
+        color: "var(--meu-color-success-contrast)",
+        background: "var(--meu-color-success)"
+      },
+      warning: {
+        color: "var(--meu-color-warning-contrast)",
+        background: "var(--meu-color-warning)"
+      },
+      danger: {
+        color: "var(--meu-color-danger-contrast)",
+        background: "var(--meu-color-danger)"
+      }
     }
   },
   defaultVariants: { tone: "neutral" }

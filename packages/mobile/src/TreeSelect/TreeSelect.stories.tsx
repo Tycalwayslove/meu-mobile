@@ -48,11 +48,16 @@ function ControlledExample({ multiple = false, readOnly = false }) {
     <div style={{ width: "min(100%, 420px)" }}>
       <PickerTrigger
         ref={triggerRef}
-        aria-readonly={readOnly || undefined}
+        aria-describedby={readOnly ? "tree-select-readonly" : undefined}
         open={open}
         value={value.map((item) => labels.get(item)).join("、")}
         onClick={() => setOpen(true)}
       />
+      {readOnly ? (
+        <span id="tree-select-readonly" style={{ position: "absolute", clipPath: "inset(50%)" }}>
+          只读
+        </span>
+      ) : null}
       <TreeSelect<string>
         open={open}
         multiple={multiple}

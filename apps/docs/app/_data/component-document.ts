@@ -181,12 +181,39 @@ function headingId(value: string) {
 }
 
 function parseTableRow(line: string) {
-  return line
-    .trim()
-    .replace(/^\|/, "")
-    .replace(/\|$/, "")
-    .split("|")
-    .map((cell) => cell.trim());
+  const source = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  const cells: string[] = [];
+  let cell = "";
+  let codeFenceLength = 0;
+  let index = 0;
+
+  while (index < source.length) {
+    const character = source[index]!;
+    if (character === "\\" && source[index + 1] === "|") {
+      cell += "|";
+      index += 2;
+      continue;
+    }
+    if (character === "`") {
+      let runLength = 1;
+      while (source[index + runLength] === "`") runLength += 1;
+      if (codeFenceLength === 0) codeFenceLength = runLength;
+      else if (codeFenceLength === runLength) codeFenceLength = 0;
+      cell += "`".repeat(runLength);
+      index += runLength;
+      continue;
+    }
+    if (character === "|" && codeFenceLength === 0) {
+      cells.push(cell.trim());
+      cell = "";
+      index += 1;
+      continue;
+    }
+    cell += character;
+    index += 1;
+  }
+  cells.push(cell.trim());
+  return cells;
 }
 
 function isTableDivider(line: string) {
@@ -356,6 +383,19 @@ export function parseComponentDocumentSource(
 
 export function getComponentManifestProduct(slug: string) {
   return productsBySlug.get(slug);
+}
+
+export function getComponentSourceHref(sourcePath: string) {
+  const repositoryBase = "https://github.com/Tycalwayslove/meu-mobile";
+  const extensionlessModulePackages = [
+    "packages/form-react/src/",
+    "packages/icons-react/src/",
+    "packages/primitives-react/src/"
+  ];
+  if (extensionlessModulePackages.some((prefix) => sourcePath.startsWith(prefix))) {
+    return `${repositoryBase}/blob/main/${sourcePath}.tsx`;
+  }
+  return `${repositoryBase}/tree/main/${sourcePath}`;
 }
 
 export function getDocumentedComponentSlugs() {

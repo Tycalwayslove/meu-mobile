@@ -804,13 +804,13 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
         ) : null}
         <div
           ref={treeRef}
-          role="tree"
+          role={rows.length === 0 ? "status" : "tree"}
           aria-busy={loadingValues.size > 0 || undefined}
           aria-describedby={readOnly ? readOnlyDescriptionId : undefined}
           aria-disabled={disabled || undefined}
           aria-invalid={status === "error" || undefined}
           aria-label={resolvedTreeLabel}
-          aria-multiselectable={multiple || undefined}
+          aria-multiselectable={rows.length > 0 && multiple ? true : undefined}
           className={tree}
           data-readonly={readOnly || undefined}
           data-status={status}

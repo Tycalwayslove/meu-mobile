@@ -61,7 +61,7 @@ export const iconButton = recipe({
     },
     {
       variants: { variant: "solid", tone: "danger" },
-      style: { color: "white", background: "var(--meu-color-danger)" }
+      style: { color: "var(--meu-color-danger-contrast)", background: "var(--meu-color-danger)" }
     },
     {
       variants: { variant: "outline", tone: "accent" },

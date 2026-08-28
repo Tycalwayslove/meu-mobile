@@ -7,7 +7,11 @@ import { ApiReference } from "../../_components/ApiReference";
 import { ComponentDocument } from "../../_components/ComponentDocument";
 import { ComponentPreview } from "../../_components/ComponentPreview";
 import { ComponentSidebar } from "../../_components/ComponentSidebar";
-import { getComponentDocument, getComponentManifestProduct } from "../../_data/component-document";
+import {
+  getComponentDocument,
+  getComponentManifestProduct,
+  getComponentSourceHref
+} from "../../_data/component-document";
 import { getComponentApiReference } from "../../_data/api-reference";
 import {
   componentDocs,
@@ -127,11 +131,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
         <section className="component-section" aria-labelledby="resources-title">
           <h2 id="resources-title">设计与源码</h2>
           <div className="component-links">
-            <a
-              href={`https://github.com/Tycalwayslove/meu-mobile/tree/main/${sourcePath}`}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a href={getComponentSourceHref(sourcePath)} target="_blank" rel="noreferrer">
               查看源码 ↗
             </a>
             <a href={figmaUrl} target="_blank" rel="noreferrer">

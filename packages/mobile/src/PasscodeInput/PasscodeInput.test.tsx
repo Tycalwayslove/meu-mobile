@@ -125,8 +125,10 @@ describe("PasscodeInput", () => {
     const input = screen.getByLabelText<HTMLInputElement>(/支付密码/);
     expect(input.readOnly).toBe(false);
     expect(input.inputMode).toBe("none");
+    expect(input.getAttribute("aria-controls")).toBeNull();
     fireEvent.focus(input);
-    expect(screen.getByRole("group", { name: "支付密码键盘" })).toBeTruthy();
+    const keyboard = screen.getByRole("group", { name: "支付密码键盘" });
+    expect(input.getAttribute("aria-controls")).toBe(keyboard.id);
 
     fireEvent.click(screen.getByRole("button", { name: "1" }));
     fireEvent.keyDown(input, { key: "2" });
@@ -146,6 +148,7 @@ describe("PasscodeInput", () => {
     fireEvent.click(screen.getByRole("button", { name: "完成" }));
     expect(onConfirm).toHaveBeenCalledWith("13");
     await waitFor(() => expect(screen.queryByRole("group", { name: "支付密码键盘" })).toBeNull());
+    expect(input.getAttribute("aria-controls")).toBeNull();
   });
 
   it("can close a custom keyboard when the passcode is complete", async () => {

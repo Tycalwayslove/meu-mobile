@@ -223,6 +223,6 @@ export const empty = style({
   placeItems: "center",
   boxSizing: "border-box",
   padding: "var(--meu-space-6)",
-  color: "var(--meu-color-muted)",
+  color: "var(--meu-color-overlay-contrast)",
   textAlign: "center"
 });

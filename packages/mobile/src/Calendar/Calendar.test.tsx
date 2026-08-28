@@ -65,6 +65,15 @@ describe("Calendar", () => {
     expect(grid.getAttribute("aria-labelledby")).toBe(monthTitle.id);
   });
 
+  it("does not forward unsupported required semantics to group or grid roles", () => {
+    render(<Calendar defaultMonth={date(1)} aria-label="配送日历" aria-required />);
+
+    expect(
+      screen.getByRole("group", { name: "配送日历" }).getAttribute("aria-required")
+    ).toBeNull();
+    expect(screen.getByRole("grid").getAttribute("aria-required")).toBeNull();
+  });
+
   it("supports uncontrolled single selection and explicit clearing", () => {
     const onChange = vi.fn();
     render(

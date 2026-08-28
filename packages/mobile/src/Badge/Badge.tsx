@@ -53,6 +53,7 @@ export function Badge({
     <span
       className={badge({ bordered, dot, fixed: hasAnchor, tone })}
       style={markerStyle}
+      role={label ? "img" : undefined}
       aria-label={label}
       aria-hidden={dot && !label ? true : undefined}
       data-meu-badge-marker

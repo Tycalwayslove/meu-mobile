@@ -115,7 +115,7 @@ export const badge = style({
   minHeight: 18,
   boxSizing: "border-box",
   padding: "0 5px",
-  color: "white",
+  color: "var(--meu-color-danger-contrast)",
   background: "var(--meu-color-danger)",
   borderRadius: "var(--meu-radius-round)",
   fontSize: 11,

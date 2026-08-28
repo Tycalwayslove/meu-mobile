@@ -47,6 +47,7 @@ export function Steps({
       ref={ref}
       className={className ? `${classes} ${className}` : classes}
       aria-label={resolvedLabel}
+      tabIndex={direction === "horizontal" ? 0 : undefined}
       data-meu-component="steps"
       data-direction={direction}
     >
