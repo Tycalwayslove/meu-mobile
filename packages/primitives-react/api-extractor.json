@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "mainEntryPointFilePath": "<projectFolder>/dist/index.d.ts",
+  "apiReport": {
+    "enabled": true,
+    "reportFileName": "primitives-react.api.md",
+    "reportFolder": "<projectFolder>/../../etc/api",
+    "reportTempFolder": "<projectFolder>/../../temp/api"
+  },
+  "docModel": {
+    "enabled": true,
+    "apiJsonFilePath": "<projectFolder>/../../temp/api/primitives-react.api.json"
+  },
+  "dtsRollup": { "enabled": false },
+  "tsdocMetadata": { "enabled": false },
+  "messages": {
+    "compilerMessageReporting": { "default": { "logLevel": "warning" } },
+    "extractorMessageReporting": { "default": { "logLevel": "warning" } },
+    "tsdocMessageReporting": { "default": { "logLevel": "warning" } }
+  }
+}

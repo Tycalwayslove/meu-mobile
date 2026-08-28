@@ -123,7 +123,8 @@ function mobile(
 
 export const componentDocs: readonly ComponentDoc[] = [
   mobile("ConfigProvider", "config-provider", "foundation", "统一主题、语言与 Portal 容器配置。", {
-    sourceName: "ConfigProvider"
+    sourceName: "ConfigProvider",
+    storyTitle: "Foundation/ConfigProvider"
   }),
   mobile(
     "ThemeProvider",
@@ -131,7 +132,8 @@ export const componentDocs: readonly ComponentDoc[] = [
     "foundation",
     "ConfigProvider 的主题语义别名，支持 light、dark 与 system。",
     {
-      sourceName: "ConfigProvider"
+      sourceName: "ConfigProvider",
+      storyTitle: "Foundation/ThemeProvider"
     }
   ),
   {
@@ -142,7 +144,9 @@ export const componentDocs: readonly ComponentDoc[] = [
     packageName: "@meu/primitives-react",
     priority: "P0",
     slug: "portal",
-    sourcePath: "packages/primitives-react/src/Portal"
+    sourcePath: "packages/primitives-react/src/Portal",
+    storyId: componentStoryIds.portal,
+    storyTitle: "Foundation/Portal"
   },
   mobile("SafeArea", "safe-area", "foundation", "读取系统安全区并提供可组合的边缘留白。", {
     storyTitle: "Layout/SafeArea"
@@ -155,7 +159,9 @@ export const componentDocs: readonly ComponentDoc[] = [
     packageName: "@meu/icons-react",
     priority: "P0",
     slug: "icon",
-    sourcePath: "packages/icons-react/src/MeuIcon"
+    sourcePath: "packages/icons-react/src/MeuIcon",
+    storyId: componentStoryIds.icon,
+    storyTitle: "Foundation/Icon"
   },
   mobile("Space", "space", "foundation", "按设计空间 Token 排布同级内容。", {
     storyTitle: "Layout/Space"
@@ -171,7 +177,9 @@ export const componentDocs: readonly ComponentDoc[] = [
     packageName: "@meu/primitives-react",
     priority: "P0",
     slug: "visually-hidden",
-    sourcePath: "packages/primitives-react/src/VisuallyHidden"
+    sourcePath: "packages/primitives-react/src/VisuallyHidden",
+    storyId: componentStoryIds["visually-hidden"],
+    storyTitle: "Foundation/VisuallyHidden"
   },
 
   mobile(

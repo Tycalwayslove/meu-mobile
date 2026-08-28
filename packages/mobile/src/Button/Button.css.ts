@@ -11,6 +11,7 @@ export const button = recipe({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
+    gap: "var(--meu-space-2)",
     border: 0,
     borderRadius: "var(--meu-radius-control)",
     boxSizing: "border-box",
@@ -55,8 +56,16 @@ export const button = recipe({
     },
     size: {
       small: { minHeight: 44, paddingInline: "var(--meu-space-3)", fontSize: 14 },
-      medium: { minHeight: "var(--meu-size-control-medium)", paddingInline: "var(--meu-space-4)", fontSize: 16 },
-      large: { minHeight: "var(--meu-size-control-large)", paddingInline: "var(--meu-space-5)", fontSize: 16 }
+      medium: {
+        minHeight: "var(--meu-size-control-medium)",
+        paddingInline: "var(--meu-space-4)",
+        fontSize: 16
+      },
+      large: {
+        minHeight: "var(--meu-size-control-large)",
+        paddingInline: "var(--meu-space-5)",
+        fontSize: 16
+      }
     },
     block: {
       true: { width: "100%" },
@@ -122,10 +131,7 @@ export const button = recipe({
 });
 
 export const buttonItem = style({
-  display: "inline-flex",
-  selectors: {
-    "&:not(:first-child)": { marginLeft: "var(--meu-space-2)" }
-  }
+  display: "inline-flex"
 });
 
 export const spinner = style({
@@ -136,6 +142,6 @@ export const spinner = style({
   borderRadius: "50%",
   animation: `${spin} 700ms linear infinite`,
   "@media": {
-    "(prefers-reduced-motion: reduce)": { animationDuration: "1400ms" }
+    "(prefers-reduced-motion: reduce)": { animation: "none" }
   }
 });

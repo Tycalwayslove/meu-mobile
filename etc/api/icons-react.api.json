@@ -1,0 +1,705 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "7.59.0",
+    "schemaVersion": 1011,
+    "oldestForwardsCompatibleVersion": 1001,
+    "tsdocConfig": {
+      "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+      "noStandardTags": true,
+      "tagDefinitions": [
+        {
+          "tagName": "@alpha",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@beta",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@defaultValue",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@decorator",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@deprecated",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@eventProperty",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@example",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@experimental",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@inheritDoc",
+          "syntaxKind": "inline"
+        },
+        {
+          "tagName": "@internal",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@label",
+          "syntaxKind": "inline"
+        },
+        {
+          "tagName": "@link",
+          "syntaxKind": "inline",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@override",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@packageDocumentation",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@param",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@privateRemarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@public",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@readonly",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@remarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@returns",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@sealed",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@see",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@throws",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@typeParam",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@virtual",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@jsx",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxRuntime",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxFrag",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxImportSource",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@betaDocumentation",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@internalRemarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@preapproved",
+          "syntaxKind": "modifier"
+        }
+      ],
+      "supportForTags": {
+        "@alpha": true,
+        "@beta": true,
+        "@defaultValue": true,
+        "@decorator": true,
+        "@deprecated": true,
+        "@eventProperty": true,
+        "@example": true,
+        "@experimental": true,
+        "@inheritDoc": true,
+        "@internal": true,
+        "@label": true,
+        "@link": true,
+        "@override": true,
+        "@packageDocumentation": true,
+        "@param": true,
+        "@privateRemarks": true,
+        "@public": true,
+        "@readonly": true,
+        "@remarks": true,
+        "@returns": true,
+        "@sealed": true,
+        "@see": true,
+        "@throws": true,
+        "@typeParam": true,
+        "@virtual": true,
+        "@betaDocumentation": true,
+        "@internalRemarks": true,
+        "@preapproved": true
+      },
+      "reportUnsupportedHtmlElements": false
+    }
+  },
+  "kind": "Package",
+  "canonicalReference": "@meu/icons-react!",
+  "docComment": "",
+  "name": "@meu/icons-react",
+  "preserveMemberOrder": false,
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "@meu/icons-react!",
+      "name": "",
+      "preserveMemberOrder": false,
+      "members": [
+        {
+          "kind": "Variable",
+          "canonicalReference": "@meu/icons-react!MeuIcon:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "MeuIcon: "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconProps",
+              "canonicalReference": "@meu/icons-react!MeuIconProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"ref\"> & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "MeuIcon",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 12
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@meu/icons-react!MeuIconCheck:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "MeuIconCheck: "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconProps",
+              "canonicalReference": "@meu/icons-react!MeuIconProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"name\" | \"icon\">, \"ref\"> & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "MeuIconCheck",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 14
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@meu/icons-react!MeuIconChevronLeft:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "MeuIconChevronLeft: "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconProps",
+              "canonicalReference": "@meu/icons-react!MeuIconProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"name\" | \"icon\">, \"ref\"> & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "MeuIconChevronLeft",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 14
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@meu/icons-react!MeuIconPlus:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "MeuIconPlus: "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconProps",
+              "canonicalReference": "@meu/icons-react!MeuIconProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"name\" | \"icon\">, \"ref\"> & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "MeuIconPlus",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 14
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/icons-react!MeuIconProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuIconProps = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGProps",
+              "canonicalReference": "@types/react!React.SVGProps:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">, \"children\"> & {\n    icon: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconNode",
+              "canonicalReference": "@meu/icons-core!MeuIconNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: string;\n    size?: number | string;\n    strokeWidth?: number;\n    title?: string;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "releaseTag": "Public",
+          "name": "MeuIconProps",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 9
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@meu/icons-react!MeuIconSearch:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "MeuIconSearch: "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconProps",
+              "canonicalReference": "@meu/icons-react!MeuIconProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"name\" | \"icon\">, \"ref\"> & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "MeuIconSearch",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 14
+          }
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "@meu/icons-react!MeuIconX:var",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "MeuIconX: "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuIconProps",
+              "canonicalReference": "@meu/icons-react!MeuIconProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"name\" | \"icon\">, \"ref\"> & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGSVGElement",
+              "canonicalReference": "!SVGSVGElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/MeuIcon.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "MeuIconX",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 14
+          }
+        }
+      ]
+    }
+  ]
+}

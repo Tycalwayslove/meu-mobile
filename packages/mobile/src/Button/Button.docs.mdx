@@ -3,7 +3,7 @@ name: Button
 slug: button
 package: "@meu/mobile"
 exports: [Button]
-status: audit
+status: implementation
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -23,8 +23,9 @@ source: packages/mobile/src/Button
 - 原生 `button`，默认 `type="button"`，支持 ref 和原生 button 属性。
 - `solid | outline | ghost | text`、三种 tone、三档 size、block、前后图标和 loading。
 - loading 时保留内容宽度、设置 `aria-busy` 并禁用点击。
+- 使用兼容 WebView 70 的焦点环、逻辑间距，并在 reduced-motion 下显示静态 loading ring。
 
-当前能力来自源码与单测；V2 状态仍为 `audit`，不等于已完成商用验收。
+当前能力来自源码与单测；V2 状态为 `implementation`，不等于已完成商用验收。
 
 ## 何时使用
 
@@ -85,7 +86,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 ## 动效
 
-当前提供按压状态和 spinner。V2 需确认只使用 transform/opacity、动画不引发布局变化，reduced-motion 下 spinner 使用可感知的静态 loading 表达。
+当前提供按压状态和 spinner；reduced-motion 下 spinner 停止旋转并保留静态 ring。V2 仍需在真实浏览器验证动画中断和高对比显示。
 
 ## 主题与定制
 
@@ -119,8 +120,8 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 - Story interaction: 待补
 - Axe: 待补
 - SSR/hydration: 隔离消费者覆盖，待增加组件级证明
-- RTL: 待补
-- Reduced motion: 待补
+- RTL: 已改用 flex gap，待浏览器视觉证明
+- Reduced motion: CSS 已静态降级，待 Story/浏览器证明
 - Mobile Chromium/WebKit E2E: 待补组件专属断言
 - Chromatic Light/Dark: 有视觉快照，待建立显式矩阵
 - Real device: 待补
@@ -129,13 +130,14 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 ### 待优化
 
-- 补齐 TSDoc、Autodocs、交互与 axe；验证 44px、字号放大、高对比和 RTL。
+- 补齐 Autodocs 交互与 axe；验证 44px、字号放大、高对比和 RTL。
 - 明确 loading 的读屏策略、宽度稳定性和异步错误恢复示例。
 - 评估是否需要 `loadingText`，没有真实场景证据前不新增 API。
 
 ### 已完成
 
 - V1 已采用原生 button、默认安全 type、loading 禁用与 ref 转发。
+- V2 已补 Props TSDoc、兼容旧 WebView 的焦点环、逻辑间距与 reduced-motion 静态 loading。
 
 ## 变更记录
 

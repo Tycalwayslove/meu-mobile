@@ -1,0 +1,6077 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "7.59.0",
+    "schemaVersion": 1011,
+    "oldestForwardsCompatibleVersion": 1001,
+    "tsdocConfig": {
+      "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+      "noStandardTags": true,
+      "tagDefinitions": [
+        {
+          "tagName": "@alpha",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@beta",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@defaultValue",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@decorator",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@deprecated",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@eventProperty",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@example",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@experimental",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@inheritDoc",
+          "syntaxKind": "inline"
+        },
+        {
+          "tagName": "@internal",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@label",
+          "syntaxKind": "inline"
+        },
+        {
+          "tagName": "@link",
+          "syntaxKind": "inline",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@override",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@packageDocumentation",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@param",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@privateRemarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@public",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@readonly",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@remarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@returns",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@sealed",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@see",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@throws",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@typeParam",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@virtual",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@jsx",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxRuntime",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxFrag",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxImportSource",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@betaDocumentation",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@internalRemarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@preapproved",
+          "syntaxKind": "modifier"
+        }
+      ],
+      "supportForTags": {
+        "@alpha": true,
+        "@beta": true,
+        "@defaultValue": true,
+        "@decorator": true,
+        "@deprecated": true,
+        "@eventProperty": true,
+        "@example": true,
+        "@experimental": true,
+        "@inheritDoc": true,
+        "@internal": true,
+        "@label": true,
+        "@link": true,
+        "@override": true,
+        "@packageDocumentation": true,
+        "@param": true,
+        "@privateRemarks": true,
+        "@public": true,
+        "@readonly": true,
+        "@remarks": true,
+        "@returns": true,
+        "@sealed": true,
+        "@see": true,
+        "@throws": true,
+        "@typeParam": true,
+        "@virtual": true,
+        "@betaDocumentation": true,
+        "@internalRemarks": true,
+        "@preapproved": true
+      },
+      "reportUnsupportedHtmlElements": false
+    }
+  },
+  "kind": "Package",
+  "canonicalReference": "@meu/form-react!",
+  "docComment": "",
+  "name": "@meu/form-react",
+  "preserveMemberOrder": false,
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "@meu/form-react!",
+      "name": "",
+      "preserveMemberOrder": false,
+      "members": [
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!applyMeuFormErrors:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function applyMeuFormErrors<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(form: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseFormReturn",
+              "canonicalReference": "react-hook-form!UseFormReturn:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": ", errors: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormServerErrors",
+              "canonicalReference": "@meu/form-react!MeuFormServerErrors:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": ", options?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ApplyMeuFormErrorsOptions",
+              "canonicalReference": "@meu/form-react!ApplyMeuFormErrorsOptions:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues> | undefined"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/server-errors.ts",
+          "returnTypeTokenRange": {
+            "startIndex": 11,
+            "endIndex": 13
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "form",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "errors",
+              "parameterTypeTokenRange": {
+                "startIndex": 6,
+                "endIndex": 8
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "options",
+              "parameterTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 10
+              },
+              "isOptional": true
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "applyMeuFormErrors"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!ApplyMeuFormErrorsOptions:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type ApplyMeuFormErrorsOptions = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    shouldFocusFirst?: boolean;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/server-errors.ts",
+          "releaseTag": "Public",
+          "name": "ApplyMeuFormErrorsOptions",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuForm:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuForm<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormProps",
+              "canonicalReference": "@meu/form-react!MeuFormProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuForm.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ children, form, noValidate, onInvalid, onSubmit, ...props }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuForm"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormCalendar:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormCalendar<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TDate = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Date",
+              "canonicalReference": "!Date:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">(props: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCalendarProps",
+              "canonicalReference": "@meu/form-react!MeuFormCalendarProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCalendar.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 8,
+            "endIndex": 10
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "props",
+              "parameterTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 7
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "name": "MeuFormCalendar"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormCalendarProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormCalendarProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TDate = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Date",
+              "canonicalReference": "!Date:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCalendarSingleProps",
+              "canonicalReference": "@meu/form-react!~MeuFormCalendarSingleProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCalendarMultipleProps",
+              "canonicalReference": "@meu/form-react!~MeuFormCalendarMultipleProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCalendarRangeProps",
+              "canonicalReference": "@meu/form-react!~MeuFormCalendarRangeProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCalendar.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormCalendarProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 11
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormCascadePicker:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormCascadePicker<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCascadePickerProps",
+              "canonicalReference": "@meu/form-react!MeuFormCascadePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCascadePicker.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ defaultOpen, description, formatValue, label, name, onCancel, onConfirm, onOpenChange, open, pickerAriaLabel, pickerTitle, required, rules, triggerProps, ...pickerProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormCascadePicker"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormCascadePickerProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormCascadePickerProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "CascadePickerAdapterProps",
+              "canonicalReference": "@meu/form-react!~CascadePickerAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReadonlyArray",
+              "canonicalReference": "!ReadonlyArray:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue | null>, options: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReadonlyArray",
+              "canonicalReference": "!ReadonlyArray:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "CascadePickerOption",
+              "canonicalReference": "@meu/mobile!CascadePickerOption:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> | null>) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onCancel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CascadePickerProps",
+              "canonicalReference": "@meu/mobile!CascadePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[\"onCancel\"];\n    onConfirm?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CascadePickerProps",
+              "canonicalReference": "@meu/mobile!CascadePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[\"onConfirm\"];\n    onOpenChange?: (open: boolean, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerOpenChangeDetails",
+              "canonicalReference": "@meu/mobile!PickerOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    open?: boolean;\n    pickerAriaLabel?: string;\n    pickerTitle?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerTriggerProps",
+              "canonicalReference": "@meu/mobile!PickerTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCascadePicker.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormCascadePickerProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 39
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormCheckbox:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormCheckbox<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCheckboxProps",
+              "canonicalReference": "@meu/form-react!MeuFormCheckboxProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCheckbox.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...checkboxProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormCheckbox"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormCheckboxGroup:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormCheckboxGroup<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "CheckboxValue",
+              "canonicalReference": "@meu/mobile!CheckboxValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "CheckboxValue",
+              "canonicalReference": "@meu/mobile!CheckboxValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormCheckboxGroupProps",
+              "canonicalReference": "@meu/form-react!MeuFormCheckboxGroupProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCheckboxGroup.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...groupProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormCheckboxGroup"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormCheckboxGroupProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormCheckboxGroupProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "CheckboxValue",
+              "canonicalReference": "@meu/mobile!CheckboxValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "CheckboxValue",
+              "canonicalReference": "@meu/mobile!CheckboxValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "CheckboxGroupProps",
+              "canonicalReference": "@meu/mobile!CheckboxGroupProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>, \"defaultValue\" | \"name\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCheckboxGroup.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormCheckboxGroupProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 21
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormCheckboxProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormCheckboxProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "CheckboxProps",
+              "canonicalReference": "@meu/mobile!CheckboxProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"checked\" | \"defaultChecked\" | \"name\" | \"onBlur\" | \"onChange\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormCheckbox.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormCheckboxProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormDatePicker:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormDatePicker<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TDate = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Date",
+              "canonicalReference": "!Date:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormDatePickerProps",
+              "canonicalReference": "@meu/form-react!MeuFormDatePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormDatePicker.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 8,
+            "endIndex": 10
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ adapter, defaultOpen, description, formatValue, label, name, onCancel, onConfirm, onOpenChange, open, pickerAriaLabel, pickerTitle, precision, required, rules, triggerProps, ...pickerProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 7
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "name": "MeuFormDatePicker"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormDatePickerProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormDatePickerProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TDate = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Date",
+              "canonicalReference": "!Date:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "DatePickerAdapterProps",
+              "canonicalReference": "@meu/form-react!~DatePickerAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate> & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: TDate, details: {\n        adapter: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateAdapter",
+              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>;\n        precision: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DatePrecision",
+              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    }) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onCancel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DatePickerProps",
+              "canonicalReference": "@meu/mobile!DatePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>[\"onCancel\"];\n    onConfirm?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DatePickerProps",
+              "canonicalReference": "@meu/mobile!DatePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>[\"onConfirm\"];\n    onOpenChange?: (open: boolean, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DatePickerOpenChangeDetails",
+              "canonicalReference": "@meu/mobile!DatePickerOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    open?: boolean;\n    pickerAriaLabel?: string;\n    pickerTitle?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerTriggerProps",
+              "canonicalReference": "@meu/mobile!PickerTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormDatePicker.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormDatePickerProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 35
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormDateRangePicker:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormDateRangePicker<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TDate = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Date",
+              "canonicalReference": "!Date:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormDateRangePickerProps",
+              "canonicalReference": "@meu/form-react!MeuFormDateRangePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormDateRangePicker.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 8,
+            "endIndex": 10
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ adapter, defaultOpen, description, disabled: pickerDisabled, formatValue, label, name, onCancel, onConfirm, onOpenChange, open, pickerAriaLabel, pickerTitle, required, rules, triggerProps, ...pickerProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 7
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "name": "MeuFormDateRangePicker"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormDateRangePickerProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormDateRangePickerProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TDate = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Date",
+              "canonicalReference": "!Date:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateRangePickerAdapterProps",
+              "canonicalReference": "@meu/form-react!~DateRangePickerAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate> & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CalendarRange",
+              "canonicalReference": "@meu/mobile!CalendarRange:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>, details: {\n        adapter: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateAdapter",
+              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>;\n    }) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateRangePickerFieldPath",
+              "canonicalReference": "@meu/form-react!~DateRangePickerFieldPath:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate>;\n    onCancel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateRangePickerProps",
+              "canonicalReference": "@meu/mobile!DateRangePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>[\"onCancel\"];\n    onConfirm?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateRangePickerProps",
+              "canonicalReference": "@meu/mobile!DateRangePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>[\"onConfirm\"];\n    onOpenChange?: (open: boolean, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateRangePickerOpenChangeDetails",
+              "canonicalReference": "@meu/mobile!DateRangePickerOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    open?: boolean;\n    pickerAriaLabel?: string;\n    pickerTitle?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "DateRangePickerFieldPath",
+              "canonicalReference": "@meu/form-react!~DateRangePickerFieldPath:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TDate>>[\"rules\"];\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerTriggerProps",
+              "canonicalReference": "@meu/mobile!PickerTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormDateRangePicker.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormDateRangePickerProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 35
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormImageUploader:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormImageUploader<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormImageUploaderProps",
+              "canonicalReference": "@meu/form-react!MeuFormImageUploaderProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormImageUploader.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, disabled, label, name, onBlur, onChange, required, rules, ...uploaderProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormImageUploader"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormImageUploaderProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormImageUploaderProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "ImageUploaderProps",
+              "canonicalReference": "@meu/mobile!ImageUploaderProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"ref\" | \"status\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onBlur?: (event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "FocusEvent",
+              "canonicalReference": "@types/react!React.FocusEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    onChange?: (items: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImageUploaderItem",
+              "canonicalReference": "@meu/mobile!ImageUploaderItem:type"
+            },
+            {
+              "kind": "Content",
+              "text": "[], details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImageUploaderChangeDetails",
+              "canonicalReference": "@meu/mobile!ImageUploaderChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormImageUploader.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormImageUploaderProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 25
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormNumberKeyboard:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormNumberKeyboard<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormNumberKeyboardProps",
+              "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormNumberKeyboard.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ defaultOpen, description, formatValue, keyboardAriaLabel, keyboardTitle, label, maxLength, name, onConfirm, onDelete, onInput, onOpenChange, open, placeholder, required, rules, transformInput, triggerProps, ...keyboardProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormNumberKeyboard"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardOpenChangeDetails:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormNumberKeyboardOpenChangeDetails = "
+            },
+            {
+              "kind": "Reference",
+              "text": "NumberKeyboardOpenChangeDetails",
+              "canonicalReference": "@meu/mobile!NumberKeyboardOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | {\n    reason: \"trigger\";\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormNumberKeyboard.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormNumberKeyboardOpenChangeDetails",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormNumberKeyboardProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "NumberKeyboardAdapterProps",
+              "canonicalReference": "@meu/form-react!~NumberKeyboardAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": " & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: string) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    keyboardAriaLabel?: string;\n    keyboardTitle?: string;\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    maxLength?: number;\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onConfirm?: (value: string) => void;\n    onDelete?: (details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "NumberKeyboardDeleteDetails",
+              "canonicalReference": "@meu/mobile!NumberKeyboardDeleteDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    onInput?: (value: string, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "NumberKeyboardInputDetails",
+              "canonicalReference": "@meu/mobile!NumberKeyboardInputDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    onOpenChange?: (open: boolean, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormNumberKeyboardOpenChangeDetails",
+              "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    open?: boolean;\n    placeholder?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n    transformInput?: (currentValue: string, input: string, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "NumberKeyboardInputDetails",
+              "canonicalReference": "@meu/mobile!NumberKeyboardInputDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => string;\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "NumberKeyboardTriggerProps",
+              "canonicalReference": "@meu/mobile!NumberKeyboardTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"aria-controls\" | \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormNumberKeyboard.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormNumberKeyboardProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 31
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormPasscodeInput:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormPasscodeInput<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormPasscodeInputProps",
+              "canonicalReference": "@meu/form-react!MeuFormPasscodeInputProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormPasscodeInput.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, disabled, label, name, onBlur, onChange, required, rules, ...inputProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormPasscodeInput"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormPasscodeInputProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormPasscodeInputProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PasscodeInputProps",
+              "canonicalReference": "@meu/mobile!PasscodeInputProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"ref\" | \"status\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onBlur?: (event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "FocusEvent",
+              "canonicalReference": "@types/react!React.FocusEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    onChange?: (value: string, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PasscodeInputChangeDetails",
+              "canonicalReference": "@meu/mobile!PasscodeInputChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormPasscodeInput.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormPasscodeInputProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 23
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormPicker:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormPicker<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormPickerProps",
+              "canonicalReference": "@meu/form-react!MeuFormPickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormPicker.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ defaultOpen, description, formatValue, label, name, onCancel, onConfirm, onOpenChange, open, pickerAriaLabel, pickerTitle, required, rules, triggerProps, ...pickerProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormPicker"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormPickerProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormPickerProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerValue",
+              "canonicalReference": "@meu/mobile!PickerValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerAdapterProps",
+              "canonicalReference": "@meu/form-react!~PickerAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReadonlyArray",
+              "canonicalReference": "!ReadonlyArray:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue | null>, options: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReadonlyArray",
+              "canonicalReference": "!ReadonlyArray:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerOption",
+              "canonicalReference": "@meu/mobile!PickerOption:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> | null>) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onCancel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerProps",
+              "canonicalReference": "@meu/mobile!PickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[\"onCancel\"];\n    onConfirm?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerProps",
+              "canonicalReference": "@meu/mobile!PickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[\"onConfirm\"];\n    onOpenChange?: (open: boolean, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerOpenChangeDetails",
+              "canonicalReference": "@meu/mobile!PickerOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    open?: boolean;\n    pickerAriaLabel?: string;\n    pickerTitle?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerTriggerProps",
+              "canonicalReference": "@meu/mobile!PickerTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormPicker.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormPickerProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 39
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "FormHTMLAttributes",
+              "canonicalReference": "@types/react!React.FormHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLFormElement",
+              "canonicalReference": "!HTMLFormElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">, \"onSubmit\"> & {\n    form: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseFormReturn",
+              "canonicalReference": "react-hook-form!UseFormReturn:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onInvalid?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SubmitErrorHandler",
+              "canonicalReference": "react-hook-form!SubmitErrorHandler:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onSubmit: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SubmitHandler",
+              "canonicalReference": "react-hook-form!SubmitHandler:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuForm.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 15
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormRadioGroup:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormRadioGroup<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "RadioValue",
+              "canonicalReference": "@meu/mobile!RadioValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "RadioValue",
+              "canonicalReference": "@meu/mobile!RadioValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormRadioGroupProps",
+              "canonicalReference": "@meu/form-react!MeuFormRadioGroupProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormRadioGroup.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...groupProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormRadioGroup"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormRadioGroupProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormRadioGroupProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "RadioValue",
+              "canonicalReference": "@meu/mobile!RadioValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "RadioValue",
+              "canonicalReference": "@meu/mobile!RadioValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "RadioGroupProps",
+              "canonicalReference": "@meu/mobile!RadioGroupProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>, \"defaultValue\" | \"name\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormRadioGroup.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormRadioGroupProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 21
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormRate:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormRate<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormRateProps",
+              "canonicalReference": "@meu/form-react!MeuFormRateProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormRate.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...rateProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormRate"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormRateProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormRateProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "RateProps",
+              "canonicalReference": "@meu/mobile!RateProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormRate.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormRateProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormSearchField:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormSearchField<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormSearchFieldProps",
+              "canonicalReference": "@meu/form-react!MeuFormSearchFieldProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSearchField.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...searchFieldProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormSearchField"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormSearchFieldProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormSearchFieldProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldProps",
+              "canonicalReference": "@meu/mobile!SearchFieldProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSearchField.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormSearchFieldProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormSegmentedControl:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormSegmentedControl<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormSegmentedControlProps",
+              "canonicalReference": "@meu/form-react!MeuFormSegmentedControlProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSegmentedControl.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...segmentedControlProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormSegmentedControl"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormSegmentedControlProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormSegmentedControlProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlProps",
+              "canonicalReference": "@meu/mobile!SegmentedControlProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>, \"defaultValue\" | \"name\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSegmentedControl.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormSegmentedControlProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 21
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormSelector:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormSelector<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorValue",
+              "canonicalReference": "@meu/mobile!SelectorValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorValue",
+              "canonicalReference": "@meu/mobile!SelectorValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormSelectorProps",
+              "canonicalReference": "@meu/form-react!MeuFormSelectorProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSelector.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...selectorProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormSelector"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormSelectorProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormSelectorProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorValue",
+              "canonicalReference": "@meu/mobile!SelectorValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorValue",
+              "canonicalReference": "@meu/mobile!SelectorValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorProps",
+              "canonicalReference": "@meu/mobile!SelectorProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>, \"defaultValue\" | \"name\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSelector.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormSelectorProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 21
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormServerErrors:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormServerErrors<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Partial",
+              "canonicalReference": "!Partial:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Record",
+              "canonicalReference": "!Record:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>, string>>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/server-errors.ts",
+          "releaseTag": "Public",
+          "name": "MeuFormServerErrors",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 9
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormSlider:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormSlider<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormSliderProps",
+              "canonicalReference": "@meu/form-react!MeuFormSliderProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSlider.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...sliderProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormSlider"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormSliderProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormSliderProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SliderProps",
+              "canonicalReference": "@meu/mobile!SliderProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSlider.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormSliderProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormStepper:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormStepper<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormStepperProps",
+              "canonicalReference": "@meu/form-react!MeuFormStepperProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormStepper.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...stepperProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormStepper"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormStepperProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormStepperProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "StepperProps",
+              "canonicalReference": "@meu/mobile!StepperProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormStepper.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormStepperProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormSwitch:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormSwitch<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormSwitchProps",
+              "canonicalReference": "@meu/form-react!MeuFormSwitchProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSwitch.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...switchProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormSwitch"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormSwitchProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormSwitchProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SwitchProps",
+              "canonicalReference": "@meu/mobile!SwitchProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"checked\" | \"defaultChecked\" | \"name\" | \"onBlur\" | \"onChange\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormSwitch.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormSwitchProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormTextArea:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormTextArea<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormTextAreaProps",
+              "canonicalReference": "@meu/form-react!MeuFormTextAreaProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTextArea.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...textAreaProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormTextArea"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormTextAreaProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormTextAreaProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "TextAreaProps",
+              "canonicalReference": "@meu/mobile!TextAreaProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTextArea.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormTextAreaProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormTextInput:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormTextInput<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormTextInputProps",
+              "canonicalReference": "@meu/form-react!MeuFormTextInputProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTextInput.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ description, label, name, required, rules, ...inputProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormTextInput"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormTextInputProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormTextInputProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "TextInputProps",
+              "canonicalReference": "@meu/mobile!TextInputProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"defaultValue\" | \"name\" | \"onBlur\" | \"onChange\" | \"value\"> & {\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTextInput.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormTextInputProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormTimePicker:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormTimePicker<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormTimePickerProps",
+              "canonicalReference": "@meu/form-react!MeuFormTimePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTimePicker.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ defaultOpen, description, formatValue, hourCycle, label, name, onCancel, onConfirm, onOpenChange, open, pickerAriaLabel, pickerTitle, precision, required, rules, triggerProps, ...pickerProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "MeuFormTimePicker"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormTimePickerProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormTimePickerProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerAdapterProps",
+              "canonicalReference": "@meu/form-react!~TimePickerAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": " & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimeValue",
+              "canonicalReference": "@meu/mobile!TimeValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", details: {\n        hourCycle: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerHourCycle",
+              "canonicalReference": "@meu/mobile!TimePickerHourCycle:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n        precision: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerPrecision",
+              "canonicalReference": "@meu/mobile!TimePickerPrecision:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    }) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerFieldPath",
+              "canonicalReference": "@meu/form-react!~TimePickerFieldPath:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onCancel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerProps",
+              "canonicalReference": "@meu/mobile!TimePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"onCancel\"];\n    onConfirm?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerProps",
+              "canonicalReference": "@meu/mobile!TimePickerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"onConfirm\"];\n    onOpenChange?: (open: boolean, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerOpenChangeDetails",
+              "canonicalReference": "@meu/mobile!TimePickerOpenChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    open?: boolean;\n    pickerAriaLabel?: string;\n    pickerTitle?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "TimePickerFieldPath",
+              "canonicalReference": "@meu/form-react!~TimePickerFieldPath:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerTriggerProps",
+              "canonicalReference": "@meu/mobile!PickerTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTimePicker.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormTimePickerProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 35
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!MeuFormTreeSelect:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function MeuFormTreeSelect<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectValue",
+              "canonicalReference": "@meu/mobile!TreeSelectValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectValue",
+              "canonicalReference": "@meu/mobile!TreeSelectValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormTreeSelectProps",
+              "canonicalReference": "@meu/form-react!MeuFormTreeSelectProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TValue>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTreeSelect.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 10,
+            "endIndex": 12
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ defaultOpen, description, formatValue, label, name, onCancel, onConfirm, onOpenChange, open, readOnly, required, rules, treeAriaLabel, treeTitle, triggerProps, ...treeSelectProps }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 9
+              },
+              "isOptional": false
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "name": "MeuFormTreeSelect"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormTreeSelectProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormTreeSelectProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectValue",
+              "canonicalReference": "@meu/mobile!TreeSelectValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectValue",
+              "canonicalReference": "@meu/mobile!TreeSelectValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectAdapterProps",
+              "canonicalReference": "@meu/form-react!~TreeSelectAdapterProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> & {\n    defaultOpen?: boolean;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    formatValue?: (value: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReadonlyArray",
+              "canonicalReference": "!ReadonlyArray:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>, options: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReadonlyArray",
+              "canonicalReference": "!ReadonlyArray:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectOption",
+              "canonicalReference": "@meu/mobile!TreeSelectOption:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>>) => "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    name: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    onCancel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectProps",
+              "canonicalReference": "@meu/mobile!TreeSelectProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[\"onCancel\"];\n    onConfirm?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectProps",
+              "canonicalReference": "@meu/mobile!TreeSelectProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[\"onConfirm\"];\n    onOpenChange?: (open: boolean, details: {\n        reason: "
+            },
+            {
+              "kind": "Reference",
+              "text": "TreeSelectOpenChangeReason",
+              "canonicalReference": "@meu/mobile!TreeSelectOpenChangeReason:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    }) => void;\n    open?: boolean;\n    required?: boolean;\n    rules?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseControllerProps",
+              "canonicalReference": "react-hook-form!UseControllerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, "
+            },
+            {
+              "kind": "Reference",
+              "text": "Path",
+              "canonicalReference": "react-hook-form!Path:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>>[\"rules\"];\n    treeAriaLabel?: string;\n    treeTitle?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    triggerProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "PickerTriggerProps",
+              "canonicalReference": "@meu/mobile!PickerTriggerProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"open\" | \"ref\" | \"status\" | \"value\">;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuFormTreeSelect.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormTreeSelectProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            },
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 5,
+                "endIndex": 6
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 7,
+            "endIndex": 39
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuUseFormProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuUseFormProps<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "UseFormProps",
+              "canonicalReference": "react-hook-form!UseFormProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>, \"resolver\"> & {\n    resolver?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Resolver",
+              "canonicalReference": "react-hook-form!Resolver:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>;\n    schema?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ZodType",
+              "canonicalReference": "zod!ZodType:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues, TFieldValues>;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/useMeuForm.ts",
+          "releaseTag": "Public",
+          "name": "MeuUseFormProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 11
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/form-react!useMeuForm:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function useMeuForm<TFieldValues extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldValues",
+              "canonicalReference": "react-hook-form!FieldValues:type"
+            },
+            {
+              "kind": "Content",
+              "text": ">(options?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuUseFormProps",
+              "canonicalReference": "@meu/form-react!MeuUseFormProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Reference",
+              "text": "UseFormReturn",
+              "canonicalReference": "react-hook-form!UseFormReturn:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TFieldValues>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/useMeuForm.ts",
+          "returnTypeTokenRange": {
+            "startIndex": 6,
+            "endIndex": 8
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "options",
+              "parameterTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 5
+              },
+              "isOptional": true
+            }
+          ],
+          "typeParameters": [
+            {
+              "typeParameterName": "TFieldValues",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "name": "useMeuForm"
+        }
+      ]
+    }
+  ]
+}

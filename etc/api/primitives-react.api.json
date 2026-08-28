@@ -1,0 +1,588 @@
+{
+  "metadata": {
+    "toolPackage": "@microsoft/api-extractor",
+    "toolVersion": "7.59.0",
+    "schemaVersion": 1011,
+    "oldestForwardsCompatibleVersion": 1001,
+    "tsdocConfig": {
+      "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+      "noStandardTags": true,
+      "tagDefinitions": [
+        {
+          "tagName": "@alpha",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@beta",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@defaultValue",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@decorator",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@deprecated",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@eventProperty",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@example",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@experimental",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@inheritDoc",
+          "syntaxKind": "inline"
+        },
+        {
+          "tagName": "@internal",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@label",
+          "syntaxKind": "inline"
+        },
+        {
+          "tagName": "@link",
+          "syntaxKind": "inline",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@override",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@packageDocumentation",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@param",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@privateRemarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@public",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@readonly",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@remarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@returns",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@sealed",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@see",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@throws",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@typeParam",
+          "syntaxKind": "block",
+          "allowMultiple": true
+        },
+        {
+          "tagName": "@virtual",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@jsx",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxRuntime",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxFrag",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@jsxImportSource",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@betaDocumentation",
+          "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@internalRemarks",
+          "syntaxKind": "block"
+        },
+        {
+          "tagName": "@preapproved",
+          "syntaxKind": "modifier"
+        }
+      ],
+      "supportForTags": {
+        "@alpha": true,
+        "@beta": true,
+        "@defaultValue": true,
+        "@decorator": true,
+        "@deprecated": true,
+        "@eventProperty": true,
+        "@example": true,
+        "@experimental": true,
+        "@inheritDoc": true,
+        "@internal": true,
+        "@label": true,
+        "@link": true,
+        "@override": true,
+        "@packageDocumentation": true,
+        "@param": true,
+        "@privateRemarks": true,
+        "@public": true,
+        "@readonly": true,
+        "@remarks": true,
+        "@returns": true,
+        "@sealed": true,
+        "@see": true,
+        "@throws": true,
+        "@typeParam": true,
+        "@virtual": true,
+        "@betaDocumentation": true,
+        "@internalRemarks": true,
+        "@preapproved": true
+      },
+      "reportUnsupportedHtmlElements": false
+    }
+  },
+  "kind": "Package",
+  "canonicalReference": "@meu/primitives-react!",
+  "docComment": "",
+  "name": "@meu/primitives-react",
+  "preserveMemberOrder": false,
+  "members": [
+    {
+      "kind": "EntryPoint",
+      "canonicalReference": "@meu/primitives-react!",
+      "name": "",
+      "preserveMemberOrder": false,
+      "members": [
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/primitives-react!FocusTrapOptions:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type FocusTrapOptions = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    active: boolean;\n    containerRef: "
+            },
+            {
+              "kind": "Reference",
+              "text": "RefObject",
+              "canonicalReference": "@types/react!React.RefObject:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | null>;\n    initialFocusRef?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "RefObject",
+              "canonicalReference": "@types/react!React.RefObject:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | null> | undefined;\n    onEscape?: (() => void) | undefined;\n    restoreFocus?: boolean;\n    returnFocusRef?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "RefObject",
+              "canonicalReference": "@types/react!React.RefObject:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | null> | undefined;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/useFocusTrap.ts",
+          "releaseTag": "Public",
+          "name": "FocusTrapOptions",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 14
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/primitives-react!Portal:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function Portal(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "PortalProps",
+              "canonicalReference": "@meu/primitives-react!PortalProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | null"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Portal.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 6
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ children, container }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isOptional": false
+            }
+          ],
+          "name": "Portal"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/primitives-react!PortalProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type PortalProps = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    children: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    container?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | (() => "
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ") | null | undefined;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Portal.tsx",
+          "releaseTag": "Public",
+          "name": "PortalProps",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 8
+          }
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/primitives-react!useBodyScrollLock:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function useBodyScrollLock(locked: "
+            },
+            {
+              "kind": "Content",
+              "text": "boolean"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/useBodyScrollLock.ts",
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "locked",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isOptional": false
+            }
+          ],
+          "name": "useBodyScrollLock"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/primitives-react!useFocusTrap:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function useFocusTrap(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "FocusTrapOptions",
+              "canonicalReference": "@meu/primitives-react!FocusTrapOptions:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "void"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/useFocusTrap.ts",
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 4
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ active, containerRef, initialFocusRef, onEscape, restoreFocus, returnFocusRef }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isOptional": false
+            }
+          ],
+          "name": "useFocusTrap"
+        },
+        {
+          "kind": "Function",
+          "canonicalReference": "@meu/primitives-react!VisuallyHidden:function(1)",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare function VisuallyHidden(input: "
+            },
+            {
+              "kind": "Reference",
+              "text": "VisuallyHiddenProps",
+              "canonicalReference": "@meu/primitives-react!VisuallyHiddenProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "): "
+            },
+            {
+              "kind": "Content",
+              "text": "import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "JSX.Element",
+              "canonicalReference": "@types/react!React.JSX.Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/VisuallyHidden.tsx",
+          "returnTypeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 5
+          },
+          "releaseTag": "Public",
+          "overloadIndex": 1,
+          "parameters": [
+            {
+              "parameterName": "{ className, ...props }",
+              "parameterTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "isOptional": false
+            },
+            {
+              "parameterName": "input",
+              "parameterTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isOptional": false
+            }
+          ],
+          "name": "VisuallyHidden"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/primitives-react!VisuallyHiddenProps:type",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type VisuallyHiddenProps = "
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLAttributes",
+              "canonicalReference": "@types/react!React.HTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLSpanElement",
+              "canonicalReference": "!HTMLSpanElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/VisuallyHidden.tsx",
+          "releaseTag": "Public",
+          "name": "VisuallyHiddenProps",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 5
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -7,14 +7,14 @@
  * built Storybook index and reports components that intentionally have no story.
  */
 export const componentStoryIds = {
-  "config-provider": null,
-  "theme-provider": null,
-  portal: null,
+  "config-provider": "foundation-configprovider--nested-configuration",
+  "theme-provider": "foundation-themeprovider--light-and-dark",
+  portal: "foundation-portal--custom-container",
   "safe-area": "layout-safearea--bottom",
-  icon: null,
+  icon: "foundation-icon--catalog",
   space: "layout-space--horizontal",
   divider: "layout-divider--default",
-  "visually-hidden": null,
+  "visually-hidden": "foundation-visuallyhidden--accessible-icon-button",
   button: "actions-button--solid",
   "icon-button": "actions-iconbutton--default",
   mask: "feedback-mask--default",

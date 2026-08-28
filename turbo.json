@@ -7,6 +7,12 @@
       "env": ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_STORYBOOK_URL"],
       "outputs": ["dist/**", ".next/**", "storybook-static/**"]
     },
+    "@meu/docs#build": {
+      "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_STORYBOOK_URL"],
+      "inputs": ["$TURBO_DEFAULT$", "../../packages/**/*.docs.mdx"],
+      "outputs": [".next/**"]
+    },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,

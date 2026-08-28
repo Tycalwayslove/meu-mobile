@@ -566,6 +566,190 @@ textarea:focus,
   line-height: 1.55;
 }
 
+.component-document__meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 28px 48px;
+  padding: 44px 0;
+  border-bottom: 1px solid var(--meu-color-border);
+}
+
+.component-document__meta h2 {
+  margin: 8px 0 10px;
+  font-family: var(--font-display);
+  font-size: 27px;
+  letter-spacing: -0.025em;
+}
+
+.component-document__meta p:not(.docs-eyebrow) {
+  max-width: 620px;
+  margin: 0;
+  color: var(--meu-color-muted);
+  line-height: 1.7;
+}
+
+.component-document__meta dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  background: var(--meu-color-border);
+  border: 1px solid var(--meu-color-border);
+  border-radius: 8px;
+}
+
+.component-document__meta dl div {
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--meu-color-surface);
+}
+
+.component-document__meta dt {
+  margin-bottom: 5px;
+  color: var(--meu-color-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.component-document__meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.component-document__meta dd[data-status="audit"]::before,
+.component-document__meta dd[data-status="design"]::before,
+.component-document__meta dd[data-status="implementation"]::before,
+.component-document__meta dd[data-status="verification"]::before,
+.component-document__meta dd[data-status="commercial"]::before {
+  width: 7px;
+  height: 7px;
+  display: inline-block;
+  margin-right: 7px;
+  content: "";
+  background: var(--meu-color-warning);
+  border-radius: 50%;
+}
+
+.component-document__meta dd[data-status="commercial"]::before {
+  background: var(--meu-color-success);
+}
+
+.component-document__exports {
+  grid-column: 1 / -1;
+}
+
+.component-document__exports > strong {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.component-document__exports > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.component-document__exports code {
+  padding: 6px 8px;
+  color: var(--meu-color-ink);
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.component-document__exports code[data-kind="type"] {
+  color: var(--meu-color-muted);
+}
+
+.component-document__section {
+  scroll-margin-top: 132px;
+}
+
+.component-document__section > h3 {
+  margin: 30px 0 10px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: -0.015em;
+}
+
+.component-document__section > p,
+.component-document__section > ul,
+.component-document__section > ol {
+  max-width: 820px;
+}
+
+.component-document__section > ul,
+.component-document__section > ol {
+  padding-left: 22px;
+  color: var(--meu-color-muted);
+  line-height: 1.75;
+}
+
+.component-document__section li + li {
+  margin-top: 5px;
+}
+
+.component-document__section p code,
+.component-document__section li code,
+.component-document__section td code,
+.component-document__section th code {
+  padding: 2px 5px;
+  color: var(--meu-color-ink);
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+.component-document__section .code-block {
+  margin-top: 18px;
+}
+
+.component-document__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--meu-color-border);
+  border-radius: 8px;
+}
+
+.component-document__table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.component-document__table-wrap th,
+.component-document__table-wrap td {
+  min-width: 150px;
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--meu-color-border);
+}
+
+.component-document__table-wrap th {
+  background: var(--meu-color-surface);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.component-document__table-wrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 .component-links,
 .component-pager {
   display: flex;
@@ -781,8 +965,13 @@ textarea:focus,
   }
 
   .site-footer,
-  .component-heading {
+  .component-heading,
+  .component-document__meta {
     grid-template-columns: 1fr;
+  }
+
+  .component-document__exports {
+    grid-column: auto;
   }
 
   .catalog__grid,

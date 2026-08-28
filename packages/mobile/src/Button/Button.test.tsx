@@ -20,5 +20,8 @@ describe("Button", () => {
     fireEvent.click(screen.getByRole("button"));
     expect(onClick).not.toHaveBeenCalled();
     expect(screen.getByRole("button").getAttribute("aria-busy")).toBe("true");
+    expect(screen.getByRole("button", { name: "保存更改" }).getAttribute("data-state")).toBe(
+      "loading"
+    );
   });
 });

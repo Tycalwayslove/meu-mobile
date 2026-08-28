@@ -24,6 +24,7 @@ jobs:
       - run: pnpm test:component-manifest
       - run: pnpm docs:manifest:verify
       - run: pnpm build:packages
+      - run: pnpm api:extract
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test

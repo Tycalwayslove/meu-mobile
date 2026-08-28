@@ -3,7 +3,7 @@ name: TextInput
 slug: text-input
 package: "@meu/mobile"
 exports: [TextInput]
-status: audit
+status: implementation
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -28,6 +28,7 @@ source: packages/mobile/src/TextInput
 - 原生单行 input，支持 ref 和除原生 `size` 外的 input 属性。
 - small/medium/large、default/error、disabled 与 clearable。
 - 与 Field context 自动关联 id、description 和 error；支持显式 ARIA 覆盖。
+- clear 在受控与非受控模式下均先派发原生 input/change 契约，再调用 `onClear`；支持 readOnly 和中英文清除名称。
 
 ## 何时使用
 
@@ -39,7 +40,7 @@ source: packages/mobile/src/TextInput
 
 ## 结构与状态
 
-结构为 input 与可选清除按钮。当前状态包括 default、focus-visible、error、disabled；V2 需补齐 readOnly、autofill、IME composing、password reveal 组合和异步校验状态契约。
+结构为 input 与可选清除按钮。当前状态包括 default、focus、error、disabled 与 readOnly；V2 需补齐 autofill、IME composing、password reveal 组合和异步校验状态契约。
 
 ## 基础用法
 
@@ -51,7 +52,7 @@ source: packages/mobile/src/TextInput
 
 ## 受控与非受控
 
-遵循原生 `value/onChange` 与 `defaultValue`。不要在生命周期中切换受控模式。当前 clear 实现直接修改 DOM value 并派发 input；受控输入的清除时序需要在 V2 修正并以 React 事件测试证明。
+遵循原生 `value/onChange` 与 `defaultValue`。不要在生命周期中切换受控模式。clear 使用原生 value setter 派发冒泡 input，受控调用方可在 `onChange` 中提交空值；该路径已有 React 测试。
 
 ## 表单集成
 
@@ -64,10 +65,10 @@ source: packages/mobile/src/TextInput
 ## Events
 
 - `onChange`：原生 React change 语义，由输入产生。
-- `onClear`：点击清除按钮后调用；当前无 details，也不能单独表示 pointer/keyboard 来源。
+- `onClear`：input change 派发后调用；当前无 details，也不区分 pointer/keyboard 来源。
 - 原生 `onInput/onBlur/onFocus/onComposition*` 均透传。
 
-V2 必须定义 clear 时 `onChange` 与 `onClear` 的顺序，并保证受控与非受控一致。
+clear 顺序固定为值置空 → 冒泡 input/change → 恢复 input 焦点 → `onClear`。
 
 ## Ref 与命令式方法
 
@@ -87,7 +88,7 @@ ref 指向真实 `HTMLInputElement`，可使用 focus、select、setSelectionRan
 
 ## 无障碍
 
-input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和 `aria-describedby` 关联。清除按钮当前固定中文 accessible name，是 V2 国际化缺口。
+input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和 `aria-describedby` 关联。清除按钮从 ConfigProvider locale 获取中英文 accessible name。
 
 ## 动效
 
@@ -103,7 +104,7 @@ input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和
 
 ## RTL 与国际化
 
-文本方向遵循 DOM；图标与内边距必须使用逻辑方向。清除 label 必须迁移到 ConfigProvider locale 或显式 prop。
+文本方向遵循 DOM；图标、内边距与清除按钮定位使用逻辑方向。清除 label 跟随 ConfigProvider locale。
 
 ## 浏览器与 WebView
 
@@ -111,8 +112,7 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 
 ## 边界情况与已知限制
 
-- 当前 clear 对 React 受控输入的事件一致性尚未证明。
-- 当前清除文案硬编码为中文。
+- 当前 `onClear` 没有 source/reason details；是否扩展需经过 V2 API 评审。
 - 未内建格式化、mask、debounce 或请求逻辑。
 
 ## 性能预算
@@ -121,7 +121,7 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 
 ## 测试证据
 
-- Unit: `TextInput.test.tsx`
+- Unit: `TextInput.test.tsx`，覆盖 Field、受控/非受控 clear、locale 与 readOnly
 - Story interaction: 待补
 - Axe: 待补
 - SSR/hydration: 待补组件级证明
@@ -135,13 +135,13 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 
 ### 待优化
 
-- 修正并冻结受控/非受控 clear 契约。
-- 国际化清除文案，验证 IME、autofill、password、selection、readOnly。
+- 继续验证 IME、autofill、password、selection 与 native form reset。
 - 补齐 TSDoc、Form adapter、Story play、axe、SSR、RTL 和真机证据。
 
 ### 已完成
 
 - V1 已使用原生 input、Field 关联、ref 和错误语义。
+- V2 已冻结 clear 事件顺序，补齐受控 clear、locale、readOnly、逻辑定位和 Props TSDoc。
 
 ## 变更记录
 

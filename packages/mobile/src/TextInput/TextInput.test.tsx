@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Field } from "../Field";
 import { TextInput } from "./TextInput";
 
@@ -22,5 +24,60 @@ describe("TextInput", () => {
     render(<TextInput clearable defaultValue="喵呜" onClear={onClear} />);
     fireEvent.click(screen.getByRole("button", { name: "清除输入" }));
     expect(onClear).toHaveBeenCalledOnce();
+    expect(screen.getByRole("textbox")).toHaveProperty("value", "");
+    expect(document.activeElement).toBe(screen.getByRole("textbox"));
+  });
+
+  it("clears controlled values through the native change contract", () => {
+    const callOrder: string[] = [];
+    const onChange = vi.fn();
+    const onClear = vi.fn();
+
+    function ControlledInput() {
+      const [value, setValue] = useState("喵呜");
+      return (
+        <TextInput
+          aria-label="店铺名称"
+          clearable
+          value={value}
+          onChange={(event) => {
+            callOrder.push("change");
+            onChange(event.currentTarget.value);
+            setValue(event.currentTarget.value);
+          }}
+          onClear={() => {
+            callOrder.push("clear");
+            onClear();
+          }}
+        />
+      );
+    }
+
+    render(<ControlledInput />);
+    fireEvent.click(screen.getByRole("button", { name: "清除输入" }));
+
+    expect(onChange).toHaveBeenCalledWith("");
+    expect(onClear).toHaveBeenCalledOnce();
+    expect(callOrder).toEqual(["change", "clear"]);
+    expect(screen.getByRole("textbox", { name: "店铺名称" })).toHaveProperty("value", "");
+  });
+
+  it("localizes the clear action and removes it from read-only fields", () => {
+    const { rerender } = render(
+      <ConfigProvider locale="en-US">
+        <TextInput aria-label="Name" clearable defaultValue="Meu" />
+      </ConfigProvider>
+    );
+    expect(screen.getByRole("button", { name: "Clear input" })).toBeTruthy();
+
+    rerender(
+      <ConfigProvider locale="en-US">
+        <TextInput aria-label="Name" clearable defaultValue="Meu" readOnly />
+      </ConfigProvider>
+    );
+    expect(screen.queryByRole("button", { name: "Clear input" })).toBeNull();
+    expect(screen.getByRole("textbox", { name: "Name" }).getAttribute("data-state")).toBe(
+      "readonly"
+    );
   });
 });

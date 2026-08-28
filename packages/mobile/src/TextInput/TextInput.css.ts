@@ -23,14 +23,25 @@ export const input = recipe({
         color: "var(--meu-color-muted)",
         background: "var(--meu-color-subtle)",
         cursor: "not-allowed"
+      },
+      "&:read-only:not(:disabled)": {
+        background: "var(--meu-color-subtle)"
       }
     }
   },
   variants: {
     size: {
       small: { minHeight: 44, paddingInline: "var(--meu-space-3)", fontSize: 14 },
-      medium: { minHeight: "var(--meu-size-control-medium)", paddingInline: "var(--meu-space-4)", fontSize: 16 },
-      large: { minHeight: "var(--meu-size-control-large)", paddingInline: "var(--meu-space-4)", fontSize: 16 }
+      medium: {
+        minHeight: "var(--meu-size-control-medium)",
+        paddingInline: "var(--meu-space-4)",
+        fontSize: 16
+      },
+      large: {
+        minHeight: "var(--meu-size-control-large)",
+        paddingInline: "var(--meu-space-4)",
+        fontSize: 16
+      }
     },
     status: {
       default: {},
@@ -54,5 +65,15 @@ export const clearButton = style({
   color: "var(--meu-color-muted)",
   background: "transparent",
   border: 0,
-  cursor: "pointer"
+  cursor: "pointer",
+  selectors: {
+    '[dir="rtl"] &': {
+      right: "auto",
+      left: 0
+    },
+    "&:focus": {
+      outline: "2px solid var(--meu-color-accent)",
+      outlineOffset: -2
+    }
+  }
 });
