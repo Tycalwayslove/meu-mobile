@@ -1,12 +1,10 @@
 name: Publish Storybook
 
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
-  group: storybook-${{ github.ref }}
+  group: storybook-manual-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
