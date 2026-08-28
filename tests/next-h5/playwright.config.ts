@@ -9,7 +9,11 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   ...(process.env.CI ? { workers: 1 } : {}),
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [
+    ...(process.env.CI ? ([["github"]] as const) : []),
+    ["list"],
+    ["html", { open: "never" }]
+  ],
   use: {
     baseURL: "http://127.0.0.1:3020",
     trace: "retain-on-failure",

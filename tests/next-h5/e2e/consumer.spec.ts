@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
+  await expect(page.locator('[data-hydrated="true"]')).toBeAttached();
 });
 
 test("renders the isolated Next consumer without hydration errors", async ({ page }) => {

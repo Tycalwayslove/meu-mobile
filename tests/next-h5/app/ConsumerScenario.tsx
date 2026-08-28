@@ -73,7 +73,7 @@ import {
   useToast
 } from "@meu/mobile";
 import type { NumberKeyboardInputDetails, VirtualListRange, VirtualListRef } from "@meu/mobile";
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
 
 const schema = z.object({
@@ -114,6 +114,10 @@ type FormValues = z.infer<typeof schema>;
 
 const displayDescription =
   "Meu Mobile 面向 Next.js 移动网页提供稳定的设计令牌、原生交互语义、图片回退和完整表单集成，同时为后续 uni-app 适配保留清晰边界。";
+
+const subscribeToHydration = () => () => undefined;
+const getClientHydrationSnapshot = () => true;
+const getServerHydrationSnapshot = () => false;
 
 const regions = [
   {
@@ -260,6 +264,11 @@ function ToastCommandDemo({ onResult }: { onResult: (message: string) => void })
 }
 
 export function ConsumerScenario() {
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientHydrationSnapshot,
+    getServerHydrationSnapshot
+  );
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [savedName, setSavedName] = useState("");
   const [savedSettings, setSavedSettings] = useState("");
@@ -339,7 +348,11 @@ export function ConsumerScenario() {
 
   return (
     <ConfigProvider theme={theme}>
-      <section className="integration-card" aria-label="组件消费场景">
+      <section
+        className="integration-card"
+        aria-label="组件消费场景"
+        data-hydrated={hydrated || undefined}
+      >
         <div className="integration-toolbar">
           <p>当前主题：{theme === "light" ? "浅色" : "深色"}</p>
           <Button
