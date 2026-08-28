@@ -1,7 +1,7 @@
 # Meu Mobile
 
 Meu Mobile 是面向移动 Web、PWA 与 Hybrid WebView 的 React 组件库。设计契约来自相邻的
-`../meu-design`，目标消费者包含 MeuMall Next.js H5；当前开发只在仓库内的隔离消费者验证，不接入业务工程。
+`meu-design`，目标消费者包含 MeuMall Next.js H5；当前开发只在仓库内的隔离消费者验证，不接入业务工程。
 
 ## 工程基线
 
@@ -34,9 +34,9 @@ SSR/hydration、主题、表单绑定、移动布局和触控目标。
 
 ## 事实源
 
-- 设计规则：`../meu-design/DESIGN.md`
-- 组件契约：`../meu-design/COMPONENTS.md`
-- Token：`../meu-design/tokens.json`
+- 设计规则：`meu-design/DESIGN.md`
+- 组件契约：`meu-design/COMPONENTS.md`
+- Token：`meu-design/tokens.json`
 - 代码实现：本仓库 `packages/`
 - Figma：设计交付镜像，不作为独立 token 写入源
 

@@ -1,4 +1,4 @@
-// Generated from ../meu-design/tokens.json. Do not edit by hand.
+// Generated from meu-design/tokens.json. Do not edit by hand.
 export const meuTokens = {
   "color": {
     "light": {

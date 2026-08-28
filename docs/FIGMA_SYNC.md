@@ -103,7 +103,7 @@ Figma 用于视觉设计、变量、组件变体与 Code Connect；仓库中的�
 ## 后续同步流程
 
 1. 先读取 `meu-design` 与组件源码，生成差异清单。
-2. 设计 token 只从 `../meu-design/tokens.json` 生成，不在 Figma 中单独改值。
+2. 设计 token 只从 `meu-design/tokens.json` 生成，不在 Figma 中单独改值。
 3. Figma 变量、变体和说明更新后，再同步 Storybook 与独立文档站示例。
 4. 组件发布为团队 Library 后，补齐或刷新 Code Connect 映射。
 5. 每轮完成命名、变量绑定、light/dark、触控尺寸、对比度和截图检查。

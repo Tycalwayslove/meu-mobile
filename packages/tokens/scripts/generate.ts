@@ -11,7 +11,7 @@ type TokenTree = Record<string, TokenLeaf | TokenTree>;
 
 const sourcePath = process.env.MEU_DESIGN_TOKENS_PATH
   ? resolve(process.env.MEU_DESIGN_TOKENS_PATH)
-  : resolve(import.meta.dirname, "../../../../meu-design/tokens.json");
+  : resolve(import.meta.dirname, "../../../meu-design/tokens.json");
 const outputDirectory = resolve(import.meta.dirname, "../src");
 const committedSnapshotPath = resolve(outputDirectory, "figma.generated.json");
 
@@ -159,7 +159,7 @@ async function generate(): Promise<void> {
   const parsed = JSON.parse(source) as { meu: TokenTree };
   const hash = createHash("sha256").update(source).digest("hex");
   const generatedTs = [
-    "// Generated from ../meu-design/tokens.json. Do not edit by hand.",
+    "// Generated from meu-design/tokens.json. Do not edit by hand.",
     `export const meuTokens = ${JSON.stringify(parsed.meu, null, 2)} as const;`,
     "",
     "export type MeuTokens = typeof meuTokens;",
@@ -167,7 +167,7 @@ async function generate(): Promise<void> {
   ].join("\n");
   const lock = JSON.stringify(
     {
-      source: "../meu-design/tokens.json",
+      source: "meu-design/tokens.json",
       sha256: hash
     },
     null,
