@@ -58,6 +58,9 @@ icons-core ─> icons-react            │
   密码或表单值，也不使用 Mask、滚动锁和焦点圈定。`NumberKeyboardTrigger` 保持原生 button 语义，
   `MeuFormNumberKeyboard` 在 `form-react` 中负责值变换、dirty / touched、校验和确认回调。未来 uni-app 复用
   事件、显示状态、连续删除节奏与布局契约，替换 Portal、Safe Area 和 DOM 事件实现。
+- PasscodeInput 以一个真实原生 input 作为值、自动填充、粘贴和可访问性事实源，视觉格仅做隐藏镜像；默认优先
+  系统键盘，可按需组合非模态 NumberKeyboard。`MeuFormPasscodeInput` 负责 RHF 值、dirty / touched、校验错误
+  与失败聚焦。未来 uni-app 复用值、长度、完成、方向和状态契约，替换 DOM input 与键盘适配层。
 
 ## Next.js 边界
 

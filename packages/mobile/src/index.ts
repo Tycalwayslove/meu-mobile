@@ -156,6 +156,16 @@ export type {
   NumberKeyboardTriggerProps,
   NumberKeyboardTriggerStatus
 } from "./NumberKeyboard";
+export { PasscodeInput } from "./PasscodeInput";
+export type {
+  PasscodeInputChangeDetails,
+  PasscodeInputChangeSource,
+  PasscodeInputDirection,
+  PasscodeInputKeyboardOptions,
+  PasscodeInputProps,
+  PasscodeInputRef,
+  PasscodeInputStatus
+} from "./PasscodeInput";
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonVariant } from "./Skeleton";
 export { Empty } from "./Empty";

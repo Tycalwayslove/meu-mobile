@@ -9,6 +9,7 @@ import {
   MeuFormDatePicker,
   MeuFormDateRangePicker,
   MeuFormNumberKeyboard,
+  MeuFormPasscodeInput,
   MeuFormPicker,
   MeuFormRate,
   MeuFormRadioGroup,
@@ -65,11 +66,7 @@ import {
   useDialog,
   useToast
 } from "@meu/mobile";
-import type {
-  NumberKeyboardInputDetails,
-  VirtualListRange,
-  VirtualListRef
-} from "@meu/mobile";
+import type { NumberKeyboardInputDetails, VirtualListRange, VirtualListRef } from "@meu/mobile";
 import { useRef, useState } from "react";
 import { z } from "zod";
 
@@ -88,6 +85,9 @@ const schema = z.object({
   paymentAmount: z
     .string()
     .refine((value) => value === "" || /^\d+(\.\d{1,2})?$/.test(value), "请输入有效金额"),
+  verificationCode: z
+    .string()
+    .refine((value) => value === "" || /^\d{4}$/.test(value), "请输入 4 位验证码"),
   region: z.array(z.string()).length(3, "请选择完整配送地区"),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
   appointment: z.array(z.union([z.string(), z.number(), z.null()])).length(2, "请选择完整预约时间"),
@@ -161,11 +161,7 @@ function formatLocalTime(value: { hour: number; minute: number; second: number }
   return `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}`;
 }
 
-function appendPaymentAmount(
-  current: string,
-  input: string,
-  details: NumberKeyboardInputDetails
-) {
+function appendPaymentAmount(current: string, input: string, details: NumberKeyboardInputDetails) {
   if (details.source === "decimal") {
     if (current.indexOf(".") >= 0) return current;
     return current ? `${current}.` : "0.";
@@ -253,6 +249,7 @@ export function ConsumerScenario() {
   const [virtualRange, setVirtualRange] = useState<VirtualListRange | null>(null);
   const [numberKeyboardResult, setNumberKeyboardResult] = useState("等待数字键盘输入");
   const [numberKeyboardClose, setNumberKeyboardClose] = useState("键盘尚未关闭");
+  const [passcodeResult, setPasscodeResult] = useState("等待验证码输入");
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -285,6 +282,7 @@ export function ConsumerScenario() {
       shipping: "standard",
       storeName: "",
       volume: 40,
+      verificationCode: "",
       viewMode: "list"
     },
     mode: "onSubmit"
@@ -996,6 +994,18 @@ export function ConsumerScenario() {
             />
             <output aria-live="polite">{numberKeyboardResult}</output>
             <output aria-live="polite">{numberKeyboardClose}</output>
+          </section>
+          <section className="integration-passcode-input" aria-label="密码输入表单集成">
+            <MeuFormPasscodeInput<FormValues>
+              name="verificationCode"
+              label="短信验证码"
+              description="真实 input 负责值与自动填充；视觉格和非模态数字键盘不重复持有表单状态。"
+              length={4}
+              separated
+              keyboard={{ closeOnComplete: true, title: "验证码键盘" }}
+              onComplete={(value) => setPasscodeResult(`验证码完成：${value}`)}
+            />
+            <output aria-live="polite">{passcodeResult}</output>
           </section>
           <MeuFormPicker<FormValues>
             name="appointment"

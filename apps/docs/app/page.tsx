@@ -16,6 +16,7 @@ import { InfiniteListDemo } from "./InfiniteListDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { NumberKeyboardDemo } from "./NumberKeyboardDemo";
 import { OverlayDemo } from "./OverlayDemo";
+import { PasscodeInputDemo } from "./PasscodeInputDemo";
 import { PickerDemo } from "./PickerDemo";
 import { PullToRefreshDemo } from "./PullToRefreshDemo";
 import { SelectionDemo } from "./SelectionDemo";
@@ -107,6 +108,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>数字键盘、外置值与完整表单绑定</h2>
           <NumberKeyboardDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>验证码分格、原生输入与完整表单绑定</h2>
+          <PasscodeInputDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

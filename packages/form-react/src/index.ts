@@ -11,6 +11,8 @@ export type {
   MeuFormNumberKeyboardOpenChangeDetails,
   MeuFormNumberKeyboardProps
 } from "./MeuFormNumberKeyboard";
+export { MeuFormPasscodeInput } from "./MeuFormPasscodeInput";
+export type { MeuFormPasscodeInputProps } from "./MeuFormPasscodeInput";
 export { MeuFormTextArea } from "./MeuFormTextArea";
 export type { MeuFormTextAreaProps } from "./MeuFormTextArea";
 export { MeuFormSearchField } from "./MeuFormSearchField";

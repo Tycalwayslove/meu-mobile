@@ -191,3 +191,14 @@ React Web 端使用非模态底部 Portal，不创建 Mask、页面滚动锁或�
 `NumberKeyboardTrigger` 是不会唤起系统软键盘的原生 button。完整表单绑定放在 `form-react` 的
 `MeuFormNumberKeyboard`：它持有字段值变换、dirty / touched、错误关联和校验焦点，核心组件继续可脱离
 React Hook Form 使用。未来 uni-app 复用事件、显示状态、连续删除节奏和布局契约，替换 Portal 与 DOM 事件。
+
+## ADR-022：PasscodeInput 以真实 input 为唯一输入事实源
+
+PasscodeInput 不创建多个输入框。一个透明的原生 input 负责 value、系统软键盘、`one-time-code` 自动填充、
+粘贴、焦点与可访问名称；分格视觉只做 `aria-hidden` 镜像，因此验证码不会被读屏重复朗读，也能完整进入
+React Hook Form 生命周期。默认使用系统键盘，mask 只改变显示和 input 类型，不宣称提供加密能力。
+
+需要固定数字布局时，`keyboard` 组合现有非模态 NumberKeyboard：真实 input 保留字段与焦点语义并设为 readonly，
+NumberKeyboard 只发布输入和删除意图，调用方或表单仍持有唯一值。完成回调按每个完整值去重，可选完成后关闭；
+不增加 Mask、页面滚动锁或焦点圈定。`MeuFormPasscodeInput` 负责 dirty / touched、Zod 错误关联和校验失败聚焦。
+未来 uni-app 复用值、长度、完成、方向和状态契约，替换 DOM input、自动填充与 Portal 实现。

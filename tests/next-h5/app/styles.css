@@ -83,7 +83,8 @@ textarea {
   margin-top: 20px;
 }
 
-.integration-number-keyboard {
+.integration-number-keyboard,
+.integration-passcode-input {
   display: grid;
   gap: 8px;
   padding: 16px;
@@ -92,7 +93,8 @@ textarea {
   border-radius: var(--meu-radius-surface);
 }
 
-.integration-number-keyboard output {
+.integration-number-keyboard output,
+.integration-passcode-input output {
   min-height: 16px;
   color: var(--meu-color-muted);
   font-size: 12px;

@@ -160,6 +160,44 @@ test("binds a non-modal number keyboard without owning the form value", async ({
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
 });
 
+test("binds passcode cells to one real form input and a non-modal keyboard", async ({ page }) => {
+  const section = page.getByRole("region", { name: "密码输入表单集成" });
+  const input = section.getByLabel(/短信验证码/);
+  const cells = section.locator("[data-meu-passcode-cell]");
+
+  await expect(input).toHaveAttribute("type", "password");
+  await expect(input).toHaveAttribute("inputmode", "numeric");
+  await expect(input).toHaveAttribute("autocomplete", "one-time-code");
+  await expect(input).toHaveAttribute("readonly", "");
+  await expect(cells).toHaveCount(4);
+  const cellBox = await cells.first().boundingBox();
+  expect(cellBox).not.toBeNull();
+  expect(cellBox ? cellBox.width : 0).toBeGreaterThanOrEqual(44);
+  expect(cellBox ? cellBox.height : 0).toBeGreaterThanOrEqual(48);
+
+  await input.focus();
+  const keyboard = page.getByRole("group", { name: "验证码键盘" });
+  await expect(keyboard).toBeVisible();
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
+  await expect(page.getByRole("dialog", { name: "验证码键盘" })).toHaveCount(0);
+
+  await keyboard.getByRole("button", { name: "1", exact: true }).click();
+  await keyboard.getByRole("button", { name: "2", exact: true }).click();
+  await keyboard.getByRole("button", { name: "删除上一位" }).click();
+  await keyboard.getByRole("button", { name: "3", exact: true }).click();
+  await keyboard.getByRole("button", { name: "4", exact: true }).click();
+  await keyboard.getByRole("button", { name: "5", exact: true }).click();
+
+  await expect(input).toHaveValue("1345");
+  await expect(section.locator('[data-meu-component="passcode-input"]')).toHaveAttribute(
+    "data-complete",
+    "true"
+  );
+  await expect(section.getByText("验证码完成：1345")).toBeVisible();
+  await expect(keyboard).toHaveCount(0);
+  await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
+});
+
 test("runs the controlled carousel with native alternatives and focus isolation", async ({
   page
 }) => {
