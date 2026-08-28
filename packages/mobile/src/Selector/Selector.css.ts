@@ -6,6 +6,7 @@ export const root = recipe({
     display: "grid",
     gridTemplateColumns: "repeat(var(--meu-selector-columns), minmax(0, 1fr))",
     width: "100%",
+    minWidth: 0,
     color: "var(--meu-color-ink)",
     fontFamily: "var(--meu-font-ui)"
   },
@@ -48,11 +49,15 @@ export const option = recipe({
     alignContent: "center",
     minHeight: 44,
     boxSizing: "border-box",
+    minWidth: 0,
     color: "var(--meu-color-ink)",
     background: "var(--meu-color-surface)",
     border: "1px solid var(--meu-color-border)",
     borderRadius: "var(--meu-radius-control)",
     cursor: "pointer",
+    overflowWrap: "anywhere",
+    textAlign: "start",
+    touchAction: "manipulation",
     transition: [
       "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
       "border-color var(--meu-motion-exit) var(--meu-motion-ease-standard)"
@@ -62,16 +67,36 @@ export const option = recipe({
       [`${input}:focus + &`]: {
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: 2
+      },
+      "&:active": {
+        background: "var(--meu-color-subtle)"
       }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(hover: hover)": {
+        selectors: {
+          "&:hover": { borderColor: "var(--meu-color-muted)" }
+        }
+      },
+      "(forced-colors: active)": {
+        borderColor: "ButtonText",
+        forcedColorAdjust: "auto"
+      }
+    }
   },
   variants: {
     active: {
       true: {
         color: "var(--meu-color-accent)",
         background: "var(--meu-color-subtle)",
-        borderColor: "var(--meu-color-accent)"
+        borderColor: "var(--meu-color-accent)",
+        "@media": {
+          "(forced-colors: active)": {
+            color: "Highlight",
+            borderColor: "Highlight"
+          }
+        }
       },
       false: {}
     },
@@ -80,7 +105,15 @@ export const option = recipe({
         color: "var(--meu-color-muted)",
         background: "var(--meu-color-subtle)",
         cursor: "not-allowed",
-        opacity: 0.65
+        opacity: 0.65,
+        pointerEvents: "none",
+        "@media": {
+          "(forced-colors: active)": {
+            color: "GrayText",
+            borderColor: "GrayText",
+            opacity: 1
+          }
+        }
       },
       false: {}
     },
@@ -93,7 +126,7 @@ export const option = recipe({
   defaultVariants: { active: false, disabled: false, size: "medium" }
 });
 
-export const label = style({ fontWeight: 500, lineHeight: 1.4 });
+export const label = style({ minWidth: 0, fontWeight: 500, lineHeight: 1.4 });
 
 export const description = style({
   marginTop: 2,
@@ -102,16 +135,21 @@ export const description = style({
   lineHeight: 1.4
 });
 
-export const withCheckMark = style({ paddingRight: "var(--meu-space-8)" });
+export const withCheckMark = style({ paddingInlineEnd: "var(--meu-space-8)" });
 
 export const checkMark = style({
   position: "absolute",
   top: 8,
-  right: 8,
+  insetInlineEnd: 8,
   width: 10,
   height: 6,
   borderLeft: "2px solid var(--meu-color-accent)",
   borderBottom: "2px solid var(--meu-color-accent)",
   transform: "rotate(-45deg)",
-  pointerEvents: "none"
+  pointerEvents: "none",
+  "@media": {
+    "(forced-colors: active)": {
+      borderColor: "Highlight"
+    }
+  }
 });

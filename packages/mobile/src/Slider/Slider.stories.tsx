@@ -4,10 +4,20 @@ import { useState } from "react";
 import { Field } from "../Field";
 import { Slider } from "./Slider";
 
+function NativeFormSlider() {
+  return (
+    <form style={{ display: "grid", gap: 12, maxWidth: 390 }}>
+      <Slider aria-label="预算" name="budget" defaultValue={25} showValue />
+      <button type="reset">恢复预算</button>
+    </form>
+  );
+}
+
 const meta = {
   title: "Data Entry/Slider",
   component: Slider,
-  args: { defaultValue: 35, showValue: true }
+  args: { "aria-label": "完成度", defaultValue: 35, showValue: true },
+  parameters: { layout: "padded" }
 } satisfies Meta<typeof Slider>;
 
 export default meta;
@@ -41,3 +51,44 @@ function ControlledSlider() {
 export const Controlled: Story = {
   render: () => <ControlledSlider />
 };
+
+export const NativeFormReset: Story = {
+  render: () => <NativeFormSlider />,
+  play: async ({ canvasElement }) => {
+    const slider = canvasElement.querySelector<HTMLInputElement>('input[type="range"]');
+    const reset = canvasElement.querySelector<HTMLButtonElement>('button[type="reset"]');
+    if (!slider || !reset) throw new globalThis.Error("Slider form controls were not rendered");
+    const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+    if (!valueDescriptor || !valueDescriptor.set)
+      throw new globalThis.Error("Native input value setter is unavailable");
+    valueDescriptor.set.call(slider, "70");
+    slider.dispatchEvent(new Event("input", { bubbles: true }));
+    await Promise.resolve();
+    reset.click();
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 0));
+    if (slider.value !== "25") throw new globalThis.Error("Slider did not restore its default");
+  }
+};
+
+export const RightToLeft: Story = {
+  args: {
+    dir: "rtl",
+    defaultValue: 75,
+    marks: [
+      { value: 0, label: "منخفض" },
+      { value: 100, label: "مرتفع" }
+    ]
+  }
+};
+
+export const Error: Story = {
+  render: () => (
+    <Field label="折扣" error="折扣必须符合活动规则">
+      <Slider defaultValue={90} />
+    </Field>
+  )
+};
+
+export const Disabled: Story = { args: { defaultValue: 60, disabled: true } };
+export const Small: Story = { args: { size: "small" } };
+export const Large: Story = { args: { size: "large" } };

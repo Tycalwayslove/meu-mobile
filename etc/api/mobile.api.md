@@ -440,6 +440,7 @@ children?: ReactNode;
 defaultChecked?: boolean;
 indeterminate?: boolean;
 onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+readOnly?: boolean;
 size?: CheckboxSize;
 status?: CheckboxStatus;
 value?: CheckboxValue;
@@ -448,7 +449,7 @@ value?: CheckboxValue;
 // @public (undocumented)
 export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>(input: CheckboxGroupProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type CheckboxGroupProps<TValue extends CheckboxValue = CheckboxValue> = Omit<HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> & {
     children: ReactNode;
     defaultValue?: TValue[];
@@ -456,18 +457,20 @@ export type CheckboxGroupProps<TValue extends CheckboxValue = CheckboxValue> = O
     disabled?: boolean;
     name?: string;
     onChange?: (value: TValue[]) => void;
+    readOnly?: boolean;
     ref?: Ref<HTMLDivElement>;
     status?: CheckboxStatus;
     value?: TValue[];
 };
 
-// @public (undocumented)
+// @public
 export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "checked" | "children" | "defaultChecked" | "onChange" | "size" | "type" | "value"> & {
     checked?: boolean;
     children?: ReactNode;
     defaultChecked?: boolean;
     indeterminate?: boolean;
     onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+    readOnly?: boolean;
     size?: CheckboxSize;
     status?: CheckboxStatus;
     value?: CheckboxValue;
@@ -1342,11 +1345,12 @@ export type PaginationDotsProps = Omit<ComponentProps<"div">, "children"> & {
 export type PaginationDotsVariant = "dot" | "line";
 
 // @public (undocumented)
-export const PasscodeInput: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "dir" | "onChange"> & {
+export const PasscodeInput: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "dir" | "inputMode" | "onChange" | "maxLength" | "minLength"> & {
 caret?: boolean;
 defaultValue?: string;
 direction?: PasscodeInputDirection;
 keyboard?: PasscodeInputKeyboardOptions;
+inputMode?: "numeric" | "text";
 length?: number;
 mask?: boolean;
 onChange?: (value: string, details: PasscodeInputChangeDetails) => void;
@@ -1356,31 +1360,35 @@ status?: PasscodeInputStatus;
 value?: string;
 } & RefAttributes<PasscodeInputRef>>;
 
-// @public (undocumented)
+// @public
 export type PasscodeInputChangeDetails = {
+    event?: ChangeEvent<HTMLInputElement> | KeyboardEvent_2<HTMLInputElement>;
+    repeated?: boolean;
     source: PasscodeInputChangeSource;
 };
 
-// @public (undocumented)
-export type PasscodeInputChangeSource = "delete" | "keyboard" | "native";
+// @public
+export type PasscodeInputChangeSource = "delete" | "hardware" | "keyboard" | "native";
 
-// @public (undocumented)
+// @public
 export type PasscodeInputDirection = "ltr" | "rtl";
 
-// @public (undocumented)
+// @public
 export type PasscodeInputKeyboardOptions = Omit<NumberKeyboardProps, "aria-label" | "aria-labelledby" | "defaultOpen" | "id" | "onConfirm" | "onDelete" | "onInput" | "onOpenChange" | "open" | "ref" | "title"> & {
     closeOnComplete?: boolean;
     keyboardAriaLabel?: string;
     onConfirm?: (value: string) => void;
+    suppressNativeKeyboard?: boolean;
     title?: string;
 };
 
-// @public (undocumented)
-export type PasscodeInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "dir" | "onChange" | "size" | "type" | "value"> & {
+// @public
+export type PasscodeInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "dir" | "inputMode" | "maxLength" | "minLength" | "onChange" | "size" | "type" | "value"> & {
     caret?: boolean;
     defaultValue?: string;
     direction?: PasscodeInputDirection;
     keyboard?: PasscodeInputKeyboardOptions;
+    inputMode?: "numeric" | "text";
     length?: number;
     mask?: boolean;
     onChange?: (value: string, details: PasscodeInputChangeDetails) => void;
@@ -1390,14 +1398,14 @@ export type PasscodeInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "de
     value?: string;
 };
 
-// @public (undocumented)
+// @public
 export type PasscodeInputRef = {
     blur: () => void;
     focus: () => void;
     input: HTMLInputElement | null;
 };
 
-// @public (undocumented)
+// @public
 export type PasscodeInputStatus = "default" | "error";
 
 // @public (undocumented)
@@ -1562,6 +1570,7 @@ checked?: boolean;
 children?: ReactNode;
 defaultChecked?: boolean;
 onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+readOnly?: boolean;
 size?: RadioSize;
 status?: RadioStatus;
 value?: RadioValue;
@@ -1570,7 +1579,7 @@ value?: RadioValue;
 // @public (undocumented)
 export function RadioGroup<TValue extends RadioValue = RadioValue>(input: RadioGroupProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type RadioGroupProps<TValue extends RadioValue = RadioValue> = Omit<HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> & {
     children: ReactNode;
     defaultValue?: TValue;
@@ -1578,18 +1587,20 @@ export type RadioGroupProps<TValue extends RadioValue = RadioValue> = Omit<HTMLA
     disabled?: boolean;
     name?: string;
     onChange?: (value: TValue, event: React.ChangeEvent<HTMLInputElement>) => void;
+    readOnly?: boolean;
     ref?: Ref<HTMLDivElement>;
     required?: boolean;
     status?: RadioStatus;
     value?: TValue | null;
 };
 
-// @public (undocumented)
+// @public
 export type RadioProps = Omit<InputHTMLAttributes<HTMLInputElement>, "checked" | "children" | "defaultChecked" | "onChange" | "size" | "type" | "value"> & {
     checked?: boolean;
     children?: ReactNode;
     defaultChecked?: boolean;
     onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+    readOnly?: boolean;
     size?: RadioSize;
     status?: RadioStatus;
     value?: RadioValue;
@@ -1604,7 +1615,7 @@ export type RadioStatus = "default" | "error";
 // @public (undocumented)
 export type RadioValue = string | number;
 
-// @public (undocumented)
+// @public
 export const Rate: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange" | "step" | "max" | "min"> & {
 allowClear?: boolean;
 allowHalf?: boolean;
@@ -1619,7 +1630,7 @@ status?: RateStatus;
 value?: number;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export type RateProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"> & {
     allowClear?: boolean;
     allowHalf?: boolean;
@@ -1737,22 +1748,25 @@ export type SearchFieldSize = "small" | "medium" | "large";
 // @public
 export type SearchFieldStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export function SegmentedControl<TValue extends SegmentedControlValue = SegmentedControlValue>(input: SegmentedControlProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type SegmentedControlOption<TValue extends SegmentedControlValue = SegmentedControlValue> = {
+    ariaLabel?: string;
     disabled?: boolean;
     icon?: ReactNode;
     label: ReactNode;
     value: TValue;
 };
 
-// @public (undocumented)
+// @public
 export type SegmentedControlProps<TValue extends SegmentedControlValue = SegmentedControlValue> = Omit<HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> & {
     block?: boolean;
     defaultValue?: TValue;
     disabled?: boolean;
+    form?: string;
+    focusRef?: Ref<HTMLInputElement>;
     name?: string;
     onChange?: (value: TValue, event: ChangeEvent<HTMLInputElement>) => void;
     options: readonly SegmentedControlOption<TValue>[];
@@ -1763,36 +1777,46 @@ export type SegmentedControlProps<TValue extends SegmentedControlValue = Segment
     value?: TValue | null;
 };
 
-// @public (undocumented)
+// @public
 export type SegmentedControlSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type SegmentedControlStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type SegmentedControlValue = string | number;
 
-// @public (undocumented)
+// @public
 export function Selector<TValue extends SelectorValue = SelectorValue>(input: SelectorProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
+export type SelectorChangeDetails<TValue extends SelectorValue = SelectorValue> = {
+    event: ChangeEvent<HTMLInputElement> | MouseEvent_2<HTMLInputElement>;
+    option: SelectorOption<TValue>;
+    source: "option" | "clear";
+};
+
+// @public
 export type SelectorOption<TValue extends SelectorValue = SelectorValue> = {
+    ariaLabel?: string;
     description?: ReactNode;
     disabled?: boolean;
     label: ReactNode;
     value: TValue;
 };
 
-// @public (undocumented)
+// @public
 export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> & {
     allowClear?: boolean;
     columns?: number;
     defaultValue?: TValue[];
     disabled?: boolean;
+    form?: string;
+    focusRef?: Ref<HTMLInputElement>;
     multiple?: boolean;
     name?: string;
-    onChange?: (value: TValue[], options: SelectorOption<TValue>[]) => void;
-    options: SelectorOption<TValue>[];
+    onChange?: (value: TValue[], options: SelectorOption<TValue>[], details?: SelectorChangeDetails<TValue>) => void;
+    options: readonly SelectorOption<TValue>[];
     ref?: Ref<HTMLDivElement>;
     required?: boolean;
     showCheckMark?: boolean;
@@ -1801,13 +1825,13 @@ export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<H
     value?: TValue[];
 };
 
-// @public (undocumented)
+// @public
 export type SelectorSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type SelectorStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type SelectorValue = string | number;
 
 // @public (undocumented)
@@ -1853,7 +1877,7 @@ export type SkeletonProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
 // @public (undocumented)
 export type SkeletonVariant = "text" | "rectangle" | "circle";
 
-// @public (undocumented)
+// @public
 export const Slider: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange" | "step" | "max" | "min"> & {
 defaultValue?: number;
 formatValue?: (value: number) => ReactNode;
@@ -1869,13 +1893,13 @@ step?: number;
 value?: number;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export type SliderMark = {
     label?: ReactNode;
     value: number;
 };
 
-// @public (undocumented)
+// @public
 export type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"> & {
     defaultValue?: number;
     formatValue?: (value: number) => ReactNode;
@@ -1926,7 +1950,7 @@ export type StepItem = {
     title: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export const Stepper: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange"> & {
 allowEmpty?: boolean;
 decrementAriaLabel?: string;
@@ -1942,7 +1966,7 @@ step?: number;
 value?: number | null;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export type StepperProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "onChange" | "size" | "type" | "value"> & {
     allowEmpty?: boolean;
     decrementAriaLabel?: string;
@@ -2051,16 +2075,18 @@ checked?: boolean;
 defaultChecked?: boolean;
 loading?: boolean;
 onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+readOnly?: boolean;
 size?: SwitchSize;
 status?: SwitchStatus;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, "checked" | "children" | "defaultChecked" | "onChange" | "size" | "type"> & {
     checked?: boolean;
     defaultChecked?: boolean;
     loading?: boolean;
     onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+    readOnly?: boolean;
     size?: SwitchSize;
     status?: SwitchStatus;
 };

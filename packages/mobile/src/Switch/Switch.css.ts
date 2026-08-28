@@ -1,4 +1,4 @@
-import { keyframes, style } from "@vanilla-extract/css";
+import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 const spin = keyframes({ to: { transform: "rotate(360deg)" } });
@@ -13,6 +13,7 @@ export const root = recipe({
     minHeight: 44,
     verticalAlign: "middle",
     WebkitTapHighlightColor: "transparent",
+    outline: "none",
     selectors: {
       "&:focus-within": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 }
     }
@@ -22,13 +23,17 @@ export const root = recipe({
       true: { cursor: "not-allowed" },
       false: { cursor: "pointer" }
     },
+    readOnly: {
+      true: { cursor: "default" },
+      false: {}
+    },
     size: {
       small: { width: 44, height: 44 },
       medium: { width: 48, height: 44 },
       large: { width: 56, height: 52 }
     }
   },
-  defaultVariants: { disabled: false, size: "medium" }
+  defaultVariants: { disabled: false, readOnly: false, size: "medium" }
 });
 
 export const input = style({
@@ -51,7 +56,8 @@ export const track = recipe({
     background: "var(--meu-color-border)",
     border: "1px solid transparent",
     borderRadius: "var(--meu-radius-round)",
-    transition: "background-color var(--meu-motion-enter) var(--meu-motion-ease-standard)"
+    transition: "background-color var(--meu-motion-enter) var(--meu-motion-ease-standard)",
+    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
   },
   variants: {
     checked: {
@@ -83,12 +89,13 @@ export const thumb = recipe({
     background: "var(--meu-color-surface)",
     borderRadius: "50%",
     boxShadow: "0 1px 3px #18201A33",
-    transition: "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)"
+    transition: "margin-inline-start var(--meu-motion-enter) var(--meu-motion-ease-standard)",
+    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
   },
   variants: {
     checked: {
       true: {},
-      false: { transform: "translateX(0)" }
+      false: { marginInlineStart: 0 }
     },
     size: {
       small: { width: 16, height: 16 },
@@ -97,9 +104,9 @@ export const thumb = recipe({
     }
   },
   compoundVariants: [
-    { variants: { checked: true, size: "small" }, style: { transform: "translateX(14px)" } },
-    { variants: { checked: true, size: "medium" }, style: { transform: "translateX(18px)" } },
-    { variants: { checked: true, size: "large" }, style: { transform: "translateX(22px)" } }
+    { variants: { checked: true, size: "small" }, style: { marginInlineStart: 14 } },
+    { variants: { checked: true, size: "medium" }, style: { marginInlineStart: 18 } },
+    { variants: { checked: true, size: "large" }, style: { marginInlineStart: 22 } }
   ],
   defaultVariants: { checked: false, size: "medium" }
 });
@@ -113,4 +120,14 @@ export const spinner = style({
   borderRadius: "50%",
   animation: `${spin} 700ms linear infinite`,
   "@media": { "(prefers-reduced-motion: reduce)": { animation: "none" } }
+});
+
+globalStyle(`${input}:checked + span`, {
+  "@media": {
+    "(forced-colors: active)": {
+      background: "Highlight",
+      borderColor: "Highlight",
+      forcedColorAdjust: "none"
+    }
+  }
 });

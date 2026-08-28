@@ -1,0 +1,296 @@
+---
+name: PasscodeInput
+slug: passcode-input
+package: "@meu/mobile"
+exports: [PasscodeInput]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "372:2"
+storyIds:
+  [
+    data-entry-passcodeinput--native-keyboard,
+    data-entry-passcodeinput--custom-keyboard,
+    data-entry-passcodeinput--custom-keyboard-with-native-input,
+    data-entry-passcodeinput--connected-complete,
+    data-entry-passcodeinput--separated-partial,
+    data-entry-passcodeinput--native-form-reset,
+    data-entry-passcodeinput--plain-text,
+    data-entry-passcodeinput--error,
+    data-entry-passcodeinput--read-only,
+    data-entry-passcodeinput--disabled,
+    data-entry-passcodeinput--right-to-left
+  ]
+source: packages/mobile/src/PasscodeInput
+---
+
+# PasscodeInput
+
+## 当前能力
+
+- 使用一个真实原生 `input` 作为值、焦点、表单、自动填充、粘贴和辅助技术的唯一事实源；分格仅是
+  `aria-hidden` 的视觉镜像。
+- 支持 connected / separated、empty / partial / complete / error / disabled / readOnly、mask / plain text、
+  LTR / RTL 和 1 个以上任意格数。
+- 支持受控与非受控值、原生 `form.reset()`、外部 `form` 关联、原生 FormData、Field 标签/说明/错误/必填
+  语义以及命令式聚焦。
+- 默认保留系统键盘、粘贴和 `autocomplete="one-time-code"`；可组合非模态 NumberKeyboard，并明确是否抑制
+  系统键盘。
+- 每个不同完整值只触发一次 `onComplete`；初始完整值和原生 reset 不触发，避免初始化或重置时误发验证请求。
+- ASCII 数字模式与 Unicode 文本模式采用不同长度策略，避免原生 UTF-16 `maxlength` 截断 emoji 半个代理项。
+
+## 何时使用
+
+用于短信/邮件验证码、一次性口令、支付短码或固定格数的短文本。验证码优先使用 `mask={false}`，让用户可以核对；
+只有确实涉及敏感口令时才使用默认遮罩。
+
+## 何时不要使用
+
+- 普通密码使用密码管理器友好的 TextInput，而不是分格输入。
+- 银行卡、手机号、金额等可变长或格式化文本使用 TextInput/NumberKeyboardTrigger。
+- 组件不负责验证码发送、倒计时、加密、风控、重试限制或服务端校验。
+
+## 结构与状态
+
+`root → aria-hidden cells + absolute native input`。NumberKeyboard 打开时通过 Portal 渲染到页面底部，不创建 Mask、
+scroll lock、`aria-modal` 或 focus trap。`data-state` 为 empty、filled、focused、error、readonly 或 disabled；
+`data-complete` 仅反映当前规范化字符数。
+
+## 基础用法
+
+```tsx
+const [code, setCode] = useState("");
+
+<Field label="短信验证码" description="请输入短信中的六位数字" required labelAssociation="native">
+  <PasscodeInput
+    name="verificationCode"
+    value={code}
+    length={6}
+    separated
+    mask={false}
+    onChange={(nextValue, details) => {
+      setCode(nextValue);
+      analytics.track("otp_input", { source: details.source });
+    }}
+    onComplete={(completeCode) => verify(completeCode)}
+  />
+</Field>;
+```
+
+## 受控与非受控
+
+- 受控：传 `value`，`onChange` 只提交规范化后的候选值；调用方未更新 `value` 时界面保持原值。
+- 非受控：传 `defaultValue`，组件持有后续值。不要在生命周期中切换受控模式。
+- `defaultValue` 后续变化不会立即覆盖用户输入，但会更新下一次原生 `form.reset()` 的目标值，与原生表单预期一致。
+- reset 不派发 `onChange` 或 `onComplete`；受控模式在浏览器 reset 后恢复调用方权威值。
+- `length` 或 `inputMode` 改变时，非受控值会静默重新规范化；业务若需记录迁移，应由调用方受控处理。
+
+## 输入与字符规则
+
+| 模式      | 规则                                                                 | 原生 maxlength |
+| --------- | -------------------------------------------------------------------- | -------------- |
+| `numeric` | 仅接受 ASCII `0-9`，默认 `pattern="[0-9]*"`，适合 OTP                | 等于 `length`  |
+| `text`    | 按 Unicode code point 分格；组合序列可能占多格，适合受控的短文本场景 | 不设置         |
+
+`length` 默认 6；非有限数、0 或负数回退到 6，小数向下取整。需要数字本地化时不要把阿拉伯-印地数字静默转成
+ASCII，应在产品级输入策略中明确转换和展示规则。
+
+## Props
+
+| Prop                         | 类型                           | 默认值          | 说明                                     |
+| ---------------------------- | ------------------------------ | --------------- | ---------------------------------------- |
+| `value`                      | `string`                       | —               | 受控值                                   |
+| `defaultValue`               | `string`                       | `""`            | 非受控初值与后续 reset 基线              |
+| `length`                     | `number`                       | `6`             | 视觉格数及最大接受字符数                 |
+| `inputMode`                  | `"numeric" \| "text"`          | `"numeric"`     | 过滤、虚拟键盘提示和长度策略             |
+| `mask`                       | `boolean`                      | `true`          | 使用 password input 和圆点镜像；不是加密 |
+| `separated`                  | `boolean`                      | `false`         | 独立圆角格或连体格                       |
+| `caret`                      | `boolean`                      | `true`          | 聚焦时显示视觉光标                       |
+| `direction`                  | `"ltr" \| "rtl"`               | `"ltr"`         | 格顺序与连体圆角方向                     |
+| `status`                     | `"default" \| "error"`         | `"default"`     | 视觉校验状态；错误文案仍应由 Field 提供  |
+| `keyboard`                   | `PasscodeInputKeyboardOptions` | —               | 组合非模态 NumberKeyboard                |
+| `onChange`                   | `(value, details) => void`     | —               | 每个不同规范化候选值                     |
+| `onComplete`                 | `(value) => void`              | —               | 每个不同的运行期完整值一次               |
+| `required/disabled/readOnly` | 原生 boolean                   | `false`         | 原生表单和交互语义                       |
+| `name/form/autoComplete`     | 原生 input 属性                | 按原生/下述默认 | FormData、外部表单与自动填充             |
+| `autoComplete`               | 原生 autocomplete token        | `one-time-code` | 短信/系统验证码建议入口                  |
+
+除显式排除的 `type/size/dir/value/defaultValue/maxLength/minLength/inputMode/onChange` 外，其余原生 input 属性透传。
+ref 使用 `PasscodeInputRef`，不是根 div。
+
+### `keyboard` 重要选项
+
+`keyboard` 继承 NumberKeyboard 的布局、label、safe area、container、confirm、randomOrder 等配置，但 open/value/input/delete
+由 PasscodeInput 管理。额外选项：
+
+- `closeOnComplete`：完整后关闭键盘并 blur。
+- `onConfirm(value)`：确认时收到当前调用方权威值。
+- `keyboardAriaLabel` / `title`：键盘可访问名称。
+- `suppressNativeKeyboard`：默认 `true`，真实 input 使用 `inputMode="none"`，并在未被调用方取消的 pointerdown 中临时
+  设为 readOnly、命令式聚焦后立即清除。input 静止和聚焦后仍参与 required constraint validation，也不会永久牺牲
+  自动填充/粘贴；设为 `false` 会保留正常键盘提示，但页面可能同时出现两套键盘，应经过产品验证。
+
+## Events
+
+### `onChange(value, details)`
+
+`details.source`：
+
+| source     | 含义                                                |
+| ---------- | --------------------------------------------------- |
+| `native`   | 系统键盘、粘贴、自动填充或调用方派发的 input change |
+| `keyboard` | Meu NumberKeyboard 按键                             |
+| `hardware` | 自绘键盘模式下由真实 input 捕获的物理字符键         |
+| `delete`   | NumberKeyboard 或物理 Backspace                     |
+
+native/hardware/delete 物理键路径提供 `details.event`；删除路径提供 `details.repeated`。调用方 `onKeyDown` 先执行，
+`preventDefault()` 可以取消组件的物理键处理。
+
+### `onComplete(value)`
+
+值在挂载后首次达到 `length` 时触发；相同完整值重复 render 不触发，回到不完整后可再次完成。初始完整值与原生 reset
+不触发。回调可能用于启动异步校验，但必须自行处理重复请求、取消、失败回退和隐私日志。
+
+## Ref 与命令式方法
+
+```ts
+type PasscodeInputRef = {
+  focus(): void;
+  blur(): void;
+  readonly input: HTMLInputElement | null;
+};
+```
+
+表单库应把校验 ref 指向 `ref.input`。不要依赖内部 cells、className 或 Portal 节点。
+
+## 表单集成
+
+- `name`、`required`、`disabled`、`readOnly`、`form` 和当前值均落到真实 input，可进入约束校验与 FormData。
+- Field 使用 `labelAssociation="native"` 时，点击可见 label 可聚焦真实 input；说明和错误 ID 会与调用方
+  `aria-describedby` 合并去重。
+- `@meu/form-react` 的 `MeuFormPasscodeInput` 已采用 native label，绑定 RHF dirty/touched/error/reset/聚焦，并链式调用
+  使用方回调。
+- schema 应与 `length`、字符模式一致；例如 `z.string().regex(/^\d{6}$/)`，不要只验证非空。
+
+## 键盘操作
+
+| 按键/方式            | 行为                                                             |
+| -------------------- | ---------------------------------------------------------------- |
+| Tab / Shift+Tab      | 聚焦真实 input 或相邻控件；NumberKeyboard 不圈定焦点             |
+| 系统/物理字符输入    | 无自绘键盘时由原生 change；抑制系统键盘时物理键走 `hardware`     |
+| Backspace            | 抑制系统键盘时删除一个完整 Unicode code point                    |
+| Paste / OTP autofill | 走 native change；是否展示建议仍由浏览器、WebView 与安全策略决定 |
+| Escape               | NumberKeyboard 配置允许时收起                                    |
+
+## 触摸与手势
+
+每格至少 44×52 CSS px，真实 input 覆盖整个组，因此整组均可点击。组件没有自定义拖动、滑动或长按手势；粘贴菜单、
+文本选择和系统键盘交由原生 input。NumberKeyboard 的长按删除契约记录在其独立事实源中。
+
+## 动效
+
+视觉格只有颜色/阴影状态过渡，caret 以 step 动画闪烁；`prefers-reduced-motion` 下 caret 静止且过渡缩短。键盘进出场由
+NumberKeyboard 的 overlay presence 负责，PasscodeInput 不创建额外动画计时器。
+
+## 主题与定制
+
+连接与分离间距使用 Token；焦点、错误、disabled、surface、ink 全部使用语义 Token。`forced-colors` 下使用
+Canvas/CanvasText/Highlight/GrayText/Mark 系统色。稳定定制入口是 Props、Field、NumberKeyboard options 与全局 Token；
+内部 cell class、DOM 层级和 data 属性不是样式覆盖 API。
+
+## 无障碍
+
+- 可访问树只暴露一个真实 textbox/password input，不暴露逐格伪输入，避免读屏重复六次。
+- 必须提供可访问名称；推荐 Field。错误使用 `aria-invalid` 与 `aria-describedby`，required 使用真实 `required`。
+- mask 不应被描述为“安全输入”；屏幕阅读器、JS 和 FormData 仍可访问值。
+- 验证失败后聚焦真实 input；不要把焦点移到纯视觉格或错误文本。
+- NumberKeyboard 是非模态 group；背景仍可操作，适合 H5 表单连续输入，不等同系统安全键盘。
+
+## SSR 与 Next.js
+
+组件文件为 client boundary，但首屏可稳定服务端渲染真实 input 和 cells。NumberKeyboard 在关闭时不输出 Portal，避免随机 DOM；
+`useId` 只用于稳定关联。服务端与客户端必须提供一致的 `length/defaultValue/direction`。不要在首个客户端 render 前根据
+`window` 改变这些值。
+
+## RTL 与国际化
+
+`direction="rtl"` 反转 flex 方向语义与连体圆角，但不会翻转数字字符串或 NumberKeyboard 标准数字排列。默认 input/键盘
+名称跟随 ConfigProvider 的 zh-CN/en-US，可通过 ARIA label 与 keyboard label 覆盖。业务错误、倒计时和验证码发送文案由
+调用方本地化。
+
+## 浏览器与 WebView
+
+生产基线为 Chrome 70 / Android WebView 与 iOS 13 / WKWebView 可解析构建产物。系统 OTP 建议、密码管理器、粘贴菜单和
+SMS autofill 属浏览器策略，不能仅凭桌面模拟证明。`inputMode="none"` 在旧 iOS/WKWebView 不可靠；pointer 聚焦守卫只能
+降低软键盘弹出概率，不能承诺所有内嵌 WebView 都不弹系统键盘。组件不会永久使用 readOnly，因为那会让 required input
+退出原生 constraint validation。
+
+## 安全与隐私
+
+- 不在 Story、日志、analytics、错误监控或 URL 中记录真实验证码/支付口令。
+- `mask`、`randomOrder`、禁用复制或自绘键盘都不是加密或可信执行环境。
+- 服务端必须限制验证码时效、尝试次数、重放与会话绑定；客户端完成回调不能作为验证成功。
+- `autocomplete="one-time-code"` 适合 OTP；长期密码不要使用该 token。
+
+## 边界情况与已知限制
+
+- `text` 按 Unicode code point，而不是完整 grapheme cluster 分格；ZWJ emoji 或组合音标可能占多个格。
+- 自绘键盘的软键盘抑制是最佳努力；旧 iOS/WKWebView 可能仍弹系统键盘，必须真机验证。调用方 pointerdown handler 先执行，
+  `preventDefault()` 可取消组件的命令式聚焦守卫。
+- 运行时动态插入一个尚不存在的外部 `form` 不会自动重新绑定 reset listener；应保证目标 form 在组件 effect 执行时存在。
+- 组件不提供逐格编辑、选中某格、光标位置移动或中间插入；它是顺序短码输入。
+- 受控调用方若异步提交 value，紧接着点击确认可能仍得到旧的调用方权威值。
+
+## 性能预算
+
+渲染复杂度为 O(length)，默认只有 6 格；输入不做 layout measurement，不注册全局 pointer/keyboard listener。仅在真实 form 上
+注册一个 reset listener，并在依赖变化/卸载时清理。业务校验和网络请求必须去重、取消并避免逐键触发。
+
+## 测试证据
+
+- Unit: `PasscodeInput.test.tsx` 覆盖受控/非受控、过滤、Field、FormData、reset、完成去重、Unicode 删除、键盘组合、
+  pointer cancellation、custom-keyboard required constraint validation、disabled/readOnly 与 ref。
+- SSR: `PasscodeInput.ssr.test.tsx` 覆盖确定性真实 input、cells、required、one-time-code 与 text mode 长度策略。
+- Form adapter: `MeuFormPasscodeInput.test.tsx` 覆盖 RHF dirty、提交、错误关联、native label 与失败聚焦。
+- Story interaction: `NativeFormReset` 在真实 Story 浏览器验证 input → reset 过渡。
+- Story states: connected/separated、partial/complete、native/custom keyboard、plain/error/readOnly/disabled/RTL。
+- Axe: 待形成 CI 独立报告；当前 Storybook a11y addon 以 error 模式运行。
+- Mobile Chromium/WebKit E2E: 通用 H5 表单已覆盖，OTP autofill/paste/系统键盘仍需专属真机记录。
+- Chromatic Light/Dark: Story 发布后建立视觉基线；Figma 组件集已通过 Light/Dark AA 与目标尺寸 QA。
+- Real device: iOS Safari/WKWebView、Android Chrome/WebView、VoiceOver/TalkBack 待记录。
+
+## V2 优化记录
+
+### 已完成
+
+- 冻结真实 input 事实源、controlled/uncontrolled、Field、FormData 与 NumberKeyboard 非模态组合契约。
+- 修复原生 form reset、描述 ID 合并、Field required、初始完成误触发、消费者 keydown 取消顺序和 Unicode 删除。
+- 明确 native / keyboard / hardware / delete 来源及 repeated/event details。
+- 新增自绘键盘与浏览器 autofill 的显式取舍、forced-colors、SSR、表单 adapter native label 和完整状态 Stories。
+- 自绘键盘不再永久设置 readOnly；改用 `inputMode="none"` 与一次性 pointer 聚焦守卫，保留 required 原生校验。
+
+### 待达到 commercial
+
+- 在支持矩阵真机完成 OTP autofill、粘贴、软键盘、密码管理器、旋转与 WebView 验证并留档。
+- 形成 axe、VoiceOver/TalkBack 和 Chromatic Light/Dark 的可追溯 CI/人工证据。
+- 决定是否引入 grapheme cluster 分段；引入前必须验证 iOS 13 fallback、体积和规范化迁移。
+
+## 维护规则
+
+任何 Props、Events、默认值、DOM/ARIA 结构、字符规范化、FormData/reset、NumberKeyboard 组合、视觉状态、Token、兼容基线或
+测试证据变化，必须在同一 PR 更新本文、Story、测试和变更记录。只有上述 commercial 待办全部有可复核证据后，才能把
+frontmatter `status` 改为 `commercial`。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                                       | 迁移说明                                                              |
+| ---------- | ------ | -------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | reset、完成、Field required、Unicode 删除、keydown 取消顺序与事件 details  | `details.source` 的物理字符键由 `keyboard` 明确为 `hardware`          |
+| 2026-08-28 | 未发布 | feature  | `keyboard.suppressNativeKeyboard`、forced-colors、native label adapter     | 需要自动填充/粘贴时显式设为 false，并验证双键盘体验                   |
+| 2026-08-28 | 未发布 | fix      | 自绘键盘保留 required constraint validation 与 pointer handler 取消顺序    | 旧 iOS/WKWebView 的软键盘抑制仍是最佳努力，需真机验证                 |
+| 2026-08-28 | 未发布 | API      | `inputMode` 收窄为 numeric/text，移除无效 `maxLength/minLength` 自定义入口 | 使用 `length` 控制格数；其他 inputMode 过去也会被实现静默当作 numeric |
+| 2026-08-28 | 0.1.0  | docs     | 建立 V2 永久事实源                                                         | 后续相关改动必须同步本文                                              |

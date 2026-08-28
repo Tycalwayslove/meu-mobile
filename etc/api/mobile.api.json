@@ -4009,7 +4009,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    size?: import(\"./types\")."
+              "text": ">) => void;\n    readOnly?: boolean;\n    size?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -4129,7 +4129,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, children, className, defaultValue, direction, disabled, id, name, onChange, ref, status, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, children, className, defaultValue, direction, disabled, id, name, onChange, readOnly, ref, status, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -4163,7 +4163,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CheckboxGroupProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link CheckboxGroup}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4221,7 +4221,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    defaultValue?: TValue[];\n    direction?: \"horizontal\" | \"vertical\";\n    disabled?: boolean;\n    name?: string;\n    onChange?: (value: TValue[]) => void;\n    ref?: "
+              "text": ";\n    defaultValue?: TValue[];\n    direction?: \"horizontal\" | \"vertical\";\n    disabled?: boolean;\n    name?: string;\n    onChange?: (value: TValue[]) => void;\n    readOnly?: boolean;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -4279,7 +4279,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CheckboxProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link Checkbox}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4337,7 +4337,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    size?: "
+              "text": ">) => void;\n    readOnly?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -12262,7 +12262,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"dir\" | \"onChange\"> & {\n    caret?: boolean;\n    defaultValue?: string;\n    direction?: import(\"./types\")."
+              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"dir\" | \"inputMode\" | \"onChange\" | \"maxLength\" | \"minLength\"> & {\n    caret?: boolean;\n    defaultValue?: string;\n    direction?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -12280,7 +12280,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    length?: number;\n    mask?: boolean;\n    onChange?: (value: string, details: "
+              "text": ";\n    inputMode?: \"numeric\" | \"text\";\n    length?: number;\n    mask?: boolean;\n    onChange?: (value: string, details: "
             },
             {
               "kind": "Reference",
@@ -12331,7 +12331,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Metadata accompanying a passcode value proposal.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12339,7 +12339,43 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    source: "
+              "text": "{\n    event?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChangeEvent",
+              "canonicalReference": "@types/react!React.ChangeEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "KeyboardEvent",
+              "canonicalReference": "@types/react!React.KeyboardEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    repeated?: boolean;\n    source: "
             },
             {
               "kind": "Reference",
@@ -12360,13 +12396,13 @@
           "name": "PasscodeInputChangeDetails",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 4
+            "endIndex": 12
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputChangeSource:type",
-          "docComment": "",
+          "docComment": "/**\n * Origin of a value proposal emitted by {@link PasscodeInput}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12374,7 +12410,7 @@
             },
             {
               "kind": "Content",
-              "text": "\"delete\" | \"keyboard\" | \"native\""
+              "text": "\"delete\" | \"hardware\" | \"keyboard\" | \"native\""
             },
             {
               "kind": "Content",
@@ -12392,7 +12428,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputDirection:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual flow direction for passcode cells.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12418,7 +12454,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputKeyboardOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Options for composing the non-modal Meu NumberKeyboard.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12440,7 +12476,7 @@
             },
             {
               "kind": "Content",
-              "text": ", \"aria-label\" | \"aria-labelledby\" | \"defaultOpen\" | \"id\" | \"onConfirm\" | \"onDelete\" | \"onInput\" | \"onOpenChange\" | \"open\" | \"ref\" | \"title\"> & {\n    closeOnComplete?: boolean;\n    keyboardAriaLabel?: string;\n    onConfirm?: (value: string) => void;\n    title?: string;\n}"
+              "text": ", \"aria-label\" | \"aria-labelledby\" | \"defaultOpen\" | \"id\" | \"onConfirm\" | \"onDelete\" | \"onInput\" | \"onOpenChange\" | \"open\" | \"ref\" | \"title\"> & {\n    closeOnComplete?: boolean;\n    keyboardAriaLabel?: string;\n    onConfirm?: (value: string) => void;\n    suppressNativeKeyboard?: boolean;\n    title?: string;\n}"
             },
             {
               "kind": "Content",
@@ -12458,7 +12494,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the real-input-backed passcode/OTP control.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12489,7 +12525,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"dir\" | \"onChange\" | \"size\" | \"type\" | \"value\"> & {\n    caret?: boolean;\n    defaultValue?: string;\n    direction?: "
+              "text": ">, \"defaultValue\" | \"dir\" | \"inputMode\" | \"maxLength\" | \"minLength\" | \"onChange\" | \"size\" | \"type\" | \"value\"> & {\n    caret?: boolean;\n    defaultValue?: string;\n    direction?: "
             },
             {
               "kind": "Reference",
@@ -12507,7 +12543,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    length?: number;\n    mask?: boolean;\n    onChange?: (value: string, details: "
+              "text": ";\n    inputMode?: \"numeric\" | \"text\";\n    length?: number;\n    mask?: boolean;\n    onChange?: (value: string, details: "
             },
             {
               "kind": "Reference",
@@ -12543,7 +12579,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputRef:type",
-          "docComment": "",
+          "docComment": "/**\n * Imperative handle exposing the real native input without leaking visual-cell internals.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -12578,7 +12614,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!PasscodeInputStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Validation presentation state.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14207,7 +14243,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    size?: import(\"./types\")."
+              "text": ">) => void;\n    readOnly?: boolean;\n    size?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -14327,7 +14363,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, children, className, defaultValue, direction, disabled, id, name, onChange, ref, required, status, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, children, className, defaultValue, direction, disabled, id, name, onChange, readOnly, ref, required, status, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -14361,7 +14397,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!RadioGroupProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link RadioGroup}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14437,7 +14473,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    ref?: "
+              "text": ">) => void;\n    readOnly?: boolean;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -14495,7 +14531,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!RadioProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link Radio}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14553,7 +14589,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    size?: "
+              "text": ">) => void;\n    readOnly?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -14676,7 +14712,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!Rate:var",
-          "docComment": "",
+          "docComment": "/**\n * A touch-friendly rating control backed by native range semantics.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -14780,7 +14816,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!RateProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link Rate}. Native range attributes are forwarded in interactive mode.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16021,7 +16057,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!SegmentedControl:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Compact mutually exclusive switch backed by a native radio group for keyboard and form behavior.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16081,7 +16117,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, block, className, defaultValue, disabled, id, name, onChange, options, ref, required, size, status, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, block, className, defaultValue, disabled, form, focusRef, id, name, onChange, onFocus, options, ref, required, size, status, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -16115,7 +16151,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SegmentedControlOption:type",
-          "docComment": "",
+          "docComment": "/**\n * One mutually exclusive native radio option.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16141,7 +16177,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    disabled?: boolean;\n    icon?: "
+              "text": "{\n    ariaLabel?: string;\n    disabled?: boolean;\n    icon?: "
             },
             {
               "kind": "Reference",
@@ -16190,7 +16226,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SegmentedControlProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the native radio-backed SegmentedControl.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16239,7 +16275,25 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    block?: boolean;\n    defaultValue?: TValue;\n    disabled?: boolean;\n    name?: string;\n    onChange?: (value: TValue, event: "
+              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    block?: boolean;\n    defaultValue?: TValue;\n    disabled?: boolean;\n    form?: string;\n    focusRef?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Ref",
+              "canonicalReference": "@types/react!React.Ref:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    name?: string;\n    onChange?: (value: TValue, event: "
             },
             {
               "kind": "Reference",
@@ -16327,13 +16381,13 @@
           ],
           "typeTokenRange": {
             "startIndex": 5,
-            "endIndex": 25
+            "endIndex": 29
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SegmentedControlSize:type",
-          "docComment": "",
+          "docComment": "/**\n * SegmentedControl touch-target and typography scale.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16359,7 +16413,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SegmentedControlStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * SegmentedControl validation presentation.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16385,7 +16439,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SegmentedControlValue:type",
-          "docComment": "",
+          "docComment": "/**\n * Primitive value used as the stable identity of a SegmentedControl option.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16411,7 +16465,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!Selector:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Card-style native radio or checkbox collection with deterministic value ordering and native form submission.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16471,7 +16525,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, allowClear, className, columns, defaultValue, disabled, id, multiple, name, onChange, options, ref, required, showCheckMark, size, status, style, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, allowClear, className, columns, defaultValue, disabled, form, focusRef, id, multiple, name, onChange, onFocus, options, ref, required, showCheckMark, size, status, style, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -16504,8 +16558,110 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SelectorChangeDetails:type",
+          "docComment": "/**\n * Metadata emitted after a direct Selector interaction.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SelectorChangeDetails<TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorValue",
+              "canonicalReference": "@meu/mobile!SelectorValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorValue",
+              "canonicalReference": "@meu/mobile!SelectorValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChangeEvent",
+              "canonicalReference": "@types/react!React.ChangeEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    option: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorOption",
+              "canonicalReference": "@meu/mobile!SelectorOption:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>;\n    source: \"option\" | \"clear\";\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Selector/types.ts",
+          "releaseTag": "Public",
+          "name": "SelectorChangeDetails",
+          "typeParameters": [
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 16
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SelectorOption:type",
-          "docComment": "",
+          "docComment": "/**\n * One native radio or checkbox option rendered by Selector.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16531,7 +16687,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    description?: "
+              "text": "{\n    ariaLabel?: string;\n    description?: "
             },
             {
               "kind": "Reference",
@@ -16580,7 +16736,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SelectorProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the native radio/checkbox-backed Selector.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16629,7 +16785,25 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    allowClear?: boolean;\n    columns?: number;\n    defaultValue?: TValue[];\n    disabled?: boolean;\n    multiple?: boolean;\n    name?: string;\n    onChange?: (value: TValue[], options: "
+              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    allowClear?: boolean;\n    columns?: number;\n    defaultValue?: TValue[];\n    disabled?: boolean;\n    form?: string;\n    focusRef?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Ref",
+              "canonicalReference": "@types/react!React.Ref:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    multiple?: boolean;\n    name?: string;\n    onChange?: (value: TValue[], options: "
             },
             {
               "kind": "Reference",
@@ -16638,7 +16812,16 @@
             },
             {
               "kind": "Content",
-              "text": "<TValue>[]) => void;\n    options: "
+              "text": "<TValue>[], details?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SelectorChangeDetails",
+              "canonicalReference": "@meu/mobile!SelectorChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>) => void;\n    options: readonly "
             },
             {
               "kind": "Reference",
@@ -16708,13 +16891,13 @@
           ],
           "typeTokenRange": {
             "startIndex": 5,
-            "endIndex": 23
+            "endIndex": 29
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SelectorSize:type",
-          "docComment": "",
+          "docComment": "/**\n * Selector touch-target and typography scale.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16740,7 +16923,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SelectorStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Selector validation presentation.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16766,7 +16949,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SelectorValue:type",
-          "docComment": "",
+          "docComment": "/**\n * Primitive value used as the stable identity of a Selector option.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17248,7 +17431,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!Slider:var",
-          "docComment": "",
+          "docComment": "/**\n * A native single-value range control with mobile pointer, keyboard and form semantics.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17397,7 +17580,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SliderMark:type",
-          "docComment": "",
+          "docComment": "/**\n * A decorative label anchored to one value on the slider track.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17432,7 +17615,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SliderProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link Slider}. Native range attributes are forwarded unless specialized here.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17819,7 +18002,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!Stepper:var",
-          "docComment": "",
+          "docComment": "/**\n * A numeric text field with accessible decrement and increment controls.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17914,7 +18097,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!StepperProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link Stepper}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18861,7 +19044,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    size?: import(\"./types\")."
+              "text": ">) => void;\n    readOnly?: boolean;\n    size?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -18912,7 +19095,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SwitchProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props accepted by {@link Switch}.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18961,7 +19144,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    size?: "
+              "text": ">) => void;\n    readOnly?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",

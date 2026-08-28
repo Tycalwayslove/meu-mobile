@@ -2,22 +2,42 @@ import type { ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
 
 export type SliderSize = "small" | "medium" | "large";
 export type SliderStatus = "default" | "error";
-export type SliderMark = { label?: ReactNode; value: number };
 
+/** A decorative label anchored to one value on the slider track. */
+export type SliderMark = {
+  /** Optional visual label. Marks are presentation-only and are not announced as choices. */
+  label?: ReactNode;
+  /** Numeric position. Values outside the effective min/max range are not rendered. */
+  value: number;
+};
+
+/** Props accepted by {@link Slider}. Native range attributes are forwarded unless specialized here. */
 export type SliderProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"
 > & {
+  /** Initial value for an uncontrolled slider. It is clamped and snapped to the effective step. */
   defaultValue?: number;
+  /** Formats the optional visual value output. It does not replace the slider's accessible value. */
   formatValue?: (value: number) => ReactNode;
+  /** Decorative track marks. */
   marks?: SliderMark[];
+  /** Upper bound. Reversed bounds are ordered; an off-grid maximum resolves to the last reachable step. @defaultValue 100 */
   max?: number;
+  /** Lower bound. Reversed finite bounds are normalized into ascending order. @defaultValue 0 */
   min?: number;
+  /** Runs for every committed native range change. */
   onChange?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
+  /** Runs once when a pointer or value-changing keyboard interaction finishes. */
   onChangeComplete?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
+  /** Shows the current formatted value beside the track. @defaultValue false */
   showValue?: boolean;
+  /** Visual and touch-target size. @defaultValue "medium" */
   size?: SliderSize;
+  /** Visual validation state. Field errors and `aria-invalid` also activate error styling. */
   status?: SliderStatus;
+  /** Positive numeric increment. Invalid values fall back to 1. @defaultValue 1 */
   step?: number;
+  /** Controlled value. It is clamped and snapped before rendering. */
   value?: number;
 };

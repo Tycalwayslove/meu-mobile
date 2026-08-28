@@ -1,0 +1,203 @@
+---
+name: SegmentedControl
+slug: segmented-control
+package: "@meu/mobile"
+exports: [SegmentedControl]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    navigation-segmentedcontrol--default,
+    navigation-segmentedcontrol--block,
+    navigation-segmentedcontrol--sizes,
+    navigation-segmentedcontrol--disabled,
+    navigation-segmentedcontrol--required-error,
+    navigation-segmentedcontrol--rtl-and-long-content,
+    navigation-segmentedcontrol--controlled-interaction
+  ]
+source: packages/mobile/src/SegmentedControl
+---
+
+# SegmentedControl
+
+## 当前能力
+
+- 用同名原生 radio 实现 2–5 个互斥同层级视图或筛选切换，保留浏览器 radio group 的 Tab、方向键、Space 和 FormData 行为。
+- 支持受控 scalar、受控 `null`、非受控默认值、首个可用项回退、选项级/整体禁用、block、三档尺寸、图标和错误态。
+- `value` 同时作为 option identity 和原生表单值；string/number 分开识别，重复 identity 只保留第一项。
+- 支持 Field label/description/error/required 无损合并、原生 required、外部 form 关联、reset、root ref 与 React Hook Form adapter。
+- 每项至少 44×44 CSS px；支持 RTL、长文截断但保留完整无障碍名称、reduced motion、forced colors、SSR 和移动 WebView。
+
+当前状态仍为 `implementation`。axe、移动 Chromium/WebKit E2E、Chromatic Light/Dark 矩阵与真机读屏验证待完成，不能标记为 commercial。
+
+## 何时使用
+
+用于在同一上下文即时切换列表/卡片、日/周/月等少量互斥视图。选项地位相同，切换应立即生效且无需单独提交按钮。
+
+## 何时不要使用
+
+页面主导航使用 Tabs、TabBar 或链接；需要提交的业务选择优先 RadioGroup/Selector；超过 5 项、文案差异大或需要说明时使用 Selector、Picker。SegmentedControl 不应用作表单提交按钮组。
+
+## 结构与状态
+
+根为 `role="radiogroup"`，每项含真实 radio 和对应 label。根暴露：
+
+- `data-meu-component="segmented-control"`
+- `data-size="small|medium|large"`
+- `data-state="default|disabled|error"`
+
+每项暴露 `data-selected` 与 `data-disabled`。选中态通过 native checked、surface 形状、文字对比和轻量阴影同时表达；强制色彩模式使用系统 Highlight。
+
+## 基础用法
+
+```tsx
+<SegmentedControl
+  aria-label="展示方式"
+  name="view"
+  options={[
+    { label: "列表", value: "list" },
+    { label: "卡片", value: "card" }
+  ]}
+  defaultValue="list"
+  onChange={(value, event) => console.log(value, event.type)}
+/>
+```
+
+填满容器：
+
+```tsx
+<SegmentedControl
+  block
+  aria-label="时间范围"
+  options={rangeOptions}
+  value={range}
+  onChange={setRange}
+/>
+```
+
+## 受控与非受控
+
+- `value` 未定义时为非受控。有效 `defaultValue` 优先，否则选择首个 enabled option；全部禁用或 options 为空时为 `null`。
+- `value` 为 scalar 时受控，交互只触发 `onChange`，视觉继续服从 props。
+- `value={null}` 是明确的受控空值，不会自动选择首项，适合 required 错误态和异步初始化。
+- 非受控当前 identity 被删除时自动回退到首个 enabled option；仅变为 disabled 时保留当前选中，避免异步权限变化抹掉事实值。
+- controlled 传入未知 identity 时不显示选中，也不自动回写。
+
+## 表单集成
+
+- 每个 radio 使用同一 `name`，checked 项进入 FormData。number 按 HTML 规则序列化为字符串。
+- `required` 放到首个 enabled radio，并在 radiogroup 输出合法 `aria-required`；浏览器按 radio group 规则要求任一同名项选中。
+- `form` 可关联组件外部 `<form id>`；未传则使用最近祖先 form。
+- 原生 reset 将非受控值恢复到首次有效 `defaultValue`，无有效默认值时回到当前 options 的首个 enabled option；受控值由调用方 reset。
+- `MeuFormSegmentedControl` 连接 React Hook Form 的 scalar value、dirty、touched、disabled、required、error 与 root focus。
+
+## Props
+
+API 表由 API Extractor 根据 `SegmentedControlProps` 和 `SegmentedControlOption` 生成。关键约束：
+
+- `options[].value` 是唯一 identity；`1` 与 `"1"` 在组件内不同，但 FormData 文本相同。
+- 重复 identity 的后续项不会渲染，避免一个值对应多个可见标签。
+- `icon` 视为装饰并 `aria-hidden`；每项仍必须有可访问的 `label`，复杂 label 可用 `ariaLabel` 覆盖名称。
+- `aria-label` 优先于 Field label；调用方和 Field 的 `aria-labelledby` / `aria-describedby` 会按 token 合并去重。
+- `block=true` 让每项等分可用宽度；false 时按内容收缩但不会超出容器。
+
+## Events
+
+`onChange(value, event)` 只在用户选择 enabled radio 时触发。初始化、options 收敛、disabled 变化和 form reset 不触发；事件为 React `ChangeEvent<HTMLInputElement>`，可读取原生 name/value/form。
+
+## Ref 与命令式方法
+
+ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 供表单库错误聚焦；正常用户 Tab 进入原生 radio。组件不提供命令式 setValue/focusOption，业务用受控状态和 DOM ref 完成。
+
+## 键盘操作
+
+| 按键            | 行为                                                                 |
+| --------------- | -------------------------------------------------------------------- |
+| Tab / Shift+Tab | 进入或离开整个原生 radio group，浏览器保持一个 group tab stop        |
+| Arrow keys      | 在 enabled radio 间移动并选择；禁用项跳过，方向与宿主浏览器/RTL 一致 |
+| Space           | 选择当前 radio                                                       |
+
+不额外实现 roving tabindex。原生同名 radio 已提供标准 roving/focus/selection 行为，自定义 keydown 会产生重复 change 或破坏 WebView 平台一致性。
+
+## 触摸与手势
+
+每个 label 是完整触摸目标，small/medium 为 44 px，large 为 48 px；`touch-action: manipulation`，无依赖 hover 的功能、滑动或长按。
+
+## 无障碍
+
+- radiogroup 必须由 `aria-label`、`aria-labelledby` 或 Field label 命名；单项名称来自可见 label，图标不重复朗读。
+- description/error 同时关联 root 与 radio；invalid 位于 radiogroup，并有 Field 错误文字。
+- 整体 disabled 输出 root `aria-disabled` 与每项 native disabled，选中事实保留。
+- 焦点落在真实 1px 裁剪 input，label 绘制 2px focus outline；不会让 `display:none` 控件退出读屏/键盘树。
+- forced colors 使用 ButtonText、Highlight、HighlightText、GrayText；reduced motion 把 transition 降为 1 ms。
+
+## 动效
+
+仅在选中态切换背景、文字与 3px 以内轻阴影，使用全局 exit 时长。无滑块位移动画，因此动态 option 宽度、RTL 和文本缩放不会产生错误几何；reduced motion 下近乎即时。
+
+## 主题与定制
+
+颜色、圆角、间距、字体和 motion 使用 Meu Token。稳定入口为 root `className/style` 与 data 属性；内部 label、input 和 class 名不属于 API。不要把 inactive 文本对比降到 Token 以下。
+
+## SSR 与 Next.js
+
+首次 render 仅使用 props、React state 和 `useId`，不读取 window/document。reset 关联在 effect 中执行；服务端输出真实 radio/name/value/checked/required，可在 Next App Router client component 中 SSR。服务端和客户端首帧必须使用相同 options 顺序。
+
+## RTL 与国际化
+
+inline-flex 自动遵循文档 `dir`，图标与文字顺序随 RTL 反转。label 单行省略但完整 DOM 文本仍是 accessible name；复杂或非文字 label 应提供本地化 `ariaLabel`。200% 字号时保持 44 px 下限，block 布局可收缩。
+
+## 浏览器与 WebView
+
+目标为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。实现依赖成熟的 radio/label/FormData/constraint validation，不使用 CSS anchor、popover、pointer capture、ResizeObserver 或 UA sniffing。宿主浏览器负责方向键对 RTL 的平台细节。
+
+## 边界情况与已知限制
+
+- options 为空或全部禁用时，没有可提交/校验的 input；required 需由 schema 返回明确错误。
+- number 与同文本 string 的 FormData 值相同，需跨网络保留类型时使用带前缀 string。
+- 长标签会视觉省略；如果用户必须比较完整长文，不应使用 SegmentedControl，应改为 Selector 或 RadioGroup。
+- icon 只装饰，不可独立承担状态或 accessible name。
+- radio 原生方向键会立即改变选择并触发 change，不提供“移动焦点后 Enter 确认”的手动激活模式。
+
+## 性能预算
+
+render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控模式只在 options identity 集合变化时收敛一次，并在所属 form 注册一个 reset 监听。
+
+## 测试证据
+
+- Unit: `SegmentedControl.test.tsx` 覆盖默认/controlled null、identity/duplicate、disabled、Field/required、FormData、外部 form、reset、option 删除回退、ref 和 native keyboard path。
+- SSR: `SegmentedControl.ssr.test.tsx` 覆盖无浏览器全局的 radio/name/value/checked/required 输出。
+- Story: seven states cover default、block、sizes、disabled、required error、RTL long content 与 controlled interaction。
+- RTL / reduced motion / forced colors: 实现已落地，专属快照矩阵待补。
+- Axe、移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 接入 axe、Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
+- 在 iOS VoiceOver 与 Android TalkBack 真机确认 group label、disabled selected 和 required 空值公告。
+- 收集业务中的 2–5 项长翻译，验证截断策略是否需要产品层改用 Selector。
+
+### 已完成
+
+- 冻结 scalar/null、受控/非受控、首项回退、option identity 与 duplicate 行为。
+- 修复 Field idref/required 合并、native FormData/constraint validation、外部 form 与 reset。
+- 明确使用 native radio roving，而非重复实现 keydown/focus 算法。
+- 补齐 44 px 目标、RTL、long content、reduced motion、forced colors、SSR、TSDoc、Story 与 Unit。
+
+## 维护规则
+
+修改公开类型、默认选择、radio/required 语义、键盘、DOM/data 属性或视觉状态时，必须同步本文件、README、Story、Unit/SSR 与 API 报告。未取得自动化及真机证据前保持 `status: implementation`。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                              | 迁移说明                                                                   |
+| ---------- | ------ | -------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固 | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option |

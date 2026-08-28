@@ -1,11 +1,22 @@
 "use client";
 
-import { forwardRef, useState } from "react";
-import type { ChangeEvent } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import type { ChangeEvent, ForwardedRef, MouseEvent } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
 import { input, root, spinner, thumb, track } from "./Switch.css";
 import type { SwitchProps } from "./types";
+
+function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
+
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
 
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   {
@@ -15,9 +26,13 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
     className,
     defaultChecked = false,
     disabled = false,
+    form,
     id,
     loading = false,
     onChange,
+    onClick,
+    readOnly = false,
+    required = false,
     size = "medium",
     status = "default",
     style,
@@ -26,20 +41,31 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   ref
 ) {
   const fieldContext = useFieldContext();
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [uncontrolledChecked, setUncontrolledChecked] = useState(defaultChecked);
   const controlled = checked !== undefined;
   const currentChecked = controlled ? checked : uncontrolledChecked;
-  const resolvedDisabled = disabled || loading;
+  const interactionBlocked = disabled || loading || readOnly;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy = mergeIdReferences(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
+  const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const invalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
     status === "error" ||
     Boolean(fieldContext && fieldContext.invalid);
+  const resetChecked = controlled ? currentChecked : defaultChecked;
+
+  useEffect(() => {
+    const element = inputRef.current;
+    if (element) element.defaultChecked = resetChecked;
+  }, [resetChecked]);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    if (resolvedDisabled) {
+    if (interactionBlocked) {
       event.preventDefault();
       return;
     }
@@ -48,45 +74,88 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
     if (onChange) onChange(nextChecked, event);
   }
 
+  function handleClick(event: MouseEvent<HTMLInputElement>) {
+    if (loading || readOnly) {
+      event.preventDefault();
+      const element = event.currentTarget;
+      element.checked = currentChecked;
+      void Promise.resolve().then(() => {
+        if (inputRef.current === element) element.checked = currentChecked;
+      });
+    }
+    if (onClick) onClick(event);
+  }
+
+  useEffect(() => {
+    const element = inputRef.current;
+    const form = element ? element.form : null;
+    if (!element || !form || controlled) return;
+
+    let resetTimer: number | null = null;
+    const handleReset = (event: Event) => {
+      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        resetTimer = null;
+        if (!event.defaultPrevented) setUncontrolledChecked(defaultChecked);
+      }, 0);
+    };
+    form.addEventListener("reset", handleReset);
+    return () => {
+      form.removeEventListener("reset", handleReset);
+      if (resetTimer !== null) window.clearTimeout(resetTimer);
+    };
+  }, [controlled, defaultChecked, form]);
+
   return (
     <span
       className={
         className
-          ? `${root({ disabled: resolvedDisabled, size })} ${className}`
-          : root({ disabled: resolvedDisabled, size })
+          ? `${root({ disabled: interactionBlocked, readOnly, size })} ${className}`
+          : root({ disabled: interactionBlocked, readOnly, size })
       }
       style={style}
       data-meu-component="switch"
       data-size={size}
+      data-readonly={readOnly ? "true" : "false"}
       data-state={
         loading
           ? "loading"
-          : resolvedDisabled
+          : disabled
             ? "disabled"
-            : currentChecked
-              ? "checked"
-              : "unchecked"
+            : readOnly
+              ? "readonly"
+              : currentChecked
+                ? "checked"
+                : "unchecked"
       }
     >
       <input
         {...props}
-        ref={ref}
+        ref={(element) => {
+          inputRef.current = element;
+          assignRef(ref, element);
+        }}
         id={resolvedId}
         className={input}
         type="checkbox"
         role="switch"
         checked={currentChecked}
-        disabled={resolvedDisabled}
+        disabled={disabled}
+        form={form}
+        required={resolvedRequired}
+        onClick={handleClick}
         onChange={handleChange}
         aria-busy={loading}
         aria-checked={currentChecked}
         aria-describedby={describedBy}
+        aria-disabled={loading || undefined}
         aria-invalid={invalid || undefined}
+        aria-readonly={readOnly || undefined}
       />
       <span
         className={track({
           checked: currentChecked,
-          disabled: resolvedDisabled,
+          disabled: interactionBlocked,
           size,
           status: invalid ? "error" : status
         })}

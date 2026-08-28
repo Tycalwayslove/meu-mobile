@@ -7,6 +7,7 @@ export const root = recipe({
     alignItems: "stretch",
     gap: 2,
     boxSizing: "border-box",
+    minWidth: 0,
     padding: 2,
     color: "var(--meu-color-ink)",
     background: "var(--meu-color-subtle)",
@@ -60,6 +61,7 @@ export const option = recipe({
     fontWeight: 500,
     lineHeight: 1.3,
     cursor: "pointer",
+    touchAction: "manipulation",
     userSelect: "none",
     WebkitTapHighlightColor: "transparent",
     transition: [
@@ -71,21 +73,58 @@ export const option = recipe({
       [`${input}:focus + &`]: {
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -2
+      },
+      "&:active": {
+        background: "var(--meu-color-surface)"
       }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(hover: hover)": {
+        selectors: {
+          "&:hover": {
+            color: "var(--meu-color-ink)",
+            background: "var(--meu-color-surface)"
+          }
+        }
+      },
+      "(forced-colors: active)": {
+        border: "1px solid ButtonText",
+        forcedColorAdjust: "auto"
+      }
+    }
   },
   variants: {
     active: {
       true: {
         color: "var(--meu-color-ink)",
         background: "var(--meu-color-surface)",
-        boxShadow: "0 1px 3px var(--meu-color-border)"
+        boxShadow: "0 1px 3px var(--meu-color-border)",
+        "@media": {
+          "(forced-colors: active)": {
+            color: "HighlightText",
+            background: "Highlight",
+            borderColor: "Highlight",
+            boxShadow: "none"
+          }
+        }
       },
       false: {}
     },
     disabled: {
-      true: { color: "var(--meu-color-muted)", cursor: "not-allowed", opacity: 0.5 },
+      true: {
+        color: "var(--meu-color-muted)",
+        cursor: "not-allowed",
+        opacity: 0.5,
+        pointerEvents: "none",
+        "@media": {
+          "(forced-colors: active)": {
+            color: "GrayText",
+            borderColor: "GrayText",
+            opacity: 1
+          }
+        }
+      },
       false: {}
     },
     size: {

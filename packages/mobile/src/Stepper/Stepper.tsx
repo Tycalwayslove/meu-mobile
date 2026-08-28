@@ -1,7 +1,7 @@
 "use client";
 
-import { forwardRef, useState } from "react";
-import type { FocusEvent, KeyboardEvent } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import type { FocusEvent, ForwardedRef, KeyboardEvent, PointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
@@ -13,6 +13,12 @@ function valuesEqual(first: number | null, second: number | null) {
   return first === second || (Number.isNaN(first) && Number.isNaN(second));
 }
 
+function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement | null) {
+  if (typeof ref === "function") ref(node);
+  else if (ref) ref.current = node;
+}
+
+/** A numeric text field with accessible decrement and increment controls. */
 export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepper(
   {
     "aria-describedby": ariaDescribedBy,
@@ -22,6 +28,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     decrementAriaLabel,
     defaultValue = 0,
     disabled = false,
+    dir,
     id,
     incrementAriaLabel,
     max,
@@ -32,6 +39,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     onKeyDown,
     precision,
     readOnly = false,
+    required: requiredProp = false,
     size = "medium",
     status = "default",
     step = 1,
@@ -43,12 +51,26 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
 ) {
   const { locale } = useMeuConfig();
   const fieldContext = useFieldContext();
+  const finiteMin = min !== undefined && Number.isFinite(min) ? min : undefined;
+  const finiteMax = max !== undefined && Number.isFinite(max) ? max : undefined;
+  const lower =
+    finiteMin !== undefined && finiteMax !== undefined ? Math.min(finiteMin, finiteMax) : finiteMin;
+  const upper =
+    finiteMin !== undefined && finiteMax !== undefined ? Math.max(finiteMin, finiteMax) : finiteMax;
+  const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
+  const normalize = (nextValue: number) =>
+    normalizeSteppedNumber({ max: upper, min: lower, precision, step: safeStep, value: nextValue });
+  const normalizeNullable = (nextValue: number | null) =>
+    nextValue === null ? null : normalize(nextValue);
+  const normalizedDefaultValue = normalizeNullable(defaultValue);
   const controlled = value !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = useState<number | null>(defaultValue);
-  const currentValue = controlled ? value : uncontrolledValue;
+  const [uncontrolledValue, setUncontrolledValue] = useState<number | null>(normalizedDefaultValue);
+  const currentValue = normalizeNullable(controlled ? value : uncontrolledValue);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(currentValue === null ? "" : String(currentValue));
-  const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const defaultValueRef = useRef(normalizedDefaultValue);
+  const stepButtonPointerRef = useRef(false);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
   const invalid =
@@ -57,16 +79,54 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     status === "error" ||
     Boolean(fieldContext && fieldContext.invalid);
   const inert = disabled || readOnly;
-  const atMin = currentValue !== null && min !== undefined && currentValue <= min;
-  const atMax = currentValue !== null && max !== undefined && currentValue >= max;
+  const required = requiredProp || Boolean(fieldContext && fieldContext.required);
+  const effectiveLower = lower === undefined ? undefined : normalize(lower);
+  const effectiveUpper = upper === undefined ? undefined : normalize(upper);
+  const atMin =
+    currentValue !== null && effectiveLower !== undefined && currentValue <= effectiveLower;
+  const atMax =
+    currentValue !== null && effectiveUpper !== undefined && currentValue >= effectiveUpper;
 
-  function normalize(nextValue: number) {
-    return normalizeSteppedNumber({ max, min, precision, step: safeStep, value: nextValue });
-  }
+  const trimmedDraft = draft.trim();
+  const parsedDraft = trimmedDraft ? parseDraft(trimmedDraft) : Number.NaN;
+  const draftAriaValue = editing && Number.isFinite(parsedDraft) ? parsedDraft : undefined;
+
+  useEffect(() => {
+    defaultValueRef.current = normalizedDefaultValue;
+  }, [normalizedDefaultValue]);
+
+  useEffect(() => {
+    if (controlled) return;
+    const form = inputRef.current ? inputRef.current.form : null;
+    if (!form) return;
+
+    function handleReset(event: Event) {
+      if (inputRef.current) {
+        inputRef.current.defaultValue =
+          defaultValueRef.current === null ? "" : String(defaultValueRef.current);
+      }
+      void Promise.resolve().then(() => {
+        if (event.defaultPrevented) return;
+        const resetValue = defaultValueRef.current;
+        setUncontrolledValue(resetValue);
+        setDraft(resetValue === null ? "" : String(resetValue));
+        setEditing(false);
+        stepButtonPointerRef.current = false;
+      });
+    }
+
+    form.addEventListener("reset", handleReset);
+    return () => form.removeEventListener("reset", handleReset);
+  }, [controlled, props.form]);
 
   function publish(nextValue: number | null) {
-    if (!controlled) setUncontrolledValue(nextValue);
-    if (!valuesEqual(currentValue, nextValue) && onChange) onChange(nextValue);
+    const normalizedValue = normalizeNullable(nextValue);
+    if (!controlled) setUncontrolledValue(normalizedValue);
+    if (!valuesEqual(currentValue, normalizedValue) && onChange) onChange(normalizedValue);
+  }
+
+  function parseDraft(text: string) {
+    return Number(text.includes(".") ? text : text.replace(",", "."));
   }
 
   function commitDraft() {
@@ -76,16 +136,16 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
       setEditing(false);
       return;
     }
-    const parsed = Number(text);
+    const parsed = parseDraft(text);
     if (Number.isFinite(parsed)) publish(normalize(parsed));
     setEditing(false);
   }
 
   function offset(direction: -1 | 1) {
     if (inert) return;
-    const draftValue = editing && Number.isFinite(Number(draft)) ? Number(draft) : currentValue;
-    const base =
-      draftValue !== null ? draftValue : min !== undefined && Number.isFinite(min) ? min : 0;
+    const parsedDraft = parseDraft(draft);
+    const draftValue = editing && Number.isFinite(parsedDraft) ? parsedDraft : currentValue;
+    const base = draftValue !== null ? draftValue : lower !== undefined ? lower : 0;
     const nextValue = normalize(base + safeStep * direction);
     setEditing(false);
     setDraft(String(nextValue));
@@ -93,11 +153,29 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   }
 
   function handleBlur(event: FocusEvent<HTMLInputElement>) {
-    commitDraft();
+    if (!stepButtonPointerRef.current) commitDraft();
     if (onBlur) onBlur(event);
   }
 
+  function handleStepButtonPointerDown() {
+    stepButtonPointerRef.current = true;
+  }
+
+  function handleStepButtonPointerCancel(event: PointerEvent<HTMLButtonElement>) {
+    if (!stepButtonPointerRef.current) return;
+    stepButtonPointerRef.current = false;
+    if (event.currentTarget.ownerDocument.activeElement !== inputRef.current) commitDraft();
+  }
+
+  function handleStepButtonClick(direction: -1 | 1) {
+    stepButtonPointerRef.current = false;
+    offset(direction);
+  }
+
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (onKeyDown) onKeyDown(event);
+    if (event.defaultPrevented || event.nativeEvent.isComposing || event.keyCode === 229) return;
+
     if (event.key === "ArrowUp") {
       event.preventDefault();
       offset(1);
@@ -106,8 +184,23 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
       offset(-1);
     } else if (event.key === "Enter") {
       event.currentTarget.blur();
+    } else if (event.key === "Home" && lower !== undefined) {
+      event.preventDefault();
+      const nextValue = effectiveLower === undefined ? normalize(lower) : effectiveLower;
+      publish(nextValue);
+      setEditing(false);
+      setDraft(String(nextValue));
+    } else if (event.key === "End" && upper !== undefined) {
+      event.preventDefault();
+      const nextValue = effectiveUpper === undefined ? normalize(upper) : effectiveUpper;
+      publish(nextValue);
+      setEditing(false);
+      setDraft(String(nextValue));
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      setDraft(currentValue === null ? "" : String(currentValue));
+      event.currentTarget.select();
     }
-    if (onKeyDown) onKeyDown(event);
   }
 
   return (
@@ -118,6 +211,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
           : root({ disabled: inert, size, status: invalid ? "error" : status })
       }
       style={style}
+      dir={dir}
       data-meu-component="stepper"
       data-size={size}
       data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
@@ -126,14 +220,20 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         className={button}
         type="button"
         disabled={inert || atMin}
+        aria-controls={resolvedId}
         aria-label={decrementAriaLabel || (locale === "zh-CN" ? "减少" : "Decrease")}
-        onClick={() => offset(-1)}
+        onPointerDown={handleStepButtonPointerDown}
+        onPointerCancel={handleStepButtonPointerCancel}
+        onClick={() => handleStepButtonClick(-1)}
       >
         <span aria-hidden="true">−</span>
       </button>
       <input
         {...props}
-        ref={ref}
+        ref={(node) => {
+          inputRef.current = node;
+          assignRef(ref, node);
+        }}
         id={resolvedId}
         className={input}
         type="text"
@@ -141,7 +241,9 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         inputMode="decimal"
         value={editing ? draft : currentValue === null ? "" : String(currentValue)}
         disabled={disabled}
+        dir={dir}
         readOnly={readOnly}
+        required={required}
         onChange={(event) => setDraft(event.target.value)}
         onFocus={(event) => {
           setDraft(currentValue === null ? "" : String(currentValue));
@@ -151,9 +253,10 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         }}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        aria-valuenow={currentValue === null ? undefined : currentValue}
-        aria-valuemin={min}
-        aria-valuemax={max}
+        aria-valuenow={editing ? draftAriaValue : currentValue === null ? undefined : currentValue}
+        aria-valuemin={effectiveLower}
+        aria-valuemax={effectiveUpper}
+        aria-required={required || undefined}
         aria-describedby={describedBy}
         aria-invalid={invalid || undefined}
       />
@@ -161,8 +264,11 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         className={button}
         type="button"
         disabled={inert || atMax}
+        aria-controls={resolvedId}
         aria-label={incrementAriaLabel || (locale === "zh-CN" ? "增加" : "Increase")}
-        onClick={() => offset(1)}
+        onPointerDown={handleStepButtonPointerDown}
+        onPointerCancel={handleStepButtonPointerCancel}
+        onClick={() => handleStepButtonClick(1)}
       >
         <span aria-hidden="true">+</span>
       </button>

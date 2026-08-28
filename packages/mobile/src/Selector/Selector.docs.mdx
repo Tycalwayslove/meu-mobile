@@ -1,0 +1,216 @@
+---
+name: Selector
+slug: selector
+package: "@meu/mobile"
+exports: [Selector]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    data-entry-selector--single,
+    data-entry-selector--multiple,
+    data-entry-selector--sizes,
+    data-entry-selector--required-error,
+    data-entry-selector--disabled,
+    data-entry-selector--rtl-and-long-content,
+    data-entry-selector--controlled-interaction
+  ]
+source: packages/mobile/src/Selector
+---
+
+# Selector
+
+## 当前能力
+
+- 以原生 radio 呈现单选，以原生 checkbox 呈现多选；公开值始终为数组，便于同一业务在单选和多选间切换。
+- 支持受控、非受控、单选再次点击清空、选项级/整体禁用、描述、1–6 列、三档尺寸、错误态和可选勾选图形。
+- `value` 同时作为选项 identity 与原生 FormData 值；string 与 number 分开识别，重复 identity 只保留第一项。
+- 值按 `options` 顺序归一化，不受用户点击顺序影响；单选只保留首个有效值，已删除的选项不会残留为幽灵值。
+- 支持 Field label/description/error/required 合并、原生 constraint validation、外部 `form` 关联、表单 reset、root ref 与 React Hook Form adapter。
+- 每个交互目标最小 44×44 CSS px；支持 RTL、200% 字号换行、reduced motion、forced colors 和服务端渲染。
+
+当前状态仍为 `implementation`。自动 axe、移动 Chromium/WebKit E2E、Chromatic Light/Dark 矩阵与真机 VoiceOver/TalkBack 证据尚未完成，不能标记为 commercial。
+
+## 何时使用
+
+用于 2–12 个可一眼比较的配送、规格、权益等卡片选项。选项可附短描述，多选时适合服务范围或筛选条件。
+
+## 何时不要使用
+
+大量或远程搜索选项使用 Picker、TreeSelect 或搜索页；即时切换同一内容视图使用 SegmentedControl。不要把链接、按钮、输入框放进 `label` 或 `description`，原生 label 内嵌交互会制造冲突点击路径。
+
+## 结构与状态
+
+单选根为 `role="radiogroup"`，子项是真实同名 radio；多选根为 `role="group"`，子项是真实 checkbox。根暴露：
+
+- `data-meu-component="selector"`
+- `data-mode="single|multiple"`
+- `data-size="small|medium|large"`
+- `data-state="default|disabled|error"`
+
+每项暴露 `data-selected` 和 `data-disabled`。选中同时通过 native checked、边框、强调色与可选勾选表达，不只依赖颜色。
+
+## 基础用法
+
+```tsx
+<Selector
+  name="shipping"
+  options={[
+    { label: "标准配送", description: "预计 2–3 天送达", value: "standard" },
+    { label: "到店自提", value: "pickup" }
+  ]}
+  defaultValue={["standard"]}
+  onChange={(value, selectedOptions, details) => {
+    console.log(value, selectedOptions, details?.source);
+  }}
+/>
+```
+
+多选：
+
+```tsx
+<Selector
+  aria-label="服务范围"
+  multiple
+  name="services"
+  options={serviceOptions}
+  defaultValue={["delivery", "pickup"]}
+/>
+```
+
+## 受控与非受控
+
+- 不传 `value` 时为非受控，`defaultValue` 只决定首次值和原生 form reset 的目标值。
+- 传 `value` 时为受控；交互只发布 `onChange`，画面继续服从调用方的 `value`。
+- 值数组会按有效唯一 option 顺序归一化。single 模式只显示第一个有效值；controlled 输入中的未知值不显示，也不会被组件回写。
+- 非受控选项被删除后会自动剔除；single 模式从 multiple 切回时保留 option 顺序中的第一个值。
+- `allowClear=true` 仅允许非必填 single 再次激活当前 radio 时清空。`required` 时清空被关闭，避免制造与约束相反的动作。
+
+## 表单集成
+
+- `name` 写入每个原生 input；multiple 的 FormData 使用同名多值，例如 `formData.getAll("services")`。
+- number identity 会按 HTML 规则序列化为字符串，服务端需按 schema 转型。
+- `form` 可关联组件外部的 `<form id>`；未传时使用最近祖先 form。
+- single required 使用原生 radio-group 必填。multiple required 在空值时将 required 放到第一项可用 checkbox，任一项选中后移除，从而表达“至少一项”而非“每项必选”。业务 schema 仍应重复验证。
+- 原生 reset 将非受控值恢复到首次 `defaultValue`；受控值只能由调用方 reset。
+- `MeuFormSelector` 完成 React Hook Form 的 value、dirty、touched、disabled、required、error 与 root focus 连接。
+
+## Props
+
+API 表由 API Extractor 根据 `SelectorProps` 和 `SelectorOption` 生成。关键约束：
+
+- `options[].value` 是 identity，必须唯一；`1` 与 `"1"` 是不同 identity，但提交到 FormData 后都为 `"1"`。
+- 重复 identity 不渲染后续项，防止同一 checked 状态对应多个视觉卡片。
+- `columns` 对有限数值取整并限制到 1–6；`NaN`/Infinity 回退为 2。
+- `ariaLabel` 用于 label 只有图形或复杂节点时提供稳定名称；正常文字标签不需要重复声明。
+- `aria-label` 优先于 Field label；`aria-labelledby` 与 Field label id、`aria-describedby` 与 Field description/error 会无损合并并去重。
+
+## Events
+
+`onChange(value, selectedOptions, details?)` 只由用户操作触发，不因 props、options 变化或 reset 自动触发：
+
+- `value`: 按 source options 顺序归一化后的 identity 数组。
+- `selectedOptions`: 与 value 对应的 option 对象。
+- `details.source`: 常规选择为 `option`，再次点击当前 single 清空为 `clear`。
+- `details.option`: 本次直接操作的 option；`details.event` 是原生 input change/click 事件。
+
+第三参数保持可选以兼容现有 form adapter 的两参数转发；组件直接调用时始终提供。
+
+## Ref 与命令式方法
+
+ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 允许表单库在校验失败时聚焦整个组；正常 Tab 路径进入原生 input。组件不提供自定义命令式 API。
+
+## 键盘操作
+
+| 模式     | 按键            | 行为                                                        |
+| -------- | --------------- | ----------------------------------------------------------- |
+| single   | Tab / Shift+Tab | 进入或离开整个原生 radio group，浏览器维持单一 tab stop     |
+| single   | 方向键          | 按浏览器原生 radio 规则移动并选择，RTL 下由平台处理物理方向 |
+| single   | Space           | 选择当前 radio                                              |
+| multiple | Tab / Shift+Tab | 逐项经过未禁用 checkbox                                     |
+| multiple | Space           | 切换当前 checkbox                                           |
+
+这里不实现自定义 roving tabindex。radio 已由 HTML 平台提供 roving 行为；给 checkbox 套 radio 式 roving 会让独立选项变得不可达。
+
+## 触摸与手势
+
+整张 label 卡片是触摸目标，small/medium/large 最小高度分别为 44/48/52 px。使用 `touch-action: manipulation` 和透明 tap highlight；没有横滑、长按或依赖 hover 的动作。
+
+## 无障碍
+
+- 可见 option label 通过 `aria-labelledby` 精确命名 input，description 通过 `aria-describedby` 单独朗读，避免把说明拼进每次名称。
+- Field 的 description/error 同时关联根和各 input；错误使用文字、根 `aria-invalid` 和视觉轮廓表达。
+- single 可合法使用 radiogroup `aria-required`；multiple 不把 `aria-required` 错放到通用 group，而用 native constraint validation 表达。
+- 整体禁用通过每个 native input 的 `disabled` 和根 `aria-disabled` 表达；disabled 已选值保留。
+- forced colors 下边框、焦点、选中和禁用使用系统色；reduced motion 将状态过渡降为 1 ms。
+
+## 动效
+
+只过渡背景色和边框色，使用全局 exit 时长与标准 easing。无布局动画、循环动画或入场动画；`prefers-reduced-motion: reduce` 下近乎即时切换。
+
+## 主题与定制
+
+颜色、圆角、间距、字体、motion 均来自 Meu Token。稳定定制入口为根 `className/style` 和公开 data 属性；内部生成 class 与 DOM 层级不属于 API。不要通过子选择器覆盖隐藏 input 的裁剪方式，否则会破坏键盘焦点。
+
+## SSR 与 Next.js
+
+首次 render 仅使用 React `useId` 和 props，不读取浏览器全局。事件、reset 监听只在 effect 中注册；服务端输出真实 checked/required/name/value，适合 Next App Router client component 的 SSR。SSR 与客户端首帧必须使用同一 option 顺序和 identity。
+
+## RTL 与国际化
+
+文本起点、勾选位置和额外 padding 使用逻辑方向属性；grid 自动遵循文档方向。文字允许换行并使用 `overflow-wrap:anywhere`，适配中文、阿拉伯文、emoji 和长翻译。业务负责 option 文案本地化。
+
+## 浏览器与 WebView
+
+依赖 React 19、原生 input/label/FormData/constraint validation 和标准 CSS。目标为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。不依赖 Pointer Events、ResizeObserver、Popover API 或 UA sniffing；原生 radio 的方向键细节由宿主浏览器决定。
+
+## 边界情况与已知限制
+
+- `options` 为空或全部禁用时，required 无可校验的 enabled input；调用方必须在 schema 层返回明确错误。
+- HTML FormData 不保留 number 类型，且字符串 `"1"` 与 number `1` 会提交相同文本；需要区分时使用带前缀的 string identity。
+- 浏览器不支持用 native radio 再次点击取消，所以 `allowClear` 通过 click 拦截实现；读屏用户可通过再次 Space 清空，但 required 时该路径关闭。
+- option description 应是简短静态说明；动态错误属于 Field error，不应放入每个 option。
+- 当前未虚拟化，超过约 20 项应切换搜索或 Picker 模式。
+
+## 性能预算
+
+render 为 O(options × selected values)，建议规模不超过 20 项；无全局监听。非受控模式仅在 options/mode 改变时收敛无效值，并在所属 form 上注册一个 reset 监听。
+
+## 测试证据
+
+- Unit: `Selector.test.tsx` 覆盖 single/multiple、controlled、clear、order、duplicate、disabled、required、FormData、外部 form、reset、Field 合并、ref 和 columns。
+- SSR: `Selector.ssr.test.tsx` 覆盖无 window/document 的原生 checked/required/name/value 输出。
+- Story: seven states cover single、multiple、sizes、required error、disabled、RTL long content 与 controlled interaction。
+- RTL / reduced motion / forced colors: CSS 契约已实现，专属自动化与截图矩阵待补。
+- Axe、移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 接入 axe、Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
+- 在真机确认 iOS VoiceOver 与 Android TalkBack 对 radio group、option description 和 clear 动作的公告。
+- 若真实业务出现 20+ options，另立 searchable/virtualized 组件，不向 Selector 叠加复杂检索。
+
+### 已完成
+
+- 冻结 single/multiple 受控与非受控契约、option identity、source order 和 clear 原因。
+- 修复 Field idref 合并、required context、multiple 至少一项 native validation、外部 form 与 reset。
+- 保留 native radio/checkbox 正确键盘模型和 FormData 事实源。
+- 补齐 44 px 目标、RTL 逻辑属性、长文换行、reduced motion、forced colors、SSR、TSDoc、Story 与 Unit。
+
+## 维护规则
+
+修改公开类型、值归一化、input 语义、required、键盘、DOM/data 属性或样式状态时，必须在同一变更中更新本文件、README、Story、Unit/SSR 与 API 报告。新状态没有自动化或真机证据时保持 `status: implementation`。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                                | 迁移说明                                                                                      |
+| ---------- | ------ | -------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | 完成 identity、Field/required、form/reset、键盘、兼容和永久文档加固 | 重复 value 后续项不再渲染；required single 不再允许清空；onChange 新增可选第三个 details 参数 |

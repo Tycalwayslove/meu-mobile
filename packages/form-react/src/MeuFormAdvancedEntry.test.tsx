@@ -43,6 +43,9 @@ function EntryForm({ onSubmit }: { onSubmit: (values: Values) => void }) {
         multiple
         rules={{ validate: (value) => (Array.isArray(value) && value.length > 0) || "请选择服务" }}
       />
+      <Button type="button" onClick={() => form.setFocus("services")}>
+        聚焦服务
+      </Button>
       <Button type="submit">保存配置</Button>
     </MeuForm>
   );
@@ -52,6 +55,11 @@ describe("MeuForm advanced entry adapters", () => {
   it("validates and submits number, rating and array values", async () => {
     const onSubmit = vi.fn();
     render(<EntryForm onSubmit={onSubmit} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "聚焦服务" }));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "配送" }))
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "保存配置" }));
     await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(2));
@@ -64,6 +72,11 @@ describe("MeuForm advanced entry adapters", () => {
     fireEvent.change(screen.getByRole("slider", { name: "服务评分" }), {
       target: { value: "4" }
     });
+    fireEvent.click(screen.getByRole("button", { name: "保存配置" }));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("checkbox", { name: "配送" }))
+    );
+
     fireEvent.click(screen.getByRole("checkbox", { name: "配送" }));
     fireEvent.click(screen.getByRole("button", { name: "保存配置" }));
 

@@ -23,7 +23,13 @@ export const root = recipe({
         boxShadow: "0 0 0 1px var(--meu-color-accent)"
       }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "ButtonText",
+        forcedColorAdjust: "auto"
+      },
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+    }
   },
   variants: {
     disabled: {
@@ -58,8 +64,8 @@ export const button = style({
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:first-child": { borderRight: "1px solid var(--meu-color-border)" },
-    "&:last-child": { borderLeft: "1px solid var(--meu-color-border)" },
+    "&:first-child": { borderInlineEnd: "1px solid var(--meu-color-border)" },
+    "&:last-child": { borderInlineStart: "1px solid var(--meu-color-border)" },
     "&:active:not(:disabled)": { background: "var(--meu-color-subtle)" },
     "&:focus": {
       position: "relative",
@@ -68,6 +74,11 @@ export const button = style({
       outlineOffset: -3
     },
     "&:disabled": { color: "var(--meu-color-muted)", cursor: "not-allowed", opacity: 0.55 }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      borderColor: "ButtonText"
+    }
   }
 });
 
@@ -84,5 +95,10 @@ export const input = style({
   textAlign: "center",
   selectors: {
     "&:disabled": { WebkitTextFillColor: "var(--meu-color-muted)", opacity: 1 }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      color: "FieldText"
+    }
   }
 });

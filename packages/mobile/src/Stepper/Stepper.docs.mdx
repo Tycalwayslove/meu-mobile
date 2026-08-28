@@ -1,0 +1,201 @@
+---
+name: Stepper
+slug: stepper
+package: "@meu/mobile"
+exports: [Stepper]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    data-entry-stepper--default,
+    data-entry-stepper--decimal,
+    data-entry-stepper--in-field,
+    data-entry-stepper--controlled,
+    data-entry-stepper--native-form-reset,
+    data-entry-stepper--required-empty,
+    data-entry-stepper--at-maximum,
+    data-entry-stepper--error,
+    data-entry-stepper--read-only,
+    data-entry-stepper--disabled,
+    data-entry-stepper--right-to-left,
+    data-entry-stepper--small,
+    data-entry-stepper--large
+  ]
+source: packages/mobile/src/Stepper
+---
+
+# Stepper
+
+## 当前能力
+
+- 文本输入 + 两个原生按钮组成的 spinbutton，支持点击、触摸、键盘、直接输入、复制粘贴、受控/非受控与 ref。
+- min/max/step/precision 统一规范化；反向 bounds 排序、非法 step 回退 1、浮点按 step base 对齐。
+- 支持 `allowEmpty` 的 null、decimal inputMode、小数逗号、无效草稿回滚、IME 保护、可取消的调用方 keydown。
+- 原生 form name/required/disabled/readOnly/reset；Field label、必填、说明和错误关联；增减按钮通过 aria-controls 指向输入。
+- 44px 按钮、三档高度、RTL 逻辑边框、reduced-motion 和 forced-colors 降级。
+
+当前为 V2 `implementation`；单元、SSR 与 Story 已建立，尚缺 axe、移动浏览器、视觉与真机验收，不能标记为 commercial。
+
+## 何时使用
+
+购物数量、人数、份数、重量增量等精确数值，常用值可通过少量点击完成，同时允许键盘直接输入。
+
+## 何时不要使用
+
+- 只需感知相对值时用 Slider；少量枚举值用 Selector；手机号、验证码不是数字运算，使用 TextInput。
+- 金额结算、任意精度金融数、科学计数、分数、单位换算不要只依赖 JS number；业务应使用 decimal/string 模型。
+- 超大范围、高频连续变化不适合逐步点击。
+
+## 结构与状态
+
+DOM 顺序为 decrement button、text input(role spinbutton)、increment button。状态为 default/focus/error/readOnly/disabled，边界会分别禁用按钮。根暴露 component/size/state data 属性；内部 class 不稳定。
+
+## 基础用法
+
+```tsx
+<Field label="购买数量" required description="每人限购 8 件">
+  <Stepper name="quantity" min={1} max={8} defaultValue={1} />
+</Field>
+```
+
+小数：
+
+```tsx
+<Stepper name="weight" min={0} max={20} step={0.25} precision={2} defaultValue={1.5} />
+```
+
+## 受控与非受控
+
+- value 不为 undefined 时受控；null 是合法空值，不代表非受控。
+- 聚焦时建立字符串草稿，允许用户暂时输入 `-`、`.` 等中间形态；blur/Enter 才解析、对齐并调用 onChange。
+- 无效草稿或不允许空值的空草稿回滚到当前规范值，不发 change；allowEmpty 时空草稿提交 null。
+- 按钮/Arrow/Home/End 立即提交。Escape 回滚草稿但保留焦点。
+- form.reset 返回时原生 DOM/FormData 已同步恢复 defaultValue，随后只同步 React 状态且不调用 onChange；取消 reset 时保持当前值，受控状态由父级决定。
+
+## 数值、精度与边界
+
+- 有限 min/max 转升序；单边 bounds 保留；NaN/Infinity 输入回滚或规范化。
+- step 必须正且有限；以有效 min（没有则 0）为基准吸附。max 不在步长网格上时，有效上限为最后一个可达步进值；End、增加按钮、ARIA 上限和发布值统一使用该端点。
+- precision 显式时限制 0–12；省略时取 step/min 的十进制位数。回调是 number，不保留视觉末尾零。
+- 仅包含逗号而无点号的草稿将首个逗号作为 decimal separator；不解析千分位、货币符号或本地化数字字形。
+
+## 表单集成
+
+- input 透传 name、form、required、disabled、readOnly、onInvalid、autocomplete 等适用属性。
+- Field required 会落到原生 text required 与 `aria-required`；空值可被浏览器 validity/RHF 捕获。
+- min/max/step 是组件数值契约，不是 text input 的原生 constraint validation；服务端/schema 必须重复验证。
+- readOnly 仍进入 FormData且可聚焦/选择；disabled 不进入 FormData且按钮不可操作。
+- ref 指向 text input，可 focus/select、读取 form/validity/value。
+
+## Props
+
+完整 API 由 types TSDoc/API Extractor生成。专有 Props：value/defaultValue、min/max/step/precision、allowEmpty、incrementAriaLabel、decrementAriaLabel、size、status、onChange；其余来自原生 input（冲突字段除外）。
+
+## Events
+
+- `onChange(value)`：按钮、键盘步进或有效草稿 commit 后，且规范值确实变化时触发。
+- `onFocus/onBlur/onKeyDown` 保留调用方 handler；blur 在内部 commit 后交给调用方。
+- 调用方 onKeyDown 先运行；preventDefault 会取消内建处理。IME composing/keyCode 229 不触发步进。
+- 原生 onInput/composition/paste 可透传，但自定义 onChange 不是逐字符事件。
+
+## Ref 与命令式方法
+
+ref 指向中央真实 input，可使用原生 `focus()`、`blur()`、`select()`、selection 与 form API。增减按钮没有公开 ref；
+程序化步进应更新受控 value，而不是模拟按钮点击。
+
+## 键盘操作
+
+| 按键       | 行为                                |
+| ---------- | ----------------------------------- |
+| ArrowUp    | 增加一个 step                       |
+| ArrowDown  | 减少一个 step                       |
+| Home / End | 有对应边界时提交 min/max            |
+| Enter      | blur 并提交草稿                     |
+| Escape     | 回滚草稿、保留焦点与当前值          |
+| Tab        | 按 DOM 顺序经过减按钮、输入、增按钮 |
+
+## 触摸与手势
+
+按钮最小 44×44 CSS px并使用原生 button 激活语义；当前没有长按连加、滑动或 document 监听。快速点击逐次提交，业务请求应做幂等/节流。页面滚动与系统手势不被阻止。
+
+## 无障碍
+
+- input role=spinbutton 暴露 value now/min/max/required/invalid；有效编辑草稿会同步 value now，不完整或非法草稿不沿用旧值；必须有 Field label 或 ARIA name。
+- 增减按钮有 ConfigProvider 本地化名称（中：增加/减少，英：Increase/Decrease）和 aria-controls。
+- 边界、readOnly/disabled 会禁用相应按钮；错误由 Field describedby + aria-invalid 公布。
+- 状态不只靠颜色；按钮 disabled、input readonly/disabled 和 ARIA 提供语义。
+
+## 动效
+
+只有边框/focus 过渡和即时 active 背景；reduced-motion 把过渡缩至 1ms。组件没有长按连续计时器或惯性动画。
+
+## 主题与定制
+
+forced-colors 使用系统 ButtonText/FieldText，焦点由 outline 保留。主题使用
+surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、按钮 accessible labels 与全局 Token；内部 grid
+和 className 不是覆盖 API。
+
+## SSR 与 Next.js
+
+- render 不读取浏览器全局；服务端确定输出两按钮、spinbutton、ARIA 和规范值。effect 只在客户端关联 form reset。
+
+## RTL 与国际化
+
+- dir 同时传给 root/input；grid 顺序随 direction，按钮分隔线使用逻辑边框。数字内容方向可由调用方单独设 dir。
+
+## 浏览器与 WebView
+
+构建产物通过 Chrome 70 / iOS 13 语法基线。`inputMode=decimal` 只提示软键盘，不保证包含负号/小数符号；IME、decimal
+comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真机验证。
+
+## 边界情况与已知限制
+
+- JS number 最多 12 位小数保护，不适合金融 arbitrary precision。
+- 没有 formatter/parser、单位前后缀、长按连续步进或 wheel 步进。
+- 受控 value 被规范化显示；父级若持续传超界值，回调不会自动修正父状态。
+- 原生 text validity 不认识 min/max/step；必须有业务/schema 校验。
+- decimal comma 只处理简单单逗号，不处理 locale grouping。
+
+## 性能预算
+
+无第三方运行时、layout read、持续 timer 或 document listener；每次 commit 为常数级解析/规范化。form reset 仅在拥有 form 且非受控时安装一个监听器。
+
+## 测试证据
+
+- Unit 12 项：按钮/键盘/bounds、小数与空值、Field、反向 bounds/受控、非整步有效上限、草稿单次发布与 ARIA 同步、decimal comma/无效草稿、取消/IME、required/controls、同步 FormData/reset 与取消边界。
+- SSR 1 项：确定 spinbutton、name/value 与两个原生按钮。
+- Story play：NativeFormReset 验证增量和恢复；状态矩阵含 decimal、controlled、required empty、maximum、error、readOnly、disabled、RTL 与尺寸。
+- 待补：axe、软键盘/IME/粘贴移动 E2E、forced-colors/200%/Light/Dark、VoiceOver/TalkBack。
+
+## V2 优化记录
+
+### 已完成
+
+- 默认值、受控值、bounds、step、precision 统一规范化。
+- 增加 form reset、required/aria-required、aria-controls 与 readOnly FormData 说明。
+- 增加 decimal comma、无效草稿回滚、Escape/Home/End、IME 防误触与可取消 keydown。
+- RTL 逻辑边框、forced-colors、TSDoc、SSR/单元/Story 与本事实源。
+
+### 待优化
+
+- 完成 axe、移动浏览器、真机读屏与视觉验收。
+- 依据真实电商长按需求评估可取消的 repeat 契约；没有埋点和跨端规范前不默认启用。
+- 若需要本地化 formatter/parser，必须同时冻结编辑态、光标与服务端序列化契约。
+
+## 维护规则
+
+行为、Props、Events、默认值、兼容范围、限制或证据改变时，同一 PR 必须更新本文件、types TSDoc、测试和 Story；事实证据不足不得标 commercial。
+
+## 变更记录
+
+| 日期       | 版本   | 类型          | 内容                                             | 迁移说明                         |
+| ---------- | ------ | ------------- | ------------------------------------------------ | -------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 全链路数值规范化、草稿/IME/键盘契约与 form reset | 超界或 step 不对齐值会显示规范值 |
+| 2026-08-28 | 未发布 | accessibility | Field required、aria-controls、RTL/高对比        | 无                               |
+| 2026-08-28 | 未发布 | docs          | 建立 Stepper V2 永久事实源                       | README 改为仅指向本文件          |

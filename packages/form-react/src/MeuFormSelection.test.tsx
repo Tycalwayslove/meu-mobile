@@ -67,6 +67,9 @@ function SelectionForm({ onSubmit }: { onSubmit: (values: Values) => void }) {
       >
         同意服务协议
       </MeuFormCheckbox>
+      <Button type="button" onClick={() => form.setFocus("viewMode")}>
+        聚焦展示方式
+      </Button>
       <Button type="submit">提交选择</Button>
     </MeuForm>
   );
@@ -77,15 +80,25 @@ describe("MeuForm selection adapters", () => {
     const onSubmit = vi.fn();
     render(<SelectionForm onSubmit={onSubmit} />);
 
+    fireEvent.click(screen.getByRole("button", { name: "聚焦展示方式" }));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("radio", { name: "列表" }))
+    );
+
     fireEvent.click(screen.getByRole("button", { name: "提交选择" }));
     await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(4));
     expect(document.activeElement).toBe(screen.getByRole("group", { name: "服务范围" }));
 
     fireEvent.click(screen.getByRole("checkbox", { name: "配送" }));
     fireEvent.click(screen.getByRole("radio", { name: "急速配送" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "同意服务协议" }));
+    fireEvent.click(screen.getByRole("button", { name: "提交选择" }));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("radio", { name: "列表" }))
+    );
+
     fireEvent.click(screen.getByRole("switch", { name: "消息通知" }));
     fireEvent.click(screen.getByRole("radio", { name: "卡片" }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "同意服务协议" }));
     fireEvent.click(screen.getByRole("button", { name: "提交选择" }));
 
     await waitFor(() =>

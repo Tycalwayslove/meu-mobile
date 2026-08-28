@@ -1,16 +1,22 @@
 "use client";
 
-import { forwardRef, useRef, useState } from "react";
-import type { CSSProperties, ChangeEvent, PointerEvent } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import type { CSSProperties, ChangeEvent, ForwardedRef, MouseEvent, PointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
-import { clampNumber, roundNumber } from "../internal/numbers";
+import { clampNumber, normalizeSteppedNumber } from "../internal/numbers";
 import { activeCharacter, activeStar, input, root, star, stars } from "./Rate.css";
 import type { RateProps } from "./types";
 
 type StarStyle = CSSProperties & { "--meu-rate-star-width": string };
 
+function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement | null) {
+  if (typeof ref === "function") ref(node);
+  else if (ref) ref.current = node;
+}
+
+/** A touch-friendly rating control backed by native range semantics. */
 export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   {
     "aria-describedby": ariaDescribedBy,
@@ -23,9 +29,13 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
     count = 5,
     defaultValue = 0,
     disabled = false,
+    dir,
     getValueLabel,
     id,
+    onClick,
     onChange,
+    onPointerCancel,
+    onPointerDown,
     readOnly = false,
     size = "medium",
     status = "default",
@@ -38,11 +48,15 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   const { locale } = useMeuConfig();
   const fieldContext = useFieldContext();
   const safeCount = Math.max(1, Math.trunc(Number.isFinite(count) ? count : 5));
+  const increment = allowHalf ? 0.5 : 1;
+  const normalize = (nextValue: number) =>
+    normalizeSteppedNumber({ max: safeCount, min: 0, step: increment, value: nextValue });
   const controlled = value !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = useState(() =>
-    clampNumber(defaultValue, 0, safeCount)
-  );
-  const currentValue = clampNumber(controlled ? value : uncontrolledValue, 0, safeCount);
+  const normalizedDefaultValue = normalize(defaultValue);
+  const [uncontrolledValue, setUncontrolledValue] = useState(normalizedDefaultValue);
+  const currentValue = normalize(controlled ? value : uncontrolledValue);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const defaultValueRef = useRef(normalizedDefaultValue);
   const pointerStartValue = useRef(currentValue);
   const pointerTargetValue = useRef(currentValue);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
@@ -60,8 +74,32 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
       : `${currentValue} of ${safeCount} stars`;
   const starWidth = size === "small" ? 30 : size === "large" ? 38 : 34;
 
+  useEffect(() => {
+    defaultValueRef.current = normalizedDefaultValue;
+  }, [normalizedDefaultValue]);
+
+  useEffect(() => {
+    if (controlled) return;
+    const form = inputRef.current ? inputRef.current.form : null;
+    if (!form) return;
+
+    function handleReset(event: Event) {
+      if (inputRef.current) inputRef.current.defaultValue = String(defaultValueRef.current);
+      void Promise.resolve().then(() => {
+        if (event.defaultPrevented) return;
+        const resetValue = defaultValueRef.current;
+        setUncontrolledValue(resetValue);
+        pointerStartValue.current = resetValue;
+        pointerTargetValue.current = resetValue;
+      });
+    }
+
+    form.addEventListener("reset", handleReset);
+    return () => form.removeEventListener("reset", handleReset);
+  }, [controlled, props.form]);
+
   function publish(nextValue: number) {
-    const bounded = clampNumber(nextValue, 0, safeCount);
+    const bounded = normalize(nextValue);
     if (!controlled) setUncontrolledValue(bounded);
     if (bounded !== currentValue && onChange) onChange(bounded);
   }
@@ -69,18 +107,37 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   function valueFromPointer(event: PointerEvent<HTMLInputElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
     if (rect.width <= 0) return currentValue;
-    const raw = ((event.clientX - rect.left) / rect.width) * safeCount;
+    const view = event.currentTarget.ownerDocument.defaultView;
+    const rtl =
+      event.currentTarget.dir === "rtl" ||
+      (view ? view.getComputedStyle(event.currentTarget).direction === "rtl" : false);
+    const ratio = (event.clientX - rect.left) / rect.width;
+    const raw = (rtl ? 1 - ratio : ratio) * safeCount;
     const multiplier = allowHalf ? 2 : 1;
     return clampNumber(Math.ceil(raw * multiplier) / multiplier, 0, safeCount);
   }
 
   function handlePointerDown(event: PointerEvent<HTMLInputElement>) {
+    if (onPointerDown) onPointerDown(event);
+    if (event.defaultPrevented) return;
     pointerStartValue.current = currentValue;
     pointerTargetValue.current = valueFromPointer(event);
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    publish(roundNumber(event.target.valueAsNumber, allowHalf ? 1 : 0));
+    publish(event.target.valueAsNumber);
+  }
+
+  function handleClick(event: MouseEvent<HTMLInputElement>) {
+    if (onClick) onClick(event);
+    if (event.defaultPrevented) return;
+    if (
+      event.detail > 0 &&
+      allowClear &&
+      pointerStartValue.current === pointerTargetValue.current
+    ) {
+      publish(0);
+    }
   }
 
   return (
@@ -91,46 +148,65 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
           : root({ disabled: inert, size, status: invalid ? "error" : status })
       }
       style={style}
+      dir={dir}
       data-meu-component="rate"
       data-size={size}
       data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
       {...(readOnly
         ? {
             id: resolvedId,
-            role: "img" as const,
+            role: "meter" as const,
             "aria-label": props["aria-label"] || valueLabel,
-            "aria-describedby": describedBy
+            "aria-labelledby": props["aria-labelledby"],
+            "aria-describedby": describedBy,
+            "aria-valuemin": 0,
+            "aria-valuemax": safeCount,
+            "aria-valuenow": currentValue,
+            "aria-valuetext": ariaValueText || valueLabel
           }
         : {})}
     >
       {!readOnly ? (
         <input
           {...props}
-          ref={ref}
+          ref={(node) => {
+            inputRef.current = node;
+            assignRef(ref, node);
+          }}
           id={resolvedId}
           className={input}
           type="range"
           min={0}
           max={safeCount}
-          step={allowHalf ? 0.5 : 1}
+          step={increment}
           value={currentValue}
           disabled={disabled}
+          dir={dir}
           onChange={handleChange}
           onPointerDown={handlePointerDown}
-          onClick={(event) => {
-            if (
-              event.detail > 0 &&
-              allowClear &&
-              pointerStartValue.current === pointerTargetValue.current
-            ) {
-              publish(0);
-            }
+          onPointerCancel={(event) => {
+            if (onPointerCancel) onPointerCancel(event);
+            pointerTargetValue.current = Number.NaN;
           }}
+          onClick={handleClick}
           aria-valuetext={ariaValueText || valueLabel}
           aria-describedby={describedBy}
           aria-invalid={invalid || undefined}
         />
-      ) : null}
+      ) : (
+        <input
+          ref={(node) => {
+            inputRef.current = node;
+            assignRef(ref, node);
+          }}
+          type="hidden"
+          name={props.name}
+          form={props.form}
+          value={currentValue}
+          disabled={disabled}
+          data-meu-slot="form-value"
+        />
+      )}
       <span className={stars({ size })} aria-hidden="true">
         {Array.from({ length: safeCount }, (_, index) => {
           const fill = Math.min(Math.max(currentValue - index, 0), 1) * 100;

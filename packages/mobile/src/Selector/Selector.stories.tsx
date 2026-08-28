@@ -14,7 +14,7 @@ const options = [
 const meta = {
   title: "Data Entry/Selector",
   component: Selector,
-  args: { options }
+  args: { "aria-label": "配送方案", options }
 } satisfies Meta<typeof Selector>;
 
 export default meta;
@@ -22,21 +22,68 @@ type Story = StoryObj<typeof meta>;
 
 export const Single: Story = { args: { defaultValue: ["standard"] } };
 
-export const Multiple: Story = { args: { defaultValue: ["standard", "pickup"], multiple: true } };
+export const Multiple: Story = {
+  args: { defaultValue: ["standard", "pickup"], multiple: true }
+};
 
-export const InField: Story = {
+export const Sizes: Story = {
   render: () => (
-    <Field label="配送方案" description="选择一种可用方案">
-      <Selector options={options} defaultValue={["standard"]} />
+    <div style={{ display: "grid", gap: 16 }}>
+      <Selector aria-label="小尺寸" options={options} size="small" />
+      <Selector aria-label="中尺寸" options={options} size="medium" />
+      <Selector aria-label="大尺寸" options={options} size="large" />
+    </div>
+  )
+};
+
+export const RequiredError: Story = {
+  render: () => (
+    <Field label="配送方案" description="请选择一种可用方案" error="配送方案不能为空" required>
+      <Selector options={options} required status="error" />
     </Field>
+  )
+};
+
+export const Disabled: Story = {
+  args: { defaultValue: ["standard"], disabled: true }
+};
+
+export const RtlAndLongContent: Story = {
+  render: () => (
+    <div dir="rtl">
+      <Selector
+        aria-label="طريقة التسليم"
+        columns={1}
+        defaultValue={["standard"]}
+        options={[
+          {
+            value: "standard",
+            label: "التوصيل القياسي إلى عنوان طويل",
+            description: "يصل الطلب عادة خلال يومين إلى ثلاثة أيام عمل"
+          },
+          { value: "pickup", label: "الاستلام من المتجر" }
+        ]}
+      />
+    </div>
   )
 };
 
 function ControlledSelector() {
   const [value, setValue] = useState<Array<string | number>>(["standard"]);
-  return <Selector options={options} value={value} onChange={setValue} />;
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <Selector aria-label="配送方案" options={options} value={value} onChange={setValue} />
+      <output aria-live="polite">当前值：{value.length > 0 ? value.join(", ") : "未选择"}</output>
+    </div>
+  );
 }
 
-export const Controlled: Story = {
-  render: () => <ControlledSelector />
+export const ControlledInteraction: Story = {
+  render: () => <ControlledSelector />,
+  play: async ({ canvasElement }) => {
+    const pickup = canvasElement.querySelector<HTMLInputElement>('input[value="pickup"]');
+    if (pickup) pickup.click();
+    await Promise.resolve();
+    if (!pickup || !pickup.checked) throw new Error("Selector interaction did not select pickup");
+  }
 };

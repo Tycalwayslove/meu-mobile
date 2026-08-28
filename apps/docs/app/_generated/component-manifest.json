@@ -1445,6 +1445,11 @@
         },
         {
           "kind": "type",
+          "name": "SelectorChangeDetails",
+          "sourcePath": "packages/mobile/src/Selector"
+        },
+        {
+          "kind": "type",
           "name": "SelectorOption",
           "sourcePath": "packages/mobile/src/Selector"
         },
@@ -2042,8 +2047,8 @@
       "externalWildcardExports": [],
       "packageName": "@meu/mobile",
       "stats": {
-        "total": 407,
-        "types": 316,
+        "total": 408,
+        "types": 317,
         "values": 91
       }
     },
@@ -3058,10 +3063,13 @@
       "sourcePath": "packages/mobile/src/Checkbox",
       "storyId": "forms-checkbox--default",
       "storyTitle": "Forms/Checkbox",
-      "declaredExports": [],
+      "declaredExports": [
+        "Checkbox",
+        "CheckboxGroup"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Checkbox/Checkbox.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4525,10 +4533,12 @@
       "sourcePath": "packages/mobile/src/PasscodeInput",
       "storyId": "data-entry-passcodeinput--native-keyboard",
       "storyTitle": "Data Entry/PasscodeInput",
-      "declaredExports": [],
+      "declaredExports": [
+        "PasscodeInput"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PasscodeInput/PasscodeInput.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4855,10 +4865,13 @@
       "sourcePath": "packages/mobile/src/Radio",
       "storyId": "forms-radio--default",
       "storyTitle": "Forms/Radio",
-      "declaredExports": [],
+      "declaredExports": [
+        "Radio",
+        "RadioGroup"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Radio/Radio.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4905,10 +4918,12 @@
       "sourcePath": "packages/mobile/src/Rate",
       "storyId": "data-entry-rate--default",
       "storyTitle": "Data Entry/Rate",
-      "declaredExports": [],
+      "declaredExports": [
+        "Rate"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Rate/Rate.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5069,10 +5084,12 @@
       "sourcePath": "packages/mobile/src/SegmentedControl",
       "storyId": "navigation-segmentedcontrol--default",
       "storyTitle": "Navigation/SegmentedControl",
-      "declaredExports": [],
+      "declaredExports": [
+        "SegmentedControl"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SegmentedControl/SegmentedControl.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5115,14 +5132,20 @@
       "sourcePath": "packages/mobile/src/Selector",
       "storyId": "data-entry-selector--single",
       "storyTitle": "Data Entry/Selector",
-      "declaredExports": [],
+      "declaredExports": [
+        "Selector"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Selector/Selector.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
           "name": "Selector"
+        },
+        {
+          "kind": "type",
+          "name": "SelectorChangeDetails"
         },
         {
           "kind": "type",
@@ -5233,10 +5256,12 @@
       "sourcePath": "packages/mobile/src/Slider",
       "storyId": "data-entry-slider--default",
       "storyTitle": "Data Entry/Slider",
-      "declaredExports": [],
+      "declaredExports": [
+        "Slider"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Slider/Slider.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5311,10 +5336,12 @@
       "sourcePath": "packages/mobile/src/Stepper",
       "storyId": "data-entry-stepper--default",
       "storyTitle": "Data Entry/Stepper",
-      "declaredExports": [],
+      "declaredExports": [
+        "Stepper"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Stepper/Stepper.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5445,10 +5472,12 @@
       "sourcePath": "packages/mobile/src/Switch",
       "storyId": "forms-switch--default",
       "storyTitle": "Forms/Switch",
-      "declaredExports": [],
+      "declaredExports": [
+        "Switch"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Switch/Switch.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -6087,16 +6116,16 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "documentedProducts": 18,
+    "documentedProducts": 27,
     "externalWildcardExports": 0,
     "packages": 4,
     "products": 68,
     "productsWithoutPublicExports": 0,
-    "publicExports": 493,
-    "publicTypes": 368,
+    "publicExports": 494,
+    "publicTypes": 369,
     "publicValues": 125,
     "undocumentedPublicExports": 6,
-    "unclaimedPublicValues": 75
+    "unclaimedPublicValues": 64
   },
   "undocumentedPublicExports": [
     {
@@ -6201,18 +6230,6 @@
       "kind": "value",
       "name": "Cell",
       "sourcePath": "packages/mobile/src/List",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Checkbox",
-      "sourcePath": "packages/mobile/src/Checkbox",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "CheckboxGroup",
-      "sourcePath": "packages/mobile/src/Checkbox",
       "packageName": "@meu/mobile"
     },
     {
@@ -6373,12 +6390,6 @@
     },
     {
       "kind": "value",
-      "name": "PasscodeInput",
-      "sourcePath": "packages/mobile/src/PasscodeInput",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "Picker",
       "sourcePath": "packages/mobile/src/Picker",
       "packageName": "@meu/mobile"
@@ -6409,24 +6420,6 @@
     },
     {
       "kind": "value",
-      "name": "Radio",
-      "sourcePath": "packages/mobile/src/Radio",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "RadioGroup",
-      "sourcePath": "packages/mobile/src/Radio",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Rate",
-      "sourcePath": "packages/mobile/src/Rate",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "Result",
       "sourcePath": "packages/mobile/src/Result",
       "packageName": "@meu/mobile"
@@ -6451,18 +6444,6 @@
     },
     {
       "kind": "value",
-      "name": "SegmentedControl",
-      "sourcePath": "packages/mobile/src/SegmentedControl",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Selector",
-      "sourcePath": "packages/mobile/src/Selector",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "SideNav",
       "sourcePath": "packages/mobile/src/SideNav",
       "packageName": "@meu/mobile"
@@ -6475,18 +6456,6 @@
     },
     {
       "kind": "value",
-      "name": "Slider",
-      "sourcePath": "packages/mobile/src/Slider",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Stepper",
-      "sourcePath": "packages/mobile/src/Stepper",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "Steps",
       "sourcePath": "packages/mobile/src/Steps",
       "packageName": "@meu/mobile"
@@ -6495,12 +6464,6 @@
       "kind": "value",
       "name": "SwipeActions",
       "sourcePath": "packages/mobile/src/SwipeActions",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Switch",
-      "sourcePath": "packages/mobile/src/Switch",
       "packageName": "@meu/mobile"
     },
     {

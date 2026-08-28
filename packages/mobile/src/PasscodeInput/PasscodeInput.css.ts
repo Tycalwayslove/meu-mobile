@@ -75,7 +75,13 @@ export const cell = recipe({
       "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)"
     ].join(", "),
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": {
+        background: "Canvas",
+        borderColor: "CanvasText",
+        color: "CanvasText",
+        forcedColorAdjust: "auto"
+      }
     }
   },
   variants: {
@@ -83,14 +89,26 @@ export const cell = recipe({
       true: {
         zIndex: 1,
         borderColor: "var(--meu-color-accent)",
-        boxShadow: "inset 0 0 0 1px var(--meu-color-accent)"
+        boxShadow: "inset 0 0 0 1px var(--meu-color-accent)",
+        "@media": {
+          "(forced-colors: active)": {
+            borderColor: "Highlight",
+            boxShadow: "inset 0 0 0 2px Highlight"
+          }
+        }
       },
       false: {}
     },
     disabled: {
       true: {
         color: "var(--meu-color-muted)",
-        background: "var(--meu-color-subtle)"
+        background: "var(--meu-color-subtle)",
+        "@media": {
+          "(forced-colors: active)": {
+            borderColor: "GrayText",
+            color: "GrayText"
+          }
+        }
       },
       false: {}
     },
@@ -110,7 +128,12 @@ export const cell = recipe({
     },
     status: {
       default: {},
-      error: { borderColor: "var(--meu-color-danger)" }
+      error: {
+        borderColor: "var(--meu-color-danger)",
+        "@media": {
+          "(forced-colors: active)": { borderColor: "Mark" }
+        }
+      }
     }
   },
   compoundVariants: [
@@ -137,7 +160,10 @@ export const dot = style({
   width: 10,
   height: 10,
   background: "currentColor",
-  borderRadius: "var(--meu-radius-round)"
+  borderRadius: "var(--meu-radius-round)",
+  "@media": {
+    "(forced-colors: active)": { background: "CanvasText" }
+  }
 });
 
 export const character = style({
@@ -156,6 +182,7 @@ export const caret = style({
   borderRadius: "var(--meu-radius-round)",
   animation: `${blink} 1s step-end infinite`,
   "@media": {
-    "(prefers-reduced-motion: reduce)": { animation: "none" }
+    "(prefers-reduced-motion: reduce)": { animation: "none" },
+    "(forced-colors: active)": { background: "Highlight" }
   }
 });

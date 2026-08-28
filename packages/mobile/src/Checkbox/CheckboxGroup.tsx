@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ForwardedRef } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
 import { group } from "./Checkbox.css";
 import { CheckboxGroupContext } from "./CheckboxGroupContext";
 import type { CheckboxGroupProps, CheckboxValue } from "./types";
+
+function assignRef<T>(ref: ForwardedRef<T> | undefined, value: T | null) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
+
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
 
 export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
   "aria-describedby": ariaDescribedBy,
@@ -20,6 +32,7 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
   id,
   name,
   onChange,
+  readOnly = false,
   ref,
   status = "default",
   tabIndex = -1,
@@ -27,12 +40,20 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
   ...props
 }: CheckboxGroupProps<TValue>) {
   const fieldContext = useFieldContext();
+  const groupRef = useRef<HTMLDivElement | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState<TValue[]>(defaultValue);
   const controlled = value !== undefined;
   const currentValue = controlled ? value : uncontrolledValue;
+  const resetValue = controlled ? currentValue : defaultValue;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
-  const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
+  const describedBy = mergeIdReferences(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
+  const labelledBy = mergeIdReferences(
+    ariaLabelledBy,
+    fieldContext ? fieldContext.labelId : undefined
+  );
   const invalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -43,7 +64,12 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
     return currentValue.some((item) => item === optionValue);
   }
 
+  function isResetSelected(optionValue: CheckboxValue) {
+    return resetValue.some((item) => item === optionValue);
+  }
+
   function toggle(optionValue: CheckboxValue, checked: boolean) {
+    if (disabled || readOnly) return;
     const typedValue = optionValue as TValue;
     const nextValue = checked
       ? currentValue.some((item) => item === typedValue)
@@ -54,13 +80,47 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
     if (onChange) onChange(nextValue);
   }
 
+  useEffect(() => {
+    const container = groupRef.current;
+    const firstInput = container
+      ? container.querySelector<HTMLInputElement>("input[type='checkbox']")
+      : null;
+    const form = firstInput ? firstInput.form : null;
+    if (!form || controlled) return;
+
+    let resetTimer: number | null = null;
+    const handleReset = (event: Event) => {
+      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        resetTimer = null;
+        if (!event.defaultPrevented) setUncontrolledValue([...defaultValue]);
+      }, 0);
+    };
+    form.addEventListener("reset", handleReset);
+    return () => {
+      form.removeEventListener("reset", handleReset);
+      if (resetTimer !== null) window.clearTimeout(resetTimer);
+    };
+  });
+
   return (
     <CheckboxGroupContext.Provider
-      value={{ disabled, isSelected, name, status: invalid ? "error" : status, toggle }}
+      value={{
+        disabled,
+        isResetSelected,
+        isSelected,
+        name,
+        readOnly,
+        status: invalid ? "error" : status,
+        toggle
+      }}
     >
       <div
         {...props}
-        ref={ref}
+        ref={(element) => {
+          groupRef.current = element;
+          assignRef(ref, element);
+        }}
         id={resolvedId}
         role="group"
         tabIndex={tabIndex}
@@ -69,7 +129,7 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
         aria-label={ariaLabel}
         aria-labelledby={ariaLabel ? undefined : labelledBy}
         data-meu-component="checkbox-group"
-        data-state={disabled ? "disabled" : invalid ? "error" : "default"}
+        data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
       >
         {children}
       </div>

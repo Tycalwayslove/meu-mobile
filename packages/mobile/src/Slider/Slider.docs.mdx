@@ -1,0 +1,191 @@
+---
+name: Slider
+slug: slider
+package: "@meu/mobile"
+exports: [Slider]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    data-entry-slider--default,
+    data-entry-slider--with-marks,
+    data-entry-slider--in-field,
+    data-entry-slider--controlled,
+    data-entry-slider--native-form-reset,
+    data-entry-slider--right-to-left,
+    data-entry-slider--error,
+    data-entry-slider--disabled,
+    data-entry-slider--small,
+    data-entry-slider--large
+  ]
+source: packages/mobile/src/Slider
+---
+
+# Slider
+
+## 当前能力
+
+- 原生 `input[type="range"]` 单值滑块，保留浏览器触摸拖动、键盘、表单、约束与读屏语义。
+- 受控/非受控、原生 form reset、ref、name/form/disabled、三档尺寸、error、可选值输出、格式化输出与装饰性 marks。
+- min/max 有限值会排序；max 不在步长网格上时使用最后一个可达值作为有效上限。渲染值、原生 max、进度、marks 和回调按同一有效范围与正 step 对齐，非法 step 回退为 1。
+- `onChangeComplete` 只在一次真实改变的 pointer 或值变更键交互结束时触发一次；取消 pointer、无变化抬手和陈旧事件不会误报。
+- track、marks 与原生 range direction 支持 RTL；焦点、forced-colors 和 44px 最小触控高度有明确降级。
+
+当前为 V2 `implementation`。单元、SSR 与 Story 契约已建立；axe、移动 Chromium/WebKit、Light/Dark 基线和真机读屏尚未完成，因此不能标记为 commercial。
+
+## 何时使用
+
+- 音量、距离、预算、完成度等连续或准连续的单值选择，用户更重视相对位置而非精确录入。
+- 候选范围稳定、上下界明确，并允许通过键盘细调的场景。
+
+## 何时不要使用
+
+- 必须精确录入、复制或比较数字时使用 Stepper/TextInput；少量离散选项使用 Radio/Selector。
+- 双端区间不是当前契约，不用两个 Slider 叠加模拟；应使用专门 RangeSlider。
+- marks 不是可点击选项或读屏列表；需要离散且有标签的选择时不要依赖 marks。
+
+## 结构与状态
+
+结构为原生 range、可选 output 和 presentation-only marks。状态为 default、focus、error、disabled，另有 small/medium/large。根节点暴露 `data-meu-component="slider"`、`data-size`、`data-state`；内部 class 不是稳定 API。
+
+## 基础用法
+
+```tsx
+<Field label="配送距离" description="0 到 20 公里">
+  <Slider
+    name="distance"
+    min={0}
+    max={20}
+    step={1}
+    defaultValue={5}
+    showValue
+    formatValue={(value) => `${value} km`}
+  />
+</Field>
+```
+
+## 受控与非受控
+
+- 传 `value` 为受控；显示值会按 bounds/step 规范化，父级仍拥有业务事实源。
+- 不传 `value` 时使用内部状态；`defaultValue` 初始化且作为原生 form reset 的恢复目标。
+- reset 返回时原生 DOM/FormData 已同步恢复默认值，随后只同步 React 状态，不调用 `onChange`/`onChangeComplete`；取消 reset 时保持当前值。运行期改变 defaultValue 后，下一次 reset 使用最新默认值。
+- 不支持在同一生命周期内切换受控性；遵循 React 表单控件约定。
+
+## 数值、精度与边界
+
+- 有限 min/max 先转为升序；非有限 min/max 分别回退 0/100。
+- step 必须是正有限数，否则按 1；值以有效 min 为 step base，使用共享十进制算法对齐并最多保留 12 位，减少 `0.1 + 0.2` 漂移。max 不对齐时，原生 slider 的 max 也会收敛到最后一个可达步进值。
+- 超界、NaN、Infinity 都会被规范化；`onChange` 报告与 DOM/视觉一致的值。
+- min 等于 max 时进度为 0，控件没有可变范围；业务通常应改为只读文本。
+
+## 表单集成
+
+- 透传 name、form、disabled、required、onInvalid 等原生属性；disabled 不进入 FormData。
+- range 总有浏览器值，HTML required 对“是否选择”没有业务校验意义；必须选择某一非默认业务值时由 schema/RHF 校验。
+- Field 注入 label、description/error、invalid 和必填说明；组件不在不支持 `aria-required` 的 slider role 上伪造状态。
+- ref 指向真实 range，可读取 `valueAsNumber`、`validity`、`form` 或调用 `focus()`。
+
+## Props
+
+完整表由 TypeScript/TSDoc 与 API Extractor生成。专有 Props：`defaultValue`、`value`、`min`、`max`、`step`、`marks`、`showValue`、`formatValue`、`size`、`status`、`onChange`、`onChangeComplete`；其余来自原生 input（冲突字段除外）。
+
+## Events
+
+- `onChange(value, event)`：每次原生 range change 后触发，value 已规范化。
+- `onChangeComplete(value, event)`：pointer up 或值变更键 keyup/blur 时，且本轮确有变化才触发；pointer cancel 不触发。
+- 调用方的 pointer/keyboard/blur handlers 会保留。pointerdown 或 keydown 上 `preventDefault()` 可取消相应原生/内部交互启动。
+- 受控父级拒绝新值时，change 仍按用户尝试报告；随后 DOM 由父级 value 回写。
+
+## Ref 与命令式方法
+
+ref 指向真实 `input[type="range"]`，可使用原生 `focus()`、`blur()`、validity 与 form API。track、marks 和 value output
+没有公开命令式句柄；程序化变值应更新受控 `value`，不要直接改 DOM value。
+
+## 键盘操作
+
+原生支持 Arrow keys 按 step 调整、PageUp/PageDown 较大调整、Home/End 到边界。Tab 进入/离开。组件不重写浏览器键盘算法，只跟踪这些键来定义 complete 边界；屏幕阅读器组合键由平台保留。
+
+## 触摸与手势
+
+- 整条轨道最小高度 44px，thumb 为 20/22/24px；依赖原生 pointer/touch 捕获和系统手势取消。
+- 拖动期间 `onChange` 可高频触发；昂贵请求放在 `onChangeComplete` 或业务节流层。
+- 组件不阻止页面纵向滚动，也不安装 document 级监听，适合 H5/WKWebView 嵌入。
+
+## 无障碍
+
+- 必须由 Field、`aria-label` 或 `aria-labelledby` 提供 accessible name；marks 和 output 不替代标签。
+- 原生 slider 暴露 min/max/now；单位/语义值可用原生 `aria-valuetext`，视觉 `formatValue` 不会自动转成可访问文本。
+- error 使用 `aria-invalid` 并关联 Field error；disabled 使用原生属性。
+- output 不使用 aria-live，避免拖动时逐帧打断读屏。
+
+## 动效
+
+Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不改变数值反馈，只缩短非必要状态过渡。
+
+## 主题与定制
+
+主题使用 accent/danger/surface/border/ink/muted 与尺寸 Token。forced-colors 下保留系统 Highlight/Canvas thumb 和系统
+焦点；CSS gradient 仅作视觉增强，原生语义不依赖颜色。稳定入口为 size、status、marks、formatValue 与全局 Token。
+
+## SSR 与 Next.js
+
+- render 阶段不读取 window/document/layout；服务端输出确定的 range/value/output，effect 仅在客户端关联 form reset。
+
+## RTL 与国际化
+
+- 根与 input 接收 `dir`；RTL 下原生方向、渐变和逻辑 mark 定位反转。混合方向标签由调用方设置 lang/dir。
+
+## 浏览器与 WebView
+
+构建产物通过 Chrome 70 / iOS 13 语法基线。range 的 appearance、thumb pseudo-element、PageUp/PageDown 与 pointer
+细节由浏览器实现；旧 WKWebView/Android WebView 仍需真机功能矩阵，语法通过不代表所有视觉和手势已验收。
+
+## 边界情况与已知限制
+
+- 仅单值、水平 slider；没有 range、vertical、tooltip、可点击 marks 或拖动前确认。
+- `formatValue` 仅视觉；返回复杂交互节点会破坏 output 语义，不应这样使用。
+- 不同浏览器对 PageUp/PageDown 的增量可能不同，这是原生契约。
+- programmatic value 变化不触发 change/complete；业务副作用应监听自己的 state。
+
+## 性能预算
+
+无第三方运行时、布局测量、document listener 或持续 timer。拖动只做常数级数值规范化和一次状态/回调；复杂格式化函数由调用方自行 memo/控制成本。
+
+## 测试证据
+
+- Unit 7 项：原生 change/complete、Field/marks、bounds/step、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
+- SSR 1 项：无浏览器全局时确定输出 range/value/output。
+- Story play：NativeFormReset 验证输入后恢复默认值；其余 Story 覆盖受控、marks、Field、RTL、error、disabled、尺寸。
+- 待补：axe、移动 Chromium/WebKit pointer+keyboard、200% 字号、forced-colors 截图、Chromatic Light/Dark、iOS VoiceOver/Android TalkBack。
+
+## V2 优化记录
+
+### 已完成
+
+- 统一 bounds/step/precision 规范化，消除 DOM、进度和回调不一致。
+- 修复 `onChangeComplete` 陈旧事件、无变化误报与重复抬手问题，并保留调用方 handlers。
+- 增加非受控 form reset、RTL 渐变/marks、兼容旧 WebView 的 focus fallback 和 forced-colors。
+- 补全 TSDoc、SSR/单元/Story 契约与本事实源。
+
+### 待优化
+
+- 完成 axe、真实移动浏览器、真机读屏、视觉回归和大字号验收。
+- 有真实双值业务与跨端契约后再设计 RangeSlider，不扩张当前 API。
+
+## 维护规则
+
+任何行为、Props、Events、默认值、兼容范围、限制或测试变化，必须在同一 PR 更新本文件、types TSDoc、测试与 Story；事实证据不足不得把 status 改为 commercial。
+
+## 变更记录
+
+| 日期       | 版本   | 类型          | 内容                                                   | 迁移说明                      |
+| ---------- | ------ | ------------- | ------------------------------------------------------ | ----------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 值统一按 bounds/step 规范化，complete 改为交互结束单次 | 非法/不对齐受控值将显示规范值 |
+| 2026-08-28 | 未发布 | compatibility | 增加 reset、RTL、forced-colors 与 SSR 证明             | 无                            |
+| 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                              | README 改为仅指向本文件       |

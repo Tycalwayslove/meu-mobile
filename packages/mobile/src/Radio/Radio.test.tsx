@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
@@ -17,6 +17,20 @@ describe("Radio", () => {
     expect(onChange).toHaveBeenCalledWith(true, expect.anything());
   });
 
+  it("supports a controlled empty group without selecting optimistically", () => {
+    const onChange = vi.fn();
+    render(
+      <RadioGroup value={null} onChange={onChange}>
+        <Radio value="standard">标准配送</Radio>
+      </RadioGroup>
+    );
+    const radio = screen.getByRole("radio", { name: "标准配送" });
+    fireEvent.click(radio);
+
+    expect(onChange).toHaveBeenCalledWith("standard", expect.anything());
+    expect(radio).toHaveProperty("checked", false);
+  });
+
   it("blocks programmatic change events while disabled", () => {
     const onChange = vi.fn();
     render(
@@ -27,6 +41,58 @@ describe("Radio", () => {
 
     fireEvent.click(screen.getByRole("radio", { name: "不可选择" }));
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("keeps readonly selection focusable and included in FormData", async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <form>
+        <Radio defaultChecked name="primary" readOnly value="yes" onChange={onChange}>
+          主要地址
+        </Radio>
+      </form>
+    );
+    const radio = screen.getByRole("radio", { name: "主要地址" });
+    fireEvent.click(radio);
+
+    await waitFor(() => expect(radio).toHaveProperty("checked", true));
+    expect(radio.getAttribute("aria-disabled")).toBe("true");
+    expect(onChange).not.toHaveBeenCalled();
+    expect(new FormData(container.querySelector("form")!).get("primary")).toBe("yes");
+  });
+
+  it("exposes standalone invalid state to assistive technology", () => {
+    render(<Radio aria-invalid>无效选项</Radio>);
+    expect(screen.getByRole("radio", { name: "无效选项" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
+
+  it("rebinds reset behavior when the external form owner changes", async () => {
+    const { rerender } = render(
+      <>
+        <form id="radio-a" />
+        <form id="radio-b" />
+        <Radio form="radio-a" name="choice" value="yes">
+          外部单选
+        </Radio>
+      </>
+    );
+    const radio = screen.getByRole("radio", { name: "外部单选" });
+    fireEvent.click(radio);
+    rerender(
+      <>
+        <form id="radio-a" />
+        <form id="radio-b" />
+        <Radio form="radio-b" name="choice" value="yes">
+          外部单选
+        </Radio>
+      </>
+    );
+    const form = document.getElementById("radio-b") as HTMLFormElement;
+    act(() => form.reset());
+    expect(new FormData(form).get("choice")).toBeNull();
+    await waitFor(() => expect(radio).toHaveProperty("checked", false));
   });
 });
 
@@ -53,5 +119,78 @@ describe("RadioGroup", () => {
     expect(onChange).toHaveBeenCalledWith("express", expect.anything());
     expect(express).toHaveProperty("checked", true);
     expect(standard).toHaveProperty("checked", false);
+  });
+
+  it("inherits Field required semantics and merges caller descriptions", () => {
+    render(
+      <Field label="配送方式" description="只能选一项" required>
+        <RadioGroup aria-describedby="external-help">
+          <Radio value="standard">标准配送</Radio>
+        </RadioGroup>
+      </Field>
+    );
+
+    const group = screen.getByRole("radiogroup", { name: "配送方式" });
+    const radio = screen.getByRole("radio", { name: "标准配送" });
+    expect(group.getAttribute("aria-required")).toBe("true");
+    expect(group.getAttribute("aria-describedby")).toContain("external-help");
+    expect(group.getAttribute("aria-describedby")).toContain("description");
+    expect(radio).toHaveProperty("required", true);
+  });
+
+  it("restores an uncontrolled group on form reset", async () => {
+    const { container } = render(
+      <form>
+        <RadioGroup defaultValue="standard" name="shipping">
+          <Radio value="standard">标准配送</Radio>
+          <Radio value="express">急速配送</Radio>
+        </RadioGroup>
+      </form>
+    );
+    fireEvent.click(screen.getByRole("radio", { name: "急速配送" }));
+    expect(new FormData(container.querySelector("form")!).get("shipping")).toBe("express");
+
+    const form = container.querySelector("form")!;
+    act(() => form.reset());
+    expect(new FormData(form).get("shipping")).toBe("standard");
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "标准配送" })).toHaveProperty("checked", true)
+    );
+  });
+
+  it("does not reset a group when the native reset event is canceled", async () => {
+    const { container } = render(
+      <form onReset={(event) => event.preventDefault()}>
+        <RadioGroup defaultValue="standard" name="shipping">
+          <Radio value="standard">标准配送</Radio>
+          <Radio value="express">急速配送</Radio>
+        </RadioGroup>
+      </form>
+    );
+    fireEvent.click(screen.getByRole("radio", { name: "急速配送" }));
+
+    act(() => container.querySelector("form")!.reset());
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    expect(screen.getByRole("radio", { name: "急速配送" })).toHaveProperty("checked", true);
+  });
+
+  it("blocks readonly group changes and preserves native submission", async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <form>
+        <RadioGroup defaultValue="standard" name="shipping" onChange={onChange} readOnly>
+          <Radio value="standard">标准配送</Radio>
+          <Radio value="express">急速配送</Radio>
+        </RadioGroup>
+      </form>
+    );
+    fireEvent.click(screen.getByRole("radio", { name: "急速配送" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "标准配送" })).toHaveProperty("checked", true)
+    );
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(new FormData(container.querySelector("form")!).get("shipping")).toBe("standard");
   });
 });

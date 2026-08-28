@@ -1,0 +1,189 @@
+---
+name: Rate
+slug: rate
+package: "@meu/mobile"
+exports: [Rate]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    data-entry-rate--default,
+    data-entry-rate--half-and-read-only,
+    data-entry-rate--in-field,
+    data-entry-rate--controlled,
+    data-entry-rate--native-form-reset,
+    data-entry-rate--right-to-left,
+    data-entry-rate--error,
+    data-entry-rate--read-only-form-value,
+    data-entry-rate--disabled,
+    data-entry-rate--custom-character,
+    data-entry-rate--small,
+    data-entry-rate--large
+  ]
+source: packages/mobile/src/Rate
+---
+
+# Rate
+
+## 当前能力
+
+- 交互态由透明原生 `input[type=range]` 覆盖整组装饰字符，保留触摸拖动、键盘、读屏、name/form/disabled 与 ref。
+- count、整星/半星、受控/非受控、重复点当前值清零、三档尺寸、custom character、Field error 和本地化 value text。
+- 数值按 1 或 0.5 对齐并限制 0..count；非法 count 回退 5，动态 count/allowHalf/value 仍保持 DOM、视觉与读屏一致。
+- RTL 指针位置与原生 range 方向同步；半填充使用逻辑方向；forced-colors 保留系统 Highlight/GrayText。
+- readOnly 输出为有名称和值的 meter 语义，同时保留 hidden input 的 FormData 和 input ref；disabled readOnly 不提交。
+
+当前为 V2 `implementation`，还需 axe、移动浏览器视觉与真机读屏验收后才能标 commercial。
+
+## 何时使用
+
+商品、服务、内容等 1–5/自定义上限的主观评分；零值表示尚未评分，允许半档时用户需要更细表达。
+
+## 何时不要使用
+
+- NPS、满意/不满意、离散文字含义或每档需解释时用 Radio/Selector。
+- 显示统计平均值可用 readOnly；若只是装饰星图且无业务值，用普通 Icon/Text。
+- 不用 character 传按钮、链接或其他交互内容，它被 aria-hidden 且会重复渲染。
+
+## 结构与状态
+
+根包含 interactive range 或 readOnly hidden input，以及 aria-hidden 字符层。状态 default/focus/error/readOnly/disabled，尺寸 small/medium/large。根暴露 component/size/state data，readOnly hidden input暴露 `data-meu-slot=form-value`。
+
+## 基础用法
+
+```tsx
+<Field label="服务评分" error={error}>
+  <Rate name="rating" allowHalf value={rating} onChange={setRating} />
+</Field>
+```
+
+只读且随表单提交：
+
+```tsx
+<Rate aria-label="历史评分" name="previousRating" value={4.5} allowHalf readOnly />
+```
+
+## 受控与非受控
+
+- value 不为 undefined 时受控；否则 defaultValue 初始化内部状态。
+- 值按 active increment 对齐并 clamp；allowHalf/count 动态变化时显示立即重新规范化。
+- 非受控 form.reset 返回时原生 DOM/FormData 已同步恢复最新 defaultValue，随后只同步 React 状态且不调用 onChange；取消 reset 时保持当前值，受控值由父级负责。
+- programmatic value 变化不触发 onChange。
+
+## 数值与清除
+
+- count 转为至少 1 的整数；非有限 count 回退 5。
+- allowHalf=false 四舍五入到整数，true 保留一位并按浏览器 step=0.5。
+- pointer 点击当前档且 allowClear=true 时发布 0；拖到其他档或 pointer cancel 不误清除。键盘 Home 可原生到 0。
+- allowClear=false 只关闭“重复点击清零”，不把 0 从值域移除；业务 required 应由 schema 明确验证 value > 0。
+
+## 表单集成
+
+- 交互态原生 range 透传 name/form/disabled/onInvalid 等；readOnly 使用 hidden input提交相同 value/name/form。
+- disabled 在两种模式都不进入 FormData。readOnly 进入但不可聚焦；其 ref 指向 hidden input，适合读取 value/form，不应用于 focus。
+- HTML required 对 range 的零值没有“未选择”语义，hidden input required 也无效；必评规则必须由 RHF/Zod/服务端检查大于 0。
+- Field 提供 accessible name/description/error/必填说明；error 映射 aria-invalid（interactive）和视觉 state。
+
+## Props
+
+完整 API 由 types TSDoc/API Extractor生成。专有 Props：value/defaultValue、count、allowHalf、allowClear、character、getValueLabel、readOnly、size、status、onChange；其余来自原生 input（冲突字段除外）。
+
+## Events
+
+- `onChange(value)`：原生 range change 或重复 pointer 清除产生不同值时触发。
+- 调用方 onPointerDown/onPointerCancel/onClick 保留；pointerdown/click preventDefault 可取消组件对应的清除跟踪/清除动作。
+- 拖动可能高频 change；昂贵提交应由业务节流或在表单提交时处理。当前没有 onChangeComplete。
+- readOnly/disabled 不触发 change。
+
+## Ref 与命令式方法
+
+ref 指向参与表单的真实 `HTMLInputElement`：交互态为 `type="range"`，readOnly 态为 hidden input。交互态可使用原生
+`focus()`；readOnly hidden input 仅用于 FormData，不应命令式聚焦。视觉字符节点不是公开 ref。
+
+## 键盘操作
+
+interactive 依赖原生 range：Arrow keys 按 1/0.5 调整，Home 到 0，End 到 count，Page keys 按浏览器策略调整，Tab 聚焦/离开。readOnly 为静态 meter，不进入 Tab 顺序。
+
+## 触摸与手势
+
+透明 range 覆盖完整字符组，根高度至少 44px；可点选、拖动并响应系统 pointer cancel。组件不阻止纵向滚动、不使用 document 监听。相邻星视觉宽度为 30/34/38px，但整体可交互轨道高度满足移动目标。
+
+## 无障碍
+
+- interactive 是原生 slider，必须有 Field/ARIA name；`aria-valuetext` 默认中英文格式，也可显式传入或用 getValueLabel。
+- character 层 aria-hidden，读屏只接收一个连续评分控件，不会重复朗读五个星。
+- readOnly 是带 label/labelledby/describedby 的 meter 语义；Field label 命名控件，aria-valuemin/max/now/valuetext 独立表达评分值。
+- error/disabled 使用 ARIA/原生属性和 data state，不只靠颜色。
+
+## 动效
+
+没有持续动画，填充宽度即时变化，reduced-motion 不需额外动画分支。
+
+## 主题与定制
+
+主题使用 warning、border、accent、danger；forced-colors 禁用该区域自动重映射并显式使用 Highlight/GrayText，使填充与
+空档可区分。稳定定制入口为 size、status、character、getValueLabel 与全局 Token；内部双层字符 DOM 不是样式 API。
+
+## SSR 与 Next.js
+
+- render 不读取 window/document/layout；服务端稳定输出 interactive range 或 readOnly meter+hidden input。getComputedStyle 仅在 pointer handler 中读取方向。
+
+## RTL 与国际化
+
+- dir 应用于根和 range；flex 排列、半填充与点击映射均随 RTL。默认 value label 随 ConfigProvider locale 中英文切换。
+
+## 浏览器与 WebView
+
+构建产物通过 Chrome 70 / iOS 13 语法基线；不同 WebView 的 range 手势细节由原生实现负责。当前尚未完成 iOS 13
+WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼容等同完整交互支持。
+
+## 边界情况与已知限制
+
+- 单个连续 slider 语义，不是五个 radio；不能逐星设置 tooltip/禁用/不同标签。
+- custom character 必须是纯装饰且尺寸适合单行；复杂 ReactNode 会重复两次用于底色/填充裁切。
+- readOnly ref 是 hidden input，不能 focus；静态可访问对象是外层 meter。
+- required 非零评分、onChangeComplete、hover preview、键盘清除提示均未内建。
+- pointer 清除通过目标几何判断，CSS transform 缩放下使用浏览器返回 rect，仍应在真实容器验收。
+
+## 性能预算
+
+渲染 O(count) 两层字符，无第三方运行时、持续 timer 或 document listener。count 不应设置到数百；大量列表建议 readOnly 并控制可见项。
+
+## 测试证据
+
+- Unit 8 项：半值 change、readOnly meter/Field 值语义、规范化、RTL 重复清除、readOnly FormData/ref、同步原生 reset 与取消边界。
+- SSR 1 项：interactive range 与 readOnly meter/hidden form markup。
+- Story play：NativeFormReset；状态矩阵覆盖 controlled、half/readOnly、RTL、error、disabled、custom character 与尺寸。
+- 待补：axe、pointer drag/keyboard 移动 E2E、forced-colors/200%/Light-Dark、VoiceOver/TalkBack。
+
+## V2 优化记录
+
+### 已完成
+
+- 统一 count/increment/value 规范化，避免视觉、DOM 与 aria-valuetext 分叉。
+- 修复 RTL 重复点击清除映射与 pointer cancel；保留调用方 pointer/click handlers。
+- 增加非受控 reset、readOnly hidden FormData/ref、Field readOnly naming。
+- 半填充改逻辑方向，增加 forced-colors、TSDoc、SSR/单元/Story 与本事实源。
+
+### 待优化
+
+- 完成 axe、真实触摸拖动、移动键盘、真机读屏与视觉验收。
+- 收到真实需求后评估 onChangeComplete/hover preview；不可复制 Slider 契约而忽略评分清除语义。
+
+## 维护规则
+
+行为、Props、Events、默认值、兼容范围、限制或测试证据变化时，同一 PR 必须更新本文件、types TSDoc、测试和 Story；证据不足不得标 commercial。
+
+## 变更记录
+
+| 日期       | 版本   | 类型          | 内容                                        | 迁移说明                           |
+| ---------- | ------ | ------------- | ------------------------------------------- | ---------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 值按整/半档规范化，修复 RTL 清除与 reset    | 非对齐受控值会显示规范值           |
+| 2026-08-28 | 未发布 | accessibility | readOnly Field naming、FormData/ref、高对比 | readOnly ref 现在指向 hidden input |
+| 2026-08-28 | 未发布 | docs          | 建立 Rate V2 永久事实源                     | README 改为仅指向本文件            |

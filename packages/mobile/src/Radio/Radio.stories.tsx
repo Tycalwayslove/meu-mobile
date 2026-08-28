@@ -19,6 +19,20 @@ function ControlledGroup() {
   );
 }
 
+function NativeFormDemo() {
+  return (
+    <form aria-label="配送方式表单" style={{ display: "grid", gap: 12 }}>
+      <RadioGroup defaultValue="standard" name="shipping" required>
+        <Radio value="standard">标准配送</Radio>
+        <Radio value="express">急速配送</Radio>
+      </RadioGroup>
+      <button type="reset" style={{ minHeight: 44 }}>
+        重置
+      </button>
+    </form>
+  );
+}
+
 const meta = {
   title: "Forms/Radio",
   component: Radio,
@@ -43,5 +57,48 @@ export const Error: Story = {
   )
 };
 export const Group: Story = { render: () => <ControlledGroup /> };
+export const ReadOnly: Story = {
+  render: () => (
+    <RadioGroup defaultValue="standard" name="shipping" readOnly>
+      <Radio value="standard">已锁定标准配送</Radio>
+      <Radio value="express">不可切换急速配送</Radio>
+    </RadioGroup>
+  )
+};
+export const NativeFormContract: Story = {
+  render: () => <NativeFormDemo />,
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector("form");
+    const options = canvasElement.querySelectorAll<HTMLInputElement>("input[type='radio']");
+    const reset = canvasElement.querySelector<HTMLButtonElement>("button[type='reset']");
+    if (!(form instanceof HTMLFormElement) || options.length !== 2 || !reset) {
+      throw new window.Error("Expected Radio native form controls");
+    }
+
+    const standard = options.item(0);
+    const express = options.item(1);
+    if (!standard || !express) throw new window.Error("Expected Radio options");
+    express.click();
+    await Promise.resolve();
+    if (new FormData(form).get("shipping") !== "express") {
+      throw new window.Error("RadioGroup did not submit the current selection");
+    }
+
+    reset.click();
+    await Promise.resolve();
+    await Promise.resolve();
+    if (!standard.checked) throw new window.Error("RadioGroup did not restore defaultValue");
+  }
+};
+export const RTL: Story = {
+  render: () => (
+    <div dir="rtl">
+      <RadioGroup defaultValue="standard" direction="horizontal">
+        <Radio value="standard">توصيل عادي</Radio>
+        <Radio value="express">توصيل سريع</Radio>
+      </RadioGroup>
+    </div>
+  )
+};
 export const Small: Story = { args: { size: "small" } };
 export const Large: Story = { args: { size: "large" } };

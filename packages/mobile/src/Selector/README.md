@@ -1,3 +1,5 @@
 # Selector
 
-卡片式单选/多选组件，公开值始终为数组，内部保留原生 radio/checkbox 语义。支持禁用项、描述、列数、清除、Field 错误关联和三档尺寸。
+卡片式原生 radio/checkbox 选择器，支持单选、多选、受控/非受控、Field、FormData、reset、RTL 和移动 WebView。
+
+公开契约、状态、键盘、兼容边界与 V2 维护记录见 [Selector.docs.mdx](./Selector.docs.mdx)。

@@ -36,6 +36,7 @@ export function MeuFormPasscodeInput<TFieldValues extends FieldValues>({
   const passcodeRef = useRef<PasscodeInputRef | null>(null);
   const { field, fieldState } = useController({
     control,
+    ...(disabled !== undefined ? { disabled } : {}),
     name,
     ...(rules ? { rules } : {})
   });
@@ -44,6 +45,7 @@ export function MeuFormPasscodeInput<TFieldValues extends FieldValues>({
   return (
     <Field
       label={label}
+      labelAssociation="native"
       description={description}
       required={required}
       error={fieldState.error ? fieldState.error.message : undefined}

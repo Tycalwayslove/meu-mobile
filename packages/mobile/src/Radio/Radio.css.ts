@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 export const root = recipe({
@@ -6,11 +6,13 @@ export const root = recipe({
     position: "relative",
     display: "inline-flex",
     alignItems: "center",
+    minWidth: 44,
     minHeight: 44,
     color: "var(--meu-color-ink)",
     fontFamily: "var(--meu-font-ui)",
     cursor: "pointer",
     WebkitTapHighlightColor: "transparent",
+    outline: "none",
     selectors: {
       "&:focus-within": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 }
     }
@@ -20,13 +22,17 @@ export const root = recipe({
       true: { color: "var(--meu-color-muted)", cursor: "not-allowed" },
       false: {}
     },
+    readOnly: {
+      true: { cursor: "default" },
+      false: {}
+    },
     size: {
       small: { gap: "var(--meu-space-2)", fontSize: 14 },
       medium: { gap: "var(--meu-space-3)", fontSize: 16 },
       large: { gap: "var(--meu-space-3)", fontSize: 16 }
     }
   },
-  defaultVariants: { disabled: false, size: "medium" }
+  defaultVariants: { disabled: false, readOnly: false, size: "medium" }
 });
 
 export const input = style({
@@ -100,6 +106,22 @@ export const indicator = recipe({
     }
   },
   defaultVariants: { checked: false, disabled: false, size: "medium", status: "default" }
+});
+
+globalStyle(`${input}:checked + span`, {
+  "@media": {
+    "(forced-colors: active)": {
+      borderColor: "Highlight",
+      color: "Highlight",
+      forcedColorAdjust: "none"
+    }
+  }
+});
+
+globalStyle(`${input} + span::after`, {
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+  }
 });
 
 export const group = recipe({

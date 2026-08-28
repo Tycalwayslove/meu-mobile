@@ -1,3 +1,3 @@
 # Slider
 
-基于原生 `input[type="range"]` 的单值滑块，保留移动端触摸、键盘和读屏行为，支持标记、格式化值、Field 错误关联与三档尺寸。
+本目录的永久事实源是 [Slider.docs.mdx](./Slider.docs.mdx)。组件能力、API 契约、兼容边界、测试证据与后续变更必须同步维护在那里；README 不重复维护易漂移的 API 内容。

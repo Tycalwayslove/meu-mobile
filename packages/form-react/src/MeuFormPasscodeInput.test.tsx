@@ -10,6 +10,7 @@ import { useMeuForm } from "./useMeuForm";
 
 const schema = z.object({ code: z.string().length(4, "请输入 4 位验证码") });
 type Values = z.infer<typeof schema>;
+type DisabledValues = { code?: string };
 
 afterEach(cleanup);
 
@@ -67,9 +68,34 @@ describe("MeuFormPasscodeInput", () => {
 
     const alert = await screen.findByRole("alert");
     const input = screen.getByLabelText<HTMLInputElement>(/短信验证码/);
+    const label = screen.getByText("短信验证码");
+    expect(label.tagName).toBe("LABEL");
+    expect((label as HTMLLabelElement).htmlFor).toBe(input.id);
     expect(alert.textContent).toBe("请输入 4 位验证码");
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.getAttribute("aria-describedby")).toContain("error");
     await waitFor(() => expect(document.activeElement).toBe(input));
+  });
+
+  it("excludes an explicitly disabled existing value from RHF submission", async () => {
+    const onSubmit = vi.fn();
+
+    function DisabledCodeForm() {
+      const form = useMeuForm<DisabledValues>({ defaultValues: { code: "1234" } });
+      return (
+        <MeuForm form={form} onSubmit={onSubmit}>
+          <MeuFormPasscodeInput<DisabledValues> name="code" label="验证码" disabled />
+          <Button type="submit">提交</Button>
+        </MeuForm>
+      );
+    }
+
+    render(<DisabledCodeForm />);
+    const input = screen.getByLabelText<HTMLInputElement>("验证码");
+    expect(input.disabled).toBe(true);
+    expect(new FormData(input.form as HTMLFormElement).has("code")).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "提交" }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({}, expect.anything()));
   });
 });

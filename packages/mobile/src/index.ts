@@ -54,6 +54,7 @@ export { Rate } from "./Rate";
 export type { RateProps, RateSize, RateStatus } from "./Rate";
 export { Selector } from "./Selector";
 export type {
+  SelectorChangeDetails,
   SelectorOption,
   SelectorProps,
   SelectorSize,

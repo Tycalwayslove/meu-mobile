@@ -4,8 +4,10 @@ import type { CheckboxStatus, CheckboxValue } from "./types";
 
 export type CheckboxGroupContextValue = {
   disabled: boolean;
+  isResetSelected: (value: CheckboxValue) => boolean;
   isSelected: (value: CheckboxValue) => boolean;
   name: string | undefined;
+  readOnly: boolean;
   status: CheckboxStatus;
   toggle: (value: CheckboxValue, checked: boolean) => void;
 };

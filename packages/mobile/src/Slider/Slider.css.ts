@@ -52,6 +52,11 @@ export const input = style({
       boxShadow: "0 0 0 2px var(--meu-color-accent)"
     },
     "&:disabled": { cursor: "not-allowed" }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      forcedColorAdjust: "auto"
+    }
   }
 });
 
@@ -71,7 +76,24 @@ globalStyle(`${input}::-webkit-slider-thumb`, {
   background: "var(--meu-color-surface)",
   border: "2px solid var(--meu-slider-fill-color)",
   borderRadius: "50%",
-  boxShadow: "0 2px 6px #18201a29"
+  boxShadow: "0 2px 6px #18201a29",
+  "@media": {
+    "(forced-colors: active)": {
+      background: "Canvas",
+      borderColor: "Highlight",
+      boxShadow: "none"
+    }
+  }
+});
+
+globalStyle(`[dir="rtl"] ${input}::-webkit-slider-runnable-track`, {
+  background:
+    "linear-gradient(to left, var(--meu-slider-fill-color) 0%, var(--meu-slider-fill-color) var(--meu-slider-progress), var(--meu-color-border) var(--meu-slider-progress), var(--meu-color-border) 100%)"
+});
+
+globalStyle(`${input}[dir="rtl"]::-webkit-slider-runnable-track`, {
+  background:
+    "linear-gradient(to left, var(--meu-slider-fill-color) 0%, var(--meu-slider-fill-color) var(--meu-slider-progress), var(--meu-color-border) var(--meu-slider-progress), var(--meu-color-border) 100%)"
 });
 
 globalStyle(`${input}::-moz-range-track`, {
@@ -92,7 +114,14 @@ globalStyle(`${input}::-moz-range-thumb`, {
   background: "var(--meu-color-surface)",
   border: "2px solid var(--meu-slider-fill-color)",
   borderRadius: "50%",
-  boxShadow: "0 2px 6px #18201a29"
+  boxShadow: "0 2px 6px #18201a29",
+  "@media": {
+    "(forced-colors: active)": {
+      background: "Canvas",
+      borderColor: "Highlight",
+      boxShadow: "none"
+    }
+  }
 });
 
 export const inputSize = recipe({
@@ -142,4 +171,16 @@ export const mark = style({
       borderRadius: "50%"
     }
   }
+});
+
+globalStyle(`[dir="rtl"] ${mark}`, {
+  transform: "translateX(50%)"
+});
+
+globalStyle(`${input}:focus::-webkit-slider-thumb`, {
+  boxShadow: "0 0 0 2px var(--meu-color-surface), 0 0 0 4px var(--meu-color-accent)"
+});
+
+globalStyle(`${input}:focus::-moz-range-thumb`, {
+  boxShadow: "0 0 0 2px var(--meu-color-surface), 0 0 0 4px var(--meu-color-accent)"
 });

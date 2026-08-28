@@ -16,6 +16,11 @@ export const root = recipe({
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: 2
       }
+    },
+    "@media": {
+      "(forced-colors: active)": {
+        forcedColorAdjust: "none"
+      }
     }
   },
   variants: {
@@ -56,7 +61,12 @@ export const star = recipe({
     flexShrink: 0,
     color: "var(--meu-color-border)",
     lineHeight: 1,
-    userSelect: "none"
+    userSelect: "none",
+    "@media": {
+      "(forced-colors: active)": {
+        color: "GrayText"
+      }
+    }
   },
   variants: {
     size: {
@@ -71,17 +81,22 @@ export const star = recipe({
 export const activeStar = style({
   position: "absolute",
   insetBlock: 0,
-  left: 0,
+  insetInlineStart: 0,
   display: "grid",
   placeItems: "center",
   overflow: "hidden",
   color: "var(--meu-color-warning)",
-  whiteSpace: "nowrap"
+  whiteSpace: "nowrap",
+  "@media": {
+    "(forced-colors: active)": {
+      color: "Highlight"
+    }
+  }
 });
 
 export const activeCharacter = style({
   position: "absolute",
-  left: 0,
+  insetInlineStart: 0,
   display: "grid",
   placeItems: "center",
   width: "var(--meu-rate-star-width)",

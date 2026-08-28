@@ -19,6 +19,20 @@ function ControlledGroup() {
   );
 }
 
+function NativeFormDemo() {
+  return (
+    <form aria-label="配送服务表单" style={{ display: "grid", gap: 12 }}>
+      <CheckboxGroup defaultValue={["delivery"]} name="service">
+        <Checkbox value="delivery">配送</Checkbox>
+        <Checkbox value="pickup">到店自提</Checkbox>
+      </CheckboxGroup>
+      <button type="reset" style={{ minHeight: 44 }}>
+        重置
+      </button>
+    </form>
+  );
+}
+
 const meta = {
   title: "Forms/Checkbox",
   component: Checkbox,
@@ -44,5 +58,48 @@ export const Error: Story = {
   )
 };
 export const Group: Story = { render: () => <ControlledGroup /> };
+export const ReadOnly: Story = {
+  render: () => (
+    <CheckboxGroup defaultValue={["delivery"]} name="service" readOnly>
+      <Checkbox value="delivery">已锁定配送</Checkbox>
+      <Checkbox value="pickup">不可新增自提</Checkbox>
+    </CheckboxGroup>
+  )
+};
+export const NativeFormContract: Story = {
+  render: () => <NativeFormDemo />,
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector("form");
+    const options = canvasElement.querySelectorAll<HTMLInputElement>("input[type='checkbox']");
+    const reset = canvasElement.querySelector<HTMLButtonElement>("button[type='reset']");
+    if (!(form instanceof HTMLFormElement) || options.length !== 2 || !reset) {
+      throw new window.Error("Expected Checkbox native form controls");
+    }
+
+    const pickup = options.item(1);
+    if (!pickup) throw new window.Error("Expected pickup Checkbox");
+    pickup.click();
+    await Promise.resolve();
+    const submitted = new FormData(form).getAll("service");
+    if (submitted.length !== 2 || submitted[0] !== "delivery" || submitted[1] !== "pickup") {
+      throw new window.Error("CheckboxGroup did not submit repeated selected values");
+    }
+
+    reset.click();
+    await Promise.resolve();
+    await Promise.resolve();
+    if (pickup.checked) throw new window.Error("CheckboxGroup did not restore defaultValue");
+  }
+};
+export const RTL: Story = {
+  render: () => (
+    <div dir="rtl">
+      <CheckboxGroup defaultValue={["delivery"]} direction="horizontal">
+        <Checkbox value="delivery">التوصيل</Checkbox>
+        <Checkbox value="pickup">الاستلام</Checkbox>
+      </CheckboxGroup>
+    </div>
+  )
+};
 export const Small: Story = { args: { size: "small" } };
 export const Large: Story = { args: { size: "large" } };

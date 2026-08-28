@@ -1,0 +1,168 @@
+---
+name: Switch
+slug: switch
+package: "@meu/mobile"
+exports: [Switch]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    forms-switch--default,
+    forms-switch--checked,
+    forms-switch--controlled,
+    forms-switch--loading,
+    forms-switch--readonly,
+    forms-switch--native-form-contract,
+    forms-switch--rtl
+  ]
+source: packages/mobile/src/Switch
+---
+
+# Switch
+
+## 当前能力
+
+- 基于原生 checkbox，暴露 `role="switch"`、checked/required/disabled/name/value/ref 和 constraint validation。
+- 支持受控/非受控、loading、readOnly、error 与三档尺寸，所有尺寸触控目标至少 44×44 CSS px。
+- 非受控值随原生 form reset 恢复；loading/readOnly 冻结交互但保留 checked 值进入 FormData。
+- 调用方与 Field IDREF 合并，Field invalid/required 进入原生控件。
+- thumb 使用逻辑 margin 移动，RTL 自动镜像；reduced-motion、forced-colors 和兼容旧 WebView 的焦点环有明确降级。
+
+状态为 `implementation`。Unit、SSR、Story contract 已补齐；发布前仍需 axe、移动双引擎、Chromatic 主题矩阵及 VoiceOver/TalkBack 证据。
+
+## 主流基线与取舍
+
+V2 对照了 [Ant Design Mobile Switch](https://mobile.ant.design/components/switch/) 的 loading/controlled/异步边界，以及 [MUI Switch](https://mui.com/material-ui/react-switch/) 的移动设置语义、label、required 与 size。Meu 采用显式 `loading` + 调用方受控异步所有权：组件不等待 Promise，也不吞并失败和竞态；这更适合 Next H5 的请求层与表单 adapter。checkedText/uncheckedText 暂不进入紧凑 track，状态文本放在可换行的外部 label/description。
+
+## 何时使用
+
+用于用户切换后立即生效的二元设置，例如通知、自动续费、隐私开关。label 应描述设置事实（“消息通知”），不要只写“开关”。
+
+## 何时不要使用
+
+- 需要用户点击保存才生效时用 Checkbox + Button，避免 Switch 暗示即时反馈。
+- 多个选项或三态选择使用 Checkbox/Radio。
+- 异步操作不可逆或风险高时先确认，不能靠 loading 隐藏风险。
+
+## 结构与状态
+
+根 span 包含覆盖完整目标的原生 input 与视觉 track/thumb。根暴露 `data-meu-component="switch"`、`data-size`、`data-readonly`、`data-state="unchecked|checked|loading|readonly|disabled"`。
+
+## 基础用法
+
+```tsx
+<Switch
+  aria-label="消息通知"
+  checked={enabled}
+  loading={saving}
+  onChange={(next) => savePreference(next)}
+/>
+```
+
+## 受控与非受控
+
+`checked !== undefined` 时受控，onChange 只报告意图；否则由 defaultChecked 初始化并在 change 后更新。非受控 form reset 回到 defaultChecked。服务端保存失败时，受控调用方应回滚 checked 并提供可读错误。
+
+## 表单集成
+
+- Switch 保留原生 checkbox 提交规则：checked 时提交 `name=value`，未选或 disabled 不提交。
+- `required` 可触发原生 constraint validation，并从 Field context 继承。
+- `loading` 不设置 native disabled：它使用 `aria-busy` + `aria-disabled` 阻断变化，因此正在保存的 checked 值仍存在于 FormData，也仍可聚焦获知状态。
+- `readOnly` 同样保留聚焦和 FormData；真正 disabled 才从 tab order 与 FormData 移除。
+
+## Props
+
+API 表由 TypeScript/TSDoc 和 API Extractor从 `SwitchProps` 生成。专有 Props 为 checked/defaultChecked/loading/readOnly/size/status/onChange，其余来自原生 input（除 type/children/size/原生 onChange）。
+
+## Events
+
+`onChange(checked, event)` 仅在接受变化后触发。disabled 不产生 native click；loading/readOnly 会 preventDefault、恢复当前值且不触发 onChange。调用方 `onClick` 仍收到 loading/readOnly 事件，可通过 `defaultPrevented` 识别冻结状态。
+
+## Ref 与命令式方法
+
+ref 指向原生 `HTMLInputElement`，可 focus、click、checkValidity 或读取 form/name/checked。业务不应直接修改 `ref.current.checked` 绕过 React 状态。
+
+## 键盘操作
+
+| 按键            | 行为                              |
+| --------------- | --------------------------------- |
+| Tab / Shift+Tab | 聚焦/离开；disabled 除外          |
+| Space           | 切换；loading/readOnly 保持当前值 |
+
+Enter 不作为 checkbox/switch 的跨浏览器标准触发键，表单提交应有明确 submit Button。
+
+## 触摸与手势
+
+透明 input 覆盖完整 44×44 或更大根区域。组件只接受 tap/click，不实现拖动；避免与横向滚动和 WebView 手势冲突。快速点击由受控 loading 状态和业务请求所有权共同去重。
+
+## 无障碍
+
+- `role="switch"` 和 `aria-checked` 传达开/关；必须提供 Field label、aria-label 或 aria-labelledby。
+- loading 同时提供 aria-busy/aria-disabled；视觉 spinner 为 aria-hidden track 的一部分，不重复命名。
+- invalid/description/error 与 Field 合并，不覆盖调用方已有 IDREF。
+- forced-colors checked track 使用系统 Highlight；焦点环使用系统 Highlight。
+
+## 动效
+
+track 颜色和 thumb 逻辑 margin 使用短状态过渡；RTL 同一属性自动反向。spinner 仅 loading 时循环；reduced-motion 下 spinner 静止，其他过渡 1ms。
+
+## 主题与定制
+
+公开入口为 size/status、className/style、data 属性和 Token。track/thumb 的尺寸关系、阴影和内部 DOM 不属于稳定 API。
+
+## SSR 与 Next.js
+
+render 不读取 browser global；reset listener 只在 effect 中安装。SSR 输出完整 checked/name/value/role。调用方不得根据客户端能力改变首屏 checked，否则会产生 hydration 不一致。
+
+## RTL 与国际化
+
+thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向右、RTL checked 向左。组件无内建业务文案；accessible name 和 loading 结果公告由页面 locale 提供。
+
+## 浏览器与 WebView
+
+依赖 React 19、原生 checkbox、FormData、form reset、CSS logical properties 和标准 media query，目标为 iOS Safari/WKWebView 15+、Android Chrome/WebView 89+。不用 pointer capture、ResizeObserver 或新动画 API；readOnly 回滚使用 Promise microtask。
+
+## 边界情况与已知限制
+
+- loading 保留焦点和 FormData，与 native disabled 不同；如业务必须从提交排除，应同时设置 disabled。
+- HTML checkbox 没有 readonly；readOnly 是 Meu 定义的交互冻结契约。
+- 组件不拥有异步请求、乐观更新、失败回滚和 Toast；调用方必须处理竞态与失败。
+- spinner 静止时仍以 track/thumb 状态表达 loading，业务应在邻近区域提供必要的文本反馈。
+
+## 性能预算
+
+无第三方运行时依赖；非受控且位于 form 时注册一个 reset listener。没有全局监听或布局测量，状态变化仅重渲染单个组件。
+
+## 测试证据
+
+- Unit: `Switch.test.tsx`，8 项，覆盖受控/非受控、Field、loading/readOnly、FormData、reset、required 与 IDREF
+- SSR: `Switch.ssr.test.tsx`，覆盖 role/checked/name/value markup
+- Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset
+- Touch target: 三尺寸 root 最小 44×44
+- RTL/reduced-motion/forced-colors：CSS 和 Story 已建；浏览器视觉证据待补
+- Axe、移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
+
+## V2 优化记录
+
+### 待优化
+
+- 完成 axe、200% 字号、移动双引擎、强制色彩截图与真机读屏验证。
+- 用隔离 H5 请求场景验证快速点击、loading 切换、失败回滚和页面卸载竞态。
+
+### 已完成
+
+- 修复 loading 通过 native disabled 丢失 FormData 的问题，并明确 aria-busy/aria-disabled 契约。
+- 增加 readOnly、原生 form reset、Field required 与 IDREF 合并。
+- thumb 改用逻辑属性支持 RTL；补齐焦点环、forced-colors、reduced-motion、SSR 和 Story contract。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                | 迁移说明                                                         |
+| ---------- | ------ | -------- | --------------------------------------------------- | ---------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | loading 表单语义、readOnly、reset、RTL 与兼容性细化 | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled` |

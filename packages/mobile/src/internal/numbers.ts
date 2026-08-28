@@ -40,11 +40,32 @@ export function normalizeSteppedNumber({
   value: number;
 }) {
   const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
-  const base = min !== undefined && Number.isFinite(min) ? min : 0;
-  const snapped = base + Math.round((value - base) / safeStep) * safeStep;
+  const finiteMin = min !== undefined && Number.isFinite(min) ? min : undefined;
+  const finiteMax = max !== undefined && Number.isFinite(max) ? max : undefined;
+  const lower =
+    finiteMin !== undefined && finiteMax !== undefined ? Math.min(finiteMin, finiteMax) : finiteMin;
+  const upper =
+    finiteMin !== undefined && finiteMax !== undefined ? Math.max(finiteMin, finiteMax) : finiteMax;
+  const base = lower === undefined ? 0 : lower;
+  // Bound before snapping so a max that is not on the step grid resolves to
+  // the last reachable value instead of an off-grid endpoint. This also makes
+  // normalization idempotent (for example 10 -> 9 for min=0/max=10/step=3).
+  const bounded = clampNumber(value, lower, upper);
+  let stepIndex = Math.round((bounded - base) / safeStep);
+  if (lower !== undefined) {
+    const lowerRatio = (lower - base) / safeStep;
+    const tolerance = Number.EPSILON * Math.max(1, Math.abs(lowerRatio)) * 4;
+    stepIndex = Math.max(stepIndex, Math.ceil(lowerRatio - tolerance));
+  }
+  if (upper !== undefined) {
+    const upperRatio = (upper - base) / safeStep;
+    const tolerance = Number.EPSILON * Math.max(1, Math.abs(upperRatio)) * 4;
+    stepIndex = Math.min(stepIndex, Math.floor(upperRatio + tolerance));
+  }
+  const snapped = base + stepIndex * safeStep;
   const resolvedPrecision =
     precision === undefined
       ? Math.max(decimalPlaces(safeStep), decimalPlaces(base))
       : Math.min(Math.max(Math.trunc(precision), 0), 12);
-  return clampNumber(roundNumber(snapped, resolvedPrecision), min, max);
+  return clampNumber(roundNumber(snapped, resolvedPrecision), lower, upper);
 }

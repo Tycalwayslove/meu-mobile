@@ -1,4 +1,4 @@
 # Radio / RadioGroup
 
-Radio 是原生单选原语；RadioGroup 管理 `string | number` 单值、统一 name 与方向布局，并保留浏览器
-方向键行为。支持受控/非受控模式、禁用态、错误态和三档尺寸。
+Radio 与 RadioGroup 的长期行为、表单/无障碍契约、验证证据和变更记录统一维护在
+[`Radio.docs.mdx`](./Radio.docs.mdx)。Props 类型事实源位于 [`types.ts`](./types.ts)。

@@ -1,0 +1,169 @@
+---
+name: RadioGroup
+slug: radio-group
+package: "@meu/mobile"
+exports: [Radio, RadioGroup]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    forms-radio--default,
+    forms-radio--checked,
+    forms-radio--readonly,
+    forms-radio--native-form-contract,
+    forms-radio--rtl
+  ]
+source: packages/mobile/src/Radio
+---
+
+# Radio / RadioGroup
+
+## 当前能力
+
+- 原生 radio input；RadioGroup 统一稳定 name，保持浏览器互斥、Tab 和方向键行为。
+- 支持 `string | number` 值、受控/非受控、controlled empty (`value=null`)、required、disabled、readOnly、错误态和三档尺寸。
+- 非受控 Group 监听原生 form reset 并恢复 defaultValue；checked 值按原生 FormData 提交。
+- Field label/description/error/required 与调用方 IDREF 无损组合。
+- 选择目标至少 44×44；RTL 使用自然文档流；forced-colors 和 reduced-motion 有静态降级。
+
+状态为 `implementation`；Unit/SSR/Story contract 已建立，axe、移动浏览器、Chromatic 主题矩阵和真机读屏尚未达到发布证据线。
+
+## 主流基线与取舍
+
+V2 对照了 [Ant Design Mobile Radio](https://mobile.ant.design/components/radio/) 的 string/number、Group 和移动端 label 模型，以及 [MUI RadioGroup](https://mui.com/material-ui/react-radio-button/) 的 shared name、controlled value、原生键盘和错误反馈。Meu 不增加自定义 icon 或命令式选择 API，优先保证 native radio name group、FormData 与浏览器方向键是一致事实源。
+
+## 何时使用
+
+用于一个集合中必须或可以只选择一项的稳定选项，例如配送方式、支付方式。优先使用 RadioGroup，单独 Radio 仅适用于已有原生 name 管理或布尔“设为默认”场景。
+
+## 何时不要使用
+
+- 多选使用 CheckboxGroup。
+- 两态设置立即生效使用 Switch。
+- 选项数量很大、需要搜索或远程加载时使用 Picker/Select 类组件。
+
+## 结构与状态
+
+Radio DOM 为 input → indicator → label。根暴露 `data-meu-component="radio"`、`data-size`、`data-readonly`、`data-state="unchecked|checked|readonly|disabled"`。Group 使用 `role="radiogroup"` 并暴露 default/error/readonly/disabled。
+
+## 基础用法
+
+```tsx
+<RadioGroup name="shipping" defaultValue="standard" required onChange={setShipping}>
+  <Radio value="standard">标准配送</Radio>
+  <Radio value="express">急速配送</Radio>
+</RadioGroup>
+```
+
+## 受控与非受控
+
+- Group `value !== undefined` 时受控；`null` 是明确的受控空值。
+- 非受控 Group 由 defaultValue 初始化并在选择时更新；form reset 回到 defaultValue。
+- standalone Radio 以 checked/defaultChecked 选择受控或非受控。多个关联 Radio 应用 RadioGroup，避免各自 React state 与浏览器同名互斥脱节。
+
+## 表单集成
+
+- Group 的所有 Radio 共享调用方 name；省略 name 时使用 React useId 生成同一 SSR/hydration 树内稳定的名称。
+- 选中项以 `name=value` 进入 FormData；disabled 原生排除。
+- required 同时位于 radiogroup (`aria-required`) 与原生 radio name group，触发浏览器 constraint validation。
+- readOnly 保持当前值可聚焦、可提交并阻断选择。radiogroup 使用 `aria-readonly`；HTML radio 没有 native readonly，组内子项由组传达，standalone 以 `aria-disabled` 表达不可修改并通过事件回滚保证值不变。
+
+## Props
+
+API 表由 TypeScript/TSDoc 和 API Extractor从 `RadioProps`、`RadioGroupProps` 生成。`value` 只接受 string/number，避免 DOM 提交和严格相等身份出现对象序列化歧义。
+
+## Events
+
+- `Radio.onChange(checked, event)` 在 standalone 或组内选中后触发；原生 radio 用户操作只产生 checked=true。
+- `RadioGroup.onChange(value, event)` 提供完整选中值和原始 input change event。
+- disabled/readOnly 不触发值回调；readOnly 原生 click 仍可被调用方观察但已 preventDefault。
+
+## Ref 与命令式方法
+
+Radio ref 指向原生 `HTMLInputElement`。Group ref 指向 radiogroup div。业务聚焦错误组选项时应聚焦当前 checked radio，若无选择则聚焦第一个 enabled radio。
+
+## 键盘操作
+
+| 按键            | 行为                                            |
+| --------------- | ----------------------------------------------- |
+| Tab / Shift+Tab | 进入/离开原生同名 radio group                   |
+| Arrow keys      | 按浏览器顺序移动选择；readOnly 时回滚并保持原值 |
+| Space           | 选择聚焦项；readOnly 时保持原值                 |
+
+不实现自定义 roving tabindex，避免覆盖 iOS/Android 原生表单行为。
+
+## 触摸与手势
+
+每个 label 是完整触摸目标，最小宽高 44×44 CSS px。组件无拖动、长按或横滑；horizontal 在窄屏自动换行。
+
+## 无障碍
+
+- radiogroup 接受 `aria-label` 或 `aria-labelledby`；Field 可见 label 默认通过后者命名。
+- required/invalid/description/error 归属 radiogroup；invalid 向子 Radio 传播错误视觉，但 ARIA invalid 只放在支持它的 group 上。
+- indicator 仅视觉；checked、required、disabled 均由原生 input 传达。
+- forced-colors 选择环使用系统 Highlight；状态不只依赖主题色。
+
+## 动效
+
+选中点只使用 opacity/scale 短过渡；reduced-motion 下为 1ms，无循环动画。
+
+## 主题与定制
+
+稳定入口为 size/status/direction、根 className/style、data 属性和 Token。内部 indicator 与生成 class 不属于公开 API。
+
+## SSR 与 Next.js
+
+render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户端树中稳定；调用方不要基于 `window` 改变首屏选项顺序。reset 监听仅在客户端 effect 注册。
+
+## RTL 与国际化
+
+使用 flex gap 和 inline flow，RTL 下选项/文字自然镜像；圆形 indicator 无方向性。长文本允许换行，业务负责 label 翻译和排序含义。
+
+## 浏览器与 WebView
+
+依赖 React 19、原生 radio、FormData、form reset 和标准 CSS，目标为 iOS Safari/WKWebView 15+、Android Chrome/WebView 89+。方向键在移动软键盘通常不可见，但蓝牙键盘和桌面 WebView 保持原生行为。
+
+## 边界情况与已知限制
+
+- HTML radio 不提供 readonly；本组件提供的 readOnly 是可聚焦、可提交的交互冻结，不等同 disabled。
+- standalone 同名 Radio 若各自非受控 React state，外部重新渲染可能恢复旧 checked；同组数据必须使用 RadioGroup 或上层受控值。
+- generated name 仅保证 React 树内稳定，不应被后端当作业务字段名；表单提交必须显式 name。
+- 动态删除当前选项不会自动选择备用项，由业务决定空值与校验。
+
+## 性能预算
+
+每个 Group 仅在非受控 form 场景注册一个 reset 监听；没有全局监听、布局测量或第三方运行时依赖。
+
+## 测试证据
+
+- Unit: `Radio.test.tsx`，8 项，覆盖单项、controlled empty、disabled/readOnly、Field、required、FormData 与 reset
+- SSR: `Radio.ssr.test.tsx`，覆盖 generated name、radiogroup、required 和 checked markup
+- Story interaction: `NativeFormContract` 覆盖原生提交、选择与 reset
+- Touch target: CSS `minWidth/minHeight: 44`
+- RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补
+- Axe、移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
+
+## V2 优化记录
+
+### 待优化
+
+- 完成 axe、移动双引擎、真机读屏、200% 字号和强制色彩验收。
+- 验证各目标 WebView 对只读方向键回滚和原生 validation bubble 的一致性。
+
+### 已完成
+
+- 修复 Field required 未传播、radiogroup invalid 归属与 IDREF 覆盖问题。
+- 增加 controlled empty、readOnly、FormData 和原生 reset 契约。
+- 补齐 44×44、WebView 兼容焦点环、RTL、forced-colors、reduced-motion、SSR 与 Story contract。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                               | 迁移说明                                      |
+| ---------- | ------ | -------- | -------------------------------------------------- | --------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | required/invalid、reset、readOnly 与兼容性细节完善 | 无破坏；只读场景可用 `readOnly` 替代 disabled |

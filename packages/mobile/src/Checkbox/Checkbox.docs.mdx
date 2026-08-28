@@ -1,0 +1,174 @@
+---
+name: Checkbox
+slug: checkbox
+package: "@meu/mobile"
+exports: [Checkbox, CheckboxGroup]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    forms-checkbox--default,
+    forms-checkbox--checked,
+    forms-checkbox--indeterminate,
+    forms-checkbox--readonly,
+    forms-checkbox--native-form-contract,
+    forms-checkbox--rtl
+  ]
+source: packages/mobile/src/Checkbox
+---
+
+# Checkbox / CheckboxGroup
+
+## 当前能力
+
+- `Checkbox` 基于原生 `input[type=checkbox]`，支持受控/非受控、mixed、required、disabled、readOnly、错误态、三档尺寸和原生 ref。
+- `CheckboxGroup` 管理 `string | number` 数组，统一 `name`、disabled/readOnly/status，支持水平换行与垂直布局。
+- 文本与指示器组成同一个 label；无文案时根目标仍至少 44×44 CSS px。
+- 非受控单项和组都监听所在原生 form 的 reset，恢复 `defaultChecked` / `defaultValue`。
+- 调用方和 Field 的 `aria-describedby` 无损合并并去重；Field invalid/required 进入单项原生语义。
+- forced-colors 保留选择标记和焦点，reduced-motion 将状态过渡缩短到 1ms。
+
+状态仍为 `implementation`：代码、Unit、SSR 和 Story contract 已建立，但 axe、移动 Chromium/WebKit、VoiceOver/TalkBack 与 Chromatic 主题矩阵尚未形成发布证据。
+
+## 主流基线与取舍
+
+V2 对照了 [Ant Design Mobile Checkbox](https://mobile.ant.design/components/checkbox/) 的受控、Group、mixed 与移动端原子化边界，以及 [MUI Checkbox](https://mui.com/material-ui/react-checkbox/) 的原生 label、controlled、indeterminate 与 FormGroup 契约。Meu 保留这些核心能力，同时优先保留真实 input、FormData、constraint validation 和原生 ref；暂不加入 custom icon/block/min-max 等 API，待 Meu 设计稿或业务证据出现后再扩展，避免视觉体系被任意插槽破坏。
+
+## 何时使用
+
+用于可独立开关的多个选择、协议确认、筛选条件和批量选择。多个同类值使用 CheckboxGroup，让名称、只读和错误状态保持一致。
+
+## 何时不要使用
+
+- 互斥选项使用 RadioGroup。
+- 设置切换后立即生效且无需显式提交时使用 Switch。
+- “至少选一项”不是原生 checkbox group 能表达的 constraint；应由 schema/Form adapter 校验并将错误交给 Field，不能给每个 checkbox 都加 `required`。
+
+## 结构与状态
+
+Checkbox DOM 顺序固定为原生 input → 视觉 indicator → label。根暴露 `data-meu-component="checkbox"`、`data-size`、`data-readonly` 和 `data-state="unchecked|checked|indeterminate|readonly|disabled"`。Group 暴露 `role="group"` 与 `data-state="default|error|readonly|disabled"`。
+
+## 基础用法
+
+```tsx
+<CheckboxGroup name="service" defaultValue={["delivery"]} onChange={setServices}>
+  <Checkbox value="delivery">配送</Checkbox>
+  <Checkbox value="pickup">到店自提</Checkbox>
+</CheckboxGroup>
+```
+
+## 受控与非受控
+
+- 单项 `checked` 存在时受控；否则从 `defaultChecked` 初始化。
+- Group `value` 存在时受控；否则从 `defaultValue` 初始化。
+- 受控回调只报告意图，调用方必须回写新值；组件不会制造临时视觉状态。
+- `defaultChecked/defaultValue` 只定义初始值与后续 form reset 目标，不用于运行时同步业务数据。
+
+## 表单集成
+
+- 单项按原生规则提交：有 `name` 且 checked 时提交 `value`，省略 value 时浏览器提交 `on`。
+- Group 为每个后代注入相同 name；FormData 通过 `getAll(name)` 获取重复值。
+- `disabled` 使用原生 disabled，既不可聚焦也不进入 FormData。
+- `readOnly` 是 Meu 的交互契约：仍可聚焦且保留已选 FormData，但点击/Space 不改变值。HTML checkbox 没有原生 readonly，因此组件用 `aria-readonly` 和事件回滚实现。
+- CheckboxGroup 不把 group required 映射到每个选项。至少一项、最少/最多数量由表单 schema 处理。
+
+## Props
+
+API 表由 TypeScript/TSDoc 和 API Extractor 从 `CheckboxProps`、`CheckboxGroupProps` 生成。原生 input 属性仅属于 Checkbox；div 属性属于 CheckboxGroup。Group 子项只有提供 `value` 才接受 Group 的选择状态。
+
+## Events
+
+- `Checkbox.onChange(checked, event)`：仅在接受真实变化后触发；disabled/readOnly 不触发。
+- `CheckboxGroup.onChange(values)`：提供完整下一数组，而不是增量操作。
+- 原生 `onClick` 仍透传；readOnly 时收到已 `preventDefault()` 的事件，不应把它当作值变化事实源。
+
+## Ref 与命令式方法
+
+Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()` 和读取 `indeterminate`。CheckboxGroup ref 指向 `HTMLDivElement`，只用于布局、滚动或查询组，不提供命令式选择 API。
+
+## 键盘操作
+
+| 按键            | 行为                                   |
+| --------------- | -------------------------------------- |
+| Tab / Shift+Tab | 按 DOM 顺序进入每个未禁用 checkbox     |
+| Space           | 切换当前 checkbox；readOnly 时保持原值 |
+
+不要在 Group 上增加 roving tabindex；checkbox 是多个独立 tab stop，符合原生和 APG 预期。
+
+## 触摸与手势
+
+整个 label 是点击目标，根节点最小宽高 44×44 CSS px；组件不拦截滚动、不实现长按或拖动。快速连续触摸仍产生每次原生 change，业务异步去重由调用方处理。
+
+## 无障碍
+
+- 原生 checkbox 提供 name、checked、disabled、required 和 mixed 语义；视觉标记 `aria-hidden`。
+- indeterminate 既设置 DOM property，也输出 `aria-checked="mixed"`；它不代表第三个提交值。
+- error 通过 `aria-invalid`，说明与错误通过去重后的 `aria-describedby` 关联。
+- forced-colors 下 checked 标记使用系统 Highlight/HighlightText；选择状态不只依赖颜色。
+- 可见文案应说明选中后的事实，不要只写“开启/关闭”。无 children 时必须提供 `aria-label` 或 `aria-labelledby`。
+
+## 动效
+
+颜色和标记透明度只使用短状态过渡；`prefers-reduced-motion: reduce` 下时长为 1ms。没有弹簧、位移或循环动画。
+
+## 主题与定制
+
+公开定制入口为 size/status、根 `className/style`、data 属性和全局 Token。内部生成 class、indicator DOM 与伪元素不是稳定 API。
+
+## SSR 与 Next.js
+
+渲染阶段不访问 window/document；form/reset 监听只在 effect 中安装。SSR 首屏直接包含 checked、name、value 和 ARIA。调用方需保证服务端与客户端的 controlled/default 值一致，避免 hydration 差异。
+
+## RTL 与国际化
+
+布局使用 flex gap，不依赖左右 margin；水平组自然按 `dir` 排列。复选标记无方向性。业务文案负责本地化并允许换行；组件不截断 200% 字号下的 label。
+
+## 浏览器与 WebView
+
+实现依赖 React 19、原生 checkbox、FormData、form reset、CSS logical properties 和标准媒体查询，目标为 iOS Safari/WKWebView 15+、Android Chrome/WebView 89+。readOnly 事件回滚使用 Promise microtask，兼容低版本 WebView；静态构建门禁不能替代真机点击与读屏。
+
+## 边界情况与已知限制
+
+- 原生 checkbox 没有 readonly；若产品希望完全跳过焦点并从提交排除，应使用 disabled。
+- Group 不内置 min/max/select-all；业务可用受控 value 实现，校验由 schema 给出明确错误。
+- `indeterminate` 是视觉/语义状态，不自动改变 checked，也不产生独立 FormData 值。
+- standalone checkbox 在 Field 的 `labelAssociation="auto"` 下由 ARIA 命名；若需要点击 Field label 聚焦/切换，显式使用 `labelAssociation="native"`。
+
+## 性能预算
+
+每个单项一个 effect 同步 indeterminate，非受控且位于 form 时再注册一个 reset 监听；Group 仅在非受控 form 场景注册一个 reset 监听。不注册 window 级监听、不测量布局、不引入运行时依赖。
+
+## 测试证据
+
+- Unit: `Checkbox.test.tsx`，10 项，覆盖 mixed、disabled/readOnly、受控单项/Group、Field、FormData 和 reset
+- SSR: `Checkbox.ssr.test.tsx`，覆盖稳定 group/name/value/checked markup
+- Story interaction: `NativeFormContract` 覆盖点击、重复 FormData 与 reset
+- Touch target: CSS root `minWidth/minHeight: 44`
+- Reduced motion / forced colors / RTL: CSS 和专属 Story 已建立；真实浏览器视觉证据待补
+- Axe、移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
+
+## V2 优化记录
+
+### 待优化
+
+- 接入 axe、移动 WebKit/Chromium、200% 字号、强制色彩截图和真机读屏验收。
+- 基于真实业务再评估 Group min/max 与 select-all API；当前不提前固化。
+
+### 已完成
+
+- 修复非受控单项/Group 无法跟随原生 form reset。
+- 增加保持 FormData 的 readOnly 契约及组级传播。
+- 合并 Field 与调用方 IDREF，传播原生 required/invalid。
+- 补齐 44×44、WebView 兼容焦点环、forced-colors、reduced-motion、SSR、FormData 和 Story contract。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                              | 迁移说明                                      |
+| ---------- | ------ | -------- | ------------------------------------------------- | --------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | reset、readOnly、IDREF、触控/高对比与验证证据完善 | 无破坏；只读场景可用 `readOnly` 替代 disabled |

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
@@ -15,6 +15,20 @@ describe("Checkbox", () => {
     fireEvent.click(checkbox);
     expect(checkbox).toHaveProperty("checked", true);
     expect(onChange).toHaveBeenCalledWith(true, expect.anything());
+  });
+
+  it("reports controlled changes without mutating the source of truth", () => {
+    const onChange = vi.fn();
+    render(
+      <Checkbox checked={false} onChange={onChange}>
+        受控选择
+      </Checkbox>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "受控选择" });
+    fireEvent.click(checkbox);
+
+    expect(onChange).toHaveBeenCalledWith(true, expect.anything());
+    expect(checkbox).toHaveProperty("checked", false);
   });
 
   it("exposes the native indeterminate state", () => {
@@ -39,6 +53,97 @@ describe("Checkbox", () => {
     expect(checkbox).toHaveProperty("disabled", true);
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("keeps readonly controls focusable, unchanged and successful in FormData", async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <form>
+        <Checkbox defaultChecked name="terms" readOnly value="accepted" onChange={onChange}>
+          条款
+        </Checkbox>
+      </form>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "条款" });
+
+    fireEvent.click(checkbox);
+    await waitFor(() => expect(checkbox).toHaveProperty("checked", true));
+    expect(checkbox).not.toHaveProperty("disabled", true);
+    expect(checkbox.getAttribute("aria-readonly")).toBe("true");
+    expect(onChange).not.toHaveBeenCalled();
+    expect(new FormData(container.querySelector("form")!).get("terms")).toBe("accepted");
+  });
+
+  it("restores uncontrolled state on native form reset", async () => {
+    const { container } = render(
+      <form>
+        <Checkbox defaultChecked name="marketing">
+          营销通知
+        </Checkbox>
+      </form>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "营销通知" });
+    fireEvent.click(checkbox);
+    expect(checkbox).toHaveProperty("checked", false);
+
+    container.querySelector("form")!.reset();
+    await waitFor(() => expect(checkbox).toHaveProperty("checked", true));
+  });
+
+  it("does not reset when the native reset event is canceled", async () => {
+    const { container } = render(
+      <form onReset={(event) => event.preventDefault()}>
+        <Checkbox defaultChecked name="marketing">
+          营销通知
+        </Checkbox>
+      </form>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "营销通知" });
+    fireEvent.click(checkbox);
+
+    act(() => container.querySelector("form")!.reset());
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    expect(checkbox).toHaveProperty("checked", false);
+  });
+
+  it("rebinds reset behavior when the external form owner changes", async () => {
+    const { rerender } = render(
+      <>
+        <form id="checkbox-a" />
+        <form id="checkbox-b" />
+        <Checkbox defaultChecked form="checkbox-a" name="choice" value="yes">
+          外部协议
+        </Checkbox>
+      </>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "外部协议" });
+    fireEvent.click(checkbox);
+    rerender(
+      <>
+        <form id="checkbox-a" />
+        <form id="checkbox-b" />
+        <Checkbox defaultChecked form="checkbox-b" name="choice" value="yes">
+          外部协议
+        </Checkbox>
+      </>
+    );
+
+    const form = document.getElementById("checkbox-b") as HTMLFormElement;
+    act(() => form.reset());
+    expect(new FormData(form).get("choice")).toBe("yes");
+    await waitFor(() => expect(checkbox).toHaveProperty("checked", true));
+  });
+
+  it("merges caller and Field descriptions and propagates native required semantics", () => {
+    render(
+      <Field label="协议" description="请阅读" required>
+        <Checkbox aria-describedby="external-help">同意</Checkbox>
+      </Field>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "协议" });
+    expect(checkbox.getAttribute("aria-describedby")).toContain("external-help");
+    expect(checkbox.getAttribute("aria-describedby")).toContain("description");
+    expect(checkbox).toHaveProperty("required", true);
+  });
 });
 
 describe("CheckboxGroup", () => {
@@ -59,5 +164,47 @@ describe("CheckboxGroup", () => {
     expect(screen.getByRole("checkbox", { name: "配送" })).toHaveProperty("checked", true);
     fireEvent.click(screen.getByRole("checkbox", { name: "自提" }));
     expect(onChange).toHaveBeenLastCalledWith(["delivery", "pickup"]);
+  });
+
+  it("resets an uncontrolled group and submits repeated native names", async () => {
+    const { container } = render(
+      <form>
+        <CheckboxGroup<string> defaultValue={["delivery"]} name="service">
+          <Checkbox value="delivery">配送</Checkbox>
+          <Checkbox value="pickup">自提</Checkbox>
+        </CheckboxGroup>
+      </form>
+    );
+    fireEvent.click(screen.getByRole("checkbox", { name: "自提" }));
+    expect(new FormData(container.querySelector("form")!).getAll("service")).toEqual([
+      "delivery",
+      "pickup"
+    ]);
+
+    const form = container.querySelector("form")!;
+    act(() => form.reset());
+    expect(new FormData(form).getAll("service")).toEqual(["delivery"]);
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: "自提" })).toHaveProperty("checked", false)
+    );
+  });
+
+  it("blocks readonly group changes without disabling its values", async () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <form>
+        <CheckboxGroup defaultValue={["delivery"]} name="service" onChange={onChange} readOnly>
+          <Checkbox value="delivery">配送</Checkbox>
+          <Checkbox value="pickup">自提</Checkbox>
+        </CheckboxGroup>
+      </form>
+    );
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "自提" }));
+    await waitFor(() =>
+      expect(screen.getByRole("checkbox", { name: "自提" })).toHaveProperty("checked", false)
+    );
+    expect(onChange).not.toHaveBeenCalled();
+    expect(new FormData(container.querySelector("form")!).getAll("service")).toEqual(["delivery"]);
   });
 });
