@@ -110,8 +110,10 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 ## 测试证据
 
 - Unit: 模态名称/关闭原因、滚动锁、受控/非受控 snap、键盘、拖拽关闭、forceMount、动态 identity、本地化/数字标题
+- Story interaction: `Default` 验证打开、handle 聚焦、关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `BottomSheet.ssr.test.tsx`；测量 hydration 专测待补
-- Axe / 双引擎手势 / Chromatic / 真机软键盘读屏: 最终统一门禁
+- 双引擎手势 / Chromatic / 真机软键盘读屏: 最终统一门禁
 
 ## V2 优化记录
 

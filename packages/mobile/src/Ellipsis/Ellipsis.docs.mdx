@@ -113,8 +113,8 @@ ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测�
 ## 测试证据
 
 - Unit: 测量、三向候选基础、受控展开、内容更新陈旧帧、非有限 rows
-- Story interaction: InteractiveExpansion 验证测量后展开状态
-- Axe: 待 CI
+- Story interaction: `InteractiveExpansion` 验证测量后展开状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Ellipsis.ssr.test.tsx` 验证稳定 fallback；hydration 专测待补
 - RTL: NarrowRTL Story
 - Reduced motion: 无动画，不适用

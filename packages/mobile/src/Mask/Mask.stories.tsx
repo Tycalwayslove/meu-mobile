@@ -30,5 +30,20 @@ export const WithDecorativeContent: Story = {
         正在准备内容…
       </span>
     )
+  },
+  play: ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const mask = body.querySelector<HTMLElement>('[data-meu-component="mask"]');
+    const backdrop = mask ? mask.querySelector<HTMLButtonElement>("button") : null;
+    if (!mask || !backdrop || !mask.textContent || !mask.textContent.includes("正在准备内容…")) {
+      throw new window.Error("Expected Mask decorative content");
+    }
+    if (
+      mask.getAttribute("aria-hidden") !== "true" ||
+      backdrop.getAttribute("aria-hidden") !== "true" ||
+      backdrop.tabIndex !== -1
+    ) {
+      throw new window.Error("Mask decorative layer leaked into the accessibility tree");
+    }
   }
 };

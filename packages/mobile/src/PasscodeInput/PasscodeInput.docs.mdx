@@ -256,9 +256,9 @@ SMS autofill 属浏览器策略，不能仅凭桌面模拟证明。`inputMode="n
   pointer cancellation、custom-keyboard required constraint validation、disabled/readOnly 与 ref。
 - SSR: `PasscodeInput.ssr.test.tsx` 覆盖确定性真实 input、cells、required、one-time-code 与 text mode 长度策略。
 - Form adapter: `MeuFormPasscodeInput.test.tsx` 覆盖 RHF dirty、提交、错误关联、native label 与失败聚焦。
-- Story interaction: `NativeFormReset` 在真实 Story 浏览器验证 input → reset 过渡。
+- Story interaction: `NativeFormReset.play` 在真实 Story 浏览器验证 input → reset 过渡；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Story states: connected/separated、partial/complete、native/custom keyboard、plain/error/readOnly/disabled/RTL。
-- Axe: 待形成 CI 独立报告；当前 Storybook a11y addon 以 error 模式运行。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe；CI 独立报告仍待固化。
 - Mobile Chromium/WebKit E2E: 通用 H5 表单已覆盖，OTP autofill/paste/系统键盘仍需专属真机记录。
 - Chromatic Light/Dark: Story 发布后建立视觉基线；Figma 组件集已通过 Light/Dark AA 与目标尺寸 QA。
 - Real device: iOS Safari/WKWebView、Android Chrome/WebView、VoiceOver/TalkBack 待记录。
@@ -276,7 +276,7 @@ SMS autofill 属浏览器策略，不能仅凭桌面模拟证明。`inputMode="n
 ### 待达到 commercial
 
 - 在支持矩阵真机完成 OTP autofill、粘贴、软键盘、密码管理器、旋转与 WebView 验证并留档。
-- 形成 axe、VoiceOver/TalkBack 和 Chromatic Light/Dark 的可追溯 CI/人工证据。
+- 形成 VoiceOver/TalkBack 和 Chromatic Light/Dark 的可追溯 CI/人工证据，并把现有本地 axe 结果固化为 CI 报告。
 - 决定是否引入 grapheme cluster 分段；引入前必须验证 iOS 13 fallback、体积和规范化迁移。
 
 ## 维护规则

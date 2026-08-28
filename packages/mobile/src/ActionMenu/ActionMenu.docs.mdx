@@ -117,8 +117,10 @@ O(actions) 分组；关闭 Provider 记录仅为退出动画短暂保留。confi
 ## 测试证据
 
 - Unit: 语义/分组/焦点、pending 跨关闭重开隔离、Popup Portal RTL/motion、回调顺序、false/reject、强制确认、受控取消、forceMount、确认随关闭清理、Provider close/clear/unmount
+- Story interaction: `Default` 验证打开、首操作聚焦、动作关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `ActionMenu.ssr.test.tsx`；hydration 专测待补
-- Axe / 双引擎 / Chromatic / 真机读屏: 最终统一门禁
+- 双引擎 / Chromatic / 真机读屏: 最终统一门禁
 
 ## V2 优化记录
 

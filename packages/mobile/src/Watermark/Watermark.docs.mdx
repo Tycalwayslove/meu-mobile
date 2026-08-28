@@ -116,8 +116,8 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 ## 测试证据
 
 - Unit: `Watermark.test.tsx` 覆盖文本/图片回退、几何归一、ref、篡改恢复、动态 children 与 SSR。
-- Story interaction: DynamicContent play 已编写并通过 typecheck；Story runner 未执行。
-- Axe: 未执行。
+- Story interaction: `DynamicContent` 验证业务内容更新且水印 overlay 保持稳定；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: Node SSR 已覆盖 stable pattern markup；hydration 专测未执行。
 - RTL: 无方向性布局；bidi 内容待真机。
 - Reduced motion: 不适用，无动画。

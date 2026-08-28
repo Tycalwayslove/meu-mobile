@@ -113,8 +113,8 @@ grid row 动画在 Chrome/WebView 70+、iOS 13+ 可用；inert 在旧内核缺�
 ## 测试证据
 
 - Unit: disclosure 关联、状态保留、accordion、disabled、controlled、动态 value 清理、inert
-- Story interaction: Accordion 验证单展开切换
-- Axe: 待 CI
+- Story interaction: `Accordion` 验证单展开切换；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Collapse.ssr.test.tsx`；hydration 专测待补
 - RTL: LongContentRTL Story
 - Reduced motion: CSS 实现
@@ -126,7 +126,7 @@ grid row 动画在 Chrome/WebView 70+、iOS 13+ 可用；inert 在旧内核缺�
 
 ### 待优化
 
-补 axe、真机读屏、嵌套 disclosure 与视觉动画基线。
+补真机读屏、嵌套 disclosure 与视觉动画基线。
 
 ### 已完成
 

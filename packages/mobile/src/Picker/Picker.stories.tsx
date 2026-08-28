@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 
 import { Field } from "../Field";
 import { ConfigProvider } from "../ConfigProvider";
+import { waitForStory } from "../storyTestUtils";
 import { Picker } from "./Picker";
 import { PickerTrigger } from "./PickerTrigger";
 import type { PickerOption, PickerProps, PickerValue } from "./types";
@@ -73,7 +74,58 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const SingleColumn: Story = {};
+export const SingleColumn: Story = {
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-component="picker-trigger"]'
+    );
+    if (!trigger) throw new window.Error("Expected Picker trigger");
+
+    trigger.focus();
+    trigger.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="picker"]') !== null,
+      "Picker did not open"
+    );
+    const picker = body.querySelector<HTMLElement>('[data-meu-component="picker"]');
+    const wheel = picker ? picker.querySelector<HTMLElement>('[role="listbox"]') : null;
+    const option = picker
+      ? Array.from(picker.querySelectorAll<HTMLElement>('[role="option"]')).find(
+          (candidate) => candidate.textContent === "当日达"
+        )
+      : undefined;
+    const confirm = picker
+      ? Array.from(picker.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "确定"
+        )
+      : undefined;
+    if (!picker || !wheel || !option || !confirm) {
+      throw new window.Error("Expected Picker wheel controls");
+    }
+    if (wheel.getAttribute("aria-orientation") !== "vertical") {
+      throw new window.Error("Picker wheel is missing vertical listbox semantics");
+    }
+
+    option.click();
+    await waitForStory(
+      () => option.getAttribute("aria-selected") === "true",
+      "Picker did not select the requested option"
+    );
+    confirm.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="picker"]') === null,
+      "Picker did not close after confirmation"
+    );
+    if (!trigger.textContent || !trigger.textContent.includes("当日达")) {
+      throw new window.Error("Picker confirmation did not update the field value");
+    }
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === trigger,
+      "Picker did not restore focus to its trigger"
+    );
+  }
+};
 
 export const MultipleColumns: Story = {
   args: {

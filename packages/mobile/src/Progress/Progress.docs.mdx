@@ -31,7 +31,7 @@ source: packages/mobile/src/Progress
 - 支持三档厚度、四种 tone、可见标签/数值、`formatValue`、`valueText` 与显式 `announce`。
 - 使用 `role="progressbar"`；不确定状态省略 `aria-valuenow`，reduced-motion 下停止循环动画。
 
-当前为 `implementation`：Unit、SSR 和 Story 已建立；axe、移动 WebKit/Chromium、Chromatic 与真机读屏尚无证据。
+当前为 `implementation`：Unit、SSR、Story interaction 与本地 axe 已建立；移动 WebKit/Chromium、Chromatic 与真机读屏尚无证据。
 
 ## 何时使用
 
@@ -118,8 +118,8 @@ RTL 下确定进度从逻辑起点（右侧）增长。可见格式和 `valueTex
 ## 测试证据
 
 - Unit: 5 项，覆盖 clamp、indeterminate、格式化、locale、announcement/valueText，以及显式 live-region 属性优先级。
-- Story interaction: 不适用；只读组件无确定性交互。
-- Axe: 未执行。
+- Story interaction: `ClampedAndFormatted.play` 验证只读 progressbar 的边界值和可访问值文本；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
 - SSR/hydration: Node SSR 1 项；hydration 未执行。
 - RTL: CSS 契约，未做浏览器 E2E。
 - Reduced motion: CSS 分支存在，未做浏览器媒体查询 E2E。
@@ -131,7 +131,7 @@ RTL 下确定进度从逻辑起点（右侧）增长。可见格式和 `valueTex
 
 ### 待优化
 
-- axe、hydration、移动浏览器、Chromatic 与真机读屏矩阵。
+- hydration、移动浏览器、Chromatic 与真机读屏矩阵。
 
 ### 已完成
 

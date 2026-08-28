@@ -50,5 +50,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const CustomContainer: Story = {
-  render: () => <CustomContainerDemo />
+  render: () => <CustomContainerDemo />,
+  play: async ({ canvasElement }) => {
+    const target = canvasElement.querySelector<HTMLElement>('[role="region"]');
+    const content = canvasElement.querySelector<HTMLElement>('[role="region"] > div');
+    await Promise.resolve();
+    if (!target || !content) throw new window.Error("Expected Portal target and content");
+    if (
+      content.parentElement !== target ||
+      content.textContent !== "Portal 内容已挂载到自定义容器"
+    ) {
+      throw new window.Error("Expected Portal content inside the custom target");
+    }
+  }
 };

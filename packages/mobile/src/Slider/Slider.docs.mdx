@@ -37,7 +37,7 @@ source: packages/mobile/src/Slider
 - `onChangeComplete` 只在一次真实改变的 pointer 或值变更键交互结束时触发一次；取消 pointer、无变化抬手和陈旧事件不会误报。
 - track、marks 与原生 range direction 支持 RTL；焦点、forced-colors 和 44px 最小触控高度有明确降级。
 
-当前为 V2 `implementation`。单元、SSR 与 Story 契约已建立；axe、移动 Chromium/WebKit、Light/Dark 基线和真机读屏尚未完成，因此不能标记为 commercial。
+当前为 V2 `implementation`。单元、SSR、Story 与本地 axe 契约已建立；移动 Chromium/WebKit、Light/Dark 视觉基线和真机读屏尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -161,8 +161,9 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 - Unit 7 项：原生 change/complete、Field/marks、bounds/step、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
 - SSR 1 项：无浏览器全局时确定输出 range/value/output。
-- Story play：NativeFormReset 验证输入后恢复默认值；其余 Story 覆盖受控、marks、Field、RTL、error、disabled、尺寸。
-- 待补：axe、移动 Chromium/WebKit pointer+keyboard、200% 字号、forced-colors 截图、Chromatic Light/Dark、iOS VoiceOver/Android TalkBack。
+- Story interaction: `NativeFormReset` 验证输入后恢复默认值；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- 待补：移动 Chromium/WebKit pointer+keyboard、200% 字号、forced-colors 截图、Chromatic Light/Dark、iOS VoiceOver/Android TalkBack。
 
 ## V2 优化记录
 
@@ -175,7 +176,7 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 ### 待优化
 
-- 完成 axe、真实移动浏览器、真机读屏、视觉回归和大字号验收。
+- 完成真实移动浏览器、真机读屏、视觉回归和大字号验收。
 - 有真实双值业务与跨端契约后再设计 RangeSlider，不扩张当前 API。
 
 ## 维护规则

@@ -37,7 +37,7 @@ export function SiteHeader() {
           })}
         </nav>
         <div className="site-tools">
-          <Link className="search-link" href="/components#catalog">
+          <Link className="search-link" href="/components#catalog" aria-label="搜索组件">
             <MeuIconSearch size={16} aria-hidden="true" />
             <span>搜索</span>
             <kbd>/</kbd>

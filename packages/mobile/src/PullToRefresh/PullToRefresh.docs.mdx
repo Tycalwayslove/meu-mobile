@@ -117,8 +117,8 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 ## 测试证据
 
 - Unit: `PullToRefresh.test.tsx`（阈值、短拉、边界、键盘、失败、多指/cancel/disabled）。
-- Story interaction: `PullToRefresh.stories.tsx` 已编写默认刷新按钮 play；runner 待执行。
-- Axe: 待补。
+- Story interaction: `Default.play` 验证替代刷新按钮与完成状态；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
 - SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；真实 hydration 待补。
 - RTL: 纵向手势不适用；文案/排版待矩阵。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
@@ -130,7 +130,7 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 
 ### 待优化
 
-- 补真实滚动容器的 Chromium/WebKit E2E、axe 与 hydration。
+- 补真实滚动容器的 Chromium/WebKit E2E 与 hydration。
 - 验证目标 iOS WKWebView 的 overscroll/rubber-band。
 
 ### 已完成

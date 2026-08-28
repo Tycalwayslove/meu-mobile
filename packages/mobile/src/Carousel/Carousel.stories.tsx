@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { waitForStory } from "../storyTestUtils";
 import { Carousel } from "./Carousel";
 import type { CarouselItem } from "./types";
 
@@ -87,7 +88,32 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const carousel = canvasElement.querySelector<HTMLElement>('[data-meu-component="carousel"]');
+    const next = canvasElement.querySelector<HTMLButtonElement>('button[aria-label="下一张"]');
+    if (!carousel || !next) throw new window.Error("Expected Carousel controls");
+    if (carousel.getAttribute("data-index") !== "0") {
+      throw new window.Error("Expected Carousel to start on the first slide");
+    }
+
+    next.click();
+    await waitForStory(
+      () => carousel.getAttribute("data-index") === "1",
+      "Expected Carousel to advance to the second slide"
+    );
+    const activeSlide = carousel.querySelector<HTMLElement>(
+      '[data-meu-carousel-slide][data-active="true"]'
+    );
+    if (
+      !activeSlide ||
+      activeSlide.getAttribute("aria-label") !== "城市散步系列" ||
+      activeSlide.hasAttribute("aria-hidden")
+    ) {
+      throw new window.Error("Expected Carousel to expose the new active slide");
+    }
+  }
+};
 
 export const LoopingAutoplay: Story = {
   args: { autoplay: true, autoplayInterval: 3000, loop: true }

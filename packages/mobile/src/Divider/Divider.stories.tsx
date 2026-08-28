@@ -17,7 +17,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const WithContent: Story = { args: { children: "订单信息" } };
+export const WithContent: Story = {
+  args: { children: "订单信息" },
+  play: ({ canvasElement }) => {
+    const divider = canvasElement.querySelector<HTMLElement>('[role="separator"]');
+    if (!divider) throw new window.Error("Expected semantic Divider");
+    if (
+      divider.getAttribute("aria-label") !== "订单信息" ||
+      divider.getAttribute("aria-orientation") !== "horizontal"
+    ) {
+      throw new window.Error("Divider is missing its accessible name or orientation");
+    }
+  }
+};
 export const StartAligned: Story = { args: { align: "start", children: "更多信息" } };
 export const EndAligned: Story = { args: { align: "end", children: "已完成" } };
 

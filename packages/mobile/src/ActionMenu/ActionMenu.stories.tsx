@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
 import { Button } from "../Button";
+import { waitForStory } from "../storyTestUtils";
 import { ActionMenu } from "./ActionMenu";
 import { ActionMenuProvider, useActionMenu } from "./ActionMenuProvider";
 import type { ActionMenuProps } from "./types";
@@ -56,7 +57,39 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!trigger) throw new window.Error("Expected the ActionMenu trigger");
+
+    trigger.click();
+    await waitForStory(
+      () => document.querySelector('[role="dialog"][aria-modal="true"]') !== null,
+      "Expected the ActionMenu dialog to open"
+    );
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]');
+    const copyAction = dialog
+      ? Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "复制订单号"
+        )
+      : undefined;
+    if (!copyAction) throw new window.Error("Expected the copy action");
+    await waitForStory(
+      () => document.activeElement === copyAction,
+      "Expected ActionMenu to focus its first action"
+    );
+
+    copyAction.click();
+    await waitForStory(
+      () => document.querySelector('[role="dialog"][aria-modal="true"]') === null,
+      "Expected the ActionMenu dialog to close after an action"
+    );
+    await waitForStory(
+      () => document.activeElement === trigger,
+      "Expected ActionMenu to restore trigger focus"
+    );
+  }
+};
 
 export const WithDescriptionAndDanger: Story = {
   args: {

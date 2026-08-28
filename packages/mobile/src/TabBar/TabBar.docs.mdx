@@ -112,8 +112,8 @@ O(items)，建议最多五项；无监听、测量和第三方运行时。
 ## 测试证据
 
 - Unit: link/button、current、controlled null、动态 remove/disable 归一、可取消点击、Badge 名称、安全区和 locale
-- Story interaction: button route current
-- Axe: 待 CI 报告
+- Story interaction: `RouteInteraction` 验证 button route 的当前态切换；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `TabBar.ssr.test.tsx`
 - RTL: 原生 flex 继承，视觉待补
 - Reduced motion: CSS 实现

@@ -149,8 +149,8 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 ## 测试证据
 
 - Unit: `ConfigProvider.test.tsx` 验证 ThemeProvider 与 ConfigProvider 同一身份、theme-only 嵌套不重置 locale/dir。
-- Story interaction: 待补自动交互；三个静态 Story 覆盖 light/dark、system 和局部主题继承。
-- Axe: 待补各组件 light/dark 对比度矩阵；Provider 本身无交互语义。
+- Story interaction: `LightAndDark` 验证独立主题边界及最近 Provider 读取；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 hydration 单测覆盖 system 标记一致和零 recoverable error。
 - RTL: 单元与 Theme-only Story 验证主题覆盖不改变方向。
 - Reduced motion: Provider 不做主题动画；应用自定义过渡仍需独立验证。

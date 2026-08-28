@@ -124,8 +124,8 @@ legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；fo
 ## 测试证据
 
 - Unit: `VisuallyHidden.test.tsx` 覆盖 SSR 文本/语义、class 合并和不设置 aria-hidden
-- Story interaction: 待补
-- Axe: AccessibleIconButton Story 由 Storybook a11y addon 扫描，尚无独立 CI 断言
+- Story interaction: `AccessibleIconButton` 验证纯图标按钮由隐藏文本获得可访问名称；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: SSR 单测已覆盖；独立 hydration 断言待补
 - RTL: 样式无方向依赖；文案 locale 待集成层验证
 - Reduced motion: 不适用，无动画
@@ -138,7 +138,6 @@ legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；fo
 ### 待优化
 
 - 增加 Windows High Contrast 和 VoiceOver/TalkBack 真机矩阵。
-- 在 Story interaction 中断言纯图标按钮 accessible name。
 - 评估独立 SkipLink，避免把可聚焦显示行为塞进当前基础组件。
 
 ### 已完成

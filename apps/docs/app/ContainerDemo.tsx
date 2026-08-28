@@ -23,43 +23,53 @@ const details = [
   }
 ] as const;
 
-export function ContainerDemo() {
+export function ContainerDemo({ focus }: { focus?: "card" | "collapse" } = {}) {
   const [openSections, setOpenSections] = useState<readonly string[]>(["delivery"]);
+
+  const card = (
+    <Card
+      media={
+        <Image
+          src="/demo-media.svg"
+          alt="绿色植物与商品包装插画"
+          width="100%"
+          height={150}
+          radius="none"
+        />
+      }
+      title={<h3 style={{ margin: 0, font: "inherit" }}>Meu 示例店铺</h3>}
+      description="今日 09:00 更新"
+      extra={<Tag tone="success">营业中</Tag>}
+      footer={
+        <Space wrap gap={2}>
+          <Button size="small">查看店铺</Button>
+          <Button size="small" tone="neutral" variant="outline">
+            联系客服
+          </Button>
+        </Space>
+      }
+    >
+      Card 只组织内容层级，具体操作保留原生 Button 或链接语义。
+    </Card>
+  );
+  const collapse = (
+    <Collapse
+      aria-label="购物帮助"
+      items={details}
+      value={openSections}
+      onChange={setOpenSections}
+      variant="card"
+      accordion
+    />
+  );
+
+  if (focus === "card") return card;
+  if (focus === "collapse") return collapse;
 
   return (
     <div style={{ display: "grid", gap: 20 }}>
-      <Card
-        media={
-          <Image
-            src="/demo-media.svg"
-            alt="绿色植物与商品包装插画"
-            width="100%"
-            height={150}
-            radius="none"
-          />
-        }
-        title={<h3 style={{ margin: 0, font: "inherit" }}>Meu 示例店铺</h3>}
-        description="今日 09:00 更新"
-        extra={<Tag tone="success">营业中</Tag>}
-        footer={
-          <Space wrap gap={2}>
-            <Button size="small">查看店铺</Button>
-            <Button size="small" tone="neutral" variant="outline">
-              联系客服
-            </Button>
-          </Space>
-        }
-      >
-        Card 只组织内容层级，具体操作保留原生 Button 或链接语义。
-      </Card>
-      <Collapse
-        aria-label="购物帮助"
-        items={details}
-        value={openSections}
-        onChange={setOpenSections}
-        variant="card"
-        accordion
-      />
+      {card}
+      {collapse}
     </div>
   );
 }

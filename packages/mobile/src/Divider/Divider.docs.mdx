@@ -130,8 +130,8 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 ## 测试证据
 
 - Unit: `Divider.test.tsx` 覆盖方向语义、vertical children、零值、原生属性与 ref
-- Story interaction: 不适用；组件无交互
-- Axe: Storybook 已配置 a11y addon，尚无组件专属执行报告
+- Story interaction: `WithContent` 验证 separator 的可访问名称与方向；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 实现无环境分支，尚无独立 hydration 测试
 - RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
 - Reduced motion: 不适用；没有内建动效

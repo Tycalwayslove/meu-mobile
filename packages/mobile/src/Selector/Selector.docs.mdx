@@ -35,7 +35,7 @@ source: packages/mobile/src/Selector
 - 支持 Field label/description/error/required 合并、原生 constraint validation、外部 `form` 关联、表单 reset、root ref 与 React Hook Form adapter。
 - 每个交互目标最小 44×44 CSS px；支持 RTL、200% 字号换行、reduced motion、forced colors 和服务端渲染。
 
-当前状态仍为 `implementation`。自动 axe、移动 Chromium/WebKit E2E、Chromatic Light/Dark 矩阵与真机 VoiceOver/TalkBack 证据尚未完成，不能标记为 commercial。
+当前状态仍为 `implementation`。移动 Chromium/WebKit E2E、Chromatic Light/Dark 视觉矩阵与真机 VoiceOver/TalkBack 证据尚未完成，不能标记为 commercial。
 
 ## 何时使用
 
@@ -186,15 +186,16 @@ render 为 O(options × selected values)，建议规模不超过 20 项；无全
 
 - Unit: `Selector.test.tsx` 覆盖 single/multiple、controlled、clear、order、duplicate、disabled、required、FormData、外部 form、reset、Field 合并、ref 和 columns。
 - SSR: `Selector.ssr.test.tsx` 覆盖无 window/document 的原生 checked/required/name/value 输出。
-- Story: seven states cover single、multiple、sizes、required error、disabled、RTL long content 与 controlled interaction。
+- Story interaction: `ControlledInteraction` 验证多选状态与受控回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - RTL / reduced motion / forced colors: CSS 契约已实现，专属自动化与截图矩阵待补。
-- Axe、移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
+- 移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 接入 axe、Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
+- 接入 Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
 - 在真机确认 iOS VoiceOver 与 Android TalkBack 对 radio group、option description 和 clear 动作的公告。
 - 若真实业务出现 20+ options，另立 searchable/virtualized 组件，不向 Selector 叠加复杂检索。
 

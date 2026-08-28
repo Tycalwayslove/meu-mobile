@@ -114,8 +114,8 @@ rail O(items)；默认 panels 也 O(items)，destroyInactive 降低 DOM 但丢�
 ## 测试证据
 
 - Unit: vertical APG、disabled skip、manual/automatic、controlled null/invalid/disabled、动态 identity、destroy、scrollIntoView、navigation
-- Story interaction: KeyboardInteraction 验证 manual 焦点移动与 Enter 激活；Unit 另覆盖 Safari 点击不聚焦及动态删除/禁用焦点回收
-- Axe: 待 CI
+- Story interaction: `KeyboardInteraction` 验证 manual 焦点移动与 Enter 激活；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `SideNav.ssr.test.tsx`；hydration 专测待补
 - RTL: LongScrollableRTL Story
 - Reduced motion: 无动画，不适用
@@ -127,7 +127,7 @@ rail O(items)；默认 panels 也 O(items)，destroyInactive 降低 DOM 但丢�
 
 ### 待优化
 
-补 axe、双引擎、真机长 rail 与路由 adapter 示例；混合 content 开发期提示。
+补双引擎、真机长 rail 与路由 adapter 示例；混合 content 开发期提示。
 
 ### 已完成
 

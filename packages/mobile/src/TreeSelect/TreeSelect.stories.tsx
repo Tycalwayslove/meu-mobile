@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 
 import { PickerTrigger } from "../Picker";
 import { ConfigProvider } from "../ConfigProvider";
+import { waitForStory } from "../storyTestUtils";
 import { TreeSelect } from "./TreeSelect";
 import type { TreeSelectOption } from "./types";
 
@@ -34,6 +35,7 @@ const options = [
 
 function ControlledExample({ multiple = false, readOnly = false }) {
   const [open, setOpen] = useState(false);
+  const [confirmCount, setConfirmCount] = useState(0);
   const [value, setValue] = useState<string[]>(
     multiple ? ["smartphone", "kitchen"] : ["smartphone"]
   );
@@ -58,6 +60,9 @@ function ControlledExample({ multiple = false, readOnly = false }) {
           只读
         </span>
       ) : null}
+      <output hidden data-tree-confirm>
+        {confirmCount}:{value.join(",")}
+      </output>
       <TreeSelect<string>
         open={open}
         multiple={multiple}
@@ -68,7 +73,10 @@ function ControlledExample({ multiple = false, readOnly = false }) {
         defaultExpandedValues={["digital", "phone", "home"]}
         {...(multiple ? { maxCount: 3 } : {})}
         returnFocusRef={triggerRef}
-        onConfirm={(nextValue) => setValue([...nextValue])}
+        onConfirm={(nextValue) => {
+          setValue([...nextValue]);
+          setConfirmCount((current) => current + 1);
+        }}
         onOpenChange={setOpen}
       />
     </div>
@@ -114,7 +122,63 @@ type Story = StoryObj<typeof meta>;
 
 export const Single: Story = {
   args: { open: false, "aria-label": "商品类目", options },
-  render: () => <ControlledExample />
+  render: () => <ControlledExample />,
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-component="picker-trigger"]'
+    );
+    if (!trigger) throw new window.Error("Expected TreeSelect trigger");
+    if (!(trigger.textContent || "").includes("智能手机")) {
+      throw new window.Error("TreeSelect trigger did not show its committed value");
+    }
+    trigger.click();
+
+    const body = canvasElement.ownerDocument.body;
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="tree-select"]') !== null,
+      "TreeSelect did not open in its portal"
+    );
+    const panel = body.querySelector<HTMLElement>('[data-meu-component="tree-select"]');
+    if (!panel) throw new window.Error("TreeSelect did not open in its portal");
+    const dialog = panel.closest<HTMLElement>('[role="dialog"]');
+    const tree = panel.querySelector<HTMLElement>('[role="tree"]');
+    if (!dialog || !tree) throw new window.Error("TreeSelect dialog content was incomplete");
+    const cancel = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => (button.textContent || "").trim() === "取消"
+    );
+    if (!cancel) throw new window.Error("Expected TreeSelect cancel action");
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === cancel,
+      "TreeSelect did not move focus into the dialog"
+    );
+
+    const computer = Array.from(tree.querySelectorAll<HTMLElement>('[role="treeitem"]')).find(
+      (item) => (item.textContent || "").includes("电脑整机")
+    );
+    if (!computer) throw new window.Error("Expected computer category tree item");
+    computer.click();
+    await waitForStory(
+      () => computer.getAttribute("aria-selected") === "true",
+      "TreeSelect did not update its draft selection"
+    );
+    if (!(trigger.textContent || "").includes("智能手机")) {
+      throw new window.Error("TreeSelect committed its draft before confirmation");
+    }
+
+    const confirm = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => (button.textContent || "").trim() === "确定"
+    );
+    if (!confirm) throw new window.Error("Expected TreeSelect confirm action");
+    confirm.click();
+    const confirmation = canvasElement.querySelector<HTMLOutputElement>("[data-tree-confirm]");
+    await waitForStory(
+      () =>
+        Boolean(confirmation && (confirmation.textContent || "").trim() === "1:computer") &&
+        (trigger.textContent || "").includes("电脑整机") &&
+        canvasElement.ownerDocument.activeElement === trigger,
+      "TreeSelect did not publish its confirmed value and restore trigger focus"
+    );
+  }
 };
 export const Multiple: Story = {
   args: { open: false, "aria-label": "商品类目", options },

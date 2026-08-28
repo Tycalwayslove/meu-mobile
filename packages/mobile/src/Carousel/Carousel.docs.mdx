@@ -124,8 +124,8 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 ## 测试证据
 
 - Unit: `Carousel.test.tsx`
-- Story interaction: 待补
-- Axe: 待补
+- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide 的可访问状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 待补组件级证明
 - RTL: 待补
 - Reduced motion: 有单测覆盖，待真实浏览器证明
@@ -138,7 +138,7 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 ### 待优化
 
 - 完成 RTL、pointer cancel、滚动仲裁、可见性、受控回滚和读屏测试。
-- 补 Story play、axe、SSR、性能与真机证据。
+- 补 SSR、性能与真机证据。
 - 审核 autoplay 默认、间隔下限与 WCAG 暂停要求的文档表达。
 
 ### 已完成

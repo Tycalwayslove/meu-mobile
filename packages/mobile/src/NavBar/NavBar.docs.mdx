@@ -114,8 +114,8 @@ Safe Area 使用带 fallback 的 env；不支持时按 0px。旧内核不支持 
 ## 测试证据
 
 - Unit: 原生 back button/link、无伪交互、本地化、取消导航、safe-area、heading slot
-- Story interaction: BackAction 验证调用方收到返回动作
-- Axe: 待 CI
+- Story interaction: `BackAction.play` 验证调用方收到返回动作；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
 - SSR/hydration: `NavBar.ssr.test.tsx`；hydration 专测待补
 - RTL: LongTitleRTL Story
 - Reduced motion: 无动画，不适用

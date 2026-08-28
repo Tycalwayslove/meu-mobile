@@ -32,7 +32,7 @@ source: packages/mobile/src/IconButton
 - 类型要求 `aria-label` 或 `aria-labelledby` 二选一；图标子树统一作为装饰内容隐藏，避免重复名称。
 - loading 保留按钮尺寸、设置 `aria-busy`、阻止重复触发，并在 reduced-motion 下显示静态 ring。
 
-当前状态为 `implementation`；尚未完成 axe、真机读屏、高对比与完整视觉矩阵，不等于商用验收完成。
+当前状态为 `implementation`；本地 axe 已通过，真机读屏、高对比与完整视觉矩阵尚未完成，不等于商用验收完成。
 
 ## 何时使用
 
@@ -127,8 +127,8 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 ## 测试证据
 
 - Unit: `IconButton.test.tsx`，覆盖默认 type、点击、label/labelledby、装饰图标、pressed、loading 与禁用
-- Story interaction: 待补
-- Axe: 待补
+- Story interaction: `Default.play` 验证按压状态、业务输出与焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
 - SSR/hydration: 结构无浏览器读取，待增加独立证明
 - RTL: 对称控件，方向性图标待矩阵验证
 - Reduced motion: CSS 静态降级已实现，待浏览器证明
@@ -140,7 +140,7 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ### 待优化
 
-- 增加 Story interaction、axe、SSR/hydration、RTL 方向图标、高对比与 200% 字号证据。
+- 增加 SSR/hydration、RTL 方向图标、高对比与 200% 字号证据。
 - 在真机读屏验证 labelledby、toggle pressed 和 loading 状态公告策略。
 - Figma 暂缺独立 IconButton node，设计补齐后更新 frontmatter。
 
@@ -148,6 +148,7 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 - 支持 label/labelledby 二选一并隐藏装饰图标子树。
 - 冻结 44px 触控、pressed 状态、loading 锁与 reduced-motion 静态降级。
+- 完成 title 级 Story play 门禁与本地 Light/Dark axe 扫描。
 - 补齐公开 API TSDoc、单测、Story 与永久留存文档。
 
 ## 变更记录

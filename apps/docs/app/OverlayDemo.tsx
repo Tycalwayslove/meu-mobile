@@ -15,7 +15,11 @@ import {
 } from "@meu/mobile";
 import { useRef, useState } from "react";
 
-export function OverlayDemo() {
+type OverlayDemoProps = {
+  focus?: "action-menu" | "bottom-sheet" | "dialog" | "mask" | "popover" | "popup" | "toast";
+};
+
+export function OverlayDemo({ focus }: OverlayDemoProps = {}) {
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -29,245 +33,286 @@ export function OverlayDemo() {
   const sheetTriggerRef = useRef<HTMLButtonElement>(null);
   const dialogTriggerRef = useRef<HTMLButtonElement>(null);
   const actionMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  const show = (component: NonNullable<OverlayDemoProps["focus"]>) =>
+    focus === undefined || focus === component;
 
   return (
     <div style={{ display: "grid", gap: 20 }}>
-      <div
-        style={{
-          position: "relative",
-          minHeight: 128,
-          overflow: "hidden",
-          background: "var(--meu-color-subtle)",
-          borderRadius: "var(--meu-radius-surface)"
-        }}
-      >
-        <Mask
-          container={null}
-          lockScroll={false}
-          opacity="thin"
-          style={{ position: "absolute", zIndex: 0 }}
+      {show("mask") ? (
+        <div
+          style={{
+            position: "relative",
+            minHeight: 128,
+            overflow: "hidden",
+            background: "var(--meu-color-subtle)",
+            borderRadius: "var(--meu-radius-surface)"
+          }}
         >
-          <span style={{ color: "white", fontSize: 14, fontWeight: 600 }}>Mask 预览</span>
-        </Mask>
-      </div>
+          <Mask
+            container={null}
+            lockScroll={false}
+            opacity="thin"
+            style={{ position: "absolute", zIndex: 0 }}
+          >
+            <span
+              style={{
+                background: "rgba(0, 0, 0, 0.78)",
+                borderRadius: 999,
+                color: "white",
+                fontSize: 14,
+                fontWeight: 600,
+                padding: "6px 10px"
+              }}
+            >
+              Mask 预览
+            </span>
+          </Mask>
+        </div>
+      ) : null}
       <Space wrap gap={2}>
-        <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
-          打开配送浮层
-        </Button>
-        <Button
-          ref={sheetTriggerRef}
-          tone="neutral"
-          variant="outline"
-          onClick={() => setSheetOpen(true)}
-        >
-          打开筛选面板
-        </Button>
-        <Popover
-          aria-label="订单快捷操作"
-          open={popoverOpen}
-          placement="bottom-start"
-          content={
-            <div style={{ display: "grid", gap: 8, minWidth: 180 }}>
-              <strong>订单快捷操作</strong>
-              <span style={{ color: "var(--meu-color-muted)" }}>自动避开视口边缘。</span>
-              <Button
-                size="small"
-                onClick={() => {
-                  setPopoverOpen(false);
-                  setDialogMessage("已复制演示订单号");
-                }}
-              >
-                复制订单号
-              </Button>
-            </div>
-          }
-          onOpenChange={setPopoverOpen}
-        >
-          <Button tone="neutral" variant="outline">
-            打开快捷操作
+        {show("popup") ? (
+          <Button ref={popupTriggerRef} onClick={() => setPopupOpen(true)}>
+            打开配送浮层
           </Button>
-        </Popover>
-        <Button
-          ref={dialogTriggerRef}
-          tone="danger"
-          variant="outline"
-          onClick={() => setDialogOpen(true)}
-        >
-          打开删除确认
-        </Button>
-        <Button
-          ref={actionMenuTriggerRef}
-          tone="neutral"
-          variant="outline"
-          onClick={() => setActionMenuOpen(true)}
-        >
-          打开订单操作
-        </Button>
-        <Button
-          tone="neutral"
-          variant="outline"
-          onClick={() =>
-            actionMenu.show({
-              title: "分享商品",
-              actions: [
-                {
-                  key: "copy",
-                  label: "复制链接",
-                  onPress: () => setDialogMessage("已复制商品链接")
-                },
-                { key: "system", label: "系统分享" }
-              ]
-            })
-          }
-        >
-          命令式操作菜单
-        </Button>
-        <Button
-          tone="neutral"
-          variant="outline"
-          onClick={() => {
-            void dialog
-              .confirm({
-                title: "确认提交订单？",
-                description: "确认后订单将进入履约流程。"
-              })
-              .then((confirmed) => setDialogMessage(confirmed ? "已确认提交" : "已取消提交"));
-          }}
-        >
-          命令式确认
-        </Button>
-        <Button
-          tone="neutral"
-          variant="outline"
-          onClick={() => toast.success({ message: "订单已保存", position: "top" })}
-        >
-          成功 Toast
-        </Button>
-        <Button
-          tone="neutral"
-          variant="outline"
-          onClick={() => {
-            toast.warning({
-              action: {
-                label: "撤销",
-                onPress: () => setDialogMessage("已撤销库存调整")
-              },
-              message: "库存不足，已调整购买数量",
-              position: "bottom"
-            });
-          }}
-        >
-          操作 Toast
-        </Button>
-      </Space>
-      <output aria-live="polite">{dialogMessage}</output>
-      <Popup
-        aria-label="配送方式"
-        open={popupOpen}
-        closeOnMaskClick
-        showCloseButton
-        returnFocusRef={popupTriggerRef}
-        onOpenChange={setPopupOpen}
-      >
-        <div style={{ display: "grid", gap: 16, padding: "56px 24px 24px" }}>
-          <h3 style={{ margin: 0 }}>配送方式</h3>
-          <p style={{ margin: 0, color: "var(--meu-color-muted)", lineHeight: 1.6 }}>
-            Popup 只负责浮层结构和交互边界，业务选择逻辑由调用方维护。
-          </p>
-          <Space wrap gap={2}>
-            <Button size="small" onClick={() => setPopupOpen(false)}>
-              确认配送
+        ) : null}
+        {show("bottom-sheet") ? (
+          <Button
+            ref={sheetTriggerRef}
+            tone="neutral"
+            variant="outline"
+            onClick={() => setSheetOpen(true)}
+          >
+            打开筛选面板
+          </Button>
+        ) : null}
+        {show("popover") ? (
+          <Popover
+            aria-label="订单快捷操作"
+            open={popoverOpen}
+            placement="bottom-start"
+            content={
+              <div style={{ display: "grid", gap: 8, minWidth: 180 }}>
+                <strong>订单快捷操作</strong>
+                <span style={{ color: "var(--meu-color-muted)" }}>自动避开视口边缘。</span>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    setPopoverOpen(false);
+                    setDialogMessage("已复制演示订单号");
+                  }}
+                >
+                  复制订单号
+                </Button>
+              </div>
+            }
+            onOpenChange={setPopoverOpen}
+          >
+            <Button tone="neutral" variant="outline">
+              打开快捷操作
+            </Button>
+          </Popover>
+        ) : null}
+        {show("dialog") ? (
+          <>
+            <Button
+              ref={dialogTriggerRef}
+              tone="danger"
+              variant="outline"
+              onClick={() => setDialogOpen(true)}
+            >
+              打开删除确认
             </Button>
             <Button
-              size="small"
-              variant="outline"
               tone="neutral"
-              onClick={() => setPopupOpen(false)}
+              variant="outline"
+              onClick={() => {
+                void dialog
+                  .confirm({
+                    title: "确认提交订单？",
+                    description: "确认后订单将进入履约流程。"
+                  })
+                  .then((confirmed) => setDialogMessage(confirmed ? "已确认提交" : "已取消提交"));
+              }}
             >
-              取消
+              命令式确认
             </Button>
-          </Space>
-        </div>
-      </Popup>
-      <BottomSheet
-        open={sheetOpen}
-        title="筛选条件"
-        showCloseButton
-        snapPoints={[0.35, 0.6, 0.9]}
-        returnFocusRef={sheetTriggerRef}
-        onOpenChange={(nextOpen, details) => {
-          setSheetOpen(nextOpen);
-          if (!nextOpen) setDialogMessage(`筛选面板已关闭：${details.reason}`);
-        }}
-      >
-        <div style={{ display: "grid", gap: 16, padding: 20 }}>
-          <p style={{ margin: 0, color: "var(--meu-color-muted)", lineHeight: 1.6 }}>
-            可拖动手柄，或使用方向键、Home 与 End 调整面板高度。
-          </p>
-          <Button
-            onClick={() => {
-              setSheetOpen(false);
-              setDialogMessage("已应用演示筛选");
-            }}
-          >
-            应用筛选
-          </Button>
-        </div>
-      </BottomSheet>
-      <ActionMenu
-        open={actionMenuOpen}
-        title="订单操作"
-        description="选择一个操作继续"
-        returnFocusRef={actionMenuTriggerRef}
-        actions={[
-          {
-            key: "copy",
-            label: "复制订单号",
-            description: "MEU-2026-0828",
-            onPress: async () => {
-              await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
-              setDialogMessage("已复制演示订单号");
-            }
-          },
-          { key: "share", label: "分享订单" },
-          {
-            key: "delete",
-            label: "永久删除",
-            tone: "danger",
-            confirmation: {
-              title: "删除订单？",
-              description: "订单及关联记录将被永久删除，此操作无法撤销。",
-              confirmText: "永久删除"
+          </>
+        ) : null}
+        {show("action-menu") ? (
+          <>
+            <Button
+              ref={actionMenuTriggerRef}
+              tone="neutral"
+              variant="outline"
+              onClick={() => setActionMenuOpen(true)}
+            >
+              打开订单操作
+            </Button>
+            <Button
+              tone="neutral"
+              variant="outline"
+              onClick={() =>
+                actionMenu.show({
+                  title: "分享商品",
+                  actions: [
+                    {
+                      key: "copy",
+                      label: "复制链接",
+                      onPress: () => setDialogMessage("已复制商品链接")
+                    },
+                    { key: "system", label: "系统分享" }
+                  ]
+                })
+              }
+            >
+              命令式操作菜单
+            </Button>
+          </>
+        ) : null}
+        {show("toast") ? (
+          <>
+            <Button
+              tone="neutral"
+              variant="outline"
+              onClick={() => toast.success({ message: "订单已保存", position: "top" })}
+            >
+              成功 Toast
+            </Button>
+            <Button
+              tone="neutral"
+              variant="outline"
+              onClick={() => {
+                toast.warning({
+                  action: {
+                    label: "撤销",
+                    onPress: () => setDialogMessage("已撤销库存调整")
+                  },
+                  message: "库存不足，已调整购买数量",
+                  position: "bottom"
+                });
+              }}
+            >
+              操作 Toast
+            </Button>
+          </>
+        ) : null}
+      </Space>
+      <output aria-live="polite">{dialogMessage}</output>
+      {show("popup") ? (
+        <Popup
+          aria-label="配送方式"
+          open={popupOpen}
+          closeOnMaskClick
+          showCloseButton
+          returnFocusRef={popupTriggerRef}
+          onOpenChange={setPopupOpen}
+        >
+          <div style={{ display: "grid", gap: 16, padding: "56px 24px 24px" }}>
+            <h3 style={{ margin: 0 }}>配送方式</h3>
+            <p style={{ margin: 0, color: "var(--meu-color-muted)", lineHeight: 1.6 }}>
+              Popup 只负责浮层结构和交互边界，业务选择逻辑由调用方维护。
+            </p>
+            <Space wrap gap={2}>
+              <Button size="small" onClick={() => setPopupOpen(false)}>
+                确认配送
+              </Button>
+              <Button
+                size="small"
+                variant="outline"
+                tone="neutral"
+                onClick={() => setPopupOpen(false)}
+              >
+                取消
+              </Button>
+            </Space>
+          </div>
+        </Popup>
+      ) : null}
+      {show("bottom-sheet") ? (
+        <BottomSheet
+          open={sheetOpen}
+          title="筛选条件"
+          showCloseButton
+          snapPoints={[0.35, 0.6, 0.9]}
+          returnFocusRef={sheetTriggerRef}
+          onOpenChange={(nextOpen, details) => {
+            setSheetOpen(nextOpen);
+            if (!nextOpen) setDialogMessage(`筛选面板已关闭：${details.reason}`);
+          }}
+        >
+          <div style={{ display: "grid", gap: 16, padding: 20 }}>
+            <p style={{ margin: 0, color: "var(--meu-color-muted)", lineHeight: 1.6 }}>
+              可拖动手柄，或使用方向键、Home 与 End 调整面板高度。
+            </p>
+            <Button
+              onClick={() => {
+                setSheetOpen(false);
+                setDialogMessage("已应用演示筛选");
+              }}
+            >
+              应用筛选
+            </Button>
+          </div>
+        </BottomSheet>
+      ) : null}
+      {show("action-menu") ? (
+        <ActionMenu
+          open={actionMenuOpen}
+          title="订单操作"
+          description="选择一个操作继续"
+          returnFocusRef={actionMenuTriggerRef}
+          actions={[
+            {
+              key: "copy",
+              label: "复制订单号",
+              description: "MEU-2026-0828",
+              onPress: async () => {
+                await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+                setDialogMessage("已复制演示订单号");
+              }
             },
-            onPress: () => setDialogMessage("已从操作菜单删除演示订单")
-          }
-        ]}
-        onOpenChange={(nextOpen, details) => {
-          setActionMenuOpen(nextOpen);
-          if (!nextOpen && details.reason !== "action") {
-            setDialogMessage(`操作菜单已关闭：${details.reason}`);
-          }
-        }}
-      />
-      <Dialog
-        open={dialogOpen}
-        title="删除订单？"
-        description="订单及关联记录将被永久删除，此操作无法撤销。"
-        returnFocusRef={dialogTriggerRef}
-        actions={[
-          { autoFocus: true, key: "cancel", label: "取消" },
-          {
-            key: "delete",
-            label: "永久删除",
-            tone: "danger",
-            onPress: async () => {
-              await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
-              setDialogMessage("已删除演示订单");
+            { key: "share", label: "分享订单" },
+            {
+              key: "delete",
+              label: "永久删除",
+              tone: "danger",
+              confirmation: {
+                title: "删除订单？",
+                description: "订单及关联记录将被永久删除，此操作无法撤销。",
+                confirmText: "永久删除"
+              },
+              onPress: () => setDialogMessage("已从操作菜单删除演示订单")
             }
-          }
-        ]}
-        onOpenChange={(nextOpen) => setDialogOpen(nextOpen)}
-      />
+          ]}
+          onOpenChange={(nextOpen, details) => {
+            setActionMenuOpen(nextOpen);
+            if (!nextOpen && details.reason !== "action") {
+              setDialogMessage(`操作菜单已关闭：${details.reason}`);
+            }
+          }}
+        />
+      ) : null}
+      {show("dialog") ? (
+        <Dialog
+          open={dialogOpen}
+          title="删除订单？"
+          description="订单及关联记录将被永久删除，此操作无法撤销。"
+          returnFocusRef={dialogTriggerRef}
+          actions={[
+            { autoFocus: true, key: "cancel", label: "取消" },
+            {
+              key: "delete",
+              label: "永久删除",
+              tone: "danger",
+              onPress: async () => {
+                await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+                setDialogMessage("已删除演示订单");
+              }
+            }
+          ]}
+          onOpenChange={(nextOpen) => setDialogOpen(nextOpen)}
+        />
+      ) : null}
     </div>
   );
 }

@@ -12,7 +12,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Count: Story = {};
+export const Count: Story = {
+  play: async ({ canvasElement }) => {
+    const badge = canvasElement.querySelector<HTMLElement>('[data-meu-component="badge"]');
+    const marker = badge ? badge.querySelector<HTMLElement>("[data-meu-badge-marker]") : null;
+    await Promise.resolve();
+    if (!badge || !marker) throw new window.Error("Expected the count Badge marker");
+    if (badge.getAttribute("data-state") !== "standalone" || marker.textContent !== "8") {
+      throw new window.Error("Expected Badge to expose its standalone count");
+    }
+    if (marker.hasAttribute("aria-hidden")) {
+      throw new window.Error("Expected the count Badge to remain in the accessibility tree");
+    }
+  }
+};
 export const Overflow: Story = { args: { content: 128, max: 99 } };
 export const Dot: Story = {
   args: {

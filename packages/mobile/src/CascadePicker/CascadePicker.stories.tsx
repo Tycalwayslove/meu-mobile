@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 
 import { Field } from "../Field";
 import { PickerTrigger } from "../Picker";
+import { waitForStory } from "../storyTestUtils";
 import { CascadePicker } from "./CascadePicker";
 import type { CascadePickerOption } from "./types";
 
@@ -113,7 +114,52 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const RegionPath: Story = {};
+export const RegionPath: Story = {
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-component="picker-trigger"]'
+    );
+    if (!trigger) throw new window.Error("Expected the CascadePicker trigger");
+
+    trigger.click();
+    await waitForStory(
+      () => document.querySelector('[role="dialog"][aria-modal="true"]') !== null,
+      "Expected the CascadePicker dialog to open"
+    );
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]');
+    const jiangsu = dialog
+      ? Array.from(dialog.querySelectorAll<HTMLElement>('[role="option"]')).find(
+          (option) => option.textContent === "江苏省"
+        )
+      : undefined;
+    if (!jiangsu) throw new window.Error("Expected the Jiangsu option");
+    jiangsu.click();
+    await Promise.resolve();
+    if (jiangsu.getAttribute("aria-selected") !== "true") {
+      throw new window.Error("Expected CascadePicker to select Jiangsu");
+    }
+
+    const confirm = dialog
+      ? Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "确定"
+        )
+      : undefined;
+    if (!confirm) throw new window.Error("Expected the CascadePicker confirm action");
+    confirm.click();
+    await waitForStory(
+      () => document.querySelector('[role="dialog"][aria-modal="true"]') === null,
+      "Expected the CascadePicker dialog to close"
+    );
+    await waitForStory(
+      () => trigger.textContent === "江苏省 / 南京市 / 玄武区",
+      "Expected the confirmed CascadePicker path on the trigger"
+    );
+    await waitForStory(
+      () => document.activeElement === trigger,
+      "Expected CascadePicker to restore trigger focus"
+    );
+  }
+};
 
 export const ExplicitEmptyChild: Story = {
   args: {

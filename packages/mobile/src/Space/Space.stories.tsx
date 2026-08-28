@@ -56,7 +56,22 @@ export const Wrapped: Story = {
         ))}
       </Space>
     </div>
-  )
+  ),
+  play: ({ canvasElement }) => {
+    const space = canvasElement.querySelector<HTMLElement>('[data-meu-component="space"]');
+    if (!space) throw new window.Error("Expected wrapped Space");
+    if (
+      space.getAttribute("data-direction") !== "horizontal" ||
+      space.getAttribute("data-gap") !== "3" ||
+      space.getAttribute("data-wrap") !== "true"
+    ) {
+      throw new window.Error("Space did not expose its wrapping layout contract");
+    }
+    const labels = Array.from(space.children, (child) => (child.textContent || "").trim());
+    if (labels.join("|") !== "筛选项 1|筛选项 2|筛选项 3|筛选项 4|筛选项 5") {
+      throw new window.Error("Space did not preserve child order");
+    }
+  }
 };
 
 export const RightToLeft: Story = {

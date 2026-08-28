@@ -19,7 +19,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Outlined: Story = {};
+export const Outlined: Story = {
+  play: async ({ canvasElement }) => {
+    const card = canvasElement.querySelector<HTMLElement>('[data-meu-component="card"]');
+    await Promise.resolve();
+    if (!card) throw new window.Error("Expected the Card boundary");
+    if (card.getAttribute("data-variant") !== "outlined" || card.hasAttribute("role")) {
+      throw new window.Error("Expected a non-interactive outlined Card");
+    }
+    if (
+      !card.querySelector("[data-meu-card-header]") ||
+      !card.querySelector("[data-meu-card-body]")
+    ) {
+      throw new window.Error("Expected Card header and body regions");
+    }
+  }
+};
 export const Filled: Story = { args: { variant: "filled" } };
 export const Elevated: Story = { args: { variant: "elevated" } };
 export const WithFooter: Story = {

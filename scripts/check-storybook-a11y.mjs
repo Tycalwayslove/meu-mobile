@@ -71,6 +71,31 @@ try {
   async function scanBatch(workerIndex) {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     await page.addInitScript({ content: axeSource });
+    await page.addInitScript({
+      content: `
+        globalThis.__MEU_STORYBOOK_RESULT__ = null;
+        globalThis.__MEU_STORYBOOK_PLAY_ERROR__ = null;
+        let meuStorybookChannel;
+        const attachMeuStorybookChannel = (channel) => {
+          if (!channel || channel.__meuQualityAttached) return;
+          channel.__meuQualityAttached = true;
+          channel.on("playFunctionThrewException", (error) => {
+            globalThis.__MEU_STORYBOOK_PLAY_ERROR__ = error;
+          });
+          channel.on("storyFinished", (result) => {
+            globalThis.__MEU_STORYBOOK_RESULT__ = result;
+          });
+        };
+        Object.defineProperty(globalThis, "__STORYBOOK_ADDONS_CHANNEL__", {
+          configurable: true,
+          get: () => meuStorybookChannel,
+          set: (channel) => {
+            meuStorybookChannel = channel;
+            attachMeuStorybookChannel(channel);
+          }
+        });
+      `
+    });
     for (let storyIndex = workerIndex; storyIndex < stories.length; storyIndex += workerCount) {
       const story = stories[storyIndex];
       for (const theme of themes) {
@@ -78,6 +103,23 @@ try {
           const globals = `theme:${theme};dir:ltr;locale:zh-CN;motion:system`;
           const url = `${origin}/iframe.html?id=${encodeURIComponent(story.id)}&viewMode=story&globals=${encodeURIComponent(globals)}`;
           await page.goto(url, { timeout: 20_000, waitUntil: "domcontentloaded" });
+          await page.waitForFunction(
+            (storyId) => {
+              const result = globalThis.__MEU_STORYBOOK_RESULT__;
+              return result && result.storyId === storyId;
+            },
+            story.id,
+            { timeout: 10_000 }
+          );
+          const storyResult = await page.evaluate(() => ({
+            error: globalThis.__MEU_STORYBOOK_PLAY_ERROR__,
+            result: globalThis.__MEU_STORYBOOK_RESULT__
+          }));
+          if (!storyResult.result || storyResult.result.status !== "success") {
+            throw new Error(
+              `Story interaction failed: ${JSON.stringify(storyResult.error || storyResult.result)}`
+            );
+          }
           await page.waitForFunction(
             () =>
               globalThis.document.querySelector("#storybook-root")?.childElementCount ||

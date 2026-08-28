@@ -54,6 +54,34 @@ export const TenThousandRows: Story = {
     items: orders,
     overscan: 4,
     renderItem: (order) => <OrderRow order={order} />
+  },
+  play: async ({ canvasElement }) => {
+    const list = canvasElement.querySelector<HTMLElement>('[role="list"][aria-label="一万条订单"]');
+    if (!list) throw new window.Error("Expected named VirtualList");
+    const rows = list.querySelectorAll<HTMLElement>('[role="listitem"]');
+    const renderedCount = Number(list.getAttribute("data-rendered-count"));
+    if (
+      !Number.isInteger(renderedCount) ||
+      renderedCount < 1 ||
+      renderedCount >= orders.length ||
+      rows.length !== renderedCount
+    ) {
+      throw new window.Error("VirtualList did not render a bounded visible window");
+    }
+    const first = rows.item(0);
+    if (
+      first.getAttribute("aria-posinset") !== "1" ||
+      first.getAttribute("aria-setsize") !== String(orders.length) ||
+      first.getAttribute("data-meu-virtual-index") !== "0" ||
+      !(first.textContent || "").includes("订单 1")
+    ) {
+      throw new window.Error("VirtualList did not expose full-collection row semantics");
+    }
+    list.focus();
+    await Promise.resolve();
+    if (canvasElement.ownerDocument.activeElement !== list) {
+      throw new window.Error("VirtualList did not accept keyboard focus");
+    }
   }
 };
 

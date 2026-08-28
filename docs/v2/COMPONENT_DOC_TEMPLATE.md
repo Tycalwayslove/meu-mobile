@@ -111,4 +111,5 @@ source: packages/mobile/src/ComponentName
 - 兼容性、限制或降级变化即使不改变类型，也必须更新文档。
 - 破坏性变更需先进入弃用周期，记录替代 API 与迁移示例。
 - 测试链接只能指向已运行的证据，不能用计划项冒充完成项。
+- Story interaction 必须说明覆盖的是“每个标题的关键路径”还是“每个 Story”；Axe 必须记录视口、主题、规则级别，以及是否在 `play` 完成后执行，禁止用静态 Story 数量冒充交互证明。
 - Story ID、Figma node、公开导出和 docs entry 的映射必须通过 CI，不允许用字符串猜测链接。

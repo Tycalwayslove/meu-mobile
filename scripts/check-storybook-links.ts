@@ -8,6 +8,7 @@ import { componentStoryIds } from "../apps/docs/app/_data/storybook-links";
 type StorybookIndexEntry = {
   id: string;
   name: string;
+  tags?: string[];
   title: string;
   type: "docs" | "story";
 };
@@ -46,6 +47,12 @@ const storyEntries = new Map(
 const docsTitles = new Set(
   entries.filter((entry) => entry.type === "docs").map((entry) => entry.title)
 );
+const storyTitles = new Set(storyEntries.values().map((entry) => entry.title));
+const interactionTitles = new Set(
+  Array.from(storyEntries.values())
+    .filter((entry) => entry.tags && entry.tags.includes("play-fn"))
+    .map((entry) => entry.title)
+);
 const componentSlugs = new Set(componentDocs.map((component) => component.slug));
 const mappedSlugs = new Set(Object.keys(componentStoryIds));
 
@@ -57,6 +64,12 @@ for (const slug of componentSlugs) {
 for (const slug of mappedSlugs) {
   if (!componentSlugs.has(slug))
     errors.push(`Storybook mapping has no matching component page: ${slug}`);
+}
+
+for (const title of storyTitles) {
+  if (!interactionTitles.has(title)) {
+    errors.push(`Storybook title has no play interaction or semantic assertion: ${title}`);
+  }
 }
 
 const componentsWithoutStories: string[] = [];
@@ -121,6 +134,7 @@ if (errors.length > 0) {
   );
   console.log(`Validated ${documentedStoryCount} storyIds from colocated component documents.`);
   console.log(`Autodocs entries cover every linked Storybook title.`);
+  console.log(`Interaction play functions cover all ${storyTitles.size} Storybook titles.`);
 }
 
 if (componentsWithoutStories.length > 0) {

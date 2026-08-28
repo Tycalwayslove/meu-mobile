@@ -17,7 +17,18 @@ export const Bottom: Story = {
       <div style={{ padding: 16 }}>页面底部内容</div>
       <SafeArea fallback={24} />
     </div>
-  )
+  ),
+  play: ({ canvasElement }) => {
+    const safeArea = canvasElement.querySelector<HTMLElement>('[data-meu-component="safe-area"]');
+    if (!safeArea) throw new window.Error("Expected SafeArea spacer");
+    if (
+      safeArea.getAttribute("aria-hidden") !== "true" ||
+      safeArea.getAttribute("data-position") !== "bottom" ||
+      safeArea.style.getPropertyValue("--meu-safe-area-fallback") !== "24px"
+    ) {
+      throw new window.Error("SafeArea did not expose its hidden bottom inset contract");
+    }
+  }
 };
 export const Top: Story = {
   render: () => (

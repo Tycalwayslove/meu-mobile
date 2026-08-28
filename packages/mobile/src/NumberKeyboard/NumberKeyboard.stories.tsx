@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { NumberKeyboard } from "./NumberKeyboard";
 import { NumberKeyboardTrigger } from "./NumberKeyboardTrigger";
+import { waitForStory } from "../storyTestUtils";
 import type { NumberKeyboardExtraKey, NumberKeyboardMode } from "./types";
 
 function KeyboardPreview({
@@ -58,7 +59,67 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Numeric: Story = { render: () => <KeyboardPreview /> };
+export const Numeric: Story = {
+  render: () => <KeyboardPreview />,
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-component="number-keyboard-trigger"]'
+    );
+    const output = canvasElement.querySelector<HTMLOutputElement>("output");
+    if (!trigger || !output) throw new window.Error("Expected NumberKeyboard preview");
+
+    trigger.focus();
+    trigger.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="number-keyboard"]') !== null,
+      "NumberKeyboard did not open"
+    );
+    const keyboard = body.querySelector<HTMLElement>('[data-meu-component="number-keyboard"]');
+    const one = keyboard
+      ? keyboard.querySelector<HTMLButtonElement>('button[aria-label="1"]')
+      : null;
+    const two = keyboard
+      ? keyboard.querySelector<HTMLButtonElement>('button[aria-label="2"]')
+      : null;
+    const backspace = keyboard
+      ? keyboard.querySelector<HTMLButtonElement>('button[aria-label="删除上一位"]')
+      : null;
+    const close = keyboard
+      ? Array.from(keyboard.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "收起"
+        )
+      : undefined;
+    if (!keyboard || !one || !two || !backspace || !close) {
+      throw new window.Error("Expected NumberKeyboard controls");
+    }
+    const labelledBy = keyboard.getAttribute("aria-labelledby");
+    const title = labelledBy ? canvasElement.ownerDocument.getElementById(labelledBy) : null;
+    if (keyboard.getAttribute("role") !== "group" || !title || title.textContent !== "交易金额") {
+      throw new window.Error("NumberKeyboard is missing its labelled group semantics");
+    }
+
+    one.click();
+    two.click();
+    await waitForStory(
+      () => output.textContent === "表单外置值：12",
+      "Number input was not emitted"
+    );
+    backspace.click();
+    await waitForStory(() => output.textContent === "表单外置值：1", "Delete was not emitted");
+    close.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="number-keyboard"]') === null,
+      "NumberKeyboard did not close"
+    );
+    if (
+      trigger.getAttribute("aria-expanded") !== "false" ||
+      canvasElement.ownerDocument.activeElement !== trigger
+    ) {
+      throw new window.Error("NumberKeyboard did not close while preserving trigger focus");
+    }
+  }
+};
 
 export const Decimal: Story = {
   render: () => <KeyboardPreview mode="decimal" />
@@ -69,9 +130,7 @@ export const Confirm: Story = {
 };
 
 export const IdentityCard: Story = {
-  render: () => (
-    <KeyboardPreview extraKey={{ ariaLabel: "字母 X", label: "X", value: "X" }} />
-  )
+  render: () => <KeyboardPreview extraKey={{ ariaLabel: "字母 X", label: "X", value: "X" }} />
 };
 
 export const RandomOrder: Story = {

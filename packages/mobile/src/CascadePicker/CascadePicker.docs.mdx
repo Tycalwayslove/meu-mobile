@@ -115,8 +115,8 @@ ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路�
 ## 测试证据
 
 - Unit: 路径归一、换支丢弃后缀、叶子缩短、取消回滚、受控确认、显式空子级与动态加载
-- Story interaction: 待补
-- Axe: 待 CI
+- Story interaction: `RegionPath` 验证换支、确认、触发器值与焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `CascadePicker.ssr.test.tsx`
 - RTL/Reduced motion: 继承 Picker 单元与 Story 证据
 - Mobile Chromium/WebKit E2E: next-h5 已覆盖换支、确认和回滚
@@ -127,7 +127,7 @@ ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路�
 
 ### 待优化
 
-补五级窄屏、异步快速换支、axe、hydration 和真机滚轮组合验证。
+补五级窄屏、异步快速换支、hydration 和真机滚轮组合验证。
 
 ### 已完成
 

@@ -35,5 +35,26 @@ export const AccessibleIconButton: Story = {
         <VisuallyHidden>搜索订单</VisuallyHidden>
       </button>
     </div>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const button = canvasElement.querySelector<HTMLButtonElement>("button");
+    const icon = button ? button.querySelector("svg") : null;
+    const hiddenName = button ? button.querySelector("span") : null;
+    await Promise.resolve();
+    if (!button || !icon || !hiddenName) {
+      throw new window.Error("Expected the accessible icon button structure");
+    }
+    if (
+      icon.getAttribute("aria-hidden") !== "true" ||
+      hiddenName.textContent !== "搜索订单" ||
+      hiddenName.hasAttribute("aria-hidden") ||
+      hiddenName.hasAttribute("hidden")
+    ) {
+      throw new window.Error("Expected VisuallyHidden to provide the button name");
+    }
+    button.focus();
+    if (document.activeElement !== button) {
+      throw new window.Error("Expected only the button to receive focus");
+    }
+  }
 };

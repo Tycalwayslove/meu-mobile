@@ -12,16 +12,16 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 
 ## 当前基线
 
-- 官网登记 68 个组件族；代码包公开 102 个大写组件或子组件导出。
-- `packages/mobile/src` 有 62 个组件目录，59 份 README；其中 34 份不超过 5 行。
-- Storybook 有 75 个组件、248 个 stories，但目前没有 `play` 交互测试。
-- 线上 Storybook 只有 1 个 Docs entry；官网 63 个 Story 链接中 35 个失效。
-- 官网 50 个组件页复用分类级 Demo，仅 18 个有相对独立的预览。
-- 组件类型约有 1059 个可选字段，当前几乎没有公开 Props JSDoc。
-- 单测覆盖基础行为，但尚未接入 axe；`@meu/test-utils` 也缺少 a11y、SSR、手势与表单辅助工具。
-- 隔离 Next H5 的本地最新结果为通过，但还没有覆盖旧版 WebView 与真实 iOS/Android 设备；V2 Batch 0 必须把稳定的 Chromium/WebKit CI 和真机记录纳入门禁。
+- Manifest 登记 68 个组件族、125 个公开值、369 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
+- API 属性清单已覆盖 222 个结构化类型、2250 个字段与 232 个事件；其中 838 个字段已有 TSDoc，剩余字段和 374 个 API Extractor release-tag 警告仍需收口。
+- Storybook 当前包含 80 个标题、374 个 Story；68 个官网组件链接、342 个留存文档 Story ID 与对应 Autodocs entry 均通过静态校验。
+- 80 个 Storybook 标题均至少包含一项关键 `play` 交互；本地浏览器门禁会等待交互成功，再对 374 个 Story 的 Light/Dark、390×844 视口执行 axe WCAG A/AA，共 748 个场景，最近一次结果为 0 违规。
+- 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；最终内容与浏览器验收仍在进行。
+- 官网生产构建会由独立本地门禁验证 68 个组件页面的 Light/Dark、主题恢复、页面结构和 axe WCAG A/AA；当前 136 个页面/主题场景为 0 违规。
+- `@meu/test-utils` 已提供 a11y、SSR/hydration、表单、手势、locale/RTL 与 reduced-motion 辅助能力；单元、隔离 Next H5 Chromium/WebKit 与旧语法扫描已有本地门禁。
+- 真实 iOS Safari/VoiceOver、Android Chrome/TalkBack、旧 WebView 运行时、全组件 hydration、性能预算和最终 Chromatic 视觉审批仍是发布阻断项。
 
-这些数字只是审计入口，不是质量结论。每个组件仍需按模板逐项验证。
+这些数字是当前仓库可重复生成的证据，不等同于组件已经达到 `commercial`。每个组件仍需按模板补齐剩余适用项并完成最终发布验收。
 
 ## 事实源与文档架构
 

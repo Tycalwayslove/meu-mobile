@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Button } from "../Button";
 import { Space } from "../Space";
+import { waitForStory } from "../storyTestUtils";
 import { BottomSheet } from "./BottomSheet";
 import type { BottomSheetProps, BottomSheetSnapPoint } from "./types";
 
@@ -69,7 +70,40 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!trigger) throw new window.Error("Expected the BottomSheet trigger");
+
+    trigger.click();
+    await waitForStory(
+      () => document.querySelector('[role="dialog"][aria-modal="true"]') !== null,
+      "Expected the BottomSheet dialog to open"
+    );
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"][aria-modal="true"]');
+    const handle = dialog
+      ? dialog.querySelector<HTMLButtonElement>('button[aria-label="调整面板高度"]')
+      : null;
+    const close = dialog
+      ? dialog.querySelector<HTMLButtonElement>('button[aria-label="关闭"]')
+      : null;
+    if (!handle || !close) throw new window.Error("Expected BottomSheet controls");
+    await waitForStory(
+      () => document.activeElement === handle,
+      "Expected BottomSheet to focus the drag handle"
+    );
+
+    close.click();
+    await waitForStory(
+      () => document.querySelector('[role="dialog"][aria-modal="true"]') === null,
+      "Expected the BottomSheet dialog to close"
+    );
+    await waitForStory(
+      () => document.activeElement === trigger,
+      "Expected BottomSheet to restore trigger focus"
+    );
+  }
+};
 
 export const MultipleSnapPoints: Story = {
   args: { snapPoints: [0.3, 0.5, 0.9] }

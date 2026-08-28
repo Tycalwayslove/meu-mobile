@@ -109,9 +109,11 @@ dialog 必须由 title、aria-label 或 aria-labelledby 命名；Calendar 和 pr
 ## 测试证据
 
 - Unit：范围排序、falsy adapter、首次/同日二次选择、取消回滚、preset、escape、受控显示、最新受控值迁移。
+- Story interaction：`Default` 验证打开、preset 生成完整范围、确认与焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe：本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR：DateRangePicker.ssr.test.tsx 覆盖 dialog、摘要、Calendar grid。
 - Figma：Meu/DateRangePicker 270:676；Empty/Start/Complete/Disabled、44px targets、Light/Dark QA。
-- Axe、Chromium/WebKit、Chromatic、真机焦点/滚动：最终统一门禁。
+- Chromium/WebKit、Chromatic、真机焦点/滚动：最终统一门禁。
 
 ## V2 优化记录
 

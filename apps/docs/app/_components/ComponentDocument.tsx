@@ -46,7 +46,12 @@ function DocumentBlock({ block }: { block: ComponentDocumentBlock }) {
     );
   }
   return (
-    <div className="component-document__table-wrap">
+    <div
+      className="component-document__table-wrap"
+      role="region"
+      aria-label={`${block.headers.join("、")}表格，可横向滚动`}
+      tabIndex={0}
+    >
       <table>
         <thead>
           <tr>

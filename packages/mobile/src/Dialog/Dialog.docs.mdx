@@ -111,8 +111,10 @@ O(actions)，无布局测量；关闭记录仅为退出动画短暂保留。
 ## 测试证据
 
 - Unit: 模态关系、焦点、Escape/Mask、pending 跨关闭重开隔离、Portal RTL/motion、false/reject、自动布局、Provider Promise/controller/clear
+- Story interaction: `Confirm` 验证 alertdialog 语义、初始焦点、确认关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Dialog.ssr.test.tsx`；hydration 专测待补
-- Axe / Mobile Chromium-WebKit / Chromatic / 真机读屏: 最终统一门禁
+- Mobile Chromium-WebKit / Chromatic / 真机读屏: 最终统一门禁
 
 ## V2 优化记录
 

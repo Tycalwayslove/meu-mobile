@@ -91,7 +91,35 @@ export const NestedConfiguration: Story = {
         <ConfigurationReadout />
       </ConfigProvider>
     </ConfigProvider>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const outer = canvasElement.querySelector<HTMLElement>(
+      '[data-meu-component="config-provider"][dir="rtl"][lang="en-US"]'
+    );
+    const nested = outer
+      ? outer.querySelector<HTMLElement>(
+          '[data-meu-component="config-provider"][dir="rtl"][lang="zh-CN"]'
+        )
+      : null;
+    await Promise.resolve();
+    if (!outer || !nested) throw new window.Error("Expected nested ConfigProvider boundaries");
+    if (
+      outer.dir !== "rtl" ||
+      outer.lang !== "en-US" ||
+      outer.getAttribute("data-meu-theme") !== "dark" ||
+      outer.getAttribute("data-meu-motion") !== "reduced"
+    ) {
+      throw new window.Error("Expected the outer ConfigProvider values");
+    }
+    if (
+      nested.dir !== "rtl" ||
+      nested.lang !== "zh-CN" ||
+      nested.getAttribute("data-meu-theme") !== "dark" ||
+      nested.getAttribute("data-meu-motion") !== "reduced"
+    ) {
+      throw new window.Error("Expected nested overrides to preserve inherited configuration");
+    }
+  }
 };
 
 export const LtrSystemDefaults: Story = {

@@ -125,8 +125,8 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 ## 测试证据
 
 - Unit: `IndexList.test.tsx` 覆盖语义、ref、键盘、滚动、动态删除、pointer 滑动和 ariaLabel。
-- Story interaction: stories 已提供，runner 待执行。
-- Axe: 待补。
+- Story interaction: `Default.play` 验证键盘索引切换、焦点和活动分组输出；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
 - SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构；hydration 专测待补。
 - RTL / Reduced motion / forced-colors: CSS 与契约完成，视觉矩阵待补。
 - Mobile Chromium/WebKit E2E、Chromatic Light/Dark、real device: 待发布批次统一验证。
@@ -135,7 +135,7 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 
 ### 待优化
 
-- 补 rail 连续滑动与页面滚动竞争的 iOS/Android 真机证据、axe 和主题视觉基线。
+- 补 rail 连续滑动与页面滚动竞争的 iOS/Android 真机证据和主题视觉基线。
 
 ### 已完成
 

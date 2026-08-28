@@ -115,8 +115,8 @@ tab O(items)；默认 panel 也为 O(items)，lazy 可延迟昂贵内容但不�
 ## 测试证据
 
 - Unit: APG 关联、禁用跳过、无效受控值、动态 remove/disable 归一、automatic/manual、controlled null、destroy、受控与非受控 lazy retain、嵌套 RTL/LTR、scrollIntoView
-- Story interaction: End 键焦点验证
-- Axe: 待 CI 报告
+- Story interaction: `KeyboardInteraction` 验证 End 键焦点移动；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Tabs.ssr.test.tsx`
 - RTL: Unit + Story
 - Reduced motion: CSS 实现
@@ -128,7 +128,7 @@ tab O(items)；默认 panel 也为 O(items)，lazy 可延迟昂贵内容但不�
 
 ### 待优化
 
-补 axe、双引擎、真机读屏与大量 tabs 滚动证据。
+补双引擎、真机读屏与大量 tabs 滚动证据。
 
 ### 已完成
 

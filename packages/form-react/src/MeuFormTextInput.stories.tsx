@@ -16,6 +16,25 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
+function nextStoryFrame() {
+  return new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+}
+
+async function waitForStory(predicate: () => boolean, message: string) {
+  const deadline = Date.now() + 2_000;
+  while (!predicate()) {
+    if (Date.now() >= deadline) throw new window.Error(message);
+    await nextStoryFrame();
+  }
+}
+
+function changeInputValue(input: HTMLInputElement, value: string) {
+  const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+  if (descriptor && descriptor.set) descriptor.set.call(input, value);
+  else input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
 function FormExample() {
   const [result, setResult] = useState("尚未提交");
   const form = useMeuForm<FormValues>({
@@ -120,5 +139,49 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ValidationAndSubmit: Story = {};
+export const ValidationAndSubmit: Story = {
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector<HTMLFormElement>("form");
+    const storeName = canvasElement.querySelector<HTMLInputElement>('input[name="storeName"]');
+    const contact = canvasElement.querySelector<HTMLInputElement>('input[name="contact"]');
+    const submit = canvasElement.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const output = canvasElement.querySelector<HTMLOutputElement>("output");
+    if (!form || !storeName || !contact || !submit || !output) {
+      throw new window.Error("Expected text input form controls");
+    }
+
+    submit.click();
+    await waitForStory(
+      () => canvasElement.querySelectorAll('[role="alert"]').length === 2,
+      "Text input form did not expose required validation errors"
+    );
+    if (
+      storeName.getAttribute("aria-invalid") !== "true" ||
+      contact.getAttribute("aria-invalid") !== "true" ||
+      canvasElement.ownerDocument.activeElement !== storeName
+    ) {
+      throw new window.Error("Text input validation did not mark and focus the first field");
+    }
+
+    changeInputValue(storeName, "喵呜体验店");
+    changeInputValue(contact, "小喵");
+    submit.click();
+    await waitForStory(
+      () => output.textContent !== "尚未提交",
+      "Text input form did not submit entered values"
+    );
+
+    const submitted = JSON.parse(output.textContent || "{}") as Partial<FormValues>;
+    if (submitted.storeName !== "喵呜体验店" || submitted.contact !== "小喵") {
+      throw new window.Error("Text input form submitted unexpected values");
+    }
+    const data = new FormData(form);
+    if (data.get("storeName") !== "喵呜体验店" || data.get("contact") !== "小喵") {
+      throw new window.Error("Text inputs did not expose their values through native FormData");
+    }
+    if (canvasElement.querySelector('[role="alert"]') !== null) {
+      throw new window.Error("Text input validation errors remained after valid submission");
+    }
+  }
+};
 export const NestedArrayAndServerErrors: Story = { render: () => <AdvancedFormExample /> };

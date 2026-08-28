@@ -20,12 +20,33 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
-export function SelectionDemo() {
+type SelectionDemoProps = {
+  focus?: "checkbox" | "radio-group" | "switch";
+};
+
+export function SelectionDemo({ focus }: SelectionDemoProps = {}) {
   const [result, setResult] = useState("尚未保存");
   const form = useMeuForm<Values>({
     schema,
     defaultValues: { agreement: false, notifications: true, services: [], shipping: "" }
   });
+
+  const checkbox = (
+    <>
+      <MeuFormCheckboxGroup<Values, string> name="services" label="服务范围" required>
+        <Checkbox value="delivery">配送</Checkbox>
+        <Checkbox value="pickup">到店自提</Checkbox>
+      </MeuFormCheckboxGroup>
+      <MeuFormCheckbox<Values> name="agreement">同意服务协议</MeuFormCheckbox>
+    </>
+  );
+  const radio = (
+    <MeuFormRadioGroup<Values, string> name="shipping" label="配送方式" required>
+      <Radio value="standard">标准配送</Radio>
+      <Radio value="express">急速配送</Radio>
+    </MeuFormRadioGroup>
+  );
+  const toggle = <MeuFormSwitch<Values> name="notifications" label="消息通知" />;
 
   return (
     <MeuForm
@@ -33,16 +54,16 @@ export function SelectionDemo() {
       onSubmit={(values) => setResult(JSON.stringify(values))}
       style={{ display: "grid", gap: 16 }}
     >
-      <MeuFormCheckboxGroup<Values, string> name="services" label="服务范围" required>
-        <Checkbox value="delivery">配送</Checkbox>
-        <Checkbox value="pickup">到店自提</Checkbox>
-      </MeuFormCheckboxGroup>
-      <MeuFormRadioGroup<Values, string> name="shipping" label="配送方式" required>
-        <Radio value="standard">标准配送</Radio>
-        <Radio value="express">急速配送</Radio>
-      </MeuFormRadioGroup>
-      <MeuFormSwitch<Values> name="notifications" label="消息通知" />
-      <MeuFormCheckbox<Values> name="agreement">同意服务协议</MeuFormCheckbox>
+      {focus === "checkbox" ? checkbox : null}
+      {focus === "radio-group" ? radio : null}
+      {focus === "switch" ? toggle : null}
+      {!focus ? (
+        <>
+          {checkbox}
+          {radio}
+          {toggle}
+        </>
+      ) : null}
       <Button type="submit">保存选择</Button>
       <output aria-live="polite">{result}</output>
     </MeuForm>

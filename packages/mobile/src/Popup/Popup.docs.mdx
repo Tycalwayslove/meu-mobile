@@ -113,8 +113,8 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 ## 测试证据
 
 - Unit: `Popup.test.tsx`
-- Story interaction: 待补
-- Axe: 待补
+- Story interaction: `Bottom.play` 验证打开、可访问对话框、关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
 - SSR/hydration: 有 Portal 基础覆盖，待组合级证明
 - RTL: 待补
 - Reduced motion: 待补
@@ -128,7 +128,7 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 
 - 先加固 Portal、focus trap 与 scroll lock，再做 Popup 交互矩阵。
 - 补 inert/嵌套策略、软键盘、安全区、退出中断、SSR、RTL 和真机证明。
-- 为每个关闭 reason 添加 Story play 与 E2E。
+- 为尚未逐项覆盖的关闭 reason 添加更细的 Story play 与 E2E。
 
 ### 已完成
 

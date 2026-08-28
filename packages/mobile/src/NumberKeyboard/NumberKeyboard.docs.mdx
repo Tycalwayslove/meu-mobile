@@ -130,8 +130,8 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 ## 测试证据
 
 - Unit: `NumberKeyboard.test.tsx`
-- Story interaction: 待补
-- Axe: 本地 Storybook Light/Dark 全量门禁覆盖；仍需补交互后状态扫描
+- Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
 - SSR/hydration: Unit 已覆盖服务端渲染；开放 Portal hydration 仍待专门证明
 - RTL: 待补
 - Reduced motion: 待补
@@ -143,7 +143,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 ### 待优化
 
-- 补 pointer cancel、开放 Portal hydration、RTL、交互后 axe 与真机测试。
+- 补 pointer cancel、开放 Portal hydration、RTL 与真机测试。
 - 补齐 form adapter 的 touched/error/reset 组合证明；dirty、输入、删除、长度和确认已有 Unit。
 - 明确触摸设备与系统软键盘共存限制，并提供降级示例。
 

@@ -8,7 +8,12 @@ function PropertyTable({ entries, title }: { entries: ComponentApiProperty[]; ti
   return (
     <div className="api-reference__properties">
       <h3>{title}</h3>
-      <div className="component-document__table-wrap">
+      <div
+        className="component-document__table-wrap"
+        role="region"
+        aria-label={`${title} 表格，可横向滚动`}
+        tabIndex={0}
+      >
         <table>
           <thead>
             <tr>

@@ -20,6 +20,18 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
+function nextStoryFrame() {
+  return new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+}
+
+async function waitForStory(predicate: () => boolean, message: string) {
+  const deadline = Date.now() + 2_000;
+  while (!predicate()) {
+    if (Date.now() >= deadline) throw new window.Error(message);
+    await nextStoryFrame();
+  }
+}
+
 function SelectionExample() {
   const [result, setResult] = useState("尚未提交");
   const form = useMeuForm<Values>({
@@ -73,4 +85,84 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const CheckboxRadioAndSwitch: Story = {};
+export const CheckboxRadioAndSwitch: Story = {
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector<HTMLFormElement>("form");
+    const submit = canvasElement.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const delivery = canvasElement.querySelector<HTMLInputElement>(
+      'input[type="checkbox"][value="delivery"]'
+    );
+    const express = canvasElement.querySelector<HTMLInputElement>(
+      'input[type="radio"][value="express"]'
+    );
+    const notifications = canvasElement.querySelector<HTMLInputElement>('input[role="switch"]');
+    const card = canvasElement.querySelector<HTMLInputElement>('input[type="radio"][value="card"]');
+    const agreement = canvasElement.querySelector<HTMLInputElement>(
+      'input[type="checkbox"][name="agreement"]'
+    );
+    const output = canvasElement.querySelector<HTMLOutputElement>("output");
+    if (
+      !form ||
+      !submit ||
+      !delivery ||
+      !express ||
+      !notifications ||
+      !card ||
+      !agreement ||
+      !output
+    ) {
+      throw new window.Error("Expected selection form controls");
+    }
+
+    submit.click();
+    await waitForStory(
+      () => canvasElement.querySelectorAll('[role="alert"]').length === 3,
+      "Selection form did not expose required field validation"
+    );
+    const serviceGroup = canvasElement.querySelector<HTMLElement>(
+      '[role="group"][aria-labelledby]'
+    );
+    if (!serviceGroup || canvasElement.ownerDocument.activeElement !== serviceGroup) {
+      throw new window.Error("Selection form did not focus its first invalid group");
+    }
+
+    delivery.click();
+    express.click();
+    if (!notifications.checked) {
+      throw new window.Error("Selection form lost its default switch value");
+    }
+    notifications.click();
+    notifications.click();
+    card.click();
+    agreement.click();
+    submit.click();
+
+    await waitForStory(
+      () => output.textContent !== "尚未提交",
+      "Selection form did not submit its selected values"
+    );
+    const submitted = JSON.parse(output.textContent || "{}") as Partial<Values>;
+    if (
+      submitted.agreement !== true ||
+      submitted.notifications !== true ||
+      !Array.isArray(submitted.services) ||
+      submitted.services.join(",") !== "delivery" ||
+      submitted.shipping !== "express" ||
+      submitted.viewMode !== "card"
+    ) {
+      throw new window.Error("Selection form submitted unexpected adapter values");
+    }
+    const data = new FormData(form);
+    const services = data.getAll("services");
+    if (
+      services.length !== 1 ||
+      services[0] !== "delivery" ||
+      data.get("shipping") !== "express" ||
+      data.get("notifications") === null ||
+      data.get("viewMode") !== "card" ||
+      data.get("agreement") === null
+    ) {
+      throw new window.Error("Selection controls did not participate in native FormData");
+    }
+  }
+};

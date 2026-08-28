@@ -137,8 +137,8 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 ## 测试证据
 
 - Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、隐藏焦点过滤与恢复
-- Story interaction: 待补
-- Axe: Storybook a11y addon 可扫描自定义容器 Story，尚无独立自动断言
+- Story interaction: `CustomContainer` 验证内容移动到调用方提供的目标容器；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记与 hydration 后移动
 - RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
 - Reduced motion: 不适用，无动画

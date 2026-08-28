@@ -122,8 +122,8 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 ## 测试证据
 
 - Unit: `TextInput.test.tsx`，覆盖 Field、受控/非受控 clear、locale 与 readOnly
-- Story interaction: 待补
-- Axe: 待补
+- Story interaction: `Clearable` 验证清除后的值、回调状态与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 待补组件级证明
 - RTL: 待补
 - Reduced motion: 不适用，待静态验证
@@ -136,7 +136,7 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 ### 待优化
 
 - 继续验证 IME、autofill、password、selection 与 native form reset。
-- 补齐 TSDoc、Form adapter、Story play、axe、SSR、RTL 和真机证据。
+- 补齐 TSDoc、Form adapter、SSR、RTL 和真机证据。
 
 ### 已完成
 

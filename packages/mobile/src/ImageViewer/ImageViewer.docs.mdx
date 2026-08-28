@@ -126,8 +126,8 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 ## 测试证据
 
 - Unit: `ImageViewer.test.tsx` 覆盖 SSR、模态/焦点/滚动、受控导航、键盘/按钮/手势缩放、ref、空/错误、RTL。
-- Story interaction: KeyboardInteraction play 已编写并通过 typecheck；Story runner 未执行。
-- Axe: 未执行。
+- Story interaction: `KeyboardInteraction.play` 验证打开、键盘缩放与关闭；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
 - SSR/hydration: closed Node SSR 已验证；open hydration 未执行。
 - RTL: 键盘方向单测，视觉/drag 待 E2E。
 - Reduced motion: CSS 已实现，截图待补。
@@ -139,7 +139,7 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 
 ### 待优化
 
-补 iOS 边缘手势、Android 多指取消、RTL drag、axe、open hydration 与真机读屏。
+补 iOS 边缘手势、Android 多指取消、RTL drag、open hydration 与真机读屏。
 
 ### 已完成
 

@@ -8,6 +8,14 @@ import { MeuForm } from "./MeuForm";
 import { MeuFormImageUploader } from "./MeuFormImageUploader";
 import { useMeuForm } from "./useMeuForm";
 
+async function waitForStory(predicate: () => boolean, message: string) {
+  const deadline = Date.now() + 3_000;
+  while (!predicate()) {
+    if (Date.now() >= deadline) throw new window.Error(message);
+    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+  }
+}
+
 const schema = z.object({
   images: z.array(z.object({ alt: z.string(), url: z.string() })).min(1, "请至少上传一张图片")
 });
@@ -53,4 +61,36 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+    const submit = Array.from(canvasElement.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => button.textContent === "验证并提交"
+    );
+    const output = canvasElement.querySelector<HTMLOutputElement>("output");
+    if (!input || !submit || !output) throw new window.Error("Expected image upload form controls");
+
+    const transfer = new DataTransfer();
+    transfer.items.add(
+      new File(["storybook image"], "storybook-product.jpg", { type: "image/jpeg" })
+    );
+    Object.defineProperty(input, "files", { configurable: true, value: transfer.files });
+    input.dispatchEvent(new window.Event("change", { bubbles: true }));
+
+    await waitForStory(
+      () =>
+        canvasElement.querySelector('button[aria-label="storybook-product.jpg，预览"]') !== null,
+      "Image upload did not produce a successful form value"
+    );
+    const remove = canvasElement.querySelector<HTMLButtonElement>(
+      'button[aria-label="删除 storybook-product.jpg"]'
+    );
+    if (!remove) throw new window.Error("Uploaded image did not expose its remove action");
+
+    submit.click();
+    await waitForStory(
+      () => output.textContent === "已提交 1 张图片",
+      "Form did not submit the uploaded image value"
+    );
+  }
+};

@@ -118,7 +118,8 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 ## 测试证据
 
 - Unit: `InfiniteList.test.tsx` 覆盖 root discovery、并发锁、失败/重试、完成、Observer 降级、disabled、自定义视觉和陈旧 rejection。
-- Story interaction / Axe: 待执行/待补。
+- Story interaction: `ErrorAndRetry.play` 验证失败、重试和恢复状态；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
 - SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖 idle/complete；Observer hydration 待补。
 - Reduced motion/forced-colors/RTL: CSS 或无方向契约完成，视觉证据待补。
 - Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。
@@ -127,7 +128,7 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 
 ### 待优化
 
-- 补嵌套 scroll root E2E、慢网/离线重试、axe 和 Light/Dark 视觉基线。
+- 补嵌套 scroll root E2E、慢网/离线重试和 Light/Dark 视觉基线。
 
 ### 已完成
 

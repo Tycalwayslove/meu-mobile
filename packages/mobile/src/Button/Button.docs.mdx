@@ -108,7 +108,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 - loading 会使按钮 disabled，因此按钮本身不能接收焦点或再次公告状态。
 - 当前没有内建防抖、请求所有权、成功/失败状态。
-- 当前没有逐 Props TSDoc 和 Story interaction 证明。
+- 当前没有逐 Props TSDoc。
 
 ## 性能预算
 
@@ -117,8 +117,8 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 ## 测试证据
 
 - Unit: `Button.test.tsx`
-- Story interaction: 待补
-- Axe: 待补
+- Story interaction: `Solid` 验证按钮激活、焦点保持与状态更新；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 隔离消费者覆盖，待增加组件级证明
 - RTL: 已改用 flex gap，待浏览器视觉证明
 - Reduced motion: CSS 已静态降级，待 Story/浏览器证明
@@ -130,7 +130,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 ### 待优化
 
-- 补齐 Autodocs 交互与 axe；验证 44px、字号放大、高对比和 RTL。
+- 补齐 Autodocs；验证 44px、字号放大、高对比和 RTL。
 - 明确 loading 的读屏策略、宽度稳定性和异步错误恢复示例。
 - 评估是否需要 `loadingText`，没有真实场景证据前不新增 API。
 

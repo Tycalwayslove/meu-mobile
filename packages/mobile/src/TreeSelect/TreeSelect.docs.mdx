@@ -137,8 +137,8 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 ## 测试证据
 
 - Unit: single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window 与 aria-invalid
-- Story interaction: 待补 play function
-- Axe: 待 CI
+- Story interaction: `Single` 验证 Portal 打开、draft 选择、确认提交与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏；浏览器 hydration 专测待补
 - RTL: RightToLeft Story 与 unit
 - Reduced motion: CSS 静态规则；浏览器 computed-style 待补
@@ -150,7 +150,7 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 ### 待优化
 
-补 axe、双引擎 hydration、读屏虚拟树、超大数据性能基准和真机异步中断；评估未来 server-search adapter，不扩展核心 filter 契约。
+补双引擎 hydration、读屏虚拟树、超大数据性能基准和真机异步中断；评估未来 server-search adapter，不扩展核心 filter 契约。
 
 ### 已完成
 

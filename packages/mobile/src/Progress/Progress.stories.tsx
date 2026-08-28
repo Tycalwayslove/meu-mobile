@@ -20,6 +20,22 @@ export const ClampedAndFormatted: Story = {
     formatValue: (value) => `${value.toFixed(1)} / 100`,
     value: 140,
     valueText: "已完成"
+  },
+  play: ({ canvasElement }) => {
+    const progress = canvasElement.querySelector<HTMLElement>('[role="progressbar"]');
+    if (!progress) throw new window.Error("Expected a progressbar");
+    if (
+      progress.getAttribute("aria-label") !== "资料上传" ||
+      progress.getAttribute("aria-valuemin") !== "0" ||
+      progress.getAttribute("aria-valuemax") !== "100" ||
+      progress.getAttribute("aria-valuenow") !== "100" ||
+      progress.getAttribute("aria-valuetext") !== "已完成"
+    ) {
+      throw new window.Error("Progress did not expose its clamped accessible value");
+    }
+    if (!(canvasElement.textContent || "").includes("100.0 / 100")) {
+      throw new window.Error("Progress did not render its formatted visible value");
+    }
   }
 };
 export const AnnouncedDanger: Story = {

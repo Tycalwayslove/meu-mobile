@@ -54,7 +54,7 @@ source: packages/form-react/src/MeuForm
 - 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按页面 DOM 顺序聚焦首个已注册错误字段。
 - `MeuForm` 透传原生 form 属性，`ref` 指向真实 `HTMLFormElement`。
 
-当前状态为 V2 `implementation`。复杂 Picker、日期、树与上传值的原生 FormData 序列化、全部 adapter 的触碰时点、axe、移动 E2E 和真机证明尚未完成，因此不能标记为 commercial。
+当前状态为 V2 `implementation`。复杂 Picker、日期、树与上传值的原生 FormData 序列化、全部 adapter 的触碰时点、移动 E2E 和真机证明尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -178,8 +178,8 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 ## 测试证据
 
 - Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、DOM 顺序聚焦、全局 disabled、required、事件顺序、FormData、嵌套、数组、dirty/touched/reset
-- Story interaction: 待补
-- Axe: 待补
+- Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 底层输入已有部分证据，Form 专属待补
 - RTL: 待补
 - Reduced motion: Form 无自有动效，组合矩阵待补
@@ -193,7 +193,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 - 冻结所有 overlay/复合 adapter 的 touched、ref 与 disabled/readOnly/required 矩阵。
 - 为九类复杂值提供显式、可配置且有后端迁移说明的 FormData serializer。
-- 补 Story play、axe、SSR、RTL、移动 E2E、Light/Dark 与真机记录。
+- 补 SSR、RTL、移动 E2E、Chromatic Light/Dark 与真机记录。
 
 ### 已完成
 

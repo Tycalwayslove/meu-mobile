@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Button } from "../Button";
 import { Space } from "../Space";
+import { waitForStory } from "../storyTestUtils";
 import { Popover } from "./Popover";
 import type { PopoverPlacement, PopoverProps } from "./types";
 
@@ -35,7 +36,52 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const trigger = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!trigger) throw new window.Error("Expected Popover trigger");
+    if (
+      trigger.getAttribute("aria-haspopup") !== "dialog" ||
+      trigger.getAttribute("aria-expanded") !== "false"
+    ) {
+      throw new window.Error("Popover trigger is missing closed dialog semantics");
+    }
+
+    trigger.focus();
+    trigger.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="popover"]') !== null,
+      "Popover did not open"
+    );
+    const popover = body.querySelector<HTMLElement>('[data-meu-component="popover"]');
+    if (
+      !popover ||
+      popover.getAttribute("role") !== "dialog" ||
+      popover.getAttribute("aria-label") !== "订单快捷操作" ||
+      trigger.getAttribute("aria-expanded") !== "true" ||
+      trigger.getAttribute("aria-controls") !== popover.id
+    ) {
+      throw new window.Error("Popover did not expose its trigger-to-dialog relationship");
+    }
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === popover,
+      "Popover did not move focus into its content"
+    );
+
+    canvasElement.ownerDocument.dispatchEvent(
+      new window.KeyboardEvent("keydown", { bubbles: true, key: "Escape" })
+    );
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="popover"]') === null,
+      "Popover did not close on Escape"
+    );
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === trigger,
+      "Popover did not restore focus to its trigger"
+    );
+  }
+};
 
 export const WithoutArrow: Story = { args: { arrow: false, placement: "bottom-start" } };
 

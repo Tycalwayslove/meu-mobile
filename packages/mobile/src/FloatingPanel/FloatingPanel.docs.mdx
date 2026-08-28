@@ -115,8 +115,8 @@ Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerH
 ## 测试证据
 
 - Unit: `FloatingPanel.test.tsx`（归一化、单 anchor 禁用、受控、速度/方向锁、cancel、disabled、键盘、ref）。
-- Story interaction: `FloatingPanel.stories.tsx` 已编写 Bottom handle 点击 play；runner 待执行。
-- Axe: 待补。
+- Story interaction: `Bottom` 验证 handle 点击与锚点状态变化；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `FloatingPanel.ssr.test.tsx` 覆盖确定 shell；真实 hydration 待补。
 - RTL: 垂直方向不适用；排版矩阵待补。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
@@ -129,7 +129,7 @@ Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerH
 ### 待优化
 
 - 补 iOS 13.4+/Android WebView 的拖拽、visual viewport/键盘和滚动移交 E2E。
-- 补 axe、hydration 与主题视觉基线。
+- 补 hydration 与主题视觉基线。
 
 ### 已完成
 

@@ -40,7 +40,7 @@ source: packages/mobile/src/Stepper
 - 原生 form name/required/disabled/readOnly/reset；Field label、必填、说明和错误关联；增减按钮通过 aria-controls 指向输入。
 - 44px 按钮、三档高度、RTL 逻辑边框、reduced-motion 和 forced-colors 降级。
 
-当前为 V2 `implementation`；单元、SSR 与 Story 已建立，尚缺 axe、移动浏览器、视觉与真机验收，不能标记为 commercial。
+当前为 V2 `implementation`；单元、SSR、Story 与本地 axe 已建立，尚缺移动浏览器、视觉与真机验收，不能标记为 commercial。
 
 ## 何时使用
 
@@ -170,8 +170,9 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 
 - Unit 12 项：按钮/键盘/bounds、小数与空值、Field、反向 bounds/受控、非整步有效上限、草稿单次发布与 ARIA 同步、decimal comma/无效草稿、取消/IME、required/controls、同步 FormData/reset 与取消边界。
 - SSR 1 项：确定 spinbutton、name/value 与两个原生按钮。
-- Story play：NativeFormReset 验证增量和恢复；状态矩阵含 decimal、controlled、required empty、maximum、error、readOnly、disabled、RTL 与尺寸。
-- 待补：axe、软键盘/IME/粘贴移动 E2E、forced-colors/200%/Light/Dark、VoiceOver/TalkBack。
+- Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- 待补：软键盘/IME/粘贴移动 E2E、forced-colors/200%/Light/Dark 视觉基线、VoiceOver/TalkBack。
 
 ## V2 优化记录
 
@@ -184,7 +185,7 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 
 ### 待优化
 
-- 完成 axe、移动浏览器、真机读屏与视觉验收。
+- 完成移动浏览器、真机读屏与视觉验收。
 - 依据真实电商长按需求评估可取消的 repeat 契约；没有埋点和跨端规范前不默认启用。
 - 若需要本地化 formatter/parser，必须同时冻结编辑态、光标与服务端序列化契约。
 

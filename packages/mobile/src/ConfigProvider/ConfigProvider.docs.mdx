@@ -32,7 +32,7 @@ source: packages/mobile/src/ConfigProvider
 - `system` theme 和 motion 都通过 CSS media query 解析；渲染期间不读取 `window`、`document`、`matchMedia` 或本地存储。
 - `portalContainer` 函数仅作为惰性配置保存，ConfigProvider 渲染和 SSR 阶段不会调用它。
 
-当前为 V2 `implementation` 状态；核心 Mask/Dialog/Popup/BottomSheet/Popover 已完成跨 Portal 方向与动效传播，其余 Portal 消费者、移动端 E2E、axe 与真机矩阵仍待全库审计，不能标记为 commercial。
+当前为 V2 `implementation` 状态；核心 Mask/Dialog/Popup/BottomSheet/Popover 已完成跨 Portal 方向与动效传播，其余 Portal 消费者、移动端 E2E 与真机矩阵仍待全库审计，不能标记为 commercial。
 
 ## 何时使用
 
@@ -169,8 +169,8 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 ## 测试证据
 
 - Unit: `ConfigProvider.test.tsx` 覆盖默认值、DOM 属性、className、逐字段嵌套继承、显式覆盖、Portal null/惰性函数和 ThemeProvider 身份。
-- Story interaction: 待补自动交互；现有四个静态 Story 覆盖嵌套、根默认、原地 Portal 与自定义 Portal 目标。
-- Axe: 待补；当前 Provider 无 role 和交互目标。
+- Story interaction: `NestedConfiguration` 验证逐字段覆盖与继承边界；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
 - Reduced motion: 单元测试覆盖嵌套策略，CSS media/reduced class 已实现；真实浏览器 computed style 待 E2E。
@@ -184,7 +184,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 
 - 完成其余 Overlay 在 body Portal 根节点复用统一 locale、dir、theme 与 motion boundary。
 - 补移动 Chromium/WebKit 的 computed style、嵌套 Portal 与 hydration E2E。
-- 补 axe、强制色彩、高对比、200% 字号及 Android/iOS 真机证据。
+- 补强制色彩、高对比、200% 字号及 Android/iOS 真机证据。
 - 评估跨 Document/iframe Portal；在有真实业务需求前不扩展现有容器类型。
 
 ### 已完成

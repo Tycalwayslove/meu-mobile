@@ -38,7 +38,7 @@ source: packages/mobile/src/TextArea
 - 合并调用方、Field description/error 与 count 的全部 `aria-describedby` ID，并去重。
 - autosize 过程中保留 textarea 的 `scrollTop`，超过 `maxRows` 后使用内部纵向滚动。
 
-当前为 V2 `implementation`，尚未完成 axe、IME 真机、200% 字号、移动 Chromium/WebKit E2E、Light/Dark 视觉接受与 Android/iOS 真机记录，不能标记为 commercial。
+当前为 V2 `implementation`，尚未完成 IME 真机、200% 字号、移动 Chromium/WebKit E2E、Light/Dark 视觉接受与 Android/iOS 真机记录，不能标记为 commercial。
 
 ## 何时使用
 
@@ -208,8 +208,8 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 ## 测试证据
 
 - Unit: `TextArea.test.tsx` 11 项覆盖 ARIA 合并/去重、无 live counter、UTF-16、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权和 readOnly；另有 1 项 SSR 测试。
-- Story interaction: `NativeFormReset` play 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；其余 Story 覆盖受控拒绝、粘贴型长文、错误和状态。
-- Axe: 待补。
+- Story interaction: `NativeFormReset` 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；隔离 Next hydration 待补。
 - RTL: 依赖原生 textarea/逻辑布局，待移动浏览器视觉证明。
 - Reduced motion: 无动效，不适用；仍待 E2E 证明无 height transition。
@@ -221,7 +221,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 
 ### 待优化
 
-- 补 axe、隔离 Next hydration、RTL、200% 字号、forced-colors 与 Light/Dark 视觉回归。
+- 补隔离 Next hydration、RTL、200% 字号、forced-colors 与 Light/Dark 视觉回归。
 - 在移动 Chromium/WebKit 覆盖 IME、paste、软键盘 viewport、旋转、受控拒绝和 reset。
 - 完成 iOS/Android 真机与读屏记录。
 - 评估 grapheme/byte/formatter API；只有服务端和 uni-app 计数算法冻结后才能增加。
@@ -235,7 +235,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 - autosize 调整期间保存 scrollTop，maxRows 溢出保持内部滚动。
 - 明确 UTF-16 计数并移除逐键 aria-live；counter 保留 describedby 关联。
 - 新增 readOnly 视觉/data 状态；合并调用方与 Field 的全部 describedby。
-- 补齐公开类型/Props/组件 TSDoc、SSR/单元测试、Story play 和留存文档。
+- 补齐公开类型/Props/组件 TSDoc、SSR/单元测试、Story play、本地 axe 和留存文档。
 
 ## 变更记录
 

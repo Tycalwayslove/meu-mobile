@@ -1,7 +1,24 @@
 import { MeuIconSearch, MeuIconX } from "@meu/icons-react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 
 import { IconButton } from "./IconButton";
+
+function SearchButtonPreview() {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <>
+      <IconButton
+        aria-label="搜索"
+        aria-pressed={pressed}
+        onClick={() => setPressed((current) => !current)}
+      >
+        <MeuIconSearch />
+      </IconButton>
+      <output aria-live="polite">搜索状态：{pressed ? "已开启" : "已关闭"}</output>
+    </>
+  );
+}
 
 const meta = {
   title: "Actions/IconButton",
@@ -12,7 +29,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  render: () => <SearchButtonPreview />,
+  play: async ({ canvasElement }) => {
+    const button = canvasElement.querySelector<HTMLButtonElement>('button[aria-label="搜索"]');
+    const output = canvasElement.querySelector<HTMLOutputElement>("output");
+    if (!button || !output) throw new window.Error("Expected IconButton preview");
+    if (button.getAttribute("aria-pressed") !== "false") {
+      throw new window.Error("IconButton did not expose its initial pressed state");
+    }
+
+    button.focus();
+    button.click();
+    await Promise.resolve();
+    if (
+      button.getAttribute("aria-pressed") !== "true" ||
+      output.textContent !== "搜索状态：已开启" ||
+      canvasElement.ownerDocument.activeElement !== button
+    ) {
+      throw new window.Error("IconButton click did not update state while retaining focus");
+    }
+  }
+};
 export const Solid: Story = { args: { variant: "solid", tone: "accent" } };
 export const OutlineDanger: Story = {
   args: { "aria-label": "关闭", children: <MeuIconX />, variant: "outline", tone: "danger" }

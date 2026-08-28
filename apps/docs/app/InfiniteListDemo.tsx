@@ -8,7 +8,12 @@ export function InfiniteListDemo() {
   const itemCount = page * 4;
 
   return (
-    <div style={{ height: 320, overflowY: "auto", border: "1px solid var(--meu-color-border)" }}>
+    <div
+      role="region"
+      aria-label="商品加载列表，可纵向滚动"
+      tabIndex={0}
+      style={{ height: 320, overflowY: "auto", border: "1px solid var(--meu-color-border)" }}
+    >
       <div style={{ display: "grid", gap: 1, background: "var(--meu-color-border)" }}>
         {Array.from({ length: itemCount }, (_, index) => (
           <div key={index} style={{ padding: 16, background: "var(--meu-color-surface)" }}>

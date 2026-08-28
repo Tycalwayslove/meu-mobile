@@ -32,5 +32,31 @@ export const ComposedCard: Story = {
         <Skeleton animated lines={2} lineWidths={["100%", "62%"]} />
       </div>
     </div>
-  )
+  ),
+  play: ({ canvasElement }) => {
+    const status = canvasElement.querySelector<HTMLElement>(
+      '[role="status"][aria-label="正在加载商品"]'
+    );
+    const skeletons = canvasElement.querySelectorAll<HTMLElement>(
+      '[data-meu-component="skeleton"]'
+    );
+    if (!status || status.getAttribute("aria-busy") !== "true") {
+      throw new window.Error("Skeleton composition did not expose its loading boundary");
+    }
+    if (skeletons.length !== 3) {
+      throw new window.Error("Skeleton composition did not render all placeholder groups");
+    }
+    skeletons.forEach((skeleton) => {
+      if (skeleton.getAttribute("aria-hidden") !== "true") {
+        throw new window.Error("A decorative Skeleton leaked into the accessibility tree");
+      }
+    });
+    if (
+      skeletons.item(0).getAttribute("data-variant") !== "rectangle" ||
+      skeletons.item(1).getAttribute("data-variant") !== "circle" ||
+      skeletons.item(2).querySelectorAll("span").length !== 2
+    ) {
+      throw new window.Error("Skeleton composition lost its media, avatar, or text geometry");
+    }
+  }
 };

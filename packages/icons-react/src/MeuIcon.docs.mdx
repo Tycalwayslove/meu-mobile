@@ -119,8 +119,8 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 ## 测试证据
 
 - Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`
-- Story interaction: 不适用；当前 Story 为静态目录与语义模式
-- Axe: Storybook 已配置 a11y addon，尚无组件专属执行报告
+- Story interaction: `Catalog` 验证装饰图标不可聚焦且对辅助技术隐藏；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 实现无浏览器分支，尚无独立 hydration 测试
 - RTL: 规则已文档化，拥有方向语义的上层组件仍需逐项验证
 - Reduced motion: 不适用；没有内建动效

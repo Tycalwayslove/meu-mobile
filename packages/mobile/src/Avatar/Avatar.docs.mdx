@@ -32,7 +32,7 @@ source: packages/mobile/src/Avatar
 - loading 与 error 都保留相同 fallback，源变化由 Image 状态机重新开始；不自行重试或缓存失败。
 - RTL 无方向性布局；forced-colors 保留轮廓。图片淡入的 reduced-motion 降级由 Image 实现。
 
-状态为 `implementation`；axe、Chromatic、移动 E2E 与真机读屏尚未完成。
+状态为 `implementation`；Chromatic、移动 E2E 与真机读屏尚未完成。
 
 ## 何时使用
 
@@ -119,8 +119,8 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 ## 测试证据
 
 - Unit: `Avatar.test.tsx` 覆盖派生/显式 initials、失败、loading、装饰 alt 和数值尺寸。
-- Story interaction: ImageFailure 触发 error 并验证 fallback；LightAndDark 提供关键状态。
-- Axe: 待补。
+- Story interaction: `ImageFailure` 触发 error 并验证 fallback；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Avatar.ssr.test.tsx` 验证无浏览器全局的稳定 fallback markup；hydration 专测待补。
 - RTL: 逻辑无关；专属自动化不适用。
 - Reduced motion: 继承 Image CSS，截图待补。
@@ -132,7 +132,7 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 
 ### 待优化
 
-- 补 axe、Chromatic、移动端图片失败/lazy loading 与 VoiceOver/TalkBack 真机验证。
+- 补 Chromatic、移动端图片失败/lazy loading 与 VoiceOver/TalkBack 真机验证。
 
 ### 已完成
 

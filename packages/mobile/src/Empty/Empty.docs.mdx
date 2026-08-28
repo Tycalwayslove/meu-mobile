@@ -29,7 +29,7 @@ source: packages/mobile/src/Empty
 - `reason=no-data|no-results|not-configured` 为分析/测试提供稳定分类，不改变业务行为。
 - 标题命名根 group、说明通过 `aria-describedby` 关联；窄屏操作区改为单列，长文案可断行。
 
-当前为 `implementation`；Unit、SSR、Story 已完成，axe、移动浏览器、视觉和真机证据未完成。
+当前为 `implementation`；Unit、SSR、Story 已完成，移动浏览器、视觉和真机证据未完成。
 
 ## 何时使用
 
@@ -121,8 +121,8 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 ## 测试证据
 
 - Unit: 4 项，覆盖命名/说明、外部与内部 IDREF 合并、无插图，以及原因/双操作/无操作。
-- Story interaction: 未执行；操作仅展示，不冒充业务回调证据。
-- Axe: 未执行。
+- Story interaction: `Default` 验证命名 group、说明关系与操作文案，不冒充业务回调证据；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: Node SSR 1 项；hydration 未执行。
 - RTL: 逻辑顺序契约；未做 E2E。
 - Reduced motion: 不适用，无动画。
@@ -134,7 +134,7 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 
 ### 待优化
 
-- axe、移动窄屏、200% 字号、Chromatic 与真机读屏验证。
+- 移动窄屏、200% 字号、Chromatic 与真机读屏验证。
 
 ### 已完成
 

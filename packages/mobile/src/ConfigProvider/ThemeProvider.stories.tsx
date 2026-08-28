@@ -47,7 +47,37 @@ export const LightAndDark: Story = {
       <ThemeCard label="Light theme" theme="light" />
       <ThemeCard label="Dark theme" theme="dark" />
     </div>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const lightLabel = Array.from(canvasElement.querySelectorAll("strong")).find(
+      (label) => label.textContent === "Light theme"
+    );
+    const darkLabel = Array.from(canvasElement.querySelectorAll("strong")).find(
+      (label) => label.textContent === "Dark theme"
+    );
+    const light = lightLabel
+      ? lightLabel.closest<HTMLElement>('[data-meu-component="config-provider"]')
+      : null;
+    const dark = darkLabel
+      ? darkLabel.closest<HTMLElement>('[data-meu-component="config-provider"]')
+      : null;
+    await Promise.resolve();
+    if (!light || !dark) throw new window.Error("Expected light and dark theme boundaries");
+    if (
+      light.getAttribute("data-meu-theme") !== "light" ||
+      dark.getAttribute("data-meu-theme") !== "dark"
+    ) {
+      throw new window.Error("Expected ThemeProvider to isolate explicit themes");
+    }
+    if (
+      !light.textContent ||
+      !light.textContent.includes("theme=light") ||
+      !dark.textContent ||
+      !dark.textContent.includes("theme=dark")
+    ) {
+      throw new window.Error("Expected descendants to read their nearest theme");
+    }
+  }
 };
 
 export const SystemTheme: Story = {

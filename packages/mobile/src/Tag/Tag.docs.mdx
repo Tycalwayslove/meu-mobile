@@ -36,7 +36,7 @@ Figma node `77:2` 是 Tag 页面参考；当前 FIGMA_SYNC 未能确定组件集
 - 五种 tone、三种 variant/size、rounded、长文 24ch 视觉省略、RTL 逻辑间距、reduced-motion 和 forced-colors。
 - 交互与关闭目标均至少 44×44，原生 Enter/Space 键盘路径成立。
 
-状态为 `implementation`；axe、移动 E2E、Chromatic 和真机读屏待补。
+状态为 `implementation`；移动 E2E、Chromatic 视觉基线和真机读屏待补。
 
 ## 何时使用
 
@@ -133,8 +133,8 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 ## 测试证据
 
 - Unit: `Tag.test.tsx` 覆盖静态、filter、selected、独立 close 键盘和 disabled 双动作。
-- Story interaction: Filter 切换并验证 aria-pressed；LightAndDark/LongText/Closable 覆盖关键状态。
-- Axe: 待补。
+- Story interaction: `Filter` 切换并验证 `aria-pressed`；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种 DOM 模式；hydration 专测待补。
 - RTL: 逻辑 CSS 已实现，专属截图待补。
 - Reduced motion: CSS 已实现，截图待补。
@@ -146,7 +146,7 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 
 ### 待优化
 
-- 补 axe、RTL/长翻译/forced-colors 视觉、移动键盘和真机读屏验证。
+- 补 RTL/长翻译/forced-colors 视觉、移动键盘和真机读屏验证。
 
 ### 已完成
 

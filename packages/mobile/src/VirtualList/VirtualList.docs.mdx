@@ -125,7 +125,8 @@ DOM 数量约为可见行加双侧 overscan；默认 overscan=3，最大归一�
 ## 测试证据
 
 - Unit: `VirtualList.test.tsx` 覆盖窗口、完整 ARIA、动态测量、远距焦点、定位、空态和 stable-key 排序保留。
-- Story interaction / Axe: 待执行/待补。
+- Story interaction: `TenThousandRows` 验证有限渲染窗口、完整集合 ARIA 与键盘焦点；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `VirtualList.ssr.test.tsx` 和 unit SSR 覆盖初始子集；真实 ResizeObserver hydration 待补。
 - RTL/forced-colors/reduced-motion: 逻辑 CSS或无动画契约完成，视觉证据待补。
 - Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。

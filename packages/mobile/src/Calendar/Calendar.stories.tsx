@@ -70,6 +70,32 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Single: Story = { render: () => <SingleExample /> };
+export const Single: Story = {
+  render: () => <SingleExample />,
+  play: async ({ canvasElement }) => {
+    const selected = canvasElement.querySelector<HTMLButtonElement>(
+      'button[data-date="2026-08-28"]'
+    );
+    const nextSelection = canvasElement.querySelector<HTMLButtonElement>(
+      'button[data-date="2026-08-12"]'
+    );
+    if (!selected || !nextSelection) throw new window.Error("Expected Calendar day controls");
+    if (selected.getAttribute("aria-pressed") !== "true") {
+      throw new window.Error("Expected the initial Calendar selection");
+    }
+
+    nextSelection.click();
+    await Promise.resolve();
+    const selectedCell = nextSelection.closest('[role="gridcell"]');
+    if (
+      selected.getAttribute("aria-pressed") !== "false" ||
+      nextSelection.getAttribute("aria-pressed") !== "true" ||
+      !selectedCell ||
+      selectedCell.getAttribute("aria-selected") !== "true"
+    ) {
+      throw new window.Error("Expected Calendar to move its controlled selection");
+    }
+  }
+};
 export const Range: Story = { render: () => <RangeExample /> };
 export const Multiple: Story = { render: () => <MultipleExample /> };

@@ -32,7 +32,7 @@ source: packages/mobile/src/Card
 - 保留 0/空字符串等有意内容，不把 Card 自动变成 button/link，避免嵌套交互冲突。
 - RTL 使用逻辑 margin；forced-colors 保留边框。无动画。
 
-状态为 `implementation`；axe、Chromatic、移动 E2E 与真实内容矩阵待补。
+状态为 `implementation`；Chromatic、移动 E2E 与真实内容矩阵待补。
 
 ## 何时使用
 
@@ -121,8 +121,8 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 ## 测试证据
 
 - Unit: `Card.test.tsx` 覆盖非交互语义、空内容、媒体比例和独立 footer action。
-- Story interaction: Card 本身无交互；WithMediaAndActions 与 LightAndDark 覆盖组合状态。
-- Axe: 待补。
+- Story interaction: `Outlined` 验证非交互根及 header/body 边界；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Card.ssr.test.tsx` 覆盖 slots、heading/link 和非 button 根；hydration 专测待补。
 - RTL: 逻辑 CSS 已实现，专属截图待补。
 - Reduced motion: 无动画，不适用。
@@ -134,7 +134,7 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 
 ### 待优化
 
-- 补 axe、长内容/RTL/forced-colors/Light-Dark 视觉与移动端操作区验证。
+- 补长内容/RTL/forced-colors/Light-Dark 视觉与移动端操作区验证。
 
 ### 已完成
 

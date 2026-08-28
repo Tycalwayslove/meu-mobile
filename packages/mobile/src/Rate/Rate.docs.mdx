@@ -39,7 +39,7 @@ source: packages/mobile/src/Rate
 - RTL 指针位置与原生 range 方向同步；半填充使用逻辑方向；forced-colors 保留系统 Highlight/GrayText。
 - readOnly 输出为有名称和值的 meter 语义，同时保留 hidden input 的 FormData 和 input ref；disabled readOnly 不提交。
 
-当前为 V2 `implementation`，还需 axe、移动浏览器视觉与真机读屏验收后才能标 commercial。
+当前为 V2 `implementation`，本地 axe 已通过；仍需移动浏览器视觉与真机读屏验收后才能标 commercial。
 
 ## 何时使用
 
@@ -159,8 +159,9 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 
 - Unit 8 项：半值 change、readOnly meter/Field 值语义、规范化、RTL 重复清除、readOnly FormData/ref、同步原生 reset 与取消边界。
 - SSR 1 项：interactive range 与 readOnly meter/hidden form markup。
-- Story play：NativeFormReset；状态矩阵覆盖 controlled、half/readOnly、RTL、error、disabled、custom character 与尺寸。
-- 待补：axe、pointer drag/keyboard 移动 E2E、forced-colors/200%/Light-Dark、VoiceOver/TalkBack。
+- Story interaction: `NativeFormReset.play` 验证原生 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
+- 待补：pointer drag/keyboard 移动 E2E、forced-colors/200%/Light-Dark、VoiceOver/TalkBack。
 
 ## V2 优化记录
 
@@ -173,7 +174,7 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 
 ### 待优化
 
-- 完成 axe、真实触摸拖动、移动键盘、真机读屏与视觉验收。
+- 完成真实触摸拖动、移动键盘、真机读屏与视觉验收。
 - 收到真实需求后评估 onChangeComplete/hover preview；不可复制 Slider 契约而忽略评分清除语义。
 
 ## 维护规则

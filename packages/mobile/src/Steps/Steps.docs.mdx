@@ -111,8 +111,8 @@ O(items)，无监听、测量或第三方运行时。
 ## 测试证据
 
 - Unit: 派生状态、current、error、横竖、本地化
-- Story interaction: 不适用，只读组件
-- Axe: 待 CI 报告
+- Story interaction: `Horizontal` 验证有序列表、派生状态、当前步骤与可聚焦语义；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Steps.ssr.test.tsx`
 - RTL: 逻辑边界 + 嵌套 RTL/LTR Story，真实截图待补
 - Reduced motion: 不适用

@@ -40,12 +40,12 @@ const sideItems = [
   { key: "service", label: "服务", content: "服务分类", disabled: true }
 ] as const;
 
-export function IndexedNavigationDemo() {
+export function IndexedNavigationDemo({ focus }: { focus?: "index-list" | "side-nav" } = {}) {
   const [sideKey, setSideKey] = useState("featured");
   const [indexKey, setIndexKey] = useState("A");
 
-  return (
-    <div style={{ display: "grid", gap: 16 }}>
+  const indexList = (
+    <>
       <IndexList
         aria-label="路线索引列表"
         sections={indexedRoutes}
@@ -53,8 +53,22 @@ export function IndexedNavigationDemo() {
         onIndexChange={setIndexKey}
       />
       <output aria-live="polite">当前索引：{indexKey}</output>
+    </>
+  );
+  const sideNav = (
+    <>
       <SideNav aria-label="商品侧边分类" items={sideItems} value={sideKey} onChange={setSideKey} />
       <output aria-live="polite">当前分类：{sideKey}</output>
+    </>
+  );
+
+  if (focus === "index-list") return <div style={{ display: "grid", gap: 16 }}>{indexList}</div>;
+  if (focus === "side-nav") return <div style={{ display: "grid", gap: 16 }}>{sideNav}</div>;
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      {indexList}
+      {sideNav}
     </div>
   );
 }

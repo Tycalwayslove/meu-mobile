@@ -34,7 +34,7 @@ source: packages/mobile/src/SegmentedControl
 - 支持 Field label/description/error/required 无损合并、原生 required、外部 form 关联、reset、root ref 与 React Hook Form adapter。
 - 每项至少 44×44 CSS px；支持 RTL、长文截断但保留完整无障碍名称、reduced motion、forced colors、SSR 和移动 WebView。
 
-当前状态仍为 `implementation`。axe、移动 Chromium/WebKit E2E、Chromatic Light/Dark 矩阵与真机读屏验证待完成，不能标记为 commercial。
+当前状态仍为 `implementation`。移动 Chromium/WebKit E2E、Chromatic Light/Dark 视觉矩阵与真机读屏验证待完成，不能标记为 commercial。
 
 ## 何时使用
 
@@ -173,15 +173,16 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 
 - Unit: `SegmentedControl.test.tsx` 覆盖默认/controlled null、identity/duplicate、disabled、Field/required、FormData、外部 form、reset、option 删除回退、ref 和 native keyboard path。
 - SSR: `SegmentedControl.ssr.test.tsx` 覆盖无浏览器全局的 radio/name/value/checked/required 输出。
-- Story: seven states cover default、block、sizes、disabled、required error、RTL long content 与 controlled interaction。
+- Story interaction: `ControlledInteraction` 验证选择状态与回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - RTL / reduced motion / forced colors: 实现已落地，专属快照矩阵待补。
-- Axe、移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
+- 移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 接入 axe、Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
+- 接入 Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
 - 在 iOS VoiceOver 与 Android TalkBack 真机确认 group label、disabled selected 和 required 空值公告。
 - 收集业务中的 2–5 项长翻译，验证截断策略是否需要产品层改用 Selector。
 

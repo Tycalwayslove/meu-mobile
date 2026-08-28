@@ -119,8 +119,8 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 ## 测试证据
 
 - Unit: 5 项，覆盖多行、circle 尺寸、非法行数、非有限尺寸回退，以及 aspect ratio/aria-hidden。
-- Story interaction: 不适用；无交互。
-- Axe: 未执行。
+- Story interaction: `ComposedCard` 验证 loading boundary、装饰性隐藏与占位结构；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: Node SSR 1 项；hydration 未执行。
 - RTL: 结构无方向依赖；未做 E2E。
 - Reduced motion: CSS 分支存在；未做浏览器 E2E。

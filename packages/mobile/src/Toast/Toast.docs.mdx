@@ -129,7 +129,8 @@ Provider 只挂载一个 toast；每个 active/queued record 为小对象和至�
 
 - Unit: `Toast.test.tsx` 覆盖 live role、focus、timeout/pause、action minimum/false/reject、Portal locale/dir/theme/motion。
 - Provider unit: `ToastProvider.test.tsx` 覆盖 FIFO、stable id/controller update、close reason、clear 与 provider guard。
-- Story interaction / Axe: stories 已建立，runner/axe 待补。
+- Story interaction: `WarningWithAction` 验证 Portal 公告、action 焦点与关闭回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `Toast.ssr.test.tsx` 覆盖 closed/provider；open Portal hydration 待补。
 - RTL/reduced-motion/forced-colors: config 与 CSS 完成，视觉证据待补。
 - Mobile Chromium/WebKit、Chromatic Light/Dark、real device: 待发布批次统一验证。

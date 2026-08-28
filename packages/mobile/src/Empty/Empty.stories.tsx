@@ -16,7 +16,29 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: ({ canvasElement }) => {
+    const empty = canvasElement.querySelector<HTMLElement>('[data-meu-component="empty"]');
+    const action = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!empty || !action) throw new window.Error("Expected Empty content and action");
+    const titleId = empty.getAttribute("aria-labelledby");
+    const descriptionId = empty.getAttribute("aria-describedby");
+    const title = titleId ? canvasElement.ownerDocument.getElementById(titleId) : null;
+    const description = descriptionId
+      ? canvasElement.ownerDocument.getElementById(descriptionId)
+      : null;
+    if (
+      empty.getAttribute("role") !== "group" ||
+      !title ||
+      title.textContent !== "暂时没有订单" ||
+      !description ||
+      description.textContent !== "当前筛选条件下没有可处理的订单。" ||
+      action.textContent !== "清除筛选"
+    ) {
+      throw new window.Error("Empty is missing its labelled group semantics");
+    }
+  }
+};
 export const WithoutIllustration: Story = { args: { illustration: null } };
 export const NoResultsWithTwoActions: Story = {
   args: {

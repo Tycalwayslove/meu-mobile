@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import { InfiniteList } from "./InfiniteList";
+import { waitForStory } from "../storyTestUtils";
 
 function InfiniteListPreview() {
   const [page, setPage] = useState(1);
@@ -73,5 +74,32 @@ export const Complete: Story = {
 
 export const ErrorAndRetry: Story = {
   args: { hasMore: true, loadMore: () => Promise.resolve() },
-  render: () => <ErrorRetryPreview />
+  render: () => <ErrorRetryPreview />,
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="infinite-list"]');
+    const loadMore = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!root || !loadMore || loadMore.textContent !== "加载更多") {
+      throw new window.Error("Expected InfiniteList manual load action");
+    }
+
+    loadMore.click();
+    await waitForStory(
+      () => root.getAttribute("data-status") === "error",
+      "InfiniteList did not expose its load error"
+    );
+    const retry = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!retry || retry.textContent !== "重试") {
+      throw new window.Error("InfiniteList did not expose its retry action");
+    }
+
+    retry.click();
+    await waitForStory(
+      () => root.getAttribute("data-status") === "idle",
+      "InfiniteList retry did not recover"
+    );
+    const recoveredAction = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!recoveredAction || recoveredAction.textContent !== "加载更多") {
+      throw new window.Error("InfiniteList did not return to its loadable state");
+    }
+  }
 };

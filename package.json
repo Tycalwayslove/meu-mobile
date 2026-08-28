@@ -36,6 +36,7 @@
     "storybook:validate-links": "tsx scripts/check-storybook-links.ts",
     "storybook:check-links": "pnpm --filter @meu/storybook build && pnpm storybook:validate-links",
     "test:storybook:a11y": "pnpm build:packages && pnpm --filter @meu/storybook build && node scripts/check-storybook-a11y.mjs",
+    "test:docs:a11y": "pnpm build:packages && pnpm --filter @meu/docs build && node scripts/check-docs-a11y.mjs",
     "docs": "pnpm build:packages && pnpm --filter @meu/docs dev",
     "playground": "pnpm build:packages && pnpm --filter @meu/playground dev",
     "integration": "pnpm build:packages && pnpm --filter @meu/next-h5-integration dev"

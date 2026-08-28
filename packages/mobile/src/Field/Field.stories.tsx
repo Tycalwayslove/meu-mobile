@@ -19,7 +19,29 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  play: ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>(
+      'input[placeholder="请输入收货人姓名"]'
+    );
+    const label = canvasElement.querySelector<HTMLLabelElement>("label");
+    if (!input || !label) throw new window.Error("Expected Field label and input");
+    const describedBy = input.getAttribute("aria-describedby");
+    const description = describedBy
+      ? canvasElement.ownerDocument.getElementById(describedBy)
+      : null;
+    if (
+      label.htmlFor !== input.id ||
+      !label.textContent ||
+      !label.textContent.includes("收货人") ||
+      !input.required ||
+      !description ||
+      description.textContent !== "请与身份证姓名保持一致"
+    ) {
+      throw new window.Error("Field did not associate its label, requirement, and description");
+    }
+  }
+};
 
 export const Error: Story = {
   args: {

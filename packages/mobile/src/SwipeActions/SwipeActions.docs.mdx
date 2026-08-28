@@ -115,8 +115,8 @@ Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window
 ## 测试证据
 
 - Unit: `SwipeActions.test.tsx`（键盘、阈值、纵向仲裁、受控拒绝、动态动作归一、capture 异常、取消、outside/Escape、异步、disabled）。
-- Story interaction: `SwipeActions.stories.tsx` 已编写默认 reveal play；runner 待执行。
-- Axe: 待补。
+- Story interaction: `Default` 验证 reveal 按钮与操作区状态；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: `SwipeActions.ssr.test.tsx` 覆盖关闭 markup；测量 hydration 待补。
 - RTL: 物理方向契约已记录，浏览器矩阵待补。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
@@ -129,7 +129,7 @@ Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window
 ### 待优化
 
 - 补 iOS 13.4+/Android WebView 滑动、纵向滚动与多行列表 E2E。
-- 补 axe、ResizeObserver hydration 和主题视觉基线。
+- 补 ResizeObserver hydration 和主题视觉基线。
 
 ### 已完成
 

@@ -46,7 +46,22 @@ export const Catalog: Story = {
         </div>
       ))}
     </div>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    const renderedIcons = canvasElement.querySelectorAll<SVGSVGElement>("svg");
+    await Promise.resolve();
+    if (renderedIcons.length !== icons.length) {
+      throw new window.Error("Expected every catalog icon to render");
+    }
+    if (
+      Array.from(renderedIcons).some(
+        (icon) =>
+          icon.getAttribute("aria-hidden") !== "true" || icon.getAttribute("focusable") !== "false"
+      )
+    ) {
+      throw new window.Error("Expected catalog icons to remain decorative and unfocusable");
+    }
+  }
 };
 
 export const SemanticIcon: Story = {

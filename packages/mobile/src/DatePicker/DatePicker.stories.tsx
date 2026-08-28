@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { Field } from "../Field";
 import { PickerTrigger } from "../Picker";
+import { waitForStory } from "../storyTestUtils";
 import { DatePicker } from "./DatePicker";
 import type { DatePickerFilter } from "./types";
 
@@ -82,7 +83,64 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const DefaultDate: Story = {};
+export const DefaultDate: Story = {
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-component="picker-trigger"]'
+    );
+    if (!trigger) throw new window.Error("Expected DatePicker trigger");
+
+    trigger.focus();
+    trigger.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="date-picker"]') !== null,
+      "DatePicker did not open"
+    );
+
+    const picker = body.querySelector<HTMLElement>('[data-meu-component="date-picker"]');
+    const dialog = picker && picker.closest<HTMLElement>('[role="dialog"]');
+    const dayOption = picker
+      ? Array.from(picker.querySelectorAll<HTMLElement>('[role="option"]')).find(
+          (option) => option.textContent === "29日"
+        )
+      : undefined;
+    const confirm = picker
+      ? Array.from(picker.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "确定"
+        )
+      : undefined;
+    if (!dialog || !dayOption || !confirm) {
+      throw new window.Error("Expected DatePicker dialog controls");
+    }
+    const labelledBy = dialog.getAttribute("aria-labelledby");
+    const title = labelledBy ? canvasElement.ownerDocument.getElementById(labelledBy) : null;
+    if (
+      dialog.getAttribute("aria-label") !== "预约日期" &&
+      (!title || title.textContent !== "预约日期")
+    ) {
+      throw new window.Error("DatePicker dialog is missing its accessible name");
+    }
+
+    dayOption.click();
+    await waitForStory(
+      () => dayOption.getAttribute("aria-selected") === "true",
+      "DatePicker did not select the requested day"
+    );
+    confirm.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="date-picker"]') === null,
+      "DatePicker did not close after confirmation"
+    );
+    if (!trigger.textContent || !trigger.textContent.includes("2026-08-29")) {
+      throw new window.Error("DatePicker confirmation did not update the field value");
+    }
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === trigger,
+      "DatePicker did not restore focus to its trigger"
+    );
+  }
+};
 
 export const DateAndTime: Story = {
   render: () => <DatePickerPreview precision="minute" />

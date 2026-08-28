@@ -117,9 +117,11 @@ min 大于 max、所有 option 被 filter、DST 不存在时间都会禁用确�
 ## 测试证据
 
 - Unit：精度、月末、bounds/step/filter、DST null、locales、取消/确认、受控、动态 adapter、动态受控模式、矛盾边界、falsy adapter 值。
+- Story interaction：`DefaultDate` 验证打开、日期选项与 dialog 命名关系；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe：本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - SSR：DatePicker.ssr.test.tsx 覆盖 dialog、列名与选中值。
 - Figma：Meu/DatePicker 231:1047；6 variants、48px options、Light/Dark token QA。
-- Axe、双引擎、Chromatic、真机滚轮/读屏：最终统一门禁。
+- 双引擎、Chromatic、真机滚轮/读屏：最终统一门禁。
 
 ## V2 优化记录
 

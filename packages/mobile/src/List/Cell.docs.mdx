@@ -108,8 +108,10 @@ O(1) DOM，无测量、Observer 或监听；大量行应结合 VirtualList。
 ## 测试证据
 
 - Unit: 静态/button/link、disabled link、0 值槽、RTL、长内容、List 语义
+- Story interaction: `List.stories.tsx` 的 `Card.play` 验证 action Cell 到业务输出的事件链；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
 - SSR/hydration: `List.ssr.test.tsx` 覆盖 Cell 原生节点；hydration 专测待补
-- Axe / 双引擎 / Chromatic / 真机读屏: 最终统一门禁
+- 双引擎 / Chromatic / 真机读屏: 最终统一门禁
 
 ## V2 优化记录
 

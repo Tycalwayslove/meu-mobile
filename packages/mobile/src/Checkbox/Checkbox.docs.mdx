@@ -34,7 +34,7 @@ source: packages/mobile/src/Checkbox
 - 调用方和 Field 的 `aria-describedby` 无损合并并去重；Field invalid/required 进入单项原生语义。
 - forced-colors 保留选择标记和焦点，reduced-motion 将状态过渡缩短到 1ms。
 
-状态仍为 `implementation`：代码、Unit、SSR 和 Story contract 已建立，但 axe、移动 Chromium/WebKit、VoiceOver/TalkBack 与 Chromatic 主题矩阵尚未形成发布证据。
+状态仍为 `implementation`：代码、Unit、SSR 和 Story contract 已建立，但移动 Chromium/WebKit、VoiceOver/TalkBack 与 Chromatic 主题矩阵尚未形成发布证据。
 
 ## 主流基线与取舍
 
@@ -148,16 +148,17 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 
 - Unit: `Checkbox.test.tsx`，10 项，覆盖 mixed、disabled/readOnly、受控单项/Group、Field、FormData 和 reset
 - SSR: `Checkbox.ssr.test.tsx`，覆盖稳定 group/name/value/checked markup
-- Story interaction: `NativeFormContract` 覆盖点击、重复 FormData 与 reset
+- Story interaction: `NativeFormContract` 覆盖点击、重复 FormData 与 reset；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
 - Touch target: CSS root `minWidth/minHeight: 44`
 - Reduced motion / forced colors / RTL: CSS 和专属 Story 已建立；真实浏览器视觉证据待补
-- Axe、移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
+- 移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
 
 ## V2 优化记录
 
 ### 待优化
 
-- 接入 axe、移动 WebKit/Chromium、200% 字号、强制色彩截图和真机读屏验收。
+- 接入移动 WebKit/Chromium、200% 字号、强制色彩截图和真机读屏验收。
 - 基于真实业务再评估 Group min/max 与 select-all API；当前不提前固化。
 
 ### 已完成

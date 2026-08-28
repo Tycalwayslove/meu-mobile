@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
 import { Button } from "../Button";
+import { waitForStory } from "../storyTestUtils";
 import { Dialog } from "./Dialog";
 import type { DialogProps } from "./types";
 
@@ -40,7 +41,57 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Confirm: Story = {};
+export const Confirm: Story = {
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const trigger = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!trigger) throw new window.Error("Expected Dialog trigger");
+
+    trigger.focus();
+    trigger.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="dialog"]') !== null,
+      "Dialog did not open"
+    );
+
+    const dialog = body.querySelector<HTMLElement>('[data-meu-component="dialog"]');
+    const cancel = dialog
+      ? Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "取消"
+        )
+      : undefined;
+    const confirm = dialog
+      ? Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "确认"
+        )
+      : undefined;
+    if (!dialog || !cancel || !confirm) throw new window.Error("Expected Dialog actions");
+    const labelledBy = dialog.getAttribute("aria-labelledby");
+    const title = labelledBy ? canvasElement.ownerDocument.getElementById(labelledBy) : null;
+    if (
+      dialog.getAttribute("role") !== "alertdialog" ||
+      dialog.getAttribute("aria-modal") !== "true" ||
+      !title ||
+      title.textContent !== "确认提交退款？"
+    ) {
+      throw new window.Error("Dialog is missing modal alert semantics");
+    }
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === cancel,
+      "Dialog did not focus its preferred action"
+    );
+
+    confirm.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="dialog"]') === null,
+      "Dialog action did not close the dialog"
+    );
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === trigger,
+      "Dialog did not restore focus to its trigger"
+    );
+  }
+};
 export const Danger: Story = {
   args: {
     actions: [

@@ -8,6 +8,14 @@ import { MeuForm } from "./MeuForm";
 import { MeuFormDateRangePicker } from "./MeuFormDateRangePicker";
 import { useMeuForm } from "./useMeuForm";
 
+async function waitForStory(predicate: () => boolean, message: string) {
+  const deadline = Date.now() + 3_000;
+  while (!predicate()) {
+    if (Date.now() >= deadline) throw new window.Error(message);
+    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+  }
+}
+
 function date(day: number) {
   return nativeDateAdapter.fromParts(createDateParts({ day, month: 8, year: 2026 }))!;
 }
@@ -59,4 +67,63 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ConfirmRangeToCommit: Story = {};
+export const ConfirmRangeToCommit: Story = {
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-component="picker-trigger"]'
+    );
+    const submit = Array.from(canvasElement.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => button.textContent === "提交日期范围"
+    );
+    const output = canvasElement.querySelector<HTMLOutputElement>("output");
+    if (!trigger || !submit || !output) {
+      throw new window.Error("Expected date range form controls");
+    }
+
+    trigger.focus();
+    trigger.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="date-range-picker"]') !== null,
+      "Form DateRangePicker did not open"
+    );
+    const picker = body.querySelector<HTMLElement>('[data-meu-component="date-range-picker"]');
+    const preset = picker
+      ? Array.from(picker.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "未来 7 天"
+        )
+      : undefined;
+    const confirm = picker
+      ? Array.from(picker.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "确定"
+        )
+      : undefined;
+    if (!picker || !preset || !confirm) {
+      throw new window.Error("Expected date range preset and confirmation");
+    }
+
+    preset.click();
+    await waitForStory(
+      () => picker.getAttribute("data-range-complete") === "true" && !confirm.disabled,
+      "Date range preset did not create a complete draft"
+    );
+    confirm.click();
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="date-range-picker"]') === null,
+      "Form DateRangePicker did not close after confirmation"
+    );
+    if (!trigger.textContent || !trigger.textContent.includes("2026-08-08 – 2026-08-14")) {
+      throw new window.Error("Confirmed range was not written to the form trigger");
+    }
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === trigger,
+      "Form DateRangePicker did not restore trigger focus"
+    );
+
+    submit.click();
+    await waitForStory(
+      () => output.textContent === "2026-08-08 – 2026-08-14",
+      "Form did not submit the confirmed date range"
+    );
+  }
+};

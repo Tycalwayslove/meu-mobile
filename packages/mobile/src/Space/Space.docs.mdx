@@ -124,8 +124,8 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 ## 测试证据
 
 - Unit: `Space.test.tsx` 覆盖顺序、方向、QA 属性、原生属性与 ref
-- Story interaction: 不适用；组件无交互
-- Axe: Storybook 已配置 a11y addon，尚无组件专属执行报告
+- Story interaction: `Wrapped` 验证方向、gap、wrap 与子项顺序；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
+- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
 - SSR/hydration: 实现无环境分支，尚无独立 hydration 测试
 - RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
 - Reduced motion: 不适用；没有内建动效

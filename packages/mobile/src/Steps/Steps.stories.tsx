@@ -18,7 +18,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Horizontal: Story = {};
+export const Horizontal: Story = {
+  play: async ({ canvasElement }) => {
+    const list = canvasElement.querySelector<HTMLOListElement>('ol[aria-label="进度"]');
+    const steps = canvasElement.querySelectorAll<HTMLLIElement>("li");
+    if (!list || steps.length !== 4) throw new window.Error("Expected four ordered Steps");
+    if (
+      list.getAttribute("data-direction") !== "horizontal" ||
+      list.tabIndex !== 0 ||
+      steps.item(0).getAttribute("data-status") !== "finish" ||
+      steps.item(1).getAttribute("data-status") !== "process" ||
+      steps.item(1).getAttribute("aria-current") !== "step" ||
+      steps.item(2).getAttribute("data-status") !== "wait"
+    ) {
+      throw new window.Error("Steps did not expose current and derived statuses");
+    }
+    list.focus();
+    await Promise.resolve();
+    if (canvasElement.ownerDocument.activeElement !== list) {
+      throw new window.Error("Horizontal Steps did not accept keyboard focus");
+    }
+  }
+};
 export const Vertical: Story = { args: { direction: "vertical" } };
 export const Error: Story = {
   args: {

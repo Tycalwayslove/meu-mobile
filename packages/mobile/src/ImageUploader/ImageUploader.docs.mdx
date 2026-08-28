@@ -122,8 +122,8 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 ## 测试证据
 
 - Unit: `ImageUploader.test.tsx` 覆盖 SSR、原生选择、校验、进度、受控、删除 veto/防重、预览、abort、URL 回收、Field 语义。
-- Story interaction: Interaction 预览/关闭 play 已编写并通过 typecheck；Story runner 未执行。
-- Axe: 未执行。
+- Story interaction: `Interaction.play` 验证预览与关闭链路；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
 - SSR/hydration: Node SSR 已覆盖；hydration 专测未执行。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。
@@ -135,7 +135,7 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ### 待优化
 
-补 picker/camera 真机、并发 beforeUpload、服务端拒绝映射、axe 与 WebKit object URL 压力测试。
+补 picker/camera 真机、并发 beforeUpload、服务端拒绝映射与 WebKit object URL 压力测试。
 
 ### 已完成
 
