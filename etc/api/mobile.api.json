@@ -4845,7 +4845,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!ConfigProvider:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Provides locale, direction, motion, theme, and portal defaults to a component subtree.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4883,7 +4883,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, className, locale, portalContainer, style, theme }",
+              "parameterName": "{ children, className, dir, locale, motion, portalContainer, style, theme }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -4904,7 +4904,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ConfigProviderProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for {@link ConfigProvider}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4921,7 +4921,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    className?: string;\n    locale?: "
+              "text": ";\n    className?: string;\n    dir?: \"ltr\" | \"rtl\";\n    locale?: "
             },
             {
               "kind": "Reference",
@@ -4930,7 +4930,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    portalContainer?: "
+              "text": ";\n    motion?: \"system\" | \"reduced\";\n    portalContainer?: "
             },
             {
               "kind": "Reference",
@@ -6576,7 +6576,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!Divider:var",
-          "docComment": "",
+          "docComment": "/**\n * Separates related content groups with native `separator` semantics.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6662,7 +6662,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!DividerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a semantic horizontal or vertical content separator.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7626,7 +7626,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!IconButton:var",
-          "docComment": "",
+          "docComment": "/**\n * Renders an icon-only native button with an enforced accessible name and mobile touch target.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7647,66 +7647,12 @@
             },
             {
               "kind": "Reference",
-              "text": "Omit",
-              "canonicalReference": "!Omit:type"
+              "text": "IconButtonProps",
+              "canonicalReference": "@meu/mobile!IconButtonProps:type"
             },
             {
               "kind": "Content",
-              "text": "<import(\"react\")."
-            },
-            {
-              "kind": "Reference",
-              "text": "ButtonHTMLAttributes",
-              "canonicalReference": "@types/react!React.ButtonHTMLAttributes:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLButtonElement",
-              "canonicalReference": "!HTMLButtonElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">, \"children\" | \"aria-label\"> & {\n    \"aria-label\": string;\n    children: import(\"react\")."
-            },
-            {
-              "kind": "Reference",
-              "text": "ReactNode",
-              "canonicalReference": "@types/react!React.ReactNode:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    loading?: boolean;\n    size?: import(\"./types\")."
-            },
-            {
-              "kind": "Reference",
-              "text": "IconButtonSize",
-              "canonicalReference": "@meu/mobile!IconButtonSize:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    tone?: import(\"./types\")."
-            },
-            {
-              "kind": "Reference",
-              "text": "IconButtonTone",
-              "canonicalReference": "@meu/mobile!IconButtonTone:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    variant?: import(\"./types\")."
-            },
-            {
-              "kind": "Reference",
-              "text": "IconButtonVariant",
-              "canonicalReference": "@meu/mobile!IconButtonVariant:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n} & import(\"react\")."
+              "text": " & import(\"react\")."
             },
             {
               "kind": "Reference",
@@ -7733,13 +7679,13 @@
           "name": "IconButton",
           "variableTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 22
+            "endIndex": 10
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IconButtonProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for an icon-only native action button.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7770,7 +7716,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"aria-label\" | \"children\"> & {\n    \"aria-label\": string;\n    children: "
+              "text": ">, \"aria-label\" | \"aria-labelledby\" | \"children\"> & {\n    children: "
             },
             {
               "kind": "Reference",
@@ -7806,7 +7752,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n}"
+              "text": ";\n} & ({\n    \"aria-label\": string;\n    \"aria-labelledby\"?: never;\n} | {\n    \"aria-label\"?: never;\n    \"aria-labelledby\": string;\n})"
             },
             {
               "kind": "Content",
@@ -7824,7 +7770,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IconButtonSize:type",
-          "docComment": "",
+          "docComment": "/**\n * Available control sizes. Every size preserves a 44px minimum target.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7850,7 +7796,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IconButtonTone:type",
-          "docComment": "",
+          "docComment": "/**\n * Semantic action tones.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7876,7 +7822,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!IconButtonVariant:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual emphasis without changing native button semantics.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10723,7 +10669,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!MeuConfig:type",
-          "docComment": "",
+          "docComment": "/**\n * Resolved configuration available to Meu Mobile components.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10731,7 +10677,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    locale: "
+              "text": "{\n    dir: \"ltr\" | \"rtl\";\n    locale: "
             },
             {
               "kind": "Reference",
@@ -10740,7 +10686,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    theme: "
+              "text": ";\n    motion: \"system\" | \"reduced\";\n    theme: "
             },
             {
               "kind": "Reference",
@@ -10785,7 +10731,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!MeuLocale:type",
-          "docComment": "",
+          "docComment": "/**\n * Locales whose built-in Meu Mobile strings are currently maintained.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -10811,7 +10757,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!MeuTheme:type",
-          "docComment": "",
+          "docComment": "/**\n * Color-scheme strategy applied to a Meu Mobile subtree.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15020,7 +14966,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!SafeArea:var",
-          "docComment": "",
+          "docComment": "/**\n * Consumes one viewport safe-area inset as a non-interactive layout spacer. It does not position content, react to the virtual keyboard, or deduplicate safe areas already consumed by an ancestor.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15034,6 +14980,15 @@
               "kind": "Reference",
               "text": "ForwardRefExoticComponent",
               "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
             },
             {
               "kind": "Content",
@@ -15055,7 +15010,16 @@
             },
             {
               "kind": "Content",
-              "text": "> & {\n    position?: \"top\" | \"bottom\";\n} & import(\"react\")."
+              "text": ">, \"children\"> & {\n    fallback?: number | string;\n    position?: import(\"./types\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "SafeAreaPosition",
+              "canonicalReference": "@meu/mobile!~SafeAreaPosition:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n} & import(\"react\")."
             },
             {
               "kind": "Reference",
@@ -15082,17 +15046,26 @@
           "name": "SafeArea",
           "variableTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 12
+            "endIndex": 16
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SafeAreaProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Properties for {@link SafeArea}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
               "text": "export type SafeAreaProps = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
             },
             {
               "kind": "Reference",
@@ -15110,7 +15083,16 @@
             },
             {
               "kind": "Content",
-              "text": "> & {\n    position?: \"top\" | \"bottom\";\n}"
+              "text": ">, \"children\"> & {\n    fallback?: number | string;\n    position?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SafeAreaPosition",
+              "canonicalReference": "@meu/mobile!~SafeAreaPosition:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n}"
             },
             {
               "kind": "Content",
@@ -15122,7 +15104,7 @@
           "name": "SafeAreaProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 5
+            "endIndex": 9
           }
         },
         {
@@ -17221,7 +17203,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!Space:var",
-          "docComment": "",
+          "docComment": "/**\n * Arranges sibling elements with a consistent Meu spacing token.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17298,7 +17280,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SpaceGap:type",
-          "docComment": "",
+          "docComment": "/**\n * Supported spacing-token steps. Each value maps to `--meu-space-{value}`.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17324,7 +17306,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SpaceProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for arranging sibling content with design-token spacing.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19833,6 +19815,34 @@
           }
         },
         {
+          "kind": "Variable",
+          "canonicalReference": "@meu/mobile!ThemeProvider:var",
+          "docComment": "/**\n * Theme-focused alias of {@link ConfigProvider}. It shares the same component identity and accepts the same props; nested omitted values inherit their parent scope.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "ThemeProvider: "
+            },
+            {
+              "kind": "Content",
+              "text": "typeof "
+            },
+            {
+              "kind": "Reference",
+              "text": "ConfigProvider",
+              "canonicalReference": "@meu/mobile!ConfigProvider:function"
+            }
+          ],
+          "fileUrlPath": "src/ConfigProvider/ConfigProvider.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "ThemeProvider",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          }
+        },
+        {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!TimePicker:function(1)",
           "docComment": "",
@@ -21943,7 +21953,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!useMeuConfig:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Reads the resolved configuration for the nearest provider scope.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

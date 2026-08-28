@@ -1,0 +1,149 @@
+---
+name: Icon
+slug: icon
+package: "@meu/icons-react"
+exports: [MeuIcon, MeuIconChevronLeft, MeuIconCheck, MeuIconPlus, MeuIconSearch, MeuIconX]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds: [foundation-icon--catalog, foundation-icon--semantic-icon]
+source: packages/icons-react/src/MeuIcon
+---
+
+# Icon
+
+## 当前能力
+
+- `@meu/icons-core` 提供 5 个平台无关 SVG node，`@meu/icons-react` 提供通用 `MeuIcon` 与 Meu 命名组件。
+- 所有图标使用 24 × 24 viewBox、`currentColor`、圆角端点，默认 `size=24`、`strokeWidth=2`。
+- 无 accessible name 时默认为装饰图并设置 `aria-hidden`；可用 `title`、`aria-label` 或 `aria-labelledby` 创建语义图。
+- 仓库随包保留 Lucide ISC、Feather MIT 文本和逐图标清单，但上游不可变 revision 与生成校验记录仍缺失。
+
+当前状态为 `implementation`，不代表来源审计或商用发布验收已完成。
+
+## 何时使用
+
+用于按钮、导航、状态或短标签旁的辅助图形。交互操作应由 Button、IconButton 或链接承载，图标只负责视觉表达。
+
+## 何时不要使用
+
+- 不把裸 SVG 图标当作可点击控件。
+- 不用图标替代必须阅读的业务文案、错误原因或金额信息。
+- 品牌 Logo、商标和业务专属资产不能直接加入基础图标集，必须单独登记权利来源。
+
+## 结构与状态
+
+结构为一个 `svg` 和静态几何节点。图标本身没有 pressed、disabled、loading 等交互状态；颜色和状态由拥有它的控件通过 `currentColor` 传递。
+
+## 基础用法
+
+```tsx
+<button type="button">
+  <MeuIconSearch aria-hidden />
+  搜索
+</button>
+
+<MeuIconCheck title="操作成功" size={20} />
+```
+
+## 受控与非受控
+
+不适用。图标不持有状态。
+
+## 表单集成
+
+不适用。图标不是表单控件，也不会参与 FormData、校验或提交。
+
+## Props
+
+通用 `MeuIcon` 需要 `icon` 和稳定 kebab-case `name`；命名图标已经固化这两项。`size` 同时控制宽高，`strokeWidth` 使用 24 × 24 坐标系单位；其余属性来自原生 `SVGProps`。
+
+## Events
+
+透传原生 SVG 事件，但不建议直接在图标上承载交互。事件、disabled 和触控目标应由拥有图标的控件处理。
+
+## Ref 与命令式方法
+
+ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
+
+## 键盘操作
+
+| 按键 | 行为                                    |
+| ---- | --------------------------------------- |
+| 无   | 图标不进入 Tab 顺序；交互由外层控件提供 |
+
+## 触摸与手势
+
+不定义触摸或手势。图标尺寸不等于合格触控目标，图标按钮仍需至少 44 × 44 CSS px 的外层控件。
+
+## 无障碍
+
+默认图标设置 `aria-hidden=true` 和 `focusable=false`。图标单独传达信息时提供 `title`、`aria-label` 或 `aria-labelledby`；已有相邻可见文案时保持装饰模式，避免重复公告。显式 `aria-hidden=true` 优先于名称输入。
+
+## 动效
+
+不提供内建动效，因此没有 reduced-motion 分支。旋转或过渡由拥有图标的组件负责，并必须提供 reduced-motion 降级。
+
+## 主题与定制
+
+稳定定制面为 `currentColor`、`size`、`strokeWidth` 和原生 SVG 属性。`data-meu-icon` 提供稳定语义 ID；内部 path 顺序不是公共样式接口。
+
+## SSR 与 Next.js
+
+输出是确定性的 SVG，不读取浏览器全局、不发起运行时请求，可在服务端渲染。交互事件仍要求位于 Client Component 边界。
+
+## RTL 与国际化
+
+图标库不自动镜像。`MeuIconChevronLeft` 只表示几何方向；“返回、上一项、展开”等语义及 RTL 旋转由 NavBar、Carousel 等拥有上下文的组件处理。图标不内置可见文案，accessible name 由调用方本地化。
+
+## 浏览器与 WebView
+
+依赖基础 inline SVG、`currentColor` 和 ARIA。完整支持范围沿用 V2 兼容矩阵；旧环境仍需通过真实 WebView 与读屏验证，不以静态语法检查代替运行时结论。
+
+## 边界情况与已知限制
+
+- 当前只有 `chevron-left`、`check`、`plus`、`search`、`x` 5 个图标。
+- 清单声明图形来自 Lucide Icons 1.34.0，当前条目源自 Feather 且 `modified=false`；仓库没有不可变上游 URL、commit、生成日志或几何 checksum，故来源链尚不能独立复现。
+- `title` 适合简短名称，不承担长说明或动态状态公告。
+- named component 不提供自动 RTL 镜像，调用方不得仅凭图形名称猜测业务方向。
+
+## 性能预算
+
+几何作为静态数组随 ESM 导出，不加载字体、图片或运行时图标网络资源。正式发布前仍需记录逐图标增量 gzip 与 tree-shaking 结果。
+
+## 测试证据
+
+- Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`
+- Story interaction: 不适用；当前 Story 为静态目录与语义模式
+- Axe: Storybook 已配置 a11y addon，尚无组件专属执行报告
+- SSR/hydration: 实现无浏览器分支，尚无独立 hydration 测试
+- RTL: 规则已文档化，拥有方向语义的上层组件仍需逐项验证
+- Reduced motion: 不适用；没有内建动效
+- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Chromatic Light/Dark: Catalog 与 SemanticIcon Story 可构建，显式 Light/Dark 快照矩阵待补
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 补齐不可变上游 revision、获取/生成脚本和几何 checksum，再把 provenance 状态从 incomplete 升级。
+- 建立新图标准入检查：Meu 名称唯一、许可文件存在、修改状态准确、语义与 RTL 所有权明确。
+- 记录 bundle 与 tree-shaking 证据，并补真实 VoiceOver/TalkBack 验收。
+
+### 已完成
+
+- 补齐公开 TSDoc、Meu DevTools displayName、尺寸/描边契约及装饰/语义名称模式。
+- 允许 `title`、`aria-label`、`aria-labelledby`，并保留显式 `aria-hidden` 优先级。
+- 审计现有许可文件与清单，将缺失的可追溯证据写入 manifest，未把仓库声明冒充完整来源证明。
+
+## 变更记录
+
+| 日期       | 版本  | 类型      | 内容                                     | 迁移说明 |
+| ---------- | ----- | --------- | ---------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0 | hardening | 完善语义模式、命名、TSDoc 与来源审计记录 | 无       |

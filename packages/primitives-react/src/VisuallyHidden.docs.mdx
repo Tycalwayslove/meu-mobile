@@ -1,0 +1,154 @@
+---
+name: VisuallyHidden
+slug: visually-hidden
+package: "@meu/primitives-react"
+exports: [VisuallyHidden]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds: [foundation-visuallyhidden--accessible-icon-button]
+source: packages/primitives-react/src/VisuallyHidden
+---
+
+# VisuallyHidden
+
+## 当前能力
+
+- 固定渲染原生 `span`，透传 span 的原生 HTML/ARIA 属性。
+- 使用 1×1、overflow、legacy clip 和现代 clip-path 组合隐藏视觉内容。
+- 不设置 `hidden`、`display: none`、`visibility: hidden` 或 `aria-hidden`，内容保留在 accessibility tree。
+- 保留 caller class，并在 forced-colors 模式维持裁剪规则。
+- SSR 输出完整文本与语义属性。
+
+当前状态为 `implementation`；尚未完成 Windows High Contrast、VoiceOver/TalkBack 真机验收，不能标记为 commercial。
+
+## 何时使用
+
+用于给纯图标按钮补 accessible name、为视觉图表补说明，或提供 `role="status"` 的读屏状态文本。文字应简短、与当前 locale 一致并随状态同步。
+
+## 何时不要使用
+
+- 不用来隐藏敏感信息、SEO 堆词或应对所有用户可见的错误。
+- 不把可操作的 Button、Link、Input 放入其中；视觉不可见的可聚焦控件会形成键盘陷阱。
+- 可见 label 更清晰时，不应只提供读屏 label。
+
+## 结构与状态
+
+结构只有一个 `span` 和 children。没有视觉状态；内容可以承载静态名称、描述或 live region，但 live region 的更新策略由调用方负责。
+
+## 基础用法
+
+```tsx
+<button type="button">
+  <MeuIconSearch aria-hidden />
+  <VisuallyHidden>搜索订单</VisuallyHidden>
+</button>
+```
+
+```tsx
+<VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
+  已加载 20 条订单
+</VisuallyHidden>
+```
+
+## 受控与非受控
+
+不适用。组件不持有状态；children 和 ARIA 属性由调用方控制。
+
+## 表单集成
+
+可作为表单控件可访问名称或描述的一部分。优先使用显式 `<label>`；需要 `aria-describedby` 时给 VisuallyHidden 稳定 `id`。验证错误若会影响所有用户，仍应可见展示。
+
+## Props
+
+接受 `HTMLAttributes<HTMLSpanElement>`，包括 children、id、role、aria-live 和 className。组件无专有行为 Props；API 表以 TSDoc/API Extractor 为准。
+
+## Events
+
+透传 span 原生事件，但组件不应作为交互目标。读屏 live region 的 announcement 时机由浏览器和辅助技术决定，不等同于 DOM event。
+
+## Ref 与命令式方法
+
+当前函数组件不转发 ref。需要命令式读写 DOM 的场景尚无证据；如后续增加必须走兼容性评审。
+
+## 键盘操作
+
+| 按键 | 行为                                |
+| ---- | ----------------------------------- |
+| 任意 | 不定义；VisuallyHidden 本身不可聚焦 |
+
+## 触摸与手势
+
+不适用。组件没有可点击面积，不应承载触摸操作。
+
+## 无障碍
+
+组件的核心契约是视觉隐藏但保留读屏可达性。caller 必须避免同时设置 `aria-hidden`、`hidden` 或空内容。纯图标按钮中的可见 SVG 应使用 `aria-hidden`，避免图标和隐藏名称重复命名。
+
+## 动效
+
+不适用。组件没有动画，reduced-motion 不改变行为。
+
+## 主题与定制
+
+没有 Token。`className` 会合并，但 caller 不应覆盖 position、尺寸、clip、overflow 或 white-space；覆盖这些属性可能泄漏隐藏文本或形成布局占位。
+
+## SSR 与 Next.js
+
+无浏览器全局和 effect，服务端直接输出 span 与文本，hydration 结构一致。可在 Server Component 输出中使用其生成的静态标记，但包入口的具体 Client/Server 边界仍以构建产物为准。
+
+## RTL 与国际化
+
+裁剪逻辑与方向无关。隐藏文案必须来自当前 locale；数值、顺序和状态词不能只复用视觉缩写。必要时可透传 `lang` 和 `dir`。
+
+## 浏览器与 WebView
+
+legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；forced-colors media rule 防止高对比模式重置导致文本泄漏。源码通过 Chrome 70 语法门禁，真实 Windows High Contrast、iOS 13 VoiceOver 和 Android TalkBack 待测。
+
+## 边界情况与已知限制
+
+- className 可覆盖隐藏样式，属于调用方责任，不是稳定主题接口。
+- 极端全局 CSS 使用 `!important` 仍可能破坏裁剪。
+- 组件不会自动去重 accessible name，也不会验证 live region 文案频率。
+- 不提供“获得焦点时显示”的 skip-link 模式；该场景应使用独立 SkipLink 组件。
+
+## 性能预算
+
+每个实例一个 span、无 hook、监听、observer 或 timer。高频 live region 更新应由调用方节流，避免辅助技术公告队列堆积。
+
+## 测试证据
+
+- Unit: `VisuallyHidden.test.tsx` 覆盖 SSR 文本/语义、class 合并和不设置 aria-hidden
+- Story interaction: 待补
+- Axe: AccessibleIconButton Story 由 Storybook a11y addon 扫描，尚无独立 CI 断言
+- SSR/hydration: SSR 单测已覆盖；独立 hydration 断言待补
+- RTL: 样式无方向依赖；文案 locale 待集成层验证
+- Reduced motion: 不适用，无动画
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 已有 AccessibleIconButton Story，更新基线待 CI 发布
+- Real device: Windows High Contrast、VoiceOver、TalkBack 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 增加 Windows High Contrast 和 VoiceOver/TalkBack 真机矩阵。
+- 在 Story interaction 中断言纯图标按钮 accessible name。
+- 评估独立 SkipLink，避免把可聚焦显示行为塞进当前基础组件。
+
+### 已完成
+
+- 增加 clip-path/WebKit clip-path，与 legacy clip 形成兼容裁剪。
+- 增加 forced-colors 规则并保持无颜色依赖。
+- 补公开 Props/组件 TSDoc、SSR 和 class 合并单测。
+
+## 变更记录
+
+| 日期       | 版本  | 类型          | 内容                                            | 迁移说明 |
+| ---------- | ----- | ------------- | ----------------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0 | compatibility | 强化现代裁剪与 forced-colors 行为并建立留存文档 | 无       |

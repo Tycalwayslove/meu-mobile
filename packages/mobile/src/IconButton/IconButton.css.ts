@@ -24,6 +24,9 @@ export const iconButton = recipe({
     ].join(", "),
     selectors: {
       "&:active:not(:disabled)": { transform: "translateY(1px)" },
+      '&[aria-pressed="true"], &[aria-pressed="mixed"]': {
+        boxShadow: "inset 0 0 0 2px currentColor"
+      },
       "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 },
       "&:disabled": {
         color: "var(--meu-color-muted)",
@@ -86,5 +89,11 @@ export const spinner = style({
   borderRightColor: "transparent",
   borderRadius: "50%",
   animation: `${spin} 700ms linear infinite`,
-  "@media": { "(prefers-reduced-motion: reduce)": { animationDuration: "1400ms" } }
+  "@media": { "(prefers-reduced-motion: reduce)": { animation: "none" } }
+});
+
+export const content = style({
+  display: "inline-grid",
+  placeItems: "center",
+  lineHeight: 0
 });

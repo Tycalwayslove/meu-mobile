@@ -1,0 +1,206 @@
+---
+name: ConfigProvider
+slug: config-provider
+package: "@meu/mobile"
+exports: [ConfigProvider, useMeuConfig]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    foundation-configprovider--nested-configuration,
+    foundation-configprovider--ltr-system-defaults,
+    foundation-configprovider--inline-portal-policy,
+    foundation-configprovider--custom-portal-target
+  ]
+source: packages/mobile/src/ConfigProvider
+---
+
+# ConfigProvider
+
+## 当前能力
+
+- 通过 React Context 向子树提供 `locale`、`dir`、`theme`、`motion` 与默认 Portal 容器。
+- 根级默认值为 `zh-CN`、`ltr`、`system` theme、`system` motion 和 `document.body` Portal 策略。
+- 嵌套 Provider 对未传入字段执行逐字段继承；显式 `portalContainer={null}` 不会被当作缺省值。
+- DOM 边界同步输出 `lang`、`dir`、`data-meu-theme` 与 `data-meu-motion`，便于语义继承和 CSS Token 生效。
+- `system` theme 和 motion 都通过 CSS media query 解析；渲染期间不读取 `window`、`document`、`matchMedia` 或本地存储。
+- `portalContainer` 函数仅作为惰性配置保存，ConfigProvider 渲染和 SSR 阶段不会调用它。
+
+当前为 V2 `implementation` 状态，尚未完成全部 Overlay 的跨 Portal 方向/动效传播、移动端 E2E、axe 与真机矩阵，不能标记为 commercial。
+
+## 何时使用
+
+- 在 Next.js H5 应用的客户端组件边界内建立 Meu Mobile 全局配置。
+- 在多语言、RTL 预览、暗色区域、弹层挂载区域或需要主动减少动效的局部子树建立嵌套作用域。
+- 测试或 Story 中显式固定 locale/theme/motion，减少环境差异造成的快照漂移。
+
+## 何时不要使用
+
+- 不用它保存登录态、业务数据、表单值或请求状态。
+- 不要为每个叶子组件重复包裹 Provider；优先在稳定布局边界建立作用域。
+- 不要把 `portalContainer={null}` 当作关闭 Portal。它表示由具体 Portal 在当前位置渲染，层叠与裁切责任由调用方承担。
+
+## 结构与状态
+
+结构为一个 Context Provider 和一个真实 `div` 配置边界。它没有 pressed、selected、invalid 或 loading 状态。配置状态由属性完全驱动：
+
+- `data-meu-theme="light|dark|system"`
+- `data-meu-motion="system|reduced"`
+- `lang="zh-CN|en-US"`
+- `dir="ltr|rtl"`
+
+`className` 会追加到内部动效策略 class，`style` 应用于同一边界。
+
+## 基础用法
+
+```tsx
+<ConfigProvider locale="zh-CN" dir="ltr" theme="system" motion="system">
+  <App />
+</ConfigProvider>
+```
+
+局部覆盖只需传变化字段：
+
+```tsx
+<ConfigProvider locale="en-US" dir="rtl" theme="dark">
+  <Checkout />
+  <ConfigProvider locale="zh-CN">
+    <AddressHelp />
+  </ConfigProvider>
+</ConfigProvider>
+```
+
+内层 `AddressHelp` 解析为 `zh-CN + rtl + dark`，其余配置继续继承。
+
+## 受控与非受控
+
+ConfigProvider 没有非受控状态。所有配置均由 Props 驱动；Props 更新后 Context 与 DOM 属性在同一次 React 提交中更新。省略字段表示继承最近父级；只在没有父级时使用根默认值。
+
+## 表单集成
+
+不适用。ConfigProvider 不注册字段、不参与校验，也不修改 `FormData`。表单适配器可读取其 locale 来生成内建提示，但业务校验文案仍由表单层负责。
+
+## Props
+
+Props 表由 TypeScript/TSDoc 与 API Extractor 生成。跨字段规则如下：
+
+- `locale`: `zh-CN | en-US`；根默认 `zh-CN`，嵌套省略时继承。
+- `dir`: `ltr | rtl`；根默认 `ltr`，不提供 `auto`，避免 UI 控件方向由不可信文本内容推断。
+- `theme`: `light | dark | system`；根默认 `system`。
+- `motion`: `system | reduced`；根默认 `system`。不提供强制 full motion，以免覆盖用户的减少动态效果偏好。
+- `portalContainer`: `HTMLElement | (() => HTMLElement) | null`。省略时继承；根省略时具体 Portal 默认使用 `document.body`；`null` 表示原地渲染。
+- `className`、`style`: 作用于真实配置边界。调用方通过 `style` 覆盖动效 Token 时，同时承担无障碍责任。
+
+## Events
+
+不适用。组件不发出自定义事件，也不监听系统主题、语言、方向或本地存储变化。主题/语言切换事件属于应用状态层。
+
+## Ref 与命令式方法
+
+当前不公开 ref 或命令式方法。需要操作布局容器时，应在 Provider 内自行渲染业务容器；未来若增加 ref 必须经过公开 API 评审。
+
+## 键盘操作
+
+| 按键   | 行为                                                |
+| ------ | --------------------------------------------------- |
+| 不适用 | Provider 本身不可聚焦，不修改子组件的原生键盘行为。 |
+
+## 触摸与手势
+
+不适用。Provider 不注册 pointer、touch 或 gesture 监听器，不阻止滚动，也不创建触控目标。
+
+## 无障碍
+
+- `lang` 与 `dir` 位于真实 DOM 祖先上，子树可获得语言和书写方向语义。
+- Provider 不增加 ARIA role，避免制造无意义的可访问性层级。
+- `motion="reduced"` 把进入/退出动效 Token 设为 `0ms`；`system` 通过 `prefers-reduced-motion` 自动降级。
+- `dir` 不会自动镜像有语义方向的图标；方向图标仍需由对应组件规则处理。
+- 渲染到 `document.body` 的 Portal 内容不是 Provider DOM 后代。具体 Overlay 必须显式复制 `lang`、`dir`、theme 与 motion；这项全库迁移尚未完成。
+
+## 动效
+
+Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-motion-enter` 与 `--meu-motion-exit`。
+
+- `system`: 常规值分别为 180ms 和 140ms；用户设置 reduced motion 时均为 0ms。
+- `reduced`: 无条件把两个时长设为 0ms。
+- 缓动 Token不被修改；零时长时不会产生可见位移过程。
+
+组件自己的非 Token 动画仍必须实现独立 reduced-motion 降级；Provider 不能替代组件级审计。
+
+## 主题与定制
+
+稳定定制面为配置 Props、语义 Token 和四个公开 DOM 属性。内部 vanilla-extract class 名不是公开 API。`style` 可设置局部 CSS 变量，但主题色应优先通过 Token 构建流程维护，避免产生不可审计的局部色值。
+
+## SSR 与 Next.js
+
+- 文件为 Client Component，但可由 Next.js 预渲染；服务端输出确定性的 DOM 属性和 class。
+- `system` 不在 JavaScript 中计算实际 light/dark，因此服务端与 hydration 标记一致，实际色值由 CSS media query 选择。
+- Portal 容器函数在 Provider 中不会执行，允许传入闭包；具体 Portal 只会在客户端挂载后解析。
+- 不要在 Server Component 中创建或传递 `HTMLElement`。Next.js 中应在客户端边界通过 ref 获得容器，或传递客户端惰性函数。
+
+## RTL 与国际化
+
+- `locale` 只控制 Meu Mobile 内建字符串与 `lang`；不会格式化业务金额、日期或地址。
+- `dir="rtl"` 写入 DOM 并进入 Context。使用 CSS 逻辑属性的子组件会自然镜像；尚未完成 RTL 审计的组件需逐项验证。
+- 仅支持 `zh-CN` 与 `en-US` 内建字符串。扩展 locale 是公开类型变化，需要先补齐全组件词条与降级策略。
+
+## 浏览器与 WebView
+
+实现只依赖 React Context、标准 `lang/dir/data-*`、CSS 自定义属性和 media query，不注册仅现代浏览器提供的事件 API。V2 正式支持矩阵为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13–14 和 Chromium 79–88 仅观察、不承诺。构建仍执行 Chrome 70 静态语法门禁，用来阻止可避免的新语法进入客户端产物，但该门禁不等于运行时支持声明。旧 WebView 必须加载 `@meu/mobile/styles.css`，否则 theme/motion Token 不生效；`prefers-reduced-motion` 不支持时保留常规时长，调用方仍可显式设为 `reduced`。
+
+## 边界情况与已知限制
+
+- 尚未为所有 body Portal 消费者复制 `dir` 与 `data-meu-motion`；Context 中已有值，但跨 DOM 层级的 CSS/语言继承需组件继续适配。
+- `system` theme 不包含用户选择持久化；若产品允许手动选择，应用需保存值并在服务端提供相同初始值。
+- Context value 在配置值变化时更新；高频创建新 portal resolver 函数会使消费者重渲染，应保持函数引用稳定。
+- `className` 与 `style` 作用于新增的真实 `div`，Provider 不是无 DOM 包装器。
+- 不支持 `dir="auto"`、任意 locale 字符串、跨 iframe/跨 Document Portal 继承。
+
+## 性能预算
+
+每个 Provider 创建一个 Context value 和一个 `div`，没有 effect、订阅或事件监听。Context value 通过 `useMemo` 按解析后的五项配置稳定。应用根部配置不应高频变化；大子树切换 locale/theme 会按 React Context 语义重新渲染消费者。
+
+## 测试证据
+
+- Unit: `ConfigProvider.test.tsx` 覆盖默认值、DOM 属性、className、逐字段嵌套继承、显式覆盖、Portal null/惰性函数和 ThemeProvider 身份。
+- Story interaction: 待补自动交互；现有四个静态 Story 覆盖嵌套、根默认、原地 Portal 与自定义 Portal 目标。
+- Axe: 待补；当前 Provider 无 role 和交互目标。
+- SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
+- RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
+- Reduced motion: 单元测试覆盖嵌套策略，CSS media/reduced class 已实现；真实浏览器 computed style 待 E2E。
+- Mobile Chromium/WebKit E2E: 待补 Provider 专属断言。
+- Chromatic Light/Dark: Story 可生成快照；基线接受状态由 Chromatic 构建记录决定。
+- Real device: 待补 Android WebView 与 iOS Safari。
+
+## V2 优化记录
+
+### 待优化
+
+- 推进所有 Overlay 在 body Portal 根节点复制 locale、dir、theme 与 motion。
+- 补移动 Chromium/WebKit 的 computed style、嵌套 Portal 与 hydration E2E。
+- 补 axe、强制色彩、高对比、200% 字号及 Android/iOS 真机证据。
+- 评估跨 Document/iframe Portal；在有真实业务需求前不扩展现有容器类型。
+
+### 已完成
+
+- 修复嵌套 Provider 省略字段时被重置为根默认值的问题。
+- 新增 `dir` 与 `motion` 配置契约，并输出稳定 DOM 标记。
+- `useMeuConfig()` 返回的 `MeuConfig` 将 `dir` 与 `motion` 明确为始终存在的解析值；Provider Props 仍保持可选继承语义。
+- 保留 `portalContainer={null}` 与惰性 resolver 语义，SSR 期间不访问 DOM。
+- 使用纯 CSS 解析 system theme/motion，验证服务端输出与 hydration 一致。
+- 为公开类型、Props、函数和 ThemeProvider alias 补充 TSDoc/release tag；新增 Context 字段在公开类型中保持 optional，以兼容已有 `MeuConfig` 对象字面量，运行时始终解析为具体值。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                         | 迁移说明                                   |
+| ---------- | ------ | -------- | -------------------------------------------- | ------------------------------------------ |
+| 2026-08-28 | 未发布 | behavior | 嵌套配置改为逐字段继承                       | 依赖旧“嵌套即重置”的代码需显式传入根默认值 |
+| 2026-08-28 | 未发布 | feature  | 新增 `dir`、`motion` 与对应 DOM/Context 契约 | 不传时保持根级旧默认行为                   |
+| 2026-08-28 | 未发布 | types    | `MeuConfig` 增加必有的 `dir`、`motion`       | 手写 MeuConfig 对象需补齐两个解析字段      |
+| 2026-08-28 | 未发布 | docs     | 建立 ConfigProvider V2 留存文档与测试基线    | 无                                         |

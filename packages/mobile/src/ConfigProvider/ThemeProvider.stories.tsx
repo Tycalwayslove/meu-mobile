@@ -1,8 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ThemeProvider } from "./index";
+import { ConfigProvider, ThemeProvider, useMeuConfig } from "./index";
 
-function ThemeCard({ label, theme }: { label: string; theme: "dark" | "light" }) {
+function ThemeName() {
+  const { dir, locale, theme } = useMeuConfig();
+  return (
+    <small style={{ color: "var(--meu-color-muted)" }}>
+      theme={theme}; locale={locale}; dir={dir}
+    </small>
+  );
+}
+
+function ThemeCard({ label, theme }: { label: string; theme: "dark" | "light" | "system" }) {
   return (
     <ThemeProvider
       theme={theme}
@@ -15,9 +24,10 @@ function ThemeCard({ label, theme }: { label: string; theme: "dark" | "light" })
       }}
     >
       <strong>{label}</strong>
-      <p style={{ color: "var(--meu-color-muted)", margin: "8px 0 0" }}>
+      <p style={{ color: "var(--meu-color-muted)", margin: "8px 0" }}>
         文字、背景与边框均读取语义 Token。
       </p>
+      <ThemeName />
     </ThemeProvider>
   );
 }
@@ -37,5 +47,17 @@ export const LightAndDark: Story = {
       <ThemeCard label="Light theme" theme="light" />
       <ThemeCard label="Dark theme" theme="dark" />
     </div>
+  )
+};
+
+export const SystemTheme: Story = {
+  render: () => <ThemeCard label="System theme (CSS media query)" theme="system" />
+};
+
+export const ThemeOnlyNestedOverride: Story = {
+  render: () => (
+    <ConfigProvider locale="en-US" dir="rtl" theme="light">
+      <ThemeCard label="Nested dark theme inherits locale and direction" theme="dark" />
+    </ConfigProvider>
   )
 };

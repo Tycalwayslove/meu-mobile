@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   getComponentDocument,
   getComponentManifestProduct,
+  getDocumentedComponentSlugs,
+  getUndocumentedComponentSlugs,
   parseComponentDocumentSource,
   type ComponentManifestProduct
 } from "./component-document";
@@ -89,7 +91,13 @@ Use \`tone\` to set the action hierarchy.
 });
 
 describe("generated manifest integration", () => {
-  const maintainedSlugs = ["button", "text-input", "popup", "carousel", "number-keyboard"];
+  const maintainedSlugs = getDocumentedComponentSlugs();
+
+  it("discovers every maintained document from the manifest", () => {
+    expect(maintainedSlugs).toEqual(
+      expect.arrayContaining(["button", "text-input", "popup", "carousel", "number-keyboard"])
+    );
+  });
 
   it.each(maintainedSlugs)("loads %s from its colocated document", (slug) => {
     const document = getComponentDocument(slug);
@@ -104,8 +112,11 @@ describe("generated manifest integration", () => {
   });
 
   it("keeps undocumented catalog entries on the legacy page path", () => {
-    const iconButton = getComponentManifestProduct("icon-button");
-    expect(iconButton && iconButton.hasDocs).toBe(false);
-    expect(getComponentDocument("icon-button")).toBeUndefined();
+    const undocumentedSlug = getUndocumentedComponentSlugs()[0];
+    if (undocumentedSlug === undefined) return;
+
+    const product = getComponentManifestProduct(undocumentedSlug);
+    expect(product && product.hasDocs).toBe(false);
+    expect(getComponentDocument(undocumentedSlug)).toBeUndefined();
   });
 });

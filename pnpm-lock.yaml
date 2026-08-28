@@ -86,6 +86,9 @@ importers:
       '@meu/mobile':
         specifier: workspace:*
         version: link:../../packages/mobile
+      '@meu/primitives-react':
+        specifier: workspace:*
+        version: link:../../packages/primitives-react
       '@meu/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -148,6 +151,9 @@ importers:
       '@meu/mobile':
         specifier: workspace:*
         version: link:../../packages/mobile
+      '@meu/primitives-react':
+        specifier: workspace:*
+        version: link:../../packages/primitives-react
       '@meu/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -315,6 +321,9 @@ importers:
 
   packages/primitives-react:
     devDependencies:
+      '@testing-library/react':
+        specifier: 16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@types/react':
         specifier: 19.2.18
         version: 19.2.18
@@ -327,6 +336,9 @@ importers:
       '@vanilla-extract/vite-plugin':
         specifier: 5.2.6
         version: 5.2.6(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.12)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.12)(yaml@2.9.0))(yaml@2.9.0)
+      jsdom:
+        specifier: 30.0.1
+        version: 30.0.1
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -378,6 +390,9 @@ importers:
       '@meu/mobile':
         specifier: workspace:*
         version: link:../../packages/mobile
+      '@meu/primitives-react':
+        specifier: workspace:*
+        version: link:../../packages/primitives-react
       '@meu/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

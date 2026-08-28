@@ -20,10 +20,30 @@ describe("Meu icon data", () => {
       version: "1.34.0"
     });
     expect(iconManifest.icons.map((icon) => icon.id)).toEqual(Object.keys(meuIconNodes));
+    expect(iconManifest.icons.map((icon) => icon.react)).toEqual([
+      "MeuIconChevronLeft",
+      "MeuIconCheck",
+      "MeuIconPlus",
+      "MeuIconSearch",
+      "MeuIconX"
+    ]);
     expect(
       iconManifest.icons.every(
-        (icon) => icon.license === "MIT" && icon.licenseFile === "licenses/feather-mit.txt"
+        (icon) =>
+          icon.license === "MIT" &&
+          icon.licenseFile === "licenses/feather-mit.txt" &&
+          icon.modified === false
       )
     ).toBe(true);
+  });
+
+  it("does not overstate the available provenance evidence", () => {
+    expect(iconManifest.provenanceAudit.status).toBe("incomplete");
+    expect(iconManifest.provenanceAudit.missing).toContain(
+      "An immutable upstream source URL or commit for Lucide Icons 1.34.0."
+    );
+    expect(iconManifest.provenanceAudit.missing).toContain(
+      "A generation log or geometry checksum tying each local SVG path to that upstream revision."
+    );
   });
 });

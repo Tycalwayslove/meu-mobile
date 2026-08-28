@@ -1,2 +1,2 @@
 export { SafeArea } from "./SafeArea";
-export type { SafeAreaProps } from "./types";
+export type { SafeAreaPosition, SafeAreaProps } from "./types";

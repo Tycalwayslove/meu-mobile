@@ -1,0 +1,160 @@
+---
+name: Divider
+slug: divider
+package: "@meu/mobile"
+exports: [Divider]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    layout-divider--default,
+    layout-divider--with-content,
+    layout-divider--start-aligned,
+    layout-divider--end-aligned,
+    layout-divider--vertical,
+    layout-divider--long-content,
+    layout-divider--right-to-left
+  ]
+source: packages/mobile/src/Divider
+---
+
+# Divider
+
+## 当前能力
+
+- 原生 `role=separator`，显式输出 horizontal/vertical `aria-orientation`。
+- horizontal 支持无文案、start/center/end 文案；长文案可收缩并自然断行。
+- vertical 随所在 flex 行拉伸，文案只适用于 horizontal。
+- 分隔线使用 border token，并在 forced-colors 下切换为系统 `CanvasText`。
+
+当前状态为 `implementation`，尚未完成真机、高对比与读屏商用验收。
+
+## 何时使用
+
+用于同一页面区域中相关内容组的静态视觉与语义分隔。当背景、标题或留白已经清晰表达分组时可省略。
+
+## 何时不要使用
+
+- 不用作可拖拽 resize handle、进度条或装饰性下划线。
+- 不在每个列表项后机械添加；连续列表优先由 List 的 divider 规则统一处理。
+- 不用 Divider 替代标题层级、Landmark 或足够留白。
+
+## 结构与状态
+
+horizontal 无文案时为容器加一条 line；有文案时为 line、content、line。start/end 只缩短逻辑起点或终点一侧的线。vertical 由容器背景绘制单线，不渲染 children。组件无交互状态。
+
+## 基础用法
+
+```tsx
+<Divider>订单信息</Divider>
+
+<div style={{ display: "flex", height: 40 }}>
+  <span>价格</span>
+  <Divider direction="vertical" aria-label="价格与库存分界" />
+  <span>库存</span>
+</div>
+```
+
+## 受控与非受控
+
+不适用。Divider 不持有状态。
+
+## 表单集成
+
+不参与表单值、校验或提交，仅分隔视觉/语义区域。
+
+## Props
+
+`direction` 默认 horizontal；`align` 默认 center 且仅影响 horizontal 文案。children 为可选 ReactNode，vertical 不渲染 children；其余属性透传原生 div，可用 `aria-label` 给没有可见文案的关键分界命名。
+
+## Events
+
+只透传原生 div 事件，没有自定义事件。Divider 本身不应绑定点击或拖拽行为。
+
+## Ref 与命令式方法
+
+ref 指向外层 `HTMLDivElement`，只提供原生 DOM 能力。
+
+## 键盘操作
+
+| 按键 | 行为                           |
+| ---- | ------------------------------ |
+| 无   | 静态 separator 不进入 Tab 顺序 |
+
+## 触摸与手势
+
+不定义触摸或手势，也没有触控目标要求。需要可拖拽分栏时应使用独立组件和完整键盘替代操作。
+
+## 无障碍
+
+组件固定使用 separator 角色和准确 orientation。字符串或数字 children 会同步为默认 accessible name；复杂 ReactNode 不能安全推导名称，需要调用方传 `aria-label` 或 `aria-labelledby`。纯装饰性且语义冗余的分隔线可由调用方传 `aria-hidden=true`，但应先确认不会丢失内容结构信息。
+
+## 动效
+
+不提供内建动效，因此没有 reduced-motion 分支。
+
+## 主题与定制
+
+线条使用 `--meu-color-border`，文案使用 muted color、UI font 与 meta line-height，间距使用 spacing token。forced-colors 下线条与文案采用系统 `CanvasText`；内部 class 不是公共 API。
+
+## SSR 与 Next.js
+
+纯渲染组件，不读取浏览器全局，服务端和客户端输出一致。只有传入事件处理器时才需要 Client Component 边界。
+
+## RTL 与国际化
+
+start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM 与读屏顺序保持 line、content、line。组件没有内建文案，children 与 `aria-label` 由调用方本地化。
+
+## 浏览器与 WebView
+
+依赖 flex、CSS custom properties、overflow-wrap 和 forced-colors media query。完整支持范围沿用 V2 兼容矩阵；不识别 forced-colors 的旧 WebView 会保留普通主题样式，不影响 separator 语义。
+
+## 边界情况与已知限制
+
+- `0` 是有效 horizontal children；null、undefined、false 按无文案处理。
+- 字符串与数字文案可自动命名 separator；复杂 ReactNode 不会被序列化为名称。
+- vertical children 不渲染，避免把横向标签误塞进 1px 结构；调用方应使用 `aria-label` 命名。
+- 极窄容器中两侧 line 保留最小 token 宽度，长文案使用 `overflow-wrap:anywhere`；无断行规则的自定义 child 仍可能溢出。
+- Divider 不提供 thickness、tone 或 dashed API；没有真实业务证据前不扩展。
+
+## 性能预算
+
+无状态、无 effect 和运行时测量。horizontal 最多生成 4 个 DOM 节点，vertical 只生成容器；正式发布前仍需记录样式增量 gzip。
+
+## 测试证据
+
+- Unit: `Divider.test.tsx` 覆盖方向语义、vertical children、零值、原生属性与 ref
+- Story interaction: 不适用；组件无交互
+- Axe: Storybook 已配置 a11y addon，尚无组件专属执行报告
+- SSR/hydration: 实现无环境分支，尚无独立 hydration 测试
+- RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
+- Reduced motion: 不适用；没有内建动效
+- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Chromatic Light/Dark: 默认、文案、对齐、vertical、长文本与 RTL Story 可构建，显式 Light/Dark 快照矩阵待补
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 在 Chromium/WebKit 建立 long content、RTL 和 vertical stretch 的几何断言。
+- 完成 Windows High Contrast、VoiceOver 与 TalkBack 真机/系统验收记录。
+- 根据真实产品案例决定是否需要 thickness 或 tone；当前不新增推测 API。
+
+### 已完成
+
+- 补齐公开 TSDoc、separator 语义、自动文本名称、orientation、逻辑对齐与 vertical 内容边界。
+- 修复数字 0 children 被误判为空，长文案允许收缩和断行。
+- 增加 forced-colors 系统色降级以及 vertical、长文案、RTL Story。
+
+## 变更记录
+
+| 日期       | 版本  | 类型      | 内容                                     | 迁移说明 |
+| ---------- | ----- | --------- | ---------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0 | hardening | 完善语义、长文案、高对比、RTL 与测试证据 | 无       |

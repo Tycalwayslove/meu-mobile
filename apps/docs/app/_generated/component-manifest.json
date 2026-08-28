@@ -2353,6 +2353,11 @@
         },
         {
           "kind": "type",
+          "name": "PortalContainer",
+          "sourcePath": "packages/primitives-react/src/Portal"
+        },
+        {
+          "kind": "type",
           "name": "PortalProps",
           "sourcePath": "packages/primitives-react/src/Portal"
         },
@@ -2380,8 +2385,8 @@
       "externalWildcardExports": [],
       "packageName": "@meu/primitives-react",
       "stats": {
-        "total": 7,
-        "types": 3,
+        "total": 8,
+        "types": 4,
         "values": 4
       }
     }
@@ -3022,10 +3027,13 @@
       "sourcePath": "packages/mobile/src/ConfigProvider",
       "storyId": "foundation-configprovider--nested-configuration",
       "storyTitle": "Foundation/ConfigProvider",
-      "declaredExports": [],
+      "declaredExports": [
+        "ConfigProvider",
+        "useMeuConfig"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ConfigProvider/ConfigProvider.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -3282,10 +3290,12 @@
       "sourcePath": "packages/mobile/src/Divider",
       "storyId": "layout-divider--default",
       "storyTitle": "Layout/Divider",
-      "declaredExports": [],
+      "declaredExports": [
+        "Divider"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Divider/Divider.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -3486,10 +3496,17 @@
       "sourcePath": "packages/icons-react/src/MeuIcon",
       "storyId": "foundation-icon--catalog",
       "storyTitle": "Foundation/Icon",
-      "declaredExports": [],
+      "declaredExports": [
+        "MeuIcon",
+        "MeuIconChevronLeft",
+        "MeuIconCheck",
+        "MeuIconPlus",
+        "MeuIconSearch",
+        "MeuIconX"
+      ],
       "docsIssues": [],
       "docsPath": "packages/icons-react/src/MeuIcon.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -3536,10 +3553,12 @@
       "sourcePath": "packages/mobile/src/IconButton",
       "storyId": "actions-iconbutton--default",
       "storyTitle": "Actions/IconButton",
-      "declaredExports": [],
+      "declaredExports": [
+        "IconButton"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/IconButton/IconButton.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4283,14 +4302,20 @@
       "sourcePath": "packages/primitives-react/src/Portal",
       "storyId": "foundation-portal--custom-container",
       "storyTitle": "Foundation/Portal",
-      "declaredExports": [],
+      "declaredExports": [
+        "Portal"
+      ],
       "docsIssues": [],
       "docsPath": "packages/primitives-react/src/Portal.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
           "name": "Portal"
+        },
+        {
+          "kind": "type",
+          "name": "PortalContainer"
         },
         {
           "kind": "type",
@@ -4519,10 +4544,12 @@
       "sourcePath": "packages/mobile/src/SafeArea",
       "storyId": "layout-safearea--bottom",
       "storyTitle": "Layout/SafeArea",
-      "declaredExports": [],
+      "declaredExports": [
+        "SafeArea"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SafeArea/SafeArea.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4793,10 +4820,12 @@
       "sourcePath": "packages/mobile/src/Space",
       "storyId": "layout-space--horizontal",
       "storyTitle": "Layout/Space",
-      "declaredExports": [],
+      "declaredExports": [
+        "Space"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Space/Space.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5191,10 +5220,12 @@
       "sourcePath": "packages/mobile/src/ConfigProvider",
       "storyId": "foundation-themeprovider--light-and-dark",
       "storyTitle": "Foundation/ThemeProvider",
-      "declaredExports": [],
+      "declaredExports": [
+        "ThemeProvider"
+      ],
       "docsIssues": [],
-      "docsPath": "packages/mobile/src/ConfigProvider/ConfigProvider.docs.mdx",
-      "hasDocs": false,
+      "docsPath": "packages/mobile/src/ConfigProvider/ThemeProvider.docs.mdx",
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5545,10 +5576,12 @@
       "sourcePath": "packages/primitives-react/src/VisuallyHidden",
       "storyId": "foundation-visuallyhidden--accessible-icon-button",
       "storyTitle": "Foundation/VisuallyHidden",
-      "declaredExports": [],
+      "declaredExports": [
+        "VisuallyHidden"
+      ],
       "docsIssues": [],
       "docsPath": "packages/primitives-react/src/VisuallyHidden.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5597,16 +5630,16 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "documentedProducts": 5,
+    "documentedProducts": 14,
     "externalWildcardExports": 1,
     "packages": 4,
     "products": 68,
     "productsWithoutPublicExports": 0,
-    "publicExports": 467,
-    "publicTypes": 341,
+    "publicExports": 468,
+    "publicTypes": 342,
     "publicValues": 126,
     "undocumentedPublicExports": 56,
-    "unclaimedPublicValues": 94
+    "unclaimedPublicValues": 79
   },
   "undocumentedPublicExports": [
     {
@@ -6039,12 +6072,6 @@
     },
     {
       "kind": "value",
-      "name": "ConfigProvider",
-      "sourcePath": "packages/mobile/src/ConfigProvider",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "createCalendarGrid",
       "sourcePath": "packages/mobile/src/Calendar",
       "packageName": "@meu/mobile"
@@ -6087,12 +6114,6 @@
     },
     {
       "kind": "value",
-      "name": "Divider",
-      "sourcePath": "packages/mobile/src/Divider",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "Ellipsis",
       "sourcePath": "packages/mobile/src/Ellipsis",
       "packageName": "@meu/mobile"
@@ -6119,12 +6140,6 @@
       "kind": "value",
       "name": "formatTimeValue",
       "sourcePath": "packages/mobile/src/TimePicker",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "IconButton",
-      "sourcePath": "packages/mobile/src/IconButton",
       "packageName": "@meu/mobile"
     },
     {
@@ -6267,12 +6282,6 @@
     },
     {
       "kind": "value",
-      "name": "SafeArea",
-      "sourcePath": "packages/mobile/src/SafeArea",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "sameCalendarDay",
       "sourcePath": "packages/mobile/src/Calendar",
       "packageName": "@meu/mobile"
@@ -6327,12 +6336,6 @@
     },
     {
       "kind": "value",
-      "name": "Space",
-      "sourcePath": "packages/mobile/src/Space",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "Stepper",
       "sourcePath": "packages/mobile/src/Stepper",
       "packageName": "@meu/mobile"
@@ -6377,12 +6380,6 @@
       "kind": "value",
       "name": "TextArea",
       "sourcePath": "packages/mobile/src/TextArea",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "ThemeProvider",
-      "sourcePath": "packages/mobile/src/ConfigProvider",
       "packageName": "@meu/mobile"
     },
     {
@@ -6435,12 +6432,6 @@
     },
     {
       "kind": "value",
-      "name": "useMeuConfig",
-      "sourcePath": "packages/mobile/src/ConfigProvider",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "useToast",
       "sourcePath": "packages/mobile/src/Toast",
       "packageName": "@meu/mobile"
@@ -6462,54 +6453,6 @@
       "name": "MeuForm",
       "sourcePath": "packages/form-react/src/MeuForm",
       "packageName": "@meu/form-react"
-    },
-    {
-      "kind": "value",
-      "name": "MeuIcon",
-      "sourcePath": "packages/icons-react/src/MeuIcon",
-      "packageName": "@meu/icons-react"
-    },
-    {
-      "kind": "value",
-      "name": "MeuIconCheck",
-      "sourcePath": "packages/icons-react/src/MeuIcon",
-      "packageName": "@meu/icons-react"
-    },
-    {
-      "kind": "value",
-      "name": "MeuIconChevronLeft",
-      "sourcePath": "packages/icons-react/src/MeuIcon",
-      "packageName": "@meu/icons-react"
-    },
-    {
-      "kind": "value",
-      "name": "MeuIconPlus",
-      "sourcePath": "packages/icons-react/src/MeuIcon",
-      "packageName": "@meu/icons-react"
-    },
-    {
-      "kind": "value",
-      "name": "MeuIconSearch",
-      "sourcePath": "packages/icons-react/src/MeuIcon",
-      "packageName": "@meu/icons-react"
-    },
-    {
-      "kind": "value",
-      "name": "MeuIconX",
-      "sourcePath": "packages/icons-react/src/MeuIcon",
-      "packageName": "@meu/icons-react"
-    },
-    {
-      "kind": "value",
-      "name": "Portal",
-      "sourcePath": "packages/primitives-react/src/Portal",
-      "packageName": "@meu/primitives-react"
-    },
-    {
-      "kind": "value",
-      "name": "VisuallyHidden",
-      "sourcePath": "packages/primitives-react/src/VisuallyHidden",
-      "packageName": "@meu/primitives-react"
     }
   ]
 }

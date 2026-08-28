@@ -2,9 +2,14 @@
 
 import { forwardRef } from "react";
 
-import { iconButton, spinner } from "./IconButton.css";
+import { content, iconButton, spinner } from "./IconButton.css";
 import type { IconButtonProps } from "./types";
 
+/**
+ * Renders an icon-only native button with an enforced accessible name and mobile touch target.
+ *
+ * @public
+ */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
   {
     children,
@@ -20,6 +25,14 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
   ref
 ) {
   const classes = iconButton({ size, tone, variant });
+  const pressed = props["aria-pressed"];
+  const state = loading
+    ? "loading"
+    : disabled
+      ? "disabled"
+      : pressed === true || pressed === "mixed"
+        ? "pressed"
+        : "default";
 
   return (
     <button
@@ -32,9 +45,15 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       data-meu-component="icon-button"
       data-size={size}
       data-tone={tone}
-      data-state={loading ? "loading" : disabled ? "disabled" : "default"}
+      data-state={state}
     >
-      {loading ? <span className={spinner} aria-hidden="true" /> : children}
+      {loading ? (
+        <span className={spinner} aria-hidden="true" />
+      ) : (
+        <span className={content} aria-hidden="true">
+          {children}
+        </span>
+      )}
     </button>
   );
 });

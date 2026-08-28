@@ -515,16 +515,16 @@ export type CollapseVariant = "plain" | "card";
 // @public (undocumented)
 export function compareCalendarDays<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate): number;
 
-// @public (undocumented)
-function ConfigProvider(input: ConfigProviderProps): JSX.Element;
-export { ConfigProvider }
-export { ConfigProvider as ThemeProvider }
+// @public
+export function ConfigProvider(input: ConfigProviderProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ConfigProviderProps = {
     children: ReactNode;
     className?: string;
+    dir?: "ltr" | "rtl";
     locale?: MeuLocale;
+    motion?: "system" | "reduced";
     portalContainer?: HTMLElement | (() => HTMLElement) | null;
     style?: CSSProperties;
     theme?: MeuTheme;
@@ -704,14 +704,14 @@ export type DialogProviderProps = {
 // @public (undocumented)
 export type DialogShowOptions = WithoutOpenState<DialogProps>;
 
-// @public (undocumented)
+// @public
 export const Divider: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
 align?: "start" | "center" | "end";
 children?: ReactNode;
 direction?: "horizontal" | "vertical";
 } & RefAttributes<HTMLDivElement>>;
 
-// @public (undocumented)
+// @public
 export type DividerProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     align?: "start" | "center" | "end";
     children?: ReactNode;
@@ -815,33 +815,31 @@ export type FormatTimeValueOptions = {
     precision?: TimePickerPrecision;
 };
 
-// @public (undocumented)
-export const IconButton: ForwardRefExoticComponent<Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "aria-label"> & {
-"aria-label": string;
-children: ReactNode;
-loading?: boolean;
-size?: IconButtonSize;
-tone?: IconButtonTone;
-variant?: IconButtonVariant;
-} & RefAttributes<HTMLButtonElement>>;
+// @public
+export const IconButton: ForwardRefExoticComponent<IconButtonProps & RefAttributes<HTMLButtonElement>>;
 
-// @public (undocumented)
-export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & {
-    "aria-label": string;
+// @public
+export type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "aria-labelledby" | "children"> & {
     children: ReactNode;
     loading?: boolean;
     size?: IconButtonSize;
     tone?: IconButtonTone;
     variant?: IconButtonVariant;
-};
+} & ({
+    "aria-label": string;
+    "aria-labelledby"?: never;
+} | {
+    "aria-label"?: never;
+    "aria-labelledby": string;
+});
 
-// @public (undocumented)
+// @public
 export type IconButtonSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type IconButtonTone = "accent" | "neutral" | "danger";
 
-// @public (undocumented)
+// @public
 export type IconButtonVariant = "solid" | "outline" | "ghost";
 
 // @public (undocumented)
@@ -1180,17 +1178,19 @@ export type MaskProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onCli
     ref?: Ref<HTMLDivElement>;
 };
 
-// @public (undocumented)
+// @public
 export type MeuConfig = {
+    dir: "ltr" | "rtl";
     locale: MeuLocale;
+    motion: "system" | "reduced";
     theme: MeuTheme;
     portalContainer: HTMLElement | (() => HTMLElement) | null | undefined;
 };
 
-// @public (undocumented)
+// @public
 export type MeuLocale = "zh-CN" | "en-US";
 
-// @public (undocumented)
+// @public
 export type MeuTheme = "light" | "dark" | "system";
 
 // @public (undocumented)
@@ -1640,14 +1640,16 @@ export type ResultProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dan
 // @public (undocumented)
 export type ResultStatus = "success" | "error" | "info" | "warning" | "waiting";
 
-// @public (undocumented)
-export const SafeArea: ForwardRefExoticComponent<HTMLAttributes<HTMLDivElement> & {
-position?: "top" | "bottom";
+// @public
+export const SafeArea: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+fallback?: number | string;
+position?: SafeAreaPosition;
 } & RefAttributes<HTMLDivElement>>;
 
-// @public (undocumented)
-export type SafeAreaProps = HTMLAttributes<HTMLDivElement> & {
-    position?: "top" | "bottom";
+// @public
+export type SafeAreaProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+    fallback?: number | string;
+    position?: SafeAreaPosition;
 };
 
 // @public (undocumented)
@@ -1851,7 +1853,7 @@ export type SliderSize = "small" | "medium" | "large";
 // @public (undocumented)
 export type SliderStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export const Space: ForwardRefExoticComponent<HTMLAttributes<HTMLDivElement> & {
 align?: "start" | "center" | "end" | "baseline" | "stretch";
 block?: boolean;
@@ -1860,10 +1862,10 @@ gap?: SpaceGap;
 wrap?: boolean;
 } & RefAttributes<HTMLDivElement>>;
 
-// @public (undocumented)
+// @public
 export type SpaceGap = 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12;
 
-// @public (undocumented)
+// @public
 export type SpaceProps = HTMLAttributes<HTMLDivElement> & {
     align?: "start" | "center" | "end" | "baseline" | "stretch";
     block?: boolean;
@@ -2147,6 +2149,9 @@ export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size">
     status?: "default" | "error";
 };
 
+// @public
+export const ThemeProvider: typeof ConfigProvider;
+
 // @public (undocumented)
 export function TimePicker(input: TimePickerProps): JSX.Element;
 
@@ -2359,7 +2364,7 @@ export function useActionMenu(): ActionMenuApi;
 // @public (undocumented)
 export function useDialog(): DialogApi;
 
-// @public (undocumented)
+// @public
 export function useMeuConfig(): MeuConfig;
 
 // @public (undocumented)
@@ -2438,6 +2443,10 @@ export type WatermarkProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "
     width?: number;
     zIndex?: number;
 };
+
+// Warnings were encountered during analysis:
+//
+// src/SafeArea/SafeArea.tsx:23:22 - (ae-forgotten-export) The symbol "SafeAreaPosition" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

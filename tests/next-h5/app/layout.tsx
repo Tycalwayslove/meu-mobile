@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import "@meu/tokens/css";
+import "@meu/primitives-react/styles.css";
 import "@meu/mobile/styles.css";
 import "./styles.css";
 

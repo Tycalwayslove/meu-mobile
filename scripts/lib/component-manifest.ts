@@ -298,9 +298,11 @@ export function collectPackageManifest(
   };
 }
 
-function expectedDocsPath(workspaceRoot: string, sourcePath: string) {
+function expectedDocsPath(workspaceRoot: string, sourcePath: string, productName: string) {
   const absoluteSource = path.resolve(workspaceRoot, sourcePath);
   if (existsSync(absoluteSource) && statSync(absoluteSource).isDirectory()) {
+    const productDocument = `${sourcePath}/${productName}.docs.mdx`;
+    if (existsSync(path.resolve(workspaceRoot, productDocument))) return productDocument;
     return `${sourcePath}/${path.basename(sourcePath)}.docs.mdx`;
   }
   return `${sourcePath}.docs.mdx`;
@@ -404,7 +406,7 @@ export function buildComponentManifest(
             .filter((item) => item.sourcePath === component.sourcePath)
             .map(({ kind, name }) => ({ kind, name }))
         : [];
-      const docsPath = expectedDocsPath(workspaceRoot, component.sourcePath);
+      const docsPath = expectedDocsPath(workspaceRoot, component.sourcePath, component.name);
       const absoluteDocsPath = path.resolve(workspaceRoot, docsPath);
       const hasDocs = existsSync(absoluteDocsPath) && statSync(absoluteDocsPath).isFile();
       const parsedDocs = hasDocs

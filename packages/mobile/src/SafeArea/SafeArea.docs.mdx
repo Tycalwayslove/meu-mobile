@@ -1,0 +1,157 @@
+---
+name: SafeArea
+slug: safe-area
+package: "@meu/mobile"
+exports: [SafeArea]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds: [layout-safearea--bottom, layout-safearea--top, layout-safearea--landscape-edges]
+source: packages/mobile/src/SafeArea
+---
+
+# SafeArea
+
+## 当前能力
+
+- 以不可交互 `div` spacer 消费 top、right、bottom 或 left 的 `env(safe-area-inset-*)`。
+- 支持 number/string `fallback`；number 转为非负 CSS px，非法或负 number 降级为 0px。
+- CSS 先声明 fallback 尺寸，再声明 env 尺寸；不认识 `env()` 的浏览器保留第一条声明。
+- 横竖屏变化由浏览器重新计算 env，left/right 可覆盖横屏刘海边缘。
+- SSR 不读取浏览器全局，默认 `aria-hidden="true"`，并透传 className、style、ref 和 div 原生属性。
+
+当前状态为 `implementation`；尚未完成真实刘海设备、键盘场景和组合布局的验收，不能标记为 commercial。
+
+## 何时使用
+
+用于全屏 H5 页面固定栏内容之外的安全区占位，例如 header 之前、bottom action bar 之后，或横屏画布左右两侧。页面需设置 `viewport-fit=cover` 才能让 iOS 提供完整 inset。
+
+## 何时不要使用
+
+- 普通文档流和不贴近屏幕边缘的容器不需要 SafeArea。
+- 不用它负责 `position: fixed`、背景延伸、滚动锁或虚拟键盘避让。
+- 已经通过 padding 消费相同 env 的父级不要再添加 sibling SafeArea。
+
+## 结构与状态
+
+结构是一个无内容 spacer。position 决定主轴：top/bottom 使用 height 与 100% width，left/right 使用 width 与 100% height。默认 bottom。组件不感知祖先是否已消费安全区。
+
+## 基础用法
+
+```tsx
+<footer className={styles.fixedFooter}>
+  <CheckoutActions />
+  <SafeArea position="bottom" />
+</footer>
+```
+
+桌面壳或不支持 env 的 WebView 可提供明确 fallback：
+
+```tsx
+<SafeArea position="bottom" fallback={20} />
+```
+
+## 受控与非受控
+
+不适用。组件没有内部状态；position 与 fallback 均由调用方声明。
+
+## 表单集成
+
+不参与 form、FormData、校验或焦点顺序。底部表单操作栏需要键盘避让时，应由页面的 viewport/keyboard 策略调整容器，而不是依赖 SafeArea。
+
+## Props
+
+`position` 默认 `bottom`，支持四条边。`fallback` 为 CSS env 不可用时的备用长度，不是最小 inset；平台能解析 env 且返回 0 时不会强制使用 fallback。组件不接受 `children`，其他属性来自原生 div。API 表以 TSDoc/API Extractor 为准。
+
+## Events
+
+不定义事件。虽然原生 div event props 会透传，但组件默认 pointer-events none 且 aria-hidden，不应用作事件目标。
+
+## Ref 与命令式方法
+
+ref 指向 `HTMLDivElement`，仅提供原生测量能力。读取尺寸会触发布局，避免在 scroll/resize 高频路径同步测量。
+
+## 键盘操作
+
+| 按键 | 行为                     |
+| ---- | ------------------------ |
+| 任意 | 不可聚焦，不参与键盘操作 |
+
+## 触摸与手势
+
+pointer-events 为 none，不阻挡底层触摸。它不处理系统 home indicator 手势或浏览器边缘返回手势。
+
+## 无障碍
+
+默认 `aria-hidden="true"`，且不应包含内容。为保持 API 兼容仍可覆盖 aria-hidden，但这样做不会赋予合理语义；需要可访问内容时应放在 sibling 容器中。
+
+## 动效
+
+不定义动画。设备旋转或浏览器 UI 改变时 env 尺寸由布局引擎更新；组件不添加过渡，避免内容边缘在系统几何变化期间滞后。reduced-motion 不改变行为。
+
+## 主题与定制
+
+公开定制面为 position、fallback、className、style 和 CSS 自定义属性 `--meu-safe-area-fallback`。caller style 中同名自定义属性优先于 fallback prop。内部生成 class 不是稳定 API。
+
+## SSR 与 Next.js
+
+服务端直接输出稳定 div，不读取 window/document 或测量尺寸；CSS env 在客户端由浏览器解析，因此 hydration DOM 一致。fallback 会以 inline CSS 自定义属性进入 SSR 标记。
+
+## RTL 与国际化
+
+left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 inset 是物理坐标。组件无文案。需要 inline-start/end 业务语义时由调用方根据 direction 选择 position。
+
+## 浏览器与 WebView
+
+双 CSS 声明使不支持 env 的浏览器使用 fallback；Chrome 70 兼容语法门禁通过后仍需运行时验证。iOS 需要 viewport-fit=cover；部分 Android WebView 即使支持 env 也可能始终返回 0。constant() 不在目标 iOS 13+ 支持范围内。
+
+## 边界情况与已知限制
+
+- fallback 只处理 env 语法不可用，不是 `max(fallback, env)`；平台返回 0 时结果是 0。
+- string fallback 必须是合法、非负 CSS length；组件不会解析 calc/var。
+- SafeArea 是纯 spacer，不接受 children；可见内容必须放在同级业务容器中。
+- 嵌套或重复实例会累加空间；消费边界是调用方的显式布局责任，同一边不要重复放置。
+- virtual keyboard 通常不改变 safe-area-inset-bottom；键盘避让必须另行实现。
+- 组件不设置背景或 fixed/sticky 定位。
+
+## 性能预算
+
+一个 div、无 state/effect/listener/observer。旋转响应完全由 CSS env 完成；不产生 JavaScript resize 工作。ref 测量由调用方承担性能成本。
+
+## 测试证据
+
+- Unit: `SafeArea.test.tsx` 覆盖四边、fallback 归一化/覆盖和 SSR
+- Story interaction: 不适用，无交互；Story 提供四边视觉样本
+- Axe: 默认 aria-hidden spacer 无可访问内容，待 Storybook CI 结果
+- SSR/hydration: SSR 单测覆盖稳定标记；独立 hydration 断言待补
+- RTL: 文档明确物理边语义，浏览器视觉证明待补
+- Reduced motion: 不适用，无动画
+- Mobile Chromium/WebKit E2E: 待补设备 emulation 与 viewport-fit 页面
+- Chromatic Light/Dark: Bottom/Top/Landscape Stories 更新基线待 CI 发布
+- Real device: 刘海 iPhone/iPad、Android 打孔屏、旋转和键盘场景待补
+
+## V2 优化记录
+
+### 待优化
+
+- 在隔离 H5 测试页加入 viewport-fit=cover、旋转和软键盘用例。
+- 用真实 iOS 13+ 与 Android WebView 记录 top/right/bottom/left 实际尺寸。
+- 验证 fixed footer、横屏全屏媒体、嵌套 provider 和浏览器工具栏收缩场景。
+
+### 已完成
+
+- 从 top/bottom 扩展到四条物理边，补横屏 Story。
+- 增加显式 CSS fallback 与 number/string API，并明确不是最小 inset。
+- 明确组件不自动去重安全区，避免对合法的多边组合施加隐式布局规则。
+- 补 Props/release tag、SSR 与 targeted unit evidence。
+
+## 变更记录
+
+| 日期       | 版本  | 类型    | 内容                                        | 迁移说明                                           |
+| ---------- | ----- | ------- | ------------------------------------------- | -------------------------------------------------- |
+| 2026-08-28 | 0.1.0 | feature | 新增左右安全区与 fallback，建立 V2 留存文档 | 原有 top/bottom 用法保持兼容；重复消费由调用方排查 |

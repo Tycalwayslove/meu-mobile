@@ -5,6 +5,19 @@
     "license": "ISC",
     "licenseFile": "licenses/lucide-isc.txt"
   },
+  "provenanceAudit": {
+    "status": "incomplete",
+    "reviewed": "2026-08-28",
+    "verified": [
+      "Every exported Meu icon ID has a manifest entry.",
+      "The declared Lucide ISC and Feather MIT license texts are distributed with this package.",
+      "Every current icon entry declares modified=false and a Feather MIT license file."
+    ],
+    "missing": [
+      "An immutable upstream source URL or commit for Lucide Icons 1.34.0.",
+      "A generation log or geometry checksum tying each local SVG path to that upstream revision."
+    ]
+  },
   "icons": [
     {
       "id": "chevron-left",

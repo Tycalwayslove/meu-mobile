@@ -1,0 +1,162 @@
+---
+name: Portal
+slug: portal
+package: "@meu/primitives-react"
+exports: [Portal]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds: [foundation-portal--custom-container]
+source: packages/primitives-react/src/Portal
+---
+
+# Portal
+
+## 当前能力
+
+- 默认把内容渲染到当前文档的 `document.body`。
+- `container` 支持 `Element`、`DocumentFragment`、惰性回调、`null` 和 `undefined`。
+- SSR 与 hydration 首帧原地输出 children，客户端可用后再移动到目标容器。
+- 目标变化或组件卸载时，由 React Portal 删除其渲染节点；组件不会删除调用方拥有的容器。
+- 容器判断基于 DOM `nodeType`，可接受 iframe 等其他 realm 的 Element，不依赖 `instanceof HTMLElement`。
+
+当前状态为 `implementation`；尚未完成嵌套模态、真实 iframe、移动 WebView 与 Chromatic 全矩阵验收，不能标记为 commercial。
+
+## 何时使用
+
+用于 Popup、Dialog、Toast 等需要脱离祖先 `overflow` 或 stacking context 的浮层。优先复用一个由应用管理的稳定浮层根节点。
+
+## 何时不要使用
+
+- 普通页面内容、布局组件和无需脱离 DOM 层级的提示不需要 Portal。
+- 不用 Portal 代替焦点管理、遮罩、滚动锁或 z-index 规范。
+- 不要把敏感内容是否服务端输出的决策交给 Portal；它在 SSR 会原地保留 children。
+
+## 结构与状态
+
+Portal 不新增包装 DOM。结构只有 React children 和解析后的目标容器。运行状态为 SSR 原地、客户端 body、自定义目标和显式原地四种；它没有视觉 disabled、loading 或 invalid 状态。
+
+## 基础用法
+
+```tsx
+<Portal>
+  <div role="status">保存成功</div>
+</Portal>
+```
+
+自定义容器应在可用后传入：
+
+```tsx
+const [overlayRoot, setOverlayRoot] = useState<HTMLDivElement | null>(null);
+
+return (
+  <>
+    <div ref={setOverlayRoot} />
+    {overlayRoot ? <Portal container={overlayRoot}>浮层内容</Portal> : null}
+  </>
+);
+```
+
+## 受控与非受控
+
+不适用。Portal 不持有打开状态；挂载、卸载和目标容器均由调用方控制。
+
+## 表单集成
+
+Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑树工作。但原生 DOM 查询、`form` 所属关系和 CSS 继承取决于实际目标；跨出表单时，提交按钮应显式设置 `form` 属性。
+
+## Props
+
+`children` 为渲染内容。`container` 未传时使用 `document.body`；传 `null` 时保持原地；回调只在客户端可用后解析。API 类型以 TSDoc/API Extractor 为准。
+
+## Events
+
+不定义事件。children 的 React 事件按 React Portal 规则沿逻辑 React 树冒泡；原生事件监听仍遵循实际 DOM 树。
+
+## Ref 与命令式方法
+
+不适用。Portal 没有包装节点，因而不提供 ref 或命令式方法。需要访问内容节点时由 child 自己持有 ref。
+
+## 键盘操作
+
+| 按键 | 行为                                       |
+| ---- | ------------------------------------------ |
+| 任意 | Portal 不拦截或定义键盘行为，交由 children |
+
+## 触摸与手势
+
+不定义触摸或手势。点击外部关闭、拖拽、手势冲突和 pointer capture 由上层浮层组件负责。
+
+## 无障碍
+
+Portal 不提供 role、accessible name、焦点陷阱或焦点恢复。移动 DOM 不会自动修复 aria 关系；引用的 ID 必须在同一 Document 内唯一。跨 Document/iframe 时必须在目标文档单独验证读屏与焦点。
+
+## 动效
+
+不适用。Portal 只负责挂载位置。进入/退出动画必须由上层组件控制，并在退出动画完成后再卸载。
+
+## 主题与定制
+
+Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后，祖先 CSS 变量可能不再继承；应用应把 Meu 主题变量安装到目标容器或目标文档。
+
+## SSR 与 Next.js
+
+文件声明为 Client Component。服务端及 hydration 首帧会原地渲染 children，避免读取 `document` 和空 SSR 标记；因此 open overlay 会先出现在调用位置，客户端 store 快照可用后再移动到 body 或自定义 target。若 JavaScript 被禁用，这些 children 会一直保留在调用位置，Portal 不会完成移动或提供交互初始化。若浮层不应进入服务端 HTML，调用方应在业务层按 open/client-ready 条件控制 children。
+
+## RTL 与国际化
+
+不适用。Portal 不生成文案或方向样式；目标容器的 `dir`、`lang` 和主题继承可能与逻辑父级不同，跨容器时应显式同步。
+
+## 浏览器与 WebView
+
+实现使用 React 19 Portal、`useSyncExternalStore`、Element/DocumentFragment 和 `nodeType`，源码未引入 Chrome 70 禁止语法。跨 realm 容器不再依赖 `instanceof HTMLElement`。真实 iOS 13 WKWebView、Android Chrome 70 和 iframe 仍待设备验证。
+
+## 边界情况与已知限制
+
+- 容器回调在每次客户端 render 时执行，必须无副作用且返回稳定 DOM 节点。
+- 回调返回空、显式 `null` 或非法运行时对象时内容原地渲染。
+- 已移出 Document 的目标不会被组件自动替换；调用方需更新 `container` 并触发 render。
+- React 只清理 Portal children，不删除或还原调用方的目标容器。
+- 跨 Document 不会自动复制样式、方向、locale 或全局事件监听。
+
+## 性能预算
+
+组件不创建 DOM wrapper、observer、timer 或全局监听。每次 render 最多执行一次容器回调和一次常数时间 `nodeType` 判断；容器回调不得包含布局扫描。
+
+## 测试证据
+
+- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理
+- Story interaction: 待补
+- Axe: Storybook a11y addon 可扫描自定义容器 Story，尚无独立自动断言
+- SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记与 hydration 后移动
+- RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
+- Reduced motion: 不适用，无动画
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 已有 CustomContainer Story，更新基线待 CI 发布
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 增加真实 iframe/跨 Document 样式、焦点与事件验证。
+- 与 Popup/Dialog 批次共同验证嵌套 Portal、退出动画、焦点恢复和多锁清理。
+- 补移动 Chromium/WebKit E2E 和真实 iOS/Android WebView 证据。
+
+### 已完成
+
+- SSR 从空输出改为 hydration-safe 的原地降级。
+- container 扩展到 Element/DocumentFragment、惰性 nullable 回调，并支持跨 realm 判断。
+- 增加目标切换、Fragment、SSR/hydration 与卸载清理单测。
+- 补齐公开 Props、容器类型 TSDoc 和 release tag。
+
+## 变更记录
+
+| 日期       | 版本  | 类型     | 内容                                           | 迁移说明                                    |
+| ---------- | ----- | -------- | ---------------------------------------------- | ------------------------------------------- |
+| 2026-08-28 | 0.1.0 | behavior | SSR 改为原地输出；扩展跨文档容器类型与清理证据 | 依赖 SSR 空字符串的调用方需在业务层条件渲染 |

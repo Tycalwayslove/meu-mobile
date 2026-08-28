@@ -1,4 +1,5 @@
 import "@meu/tokens/css";
+import "@meu/primitives-react/styles.css";
 import "@meu/mobile/styles.css";
 
 import { ConfigProvider } from "../../../packages/mobile/src/ConfigProvider";

@@ -9,19 +9,19 @@ import type { MeuIconNode } from '@meu/icons-core';
 import { RefAttributes } from 'react';
 import type { SVGProps } from 'react';
 
-// @public (undocumented)
+// @public
 export const MeuIcon: ForwardRefExoticComponent<Omit<MeuIconProps, "ref"> & RefAttributes<SVGSVGElement>>;
 
-// @public (undocumented)
+// @public
 export const MeuIconCheck: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "name" | "icon">, "ref"> & RefAttributes<SVGSVGElement>>;
 
-// @public (undocumented)
+// @public
 export const MeuIconChevronLeft: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "name" | "icon">, "ref"> & RefAttributes<SVGSVGElement>>;
 
-// @public (undocumented)
+// @public
 export const MeuIconPlus: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "name" | "icon">, "ref"> & RefAttributes<SVGSVGElement>>;
 
-// @public (undocumented)
+// @public
 export type MeuIconProps = Omit<SVGProps<SVGSVGElement>, "children"> & {
     icon: MeuIconNode;
     name: string;
@@ -30,10 +30,10 @@ export type MeuIconProps = Omit<SVGProps<SVGSVGElement>, "children"> & {
     title?: string;
 };
 
-// @public (undocumented)
+// @public
 export const MeuIconSearch: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "name" | "icon">, "ref"> & RefAttributes<SVGSVGElement>>;
 
-// @public (undocumented)
+// @public
 export const MeuIconX: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "name" | "icon">, "ref"> & RefAttributes<SVGSVGElement>>;
 
 // (No @packageDocumentation comment for this package)

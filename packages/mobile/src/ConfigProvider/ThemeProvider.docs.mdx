@@ -1,0 +1,182 @@
+---
+name: ThemeProvider
+slug: theme-provider
+package: "@meu/mobile"
+exports: [ThemeProvider]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    foundation-themeprovider--light-and-dark,
+    foundation-themeprovider--system-theme,
+    foundation-themeprovider--theme-only-nested-override
+  ]
+source: packages/mobile/src/ConfigProvider
+---
+
+# ThemeProvider
+
+## 当前能力
+
+- `ThemeProvider` 是 `ConfigProvider` 的主题语义别名，运行时组件身份严格相同，接受同一组 Props。
+- 支持 `light`、`dark` 与 `system`，通过 `data-meu-theme` 切换语义色彩 Token。
+- 嵌套时只覆盖显式传入的 theme；locale、dir、motion 与 portal 配置继续继承父级。
+- `system` 由 CSS `prefers-color-scheme` 解析，不在 hydration 阶段读取浏览器环境。
+
+当前为 V2 `implementation` 状态。主题持久化、首屏服务端选择、forced-colors、高对比矩阵与真机验证尚未形成库级能力，不能标记为 commercial。
+
+## 何时使用
+
+- 只想强调局部主题覆盖意图时使用，例如暗色媒体预览区或浅色支付面板。
+- 组件文档、视觉回归中并排固定 light/dark，保证同一份语义 Token 在两套色彩中的表现。
+- 应用根级同时需要 locale、dir、motion 或 Portal 策略时可直接使用 `ConfigProvider`；两者行为完全相同。
+
+## 何时不要使用
+
+- 不要把 ThemeProvider 当作主题状态仓库或持久化工具。
+- 不要在组件内部读取 `localStorage` 后再临时切换 system/light/dark，这会造成 SSR 首屏与 hydration 不一致。
+- 不要用嵌套主题修补缺失 Token；应在 Token 层修复语义色彩。
+
+## 结构与状态
+
+结构与 ConfigProvider 相同：Context + 真实 `div` 边界。主题状态通过 `data-meu-theme="light|dark|system"` 表达。Provider 本身没有 hover、pressed、disabled、loading、invalid 或 selected 状态。
+
+## 基础用法
+
+```tsx
+<ThemeProvider theme="dark">
+  <OrderSummary />
+</ThemeProvider>
+```
+
+局部主题只覆盖 theme：
+
+```tsx
+<ConfigProvider locale="en-US" dir="rtl" theme="light">
+  <ThemeProvider theme="dark">
+    <MediaViewer />
+  </ThemeProvider>
+</ConfigProvider>
+```
+
+内层仍解析为 `locale="en-US"` 和 `dir="rtl"`。
+
+## 受控与非受控
+
+ThemeProvider 不持有内部主题状态。`theme` 完全受控；省略时继承最近 Provider，根级省略时为 `system`。应用负责保存用户选择、同步服务端 cookie 和更新属性。
+
+## 表单集成
+
+不适用。主题不会改变字段值、校验、提交或 FormData。表单的 error/disabled/focus 状态必须使用对应语义 Token，在 light/dark 下分别满足对比度。
+
+## Props
+
+与 `ConfigProviderProps` 完全相同，不建立第二套 Props 类型。主题相关约束：
+
+- `theme="light"`: 固定浅色 Token。
+- `theme="dark"`: 固定深色 Token。
+- `theme="system"`: 根级默认，通过 `prefers-color-scheme: dark` 选择暗色 Token。
+- 省略 `theme`: 继承父级，而不是重新回到 system。
+
+其余 locale、dir、motion、portalContainer、className 和 style 行为见 ConfigProvider 文档。
+
+## Events
+
+不适用。ThemeProvider 不发出 `onThemeChange`，也不监听系统主题变化；CSS media query 会直接重算 Token，不需要 React 更新。业务主题选择事件由应用状态层定义。
+
+## Ref 与命令式方法
+
+当前不公开 ref 或主题命令式方法。不要通过查询内部 class 切换主题；更新受控 `theme` 属性即可。
+
+## 键盘操作
+
+| 按键   | 行为                                |
+| ------ | ----------------------------------- |
+| 不适用 | Provider 不可聚焦，不接管键盘输入。 |
+
+## 触摸与手势
+
+不适用。Provider 不创建触控目标或手势。主题选择控件应使用 Radio、SegmentedControl 或 Switch，并由应用更新 `theme`。
+
+## 无障碍
+
+- 主题不应成为传递状态的唯一方式；success/warning/danger 同时需要文本、图标或语义。
+- ThemeProvider 本身没有 role，不增加读屏层级。
+- 固定 light/dark 与 system 都必须在组件级验证文本、边框、焦点环和禁用态对比度。
+- forced-colors/high contrast 当前依赖浏览器默认与各组件 CSS，尚无 Provider 开关或完整证明。
+
+## 动效
+
+ThemeProvider 自身不执行主题过渡，避免大面积颜色动画、首屏闪烁和 reduced-motion 风险。若应用添加主题切换动画，必须在应用层遵守 `motion` 策略并避免对整个页面使用长时间 transition。
+
+## 主题与定制
+
+公开主题面是 `theme` 和 `--meu-color-*` 语义 Token。`data-meu-theme` 是稳定 DOM 契约；生成的 class 名不是 API。不要覆盖组件内部 class，也不要在业务 CSS 中依赖 ThemeProvider 的 DOM 层级深度。
+
+## SSR 与 Next.js
+
+- `system` 的服务端与客户端都输出 `data-meu-theme="system"`，由 CSS 解析实际方案，不产生 JavaScript hydration 分支。
+- 若产品保存用户显式的 light/dark，推荐把选择写入 cookie，并让服务端首屏与客户端使用同一 `theme` Prop。
+- 仅在客户端读取 localStorage 再切换会产生可见的主题跳变；ThemeProvider 当前不内置阻塞脚本或持久化机制。
+- CSP nonce、内联防闪脚本和服务端主题协商属于应用壳层，不由组件库隐式注入。
+
+## RTL 与国际化
+
+主题本身与方向/locale 正交。由于它是 ConfigProvider alias，嵌套 ThemeProvider 会继承父级 `dir` 和 `locale`，不会将其重置。主题 Token 不应包含方向性含义。
+
+## 浏览器与 WebView
+
+固定 light/dark 依赖 CSS 自定义属性和 data attribute；system 额外依赖 `prefers-color-scheme`。在不支持该 media query 的旧 WebView 中，system 保持浅色基线；需要确定暗色时应显式传 `dark`。V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13–14 和 Chromium 79–88 仅观察、不承诺。Chrome 70 静态语法门禁只证明客户端产物未引入被禁语法，不是运行时支持声明。
+
+## 边界情况与已知限制
+
+- 不内置 localStorage/cookie 持久化、跨标签页同步或系统主题 JavaScript 事件。
+- system 在不支持 `prefers-color-scheme` 的环境中降级为浅色。
+- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；Overlay 需在 Portal 根复制 `data-meu-theme`。现有迁移覆盖度按各 Overlay 文档为准。
+- 主题切换没有 transition；这是当前明确行为，不是缺失动画。
+- ThemeProvider 接受完整 ConfigProvider Props，因为它是兼容 alias；当前不通过收窄 Props 制造破坏性变化。
+
+## 性能预算
+
+ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia 订阅或存储读取。system 变化由 CSS 引擎处理，不触发 React 子树重渲染；显式 theme Prop 变化按 Context 语义更新消费者。
+
+## 测试证据
+
+- Unit: `ConfigProvider.test.tsx` 验证 ThemeProvider 与 ConfigProvider 同一身份、theme-only 嵌套不重置 locale/dir。
+- Story interaction: 待补自动交互；三个静态 Story 覆盖 light/dark、system 和局部主题继承。
+- Axe: 待补各组件 light/dark 对比度矩阵；Provider 本身无交互语义。
+- SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 hydration 单测覆盖 system 标记一致和零 recoverable error。
+- RTL: 单元与 Theme-only Story 验证主题覆盖不改变方向。
+- Reduced motion: Provider 不做主题动画；应用自定义过渡仍需独立验证。
+- Mobile Chromium/WebKit E2E: 待补 system media emulation 与固定主题截图。
+- Chromatic Light/Dark: `LightAndDark` 提供双主题快照入口；基线接受状态由 Chromatic 构建记录决定。
+- Real device: 待补 Android WebView、iOS Safari 及系统主题切换。
+
+## V2 优化记录
+
+### 待优化
+
+- 建立应用壳层的 cookie/SSR 主题持久化参考方案，但不隐式加入组件运行时。
+- 完成 Overlay Portal 主题属性传播审计。
+- 补 forced-colors、高对比、system media emulation、Chromium/WebKit E2E 与真机证据。
+- 评估是否需要独立 ThemeProviderProps；没有迁移收益前维持 alias 兼容。
+
+### 已完成
+
+- 明确 ThemeProvider 是 ConfigProvider 的精确 alias，补充可审查的公开声明与测试。
+- 修复 theme-only 嵌套导致 locale/dir/portal 等配置被重置的问题。
+- 保持 system 纯 CSS 解析，SSR/hydration 不访问浏览器环境。
+- 增加 light/dark、system 与嵌套继承 Story。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                 | 迁移说明                             |
+| ---------- | ------ | -------- | ------------------------------------ | ------------------------------------ |
+| 2026-08-28 | 未发布 | behavior | ThemeProvider 嵌套改为只覆盖显式字段 | 若依赖旧重置行为，请显式传入所有配置 |
+| 2026-08-28 | 未发布 | docs     | 明确 alias、system SSR 与持久化边界  | 无                                   |

@@ -271,7 +271,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/primitives-react!Portal:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Renders children into `document.body` or a caller-owned DOM container. During SSR and the first hydration pass, children stay in place so server markup remains useful and hydration-safe. React owns portal cleanup when the destination changes or the component unmounts.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -297,17 +297,13 @@
             },
             {
               "kind": "Content",
-              "text": " | null"
-            },
-            {
-              "kind": "Content",
               "text": ";"
             }
           ],
           "fileUrlPath": "src/Portal.tsx",
           "returnTypeTokenRange": {
             "startIndex": 3,
-            "endIndex": 6
+            "endIndex": 5
           },
           "releaseTag": "Public",
           "overloadIndex": 1,
@@ -333,8 +329,44 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "@meu/primitives-react!PortalContainer:type",
+          "docComment": "/**\n * A DOM node accepted by React DOM as a portal destination.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type PortalContainer = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Element",
+              "canonicalReference": "!Element:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "DocumentFragment",
+              "canonicalReference": "!DocumentFragment:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Portal.tsx",
+          "releaseTag": "Public",
+          "name": "PortalContainer",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 4
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "@meu/primitives-react!PortalProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Properties for {@link Portal}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -355,8 +387,8 @@
             },
             {
               "kind": "Reference",
-              "text": "HTMLElement",
-              "canonicalReference": "!HTMLElement:interface"
+              "text": "PortalContainer",
+              "canonicalReference": "@meu/primitives-react!PortalContainer:type"
             },
             {
               "kind": "Content",
@@ -364,12 +396,12 @@
             },
             {
               "kind": "Reference",
-              "text": "HTMLElement",
-              "canonicalReference": "!HTMLElement:interface"
+              "text": "PortalContainer",
+              "canonicalReference": "@meu/primitives-react!PortalContainer:type"
             },
             {
               "kind": "Content",
-              "text": ") | null | undefined;\n}"
+              "text": " | null | undefined) | null | undefined;\n}"
             },
             {
               "kind": "Content",
@@ -486,7 +518,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/primitives-react!VisuallyHidden:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Keeps content in the accessibility tree while clipping it visually. The component deliberately renders a `span` and never applies `aria-hidden`, `hidden`, or `display: none`.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -545,7 +577,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/primitives-react!VisuallyHiddenProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Properties accepted by {@link VisuallyHidden}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

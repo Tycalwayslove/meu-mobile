@@ -1,0 +1,157 @@
+---
+name: IconButton
+slug: icon-button
+package: "@meu/mobile"
+exports: [IconButton]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    actions-iconbutton--default,
+    actions-iconbutton--solid,
+    actions-iconbutton--outline-danger,
+    actions-iconbutton--loading,
+    actions-iconbutton--pressed,
+    actions-iconbutton--sizes
+  ]
+source: packages/mobile/src/IconButton
+---
+
+# IconButton
+
+## 当前能力
+
+- 原生 `button`，默认 `type="button"`，支持 ref、原生 button 属性和 `aria-pressed`。
+- `solid | outline | ghost`、三种 tone、三档 size 与 loading；全部尺寸保持至少 44×44 CSS px。
+- 类型要求 `aria-label` 或 `aria-labelledby` 二选一；图标子树统一作为装饰内容隐藏，避免重复名称。
+- loading 保留按钮尺寸、设置 `aria-busy`、阻止重复触发，并在 reduced-motion 下显示静态 ring。
+
+当前状态为 `implementation`；尚未完成 axe、真机读屏、高对比与完整视觉矩阵，不等于商用验收完成。
+
+## 何时使用
+
+用于关闭、搜索、收藏、更多等空间受限且图标含义稳定的单一动作。动作必须能用简短名称明确表达。
+
+## 何时不要使用
+
+动作含义依赖解释、业务风险高或需要同时显示文字时使用 `Button`。不要用 IconButton 表示纯状态；无操作的图标直接使用 `MeuIcon`。
+
+## 结构与状态
+
+结构为 native button → decorative content 或 loading ring。状态包括 default、pressed、focus、disabled、loading；pressed 仅由调用方传入 `aria-pressed`，组件不持有选择状态。
+
+## 基础用法
+
+```tsx
+<IconButton aria-label="搜索商品">
+  <MeuIconSearch />
+</IconButton>
+
+<IconButton aria-label="取消收藏" aria-pressed={favorite} onClick={toggleFavorite}>
+  <MeuIconCheck />
+</IconButton>
+```
+
+## 受控与非受控
+
+不适用。IconButton 不持有业务状态；toggle 场景由调用方控制 `aria-pressed`，loading/disabled 也由调用方提交。
+
+## 表单集成
+
+默认 `type="button"`，避免在 form 内意外提交。显式设置 `type="submit"` 时遵循原生提交；loading/disabled 时不会触发提交。name/value 由原生 button 属性透传。
+
+## Props
+
+API 由 `IconButtonProps`、`IconButtonSize`、`IconButtonTone` 与 `IconButtonVariant` 生成。必须提供非空且具体的 `aria-label`，或提供指向真实文本的 `aria-labelledby`；两者不能同时提供。children 只用于图标，不作为 accessible name。
+
+## Events
+
+没有自定义事件。`onClick/onPointer*/onKey*` 等原生事件透传；loading 或 disabled 使用原生 disabled 阻止事件。组件不吞掉错误，也不负责异步请求或回滚。
+
+## Ref 与命令式方法
+
+ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在测试或明确的焦点恢复流程中，不应通过 ref 绕过 disabled/loading。
+
+## 键盘操作
+
+| 按键  | 行为           |
+| ----- | -------------- |
+| Tab   | 聚焦可用按钮   |
+| Enter | 触发原生 click |
+| Space | 触发原生 click |
+
+## 触摸与手势
+
+无自定义手势。所有尺寸至少 44×44 CSS px；快速连点由调用方及时进入 loading/disabled 锁定。长按沿用浏览器行为，组件不注册全局 pointer listener。
+
+## 无障碍
+
+使用原生 button。可访问名称必须描述动作而非图标外观，例如“关闭对话框”而不是“叉号”。toggle 动作使用 `aria-pressed`；图标子树被 `aria-hidden`，避免 SVG title 与按钮名称重复。焦点环兼容旧 WebView 的 `:focus`。
+
+## 动效
+
+按压只使用 transform，颜色使用 Token 时长；loading ring 默认旋转。`prefers-reduced-motion: reduce` 下停止旋转并把过渡压缩到 1ms，状态仍通过 `aria-busy` 与静态 ring 表达。
+
+## 主题与定制
+
+稳定入口为 size、tone、variant、原生属性、语义 Token 与 `data-size/data-tone/data-state`。内部 class 和 DOM wrapper 不属于公开 API。
+
+## SSR 与 Next.js
+
+渲染不读取 window/document，服务端与客户端结构稳定。它是 Client Component，可从 Next Client Component 直接消费；首次 loading/pressed 值必须在服务端与客户端一致。
+
+## RTL 与国际化
+
+控件本身对称，不改变图标方向。返回/前进等方向性图标是否镜像由具体图标或调用方决定。accessible name 由业务 locale 提供，组件不猜测或翻译动作名称。
+
+## 浏览器与 WebView
+
+实现只使用原生 button、基础 Grid、transform 与 Token CSS；兼容门禁覆盖 Chrome 70/iOS 13 语法。产品支持口径仍以 V2 总体矩阵为准，真机 Safari/WKWebView 与 Android TalkBack 尚待验证。
+
+## 边界情况与已知限制
+
+- TypeScript 只能要求存在 label 字符串，不能证明字符串非空或 `aria-labelledby` ID 有效。
+- children 被整体视为装饰内容；需要可访问复合内容时应使用 `Button`。
+- loading 不提供进度百分比或完成公告；业务结果由页面 live region 或反馈组件负责。
+
+## 性能预算
+
+单个按钮不注册 effect、observer 或全局监听；状态更新只影响自身。图标应使用可 tree-shake 的 `MeuIcon*` 命名导出。
+
+## 测试证据
+
+- Unit: `IconButton.test.tsx`，覆盖默认 type、点击、label/labelledby、装饰图标、pressed、loading 与禁用
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 结构无浏览器读取，待增加独立证明
+- RTL: 对称控件，方向性图标待矩阵验证
+- Reduced motion: CSS 静态降级已实现，待浏览器证明
+- Mobile Chromium/WebKit E2E: 通用 44px 目标覆盖，待增加 IconButton 专属断言
+- Chromatic Light/Dark: 现有 Story 可生成基线，待显式矩阵
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 增加 Story interaction、axe、SSR/hydration、RTL 方向图标、高对比与 200% 字号证据。
+- 在真机读屏验证 labelledby、toggle pressed 和 loading 状态公告策略。
+- Figma 暂缺独立 IconButton node，设计补齐后更新 frontmatter。
+
+### 已完成
+
+- 支持 label/labelledby 二选一并隐藏装饰图标子树。
+- 冻结 44px 触控、pressed 状态、loading 锁与 reduced-motion 静态降级。
+- 补齐公开 API TSDoc、单测、Story 与永久留存文档。
+
+## 变更记录
+
+| 日期       | 版本  | 类型           | 内容                                                     | 迁移说明                     |
+| ---------- | ----- | -------------- | -------------------------------------------------------- | ---------------------------- |
+| 2026-08-28 | 0.1.0 | implementation | 增加 labelledby、pressed、装饰图标与 reduced-motion 契约 | 现有 aria-label 用法无需迁移 |

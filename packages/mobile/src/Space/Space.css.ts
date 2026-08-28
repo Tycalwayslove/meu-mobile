@@ -1,7 +1,7 @@
 import { recipe } from "@vanilla-extract/recipes";
 
 export const space = recipe({
-  base: { display: "inline-flex", boxSizing: "border-box" },
+  base: { display: "inline-flex", boxSizing: "border-box", minWidth: 0 },
   variants: {
     direction: { horizontal: { flexDirection: "row" }, vertical: { flexDirection: "column" } },
     align: {

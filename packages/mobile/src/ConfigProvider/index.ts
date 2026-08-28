@@ -1,7 +1,2 @@
-export { ConfigProvider, ConfigProvider as ThemeProvider, useMeuConfig } from "./ConfigProvider";
-export type {
-  ConfigProviderProps,
-  MeuConfig,
-  MeuLocale,
-  MeuTheme
-} from "./ConfigProvider";
+export { ConfigProvider, ThemeProvider, useMeuConfig } from "./ConfigProvider";
+export type { ConfigProviderProps, MeuConfig, MeuLocale, MeuTheme } from "./ConfigProvider";

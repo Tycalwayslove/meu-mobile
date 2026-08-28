@@ -191,7 +191,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/icons-react!MeuIcon:var",
-          "docComment": "",
+          "docComment": "/**\n * Renders curated Meu SVG geometry using `currentColor` and a 24 × 24 viewBox. The icon is decorative by default; provide `title`, `aria-label`, or `aria-labelledby` only when the icon itself conveys information that adjacent text does not.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -259,7 +259,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/icons-react!MeuIconCheck:var",
-          "docComment": "",
+          "docComment": "/**\n * Confirmation or completion mark.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -336,7 +336,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/icons-react!MeuIconChevronLeft:var",
-          "docComment": "",
+          "docComment": "/**\n * Directional left chevron. The consuming navigation component owns RTL mirroring.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -413,7 +413,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/icons-react!MeuIconPlus:var",
-          "docComment": "",
+          "docComment": "/**\n * Add or create mark.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -490,7 +490,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/icons-react!MeuIconProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props shared by the generic and named Meu SVG icon components.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -548,7 +548,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/icons-react!MeuIconSearch:var",
-          "docComment": "",
+          "docComment": "/**\n * Search mark.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -625,7 +625,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/icons-react!MeuIconX:var",
-          "docComment": "",
+          "docComment": "/**\n * Close, clear, or failure mark; its accessible meaning comes from the owning control.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

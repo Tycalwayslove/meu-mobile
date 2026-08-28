@@ -1,0 +1,154 @@
+---
+name: Space
+slug: space
+package: "@meu/mobile"
+exports: [Space]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    layout-space--horizontal,
+    layout-space--vertical,
+    layout-space--wrapped,
+    layout-space--right-to-left,
+    layout-space--token-scale
+  ]
+source: packages/mobile/src/Space
+---
+
+# Space
+
+## 当前能力
+
+- 以 `inline-flex` 排列同级内容，`block` 可占满可用 inline width。
+- 支持 horizontal/vertical、5 种 cross-axis 对齐、wrap，以及 9 档 Meu spacing token gap。
+- horizontal 的开始方向跟随容器 `dir`，没有物理 left/right 布局 API。
+
+当前状态为 `implementation`，尚未完成旧 WebView 与真机商用验收。
+
+## 何时使用
+
+用于按钮组、标签组、图标与文字等同级元素之间的稳定间距。gap 应来自设计 token，不用临时 margin 拼接相同结构。
+
+## 何时不要使用
+
+- 页面网格、复杂两栏布局或内容区骨架应使用专门布局容器。
+- 不用多层 Space 模拟 Card、List 或表单结构。
+- 需要分配剩余宽度、定位或滚动吸附时直接使用合适的 CSS layout。
+
+## 结构与状态
+
+结构是一个 div flex container 与调用方 children。没有交互状态；`data-direction`、`data-align`、`data-gap`、`data-wrap` 用于调试和视觉验收。
+
+## 基础用法
+
+```tsx
+<Space gap={3} wrap>
+  <Button>保存</Button>
+  <Button variant="outline">取消</Button>
+</Space>
+```
+
+## 受控与非受控
+
+不适用。所有布局参数均直接由 Props 决定，不持有内部状态。
+
+## 表单集成
+
+Space 不参与表单值、校验或提交。它不会改变内部原生控件的 name、disabled、Tab 顺序或 FormData。
+
+## Props
+
+`gap` 只接受 `1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12`，分别映射 `--meu-space-{n}`。`direction` 默认 horizontal，`align` 默认 center，`gap` 默认 2，`block` 与 `wrap` 默认 false；其余属性透传原生 div。
+
+## Events
+
+只透传原生 div 事件，没有自定义事件或事件时序。
+
+## Ref 与命令式方法
+
+ref 指向外层 `HTMLDivElement`，只提供原生 DOM 能力。
+
+## 键盘操作
+
+| 按键 | 行为                                         |
+| ---- | -------------------------------------------- |
+| 无   | Space 不创建焦点；children 保持原有 Tab 顺序 |
+
+## 触摸与手势
+
+不定义手势，也不扩大 children 的触控目标。
+
+## 无障碍
+
+默认 div 没有额外 ARIA 语义，不改变 children 的读屏顺序。若内容本质是列表、工具栏或分组，应由调用方选择语义元素或设置准确角色，不能仅因视觉排列添加 ARIA。
+
+## 动效
+
+不提供内建动效，因此没有 reduced-motion 分支。children 尺寸变化导致的重排不会被 Space 动画化。
+
+## 主题与定制
+
+稳定定制面为 9 档 spacing token、方向、对齐、block 和 wrap。内部生成 class 不是公共 API；消费者 className 可用于容器级补充布局。
+
+## SSR 与 Next.js
+
+纯渲染组件，不读取浏览器全局，服务端与客户端输出一致。只有传入事件处理器时才需要 Client Component 边界。
+
+## RTL 与国际化
+
+horizontal 使用 flex row，顺序跟随 `dir=ltr|rtl`；start/end 是逻辑方向。Space 不含内建文案。改变 RTL 视觉顺序不会修改 DOM 顺序或读屏顺序，业务流程仍应使用符合语义的 children 顺序。
+
+## 浏览器与 WebView
+
+V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex gap。iOS 13–14 与 Chromium 79–83 属观察档，原生 flex gap 可能不可用；当前不注入 JS 检测或 margin polyfill，因此这些环境会保留排列但间距可能丢失。不要把旧语法扫描当作 flex gap 运行时证明。
+
+## 边界情况与已知限制
+
+- horizontal wrap 会按可用 inline width 换行；不可断行的 child 仍可能溢出。
+- vertical wrap 只有容器存在明确 block-size 时才会产生新列，否则看起来与 nowrap 相同。
+- `align=baseline` 依赖 children 自身 baseline；纯图形或复杂嵌套的结果由浏览器决定。
+- Space 不克隆 children，也不为 Fragment 内部节点单独分配 API。
+- 观察档旧 WebView 的 flex gap 没有内建 fallback。
+
+## 性能预算
+
+无状态、无 effect、无 children clone 和运行时测量。单实例只生成一个容器节点；正式发布前仍需记录样式增量 gzip。
+
+## 测试证据
+
+- Unit: `Space.test.tsx` 覆盖顺序、方向、QA 属性、原生属性与 ref
+- Story interaction: 不适用；组件无交互
+- Axe: Storybook 已配置 a11y addon，尚无组件专属执行报告
+- SSR/hydration: 实现无环境分支，尚无独立 hydration 测试
+- RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
+- Reduced motion: 不适用；没有内建动效
+- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Chromatic Light/Dark: 5 组 Story 可构建，显式 Light/Dark 快照矩阵待补
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 在目标 Chromium/WebKit 建立 wrap、RTL、baseline 与长内容的尺寸断言。
+- 决定观察档旧 WebView 是明确不支持 gap，还是引入经过验证且不改变外部尺寸的 fallback。
+- 记录真机和 200% 字号重排结果。
+
+### 已完成
+
+- 补齐公开 TSDoc、token gap 契约、逻辑方向规则和稳定 QA data 属性。
+- 增加 wrap、RTL 与 token scale Story，并记录 vertical wrap 和旧 WebView 边界。
+- 保留现有 Props 与 DOM 结构，未新增无场景证据的布局 API。
+
+## 变更记录
+
+| 日期       | 版本  | 类型      | 内容                                    | 迁移说明 |
+| ---------- | ----- | --------- | --------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0 | hardening | 完善 TSDoc、RTL/wrap/兼容边界和测试证据 | 无       |

@@ -8,8 +8,9 @@ export const metadata: Metadata = {
   description: "在 Next.js H5 工作区中接入 Meu Mobile。"
 };
 
-const installCode = `pnpm add @meu/mobile@workspace:* @meu/form-react@workspace:*`;
+const installCode = `pnpm add '@meu/mobile@workspace:*' '@meu/form-react@workspace:*' '@meu/primitives-react@workspace:*'`;
 const layoutCode = `import "@meu/tokens/css";
+import "@meu/primitives-react/styles.css";
 import "@meu/mobile/styles.css";
 import { ConfigProvider } from "@meu/mobile";
 
@@ -64,7 +65,8 @@ export default function GettingStartedPage() {
           <article className="content-card">
             <h3>兼容基线</h3>
             <p>
-              默认目标为 Chrome 70、Android WebView 70 与 iOS Safari 13，不依赖现代 API 偶然可用。
+              完整支持 iOS/WKWebView 15+ 与 Android Chrome/WebView 89+；更早环境属于观察档，
+              静态语法门禁不等同于运行时支持承诺。
             </p>
           </article>
         </div>

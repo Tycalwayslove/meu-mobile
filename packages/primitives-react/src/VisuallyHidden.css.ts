@@ -8,6 +8,16 @@ export const visuallyHidden = style({
   margin: -1,
   overflow: "hidden",
   clip: "rect(0, 0, 0, 0)",
+  clipPath: "inset(50%)",
+  WebkitClipPath: "inset(50%)",
   whiteSpace: "nowrap",
-  border: 0
+  wordWrap: "normal",
+  border: 0,
+  "@media": {
+    "(forced-colors: active)": {
+      border: 0,
+      clipPath: "inset(50%)",
+      forcedColorAdjust: "none"
+    }
+  }
 });

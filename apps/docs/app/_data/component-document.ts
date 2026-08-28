@@ -358,6 +358,14 @@ export function getComponentManifestProduct(slug: string) {
   return productsBySlug.get(slug);
 }
 
+export function getDocumentedComponentSlugs() {
+  return products.filter((product) => product.hasDocs).map((product) => product.slug);
+}
+
+export function getUndocumentedComponentSlugs() {
+  return products.filter((product) => !product.hasDocs).map((product) => product.slug);
+}
+
 export function getComponentDocument(slug: string) {
   const cached = documentCache.get(slug);
   if (cached) return cached;

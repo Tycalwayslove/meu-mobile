@@ -13,7 +13,10 @@ afterEach(() => {
 
 describe("NumberKeyboard", () => {
   it("server-renders without reading browser globals", () => {
-    expect(renderToString(<NumberKeyboard open aria-label="数字键盘" />)).toBe("");
+    const markup = renderToString(<NumberKeyboard open aria-label="数字键盘" />);
+    expect(markup).toContain('role="group"');
+    expect(markup).toContain('aria-label="数字键盘"');
+    expect(markup).toContain('data-meu-overlay-layer="number-keyboard"');
   });
 
   it("emits digit, decimal and custom-key intentions without owning a value", () => {
@@ -131,11 +134,13 @@ describe("NumberKeyboard", () => {
       </ConfigProvider>
     );
     const group = screen.getByRole("group", { name: "Number keyboard" });
-    const renderedDigits = Array.from(group.querySelectorAll<HTMLButtonElement>("[data-key]")).
-      map((button) => button.dataset.key).
-      filter((value): value is string => Boolean(value && /^\d$/.test(value)));
+    const renderedDigits = Array.from(group.querySelectorAll<HTMLButtonElement>("[data-key]"))
+      .map((button) => button.dataset.key)
+      .filter((value): value is string => Boolean(value && /^\d$/.test(value)));
     expect(renderedDigits).toHaveLength(10);
-    expect(new Set(renderedDigits)).toEqual(new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]));
+    expect(new Set(renderedDigits)).toEqual(
+      new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+    );
     expect(renderedDigits).not.toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]);
     expect(screen.getByRole("button", { name: "Delete last digit" })).toBeTruthy();
 

@@ -116,7 +116,7 @@ source: packages/example/src/Button
   );
 });
 
-test("buildComponentManifest maps product docs by source module, not display name", () => {
+test("buildComponentManifest maps shared modules to product-specific documents", () => {
   const fixtureRoot = mkdtempSync(path.join(tmpdir(), "meu-manifest-"));
   try {
     mkdirSync(path.join(fixtureRoot, "packages/example/src/Button"), { recursive: true });
@@ -132,6 +132,10 @@ test("buildComponentManifest maps product docs by source module, not display nam
       path.join(fixtureRoot, "packages/example/src/Button/Button.docs.mdx"),
       "# Button\n"
     );
+    writeFileSync(
+      path.join(fixtureRoot, "packages/example/src/Button/ThemeButton.docs.mdx"),
+      "# ThemeButton\n"
+    );
     const products: ProductComponent[] = [
       {
         category: "actions",
@@ -142,13 +146,23 @@ test("buildComponentManifest maps product docs by source module, not display nam
         priority: "P0",
         slug: "button",
         sourcePath: "packages/example/src/Button"
+      },
+      {
+        category: "actions",
+        description: "Themed action",
+        highlights: [],
+        name: "ThemeButton",
+        packageName: "@meu/example",
+        priority: "P0",
+        slug: "theme-button",
+        sourcePath: "packages/example/src/Button"
       }
     ];
     const manifest = buildComponentManifest(fixtureRoot, products, [
       { entryPath: "packages/example/src/index.ts", packageName: "@meu/example" }
     ]);
 
-    assert.equal(manifest.summary.documentedProducts, 1);
+    assert.equal(manifest.summary.documentedProducts, 2);
     const product = manifest.products[0];
     assert.ok(product);
     assert.deepEqual(product.publicExports, [
@@ -156,6 +170,9 @@ test("buildComponentManifest maps product docs by source module, not display nam
       { kind: "type", name: "MeuButtonProps" }
     ]);
     assert.equal(product.docsPath, "packages/example/src/Button/Button.docs.mdx");
+    const themeProduct = manifest.products[1];
+    assert.ok(themeProduct);
+    assert.equal(themeProduct.docsPath, "packages/example/src/Button/ThemeButton.docs.mdx");
   } finally {
     rmSync(fixtureRoot, { force: true, recursive: true });
   }

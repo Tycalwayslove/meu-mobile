@@ -19,13 +19,16 @@ export type FocusTrapOptions = {
     returnFocusRef?: RefObject<HTMLElement | null> | undefined;
 };
 
-// @public (undocumented)
-export function Portal(input: PortalProps): JSX.Element | null;
+// @public
+export function Portal(input: PortalProps): JSX.Element;
 
-// @public (undocumented)
+// @public
+export type PortalContainer = Element | DocumentFragment;
+
+// @public
 export type PortalProps = {
     children: ReactNode;
-    container?: HTMLElement | (() => HTMLElement) | null | undefined;
+    container?: PortalContainer | (() => PortalContainer | null | undefined) | null | undefined;
 };
 
 // @public (undocumented)
@@ -34,10 +37,10 @@ export function useBodyScrollLock(locked: boolean): void;
 // @public (undocumented)
 export function useFocusTrap(input: FocusTrapOptions): void;
 
-// @public (undocumented)
+// @public
 export function VisuallyHidden(input: VisuallyHiddenProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type VisuallyHiddenProps = HTMLAttributes<HTMLSpanElement>;
 
 // (No @packageDocumentation comment for this package)
