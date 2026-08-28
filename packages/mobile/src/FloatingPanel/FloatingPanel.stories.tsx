@@ -15,7 +15,7 @@ function PanelPreview({ placement = "bottom" }: { placement?: FloatingPanelPlace
         position: "relative",
         minHeight: 680,
         overflow: "hidden",
-        background: "var(--meu-color-surface-muted)"
+        background: "var(--meu-color-subtle)"
       }}
     >
       <div

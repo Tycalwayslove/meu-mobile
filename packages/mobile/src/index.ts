@@ -96,6 +96,17 @@ export { Collapse } from "./Collapse";
 export type { CollapseArrow, CollapseItem, CollapseProps, CollapseVariant } from "./Collapse";
 export { NavBar } from "./NavBar";
 export type { NavBarProps } from "./NavBar";
+export { IndexList } from "./IndexList";
+export type {
+  IndexListChangeDetails,
+  IndexListChangeSource,
+  IndexListProps,
+  IndexListRef,
+  IndexListScrollOptions,
+  IndexListSection
+} from "./IndexList";
+export { SideNav } from "./SideNav";
+export type { SideNavActivationMode, SideNavItem, SideNavProps } from "./SideNav";
 export { SegmentedControl } from "./SegmentedControl";
 export type {
   SegmentedControlOption,

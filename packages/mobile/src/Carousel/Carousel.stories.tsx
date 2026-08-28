@@ -43,14 +43,14 @@ function PreviewSlide({
         padding: "32px 72px",
         alignContent: "end",
         color: "var(--meu-color-ink)",
-        background: "var(--meu-color-surface-muted)",
+        background: "var(--meu-color-subtle)",
         border: "1px solid var(--meu-color-border)",
-        borderRadius: "var(--meu-radius-large)"
+        borderRadius: "var(--meu-radius-surface)"
       }}
     >
       <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em" }}>{eyebrow}</span>
       <strong style={{ marginTop: 8, fontSize: 32, lineHeight: 1.1 }}>{title}</strong>
-      <span style={{ marginTop: 8, color: "var(--meu-color-ink-muted)" }}>{detail}</span>
+      <span style={{ marginTop: 8, color: "var(--meu-color-muted)" }}>{detail}</span>
     </article>
   );
 }

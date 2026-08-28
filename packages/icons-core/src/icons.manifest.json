@@ -3,13 +3,48 @@
     "name": "Lucide Icons",
     "version": "1.34.0",
     "license": "ISC",
-    "licenseFile": "../../licenses/lucide-isc.txt"
+    "licenseFile": "licenses/lucide-isc.txt"
   },
   "icons": [
-    { "id": "chevron-left", "upstream": "chevron-left", "react": "MeuIconChevronLeft", "modified": false, "license": "MIT" },
-    { "id": "check", "upstream": "check", "react": "MeuIconCheck", "modified": false, "license": "MIT" },
-    { "id": "plus", "upstream": "plus", "react": "MeuIconPlus", "modified": false, "license": "MIT" },
-    { "id": "search", "upstream": "search", "react": "MeuIconSearch", "modified": false, "license": "MIT" },
-    { "id": "x", "upstream": "x", "react": "MeuIconX", "modified": false, "license": "MIT" }
+    {
+      "id": "chevron-left",
+      "upstream": "chevron-left",
+      "react": "MeuIconChevronLeft",
+      "modified": false,
+      "license": "MIT",
+      "licenseFile": "licenses/feather-mit.txt"
+    },
+    {
+      "id": "check",
+      "upstream": "check",
+      "react": "MeuIconCheck",
+      "modified": false,
+      "license": "MIT",
+      "licenseFile": "licenses/feather-mit.txt"
+    },
+    {
+      "id": "plus",
+      "upstream": "plus",
+      "react": "MeuIconPlus",
+      "modified": false,
+      "license": "MIT",
+      "licenseFile": "licenses/feather-mit.txt"
+    },
+    {
+      "id": "search",
+      "upstream": "search",
+      "react": "MeuIconSearch",
+      "modified": false,
+      "license": "MIT",
+      "licenseFile": "licenses/feather-mit.txt"
+    },
+    {
+      "id": "x",
+      "upstream": "x",
+      "react": "MeuIconX",
+      "modified": false,
+      "license": "MIT",
+      "licenseFile": "licenses/feather-mit.txt"
+    }
   ]
 }

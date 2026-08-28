@@ -25,16 +25,16 @@ export function CarouselDemo() {
                 minHeight: 240,
                 padding: "32px 72px",
                 alignContent: "end",
-                background: "var(--meu-color-surface-muted)",
+                background: "var(--meu-color-subtle)",
                 border: "1px solid var(--meu-color-border)",
-                borderRadius: "var(--meu-radius-large)"
+                borderRadius: "var(--meu-radius-surface)"
               }}
             >
               <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em" }}>
                 {item.eyebrow}
               </span>
               <strong style={{ marginTop: 8, fontSize: 30 }}>{item.title}</strong>
-              <span style={{ marginTop: 6, color: "var(--meu-color-ink-muted)" }}>
+              <span style={{ marginTop: 6, color: "var(--meu-color-muted)" }}>
                 原生控制、拖拽和只读页码指示共同工作。
               </span>
             </article>

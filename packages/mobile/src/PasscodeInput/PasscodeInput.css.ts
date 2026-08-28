@@ -137,7 +137,7 @@ export const dot = style({
   width: 10,
   height: 10,
   background: "currentColor",
-  borderRadius: "var(--meu-radius-full)"
+  borderRadius: "var(--meu-radius-round)"
 });
 
 export const character = style({
@@ -153,7 +153,7 @@ export const caret = style({
   width: 2,
   height: 24,
   background: "var(--meu-color-accent)",
-  borderRadius: "var(--meu-radius-full)",
+  borderRadius: "var(--meu-radius-round)",
   animation: `${blink} 1s step-end infinite`,
   "@media": {
     "(prefers-reduced-motion: reduce)": { animation: "none" }

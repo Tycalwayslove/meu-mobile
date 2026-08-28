@@ -254,3 +254,18 @@ React Web 直接输出 `aria-hidden`、不可聚焦且 `pointer-events:none` 的
 默认 MutationObserver 只修复水印 SVG 自身的删除、属性、文本与子树变更，并通过 `onRemove` 提供审计信号；它只
 提高随手删除的成本，具备 DOM 控制权的调用方仍可关闭观察或移除整个宿主。未来 uni-app 复用内容优先级、图片
 回退和几何契约，使用 canvas 或平台原生视图重新实现渲染与宿主观察。
+
+## ADR-027：IndexList 与 SideNav 补齐 P0 导航目录并保持滚动、路由解耦
+
+设计目录把 IndexList 与 SideNav 列为 P0，但早期路线图遗漏了它们。IndexList 采用数据化 sections，而不是限制
+compound child 类型；key 同时承担分组身份、索引可访问名称和 imperative scroll 目标。组件只拥有自己的有界
+滚动视口，滚动观察使用本地 scrollTop / offsetTop，不监听 window，也不把页面级 sticky 或虚拟化塞入基础导航。
+
+右侧索引使用可滚动的 44×44px 原生按钮列，roving tab stop 与 ArrowUp / ArrowDown / Home / End 让键盘路径和
+触摸路径等价。`onIndexChange` 明确区分 index 与 scroll 来源；`ref.scrollTo` 返回目标是否存在，调用方可选择
+平滑滚动与焦点移动。
+
+SideNav 继续使用 `value / defaultValue / onChange`。items 带 content 时采用 WAI-ARIA vertical tabs，默认保留
+非活动面板状态；不带 content 时降为 navigation button，当前项使用 `aria-current="page"`，从而允许 Next 路由
+或业务状态持有内容。两者均不进入 form-react。未来 uni-app 复用 sections/items、值和事件状态机，替换 DOM
+滚动、焦点与 ARIA 实现。

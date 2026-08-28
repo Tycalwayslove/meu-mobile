@@ -15,6 +15,7 @@ import { InformationDemo } from "./InformationDemo";
 import { InfiniteListDemo } from "./InfiniteListDemo";
 import { ImageViewerDemo } from "./ImageViewerDemo";
 import { ImageUploaderDemo } from "./ImageUploaderDemo";
+import { IndexedNavigationDemo } from "./IndexedNavigationDemo";
 import { NavigationDemo } from "./NavigationDemo";
 import { NumberKeyboardDemo } from "./NumberKeyboardDemo";
 import { OverlayDemo } from "./OverlayDemo";
@@ -148,6 +149,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>页面导航、标签与流程状态</h2>
           <NavigationDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>索引列表与侧边分类导航</h2>
+          <IndexedNavigationDemo />
         </section>
         <section className={styles.formSection}>
           <h2>加载、空状态与流程结果</h2>

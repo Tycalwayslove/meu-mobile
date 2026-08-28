@@ -115,7 +115,7 @@ export const expandTarget = style({
 export const chevron = style({
   display: "grid",
   placeItems: "center",
-  transition: "transform var(--meu-motion-fast)",
+  transition: "transform var(--meu-motion-exit)",
   transform: "rotate(180deg)",
   selectors: { '&[data-expanded="true"]': { transform: "rotate(270deg)" } },
   "@media": { "(prefers-reduced-motion: reduce)": { transition: "none" } }
@@ -152,7 +152,7 @@ export const selection = style({
   boxSizing: "border-box",
   border: "1.5px solid var(--meu-color-border)",
   borderRadius: "var(--meu-radius-round)",
-  color: "var(--meu-color-on-accent)",
+  color: "var(--meu-color-accent-contrast)",
   background: "var(--meu-color-surface)",
   selectors: {
     '&[data-multiple="true"]': { borderRadius: "var(--meu-radius-control)" },

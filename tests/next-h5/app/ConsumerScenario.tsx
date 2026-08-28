@@ -45,6 +45,7 @@ import {
   FloatingPanel,
   Image,
   ImageViewer,
+  IndexList,
   InfiniteList,
   List,
   Mask,
@@ -58,6 +59,7 @@ import {
   Result,
   SearchField,
   SegmentedControl,
+  SideNav,
   Skeleton,
   Steps,
   SwipeActions,
@@ -269,6 +271,10 @@ export function ConsumerScenario() {
   const [watermarkMessage, setWatermarkMessage] = useState("水印未发生 DOM 变更");
   const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
   const [navigationMessage, setNavigationMessage] = useState("等待导航操作");
+  const [indexedNavigationMessage, setIndexedNavigationMessage] =
+    useState("索引 A / 分类 featured");
+  const [activeIndexKey, setActiveIndexKey] = useState("A");
+  const [sideNavKey, setSideNavKey] = useState("featured");
   const [previewMode, setPreviewMode] = useState<"summary" | "detail">("summary");
   const [previewPage, setPreviewPage] = useState(1);
   const [contentTab, setContentTab] = useState("overview");
@@ -660,6 +666,60 @@ export function ConsumerScenario() {
               { key: "profile", label: "我的", icon: <MeuIconCheck size={22} />, disabled: true }
             ]}
           />
+        </section>
+
+        <section className="integration-indexed-navigation" aria-label="索引与侧边导航">
+          <IndexList
+            aria-label="路线索引列表"
+            sections={[
+              {
+                key: "A",
+                content: (
+                  <List divider="full">
+                    <Cell title="安静早晨路线" />
+                    <Cell title="奥体中心路线" />
+                  </List>
+                )
+              },
+              {
+                key: "B",
+                content: (
+                  <List divider="full">
+                    <Cell title="滨江夜跑路线" />
+                    <Cell title="北山散步路线" />
+                  </List>
+                )
+              },
+              {
+                key: "C",
+                content: (
+                  <List divider="full">
+                    <Cell title="城市绿道路线" />
+                    <Cell title="茶园轻徒步" />
+                  </List>
+                )
+              }
+            ]}
+            onIndexChange={(key) => {
+              setActiveIndexKey(key);
+              setIndexedNavigationMessage(`索引 ${key} / 分类 ${sideNavKey}`);
+            }}
+          />
+          <SideNav
+            aria-label="商品侧边分类"
+            value={sideNavKey}
+            items={[
+              { key: "featured", label: "精选", content: "精选活动与限时推荐" },
+              { key: "food", label: "食品", badge: 3, content: "食品与饮品分类" },
+              { key: "home", label: "家居", content: "家居与生活分类" },
+              { key: "service", label: "服务", content: "服务分类", disabled: true }
+            ]}
+            onChange={(key) => {
+              setSideNavKey(key);
+              setIndexedNavigationMessage(`索引 ${activeIndexKey} / 分类 ${key}`);
+            }}
+          />
+          <output aria-live="polite">{indexedNavigationMessage}</output>
         </section>
 
         <div className="integration-list">

@@ -13,9 +13,9 @@ export function FloatingPanelDemo() {
         position: "relative",
         minHeight: 580,
         overflow: "hidden",
-        background: "var(--meu-color-surface-muted)",
+        background: "var(--meu-color-subtle)",
         border: "1px solid var(--meu-color-border)",
-        borderRadius: "var(--meu-radius-large)"
+        borderRadius: "var(--meu-radius-surface)"
       }}
     >
       <div

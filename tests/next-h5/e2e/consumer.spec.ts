@@ -34,6 +34,24 @@ test("renders a non-interactive watermark and restores its removed overlay", asy
   await expect(section.getByText("水印已恢复")).toBeVisible();
 });
 
+test("navigates indexed sections and vertical category panels", async ({ page }) => {
+  const section = page.getByRole("region", { name: "索引与侧边导航" });
+  const indexList = section.locator('[data-meu-component="index-list"]');
+  const indexB = indexList.getByRole("button", { name: "B" });
+
+  await indexB.click();
+  await expect(indexB).toHaveAttribute("aria-current", "location");
+  await expect(section.getByText("索引 B / 分类 featured")).toBeVisible();
+
+  const featured = section.getByRole("tab", { name: "精选" });
+  await featured.focus();
+  await featured.press("ArrowDown");
+  const food = section.getByRole("tab", { name: /食品/ });
+  await expect(food).toHaveAttribute("aria-selected", "true");
+  await expect(section.getByRole("tabpanel", { name: /食品/ })).toContainText("食品与饮品分类");
+  await expect(section.getByText("索引 B / 分类 food")).toBeVisible();
+});
+
 test("binds validation, clear action and successful submission", async ({ page }) => {
   const input = page.getByLabel("店铺名称");
   await page.getByRole("button", { name: "保存店铺" }).click();
@@ -1044,6 +1062,7 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
     .getByText("卡片", { exact: true })
     .click();
 
+  await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
     page.getByText(

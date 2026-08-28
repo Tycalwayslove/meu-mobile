@@ -73,6 +73,12 @@ icons-core ─> icons-react            │
 - Watermark 是纯展示容器，不进入表单层，也不拥有鉴权或防截图能力。React Web 使用同构 SVG pattern 完成
   文字、多行和图片平铺，并用 MutationObserver 原位恢复被误删或修改的水印节点；未来 uni-app 复用内容回退、
   几何、间距、偏移和旋转契约，替换 SVG、CSS token 与 DOM 观察实现。
+- IndexList 固定为自身的有界滚动容器，Meu 持有 sections、索引激活来源与命令式定位契约；React Web 使用
+  `scrollTop`、sticky section header 和 44px 索引按钮实现快速定位，不监听页面滚动。未来 uni-app 使用
+  scroll-view 重建滚动和索引焦点，复用稳定 key 与事件模型。
+- SideNav 是与路由解耦的垂直同层级导航：带 content 时提供完整 vertical tabs，不带 content 时只提供
+  navigation button 与 `aria-current`。值、禁用和 activation mode 属于共享契约，DOM tabpanel、焦点与 ARIA
+  留在 React Web 适配层。
 
 ## Next.js 边界
 

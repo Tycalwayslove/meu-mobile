@@ -172,7 +172,7 @@ export const key = recipe({
         fontSize: 16,
         fontWeight: 700,
         selectors: {
-          "&:active:not(:disabled)": { background: "var(--meu-color-accent-strong)" },
+          "&:active:not(:disabled)": { background: "var(--meu-color-accent-pressed)" },
           "&:disabled": {
             color: "var(--meu-color-muted)",
             background: "var(--meu-color-subtle)",
@@ -248,7 +248,7 @@ export const triggerSuffix = style({
   color: "var(--meu-color-muted)",
   background: "var(--meu-color-subtle)",
   border: "1px solid var(--meu-color-border)",
-  borderRadius: "var(--meu-radius-small)",
+  borderRadius: "var(--meu-radius-control)",
   fontSize: 11,
   fontWeight: 700,
   letterSpacing: "0.04em"

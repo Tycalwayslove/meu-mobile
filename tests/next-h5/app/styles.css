@@ -198,6 +198,22 @@ textarea {
   margin-bottom: 24px;
 }
 
+.integration-indexed-navigation {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.integration-indexed-navigation [data-meu-component="index-list"] {
+  height: 320px;
+}
+
+.integration-indexed-navigation > output {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-swipe-actions {
   display: grid;
   gap: 12px;
@@ -215,7 +231,7 @@ textarea {
   min-height: 540px;
   overflow: hidden;
   border: 1px solid var(--meu-color-border);
-  border-radius: var(--meu-radius-large);
+  border-radius: var(--meu-radius-surface);
 }
 
 .integration-floating-panel-map {
@@ -223,7 +239,7 @@ textarea {
   min-height: 540px;
   place-items: center;
   color: var(--meu-color-muted);
-  background-color: var(--meu-color-surface-muted);
+  background-color: var(--meu-color-subtle);
   background-image:
     linear-gradient(var(--meu-color-border) 1px, transparent 1px),
     linear-gradient(90deg, var(--meu-color-border) 1px, transparent 1px);
@@ -243,7 +259,7 @@ textarea {
   padding: 6px 10px;
   background: var(--meu-color-surface);
   border: 1px solid var(--meu-color-border);
-  border-radius: var(--meu-radius-small);
+  border-radius: var(--meu-radius-control);
 }
 
 .integration-navigation {

@@ -44,6 +44,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 - Batch 3B2：Card、Collapse（已完成）
 - Batch 3C1：NavBar、SegmentedControl、PaginationDots（已完成）
 - Batch 3C2：Tabs、TabBar、Steps（已完成）
+- Batch 3D：IndexList、SideNav（目录一致性补齐，已完成）
 
 重点：先完成 Cell/List，再基于它们组装导航与列表型组件。
 
@@ -56,13 +57,13 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 
 重点：统一 Portal、焦点捕获与恢复、滚动锁、Escape、reduced motion 和命令式 helper 的可替换性。
 
-## Batch 5：选择器与复合输入
+## Batch 5：选择器与复合输入（已完成）
 
 - Picker（已完成）、CascadePicker（已完成）、DatePicker（已完成）、TimePicker（已完成）、Calendar（已完成）、DateRangePicker（已完成）
 
 重点：复用 `date-adapter`，核心包不绑定具体日期库和业务时区。
 
-## Batch 6：手势、高成本与业务验证组件
+## Batch 6：手势、高成本与业务验证组件（已完成）
 
 - PullToRefresh（已完成）、InfiniteList（已完成）、Carousel（已完成）、SwipeActions（已完成）、FloatingPanel（已完成）
 - VirtualList（已完成）、NumberKeyboard（已完成）、PasscodeInput（已完成）、ImageViewer（已完成）、ImageUploader（已完成）、TreeSelect（已完成）、Watermark（已完成）
