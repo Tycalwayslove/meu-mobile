@@ -26,6 +26,10 @@ export const textarea = recipe({
         background: "var(--meu-color-subtle)",
         cursor: "not-allowed",
         resize: "none"
+      },
+      "&:read-only:not(:disabled)": {
+        background: "var(--meu-color-subtle)",
+        resize: "none"
       }
     }
   },
@@ -59,6 +63,11 @@ export const textarea = recipe({
       error: { borderColor: "var(--meu-color-danger)" }
     }
   },
+  compoundVariants: [
+    { variants: { autoSize: true, size: "small" }, style: { minHeight: 0 } },
+    { variants: { autoSize: true, size: "medium" }, style: { minHeight: 0 } },
+    { variants: { autoSize: true, size: "large" }, style: { minHeight: 0 } }
+  ],
   defaultVariants: { autoSize: false, size: "medium", status: "default" }
 });
 
@@ -67,5 +76,7 @@ export const counter = style({
   color: "var(--meu-color-muted)",
   fontFamily: "var(--meu-font-ui)",
   fontSize: "var(--meu-font-meta-font-size)",
-  lineHeight: "var(--meu-font-meta-line-height)"
+  fontVariantNumeric: "tabular-nums",
+  lineHeight: "var(--meu-font-meta-line-height)",
+  userSelect: "none"
 });

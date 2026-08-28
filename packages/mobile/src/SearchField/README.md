@@ -1,4 +1,4 @@
 # SearchField
 
-用于移动端站内搜索和列表过滤。支持受控/非受控值、回车搜索、清除动作、加载态和 `Field` 语义。
-组件不请求接口、不做防抖，也不保存业务搜索历史；这些行为由消费者组合。
+SearchField 的 V2 行为、事件、兼容性、证据与变更记录以
+[`SearchField.docs.mdx`](./SearchField.docs.mdx) 为唯一事实源。

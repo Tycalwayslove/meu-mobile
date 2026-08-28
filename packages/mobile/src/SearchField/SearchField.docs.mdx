@@ -1,0 +1,222 @@
+---
+name: SearchField
+slug: search-field
+package: "@meu/mobile"
+exports: [SearchField]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    forms-searchfield--default,
+    forms-searchfield--controlled-and-submitted,
+    forms-searchfield--clear-and-focus-contract,
+    forms-searchfield--error,
+    forms-searchfield--disabled,
+    forms-searchfield--read-only,
+    forms-searchfield--loading,
+    forms-searchfield--native-form-submission,
+    forms-searchfield--large
+  ]
+source: packages/mobile/src/SearchField
+---
+
+# SearchField
+
+## 当前能力
+
+- 使用真实的 `input[type="search"]`，支持 ref、`name/form/autoComplete/inputMode` 等原生输入属性，以及受控和非受控值。
+- 支持 Enter 搜索、IME 组合输入、clear、readOnly、disabled、loading、error 和三档高度；所有可操作目标至少 44×44 CSS px。
+- `onChange/onClear/onSearch` 保留原有首参，并提供含稳定 `source` 与原始 React event 的 details 第二参。
+- 有 `onSearch` 时组件独占 Enter 并阻止原生 form submit；没有 `onSearch` 时 Enter 完全交还原生 form。
+- loading 时输入仍可编辑，但会隐藏 clear、公告搜索中状态，并阻止 Enter 产生重复回调或原生提交。
+
+当前状态为 `implementation`。单元、SSR 与一条 Story play 已补齐；axe、完整 Light/Dark/RTL/字号矩阵、移动 WebKit/Chromium 专属 E2E 和真机读屏尚未完成，因此不能标记为 commercial。
+
+## 何时使用
+
+用于商城商品、订单、品牌或当前列表的文本搜索。适合“输入关键词后按 Enter 发起请求”以及“输入即过滤、Enter 确认”的场景。
+
+## 何时不要使用
+
+普通表单文本、地址或多行内容使用 `Input`/`TextArea`。筛选项很多时使用独立筛选页面；搜索建议、历史记录和结果浮层应由 Combobox/Popover 类模式组合，SearchField 本身不管理请求、列表或路由。
+
+## 结构与状态
+
+结构为 wrapper → 装饰性搜索图标 → native search input → clear button 或 loading status。状态包括 default、focus、error、read-only、disabled 与 loading。
+
+- clear 只在 `clearable=true`、值非空、可编辑、非 loading、非 disabled 时出现。
+- readOnly 保留焦点、复制与 Enter 搜索，但不允许改值或清空。
+- disabled 使用原生 disabled，不能获得焦点或提交值。
+- loading 不锁住输入编辑，方便用户修正查询；它只锁住提交动作。
+
+## 基础用法
+
+```tsx
+const [query, setQuery] = useState("");
+
+<SearchField
+  aria-label="搜索商品"
+  placeholder="商品、品牌或订单"
+  value={query}
+  onChange={(nextValue, details) => {
+    setQuery(nextValue);
+    analytics.track("search_value", { source: details.source });
+  }}
+  onSearch={(nextValue, details) => {
+    void searchProducts(nextValue);
+  }}
+/>;
+```
+
+SearchField 不内置 debounce、请求取消、缓存、历史或路由同步。调用方应在值变化后取消旧请求，并在请求期间传入 `loading`。
+
+## 受控与非受控
+
+传 `value` 时由调用方控制，组件只通过 `onChange(nextValue, details)` 请求更新；清除后如果调用方不更新 `value`，旧值仍会显示。只传 `defaultValue` 时组件拥有后续值。不要在生命周期内切换受控模式。
+
+## 表单集成
+
+```tsx
+<form
+  action="/search"
+  onSubmit={(event) => {
+    // 这里是唯一请求入口；不要同时传 onSearch。
+  }}
+>
+  <SearchField aria-label="搜索订单" name="query" />
+</form>
+```
+
+- 未传 `onSearch`：Enter 保留浏览器原生 submit，适用于 Server Action、GET form 和统一 `onSubmit`。
+- 传入 `onSearch`：Enter 先 `preventDefault()`，只调用 `onSearch`，不会再触发外围 form submit，避免一次按键发起两次请求。
+- consumer `onKeyDown` 先执行；它调用 `preventDefault()` 后，SearchField 不再调用 `onSearch`。
+- loading 或重复 Enter 会被阻止。disabled input 不参与 FormData；readOnly input 仍参与。
+
+如果旧代码故意同时依赖 `onSearch` 和 `onSubmit`，应迁移为单一入口。确需在回调中走 form 流程时，可显式调用目标 form 的 `requestSubmit()`，并确保只有一处发请求。
+
+## Props
+
+API 表由 `SearchFieldProps`、`SearchFieldSize`、`SearchFieldStatus` 与事件 details 类型生成。关键跨字段规则如下：
+
+- `clearable` 默认 true；readOnly、disabled、loading 始终优先隐藏 clear。
+- `enterKeyHint` 默认 `search`，只提示软键盘外观，不改变 Enter 所有权。
+- `className/style` 作用在视觉 wrapper；其余原生 input 属性传给真实 input。内部 class 与 DOM 层级不是稳定 API。
+- `clearLabel/loadingLabel` 可覆盖内置中英文 accessible name；未覆盖时跟随 `ConfigProvider.locale`。
+- `status="error"`、Field error 或有效 `aria-invalid` 都进入 error 状态；`grammar/spelling` 值会原样保留。
+
+## Events
+
+| 事件        | 参数                      | source | 顺序与取消规则                                                                |
+| ----------- | ------------------------- | ------ | ----------------------------------------------------------------------------- |
+| `onChange`  | `(value, details)`        | input  | 原生 change 后更新非受控状态，再调用；`details.event` 是 input change event   |
+| `onChange`  | `(value, details)`        | clear  | clear 请求空值后调用，随后恢复 input 焦点，再调用 `onClear`                   |
+| `onClear`   | `(details)`               | clear  | 只由内置 clear button 触发；与同次 `onChange` 共用同一个 details/event        |
+| `onSearch`  | `(value, details)`        | enter  | consumer keydown 未取消且非组合输入、非 repeat/loading 时触发；默认行为已阻止 |
+| `onKeyDown` | 原生 React keyboard event | 不适用 | 总是先于 SearchField 的 Enter 逻辑；`preventDefault()` 可取消后续搜索         |
+
+details 中的 `event` 是 React SyntheticEvent。不要把 DOM event 序列化进日志；异步任务只保存需要的 value/source。
+
+## Ref 与命令式方法
+
+ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()` 并读取 `form`。内置 clear 在通知 `onClear` 前恢复 input 焦点。除测试和明确焦点恢复外，不要通过 ref 修改受控 value。
+
+## 键盘操作
+
+| 按键         | 行为                                                         |
+| ------------ | ------------------------------------------------------------ |
+| Tab          | 聚焦 input；值非空且可清除时，下一次 Tab 可聚焦 clear button |
+| Enter        | 有 `onSearch` 时搜索；无 `onSearch` 时交给原生 form submit   |
+| Enter (IME)  | 完成候选词，不触发搜索                                       |
+| Enter repeat | 阻止重复搜索和重复原生提交                                   |
+| Space        | clear button 聚焦时按原生 button 规则清空                    |
+
+浏览器对 `input[type="search"]` 的 Escape 行为并不一致，Escape 清空不属于当前公开契约；使用内置 clear button 可获得一致事件和焦点行为。
+
+## 触摸与手势
+
+没有自定义手势。输入区高度与 clear button 均至少 44 CSS px；clear 使用原生 button，tap 后重新聚焦输入，鼠标按下不会先夺走焦点。组件不拦截页面滚动、不注册全局 pointer listener，也不自行 debounce 快速输入。
+
+## 无障碍
+
+输入使用原生 searchbox 语义，必须通过 `Field label`、`aria-label` 或有效 `aria-labelledby` 获得名称。搜索图标为装饰内容。clear 是有名称的原生 button；loading 插入 `role="status"` 并在 input 设置 `aria-busy`，避免 busy 容器延迟状态公告。error 通过 `aria-invalid` 以及 Field 的 description/error 关联表达，不能只看边框颜色。
+
+内置中文/英文 clear 和 loading 名称只覆盖现有 locale；其他语言必须传 `clearLabel/loadingLabel`。当前尚未留下 VoiceOver/TalkBack 与 200% 字号证据。
+
+## 动效
+
+焦点、背景和边框过渡使用共享 motion token。loading ring 只在任务进行中旋转；`prefers-reduced-motion: reduce` 时完全停止并保留静态缺口 ring，状态仍通过 `role=status` 和 `aria-busy` 表达。没有永久装饰性动画。
+
+## 主题与定制
+
+颜色、圆角、尺寸和 motion 只引用 Meu 语义 Token。稳定定制入口为 size、status、原生属性、`className/style` 以及 `data-size/data-state/data-readonly`。内部 vanilla-extract class、icon 和 wrapper 层级不是公开 API。
+
+## SSR 与 Next.js
+
+渲染不读取 window/document，SSR 单测证明会输出真实 search input、name、value 与 readOnly 状态。组件包含 `"use client"`，应从 Next Client Component 使用；服务端与首次客户端的 `value/defaultValue/loading/readOnly` 必须一致以避免 hydration mismatch。
+
+## RTL 与国际化
+
+布局使用 `padding-inline`，会跟随上层 `dir`。搜索和 clear 图标本身对称，不需要镜像。业务 placeholder、label 和请求结果文案由调用方本地化；内置 clear/loading 名称可覆盖。
+
+RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立浏览器证据。
+
+## 浏览器与 WebView
+
+实现使用原生 input/button、Flex、CSS logical properties、`:focus-within`、native click 和基础 key/composition events。仓库静态语法门禁不等于运行时证明；产品完整支持口径仍为 iOS Safari/WKWebView 15+、Android Chrome/WebView 89+，iOS 13–14 与 Chromium 79–88 为观察档。
+
+待补 iOS 中文输入法、Android Gboard、WKWebView 软键盘 `enterKeyHint`、VoiceOver/TalkBack 和 tap-clear 键盘保持的真机记录。
+
+## 边界情况与已知限制
+
+- 组件不 trim、规范化或限制关键词；空字符串是否可搜索由业务决定。
+- loading 允许继续编辑，但阻止 Enter；业务需要在 query 改变时取消或忽略旧请求。
+- clear 是值变更请求，不保证受控调用方接受空值。
+- `onSearch` 现在阻止外围 form submit；依赖旧“双触发”行为的代码必须迁移到单一请求入口。
+- IME 通过 composition state、blur reset、native `isComposing` 与兼容性 `keyCode=229` 防护，但仍需真机输入法矩阵。
+- 浏览器原生 search Escape/cancel 行为不作为契约；WebKit cancel 按钮被隐藏以避免绕过 `onClear`。
+- `className/style` 历史上作用于 wrapper，而非原生 input；修改该行为会是破坏性变更。
+
+## 性能预算
+
+每个实例仅维护一个非受控 value state 与一个 composition ref，不注册 effect、observer、timer 或全局 listener。每次输入只产生一次本地更新和调用方回调；请求、防抖与竞态取消由业务层负责。
+
+## 测试证据
+
+- Unit: `SearchField.test.tsx` 覆盖事件首参/details、clear 顺序与焦点、readOnly、disabled、loading、IME、repeat、consumer cancellation、原生/回调 form 所有权和受控 live native value
+- Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复
+- Axe: 待补
+- SSR/hydration: `renderToString` 覆盖 native type/name/value/readOnly；hydration 专项待补
+- RTL: 使用 logical CSS；浏览器矩阵待补
+- Reduced motion: CSS 静态 ring 已实现；浏览器 computed-style 证明待补
+- Mobile Chromium/WebKit E2E: 现有隔离 H5 搜索/清除路径可复用，V2 details/form/IME 专项待补
+- Chromatic Light/Dark: Story 集已覆盖状态入口，显式双主题审批待补
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 增加 axe、hydration、RTL、强制色、200% 字号、Light/Dark Chromatic 与移动双浏览器专项证据。
+- 在真实 iOS 中文输入法、Android Gboard、VoiceOver 与 TalkBack 验证 Enter、loading 公告和 tap-clear 键盘保持。
+- 与 Field V2 契约合并 required、显式 id、description/error 和 composite label 修复后的集成证据。
+- Figma 暂缺可追溯 file key/node ID，设计资产补齐后更新 frontmatter。
+
+### 已完成
+
+- 冻结 Enter 与 native form 的单一所有权，尊重 consumer `preventDefault()`。
+- 为 change/clear/search 增加稳定 source/details/event，同时保持旧首参用法。
+- 修复 readOnly clear、IME composition、repeat Enter、loading 重复提交和焦点恢复边界。
+- loading 改为可公告状态，reduced motion 改为静态 ring；补齐强制色与 44px clear 目标。
+- 补齐公开 TSDoc、SSR/单元测试、Story play、完整留存文档和 README 指针。
+
+## 变更记录
+
+| 日期       | 版本  | 类型           | 内容                                                                   | 迁移说明                                                              |
+| ---------- | ----- | -------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 2026-08-28 | 0.1.0 | implementation | 增加 details、单一 Enter 所有权、IME/readOnly/loading/focus 与动效契约 | 旧单参回调继续可用；依赖 onSearch+form 双触发的代码迁移到单一请求入口 |

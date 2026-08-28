@@ -1,0 +1,197 @@
+---
+name: Field
+slug: field
+package: "@meu/mobile"
+exports: [Field]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    forms-field--default,
+    forms-field--error,
+    forms-field--explicit-control-id,
+    forms-field--composite-control,
+    forms-field--external-validation
+  ]
+source: packages/mobile/src/Field
+---
+
+# Field
+
+## 当前能力
+
+- 将一个主要控件与可见 label、description、error、required 和 invalid 状态组合。
+- 为单个直接 React 子元素注入稳定 `id`，并合并调用方与 Field 的 `aria-describedby`，不会覆盖调用方已有的说明节点。
+- 原生 labelable HTML 元素默认使用 `label[for]`；React 组件默认使用 `aria-labelledby`，避免把 `label[for]` 指向 `div`、`role=group` 等非 labelable 节点。
+- `required` 与 `invalid` 同时进入 Field context；native 关联收到真实 `required`，不支持 required 的 ARIA/按钮路径通过本地化隐藏说明表达，避免输出无效属性。
+- 根节点支持标准 div 属性、`style`、`className`、`id`、事件与 `HTMLDivElement` ref。
+
+这些能力仍处于 `implementation`。axe、移动端专属 E2E、Chromatic Light/Dark 矩阵与真机读屏记录尚未完成，不能标记为 commercial。
+
+## 何时使用
+
+用于一个表单控件及其标签、帮助文字和校验反馈。一个 Field 应只有一个主要提交值或一个语义完整的组合控件，例如 RadioGroup、CheckboxGroup。
+
+## 何时不要使用
+
+不要用 Field 包裹互不相关的多个输入；这会让单一 label、required 和 error 无法准确归属。纯展示信息使用普通排版；一组独立字段使用多个 Field 和 `fieldset/legend` 组合。
+
+## 结构与状态
+
+结构顺序固定为 label → control → description → error，与视觉、DOM 和读屏阅读顺序一致。根节点暴露：
+
+- `data-meu-component="field"`
+- `data-meu-slot="label|description|error"`
+- `data-required="true|false"`
+- `data-invalid="true|false"`
+
+Field 本身没有 pressed、loading、selected 或 disabled 状态；这些属于实际控件。error 有内容或 `invalid=true` 时进入 invalid。
+
+## 基础用法
+
+原生元素会自动使用 native label：
+
+```tsx
+<Field label="收货人" description="请与证件姓名一致" error={error} required>
+  <input name="recipient" autoComplete="name" />
+</Field>
+```
+
+Meu 单一原生控件包装器应显式选择 `native`，以保留点击标签聚焦和浏览器原生必填校验：
+
+```tsx
+<Field label="手机号" labelAssociation="native" required>
+  <TextInput id="phone" name="phone" inputMode="tel" autoComplete="tel" />
+</Field>
+```
+
+组合控件使用 ARIA 命名，不生成无效的 `label[for]`：
+
+```tsx
+<Field label="配送方式" labelAssociation="aria" required>
+  <RadioGroup name="shipping">...</RadioGroup>
+</Field>
+```
+
+## 受控与非受控
+
+不适用。Field 不持有控件值，也不缓存校验状态；`error`、`invalid` 与 `required` 均由调用方声明。受控/非受控契约由子控件负责。
+
+## 表单集成
+
+- `native` 关联会把 `required=true` 注入直接子元素，并由浏览器 constraint validation 与 FormData 按子控件本身的 `name/value` 工作。
+- `aria` 关联只负责命名。支持 required 的组合控件应在自身合法 role 上提供 `required`/`aria-required`；按钮或 `role=group` 等不支持该属性的控件会由 Field 追加本地化隐藏必填说明。它不会替代原生 constraint validation，组合控件仍须在自身隐藏 input 或表单 adapter 中实现提交与校验。
+- `invalid=true` 可在错误文案由页面级区域呈现时只设置状态；若 `error` 有内容，Field 自动 invalid 并关联错误节点。
+- React Hook Form adapter 必须继续把 `name/ref/onBlur/disabled/required` 传给实际控件，Field 不代理这些值。
+
+## Props
+
+API 表由 API Extractor 根据 `FieldProps` 生成。跨字段规则：
+
+- 直接子元素的显式 `id` 优先于 `controlId`；两者都没有时使用稳定的 React `useId`。
+- 根 `id` 只标识 Field 容器；若未提供 control id，则控制 id 为 `${rootId}-control`，不会复用根 id。
+- `labelAssociation="auto"` 只将直接原生 labelable HTML 元素识别为 native；React 组件使用 aria。封装单一 input/textarea 的组件应明确传 `native`。
+- `requiredText` 可覆盖 ARIA 回退路径的“必填/Required”文案；默认值跟随 `ConfigProvider.locale`。控件已自行声明合法 required 语义时不会重复追加。
+- `aria-label` 是调用方的明确命名选择，因此不会再追加 Field label 的 `aria-labelledby`。
+- `description`、`error` 和 `label` 接受 `0` 或空字符串；只有 `null`、`undefined`、`false` 表示不渲染。
+
+## Events
+
+Field 没有专有事件。根节点透传标准 div 事件；控件事件由 child 自己拥有。根事件冒泡不应被当作字段值变化事实源。
+
+## Ref 与命令式方法
+
+ref 指向 Field 根 `HTMLDivElement`，适合滚动到首个错误字段或测量布局。要 focus、select 或读取原生 validity，ref 必须传给子控件。
+
+## 键盘操作
+
+| 按键            | 行为                                  |
+| --------------- | ------------------------------------- |
+| Tab / Shift+Tab | Field 不增加 tab stop；焦点进入子控件 |
+| Enter / Space   | 由子控件原生或 APG 交互契约处理       |
+
+native label 点击聚焦对应 labelable 控件；ARIA 组合标签只提供名称，不伪装成可操作元素。
+
+## 触摸与手势
+
+Field 无自有手势。native label 可扩大单一控件的可点击文本区域；ARIA 组合标签不会拦截触摸。实际交互目标仍由子控件保证至少 44×44 CSS px。
+
+## 无障碍
+
+- description 先于 error 出现在 `aria-describedby`，调用方已有 id 保留在最前，并按 token 去重。
+- error 使用 `role="alert"`；适用于校验结果发生变化后的及时公告。不要在每次按键时重复替换相同错误。
+- required 星号为视觉符号并 `aria-hidden`；required 事实由 native/合法 ARIA 属性或 Field 隐藏说明表达，不依赖颜色或符号，也不会把 `aria-required` 错放到 button/group。
+- 组合控件通过 `aria-labelledby` 引用可见 `<span>`，不会生成指向非 labelable 元素的 `label[for]`。
+- 若调用方提供 `aria-label`，该名称优先；视觉 label 仍显示，但团队需要确保两者表达一致。
+
+## 动效
+
+不适用。Field 不引入进入、退出或循环动画；子控件状态变化遵循各自 reduced-motion 契约。
+
+## 主题与定制
+
+当前视觉使用全局字体、ink、muted、danger 与 spacing Token。稳定定制入口为根 `className/style` 与公开 data 属性；内部生成 class 不属于 API。错误同时由文字、`aria-invalid` 和 alert 语义表达。
+
+## SSR 与 Next.js
+
+Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydration 树一致时保持关联稳定。调用方不可根据客户端条件改变首屏 Field 顺序，否则 React 自身的 id 序列会变化。根 `id` 或 child `id` 可用于需要跨树引用的稳定业务标识。
+
+## RTL 与国际化
+
+布局使用 block 流和逻辑 margin；required 标记通过 `margin-inline-start` 跟随方向。label/description/error 由业务 locale 提供；仅 required 无障碍回退文案内置“必填/Required”，可用 `requiredText` 覆盖。中英文长文本与 200% 字号应允许自然换行。
+
+## 浏览器与 WebView
+
+实现只依赖 React、原生 label/ARIA 和标准 DOM 属性；目标为 iOS Safari/WKWebView 15+、Android Chrome/WebView 89+。静态语法门禁不能代替 VoiceOver/TalkBack、浏览器原生校验气泡和输入法真机验证。
+
+## 边界情况与已知限制
+
+- 自动属性注入只适用于一个直接 React element。Fragment、多个控件或中间布局组件必须由内部控件调用 `useFieldContext` 并合并自身 ARIA；当前不会递归克隆后代。
+- `auto` 无法从 React 组件类型可靠判断最终 DOM，因此默认使用更安全的 ARIA 组合语义。单一 input wrapper 若需要 native label 点击和 constraint validation，必须设置 `labelAssociation="native"`。
+- Field-aware 旧组件中仍有使用 `callerAria || fieldAria` 的实现；Field 对直接子元素的合并已避免丢失，但深层包装组件需要在各自 V2 批次改为 token 合并。
+- 首次错误自动聚焦与整表 error summary 由 Form 层负责，Field 不自行抢焦点。
+
+## 性能预算
+
+每个 Field 只克隆一个直接 React element，不注册全局监听、不测量布局、不触发额外 effect。上下文对象随 Field render 更新；高频输入状态应留在控件内部或表单订阅层，避免重渲染整张表。
+
+## 测试证据
+
+- Unit: `Field.test.tsx`，覆盖显式 id、说明合并/去重、native/composite 标签、required/invalid context、ARIA 命名优先级、根 DOM/ref
+- Story interaction: 当前 Storybook 未安装交互测试运行依赖；已有五个静态状态故事，play 待基础设施接入
+- Axe: 待补
+- SSR/hydration: `Field.ssr.test.tsx` 覆盖无浏览器全局的稳定原生关联；hydration 待补
+- RTL: 使用逻辑属性，待专属自动化证明
+- Reduced motion: 不适用，无动效
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: Story 可生成快照，待矩阵化验收
+- Real device: iOS VoiceOver、Android TalkBack 与原生 constraint validation 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 接入 axe、hydration、RTL、200% 字号、强制色彩、移动 Chromium/WebKit 与真机读屏验证。
+- Field-aware 深层包装组件逐个改为无损合并调用方与 context 的 ARIA idrefs。
+- 在 Form 批次完成首次错误聚焦、error summary、服务端错误与 RHF touched/disabled/ref 证明。
+
+### 已完成
+
+- 修复显式 child id 与 label 断连。
+- 合并调用方、description 与 error 的 `aria-describedby` 并去重。
+- 区分 native 与 composite 标签语义，组合控件不再生成无效 `label[for]`。
+- 增加 required/invalid context、原生 required 传播及不支持 required 控件的本地化隐藏说明。
+- 增加根 DOM props、style、id、事件与 `HTMLDivElement` ref 契约。
+- 补齐公开 Props/context TSDoc、Unit、SSR、Story 与共置文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                    | 迁移说明                                                                                                                                                      |
+| ---------- | ------ | -------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | 修复关联、ARIA 合并、required/invalid 与根 DOM/ref 契约 | React 单控件 wrapper 如需 native label 点击与原生 required，设置 `labelAssociation="native"`；组合控件使用 `aria`，仅在其 role 合法时自行声明 `aria-required` |

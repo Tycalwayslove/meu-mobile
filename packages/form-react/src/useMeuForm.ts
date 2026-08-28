@@ -5,23 +5,42 @@ import { useForm } from "react-hook-form";
 import type { FieldValues, Resolver, UseFormProps, UseFormReturn } from "react-hook-form";
 import type { ZodType } from "zod";
 
-export type MeuUseFormProps<TFieldValues extends FieldValues> = Omit<
-  UseFormProps<TFieldValues>,
-  "resolver"
-> & {
-  resolver?: Resolver<TFieldValues>;
-  schema?: ZodType<TFieldValues, TFieldValues>;
-};
+/** @public */
+export type MeuUseFormProps<
+  TFieldValues extends FieldValues,
+  TContext = unknown,
+  TTransformedValues = TFieldValues
+> = Omit<UseFormProps<TFieldValues, TContext, TTransformedValues>, "resolver"> &
+  (
+    | {
+        resolver?: never;
+        schema: ZodType<TTransformedValues, TFieldValues>;
+      }
+    | {
+        resolver?: Resolver<TFieldValues, TContext, TTransformedValues>;
+        schema?: never;
+      }
+  );
 
-export function useMeuForm<TFieldValues extends FieldValues>(
-  options: MeuUseFormProps<TFieldValues> = {}
-): UseFormReturn<TFieldValues> {
+/**
+ * Creates a React Hook Form instance with an optional Zod schema.
+ *
+ * `schema` and `resolver` are intentionally mutually exclusive. Use the input and transformed
+ * generics when a schema changes the submitted value shape.
+ *
+ * @public
+ */
+export function useMeuForm<
+  TFieldValues extends FieldValues,
+  TContext = unknown,
+  TTransformedValues = TFieldValues
+>(
+  options: MeuUseFormProps<TFieldValues, TContext, TTransformedValues> = {}
+): UseFormReturn<TFieldValues, TContext, TTransformedValues> {
   const { resolver: suppliedResolver, schema, ...formOptions } = options;
-  const resolver = schema
-    ? (zodResolver(schema) as Resolver<TFieldValues>)
-    : suppliedResolver;
+  const resolver = schema ? zodResolver(schema) : suppliedResolver;
 
-  return useForm<TFieldValues>({
+  return useForm<TFieldValues, TContext, TTransformedValues>({
     ...formOptions,
     ...(resolver ? { resolver } : {})
   });

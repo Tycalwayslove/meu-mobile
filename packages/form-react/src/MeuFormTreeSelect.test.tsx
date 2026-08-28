@@ -62,6 +62,9 @@ describe("MeuFormTreeSelect", () => {
     await waitFor(() => expect(screen.queryByText("请选择商品类目")).toBeNull());
     expect(screen.getByTestId("dirty").textContent).toBe("true");
     expect(trigger.textContent).toContain("智能手机");
+    const formElement = trigger.closest("form");
+    expect(formElement).not.toBeNull();
+    expect(new FormData(formElement as HTMLFormElement).getAll("categories")).toEqual(["phone"]);
 
     fireEvent.click(screen.getByRole("button", { name: "提交" }));
     await waitFor(() =>

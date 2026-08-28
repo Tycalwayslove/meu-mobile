@@ -53,6 +53,9 @@ describe("MeuFormPasscodeInput", () => {
     await waitFor(() => expect(onComplete).toHaveBeenCalledWith("1234"));
     expect(screen.getByTestId("dirty").textContent).toBe("dirty");
     expect(input.value).toBe("1234");
+    const formElement = input.closest("form");
+    expect(formElement).not.toBeNull();
+    expect(new FormData(formElement as HTMLFormElement).get("code")).toBe("1234");
 
     fireEvent.click(screen.getByRole("button", { name: "验证" }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ code: "1234" }, expect.anything()));

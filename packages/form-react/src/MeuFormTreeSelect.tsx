@@ -13,7 +13,9 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
-type TreeSelectAdapterProps<TValue extends TreeSelectValue> = Omit<
+import { HiddenFormValues } from "./HiddenFormValues";
+
+export type MeuFormTreeSelectAdapterProps<TValue extends TreeSelectValue> = Omit<
   TreeSelectProps<TValue>,
   | "aria-label"
   | "aria-labelledby"
@@ -32,7 +34,7 @@ type TreeSelectAdapterProps<TValue extends TreeSelectValue> = Omit<
 export type MeuFormTreeSelectProps<
   TFieldValues extends FieldValues,
   TValue extends TreeSelectValue = TreeSelectValue
-> = TreeSelectAdapterProps<TValue> & {
+> = MeuFormTreeSelectAdapterProps<TValue> & {
   defaultOpen?: boolean;
   description?: ReactNode;
   formatValue?: (
@@ -145,7 +147,6 @@ export function MeuFormTreeSelect<
           field.ref(node);
         }}
         aria-readonly={readOnly || undefined}
-        aria-required={required || undefined}
         disabled={disabled}
         open={resolvedOpen}
         status={fieldState.invalid ? "error" : "default"}
@@ -159,6 +160,7 @@ export function MeuFormTreeSelect<
           if (!event.defaultPrevented) changeOpen(true, { reason: "trigger" });
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={currentValue} />
       <TreeSelect<TValue>
         {...treeSelectProps}
         {...(hasTitle ? { title: titleContent } : { "aria-label": treeAriaLabel || "Tree Select" })}

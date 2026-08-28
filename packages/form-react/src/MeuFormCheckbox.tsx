@@ -3,8 +3,10 @@
 import { Checkbox, Field } from "@meu/mobile";
 import type { CheckboxProps } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuBooleanFieldPath } from "./adapter-types";
 
 export type MeuFormCheckboxProps<TFieldValues extends FieldValues> = Omit<
   CheckboxProps,
@@ -12,15 +14,19 @@ export type MeuFormCheckboxProps<TFieldValues extends FieldValues> = Omit<
 > & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuBooleanFieldPath<TFieldValues>;
+  onBlur?: CheckboxProps["onBlur"];
+  onChange?: CheckboxProps["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuBooleanFieldPath<TFieldValues>>["rules"];
 };
 
 export function MeuFormCheckbox<TFieldValues extends FieldValues>({
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...checkboxProps
@@ -41,11 +47,19 @@ export function MeuFormCheckbox<TFieldValues extends FieldValues>({
         >
           <Checkbox
             {...checkboxProps}
+            disabled={Boolean(checkboxProps.disabled || field.disabled)}
             name={field.name}
             ref={field.ref}
+            required={required}
             checked={field.value === true}
-            onBlur={field.onBlur}
-            onChange={(nextChecked) => field.onChange(nextChecked)}
+            onBlur={(event) => {
+              field.onBlur();
+              if (onBlur) onBlur(event);
+            }}
+            onChange={(nextChecked, event) => {
+              field.onChange(nextChecked);
+              if (onChange) onChange(nextChecked, event);
+            }}
             status={fieldState.invalid ? "error" : "default"}
           />
         </Field>

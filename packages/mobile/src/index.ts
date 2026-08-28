@@ -18,13 +18,22 @@ export type { SpaceGap, SpaceProps } from "./Space";
 export { ConfigProvider, ThemeProvider, useMeuConfig } from "./ConfigProvider";
 export type { ConfigProviderProps, MeuConfig, MeuLocale, MeuTheme } from "./ConfigProvider";
 export { Field } from "./Field";
-export type { FieldProps } from "./Field";
+export type { FieldLabelAssociation, FieldProps } from "./Field";
 export { TextInput } from "./TextInput";
 export type { TextInputProps } from "./TextInput";
 export { TextArea } from "./TextArea";
 export type { TextAreaAutoSize, TextAreaProps, TextAreaSize, TextAreaStatus } from "./TextArea";
 export { SearchField } from "./SearchField";
-export type { SearchFieldProps, SearchFieldSize, SearchFieldStatus } from "./SearchField";
+export type {
+  SearchFieldChangeDetails,
+  SearchFieldChangeSource,
+  SearchFieldClearDetails,
+  SearchFieldInputChangeDetails,
+  SearchFieldProps,
+  SearchFieldSearchDetails,
+  SearchFieldSize,
+  SearchFieldStatus
+} from "./SearchField";
 export { Checkbox, CheckboxGroup } from "./Checkbox";
 export type {
   CheckboxGroupProps,

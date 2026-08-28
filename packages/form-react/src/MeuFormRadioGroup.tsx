@@ -3,8 +3,10 @@
 import { Field, RadioGroup } from "@meu/mobile";
 import type { RadioGroupProps, RadioValue } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuSelectionFieldPath } from "./adapter-types";
 
 export type MeuFormRadioGroupProps<
   TFieldValues extends FieldValues,
@@ -12,9 +14,10 @@ export type MeuFormRadioGroupProps<
 > = Omit<RadioGroupProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuSelectionFieldPath<TFieldValues, TValue>;
+  onChange?: RadioGroupProps<TValue>["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuSelectionFieldPath<TFieldValues, TValue>>["rules"];
 };
 
 export function MeuFormRadioGroup<
@@ -24,6 +27,8 @@ export function MeuFormRadioGroup<
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...groupProps
@@ -50,10 +55,20 @@ export function MeuFormRadioGroup<
           >
             <RadioGroup<TValue>
               {...groupProps}
+              disabled={Boolean(groupProps.disabled || field.disabled)}
               name={field.name}
               ref={field.ref}
+              required={required}
               value={currentValue}
-              onChange={(nextValue) => field.onChange(nextValue)}
+              onBlur={(event) => {
+                if (event.currentTarget.contains(event.relatedTarget)) return;
+                field.onBlur();
+                if (onBlur) onBlur(event);
+              }}
+              onChange={(nextValue, event) => {
+                field.onChange(nextValue);
+                if (onChange) onChange(nextValue, event);
+              }}
               status={fieldState.invalid ? "error" : "default"}
             />
           </Field>

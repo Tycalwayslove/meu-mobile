@@ -14,7 +14,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
-type DatePickerAdapterProps<TDate> = Omit<
+export type MeuFormDatePickerAdapterProps<TDate> = Omit<
   DatePickerProps<TDate>,
   | "aria-label"
   | "aria-labelledby"
@@ -33,7 +33,7 @@ type DatePickerAdapterProps<TDate> = Omit<
 export type MeuFormDatePickerProps<
   TFieldValues extends FieldValues,
   TDate = Date
-> = DatePickerAdapterProps<TDate> & {
+> = MeuFormDatePickerAdapterProps<TDate> & {
   defaultOpen?: boolean;
   description?: ReactNode;
   formatValue?: (
@@ -130,7 +130,6 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
         }}
         disabled={disabled}
         open={resolvedOpen}
-        aria-required={required || undefined}
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {

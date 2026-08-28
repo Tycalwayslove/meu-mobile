@@ -1,0 +1,215 @@
+---
+name: Form
+slug: form
+package: "@meu/form-react"
+exports:
+  [
+    MeuForm,
+    MeuFormTextInput,
+    MeuFormNumberKeyboard,
+    MeuFormPasscodeInput,
+    MeuFormImageUploader,
+    MeuFormTextArea,
+    MeuFormSearchField,
+    MeuFormCheckbox,
+    MeuFormCheckboxGroup,
+    MeuFormRadioGroup,
+    MeuFormSwitch,
+    MeuFormStepper,
+    MeuFormSlider,
+    MeuFormRate,
+    MeuFormSelector,
+    MeuFormTreeSelect,
+    MeuFormPicker,
+    MeuFormCascadePicker,
+    MeuFormDatePicker,
+    MeuFormDateRangePicker,
+    MeuFormCalendar,
+    MeuFormTimePicker,
+    MeuFormSegmentedControl,
+    useMeuForm
+  ]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds: [forms-formtextinput--validation-and-submit]
+source: packages/form-react/src/MeuForm
+---
+
+# Form
+
+## 当前能力
+
+- `MeuForm` 使用原生 `form`，通过 React Hook Form `FormProvider` 向 Meu adapter 提供统一作用域。
+- `useMeuForm` 支持 React Hook Form 原生 resolver，或使用单一 Zod schema；两者在类型上互斥。
+- Zod transform 的输入值与提交值可通过三个泛型分别表达，不再把 transform 后的类型伪装成输入类型。
+- 表单级 `disabled` 会传播到本批次覆盖的文本、选择、数值与分段控件 adapter。
+- adapter 将 `required` 同步给 Field 和适用的原生控件；`MeuForm` 默认 `noValidate=true`，由 React Hook Form 负责验证与错误展示。
+- NumberKeyboard、PasscodeInput、Picker、CascadePicker、TimePicker 与 TreeSelect 提供原生 FormData 值；集合值按同名重复条目保持顺序。
+- 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按页面 DOM 顺序聚焦首个已注册错误字段。
+- `MeuForm` 透传原生 form 属性，`ref` 指向真实 `HTMLFormElement`。
+
+当前状态为 V2 `implementation`。复杂 Picker、日期、树与上传值的原生 FormData 序列化、全部 adapter 的触碰时点、axe、移动 E2E 和真机证明尚未完成，因此不能标记为 commercial。
+
+## 何时使用
+
+用于需要 React Hook Form 生命周期、Zod 校验、服务端错误映射、嵌套字段或数组字段的移动 H5 表单。简单的浏览器提交可以直接组合原生 `form`、Field 和 Meu 输入组件，不必引入该包。
+
+## 何时不要使用
+
+- 不把请求、缓存、路由、Toast 或业务状态放入 MeuForm。
+- 不通过 `@meu/form-react` 间接导入 React Hook Form。上游 hooks 和类型应直接从 `react-hook-form` 导入。
+- 不假设 RHF 中存在的任意对象会自动进入 `new FormData(form)`；日期泛型、Calendar 与上传项仍需显式序列化。
+
+## 结构与状态
+
+结构为原生 `form`、`FormProvider` 和各字段 adapter。字段的 default、focus、invalid、disabled、readOnly、loading 状态由底层组件渲染。Form 本身不增加卡片、间距或状态动画。
+
+## 基础用法
+
+```tsx
+"use client";
+
+import { MeuForm, MeuFormTextInput, useMeuForm } from "@meu/form-react";
+
+type Values = { storeName: string };
+
+export function StoreForm() {
+  const form = useMeuForm<Values>({ defaultValues: { storeName: "" } });
+
+  return (
+    <MeuForm form={form} onSubmit={(values) => saveStore(values)}>
+      <MeuFormTextInput<Values>
+        name="storeName"
+        label="店铺名称"
+        required
+        rules={{ required: "请输入店铺名称" }}
+      />
+      <button type="submit">保存更改</button>
+    </MeuForm>
+  );
+}
+```
+
+## 受控与非受控
+
+由 React Hook Form 管理。`defaultValues` 是推荐事实源；不要同时向 adapter 传 `value/defaultValue`。业务需要外部同步时使用 RHF `values`、`reset`、`setValue` 或 `useWatch`，并遵守各自的 dirty/touched 语义。
+
+## 表单集成
+
+- 文本、textarea、search、checkbox、switch、stepper、slider 和 rate 保留原生 `name/ref/onBlur/required/disabled`。
+- CheckboxGroup、RadioGroup、Selector 与 SegmentedControl 只有在焦点离开整个复合控件后才调用 RHF `onBlur`，组内移动焦点不会提前变成 touched。
+- 非原生字符串/标量集合通过 hidden successful controls 参与 FormData；`getAll(name)` 按选择顺序返回 Picker、CascadePicker 与 TreeSelect 值。
+- `rules.required` 决定 RHF 校验；视觉 `required` 同时表达字段必填并下传原生语义。二者需要由调用方保持一致。
+- 默认 `noValidate=true`，避免浏览器气泡与 React Hook Form 错误重复。显式设置 `noValidate={false}` 会启用浏览器原生约束阻断。
+
+## Props
+
+`MeuFormProps` 继承原生 form 属性并要求 `form` 与 `onSubmit`。`onInvalid`、`noValidate` 和 `ref` 为主要表单级能力。adapter 的 Props 表由 API Extractor 从各公开类型生成。
+
+`useMeuForm` 接受 React Hook Form 配置，并在 `schema` 与 `resolver` 中二选一。字段 adapter 使用 `MeuStringFieldPath`、`MeuBooleanFieldPath`、`MeuNumberFieldPath`、`MeuSelectionFieldPath` 与 `MeuCollectionFieldPath` 阻止明显的错误值形状绑定；日期范围与时间分别公开 `MeuDateRangePickerFieldPath`、`MeuTimePickerFieldPath`，避免公开 Props 引用不可导入的内部别名。
+
+## Events
+
+- `onSubmit(values, event)`：校验通过后触发；Zod transform 存在时 values 是 transform 后类型。
+- `onInvalid(errors, event)`：RHF 校验未通过时触发。
+- adapter 的 `onChange/onBlur`：先更新 RHF value/touched，再调用消费方同名回调；业务回调读取 `getValues()` 时已得到新值。
+- 原生 `onReset/onInput/onChange` 等 form 事件继续透传，但字段状态仍由 RHF 维护。原生 reset 必须配合 `form.reset()`，否则 RHF 状态可能与 DOM 分离。
+- `applyMeuFormErrors(form, errors, options)`：先写入所有 server error，再按 DOM 顺序聚焦首个具名控件；返回实际首字段 path。
+
+## Ref 与命令式方法
+
+`MeuForm` ref 指向 `HTMLFormElement`，可使用 `requestSubmit()`、`reset()` 和原生查询。字段聚焦优先使用 RHF `setFocus()`；不要依赖 Meu 内部 DOM class。
+
+## 键盘操作
+
+| 按键            | 行为                                                 |
+| --------------- | ---------------------------------------------------- |
+| Tab / Shift+Tab | 按 DOM 顺序移动，复合组内部遵循底层控件原生行为      |
+| Enter           | 单行字段遵循浏览器 submit 规则；SearchField 另有契约 |
+| Space           | 切换 checkbox、switch 或当前可操作按钮               |
+
+首次错误聚焦必须落到可操作控件，并在错误文字更新后保持清晰 accessible description。
+
+## 触摸与手势
+
+Form 不定义手势。所有 adapter 继承底层组件至少 44×44 CSS px 的触控目标、pointer cancel 和滚动冲突策略。提交按钮的重复请求由业务 loading 状态阻止。
+
+## 无障碍
+
+使用原生 form、input、textarea、button、checkbox、radio 与 range 语义。Field 负责 label、description、error、required 和 invalid 关联；复合 adapter 使用 group/radiogroup 名称。服务端错误写入后应公告对应 alert，并把焦点移到页面顺序中的首个错误控件。
+
+## 动效
+
+Form 不定义动效。字段和反馈组件各自遵守 ConfigProvider motion 与 `prefers-reduced-motion`。校验错误不得通过长位移动画导致输入位置跳动。
+
+## 主题与定制
+
+Form 不创建视觉容器。布局、间距、Field 和底层控件使用 Meu Token；`className`、`style` 和原生 form 属性由 `MeuForm` 透传。
+
+## SSR 与 Next.js
+
+`@meu/form-react` 主入口是 Client Component 边界。纯服务端错误类型和辅助函数从 `@meu/form-react/server` 导入，避免穿过带有 `"use client"` 的根入口。默认值必须在服务端数据与首次客户端渲染之间稳定。
+
+## RTL 与国际化
+
+Form 不生成文案。Field、组件默认 label、日期格式和错误消息分别由 ConfigProvider、adapter 或业务提供。服务端错误必须使用当前 locale，且中英文长文案需在 200% 字号下测试。
+
+## 浏览器与 WebView
+
+核心依赖原生 form 和 React Hook Form。V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；观察档不能只依赖静态语法扫描。软键盘、自动填充、密码管理、IME、原生 reset 和首次错误滚动需在移动浏览器验证。
+
+## 边界情况与已知限制
+
+- DatePicker、DateRangePicker、Calendar 与 ImageUploader 的值类型依赖 adapter、时区或上传协议，尚未提供默认 FormData 序列化，避免静默改变后端 payload。
+- 部分 overlay adapter 的 touched 时点仍需统一为完成、关闭或焦点真正离开后的稳定规则。
+- 仅设置 `required` 不会自动生成 RHF `rules.required`；自动合成会改变校验消息和现有行为，因此当前不隐式处理。
+- 从根入口移除了 React Hook Form wildcard re-export；消费者必须直接依赖并导入 `react-hook-form`。
+
+## 性能预算
+
+Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时按需扫描具名控件确定首个错误顺序。adapter 不复制业务值，也不增加全局事件监听。
+
+## 测试证据
+
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、DOM 顺序聚焦、全局 disabled、required、事件顺序、FormData、嵌套、数组、dirty/touched/reset
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 底层输入已有部分证据，Form 专属待补
+- RTL: 待补
+- Reduced motion: Form 无自有动效，组合矩阵待补
+- Mobile Chromium/WebKit E2E: 隔离 H5 有基础提交路径，本批次专项待补
+- Chromatic Light/Dark: 有静态 Story，待交互矩阵
+- Real device: 待补 iOS Safari/VoiceOver 与 Android Chrome/TalkBack
+
+## V2 优化记录
+
+### 待优化
+
+- 冻结所有 overlay/复合 adapter 的 touched、ref 与 disabled/readOnly/required 矩阵。
+- 为九类复杂值提供显式、可配置且有后端迁移说明的 FormData serializer。
+- 补 Story play、axe、SSR、RTL、移动 E2E、Light/Dark 与真机记录。
+
+### 已完成
+
+- 表单级 disabled 和 required 传播到高频文本、选择与数值 adapter。
+- 复合控件仅在焦点离开整个组后标记 touched。
+- Zod input/output transform 类型进入公开 API，schema 与 resolver 类型互斥。
+- 公开日期范围与时间字段路径类型，API 报告不再包含 forgotten export。
+- 新增 server-safe 子路径，移除 React Hook Form wildcard 公共面，排除 Story declarations，并声明 tree-shaking side effects。
+- 服务端错误首次聚焦按 DOM 顺序执行；MeuForm 支持原生 form ref。
+- NumberKeyboard、PasscodeInput、Picker、CascadePicker、TimePicker 与 TreeSelect 已进入原生 FormData；复杂集合使用同名重复条目。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                 | 迁移说明                                                             |
+| ---------- | ------ | -------- | ---------------------------------------------------- | -------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | disabled、required 与复合控件 touched 契约统一       | 全局 disabled 现在会真实禁用 adapter；required 进入原生语义          |
+| 2026-08-28 | 未发布 | types    | 字段 path 按值类型收紧，支持 Zod transform 输入/输出 | 误绑定到不兼容字段的代码会出现类型错误                               |
+| 2026-08-28 | 未发布 | breaking | 移除 RHF wildcard，服务端辅助函数迁移到 `/server`    | 从 `react-hook-form` 直接导入上游 API；改用 `@meu/form-react/server` |
+| 2026-08-28 | 未发布 | build    | 排除 Story declaration，增加 sideEffects 声明        | 无                                                                   |

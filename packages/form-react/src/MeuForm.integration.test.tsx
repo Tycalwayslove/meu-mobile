@@ -77,8 +77,8 @@ function ServerErrorsExample() {
         type="button"
         onClick={() =>
           applyMeuFormErrors(form, {
-            storeName: "店铺名称已存在",
-            contact: "联系人不可用"
+            contact: "联系人不可用",
+            storeName: "店铺名称已存在"
           })
         }
       >

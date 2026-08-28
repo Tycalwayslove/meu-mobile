@@ -1,4 +1,5 @@
 # TextArea
 
-用于多行文本输入。支持受控/非受控值、三档尺寸、原生 `rows`/`maxLength`、字符计数，以及
-带 `minRows`/`maxRows` 约束的自动高度。标签、描述和错误信息由 `Field` 提供。
+完整、可维护的组件契约见 [`TextArea.docs.mdx`](./TextArea.docs.mdx)。
+
+README 仅保留入口，避免与 Props、autosize、计数、表单重置和兼容性事实源重复维护。

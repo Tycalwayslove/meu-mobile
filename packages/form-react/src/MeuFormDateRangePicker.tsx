@@ -14,7 +14,7 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
 
-type DateRangePickerAdapterProps<TDate> = Omit<
+export type MeuFormDateRangePickerAdapterProps<TDate> = Omit<
   DateRangePickerProps<TDate>,
   | "aria-label"
   | "aria-labelledby"
@@ -30,14 +30,14 @@ type DateRangePickerAdapterProps<TDate> = Omit<
   | "value"
 >;
 
-type DateRangePickerFieldPath<TFieldValues extends FieldValues, TDate> =
+export type MeuDateRangePickerFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null>
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null | undefined>;
 
 export type MeuFormDateRangePickerProps<
   TFieldValues extends FieldValues,
   TDate = Date
-> = DateRangePickerAdapterProps<TDate> & {
+> = MeuFormDateRangePickerAdapterProps<TDate> & {
   defaultOpen?: boolean;
   description?: ReactNode;
   formatValue?: (
@@ -45,7 +45,7 @@ export type MeuFormDateRangePickerProps<
     details: { adapter: DateAdapter<TDate> }
   ) => ReactNode;
   label?: ReactNode;
-  name: DateRangePickerFieldPath<TFieldValues, TDate>;
+  name: MeuDateRangePickerFieldPath<TFieldValues, TDate>;
   onCancel?: DateRangePickerProps<TDate>["onCancel"];
   onConfirm?: DateRangePickerProps<TDate>["onConfirm"];
   onOpenChange?: (open: boolean, details: DateRangePickerOpenChangeDetails) => void;
@@ -53,7 +53,10 @@ export type MeuFormDateRangePickerProps<
   pickerAriaLabel?: string;
   pickerTitle?: ReactNode;
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, DateRangePickerFieldPath<TFieldValues, TDate>>["rules"];
+  rules?: UseControllerProps<
+    TFieldValues,
+    MeuDateRangePickerFieldPath<TFieldValues, TDate>
+  >["rules"];
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -84,7 +87,7 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
   const resolvedAdapter = (adapter || nativeDateAdapter) as DateAdapter<TDate>;
   const { field, fieldState } = useController<
     TFieldValues,
-    DateRangePickerFieldPath<TFieldValues, TDate>
+    MeuDateRangePickerFieldPath<TFieldValues, TDate>
   >({
     control,
     name,
@@ -135,7 +138,6 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
         }}
         disabled={disabled}
         open={resolvedOpen}
-        aria-required={required || undefined}
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {

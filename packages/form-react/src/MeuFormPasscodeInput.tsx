@@ -55,6 +55,8 @@ export function MeuFormPasscodeInput<TFieldValues extends FieldValues>({
           field.ref(handle ? handle.input : null);
         }}
         disabled={Boolean(disabled || field.disabled)}
+        name={field.name}
+        required={required}
         status={fieldState.invalid ? "error" : "default"}
         value={value}
         onChange={(nextValue, details) => {

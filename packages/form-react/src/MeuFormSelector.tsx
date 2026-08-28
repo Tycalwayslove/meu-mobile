@@ -3,8 +3,10 @@
 import { Field, Selector } from "@meu/mobile";
 import type { SelectorProps, SelectorValue } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuCollectionFieldPath } from "./adapter-types";
 
 export type MeuFormSelectorProps<
   TFieldValues extends FieldValues,
@@ -12,9 +14,10 @@ export type MeuFormSelectorProps<
 > = Omit<SelectorProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuCollectionFieldPath<TFieldValues, TValue>;
+  onChange?: SelectorProps<TValue>["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuCollectionFieldPath<TFieldValues, TValue>>["rules"];
 };
 
 export function MeuFormSelector<
@@ -24,6 +27,8 @@ export function MeuFormSelector<
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...selectorProps
@@ -44,10 +49,20 @@ export function MeuFormSelector<
         >
           <Selector<TValue>
             {...selectorProps}
+            disabled={Boolean(selectorProps.disabled || field.disabled)}
             name={field.name}
             ref={field.ref}
+            required={required}
             value={Array.isArray(field.value) ? (field.value as TValue[]) : []}
-            onChange={(nextValue) => field.onChange(nextValue)}
+            onBlur={(event) => {
+              if (event.currentTarget.contains(event.relatedTarget)) return;
+              field.onBlur();
+              if (onBlur) onBlur(event);
+            }}
+            onChange={(nextValue, options) => {
+              field.onChange(nextValue);
+              if (onChange) onChange(nextValue, options);
+            }}
             status={fieldState.invalid ? "error" : "default"}
           />
         </Field>

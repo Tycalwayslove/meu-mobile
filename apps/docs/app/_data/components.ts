@@ -26,6 +26,7 @@ export type ComponentDoc = {
   priority: "P0" | "P1" | "P2";
   slug: string;
   sourcePath: string;
+  sourcePathPrefixes?: readonly string[];
   storyId?: string;
   storyTitle?: string;
 };
@@ -271,6 +272,7 @@ export const componentDocs: readonly ComponentDoc[] = [
     priority: "P0",
     slug: "form",
     sourcePath: "packages/form-react/src/MeuForm",
+    sourcePathPrefixes: ["packages/form-react/src/"],
     storyId: componentStoryIds.form,
     storyTitle: "Forms/FormTextInput"
   },

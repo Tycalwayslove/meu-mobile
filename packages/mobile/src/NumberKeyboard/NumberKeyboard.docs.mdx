@@ -28,7 +28,7 @@ source: packages/mobile/src/NumberKeyboard
 - 非模态底部 Portal 数字键盘，不持有业务值，不使用 Mask、滚动锁或焦点圈定。
 - number/decimal、extra key、全宽 confirm、受控/非受控 open、safe area、关闭按钮和随机数字顺序。
 - 输入、删除、确认和关闭分离；删除键可在按住 600ms 后每 120ms 连续触发。
-- NumberKeyboardTrigger 提供不会唤起系统软键盘的原生 button 触发器。
+- NumberKeyboardTrigger 提供不会唤起系统软键盘的原生 button 触发器，并合并 Field 的 label/description/error 关联。
 
 ## 何时使用
 
@@ -94,7 +94,7 @@ NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命
 
 ## 无障碍
 
-根为有名称的 group；每个按键为原生 button 并有 accessible name。非模态设计不使用 aria-modal；调用方必须保留真实 input 或等价字段语义。
+根为有名称的 group；每个按键为原生 button 并有 accessible name。非模态设计不使用 aria-modal；调用方必须保留真实 input 或等价字段语义。Trigger 的 button 不支持 `aria-required`，该属性从公开类型排除；必填状态由 Field 的本地化隐藏说明与校验错误表达。
 
 ## 动效
 
@@ -150,9 +150,11 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 ### 已完成
 
 - V1 已采用值与显示分离、非模态 Portal、原生按键、关闭原因、连删节奏和安全边界声明。
+- Trigger 无损合并 Field 命名/说明，并移除 button 上无效的 `aria-required` API；form adapter 的值可进入原生 FormData。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
-| ---------- | ----- | ---- | -------------------- | -------- |
-| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |
+| 日期       | 版本   | 类型     | 内容                                       | 迁移说明                                                    |
+| ---------- | ------ | -------- | ------------------------------------------ | ----------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | Trigger 合并 Field 语义并移除无效 required | 不再向 Trigger 传 `aria-required`；在 Field 上声明 required |
+| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                       | 无                                                          |

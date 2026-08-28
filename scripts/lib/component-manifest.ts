@@ -20,6 +20,8 @@ export type ProductComponent = {
   priority: string;
   slug: string;
   sourcePath: string;
+  /** Additional source prefixes whose public exports belong to this product document. */
+  sourcePathPrefixes?: readonly string[];
   storyId?: string;
 };
 
@@ -308,6 +310,14 @@ function expectedDocsPath(workspaceRoot: string, sourcePath: string, productName
   return `${sourcePath}.docs.mdx`;
 }
 
+function productOwnsSource(component: ProductComponent, sourcePath: string) {
+  if (component.sourcePath === sourcePath) return true;
+  return Boolean(
+    component.sourcePathPrefixes &&
+    component.sourcePathPrefixes.some((prefix) => sourcePath.startsWith(prefix))
+  );
+}
+
 type ParsedDocs = {
   declaredExports: string[];
   issues: string[];
@@ -335,9 +345,25 @@ export function parseComponentDocs(
   }
 
   const frontmatter = new Map<string, string>();
-  for (const line of frontmatterMatch[1]!.split(/\r?\n/)) {
+  const frontmatterLines = frontmatterMatch[1]!.split(/\r?\n/);
+  for (let index = 0; index < frontmatterLines.length; index += 1) {
+    const line = frontmatterLines[index]!;
     const match = line.match(/^([A-Za-z][A-Za-z0-9]*):\s*(.*)$/);
-    if (match) frontmatter.set(match[1]!, match[2]!.trim().replace(/^['"]|['"]$/g, ""));
+    if (!match) continue;
+    const key = match[1]!;
+    let value = match[2]!.trim();
+    const nextCandidate = frontmatterLines[index + 1];
+    if (value === "" && nextCandidate !== undefined && nextCandidate.trim().startsWith("[")) {
+      const continuation: string[] = [];
+      do {
+        index += 1;
+        const nextLine = frontmatterLines[index];
+        if (nextLine === undefined) break;
+        continuation.push(nextLine.trim());
+      } while (!continuation[continuation.length - 1]!.endsWith("]"));
+      value = continuation.join(" ");
+    }
+    frontmatter.set(key, value.replace(/^['"]|['"]$/g, ""));
   }
 
   const requiredFields = [
@@ -403,7 +429,7 @@ export function buildComponentManifest(
       const packageManifest = packageByName.get(component.packageName);
       const publicExports = packageManifest
         ? packageManifest.exports
-            .filter((item) => item.sourcePath === component.sourcePath)
+            .filter((item) => productOwnsSource(component, item.sourcePath))
             .map(({ kind, name }) => ({ kind, name }))
         : [];
       const docsPath = expectedDocsPath(workspaceRoot, component.sourcePath, component.name);
@@ -422,12 +448,16 @@ export function buildComponentManifest(
       };
     });
 
-  const documentedSources = new Set(
-    products.map((component) => `${component.packageName}:${component.sourcePath}`)
-  );
   const undocumentedPublicExports = packages.flatMap((packageManifest) =>
     packageManifest.exports
-      .filter((item) => !documentedSources.has(`${packageManifest.packageName}:${item.sourcePath}`))
+      .filter(
+        (item) =>
+          !components.some(
+            (component) =>
+              component.packageName === packageManifest.packageName &&
+              productOwnsSource(component, item.sourcePath)
+          )
+      )
       .map((item) => ({ ...item, packageName: packageManifest.packageName }))
   );
   const claimedPublicValues = new Set(
@@ -435,15 +465,16 @@ export function buildComponentManifest(
       product.declaredExports.map((name) => `${product.packageName}:${name}`)
     )
   );
-  const productSources = new Set(
-    products.map((product) => `${product.packageName}:${product.sourcePath}`)
-  );
   const unclaimedPublicValues = packages.flatMap((packageManifest) =>
     packageManifest.exports
       .filter(
         (item) =>
           item.kind === "value" &&
-          productSources.has(`${packageManifest.packageName}:${item.sourcePath}`) &&
+          components.some(
+            (component) =>
+              component.packageName === packageManifest.packageName &&
+              productOwnsSource(component, item.sourcePath)
+          ) &&
           !claimedPublicValues.has(`${packageManifest.packageName}:${item.name}`)
       )
       .map((item) => ({ ...item, packageName: packageManifest.packageName }))

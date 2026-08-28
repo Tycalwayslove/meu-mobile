@@ -59,7 +59,10 @@ test("parseComponentDocs validates metadata, public values and required sections
 name: Button
 slug: button
 package: "@meu/example"
-exports: [MeuButton]
+exports:
+  [
+    MeuButton
+  ]
 status: audit
 priority: P0
 since: 0.1.0
@@ -194,6 +197,14 @@ test("workspace manifest covers the four packages and all declared product entri
   );
   assert.equal(
     form.publicExports.some((item) => item.name === "MeuForm" && item.kind === "value"),
+    true
+  );
+  assert.equal(
+    form.publicExports.some((item) => item.name === "MeuFormTextInput" && item.kind === "value"),
+    true
+  );
+  assert.equal(
+    form.publicExports.some((item) => item.name === "useMeuForm" && item.kind === "value"),
     true
   );
   assert.equal(

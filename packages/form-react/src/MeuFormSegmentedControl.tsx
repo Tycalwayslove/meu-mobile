@@ -3,8 +3,10 @@
 import { Field, SegmentedControl } from "@meu/mobile";
 import type { SegmentedControlProps, SegmentedControlValue } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuSelectionFieldPath } from "./adapter-types";
 
 export type MeuFormSegmentedControlProps<
   TFieldValues extends FieldValues,
@@ -12,9 +14,10 @@ export type MeuFormSegmentedControlProps<
 > = Omit<SegmentedControlProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuSelectionFieldPath<TFieldValues, TValue>;
+  onChange?: SegmentedControlProps<TValue>["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuSelectionFieldPath<TFieldValues, TValue>>["rules"];
 };
 
 export function MeuFormSegmentedControl<
@@ -24,6 +27,8 @@ export function MeuFormSegmentedControl<
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...segmentedControlProps
@@ -44,6 +49,7 @@ export function MeuFormSegmentedControl<
         >
           <SegmentedControl<TValue>
             {...segmentedControlProps}
+            disabled={Boolean(segmentedControlProps.disabled || field.disabled)}
             name={field.name}
             ref={field.ref}
             required={required}
@@ -52,7 +58,15 @@ export function MeuFormSegmentedControl<
                 ? field.value
                 : null
             }
-            onChange={(nextValue) => field.onChange(nextValue)}
+            onBlur={(event) => {
+              if (event.currentTarget.contains(event.relatedTarget)) return;
+              field.onBlur();
+              if (onBlur) onBlur(event);
+            }}
+            onChange={(nextValue, event) => {
+              field.onChange(nextValue);
+              if (onChange) onChange(nextValue, event);
+            }}
             status={fieldState.invalid ? "error" : "default"}
           />
         </Field>

@@ -3,8 +3,10 @@
 import { Field, Slider } from "@meu/mobile";
 import type { SliderProps } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuNumberFieldPath } from "./adapter-types";
 
 export type MeuFormSliderProps<TFieldValues extends FieldValues> = Omit<
   SliderProps,
@@ -12,15 +14,19 @@ export type MeuFormSliderProps<TFieldValues extends FieldValues> = Omit<
 > & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuNumberFieldPath<TFieldValues>;
+  onBlur?: SliderProps["onBlur"];
+  onChange?: SliderProps["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuNumberFieldPath<TFieldValues>>["rules"];
 };
 
 export function MeuFormSlider<TFieldValues extends FieldValues>({
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...sliderProps
@@ -44,11 +50,19 @@ export function MeuFormSlider<TFieldValues extends FieldValues>({
           >
             <Slider
               {...sliderProps}
+              disabled={Boolean(sliderProps.disabled || field.disabled)}
               name={field.name}
               ref={field.ref}
+              required={required}
               value={currentValue}
-              onBlur={field.onBlur}
-              onChange={(nextValue) => field.onChange(nextValue)}
+              onBlur={(event) => {
+                field.onBlur();
+                if (onBlur) onBlur(event);
+              }}
+              onChange={(nextValue, event) => {
+                field.onChange(nextValue);
+                if (onChange) onChange(nextValue, event);
+              }}
               status={fieldState.invalid ? "error" : "default"}
             />
           </Field>

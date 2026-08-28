@@ -13,7 +13,9 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
-type PickerAdapterProps<TValue extends PickerValue> = Omit<
+import { HiddenFormValues } from "./HiddenFormValues";
+
+export type MeuFormPickerAdapterProps<TValue extends PickerValue> = Omit<
   PickerProps<TValue>,
   | "aria-label"
   | "aria-labelledby"
@@ -32,7 +34,7 @@ type PickerAdapterProps<TValue extends PickerValue> = Omit<
 export type MeuFormPickerProps<
   TFieldValues extends FieldValues,
   TValue extends PickerValue = PickerValue
-> = PickerAdapterProps<TValue> & {
+> = MeuFormPickerAdapterProps<TValue> & {
   defaultOpen?: boolean;
   description?: ReactNode;
   formatValue?: (
@@ -141,7 +143,6 @@ export function MeuFormPicker<
         }}
         disabled={disabled}
         open={resolvedOpen}
-        aria-required={required || undefined}
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
@@ -155,6 +156,7 @@ export function MeuFormPicker<
           }
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={currentValue} />
       <Picker<TValue>
         {...pickerProps}
         {...(hasTitle ? { title: titleContent } : { "aria-label": pickerAriaLabel || "Picker" })}

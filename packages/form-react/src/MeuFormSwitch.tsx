@@ -3,8 +3,10 @@
 import { Field, Switch } from "@meu/mobile";
 import type { SwitchProps } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuBooleanFieldPath } from "./adapter-types";
 
 export type MeuFormSwitchProps<TFieldValues extends FieldValues> = Omit<
   SwitchProps,
@@ -12,15 +14,19 @@ export type MeuFormSwitchProps<TFieldValues extends FieldValues> = Omit<
 > & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuBooleanFieldPath<TFieldValues>;
+  onBlur?: SwitchProps["onBlur"];
+  onChange?: SwitchProps["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuBooleanFieldPath<TFieldValues>>["rules"];
 };
 
 export function MeuFormSwitch<TFieldValues extends FieldValues>({
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...switchProps
@@ -41,11 +47,19 @@ export function MeuFormSwitch<TFieldValues extends FieldValues>({
         >
           <Switch
             {...switchProps}
+            disabled={Boolean(switchProps.disabled || field.disabled)}
             name={field.name}
             ref={field.ref}
+            required={required}
             checked={field.value === true}
-            onBlur={field.onBlur}
-            onChange={(nextChecked) => field.onChange(nextChecked)}
+            onBlur={(event) => {
+              field.onBlur();
+              if (onBlur) onBlur(event);
+            }}
+            onChange={(nextChecked, event) => {
+              field.onChange(nextChecked);
+              if (onChange) onChange(nextChecked, event);
+            }}
             status={fieldState.invalid ? "error" : "default"}
           />
         </Field>

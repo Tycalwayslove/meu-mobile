@@ -60,6 +60,9 @@ describe("MeuFormTimePicker", () => {
     fireEvent.click(screen.getByRole("button", { name: "确定" }));
     await waitFor(() => expect(trigger.textContent).toContain("10:45"));
     expect(screen.getByTestId("dirty").textContent).toBe("dirty");
+    const formElement = trigger.closest("form");
+    expect(formElement).not.toBeNull();
+    expect(new FormData(formElement as HTMLFormElement).get("deliveryTime")).toBe("10:45");
 
     fireEvent.click(screen.getByRole("button", { name: "提交订单" }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());

@@ -1,7 +1,15 @@
 "use client";
 
-import { forwardRef, useEffect, useId, useRef, useState } from "react";
-import type { ChangeEvent, ForwardedRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "react";
+import type { ChangeEvent, CSSProperties, ForwardedRef } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
 import { counter, root, textarea } from "./TextArea.css";
@@ -27,13 +35,21 @@ function getRows(autoSize: TextAreaAutoSize, key: "maxRows" | "minRows"): number
   return typeof rows === "number" && rows > 0 ? rows : undefined;
 }
 
-function resizeTextArea(element: HTMLTextAreaElement, autoSize: TextAreaAutoSize) {
-  if (!autoSize) {
-    element.style.height = "";
-    element.style.overflowY = "";
-    return;
-  }
+function mergeDescriptionIds(...values: Array<string | undefined>): string | undefined {
+  const ids: string[] = [];
+  values.forEach((value) => {
+    if (!value) return;
+    value.split(/\s+/).forEach((id) => {
+      if (id && ids.indexOf(id) === -1) ids.push(id);
+    });
+  });
+  return ids.length > 0 ? ids.join(" ") : undefined;
+}
 
+function resizeTextArea(element: HTMLTextAreaElement, autoSize: TextAreaAutoSize) {
+  if (!autoSize) return;
+
+  const previousScrollTop = element.scrollTop;
   element.style.height = "auto";
   const computed = window.getComputedStyle(element);
   const lineHeight = Number.parseFloat(computed.lineHeight) || 24;
@@ -55,8 +71,22 @@ function resizeTextArea(element: HTMLTextAreaElement, autoSize: TextAreaAutoSize
 
   element.style.height = `${nextHeight}px`;
   element.style.overflowY = naturalHeight > maxHeight ? "auto" : "hidden";
+  element.scrollTop = previousScrollTop;
 }
 
+function restoreAuthoredSize(element: HTMLTextAreaElement, style: CSSProperties | undefined) {
+  const height = style ? style.height : undefined;
+  const overflowY = style ? style.overflowY : undefined;
+  element.style.height = typeof height === "number" ? `${height}px` : height || "";
+  element.style.overflowY = typeof overflowY === "string" ? overflowY : "";
+}
+
+/**
+ * Native multiline text input with Field integration, optional UTF-16 counting, and bounded
+ * content-driven height.
+ *
+ * @public
+ */
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function TextArea(
   {
     "aria-describedby": ariaDescribedBy,
@@ -65,13 +95,16 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     className,
     defaultValue,
     disabled = false,
+    form,
     id,
     maxLength,
     onChange,
+    readOnly = false,
     rows,
     showCount = false,
     size = "medium",
     status = "default",
+    style,
     value,
     ...props
   },
@@ -80,15 +113,21 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   const fieldContext = useFieldContext();
   const countId = `meu-text-area-count-${useId()}`;
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const autoSizeRef = useRef(autoSize);
+  const wasAutoSizeRef = useRef(false);
+  const resizeFrameRef = useRef<number | null>(null);
+  const resizeTimerRef = useRef<number | null>(null);
+  const resetTimerRef = useRef<number | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState(() => normalizeValue(defaultValue));
   const controlled = value !== undefined;
   const displayedValue = controlled ? normalizeValue(value) : uncontrolledValue;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const fieldDescribedBy = fieldContext ? fieldContext.describedBy : undefined;
-  const describedBy =
-    [ariaDescribedBy || fieldDescribedBy, showCount ? countId : undefined]
-      .filter(Boolean)
-      .join(" ") || undefined;
+  const describedBy = mergeDescriptionIds(
+    ariaDescribedBy,
+    fieldDescribedBy,
+    showCount ? countId : undefined
+  );
   const invalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -101,14 +140,129 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   });
   const minRows = getRows(autoSize, "minRows");
 
+  const cancelScheduledResize = useCallback(() => {
+    if (resizeFrameRef.current !== null && typeof window.cancelAnimationFrame === "function") {
+      window.cancelAnimationFrame(resizeFrameRef.current);
+    }
+    if (resizeTimerRef.current !== null) window.clearTimeout(resizeTimerRef.current);
+    resizeFrameRef.current = null;
+    resizeTimerRef.current = null;
+  }, []);
+
+  const resizeNow = useCallback(() => {
+    const element = textAreaRef.current;
+    if (element) resizeTextArea(element, autoSizeRef.current);
+  }, []);
+
+  const scheduleResize = useCallback(() => {
+    cancelScheduledResize();
+    if (typeof window.requestAnimationFrame === "function") {
+      resizeFrameRef.current = window.requestAnimationFrame(() => {
+        resizeFrameRef.current = null;
+        resizeNow();
+      });
+      return;
+    }
+    resizeTimerRef.current = window.setTimeout(() => {
+      resizeTimerRef.current = null;
+      resizeNow();
+    }, 0);
+  }, [cancelScheduledResize, resizeNow]);
+
+  useLayoutEffect(() => {
+    const element = textAreaRef.current;
+    const wasAutoSize = wasAutoSizeRef.current;
+    autoSizeRef.current = autoSize;
+    wasAutoSizeRef.current = Boolean(autoSize);
+    if (autoSize) resizeNow();
+    else if (wasAutoSize && element) restoreAuthoredSize(element, style);
+  }, [autoSize, displayedValue, resizeNow, style]);
+
   useEffect(() => {
     const element = textAreaRef.current;
-    if (element) resizeTextArea(element, autoSize);
-  }, [autoSize, displayedValue]);
+    if (!element || !autoSize) return undefined;
+
+    let active = true;
+    let observedWidth = element.getBoundingClientRect().width;
+    const handleOrientationChange = () => scheduleResize();
+    const handleViewportResize = () => scheduleResize();
+    let observer: ResizeObserver | null = null;
+
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        const nextWidth = entry ? entry.contentRect.width : element.getBoundingClientRect().width;
+        if (Math.abs(nextWidth - observedWidth) < 0.5) return;
+        observedWidth = nextWidth;
+        scheduleResize();
+      });
+      observer.observe(element);
+    } else {
+      window.addEventListener("resize", handleViewportResize);
+    }
+    window.addEventListener("orientationchange", handleOrientationChange);
+
+    const fonts = document.fonts;
+    const handleFontsChanged = () => scheduleResize();
+    if (fonts) {
+      void fonts.ready.then(() => {
+        if (active) scheduleResize();
+      });
+      if (typeof fonts.addEventListener === "function") {
+        fonts.addEventListener("loadingdone", handleFontsChanged);
+      }
+    }
+
+    return () => {
+      active = false;
+      if (observer) observer.disconnect();
+      else window.removeEventListener("resize", handleViewportResize);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+      if (fonts && typeof fonts.removeEventListener === "function") {
+        fonts.removeEventListener("loadingdone", handleFontsChanged);
+      }
+      cancelScheduledResize();
+    };
+  }, [autoSize, cancelScheduledResize, scheduleResize]);
+
+  useEffect(() => {
+    const element = textAreaRef.current;
+    const ownerForm = element ? element.form : null;
+    if (!element || !ownerForm) return undefined;
+
+    const handleReset = () => {
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = window.setTimeout(() => {
+        resetTimerRef.current = null;
+        const currentElement = textAreaRef.current;
+        if (!currentElement) return;
+        if (controlled) currentElement.value = normalizeValue(value);
+        else setUncontrolledValue(currentElement.value);
+        if (autoSizeRef.current) resizeTextArea(currentElement, autoSizeRef.current);
+      }, 0);
+    };
+
+    ownerForm.addEventListener("reset", handleReset);
+    return () => {
+      ownerForm.removeEventListener("reset", handleReset);
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    };
+  }, [controlled, form, value]);
+
+  useEffect(
+    () => () => {
+      cancelScheduledResize();
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+    },
+    [cancelScheduledResize]
+  );
 
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
-    if (!controlled) setUncontrolledValue(event.target.value);
-    resizeTextArea(event.target, autoSize);
+    const nextValue = event.target.value;
+    if (!controlled) setUncontrolledValue(nextValue);
+    if (autoSize) resizeTextArea(event.target, autoSize);
+    if (controlled && autoSize) scheduleResize();
     if (onChange) onChange(event);
   }
 
@@ -124,19 +278,22 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         className={className ? `${classes} ${className}` : classes}
         defaultValue={controlled ? undefined : defaultValue}
         disabled={disabled}
+        form={form}
         maxLength={maxLength}
         onChange={handleChange}
+        readOnly={readOnly}
         rows={rows || minRows || 3}
+        style={style}
         value={controlled ? value : undefined}
         aria-describedby={describedBy}
         aria-invalid={invalid || undefined}
         data-auto-size={autoSize ? "true" : "false"}
         data-meu-component="text-area"
         data-size={size}
-        data-state={disabled ? "disabled" : invalid ? "error" : "default"}
+        data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
       />
       {showCount ? (
-        <span id={countId} className={counter} aria-live="polite" data-meu-slot="count">
+        <span id={countId} className={counter} data-meu-slot="count">
           {displayedValue.length}
           {typeof maxLength === "number" ? ` / ${maxLength}` : null}
         </span>

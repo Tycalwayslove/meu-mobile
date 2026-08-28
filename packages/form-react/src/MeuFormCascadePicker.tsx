@@ -13,7 +13,9 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
-type CascadePickerAdapterProps<TValue extends PickerValue> = Omit<
+import { HiddenFormValues } from "./HiddenFormValues";
+
+export type MeuFormCascadePickerAdapterProps<TValue extends PickerValue> = Omit<
   CascadePickerProps<TValue>,
   | "aria-label"
   | "aria-labelledby"
@@ -32,7 +34,7 @@ type CascadePickerAdapterProps<TValue extends PickerValue> = Omit<
 export type MeuFormCascadePickerProps<
   TFieldValues extends FieldValues,
   TValue extends PickerValue = PickerValue
-> = CascadePickerAdapterProps<TValue> & {
+> = MeuFormCascadePickerAdapterProps<TValue> & {
   defaultOpen?: boolean;
   description?: ReactNode;
   formatValue?: (
@@ -152,7 +154,6 @@ export function MeuFormCascadePicker<
         }}
         disabled={disabled}
         open={resolvedOpen}
-        aria-required={required || undefined}
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
@@ -164,6 +165,7 @@ export function MeuFormCascadePicker<
           if (!event.defaultPrevented) requestOpenChange(true, { reason: "trigger" });
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={currentValue} />
       <CascadePicker<TValue>
         {...pickerProps}
         {...(hasTitle

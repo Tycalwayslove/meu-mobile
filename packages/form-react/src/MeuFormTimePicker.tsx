@@ -14,13 +14,15 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
 
-type TimePickerFieldPath<TFieldValues extends FieldValues> =
+import { HiddenFormValues } from "./HiddenFormValues";
+
+export type MeuTimePickerFieldPath<TFieldValues extends FieldValues> =
   | FieldPathByValue<TFieldValues, TimeValue>
   | FieldPathByValue<TFieldValues, TimeValue | null>
   | FieldPathByValue<TFieldValues, TimeValue | undefined>
   | FieldPathByValue<TFieldValues, TimeValue | null | undefined>;
 
-type TimePickerAdapterProps = Omit<
+export type MeuFormTimePickerAdapterProps = Omit<
   TimePickerProps,
   | "aria-label"
   | "aria-labelledby"
@@ -36,25 +38,26 @@ type TimePickerAdapterProps = Omit<
   | "value"
 >;
 
-export type MeuFormTimePickerProps<TFieldValues extends FieldValues> = TimePickerAdapterProps & {
-  defaultOpen?: boolean;
-  description?: ReactNode;
-  formatValue?: (
-    value: TimeValue,
-    details: { hourCycle: TimePickerHourCycle; precision: TimePickerPrecision }
-  ) => ReactNode;
-  label?: ReactNode;
-  name: TimePickerFieldPath<TFieldValues>;
-  onCancel?: TimePickerProps["onCancel"];
-  onConfirm?: TimePickerProps["onConfirm"];
-  onOpenChange?: (open: boolean, details: TimePickerOpenChangeDetails) => void;
-  open?: boolean;
-  pickerAriaLabel?: string;
-  pickerTitle?: ReactNode;
-  required?: boolean;
-  rules?: UseControllerProps<TFieldValues, TimePickerFieldPath<TFieldValues>>["rules"];
-  triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
-};
+export type MeuFormTimePickerProps<TFieldValues extends FieldValues> =
+  MeuFormTimePickerAdapterProps & {
+    defaultOpen?: boolean;
+    description?: ReactNode;
+    formatValue?: (
+      value: TimeValue,
+      details: { hourCycle: TimePickerHourCycle; precision: TimePickerPrecision }
+    ) => ReactNode;
+    label?: ReactNode;
+    name: MeuTimePickerFieldPath<TFieldValues>;
+    onCancel?: TimePickerProps["onCancel"];
+    onConfirm?: TimePickerProps["onConfirm"];
+    onOpenChange?: (open: boolean, details: TimePickerOpenChangeDetails) => void;
+    open?: boolean;
+    pickerAriaLabel?: string;
+    pickerTitle?: ReactNode;
+    required?: boolean;
+    rules?: UseControllerProps<TFieldValues, MeuTimePickerFieldPath<TFieldValues>>["rules"];
+    triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
+  };
 
 export function MeuFormTimePicker<TFieldValues extends FieldValues>({
   defaultOpen = false,
@@ -92,6 +95,10 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
         ? formatValue(currentValue, { hourCycle, precision })
         : formatTimeValue(currentValue, { hourCycle, precision })
       : undefined;
+  const serializedValue =
+    currentValue !== null && isValidTimeValue(currentValue)
+      ? formatTimeValue(currentValue, { hourCycle: "h23", precision })
+      : null;
   const {
     disabled: triggerDisabled,
     onBlur: triggerOnBlur,
@@ -123,7 +130,6 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
         }}
         disabled={disabled}
         open={resolvedOpen}
-        aria-required={required || undefined}
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
@@ -135,6 +141,7 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
           if (!event.defaultPrevented) requestOpenChange(true, { reason: "trigger" });
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={[serializedValue]} />
       <TimePicker
         {...pickerProps}
         {...(hasTitle

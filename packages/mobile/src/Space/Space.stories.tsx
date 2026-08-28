@@ -4,7 +4,7 @@ import { Button } from "../Button";
 import { Space } from "./Space";
 
 const itemStyle = {
-  background: "var(--meu-color-surface-raised)",
+  background: "var(--meu-color-surface)",
   border: "1px solid var(--meu-color-border)",
   borderRadius: "var(--meu-radius-control)",
   boxSizing: "border-box" as const,

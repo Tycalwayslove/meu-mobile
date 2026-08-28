@@ -13,8 +13,9 @@ import type {
   NumberKeyboardProps,
   NumberKeyboardTriggerProps
 } from "@meu/mobile";
+import { HiddenFormValues } from "./HiddenFormValues";
 
-type NumberKeyboardAdapterProps = Omit<
+export type MeuFormNumberKeyboardAdapterProps = Omit<
   NumberKeyboardProps,
   | "aria-label"
   | "aria-labelledby"
@@ -30,11 +31,10 @@ type NumberKeyboardAdapterProps = Omit<
 >;
 
 export type MeuFormNumberKeyboardOpenChangeDetails =
-  | NumberKeyboardOpenChangeDetails
-  | { reason: "trigger" };
+  NumberKeyboardOpenChangeDetails | { reason: "trigger" };
 
 export type MeuFormNumberKeyboardProps<TFieldValues extends FieldValues> =
-  NumberKeyboardAdapterProps & {
+  MeuFormNumberKeyboardAdapterProps & {
     defaultOpen?: boolean;
     description?: ReactNode;
     formatValue?: (value: string) => ReactNode;
@@ -117,13 +117,11 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
     ...resolvedTriggerProps
   } = triggerProps || {};
   const disabled = Boolean(field.disabled || triggerDisabled || keyboardProps.disabled);
-  const titleContent = keyboardTitle === undefined && typeof label === "string" ? label : keyboardTitle;
+  const titleContent =
+    keyboardTitle === undefined && typeof label === "string" ? label : keyboardTitle;
   const displayValue = formatValue ? formatValue(currentValue) : currentValue;
 
-  function requestOpenChange(
-    nextOpen: boolean,
-    details: MeuFormNumberKeyboardOpenChangeDetails
-  ) {
+  function requestOpenChange(nextOpen: boolean, details: MeuFormNumberKeyboardOpenChangeDetails) {
     if (resolvedOpen === nextOpen) return;
     if (!controlledOpen) setUncontrolledOpen(nextOpen);
     if (!nextOpen) field.onBlur();
@@ -144,7 +142,6 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
           field.ref(node);
         }}
         aria-controls={keyboardId}
-        aria-required={required || undefined}
         disabled={disabled}
         open={resolvedOpen}
         placeholder={placeholder}
@@ -159,9 +156,12 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
           if (!event.defaultPrevented) requestOpenChange(true, { reason: "trigger" });
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={[currentValue]} />
       <NumberKeyboard
         {...keyboardProps}
-        {...(titleContent ? { title: titleContent } : { "aria-label": keyboardAriaLabel || "数字键盘" })}
+        {...(titleContent
+          ? { title: titleContent }
+          : { "aria-label": keyboardAriaLabel || "数字键盘" })}
         id={keyboardId}
         disabled={disabled}
         open={resolvedOpen}

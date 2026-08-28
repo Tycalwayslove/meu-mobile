@@ -15,61 +15,70 @@ import type { ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
 
-type CalendarAdapterProps<TDate> = Omit<
+export type MeuFormCalendarAdapterProps<TDate> = Omit<
   CalendarBaseProps<TDate>,
   "defaultValue" | "onChange" | "ref" | "selectionMode" | "value"
 >;
 
-type CalendarSingleFieldPath<TFieldValues extends FieldValues, TDate> =
+export type MeuFormCalendarSingleFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, NoInfer<TDate> | null>
   | FieldPathByValue<TFieldValues, NoInfer<TDate> | null | undefined>;
 
-type CalendarMultipleFieldPath<TFieldValues extends FieldValues, TDate> =
+export type MeuFormCalendarMultipleFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, ReadonlyArray<NoInfer<TDate>>>
   | FieldPathByValue<TFieldValues, ReadonlyArray<NoInfer<TDate>> | undefined>;
 
-type CalendarRangeFieldPath<TFieldValues extends FieldValues, TDate> =
+export type MeuFormCalendarRangeFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null>
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null | undefined>;
 
 type CalendarFieldPath<TFieldValues extends FieldValues, TDate> =
-  | CalendarSingleFieldPath<TFieldValues, TDate>
-  | CalendarMultipleFieldPath<TFieldValues, TDate>
-  | CalendarRangeFieldPath<TFieldValues, TDate>;
+  | MeuFormCalendarSingleFieldPath<TFieldValues, TDate>
+  | MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>
+  | MeuFormCalendarRangeFieldPath<TFieldValues, TDate>;
 
-type MeuFormCalendarCommonProps<TDate> = CalendarAdapterProps<TDate> & {
+export type MeuFormCalendarCommonProps<TDate> = MeuFormCalendarAdapterProps<TDate> & {
   description?: ReactNode;
   label?: ReactNode;
   required?: boolean;
 };
 
-type MeuFormCalendarSingleProps<
+export type MeuFormCalendarSingleProps<
   TFieldValues extends FieldValues,
   TDate
 > = MeuFormCalendarCommonProps<TDate> & {
-  name: CalendarSingleFieldPath<TFieldValues, TDate>;
+  name: MeuFormCalendarSingleFieldPath<TFieldValues, TDate>;
   onChange?: CalendarSingleProps<TDate>["onChange"];
-  rules?: UseControllerProps<TFieldValues, CalendarSingleFieldPath<TFieldValues, TDate>>["rules"];
+  rules?: UseControllerProps<
+    TFieldValues,
+    MeuFormCalendarSingleFieldPath<TFieldValues, TDate>
+  >["rules"];
   selectionMode?: "single";
 };
 
-type MeuFormCalendarMultipleProps<
+export type MeuFormCalendarMultipleProps<
   TFieldValues extends FieldValues,
   TDate
 > = MeuFormCalendarCommonProps<TDate> & {
-  name: CalendarMultipleFieldPath<TFieldValues, TDate>;
+  name: MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>;
   onChange?: CalendarMultipleProps<TDate>["onChange"];
-  rules?: UseControllerProps<TFieldValues, CalendarMultipleFieldPath<TFieldValues, TDate>>["rules"];
+  rules?: UseControllerProps<
+    TFieldValues,
+    MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>
+  >["rules"];
   selectionMode: "multiple";
 };
 
-type MeuFormCalendarRangeProps<
+export type MeuFormCalendarRangeProps<
   TFieldValues extends FieldValues,
   TDate
 > = MeuFormCalendarCommonProps<TDate> & {
-  name: CalendarRangeFieldPath<TFieldValues, TDate>;
+  name: MeuFormCalendarRangeFieldPath<TFieldValues, TDate>;
   onChange?: CalendarRangeProps<TDate>["onChange"];
-  rules?: UseControllerProps<TFieldValues, CalendarRangeFieldPath<TFieldValues, TDate>>["rules"];
+  rules?: UseControllerProps<
+    TFieldValues,
+    MeuFormCalendarRangeFieldPath<TFieldValues, TDate>
+  >["rules"];
   selectionMode: "range";
 };
 

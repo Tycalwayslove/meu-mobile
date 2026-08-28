@@ -13,7 +13,10 @@ type Values = z.infer<typeof schema>;
 
 afterEach(cleanup);
 
-function AmountForm({ onConfirm, onSubmit }: {
+function AmountForm({
+  onConfirm,
+  onSubmit
+}: {
   onConfirm: (value: string) => void;
   onSubmit: (values: Values) => void;
 }) {
@@ -59,6 +62,9 @@ describe("MeuFormNumberKeyboard", () => {
     fireEvent.click(screen.getByRole("button", { name: "完成输入" }));
     expect(onConfirm).toHaveBeenCalledWith("1.2");
     await waitFor(() => expect(trigger.getAttribute("aria-expanded")).toBe("false"));
+    const formElement = trigger.closest("form");
+    expect(formElement).not.toBeNull();
+    expect(new FormData(formElement as HTMLFormElement).get("amount")).toBe("1.2");
 
     fireEvent.click(screen.getByRole("button", { name: "提交金额" }));
     await waitFor(() =>

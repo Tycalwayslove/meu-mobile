@@ -750,17 +750,33 @@ export type EmptyProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dang
     title: ReactNode;
 };
 
-// @public (undocumented)
-export function Field(input: FieldProps): JSX.Element;
+// @public
+export const Field: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+children: ReactNode;
+controlId?: string;
+description?: ReactNode;
+error?: ReactNode;
+invalid?: boolean;
+label?: ReactNode;
+labelAssociation?: FieldLabelAssociation;
+required?: boolean;
+requiredText?: ReactNode;
+} & RefAttributes<HTMLDivElement>>;
 
-// @public (undocumented)
-export type FieldProps = {
+// @public
+export type FieldLabelAssociation = "auto" | "native" | "aria";
+
+// @public
+export type FieldProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     children: ReactNode;
-    className?: string;
+    controlId?: string;
     description?: ReactNode;
     error?: ReactNode;
+    invalid?: boolean;
     label?: ReactNode;
+    labelAssociation?: FieldLabelAssociation;
     required?: boolean;
+    requiredText?: ReactNode;
 };
 
 // @public (undocumented)
@@ -1285,7 +1301,7 @@ export type NumberKeyboardProps = Omit<HTMLAttributes<HTMLDivElement>, "children
 export function NumberKeyboardTrigger(input: NumberKeyboardTriggerProps): JSX.Element;
 
 // @public (undocumented)
-export type NumberKeyboardTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "value"> & {
+export type NumberKeyboardTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-required" | "children" | "value"> & {
     open?: boolean;
     placeholder?: ReactNode;
     ref?: Ref<HTMLButtonElement>;
@@ -1424,7 +1440,7 @@ export type PickerSelectReason = "keyboard" | "pointer" | "scroll";
 export function PickerTrigger(input: PickerTriggerProps): JSX.Element;
 
 // @public (undocumented)
-export type PickerTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "value"> & {
+export type PickerTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-required" | "children" | "value"> & {
     open?: boolean;
     placeholder?: ReactNode;
     ref?: Ref<HTMLButtonElement>;
@@ -1661,36 +1677,64 @@ export function sameCalendarMonth<TDate>(adapter: DateAdapter<TDate>, left: TDat
 // @public (undocumented)
 export function sameDateRange<TDate>(adapter: DateAdapter<TDate>, left: CalendarRange<TDate> | null | undefined, right: CalendarRange<TDate> | null | undefined): boolean;
 
-// @public (undocumented)
+// @public
 export const SearchField: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange"> & {
+clearLabel?: string;
 clearable?: boolean;
 defaultValue?: string;
 loading?: boolean;
-onChange?: (value: string) => void;
-onClear?: () => void;
-onSearch?: (value: string) => void;
+loadingLabel?: string;
+onChange?: (value: string, details: SearchFieldChangeDetails) => void;
+onClear?: (details: SearchFieldClearDetails) => void;
+onSearch?: (value: string, details: SearchFieldSearchDetails) => void;
 size?: SearchFieldSize;
 status?: SearchFieldStatus;
 value?: string;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
+export type SearchFieldChangeDetails = SearchFieldClearDetails | SearchFieldInputChangeDetails;
+
+// @public
+export type SearchFieldChangeSource = "clear" | "input";
+
+// @public
+export type SearchFieldClearDetails = Readonly<{
+    event: MouseEvent_2<HTMLButtonElement>;
+    source: "clear";
+}>;
+
+// @public
+export type SearchFieldInputChangeDetails = Readonly<{
+    event: ChangeEvent<HTMLInputElement>;
+    source: "input";
+}>;
+
+// @public
 export type SearchFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "onChange" | "size" | "type" | "value"> & {
+    clearLabel?: string;
     clearable?: boolean;
     defaultValue?: string;
     loading?: boolean;
-    onChange?: (value: string) => void;
-    onClear?: () => void;
-    onSearch?: (value: string) => void;
+    loadingLabel?: string;
+    onChange?: (value: string, details: SearchFieldChangeDetails) => void;
+    onClear?: (details: SearchFieldClearDetails) => void;
+    onSearch?: (value: string, details: SearchFieldSearchDetails) => void;
     size?: SearchFieldSize;
     status?: SearchFieldStatus;
     value?: string;
 };
 
-// @public (undocumented)
+// @public
+export type SearchFieldSearchDetails = Readonly<{
+    event: KeyboardEvent_2<HTMLInputElement>;
+    source: "enter";
+}>;
+
+// @public
 export type SearchFieldSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type SearchFieldStatus = "default" | "error";
 
 // @public (undocumented)
@@ -2105,7 +2149,7 @@ export type TagTone = "neutral" | "accent" | "success" | "warning" | "danger";
 // @public (undocumented)
 export type TagVariant = "solid" | "soft" | "outline";
 
-// @public (undocumented)
+// @public
 export const TextArea: ForwardRefExoticComponent<Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "children"> & {
 autoSize?: TextAreaAutoSize;
 showCount?: boolean;
@@ -2113,13 +2157,13 @@ size?: TextAreaSize;
 status?: TextAreaStatus;
 } & RefAttributes<HTMLTextAreaElement>>;
 
-// @public (undocumented)
+// @public
 export type TextAreaAutoSize = boolean | {
     maxRows?: number;
     minRows?: number;
 };
 
-// @public (undocumented)
+// @public
 export type TextAreaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "children"> & {
     autoSize?: TextAreaAutoSize;
     showCount?: boolean;
@@ -2127,10 +2171,10 @@ export type TextAreaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "c
     status?: TextAreaStatus;
 };
 
-// @public (undocumented)
+// @public
 export type TextAreaSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type TextAreaStatus = "default" | "error";
 
 // @public (undocumented)

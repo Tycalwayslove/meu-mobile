@@ -93,7 +93,7 @@ export type PickerTriggerStatus = "default" | "error";
 
 export type PickerTriggerProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
-  "children" | "value"
+  "aria-required" | "children" | "value"
 > & {
   open?: boolean;
   placeholder?: ReactNode;

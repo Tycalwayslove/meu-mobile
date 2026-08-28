@@ -29,7 +29,7 @@ export type NumberKeyboardTriggerStatus = "default" | "error";
 
 export type NumberKeyboardTriggerProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
-  "children" | "value"
+  "aria-required" | "children" | "value"
 > & {
   open?: boolean;
   placeholder?: ReactNode;

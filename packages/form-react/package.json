@@ -2,6 +2,7 @@
   "name": "@meu/form-react",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": false,
   "type": "module",
   "files": [
     "dist"
@@ -10,6 +11,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
     }
   },
   "scripts": {

@@ -13,6 +13,11 @@ export const root = recipe({
     background: "var(--meu-color-subtle)",
     border: "1px solid transparent",
     borderRadius: "var(--meu-radius-control)",
+    transition: [
+      "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+      "border-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+      "box-shadow var(--meu-motion-exit) var(--meu-motion-ease-standard)"
+    ].join(", "),
     selectors: {
       "&:focus-within": {
         color: "var(--meu-color-accent)",
@@ -20,11 +25,27 @@ export const root = recipe({
         borderColor: "var(--meu-color-accent)",
         boxShadow: "0 0 0 1px var(--meu-color-accent)"
       }
+    },
+    "@media": {
+      "(forced-colors: active)": { borderColor: "ButtonText" },
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
     }
   },
   variants: {
     disabled: {
-      true: { color: "var(--meu-color-muted)", cursor: "not-allowed", opacity: 0.72 },
+      true: {
+        color: "var(--meu-color-muted)",
+        background: "var(--meu-color-subtle)",
+        borderColor: "var(--meu-color-border)",
+        cursor: "not-allowed"
+      },
+      false: {}
+    },
+    readOnly: {
+      true: {
+        background: "var(--meu-color-surface)",
+        borderColor: "var(--meu-color-border)"
+      },
       false: {}
     },
     size: {
@@ -43,7 +64,7 @@ export const root = recipe({
       error: { borderColor: "var(--meu-color-danger)" }
     }
   },
-  defaultVariants: { disabled: false, size: "medium", status: "default" }
+  defaultVariants: { disabled: false, readOnly: false, size: "medium", status: "default" }
 });
 
 export const searchIcon = style({
@@ -68,7 +89,8 @@ export const input = style({
   selectors: {
     "&::placeholder": { color: "var(--meu-color-muted)" },
     "&::-webkit-search-cancel-button": { display: "none" },
-    "&:disabled": { color: "var(--meu-color-muted)", cursor: "not-allowed" }
+    "&:disabled": { color: "var(--meu-color-muted)", cursor: "not-allowed" },
+    "&:read-only:not(:disabled)": { cursor: "text" }
   }
 });
 
@@ -86,18 +108,31 @@ export const clearButton = style({
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
+    "&:active": { background: "var(--meu-color-subtle)" },
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -3 }
+  },
+  "@media": {
+    "(forced-colors: active)": { color: "ButtonText", forcedColorAdjust: "auto" }
   }
 });
 
-export const spinner = style({
+export const loadingIndicator = style({
+  display: "grid",
+  placeItems: "center",
   flexShrink: 0,
+  width: 44,
+  height: 44
+});
+
+export const spinner = style({
   width: 16,
   height: 16,
-  marginInline: 14,
   border: "2px solid currentColor",
   borderRightColor: "transparent",
   borderRadius: "50%",
   animation: `${spin} 700ms linear infinite`,
-  "@media": { "(prefers-reduced-motion: reduce)": { animationDuration: "1400ms" } }
+  "@media": {
+    "(forced-colors: active)": { borderColor: "ButtonText", borderRightColor: "transparent" },
+    "(prefers-reduced-motion: reduce)": { animation: "none" }
+  }
 });

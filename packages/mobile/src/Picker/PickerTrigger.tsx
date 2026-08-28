@@ -7,6 +7,8 @@ import type { PickerTriggerProps } from "./types";
 export function PickerTrigger({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   className,
   disabled = false,
   id,
@@ -20,7 +22,13 @@ export function PickerTrigger({
 }: PickerTriggerProps) {
   const fieldContext = useFieldContext();
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy =
+    [ariaDescribedBy, fieldContext ? fieldContext.describedBy : undefined]
+      .flatMap((value) => (value ? value.trim().split(/\s+/) : []))
+      .filter((value, index, values) => values.indexOf(value) === index)
+      .join(" ") || undefined;
+  const labelledBy =
+    ariaLabelledBy || (!ariaLabel && fieldContext ? fieldContext.labelId : undefined);
   const invalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -40,6 +48,8 @@ export function PickerTrigger({
       aria-describedby={describedBy}
       aria-expanded={open}
       aria-haspopup="dialog"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabel ? undefined : labelledBy}
       data-invalid={invalid || undefined}
       data-meu-component="picker-trigger"
       data-state={disabled ? "disabled" : invalid ? "error" : open ? "open" : "default"}

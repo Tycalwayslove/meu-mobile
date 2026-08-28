@@ -1,17 +1,14 @@
 "use client";
 
 import { useFieldContext } from "../Field/FieldContext";
-import {
-  trigger,
-  triggerPlaceholder,
-  triggerSuffix,
-  triggerValue
-} from "./NumberKeyboard.css";
+import { trigger, triggerPlaceholder, triggerSuffix, triggerValue } from "./NumberKeyboard.css";
 import type { NumberKeyboardTriggerProps } from "./types";
 
 export function NumberKeyboardTrigger({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   className,
   disabled = false,
   id,
@@ -25,7 +22,13 @@ export function NumberKeyboardTrigger({
 }: NumberKeyboardTriggerProps) {
   const fieldContext = useFieldContext();
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy =
+    [ariaDescribedBy, fieldContext ? fieldContext.describedBy : undefined]
+      .flatMap((item) => (item ? item.trim().split(/\s+/) : []))
+      .filter((item, index, items) => items.indexOf(item) === index)
+      .join(" ") || undefined;
+  const labelledBy =
+    ariaLabelledBy || (!ariaLabel && fieldContext ? fieldContext.labelId : undefined);
   const invalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -44,6 +47,8 @@ export function NumberKeyboardTrigger({
       disabled={disabled}
       aria-describedby={describedBy}
       aria-expanded={open}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabel ? undefined : labelledBy}
       data-invalid={invalid || undefined}
       data-meu-component="number-keyboard-trigger"
       data-state={disabled ? "disabled" : invalid ? "error" : open ? "open" : "default"}

@@ -7077,22 +7077,13 @@
           }
         },
         {
-          "kind": "Function",
-          "canonicalReference": "@meu/mobile!Field:function(1)",
-          "docComment": "",
+          "kind": "Variable",
+          "canonicalReference": "@meu/mobile!Field:var",
+          "docComment": "/**\n * Composes one control with its visible label, supporting text, validation feedback and shared accessibility state. The ref points to the root `HTMLDivElement`, while the child keeps its own native or component ref.\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function Field(input: "
-            },
-            {
-              "kind": "Reference",
-              "text": "FieldProps",
-              "canonicalReference": "@meu/mobile!FieldProps:type"
-            },
-            {
-              "kind": "Content",
-              "text": "): "
+              "text": "Field: "
             },
             {
               "kind": "Content",
@@ -7100,53 +7091,39 @@
             },
             {
               "kind": "Reference",
-              "text": "JSX.Element",
-              "canonicalReference": "@types/react!React.JSX.Element:interface"
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
             },
             {
               "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "fileUrlPath": "src/Field/Field.tsx",
-          "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 5
-          },
-          "releaseTag": "Public",
-          "overloadIndex": 1,
-          "parameters": [
-            {
-              "parameterName": "{ children, className, description, error, label: labelContent, required }",
-              "parameterTypeTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "isOptional": false
+              "text": "<"
             },
             {
-              "parameterName": "input",
-              "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              },
-              "isOptional": false
-            }
-          ],
-          "name": "Field"
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@meu/mobile!FieldProps:type",
-          "docComment": "",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export type FieldProps = "
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
             },
             {
               "kind": "Content",
-              "text": "{\n    children: "
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLAttributes",
+              "canonicalReference": "@types/react!React.HTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLDivElement",
+              "canonicalReference": "!HTMLDivElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">, \"children\"> & {\n    children: "
             },
             {
               "kind": "Reference",
@@ -7155,7 +7132,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    className?: string;\n    description?: "
+              "text": ";\n    controlId?: string;\n    description?: "
             },
             {
               "kind": "Reference",
@@ -7173,7 +7150,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    label?: "
+              "text": ";\n    invalid?: boolean;\n    label?: "
             },
             {
               "kind": "Reference",
@@ -7182,7 +7159,169 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    required?: boolean;\n}"
+              "text": ";\n    labelAssociation?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldLabelAssociation",
+              "canonicalReference": "@meu/mobile!FieldLabelAssociation:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    requiredText?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n} & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLDivElement",
+              "canonicalReference": "!HTMLDivElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
+            }
+          ],
+          "fileUrlPath": "src/Field/Field.tsx",
+          "isReadonly": true,
+          "releaseTag": "Public",
+          "name": "Field",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 26
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!FieldLabelAssociation:type",
+          "docComment": "/**\n * Controls how the visible field label names the direct child control.\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type FieldLabelAssociation = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"auto\" | \"native\" | \"aria\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Field/Field.tsx",
+          "releaseTag": "Public",
+          "name": "FieldLabelAssociation",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!FieldProps:type",
+          "docComment": "/**\n * Props accepted by {@link Field}.\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type FieldProps = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLAttributes",
+              "canonicalReference": "@types/react!React.HTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLDivElement",
+              "canonicalReference": "!HTMLDivElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">, \"children\"> & {\n    children: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    controlId?: string;\n    description?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    error?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    invalid?: boolean;\n    label?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    labelAssociation?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "FieldLabelAssociation",
+              "canonicalReference": "@meu/mobile!FieldLabelAssociation:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    required?: boolean;\n    requiredText?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n}"
             },
             {
               "kind": "Content",
@@ -7194,7 +7333,7 @@
           "name": "FieldProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 10
+            "endIndex": 19
           }
         },
         {
@@ -11650,7 +11789,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, className, disabled, id, open, placeholder, ref, status, type, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, className, disabled, id, open, placeholder, ref, status, type, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -11702,7 +11841,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"value\"> & {\n    open?: boolean;\n    placeholder?: "
+              "text": ">, \"aria-required\" | \"children\" | \"value\"> & {\n    open?: boolean;\n    placeholder?: "
             },
             {
               "kind": "Reference",
@@ -12923,7 +13062,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, className, disabled, id, open, placeholder, ref, status, type, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, className, disabled, id, open, placeholder, ref, status, type, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -12975,7 +13114,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"value\"> & {\n    open?: boolean;\n    placeholder?: "
+              "text": ">, \"aria-required\" | \"children\" | \"value\"> & {\n    open?: boolean;\n    placeholder?: "
             },
             {
               "kind": "Reference",
@@ -15405,7 +15544,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!SearchField:var",
-          "docComment": "",
+          "docComment": "/**\n * A native mobile search input with clear, loading, IME, and single-owner Enter semantics.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15449,7 +15588,34 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"onChange\"> & {\n    clearable?: boolean;\n    defaultValue?: string;\n    loading?: boolean;\n    onChange?: (value: string) => void;\n    onClear?: () => void;\n    onSearch?: (value: string) => void;\n    size?: import(\"./types\")."
+              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"onChange\"> & {\n    clearLabel?: string;\n    clearable?: boolean;\n    defaultValue?: string;\n    loading?: boolean;\n    loadingLabel?: string;\n    onChange?: (value: string, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldChangeDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    onClear?: (details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldClearDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldClearDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    onSearch?: (value: string, details: import(\"./types\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldSearchDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldSearchDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    size?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -15494,13 +15660,173 @@
           "name": "SearchField",
           "variableTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 18
+            "endIndex": 24
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SearchFieldChangeDetails:type",
+          "docComment": "/**\n * Details accompanying `onChange`.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SearchFieldChangeDetails = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldClearDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldClearDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldInputChangeDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldInputChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SearchField/types.ts",
+          "releaseTag": "Public",
+          "name": "SearchFieldChangeDetails",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 4
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SearchFieldChangeSource:type",
+          "docComment": "/**\n * Why the search value changed.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SearchFieldChangeSource = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"clear\" | \"input\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SearchField/types.ts",
+          "releaseTag": "Public",
+          "name": "SearchFieldChangeSource",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SearchFieldClearDetails:type",
+          "docComment": "/**\n * Details emitted when the built-in clear button is activated.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SearchFieldClearDetails = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Readonly",
+              "canonicalReference": "!Readonly:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<{\n    event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    source: \"clear\";\n}>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SearchField/types.ts",
+          "releaseTag": "Public",
+          "name": "SearchFieldClearDetails",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 7
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SearchFieldInputChangeDetails:type",
+          "docComment": "/**\n * Details emitted for a native input edit.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SearchFieldInputChangeDetails = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Readonly",
+              "canonicalReference": "!Readonly:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<{\n    event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChangeEvent",
+              "canonicalReference": "@types/react!React.ChangeEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    source: \"input\";\n}>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SearchField/types.ts",
+          "releaseTag": "Public",
+          "name": "SearchFieldInputChangeDetails",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 7
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SearchFieldProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the mobile search input. Native input attributes are forwarded.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15531,7 +15857,34 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\" | \"size\" | \"type\" | \"value\"> & {\n    clearable?: boolean;\n    defaultValue?: string;\n    loading?: boolean;\n    onChange?: (value: string) => void;\n    onClear?: () => void;\n    onSearch?: (value: string) => void;\n    size?: "
+              "text": ">, \"defaultValue\" | \"onChange\" | \"size\" | \"type\" | \"value\"> & {\n    clearLabel?: string;\n    clearable?: boolean;\n    defaultValue?: string;\n    loading?: boolean;\n    loadingLabel?: string;\n    onChange?: (value: string, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldChangeDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldChangeDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    onClear?: (details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldClearDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldClearDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    onSearch?: (value: string, details: "
+            },
+            {
+              "kind": "Reference",
+              "text": "SearchFieldSearchDetails",
+              "canonicalReference": "@meu/mobile!SearchFieldSearchDetails:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => void;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -15561,13 +15914,62 @@
           "name": "SearchFieldProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 11
+            "endIndex": 17
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SearchFieldSearchDetails:type",
+          "docComment": "/**\n * Details emitted when Enter requests a search.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SearchFieldSearchDetails = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Readonly",
+              "canonicalReference": "!Readonly:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<{\n    event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "KeyboardEvent",
+              "canonicalReference": "@types/react!React.KeyboardEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    source: \"enter\";\n}>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SearchField/types.ts",
+          "releaseTag": "Public",
+          "name": "SearchFieldSearchDetails",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 7
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SearchFieldSize:type",
-          "docComment": "",
+          "docComment": "/**\n * The rendered control-height preset. Every preset keeps a 44 CSS px minimum target.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -15593,7 +15995,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SearchFieldStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual and semantic validation state. `error` also sets `aria-invalid`.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19433,7 +19835,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "@meu/mobile!TextArea:var",
-          "docComment": "",
+          "docComment": "/**\n * Native multiline text input with Field integration, optional UTF-16 counting, and bounded content-driven height.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19537,7 +19939,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TextAreaAutoSize:type",
-          "docComment": "",
+          "docComment": "/**\n * Enables content-driven height, optionally bounded by positive row counts.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19563,7 +19965,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TextAreaProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for the native Meu Mobile multiline text field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19639,7 +20041,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TextAreaSize:type",
-          "docComment": "",
+          "docComment": "/**\n * Visual density and default non-autosize height.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -19665,7 +20067,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TextAreaStatus:type",
-          "docComment": "",
+          "docComment": "/**\n * Validation presentation for TextArea.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

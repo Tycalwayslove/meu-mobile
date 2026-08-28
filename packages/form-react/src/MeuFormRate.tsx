@@ -3,8 +3,10 @@
 import { Field, Rate } from "@meu/mobile";
 import type { RateProps } from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
-import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
+
+import type { MeuNumberFieldPath } from "./adapter-types";
 
 export type MeuFormRateProps<TFieldValues extends FieldValues> = Omit<
   RateProps,
@@ -12,15 +14,19 @@ export type MeuFormRateProps<TFieldValues extends FieldValues> = Omit<
 > & {
   description?: ReactNode;
   label?: ReactNode;
-  name: Path<TFieldValues>;
+  name: MeuNumberFieldPath<TFieldValues>;
+  onBlur?: RateProps["onBlur"];
+  onChange?: RateProps["onChange"];
   required?: boolean;
-  rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  rules?: UseControllerProps<TFieldValues, MeuNumberFieldPath<TFieldValues>>["rules"];
 };
 
 export function MeuFormRate<TFieldValues extends FieldValues>({
   description,
   label,
   name,
+  onBlur,
+  onChange,
   required = false,
   rules,
   ...rateProps
@@ -41,11 +47,19 @@ export function MeuFormRate<TFieldValues extends FieldValues>({
         >
           <Rate
             {...rateProps}
+            disabled={Boolean(rateProps.disabled || field.disabled)}
             name={field.name}
             ref={field.ref}
+            required={required}
             value={typeof field.value === "number" ? field.value : 0}
-            onBlur={field.onBlur}
-            onChange={field.onChange}
+            onBlur={(event) => {
+              field.onBlur();
+              if (onBlur) onBlur(event);
+            }}
+            onChange={(nextValue) => {
+              field.onChange(nextValue);
+              if (onChange) onChange(nextValue);
+            }}
             status={fieldState.invalid ? "error" : "default"}
           />
         </Field>

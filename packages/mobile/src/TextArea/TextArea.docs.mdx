@@ -1,0 +1,247 @@
+---
+name: TextArea
+slug: text-area
+package: "@meu/mobile"
+exports: [TextArea]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: null
+  nodeId: null
+storyIds:
+  [
+    forms-textarea--default,
+    forms-textarea--counted,
+    forms-textarea--auto-size,
+    forms-textarea--controlled-rollback,
+    forms-textarea--native-form-reset,
+    forms-textarea--small,
+    forms-textarea--large,
+    forms-textarea--error,
+    forms-textarea--read-only,
+    forms-textarea--disabled
+  ]
+source: packages/mobile/src/TextArea
+---
+
+# TextArea
+
+## 当前能力
+
+- 基于原生 `textarea`，支持受控/非受控值、原生 form 属性、ref、三档尺寸、error、disabled 与 readOnly。
+- `showCount` 显示与原生 `maxLength` 一致的 UTF-16 code unit 计数，计数通过 `aria-describedby` 关联但不是逐键 live region。
+- `autoSize` 支持 `minRows`/`maxRows`，首次客户端提交前测量，并响应输入、粘贴、受控回滚、原生 form reset、宽度、旋转与字体加载变化。
+- `ResizeObserver` 不存在时退回 `window.resize`；旋转使用 `orientationchange`，Portal 或外层布局变宽时可重新测量。
+- 合并调用方、Field description/error 与 count 的全部 `aria-describedby` ID，并去重。
+- autosize 过程中保留 textarea 的 `scrollTop`，超过 `maxRows` 后使用内部纵向滚动。
+
+当前为 V2 `implementation`，尚未完成 axe、IME 真机、200% 字号、移动 Chromium/WebKit E2E、Light/Dark 视觉接受与 Android/iOS 真机记录，不能标记为 commercial。
+
+## 何时使用
+
+- 商品说明、订单备注、地址补充、售后原因等需要多行自由文本的表单字段。
+- 文本长度中等且高度随内容增长能减少内层滚动时，可启用有上限的 `autoSize`。
+- 产品限制由原生 `maxLength` 表达、且 UTF-16 计数与后端限制一致时，可启用 `showCount`。
+
+## 何时不要使用
+
+- 单行姓名、手机号、搜索词使用 TextInput 或 SearchField。
+- 富文本、Markdown、代码编辑、@mention、结构化标签或超长文档应使用专用编辑器。
+- 后端按 grapheme、Unicode code point、UTF-8 byte 或中英文权重计费时，不要把内建计数当作业务配额；应在业务层提供匹配服务端的校验与说明。
+- 不要无上限地让长文本撑高移动页面；真实业务通常应设置 `maxRows`。
+
+## 结构与状态
+
+Anatomy 为原生 textarea + 可选视觉 counter，外层 `span` 只负责纵向布局。支持以下状态：
+
+- default：可输入、固定高度或 autosize。
+- focus：accent 边框与 1px 外环。
+- error：danger 边框与 `aria-invalid`，可由 `status`、显式 ARIA 或 Field error 触发。
+- readOnly：保留可聚焦、可选择与可提交语义，使用 subtle 背景，禁止拖动改变高度。
+- disabled：muted 文字、subtle 背景，不可聚焦且不会进入 FormData。
+
+状态通过 `data-state="default|error|readonly|disabled"`、`data-size` 与 `data-auto-size` 暴露。内部 class 不是公开契约。
+
+## 基础用法
+
+```tsx
+<Field label="订单备注" description="请勿填写支付密码">
+  <TextArea
+    name="note"
+    placeholder="补充配送时间或位置"
+    autoSize={{ minRows: 2, maxRows: 6 }}
+    maxLength={200}
+    showCount
+  />
+</Field>
+```
+
+readOnly 与 disabled 不等价：
+
+```tsx
+<TextArea name="reviewNote" value={note} readOnly />
+```
+
+该字段仍会随原生表单提交；disabled 字段不会。
+
+## 受控与非受控
+
+- 传 `value` 即受控；DOM 显示由父级值决定，`onChange` 只报告原生事件。
+- 不传 `value` 时由原生 defaultValue 初始化，组件同步一份值用于 counter。
+- 受控父级拒绝输入或粘贴结果时，React 恢复旧值后，TextArea 会在下一帧按恢复后的 DOM 重新 autosize。
+- 非受控原生 `form.reset()` 完成后，counter 和 autosize 会在同一任务队列的下一次调度中读取恢复后的原生值。
+- 受控字段收到 form reset 时保持受控 `value`，不会伪装成非受控默认值，也不会额外触发 `onChange`。
+
+不要在同一生命周期内从受控切到非受控；遵循 React 原生 textarea 契约。
+
+## 表单集成
+
+- 透传 `name`、`form`、`required`、`disabled`、`readOnly`、`onBlur`、`onInvalid` 与其他原生属性。
+- `form` 可关联外部 form；监听器从 `HTMLTextAreaElement.form` 获取真实 owner。
+- 非受控 reset 恢复 `defaultValue`；受控 reset 由业务状态决定。
+- readOnly 字段进入 FormData，disabled 字段不进入；组件不改写浏览器行为。
+- Field 提供 label、description、error 与 invalid。显式 `aria-describedby` 不再覆盖 Field 内容，而是与 description/error/count 合并并去重。
+- RHF/Formik 等库应通过原生 ref、name、value/defaultValue、onChange 和 onBlur 接入；适配器证据由 form-react 对应文档维护。
+
+## Props
+
+Props 表由 TypeScript/TSDoc 与 API Extractor 生成。专有 Props 与跨字段规则：
+
+- `autoSize`: 默认 false。`true` 使用内容高度；对象可给正数 `minRows`/`maxRows`。非正数忽略，max 小于 min 时按 min 处理。
+- `showCount`: 默认 false。只显示当前 UTF-16 code unit 数；不截断、不改变 value，也不增加 live announcement。
+- `size`: `small | medium | large`，默认 medium；autosize 开启后尺寸继续控制字号和 padding，但固定 minHeight 由行数约束接管。
+- `status`: `default | error`，默认 default；Field error 或 `aria-invalid="true"` 同样进入 error 状态。
+- `rows`: 保留原生属性。autosize 时作为初始/无 JavaScript 行数提示；对象形式的 minRows 决定计算下限。
+- `maxLength`: 完全采用原生限制和 UTF-16 语义；受控程序值可以超过 maxLength，组件不会偷偷截断。
+
+## Events
+
+组件不新增自定义事件：
+
+- `onChange(event)`: 沿用 React 原生 textarea change 契约。非受控 counter 先请求状态同步，autosize 使用事件中的即时 DOM 值，然后调用调用方 handler。
+- `onInput`、`onPaste`、`onCompositionStart/Update/End`、`onBlur`、`onFocus`、`onInvalid`: 原样透传。粘贴或 IME 最终产生的 change 会进入同一计数与 autosize 流程。
+- 原生 reset 不触发 `onChange`；组件只在浏览器完成 reset 后同步派生显示。
+
+事件不可由组件取消。调用方可按原生事件能力 `preventDefault`，但不能假设取消 change 会自动回滚 value；受控模式应通过保留旧 value 表达拒绝。
+
+## Ref 与命令式方法
+
+ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`setSelectionRange()`、`form`、`validity` 等原生能力。没有额外命令式 autosize API；宽度、字体、value 与 viewport 变化会自动触发测量。
+
+## 键盘操作
+
+| 按键                 | 行为                                        |
+| -------------------- | ------------------------------------------- |
+| Tab / Shift+Tab      | 按页面焦点顺序进入或离开 textarea。         |
+| Arrow keys           | 在文本与换行之间移动光标。                  |
+| Enter                | 插入换行；不会隐式提交表单。                |
+| Cmd/Ctrl + A/C/X/V/Z | 沿用平台选择、剪切、粘贴与撤销。            |
+| Escape               | 不定义组件行为，由页面或 Overlay 契约决定。 |
+
+## 触摸与手势
+
+- 点击输入区域使用原生 textarea 打开软键盘、选择文字和拖动 selection handle。
+- 默认尺寸远大于 44×44 CSS px；组件不增加自定义触摸手势。
+- autosize 和 readOnly 禁用用户 resize handle；固定模式允许浏览器原生纵向 resize。
+- 软键盘引起 viewport 变化时，无 ResizeObserver 环境会通过 resize fallback 重新测量。
+
+## 无障碍
+
+- 必须通过 Field label、`aria-label` 或 `aria-labelledby` 提供 accessible name；placeholder 不是可靠标签。
+- 使用原生 textbox/multiline 语义，不添加冗余 role。
+- error 状态使用 `aria-invalid`，Field error 通过 `aria-describedby` 关联并作为 alert 呈现。
+- counter 也在 `aria-describedby` 中，因此聚焦时可获得长度上下文；它故意不使用 `aria-live`，避免每次输入都打断读屏。
+- UTF-16 计数意味着多数 BMP 汉字/拉丁字符为 1，常见 emoji 可能为 2 或更多。文档明确这一点，避免把视觉字符数误当作当前契约。
+- readOnly 仍可聚焦和选择，disabled 不可聚焦；状态不只依赖背景色，还通过原生属性和 data-state 表达。
+
+## 动效
+
+不适用。TextArea 没有进入、退出或装饰性动画；autosize 直接设置高度，不做 height transition，避免输入延迟、布局追赶与 reduced-motion 风险。`prefers-reduced-motion` 不需要额外分支。
+
+## 主题与定制
+
+使用 surface、ink、muted、border、accent、danger、subtle、字体、间距与圆角 Token。稳定定制面是 size/status/原生 className/style 与 data 属性；vanilla-extract class 名不是 API。启用 autoSize 后组件拥有 inline `height` 与 `overflowY`，调用方不应同时通过 style 控制这两个属性。
+
+## SSR 与 Next.js
+
+- 渲染阶段不读取 window、document、getComputedStyle、ResizeObserver 或 fonts。
+- 服务端输出稳定的 textarea、rows、counter、ARIA 与 data 属性；首次客户端 layout effect 在绘制前补上计算高度。
+- autosize 的服务端高度由 `rows`/minRows 与 CSS 决定，客户端测量后可能发生一次必要的布局校正，但不会产生 hydration 属性不匹配。
+- 组件声明为 Client Component，Server Component 可渲染它，但事件 handler 必须位于客户端边界。
+
+## RTL 与国际化
+
+- textarea 继承上层 `dir`/`lang`，CSS padding 使用逻辑方向，无左右位置假设。
+- 组件没有内建文案；counter 使用浏览器数字字形，不做 locale number formatting。
+- 字符计数采用 UTF-16，与语言无关。需要用户可见 grapheme 计数时应由产品先冻结跨端/后端算法，再评估兼容 API，当前不使用 `Intl.Segmenter`。
+- 中英文长文本和双向文本由原生 textarea 处理；方向性内容可使用原生 `dir` 属性显式覆盖。
+
+## 浏览器与 WebView
+
+正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13–14、Chromium 79–88 为观察档。Chrome 70 静态语法门禁只检查构建语法，不代表运行时支持。
+
+- ResizeObserver 可用时仅在宽度发生实质变化时重新测量，避免自身高度变化形成 observer loop。
+- ResizeObserver 不可用时监听 window resize；orientationchange 始终作为旋转兜底。
+- `document.fonts.ready` 与 loadingdone 可用时触发字体重测；不支持 Font Loading API 时仍保留首次、输入与 viewport 测量。
+- `requestAnimationFrame` 不可用时，受控回滚和观察器调度退回 0ms timer。
+
+## 边界情况与已知限制
+
+- showCount 是 UTF-16 code unit，不是 grapheme/code point/byte/加权字符数。
+- autoSize 通过读取 scrollHeight 强制布局；不适合每页同时挂载大量持续输入的 textarea。
+- 隐藏容器首次 scrollHeight 可能为 0；容器显示并产生宽度变化时会重新测量，若显示过程完全不改变宽度，业务应触发一次 viewport resize 或重新挂载。
+- 调用方在 autoSize 开启时设置 style.height/overflowY 会与组件所有权冲突，不保证结果。
+- 浏览器拼写检查、自动更正、语音输入和密码管理器行为保持原生，不做统一拦截。
+- 外部 form 在 TextArea 挂载后才动态插入且 TextArea 自身未重渲染时，reset listener 可能要到下一次组件更新才关联。
+- 当前没有 count formatter、grapheme strategy、手动 resize 命令或 onHeightChange；没有真实跨端契约前不新增 API。
+
+## 性能预算
+
+- 固定高度且不显示 count 时仍保留最小原生事件开销，不安装 ResizeObserver/font/viewport 监听。
+- autoSize 每次有效输入读取一次 computed style 与 scrollHeight；ResizeObserver 调度按 animation frame 合并，只响应宽度变化。
+- 非受控输入为 counter 派生值进行一次 React state 更新；受控值由父级更新。
+- 没有第三方运行时依赖、循环 timer 或持续动画。大批量表格不应为所有行同时启用 autoSize。
+
+## 测试证据
+
+- Unit: `TextArea.test.tsx` 11 项覆盖 ARIA 合并/去重、无 live counter、UTF-16、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权和 readOnly；另有 1 项 SSR 测试。
+- Story interaction: `NativeFormReset` play 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；其余 Story 覆盖受控拒绝、粘贴型长文、错误和状态。
+- Axe: 待补。
+- SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；隔离 Next hydration 待补。
+- RTL: 依赖原生 textarea/逻辑布局，待移动浏览器视觉证明。
+- Reduced motion: 无动效，不适用；仍待 E2E 证明无 height transition。
+- Mobile Chromium/WebKit E2E: 待补软键盘、IME、旋转、paste 与 form reset。
+- Chromatic Light/Dark: Story 入口已齐，视觉基线待接受。
+- Real device: 待补 iOS Safari/VoiceOver 与 Android Chrome/TalkBack。
+
+## V2 优化记录
+
+### 待优化
+
+- 补 axe、隔离 Next hydration、RTL、200% 字号、forced-colors 与 Light/Dark 视觉回归。
+- 在移动 Chromium/WebKit 覆盖 IME、paste、软键盘 viewport、旋转、受控拒绝和 reset。
+- 完成 iOS/Android 真机与读屏记录。
+- 评估 grapheme/byte/formatter API；只有服务端和 uni-app 计数算法冻结后才能增加。
+- 评估隐藏容器主动 remeasure 与高度变化事件；不在缺少真实使用方时扩展命令式 API。
+
+### 已完成
+
+- 修复非受控 form.reset 后 counter 与 autosize 不同步。
+- autosize 改为首帧 layout 测量，并覆盖输入、paste change、受控回滚、宽度、旋转和字体变化。
+- 增加 ResizeObserver 不可用与 requestAnimationFrame 不可用的降级路径。
+- autosize 调整期间保存 scrollTop，maxRows 溢出保持内部滚动。
+- 明确 UTF-16 计数并移除逐键 aria-live；counter 保留 describedby 关联。
+- 新增 readOnly 视觉/data 状态；合并调用方与 Field 的全部 describedby。
+- 补齐公开类型/Props/组件 TSDoc、SSR/单元测试、Story play 和留存文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型          | 内容                                             | 迁移说明                                                                        |
+| ---------- | ------ | ------------- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | fix           | reset、受控回滚、宽度/字体/旋转 autosize 同步    | 无 API 迁移                                                                     |
+| 2026-08-28 | 未发布 | accessibility | describedby 改为合并；counter 不再逐键 aria-live | 若测试依赖 `aria-live="polite"`，应改为验证 describedby；业务重要阈值请单独播报 |
+| 2026-08-28 | 未发布 | behavior      | readOnly 增加独立 data-state 与 subtle 背景      | 原生提交/聚焦语义不变                                                           |
+| 2026-08-28 | 未发布 | docs          | 建立 TextArea V2 留存文档与 README 指针          | 无                                                                              |
