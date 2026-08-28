@@ -9,8 +9,22 @@ type TokenLeaf = {
 
 type TokenTree = Record<string, TokenLeaf | TokenTree>;
 
-const sourcePath = resolve(import.meta.dirname, "../../../../meu-design/tokens.json");
+const sourcePath = process.env.MEU_DESIGN_TOKENS_PATH
+  ? resolve(process.env.MEU_DESIGN_TOKENS_PATH)
+  : resolve(import.meta.dirname, "../../../../meu-design/tokens.json");
 const outputDirectory = resolve(import.meta.dirname, "../src");
+const committedSnapshotPath = resolve(outputDirectory, "figma.generated.json");
+
+async function readTokenSource(): Promise<string> {
+  try {
+    return await readFile(sourcePath, "utf8");
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
+      return readFile(committedSnapshotPath, "utf8");
+    }
+    throw error;
+  }
+}
 
 function isTokenLeaf(value: unknown): value is TokenLeaf {
   return typeof value === "object" && value !== null && "$value" in value;
@@ -141,7 +155,7 @@ function buildCss(tokens: TokenTree): string {
 }
 
 async function generate(): Promise<void> {
-  const source = await readFile(sourcePath, "utf8");
+  const source = await readTokenSource();
   const parsed = JSON.parse(source) as { meu: TokenTree };
   const hash = createHash("sha256").update(source).digest("hex");
   const generatedTs = [
