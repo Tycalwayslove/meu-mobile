@@ -1,3 +1,5 @@
+import { componentStoryIds, getComponentStoryId } from "./storybook-links";
+
 export type ComponentCategoryId =
   | "foundation"
   | "actions-feedback"
@@ -25,6 +27,7 @@ export type ComponentDoc = {
   slug: string;
   sourcePath: string;
   storyId?: string;
+  storyTitle?: string;
 };
 
 export const componentCategories: readonly ComponentCategory[] = [
@@ -89,13 +92,6 @@ const defaultHighlights: Record<ComponentCategoryId, readonly string[]> = {
   advanced: ["复杂状态契约", "本地 H5 验证", "uni-app 适配边界"]
 };
 
-function storyId(title: string) {
-  return `${title
-    .toLowerCase()
-    .replace(/\s*&\s*/g, "-")
-    .replace(/[\s/]+/g, "-")}--default`;
-}
-
 function mobile(
   name: string,
   slug: string,
@@ -104,10 +100,13 @@ function mobile(
   options: {
     priority?: "P0" | "P1" | "P2";
     sourceName?: string;
+    /** Human-readable Storybook grouping; the link itself comes from the explicit ID map. */
     storyTitle?: string;
     highlights?: readonly string[];
   } = {}
 ): ComponentDoc {
+  const storyId = getComponentStoryId(slug);
+
   return {
     category,
     description,
@@ -117,7 +116,8 @@ function mobile(
     priority: options.priority || "P0",
     slug,
     sourcePath: `packages/mobile/src/${options.sourceName || name}`,
-    ...(options.storyTitle ? { storyId: storyId(options.storyTitle) } : {})
+    ...(storyId ? { storyId } : {}),
+    ...(options.storyTitle ? { storyTitle: options.storyTitle } : {})
   };
 }
 
@@ -263,7 +263,8 @@ export const componentDocs: readonly ComponentDoc[] = [
     priority: "P0",
     slug: "form",
     sourcePath: "packages/form-react/src/MeuForm",
-    storyId: storyId("Forms/FormTextInput")
+    storyId: componentStoryIds.form,
+    storyTitle: "Forms/FormTextInput"
   },
   mobile("TextInput", "text-input", "data-entry", "原生单行输入，支持清除、状态与 Field 关联。", {
     storyTitle: "Forms/TextInput"

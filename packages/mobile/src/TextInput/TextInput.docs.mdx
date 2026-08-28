@@ -1,0 +1,150 @@
+---
+name: TextInput
+slug: text-input
+package: "@meu/mobile"
+exports: [TextInput]
+status: audit
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [
+    forms-textinput--default,
+    forms-textinput--error,
+    forms-textinput--disabled,
+    forms-textinput--clearable
+  ]
+source: packages/mobile/src/TextInput
+---
+
+# TextInput
+
+## 当前能力
+
+- 原生单行 input，支持 ref 和除原生 `size` 外的 input 属性。
+- small/medium/large、default/error、disabled 与 clearable。
+- 与 Field context 自动关联 id、description 和 error；支持显式 ARIA 覆盖。
+
+## 何时使用
+
+用于姓名、手机号、搜索词、短文本、密码等单行输入。应根据数据类型设置 `type`、`inputMode`、`autoComplete` 和 `enterKeyHint`。
+
+## 何时不要使用
+
+多行内容使用 TextArea；数字加减使用 Stepper；固定选项使用 Selector/Radio；特殊数字键盘仅在系统键盘不能满足时使用。
+
+## 结构与状态
+
+结构为 input 与可选清除按钮。当前状态包括 default、focus-visible、error、disabled；V2 需补齐 readOnly、autofill、IME composing、password reveal 组合和异步校验状态契约。
+
+## 基础用法
+
+```tsx
+<Field label="手机号" error={error}>
+  <TextInput inputMode="tel" autoComplete="tel" value={value} onChange={onChange} />
+</Field>
+```
+
+## 受控与非受控
+
+遵循原生 `value/onChange` 与 `defaultValue`。不要在生命周期中切换受控模式。当前 clear 实现直接修改 DOM value 并派发 input；受控输入的清除时序需要在 V2 修正并以 React 事件测试证明。
+
+## 表单集成
+
+透传 `name`、`required`、`disabled`、`readOnly`、`onBlur` 和 ref，可参与原生 FormData。React Hook Form 使用 `MeuFormTextInput`；V2 需覆盖 dirty、touched、服务端错误、首次错误聚焦和 reset。
+
+## Props
+
+专有 Props 为 `clearable`、`onClear`、`size`、`status`，其余来自原生 input。API 表由 API Extractor 生成。
+
+## Events
+
+- `onChange`：原生 React change 语义，由输入产生。
+- `onClear`：点击清除按钮后调用；当前无 details，也不能单独表示 pointer/keyboard 来源。
+- 原生 `onInput/onBlur/onFocus/onComposition*` 均透传。
+
+V2 必须定义 clear 时 `onChange` 与 `onClear` 的顺序，并保证受控与非受控一致。
+
+## Ref 与命令式方法
+
+ref 指向真实 `HTMLInputElement`，可使用 focus、select、setSelectionRange 等原生能力。
+
+## 键盘操作
+
+| 按键            | 行为                                            |
+| --------------- | ----------------------------------------------- |
+| Tab / Shift+Tab | 在 input、清除按钮和相邻控件间移动              |
+| 输入法组合键    | 由原生 input 处理，组合期间不得错误提交或格式化 |
+| Enter           | 由表单和 `enterKeyHint` 场景决定                |
+
+## 触摸与手势
+
+无自有手势。清除按钮必须达到 44×44 CSS px，且不能遮挡文本、选择手柄或浏览器密码管理 UI。
+
+## 无障碍
+
+input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和 `aria-describedby` 关联。清除按钮当前固定中文 accessible name，是 V2 国际化缺口。
+
+## 动效
+
+仅使用状态过渡，无业务动效。reduced-motion 下不应影响输入反馈。
+
+## 主题与定制
+
+稳定入口为 size、status、原生属性、Field 组合和全局 Token。内部 wrapper/class 不作为 API。
+
+## SSR 与 Next.js
+
+初始 value/defaultValue 必须在服务端和客户端一致。autoFocus 可能影响 hydration 后体验，不应用作默认生产行为。
+
+## RTL 与国际化
+
+文本方向遵循 DOM；图标与内边距必须使用逻辑方向。清除 label 必须迁移到 ConfigProvider locale 或显式 prop。
+
+## 浏览器与 WebView
+
+IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Safari/WKWebView 与 Android Chrome/WebView 真机验证。
+
+## 边界情况与已知限制
+
+- 当前 clear 对 React 受控输入的事件一致性尚未证明。
+- 当前清除文案硬编码为中文。
+- 未内建格式化、mask、debounce 或请求逻辑。
+
+## 性能预算
+
+单次输入不应引入额外 layout measurement 或全局监听；格式化和远程校验由调用层节流。
+
+## 测试证据
+
+- Unit: `TextInput.test.tsx`
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 待补组件级证明
+- RTL: 待补
+- Reduced motion: 不适用，待静态验证
+- Mobile Chromium/WebKit E2E: 有通用表单路径，待专属 IME/autofill 真机记录
+- Chromatic Light/Dark: 有视觉快照，待矩阵化
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 修正并冻结受控/非受控 clear 契约。
+- 国际化清除文案，验证 IME、autofill、password、selection、readOnly。
+- 补齐 TSDoc、Form adapter、Story play、axe、SSR、RTL 和真机证据。
+
+### 已完成
+
+- V1 已使用原生 input、Field 关联、ref 和错误语义。
+
+## 变更记录
+
+| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
+| ---------- | ----- | ---- | -------------------- | -------- |
+| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |

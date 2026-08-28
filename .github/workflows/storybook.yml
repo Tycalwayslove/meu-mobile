@@ -25,11 +25,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Build packages
-        if: env.CHROMATIC_PROJECT_TOKEN != ''
         run: pnpm build:packages
       - name: Build Storybook
-        if: env.CHROMATIC_PROJECT_TOKEN != ''
         run: pnpm --filter @meu/storybook build
+      - name: Validate documentation Storybook links
+        run: pnpm storybook:validate-links
       - name: Publish to Chromatic
         if: env.CHROMATIC_PROJECT_TOKEN != ''
         run: pnpm exec chromatic --project-token="$CHROMATIC_PROJECT_TOKEN" --storybook-build-dir=apps/storybook/storybook-static --exit-zero-on-changes

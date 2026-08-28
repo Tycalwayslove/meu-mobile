@@ -21,6 +21,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm tokens:check
+      - run: pnpm test:component-manifest
+      - run: pnpm docs:manifest:verify
       - run: pnpm build:packages
       - run: pnpm lint
       - run: pnpm typecheck

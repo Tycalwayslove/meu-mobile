@@ -1,0 +1,158 @@
+---
+name: NumberKeyboard
+slug: number-keyboard
+package: "@meu/mobile"
+exports: [NumberKeyboard, NumberKeyboardTrigger]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "361:153"
+storyIds:
+  [
+    data-entry-numberkeyboard--numeric,
+    data-entry-numberkeyboard--decimal,
+    data-entry-numberkeyboard--confirm,
+    data-entry-numberkeyboard--random-order
+  ]
+source: packages/mobile/src/NumberKeyboard
+---
+
+# NumberKeyboard
+
+## 当前能力
+
+- 非模态底部 Portal 数字键盘，不持有业务值，不使用 Mask、滚动锁或焦点圈定。
+- number/decimal、extra key、全宽 confirm、受控/非受控 open、safe area、关闭按钮和随机数字顺序。
+- 输入、删除、确认和关闭分离；删除键可在按住 600ms 后每 120ms 连续触发。
+- NumberKeyboardTrigger 提供不会唤起系统软键盘的原生 button 触发器。
+
+## 何时使用
+
+仅用于系统键盘无法满足的金额快捷输入、终端设备或特定业务流程。一般数字、OTP 和密码输入仍优先真实 input 与系统键盘。
+
+## 何时不要使用
+
+`randomOrder` 不是密码学安全措施；组件不负责金额精度、密码储存、身份校验或表单值。不能用自绘键盘替代可用的原生输入而牺牲辅助技术。
+
+## 结构与状态
+
+Portal layer → panel → optional header → 3×4 key grid → optional confirm。open/defaultOpen 只表示显示；业务 value 始终由 caller/form 持有。
+
+## 基础用法
+
+```tsx
+<NumberKeyboardTrigger open={open} value={value} onClick={() => setOpen(true)} />
+<NumberKeyboard
+  open={open}
+  mode="decimal"
+  onInput={(part) => setValue((current) => current + part)}
+  onDelete={() => setValue((current) => current.slice(0, -1))}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+`open/onOpenChange` 或 `defaultOpen` 只控制可见性。组件没有 value/defaultValue/onChange。值、格式、长度、精度和校验属于调用方。
+
+## 表单集成
+
+推荐 `MeuFormNumberKeyboard` 绑定 React Hook Form；adapter 负责 dirty/touched、错误关联、校验焦点和字符拼接。核心组件不依赖表单库。
+
+## Props
+
+API 由 `NumberKeyboardProps` 与 `NumberKeyboardTriggerProps` 生成。重要选项包括 mode、extraKey、confirmLabel、deleteRepeat、randomOrder、showCloseButton、safeArea、container 和显示状态 Props。
+
+## Events
+
+- `onInput(value, { source })`：source 为 digit、decimal 或 extra。
+- `onDelete({ repeated })`：区分单击与长按重复。
+- `onConfirm()`：点击确认时触发。
+- `onOpenChange(open, { reason })`：reason 为 close-button、confirm、escape。
+
+事件只表达意图，不保证业务值已更新。confirm 默认请求关闭，可通过 `closeOnConfirm=false` 改变。
+
+## Ref 与命令式方法
+
+NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命令式输入或 close 方法，状态变化通过 Props 完成。
+
+## 键盘操作
+
+| 按键            | 行为                       |
+| --------------- | -------------------------- |
+| Tab / Shift+Tab | 遍历原生按键，不圈定焦点   |
+| Enter / Space   | 激活聚焦按键               |
+| Escape          | `closeOnEscape` 时请求收起 |
+
+## 触摸与手势
+
+数字键至少 56px 高；删除支持长按。鼠标按下使用 preventDefault 保留真实 input 焦点，但键盘 Tab 仍可进入按键。V2 需验证 pointer cancel、触摸长按菜单、快速切换 open 和卸载清理。
+
+## 无障碍
+
+根为有名称的 group；每个按键为原生 button 并有 accessible name。非模态设计不使用 aria-modal；调用方必须保留真实 input 或等价字段语义。
+
+## 动效
+
+底部进入/退出由 overlay presence 管理。V2 需冻结时长、缓动、中断和 reduced-motion，并证明退出期间不会继续发布输入。
+
+## 主题与定制
+
+公开定制为 title、labels、mode、extraKey、confirmLabel、safeArea、container 和全局 Token。按键布局不是任意 render API，以保持尺寸与可访问性。
+
+## SSR 与 Next.js
+
+closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder 只在打开时于客户端计算，避免服务端随机 DOM mismatch。
+
+## RTL 与国际化
+
+内置 zh-CN/en-US labels，可逐项覆盖。数字布局保持标准数字顺序，不因 RTL 自动反转；业务值方向由真实 input 决定。
+
+## 浏览器与 WebView
+
+依赖 Portal、PointerEvent、定时器和 safe-area env。必须验证 iOS 长按、焦点保持、软键盘共存、Android WebView 和外接键盘。
+
+## 边界情况与已知限制
+
+- randomOrder 使用 `Math.random`，仅视觉混淆。
+- decimal 不阻止 caller 输入多个小数点；金额精度与格式由业务层控制。
+- 鼠标焦点保留不等于触摸设备能强制保留系统软键盘。
+- 非模态组件不会阻止背景滚动或背景操作。
+
+## 性能预算
+
+每次打开最多渲染固定数量按键；所有重复删除计时器必须在关闭和卸载时清理，不能遗留全局监听。
+
+## 测试证据
+
+- Unit: `NumberKeyboard.test.tsx`
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 待补组件级证明
+- RTL: 待补
+- Reduced motion: 待补
+- Mobile Chromium/WebKit E2E: 待补焦点与长按路径
+- Chromatic Light/Dark: Figma 已验收，Story 待建立显式矩阵
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 补长按/pointer cancel、焦点保持、SSR、RTL、axe 与真机测试。
+- 完整验证 form adapter 的 dirty/touched/error/reset 行为。
+- 明确触摸设备与系统软键盘共存限制，并提供降级示例。
+
+### 已完成
+
+- V1 已采用值与显示分离、非模态 Portal、原生按键、关闭原因、连删节奏和安全边界声明。
+
+## 变更记录
+
+| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
+| ---------- | ----- | ---- | -------------------- | -------- |
+| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |

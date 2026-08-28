@@ -1,0 +1,144 @@
+---
+name: Button
+slug: button
+package: "@meu/mobile"
+exports: [Button]
+status: audit
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: null
+storyIds:
+  [actions-button--solid, actions-button--outline, actions-button--loading, actions-button--danger]
+source: packages/mobile/src/Button
+---
+
+# Button
+
+## 当前能力
+
+- 原生 `button`，默认 `type="button"`，支持 ref 和原生 button 属性。
+- `solid | outline | ghost | text`、三种 tone、三档 size、block、前后图标和 loading。
+- loading 时保留内容宽度、设置 `aria-busy` 并禁用点击。
+
+当前能力来自源码与单测；V2 状态仍为 `audit`，不等于已完成商用验收。
+
+## 何时使用
+
+用于提交、确认、下一步、取消或删除等明确操作。页面应有清晰的主次层级，同一区域避免多个主按钮竞争。
+
+## 何时不要使用
+
+- 纯导航优先使用链接；无文字操作使用 IconButton。
+- 不把整张 Card 或 Cell 包进 Button。
+- 不用 disabled 替代权限、失败或未满足条件的解释。
+
+## 结构与状态
+
+结构为 leading icon、label、trailing icon。现有状态包括 default、hover/active/focus-visible、disabled、loading；V2 还需验证高对比、200% 字号、长文本和异步失败恢复。
+
+## 基础用法
+
+```tsx
+<Button tone="accent" onClick={save}>
+  保存更改
+</Button>
+```
+
+## 受控与非受控
+
+不适用。Button 不持有业务状态；loading 和 disabled 由调用方控制。
+
+## 表单集成
+
+默认不会提交表单。需要提交时显式设置 `type="submit"`；loading 会禁用原生按钮并阻止重复提交。V2 需补充 FormData、React Hook Form 和服务端错误示例。
+
+## Props
+
+API 表最终由 TypeScript/TSDoc 和 API Extractor生成。当前专有 Props：`block`、`leadingIcon`、`loading`、`size`、`tone`、`trailingIcon`、`variant`，其余来自原生 `ButtonHTMLAttributes`。
+
+## Events
+
+透传原生 button 事件。loading 或 disabled 时原生 `click` 不触发。组件不负责 debounce、请求、成功提示或错误处理。
+
+## Ref 与命令式方法
+
+ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力。
+
+## 键盘操作
+
+| 按键            | 行为           |
+| --------------- | -------------- |
+| Tab / Shift+Tab | 移入或移出焦点 |
+| Enter / Space   | 触发按钮       |
+
+## 触摸与手势
+
+不定义自有手势。V2 必须逐尺寸证明默认触控目标不小于 44×44 CSS px，并验证快速连点与 loading 切换。
+
+## 无障碍
+
+使用原生语义。可见文字通常提供 accessible name；仅图标操作不应使用 Button。loading 使用 `aria-busy`，但状态播报与操作结果由业务层负责。
+
+## 动效
+
+当前提供按压状态和 spinner。V2 需确认只使用 transform/opacity、动画不引发布局变化，reduced-motion 下 spinner 使用可感知的静态 loading 表达。
+
+## 主题与定制
+
+公开定制面为 `variant`、`tone`、`size`、`block`、图标插槽和全局 Token。内部 class 不是稳定 API。
+
+## SSR 与 Next.js
+
+渲染阶段不读取浏览器全局；作为交互组件需位于 Client Component 边界。SSR DOM 应与 hydration 一致。
+
+## RTL 与国际化
+
+组件本身没有文案；leading/trailing 表达视觉顺序，方向性图标由调用方或图标层处理。V2 需验证逻辑间距和长文本。
+
+## 浏览器与 WebView
+
+依赖原生 button 与 CSS。完整支持范围按 V2 兼容矩阵，不能用语法扫描代替运行时验证。
+
+## 边界情况与已知限制
+
+- loading 会使按钮 disabled，因此按钮本身不能接收焦点或再次公告状态。
+- 当前没有内建防抖、请求所有权、成功/失败状态。
+- 当前没有逐 Props TSDoc 和 Story interaction 证明。
+
+## 性能预算
+
+无运行时依赖和计时器；V2 记录组件增量 gzip，并确保图标不会被整包引入。
+
+## 测试证据
+
+- Unit: `Button.test.tsx`
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 隔离消费者覆盖，待增加组件级证明
+- RTL: 待补
+- Reduced motion: 待补
+- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Chromatic Light/Dark: 有视觉快照，待建立显式矩阵
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 补齐 TSDoc、Autodocs、交互与 axe；验证 44px、字号放大、高对比和 RTL。
+- 明确 loading 的读屏策略、宽度稳定性和异步错误恢复示例。
+- 评估是否需要 `loadingText`，没有真实场景证据前不新增 API。
+
+### 已完成
+
+- V1 已采用原生 button、默认安全 type、loading 禁用与 ref 转发。
+
+## 变更记录
+
+| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
+| ---------- | ----- | ---- | -------------------- | -------- |
+| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |

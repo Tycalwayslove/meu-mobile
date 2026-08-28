@@ -1,0 +1,139 @@
+---
+name: Popup
+slug: popup
+package: "@meu/mobile"
+exports: [Popup]
+status: audit
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "151:724"
+storyIds: [feedback-popup--bottom, feedback-popup--top, feedback-popup--left, feedback-popup--right]
+source: packages/mobile/src/Popup
+---
+
+# Popup
+
+## 当前能力
+
+- 四方向 Portal 浮层，支持受控/非受控 open、Mask、滚动锁、焦点圈定/恢复、Escape 和关闭按钮。
+- 支持自定义 portal container、forceMount、safe area、initial/return focus ref。
+- 关闭事件提供 `mask | escape | close-button` reason，退出动画结束后卸载。
+
+## 何时使用
+
+作为需要阻断背景交互的通用模态面板基础。业务级 Dialog、Picker、ActionMenu 应优先使用对应高层组件。
+
+## 何时不要使用
+
+非模态提示使用 Popover/Toast；复杂拖拽与 snap 使用 BottomSheet；不在 Popup 内重复实现路由、数据请求或表单状态机。
+
+## 结构与状态
+
+Portal layer → optional Mask → dialog panel → optional close button → body。状态为 closed、entering、open、exiting；视觉方向由 position 决定。
+
+## 基础用法
+
+```tsx
+<Popup aria-label="筛选条件" open={open} onOpenChange={setOpen}>
+  <FilterForm />
+</Popup>
+```
+
+## 受控与非受控
+
+受控使用 `open/onOpenChange`，非受控使用 `defaultOpen`。受控模式下关闭意图只回调，不自行改变 open；调用方必须提交新值。
+
+## 表单集成
+
+Popup 不持有表单值。关闭前是否丢弃草稿由组合组件决定；提交按钮应在表单内使用原生 submit。
+
+## Props
+
+API 由 `PopupProps` 生成。调用方必须二选一提供 `aria-label` 或 `aria-labelledby`；重要行为 Props 包括 container、mask、lockScroll、closeOnEscape、closeOnMaskClick、restoreFocus、initialFocusRef、returnFocusRef、forceMount 和 safeArea。
+
+## Events
+
+`onOpenChange(open, details)` 仅在组件请求变化时调用。当前关闭 reason 为 `mask`、`escape`、`close-button`；程序化 open 变化不反向发事件。
+
+## Ref 与命令式方法
+
+ref 指向 dialog panel。焦点控制优先使用 `initialFocusRef` 和 `returnFocusRef`，不要依赖内部 DOM。
+
+## 键盘操作
+
+| 按键            | 行为                       |
+| --------------- | -------------------------- |
+| Escape          | `closeOnEscape` 时请求关闭 |
+| Tab / Shift+Tab | 在最上层 Popup 内循环焦点  |
+
+## 触摸与手势
+
+Mask 点击可选关闭；面板本身不定义拖拽。关闭按钮目标至少 44×44。V2 需验证 pointer cancel 与滚动边界。
+
+## 无障碍
+
+面板使用 `role="dialog"`、`aria-modal="true"` 并强制可访问名称。打开时圈定焦点，关闭后恢复。V2 必须验证嵌套 overlay、动态 focusable、background inert 与读屏浏览模式。
+
+## 动效
+
+位置决定进入/退出方向，presence 层保留退出 DOM。V2 需冻结时长/缓动/中断规则，并在 reduced-motion 下即时或淡化切换。
+
+## 主题与定制
+
+公开定制为 position、maskOpacity、safeArea、close button、container、className/style 与全局 Token。z-index 由 overlay 层级统一治理。
+
+## SSR 与 Next.js
+
+Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 closed/open/forceMount 的 hydration DOM 稳定。
+
+## RTL 与国际化
+
+关闭 label 从 ConfigProvider locale 获取，也可显式覆盖。left/right position 在 RTL 下仍表示物理方向；若产品需要 start/end，需在 V2 API 评审后增加，不能静默翻转。
+
+## 浏览器与 WebView
+
+重点验证 iOS body lock、软键盘/visual viewport、返回焦点、嵌套 Portal 和浏览器后退键组合。
+
+## 边界情况与已知限制
+
+- 当前 `aria-modal` 固定为 true，不适合非模态用法。
+- overlay primitives 缺少独立完整测试，是 Popup 商用前置阻断项。
+- container 指向自定义文档或 Shadow DOM 的边界尚未声明支持。
+
+## 性能预算
+
+关闭且非 forceMount 时不保留内容；全局监听和 body lock 必须引用计数并在卸载时清理。
+
+## 测试证据
+
+- Unit: `Popup.test.tsx`
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 有 Portal 基础覆盖，待组合级证明
+- RTL: 待补
+- Reduced motion: 待补
+- Mobile Chromium/WebKit E2E: 有通用 overlay 路径，待嵌套与键盘场景
+- Chromatic Light/Dark: Figma 与 stories 已有基线，待显式矩阵
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 先加固 Portal、focus trap 与 scroll lock，再做 Popup 交互矩阵。
+- 补 inert/嵌套策略、软键盘、安全区、退出中断、SSR、RTL 和真机证明。
+- 为每个关闭 reason 添加 Story play 与 E2E。
+
+### 已完成
+
+- V1 已统一 Portal、Mask、受控模型、焦点、滚动锁、关闭原因与四方向样式。
+
+## 变更记录
+
+| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
+| ---------- | ----- | ---- | -------------------- | -------- |
+| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |

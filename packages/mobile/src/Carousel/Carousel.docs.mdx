@@ -1,0 +1,152 @@
+---
+name: Carousel
+slug: carousel
+package: "@meu/mobile"
+exports: [Carousel]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-28
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "302:122"
+storyIds:
+  [
+    gesture-carousel--default,
+    gesture-carousel--looping-autoplay,
+    gesture-carousel--controlled,
+    gesture-carousel--disabled
+  ]
+source: packages/mobile/src/Carousel
+---
+
+# Carousel
+
+## 当前能力
+
+- Embla 驱动的单页轮播，支持受控/非受控 index、drag、loop、gap、indicator 和可选 autoplay。
+- 固定提供前后原生按钮；autoplay 时提供暂停/播放按钮，并在 hover、focus、页面隐藏和 drag 时暂停。
+- `onIndexChange` 区分 `autoplay | drag | next | previous`；非活动页从焦点顺序移除。
+
+## 何时使用
+
+用于商品横幅、内容推荐、媒体画廊和有限页引导。重要内容不应只存在于自动轮播中。
+
+## 何时不要使用
+
+长列表使用横向 List/VirtualList；步骤流程使用 Steps；不使用轮播隐藏必须阅读的条款或关键操作。
+
+## 结构与状态
+
+root → controls → viewport/track/slides → indicator。状态包括 active index、dragging、rotating、paused、disabled、reduced-motion；视觉设计不应把瞬时运行时状态全部伪造成 variants。
+
+## 基础用法
+
+```tsx
+<Carousel
+  aria-label="活动推荐"
+  items={banners.map((item) => ({
+    key: item.id,
+    ariaLabel: item.title,
+    content: <Banner {...item} />
+  }))}
+/>
+```
+
+## 受控与非受控
+
+受控使用 `index/onIndexChange`，非受控使用 `defaultIndex`。输入会归一化到现有 item 范围；受控调用方未更新 index 时，视图会回滚到受控值。
+
+## 表单集成
+
+不适用。Carousel 不应作为隐式表单字段；需要选择语义时使用 Selector 或 RadioGroup。
+
+## Props
+
+API 表由 `CarouselProps` 生成。核心为 items、index/defaultIndex、onIndexChange、allowDrag、loop、autoplay、autoplayInterval、indicator、gap 与可访问 label props。
+
+## Events
+
+`onIndexChange(index, { reason })` 只在实际选择变化时触发。drag 开始会永久暂停本轮 autoplay，前后按钮也会暂停；hover 只是暂时暂停。
+
+## Ref 与命令式方法
+
+ref 指向根 `HTMLDivElement`。不公开 Embla instance；程序化切换通过受控 index 完成。
+
+## 键盘操作
+
+| 按键          | 行为                                      |
+| ------------- | ----------------------------------------- |
+| Tab           | 进入暂停/播放、上一张、下一张和当前页内容 |
+| Enter / Space | 触发对应原生按钮                          |
+
+当前不在根节点劫持方向键，避免与页面滚动冲突。
+
+## 触摸与手势
+
+drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向页面滚动、pointer cancel、多指、嵌套可点击内容和 RTL。
+
+## 无障碍
+
+提供 carousel/slide roledescription、每页名称、live region、暂停控制和前后按钮。非活动页 `aria-hidden` 并移除后代焦点。V2 需通过读屏和 DOM 动态变更验证 tabindex 恢复不会污染调用方。
+
+## 动效
+
+默认不自动播放。reduced-motion 时自动播放不启动，用户显式播放后使用即时切换。V2 需验证动画中断、controlled rollback 和 loop clone 的可见性。
+
+## 主题与定制
+
+稳定入口为 indicator renderer/variant、gap、items content 和全局 Token。Embla DOM/class 不是公开 API。
+
+## SSR 与 Next.js
+
+服务端输出静态 slides，交互在客户端初始化。items 的 key、数量和初始 index 在 hydration 前必须稳定。
+
+## RTL 与国际化
+
+内置中英文按钮与 roledescription。V2 需验证 RTL 下视觉顺序、手势方向、前后按钮图标和 Embla direction 配置。
+
+## 浏览器与 WebView
+
+依赖 Pointer/Touch、MutationObserver、matchMedia、visibility API 和 Embla。必须在目标 iOS/Android WebView 验证；matchMedia 已有 addListener fallback。
+
+## 边界情况与已知限制
+
+- items 为空或只有一项时控制按钮禁用。
+- autoplay 最短间隔归一为 1000ms，但内容可读时间仍由调用方负责。
+- MutationObserver 会扫描 slide 后代焦点，复杂动态内容需性能验证。
+
+## 性能预算
+
+普通轮播建议保持有限 slides；超大列表不属于本组件。V2 记录 50 slides/复杂卡片基准、主线程长任务和增量 gzip。
+
+## 测试证据
+
+- Unit: `Carousel.test.tsx`
+- Story interaction: 待补
+- Axe: 待补
+- SSR/hydration: 待补组件级证明
+- RTL: 待补
+- Reduced motion: 有单测覆盖，待真实浏览器证明
+- Mobile Chromium/WebKit E2E: 待补拖拽与滚动竞争
+- Chromatic Light/Dark: Figma 与 stories 已有基线，待矩阵化
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+- 完成 RTL、pointer cancel、滚动仲裁、可见性、受控回滚和读屏测试。
+- 补 Story play、axe、SSR、性能与真机证据。
+- 审核 autoplay 默认、间隔下限与 WCAG 暂停要求的文档表达。
+
+### 已完成
+
+- V1 已默认关闭 autoplay，提供暂停/播放与前后按钮、reduced-motion 降级和 reason 事件。
+
+## 变更记录
+
+| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
+| ---------- | ----- | ---- | -------------------- | -------- |
+| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |
