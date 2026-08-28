@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { waitForStory } from "../storyTestUtils";
 import { Ellipsis } from "./Ellipsis";
 
 const content =
@@ -25,15 +26,16 @@ export const InteractiveExpansion: Story = {
     </div>
   ),
   play: async ({ canvasElement }) => {
-    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
-    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
-    const action = canvasElement.querySelector<HTMLButtonElement>("button");
-    if (!action) throw new window.Error("Expected a measured Ellipsis action");
+    await waitForStory(
+      () => canvasElement.querySelector<HTMLButtonElement>("button") !== null,
+      "Expected a measured Ellipsis action"
+    );
+    const action = canvasElement.querySelector<HTMLButtonElement>("button")!;
     action.click();
-    await Promise.resolve();
-    if (action.getAttribute("aria-expanded") !== "true") {
-      throw new window.Error("Ellipsis did not expose its expanded state");
-    }
+    await waitForStory(
+      () => action.getAttribute("aria-expanded") === "true",
+      "Ellipsis did not expose its expanded state"
+    );
   }
 };
 export const NarrowRTL: Story = {

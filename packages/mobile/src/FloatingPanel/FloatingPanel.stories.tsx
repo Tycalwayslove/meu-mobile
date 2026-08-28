@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Button } from "../Button";
 import { Cell, List } from "../List";
+import { waitForStory } from "../storyTestUtils";
 import { FloatingPanel } from "./FloatingPanel";
 import type { FloatingPanelPlacement } from "./types";
 
@@ -73,11 +74,15 @@ export const Bottom: Story = {
     const panel = canvasElement.querySelector<HTMLElement>('[data-meu-component="floating-panel"]');
     const handle = canvasElement.querySelector<HTMLButtonElement>("button[aria-controls]");
     if (!panel || !handle) throw new window.Error("Expected FloatingPanel handle");
+    await waitForStory(
+      () => panel.getAttribute("data-measured") === "true" && !handle.disabled,
+      "FloatingPanel did not finish measuring its anchors"
+    );
     handle.click();
-    await Promise.resolve();
-    if (panel.getAttribute("data-anchor-index") !== "1") {
-      throw new window.Error("FloatingPanel did not request the next controlled anchor");
-    }
+    await waitForStory(
+      () => panel.getAttribute("data-anchor-index") === "1",
+      "FloatingPanel did not request the next controlled anchor"
+    );
   }
 };
 

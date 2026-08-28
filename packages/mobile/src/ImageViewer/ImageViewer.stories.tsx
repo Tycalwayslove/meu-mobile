@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 
 import { Button } from "../Button";
 import { ThemeProvider } from "../ConfigProvider";
+import { nextStoryFrame, waitForStory } from "../storyTestUtils";
 import { ImageViewer } from "./ImageViewer";
 
 const images = [
@@ -81,13 +82,17 @@ export const KeyboardInteraction: Story = {
     const trigger = canvasElement.querySelector<HTMLButtonElement>("button");
     if (!trigger) throw new window.Error("Expected ImageViewer trigger");
     trigger.click();
-    await Promise.resolve();
-    const dialog = document.querySelector<HTMLElement>('[data-meu-component="image-viewer"]');
-    if (!dialog) throw new window.Error("ImageViewer did not open");
+    await waitForStory(
+      () => document.querySelector<HTMLElement>('[data-meu-component="image-viewer"]') !== null,
+      "ImageViewer did not open"
+    );
+    const dialog = document.querySelector<HTMLElement>('[data-meu-component="image-viewer"]')!;
+    await nextStoryFrame();
     dialog.dispatchEvent(new window.KeyboardEvent("keydown", { key: "+", bubbles: true }));
-    if (dialog.getAttribute("data-scale") !== "1.5") {
-      throw new window.Error("ImageViewer keyboard zoom did not update scale");
-    }
+    await waitForStory(
+      () => dialog.getAttribute("data-scale") === "1.5",
+      "ImageViewer keyboard zoom did not update scale"
+    );
     dialog.dispatchEvent(new window.KeyboardEvent("keydown", { key: "0", bubbles: true }));
     const close = document.querySelector<HTMLButtonElement>("button[aria-label='关闭图片预览']");
     if (close) close.click();

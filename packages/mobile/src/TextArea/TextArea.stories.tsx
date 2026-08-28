@@ -98,18 +98,16 @@ export const NativeFormReset: Story = {
       textArea.value = "修改后的商品说明";
     }
     textArea.dispatchEvent(new Event("input", { bubbles: true }));
-    await waitFor(
-      () => canvasElement.querySelector("[data-meu-slot='count']")?.textContent === "8 / 100",
-      "TextArea input event did not update the uncontrolled value and count"
-    );
+    await waitFor(() => {
+      const count = canvasElement.querySelector("[data-meu-slot='count']");
+      return count !== null && count.textContent === "8 / 100";
+    }, "TextArea input event did not update the uncontrolled value and count");
 
     resetButton.click();
-    await waitFor(
-      () =>
-        textArea.value === "初始说明" &&
-        canvasElement.querySelector("[data-meu-slot='count']")?.textContent === "4 / 100",
-      "Native reset did not restore TextArea value and count"
-    );
+    await waitFor(() => {
+      const count = canvasElement.querySelector("[data-meu-slot='count']");
+      return textArea.value === "初始说明" && count !== null && count.textContent === "4 / 100";
+    }, "Native reset did not restore TextArea value and count");
 
     if (form.elements.length !== 2) throw new window.Error("Unexpected reset story form controls");
   }

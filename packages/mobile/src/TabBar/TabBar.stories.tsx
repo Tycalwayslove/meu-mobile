@@ -1,6 +1,7 @@
 import { MeuIconCheck, MeuIconPlus, MeuIconSearch } from "@meu/icons-react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { waitForStory } from "../storyTestUtils";
 import { TabBar } from "./TabBar";
 
 const items = [
@@ -28,13 +29,14 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 export const WithSafeArea: Story = { args: { safeArea: true } };
 export const RouteInteraction: Story = {
-  play: ({ canvasElement }) => {
+  play: async ({ canvasElement }) => {
     const target = canvasElement.querySelector<HTMLButtonElement>("button");
     if (!target) throw new window.Error("Expected a button-backed tab bar item");
     target.click();
-    if (target.getAttribute("aria-current") !== "page") {
-      throw new window.Error("TabBar did not mark the requested route current");
-    }
+    await waitForStory(
+      () => target.getAttribute("aria-current") === "page",
+      "TabBar did not mark the requested route current"
+    );
   }
 };
 export const Landscape: Story = {

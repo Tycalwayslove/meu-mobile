@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { ThemeProvider } from "../ConfigProvider";
+import { waitForStory } from "../storyTestUtils";
 import { Image } from "./Image";
 
 const meta = {
@@ -25,11 +26,16 @@ export const Fallback: Story = {
     const image = canvasElement.querySelector("img");
     if (!image) throw new window.Error("Expected Image img element");
     image.dispatchEvent(new window.Event("error", { bubbles: true }));
-    await Promise.resolve();
-    const content = canvasElement.textContent;
-    if (!content || !content.includes("暂时无法显示图片")) {
-      throw new window.Error("Image did not expose its fallback after an error");
-    }
+    await waitForStory(() => {
+      const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+      const content = canvasElement.textContent;
+      return Boolean(
+        root &&
+        root.getAttribute("data-state") === "error" &&
+        content &&
+        content.includes("暂时无法显示图片")
+      );
+    }, "Image did not expose its fallback after an error");
   }
 };
 export const Lazy: Story = { args: { loading: "lazy" } };
