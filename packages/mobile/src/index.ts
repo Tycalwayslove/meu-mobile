@@ -169,6 +169,21 @@ export type {
   VirtualListScrollOptions,
   VirtualListScrollToIndexOptions
 } from "./VirtualList";
+export { TreeSelect } from "./TreeSelect";
+export type {
+  TreeSelectChangeDetails,
+  TreeSelectExpandDetails,
+  TreeSelectFilter,
+  TreeSelectInteractionReason,
+  TreeSelectLoadContext,
+  TreeSelectOpenChangeReason,
+  TreeSelectOption,
+  TreeSelectPath,
+  TreeSelectProps,
+  TreeSelectSelectionMode,
+  TreeSelectStatus,
+  TreeSelectValue
+} from "./TreeSelect";
 export { NumberKeyboard } from "./NumberKeyboard";
 export { NumberKeyboardTrigger } from "./NumberKeyboard";
 export type {

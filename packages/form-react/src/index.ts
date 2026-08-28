@@ -35,6 +35,8 @@ export { MeuFormRate } from "./MeuFormRate";
 export type { MeuFormRateProps } from "./MeuFormRate";
 export { MeuFormSelector } from "./MeuFormSelector";
 export type { MeuFormSelectorProps } from "./MeuFormSelector";
+export { MeuFormTreeSelect } from "./MeuFormTreeSelect";
+export type { MeuFormTreeSelectProps } from "./MeuFormTreeSelect";
 export { MeuFormPicker } from "./MeuFormPicker";
 export type { MeuFormPickerProps } from "./MeuFormPicker";
 export { MeuFormCascadePicker } from "./MeuFormCascadePicker";

@@ -24,6 +24,7 @@ import { PullToRefreshDemo } from "./PullToRefreshDemo";
 import { SelectionDemo } from "./SelectionDemo";
 import { SwipeActionsDemo } from "./SwipeActionsDemo";
 import { TimePickerDemo } from "./TimePickerDemo";
+import { TreeSelectDemo } from "./TreeSelectDemo";
 import { VirtualListDemo } from "./VirtualListDemo";
 import styles from "./page.module.css";
 
@@ -102,6 +103,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>图片上传任务、失败重试与完整表单绑定</h2>
           <ImageUploaderDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>可搜索层级选择、虚拟化与确认式表单绑定</h2>
+          <TreeSelectDemo />
         </section>
         <section className={styles.formSection}>
           <h2>列表滑动操作与常驻等价入口</h2>

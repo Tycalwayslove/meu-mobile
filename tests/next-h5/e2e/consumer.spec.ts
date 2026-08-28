@@ -239,6 +239,43 @@ test("binds image upload tasks to serializable form values and native input focu
   await expect(page.getByText("已保存图片：1")).toBeVisible();
 });
 
+test("binds searchable tree drafts and restores focus after confirmation", async ({ page }) => {
+  const section = page.getByRole("region", { name: "树形选择表单集成" });
+  const trigger = section.getByRole("button", { name: "商品类目" });
+  await expect(trigger).toContainText("智能手机");
+  await trigger.click();
+
+  const dialog = page.getByRole("dialog", { name: "商品类目" });
+  const tree = dialog.getByRole("tree", { name: "可选项" });
+  await expect(tree).toHaveAttribute("aria-multiselectable", "true");
+  await expect(tree.getByRole("treeitem", { name: "数码家电" })).toHaveAttribute(
+    "aria-expanded",
+    "true"
+  );
+  const kitchen = tree.getByRole("treeitem", { name: "厨房用品" });
+  const kitchenBox = await kitchen.boundingBox();
+  expect(kitchenBox).not.toBeNull();
+  expect(kitchenBox ? kitchenBox.height : 0).toBeGreaterThanOrEqual(48);
+
+  const search = dialog.getByRole("searchbox", { name: "搜索选项" });
+  await search.fill("厨房");
+  await expect(tree.getByRole("treeitem")).toHaveCount(2);
+  await expect(tree.getByRole("treeitem", { name: "家居生活" })).toBeVisible();
+  await tree.getByRole("treeitem", { name: "厨房用品" }).click();
+  await dialog.getByRole("button", { name: "取消" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toContainText("智能手机");
+  await expect(trigger).toBeFocused();
+
+  await trigger.click();
+  await expect(dialog.getByRole("searchbox", { name: "搜索选项" })).toHaveValue("");
+  await tree.getByRole("treeitem", { name: "厨房用品" }).click();
+  await dialog.getByRole("button", { name: "确定" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toContainText("智能手机、厨房用品");
+  await expect(trigger).toBeFocused();
+});
+
 test("runs the controlled carousel with native alternatives and focus isolation", async ({
   page
 }) => {

@@ -25,6 +25,8 @@ reset/watch/trigger、服务端字段错误及首次错误聚焦。
 - `MeuFormCalendar` 按模式精确映射 `TDate | null`、`ReadonlyArray<TDate>` 或
   `readonly [TDate, TDate] | null`。内联选择立即写入字段；范围首个日期写入同日范围并携带
   `details.complete=false`，第二个日期完成范围。校验错误聚焦到当前可操作的真实日期按钮。
+- `MeuFormTreeSelect` 映射层级节点值数组；展开、搜索和面板内选择只修改 draft，确认时执行字段 change + blur，
+  取消不产生 dirty。错误关联、touched 与首次错误焦点落在复用的原生 `PickerTrigger`。
 - Zod 通过 `schema` 便捷参数接入；也可传任意 React Hook Form `resolver`，二者同时存在时 `schema` 优先。
 - `applyMeuFormErrors` 接收路径化字段错误，例如 `profile.name`、`items.0.title`，默认聚焦第一个有效错误字段。
 - `MeuForm` 保留原生 `<form>` 语义并默认 `noValidate`，首次客户端校验失败沿用 React Hook Form 的聚焦策略。

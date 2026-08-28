@@ -22,6 +22,7 @@ import {
   MeuFormTextArea,
   MeuFormTextInput,
   MeuFormTimePicker,
+  MeuFormTreeSelect,
   useMeuForm
 } from "@meu/form-react";
 import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
@@ -93,6 +94,7 @@ const schema = z.object({
   productImages: z
     .array(z.object({ alt: z.string(), url: z.string() }))
     .min(1, "请至少上传一张商品图片"),
+  productCategories: z.array(z.string()).min(1, "请至少选择一个商品类目"),
   region: z.array(z.string()).length(3, "请选择完整配送地区"),
   fulfillment: z.array(z.string()).min(1, "请选择履约方案"),
   appointment: z.array(z.union([z.string(), z.number(), z.null()])).length(2, "请选择完整预约时间"),
@@ -144,6 +146,32 @@ const regions = [
         value: "suzhou",
         children: [{ label: "姑苏区", value: "gusu" }]
       }
+    ]
+  }
+] as const;
+
+const productCategories = [
+  {
+    label: "数码家电",
+    value: "digital",
+    children: [
+      {
+        label: "手机通讯",
+        value: "phone",
+        children: [
+          { label: "智能手机", value: "smartphone" },
+          { label: "手机配件", value: "phone-accessories" }
+        ]
+      },
+      { label: "电脑整机", value: "computer" }
+    ]
+  },
+  {
+    label: "家居生活",
+    value: "home",
+    children: [
+      { label: "厨房用品", value: "kitchen" },
+      { label: "收纳清洁", value: "storage" }
     ]
   }
 ] as const;
@@ -286,6 +314,7 @@ export function ConsumerScenario() {
       fulfillment: ["standard"],
       notifications: true,
       paymentAmount: "",
+      productCategories: ["smartphone"],
       productImages: [{ alt: "已有商品主图", url: "/demo-media.svg" }],
       quantity: 1,
       rating: 3,
@@ -1075,6 +1104,20 @@ export function ConsumerScenario() {
               }}
             />
             <output aria-live="polite">{imageUploadResult}</output>
+          </section>
+          <section className="integration-tree-select" aria-label="树形选择表单集成">
+            <MeuFormTreeSelect<FormValues, string>
+              multiple
+              name="productCategories"
+              label="商品类目"
+              description="搜索和展开只修改面板状态；确定后才将叶子节点数组写入表单。"
+              options={productCategories}
+              defaultExpandedValues={["digital", "phone", "home"]}
+              maxCount={3}
+              required
+              triggerProps={{ placeholder: "选择商品类目" }}
+              virtual={false}
+            />
           </section>
           <MeuFormPicker<FormValues>
             name="appointment"

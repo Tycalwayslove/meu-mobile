@@ -225,3 +225,18 @@ beforeUpload 与 maxCount，失败原因分别上报；临时任务使用 pendin
 并回收 object URL，失败任务保留显式 retry / remove。成功图片复用 Image，预览复用 ImageViewer，删除支持异步
 veto。`MeuFormImageUploader` 把成功数组绑定 React Hook Form，负责 dirty / touched、schema 错误关联和校验失败
 聚焦；未来 uni-app 复用成功项、任务状态、拒绝原因和回调语义，替换文件选择、上传取消与 DOM 实现。
+
+## ADR-025：TreeSelect 使用独立选择与确认式树 draft
+
+TreeSelect 面向需要搜索、展开或展示大量节点的层级选择，不替代按固定路径逐列选择的 CascadePicker。核心值统一为
+节点 `value` 数组：单选最多一个，多选采用独立勾选，不默认执行父子联动。这样 options 异步变化、禁用节点或新增
+子树不会静默改写已经提交的表单值；需要业务级级联勾选时由调用方显式计算后再提交。
+
+组件复用 Popup 的 Mask、滚动锁、Escape、焦点恢复与安全区，并沿用 Picker 的确认式 draft：搜索、展开和选择只
+改变面板状态，确定才提交，取消类关闭全部回滚。搜索命中会显示完整祖先路径但不改写展开值；`isLeaf=false` 的
+节点通过 `loadChildren` 请求调用方更新 options，并以 AbortSignal 和 pending 去重控制生命周期。
+
+React Web 适配层使用 TanStack Virtual 窗口化扁平可见节点，并显式提供 tree/treeitem、level、posinset、setsize、
+单选 aria-selected、多选 aria-checked 和标准方向键交互。`MeuFormTreeSelect` 复用 PickerTrigger，并在确认时执行
+change + blur，使 dirty、touched 和校验同步完成。未来 uni-app 复用树模型、值、展开、搜索和加载事件，替换
+Portal、DOM 焦点、ARIA 与虚拟化实现。

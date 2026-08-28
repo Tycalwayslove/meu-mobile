@@ -67,6 +67,9 @@ icons-core ─> icons-react            │
 - ImageUploader 把可序列化成功项与 Web 上传任务分离：调用方注入 transport，组件只管理选择、校验、进度、
   abort、失败重试和 object URL 生命周期，并组合 Image 与 ImageViewer。`MeuFormImageUploader` 负责数组值、
   dirty / touched、错误关联与失败聚焦；未来 uni-app 复用成功项、任务状态和拒绝原因，替换文件与 DOM 适配层。
+- TreeSelect 组合 Popup 的确认式 draft 与专用树模型，适合搜索、展开和大数据层级选择；单选和多选值统一为
+  数组，多选默认独立勾选，不隐式联动父子节点。React Web 使用 TanStack Virtual 窗口化扁平可见节点并实现
+  WAI-ARIA Tree View 键盘行为；未来 uni-app 复用值、展开、搜索和异步加载契约，替换 DOM、ARIA 与虚拟化层。
 
 ## Next.js 边界
 
