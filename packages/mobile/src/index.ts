@@ -184,6 +184,8 @@ export type {
   TreeSelectStatus,
   TreeSelectValue
 } from "./TreeSelect";
+export { Watermark } from "./Watermark";
+export type { WatermarkFont, WatermarkProps } from "./Watermark";
 export { NumberKeyboard } from "./NumberKeyboard";
 export { NumberKeyboardTrigger } from "./NumberKeyboard";
 export type {

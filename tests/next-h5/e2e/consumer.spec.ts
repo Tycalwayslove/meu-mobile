@@ -19,6 +19,21 @@ test("renders the isolated Next consumer without hydration errors", async ({ pag
   expect(runtimeErrors).toEqual([]);
 });
 
+test("renders a non-interactive watermark and restores its removed overlay", async ({ page }) => {
+  const section = page.getByRole("region", { name: "内容水印" });
+  const watermark = section.locator('[data-meu-component="watermark"]');
+  const overlay = watermark.locator("[data-meu-watermark-overlay]");
+
+  await expect(overlay).toHaveAttribute("aria-hidden", "true");
+  await expect(overlay).toHaveCSS("pointer-events", "none");
+  await section.getByRole("button", { name: "查看水印凭证" }).click();
+  await expect(section.getByText("水印内操作可用")).toBeVisible();
+
+  await overlay.evaluate((node) => node.remove());
+  await expect(watermark.locator("[data-meu-watermark-overlay]")).toBeAttached();
+  await expect(section.getByText("水印已恢复")).toBeVisible();
+});
+
 test("binds validation, clear action and successful submission", async ({ page }) => {
   const input = page.getByLabel("店铺名称");
   await page.getByRole("button", { name: "保存店铺" }).click();

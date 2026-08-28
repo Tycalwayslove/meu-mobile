@@ -292,6 +292,27 @@ textarea {
   border-radius: var(--meu-radius-surface);
 }
 
+.integration-watermark {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.integration-watermark [data-meu-component="watermark"] {
+  min-height: 220px;
+}
+
+.integration-watermark h2,
+.integration-watermark p {
+  margin-top: 0;
+}
+
+.integration-watermark > output {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-tags,
 .integration-avatars {
   display: flex;

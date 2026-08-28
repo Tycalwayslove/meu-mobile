@@ -66,6 +66,7 @@ import {
   Tag,
   ToastProvider,
   VirtualList,
+  Watermark,
   useDialog,
   useToast
 } from "@meu/mobile";
@@ -265,6 +266,7 @@ export function ConsumerScenario() {
   const [searchedFor, setSearchedFor] = useState("");
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
+  const [watermarkMessage, setWatermarkMessage] = useState("水印未发生 DOM 变更");
   const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
   const [navigationMessage, setNavigationMessage] = useState("等待导航操作");
   const [previewMode, setPreviewMode] = useState<"summary" | "detail">("summary");
@@ -711,6 +713,27 @@ export function ConsumerScenario() {
           />
           <Ellipsis content={displayDescription} rows={2} />
           <output aria-live="polite">{displayAction}</output>
+        </section>
+
+        <section className="integration-watermark" aria-label="内容水印">
+          <Watermark
+            content={["Meu Mobile", "订单 MEU-20260828"]}
+            onRemove={() => setWatermarkMessage("水印已恢复")}
+          >
+            <Card>
+              <h2>带来源标识的订单凭证</h2>
+              <p>水印不阻断真实内容和原生交互。</p>
+              <Button
+                size="small"
+                variant="outline"
+                tone="neutral"
+                onClick={() => setWatermarkMessage("水印内操作可用")}
+              >
+                查看水印凭证
+              </Button>
+            </Card>
+          </Watermark>
+          <output aria-live="polite">{watermarkMessage}</output>
         </section>
 
         <section className="integration-containers" aria-label="卡片与折叠内容">

@@ -240,3 +240,17 @@ React Web 适配层使用 TanStack Virtual 窗口化扁平可见节点，并显�
 单选 aria-selected、多选 aria-checked 和标准方向键交互。`MeuFormTreeSelect` 复用 PickerTrigger，并在确认时执行
 change + blur，使 dirty、touched 和校验同步完成。未来 uni-app 复用树模型、值、展开、搜索和加载事件，替换
 Portal、DOM 焦点、ARIA 与虚拟化实现。
+
+## ADR-026：Watermark 使用同构 SVG，并明确弱安全边界
+
+Watermark 用于版权提示和泄露追踪，不作为访问控制、防截图、防录屏或加密能力。`content` 支持单行、多行和数组，
+`image` 优先且失败时回退到文字；宽高、gap、offset、rotate、opacity 和 zIndex 只描述重复图案，不影响子内容
+语义。组件不进入 `form-react`，图片素材必须来自 Meu 自有资产或保留可审计许可来源。
+
+React Web 直接输出 `aria-hidden`、不可聚焦且 `pointer-events:none` 的 SVG pattern，服务端与客户端首屏结构一致，
+无需 canvas、异步测量或 hydration 后补绘。图案使用旋转后外接尺寸和交错两行平铺，避免内容边角被裁切；默认颜色
+来自 `color/muted`，自然继承 Light、Dark 与 System token。
+
+默认 MutationObserver 只修复水印 SVG 自身的删除、属性、文本与子树变更，并通过 `onRemove` 提供审计信号；它只
+提高随手删除的成本，具备 DOM 控制权的调用方仍可关闭观察或移除整个宿主。未来 uni-app 复用内容优先级、图片
+回退和几何契约，使用 canvas 或平台原生视图重新实现渲染与宿主观察。

@@ -65,7 +65,7 @@ Picker、手势与高成本复合组件。分类参考 Ant Design Mobile 等成�
 ## Batch 6：手势、高成本与业务验证组件
 
 - PullToRefresh（已完成）、InfiniteList（已完成）、Carousel（已完成）、SwipeActions（已完成）、FloatingPanel（已完成）
-- VirtualList（已完成）、NumberKeyboard（已完成）、PasscodeInput（已完成）、ImageViewer（已完成）、ImageUploader（已完成）、TreeSelect（已完成）、Watermark
+- VirtualList（已完成）、NumberKeyboard（已完成）、PasscodeInput（已完成）、ImageViewer（已完成）、ImageUploader（已完成）、TreeSelect（已完成）、Watermark（已完成）
 
 重点：开发批次先通过仓库内 Pixel 5 Chromium、iPhone 13 WebKit、性能边界和替代操作路径验证；按当前
 范围不接入 `hybird-meumall` 或真实业务链路，真机 Safari / Chrome 回归留到发布加固阶段。

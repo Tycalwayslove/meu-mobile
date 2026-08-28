@@ -26,6 +26,7 @@ import { SwipeActionsDemo } from "./SwipeActionsDemo";
 import { TimePickerDemo } from "./TimePickerDemo";
 import { TreeSelectDemo } from "./TreeSelectDemo";
 import { VirtualListDemo } from "./VirtualListDemo";
+import { WatermarkDemo } from "./WatermarkDemo";
 import styles from "./page.module.css";
 
 export default function HomePage() {
@@ -127,6 +128,10 @@ export default function HomePage() {
         <section className={styles.formSection}>
           <h2>验证码分格、原生输入与完整表单绑定</h2>
           <PasscodeInputDemo />
+        </section>
+        <section className={styles.formSection}>
+          <h2>内容水印、图片回退与误删恢复</h2>
+          <WatermarkDemo />
         </section>
         <section className={styles.formSection}>
           <h2>信息行与分组列表</h2>

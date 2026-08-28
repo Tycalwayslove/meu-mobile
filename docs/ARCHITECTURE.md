@@ -70,6 +70,9 @@ icons-core ─> icons-react            │
 - TreeSelect 组合 Popup 的确认式 draft 与专用树模型，适合搜索、展开和大数据层级选择；单选和多选值统一为
   数组，多选默认独立勾选，不隐式联动父子节点。React Web 使用 TanStack Virtual 窗口化扁平可见节点并实现
   WAI-ARIA Tree View 键盘行为；未来 uni-app 复用值、展开、搜索和异步加载契约，替换 DOM、ARIA 与虚拟化层。
+- Watermark 是纯展示容器，不进入表单层，也不拥有鉴权或防截图能力。React Web 使用同构 SVG pattern 完成
+  文字、多行和图片平铺，并用 MutationObserver 原位恢复被误删或修改的水印节点；未来 uni-app 复用内容回退、
+  几何、间距、偏移和旋转契约，替换 SVG、CSS token 与 DOM 观察实现。
 
 ## Next.js 边界
 
