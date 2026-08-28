@@ -24,7 +24,15 @@ export const badge = recipe({
     fontWeight: 600,
     lineHeight: 1,
     fontVariantNumeric: "tabular-nums",
-    whiteSpace: "nowrap"
+    whiteSpace: "nowrap",
+    "@media": {
+      "(forced-colors: active)": {
+        border: "1px solid CanvasText",
+        color: "Canvas",
+        background: "CanvasText",
+        boxShadow: "none"
+      }
+    }
   },
   variants: {
     bordered: {
@@ -40,8 +48,9 @@ export const badge = recipe({
         position: "absolute",
         zIndex: 1,
         top: "var(--meu-badge-offset-y, 0px)",
-        right: "var(--meu-badge-offset-x, 0px)",
-        transform: "translate(50%, -50%)"
+        insetInlineEnd: "var(--meu-badge-offset-x, 0px)",
+        transform: "translate(50%, -50%)",
+        selectors: { "[dir='rtl'] &": { transform: "translate(-50%, -50%)" } }
       },
       false: {}
     },
@@ -61,6 +70,7 @@ export const badge = recipe({
 
 export const badgeContent = style({
   minWidth: 0,
+  maxWidth: "12ch",
   overflow: "hidden",
   textOverflow: "ellipsis"
 });

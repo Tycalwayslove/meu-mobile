@@ -1,0 +1,146 @@
+---
+name: Skeleton
+slug: skeleton
+package: "@meu/mobile"
+exports: [Skeleton]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "130:23"
+storyIds:
+  [
+    feedback-skeleton--paragraph,
+    feedback-skeleton--animated-paragraph,
+    feedback-skeleton--rectangle,
+    feedback-skeleton--circle,
+    feedback-skeleton--stable-media-ratio,
+    feedback-skeleton--composed-card
+  ]
+source: packages/mobile/src/Skeleton
+---
+
+# Skeleton
+
+## 当前能力
+
+- 支持 text（1–20 行）、rectangle、circle，数字尺寸按 px 解析。
+- 支持逐行宽度、稳定 width/height、`aspectRatio` 与多实例组合；始终 `aria-hidden=true`。
+- shimmer 为显式 opt-in，reduced-motion 下关闭；forced-colors 保留占位轮廓。
+
+当前为 `implementation`；Unit、SSR、Story 已完成，浏览器、视觉基线和真机证据未完成。
+
+## 何时使用
+
+用于已知最终布局的短时加载，占位几何应与真实内容一致以降低 CLS。组合头像、媒体、标题与正文时使用多个 Skeleton。
+
+## 何时不要使用
+
+未知结构或长等待使用 Progress/状态文案；失败与空数据使用 Result/Empty。不要把 Skeleton 当作加载公告。
+
+## 结构与状态
+
+非 text 是单个装饰块；text 根包含固定数量的装饰行。稳定属性：`data-variant`、`data-animated`、`data-meu-component`。
+
+## 基础用法
+
+```tsx
+<section aria-busy="true" aria-label="正在加载商品">
+  <Skeleton animated aspectRatio="4 / 3" height="auto" variant="rectangle" />
+  <Skeleton animated lines={2} lineWidths={["100%", "64%"]} />
+</section>
+```
+
+## 受控与非受控
+
+不适用；组件为纯派生占位视图。
+
+## 表单集成
+
+不适用；不产生 FormData。表单加载时应由调用方禁用真实控件，而不是以 Skeleton 模拟可操作字段。
+
+## Props
+
+text 的 `lines` 夹紧到 1–20，最后一行缺省 72%；circle 缺一边尺寸时复用另一边。`aspectRatio` 用于预留媒体比例，但调用方仍应给出确定 width/容器约束。
+
+## Events
+
+不适用；无交互和生命周期回调。
+
+## Ref 与命令式方法
+
+`ref` 指向根 div；无命令式方法。
+
+## 键盘操作
+
+| 按键   | 行为                    |
+| ------ | ----------------------- |
+| 不适用 | 装饰占位不进入 Tab 顺序 |
+
+## 触摸与手势
+
+不适用；占位块不接收点击。
+
+## 无障碍
+
+Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-busy=true`，加载完成改为 false；必要的加载文案由独立 status 提供，不能放进 aria-hidden 子树。
+
+## 动效
+
+`animated=false` 默认静态。shimmer 只改变伪元素 transform；reduced-motion 下动画和高光透明度关闭。
+
+## 主题与定制
+
+使用 subtle/surface、radius、space、motion Token。内部 class 和 shimmer 细节不是 API。
+
+## SSR 与 Next.js
+
+无浏览器 API；SSR 输出稳定。服务端与客户端需保持 lines、variant 和尺寸一致，避免 hydration/布局变化。
+
+## RTL 与国际化
+
+无可见文案；组合布局由父容器控制方向。shimmer 不表达方向性业务含义。
+
+## 浏览器与 WebView
+
+基础 grid、aspect-ratio、CSS 变量与伪元素；不支持 aspect-ratio 的旧 WebView 应同时传 width/height 作为稳定回退。forced-colors 显示系统边框。
+
+## 边界情况与已知限制
+
+不测量最终内容，不自动生成业务布局，不拥有 `aria-busy`。`height=auto` 只有在 aspectRatio 与可解析 width/容器宽度存在时才能稳定预留高度。
+
+## 性能预算
+
+每个块一个元素（text 每行一个 span）；长列表应限制首屏占位数量。动画只使用 transform，但大量 shimmer 仍会消耗合成资源。
+
+## 测试证据
+
+- Unit: 5 项，覆盖多行、circle 尺寸、非法行数、非有限尺寸回退，以及 aspect ratio/aria-hidden。
+- Story interaction: 不适用；无交互。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 1 项；hydration 未执行。
+- RTL: 结构无方向依赖；未做 E2E。
+- Reduced motion: CSS 分支存在；未做浏览器 E2E。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: 未执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+- 验证 CLS 指标、浏览器媒体查询、Chromatic 和旧 WebView 回退。
+
+### 已完成
+
+- 固化组合形状、调用方 aria-busy 边界、确定几何与 reduced-motion/forced-colors 契约。
+- 新增 `aspectRatio` 和 SSR 证据。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                           | 迁移说明       |
+| ---------- | ------ | -------- | ---------------------------------------------- | -------------- |
+| 2026-08-29 | 未发布 | 兼容增强 | 新增 `aspectRatio`，完善 CLS、组合与无障碍边界 | 旧调用无需迁移 |

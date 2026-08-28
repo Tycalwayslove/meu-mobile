@@ -34,4 +34,51 @@ describe("Empty", () => {
     expect(empty.querySelector('[aria-hidden="true"]')).toBeNull();
     expect(screen.getByRole("link", { name: "刷新" }).getAttribute("href")).toBe("#retry");
   });
+
+  it("supports a reason and primary/secondary action hierarchy without requiring actions", () => {
+    const { rerender } = render(
+      <Empty
+        reason="no-results"
+        title="没有匹配项"
+        description="调整筛选条件，或返回全部商品。"
+        action={<Button>清除筛选</Button>}
+        secondaryAction={<a href="#all">查看全部</a>}
+      />
+    );
+    const empty = screen.getByRole("group", { name: "没有匹配项" });
+    expect(empty.getAttribute("data-reason")).toBe("no-results");
+    expect(screen.getByRole("button", { name: "清除筛选" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "查看全部" })).toBeTruthy();
+
+    rerender(<Empty title="尚未配置" description="完成配置后会显示内容。" />);
+    expect(screen.getByRole("group", { name: "尚未配置" })).toBeTruthy();
+    expect(document.querySelector('[data-meu-slot="actions"]')).toBeNull();
+  });
+
+  it("merges caller ID references with its visible title and description", () => {
+    render(
+      <>
+        <span id="external-empty-title">购物车区域</span>
+        <span id="external-empty-hint">登录后可同步商品</span>
+        <Empty
+          aria-labelledby="external-empty-title external-empty-title"
+          aria-describedby="external-empty-hint external-empty-hint"
+          title="购物车为空"
+          description="添加商品后会显示在这里。"
+        />
+      </>
+    );
+    const empty = screen.getByRole("group", {
+      name: /购物车为空.*购物车区域|购物车区域.*购物车为空/
+    });
+    const labelledByValue = empty.getAttribute("aria-labelledby");
+    const describedByValue = empty.getAttribute("aria-describedby");
+    const labelledBy = labelledByValue ? labelledByValue.split(/\s+/) : [];
+    const describedBy = describedByValue ? describedByValue.split(/\s+/) : [];
+    expect(labelledBy).toContain("external-empty-title");
+    expect(labelledBy.filter((id) => id === "external-empty-title")).toHaveLength(1);
+    expect(describedBy).toContain("external-empty-hint");
+    expect(describedBy.filter((id) => id === "external-empty-hint")).toHaveLength(1);
+    expect(describedBy.some((id) => id.includes("description"))).toBe(true);
+  });
 });

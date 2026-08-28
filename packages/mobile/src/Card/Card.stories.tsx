@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { Button } from "../Button";
+import { ThemeProvider } from "../ConfigProvider";
 import { Tag } from "../Tag";
 import { Card } from "./Card";
 
@@ -23,4 +24,42 @@ export const Filled: Story = { args: { variant: "filled" } };
 export const Elevated: Story = { args: { variant: "elevated" } };
 export const WithFooter: Story = {
   args: { footer: <Button size="small">查看详情</Button> }
+};
+export const WithMediaAndActions: Story = {
+  args: {
+    footer: (
+      <>
+        <Button size="small" variant="outline">
+          稍后处理
+        </Button>
+        <Button size="small">查看详情</Button>
+      </>
+    ),
+    footerLayout: "actions",
+    media: (
+      <div
+        role="img"
+        aria-label="店铺封面占位"
+        style={{ width: "100%", height: "100%", background: "var(--meu-color-subtle)" }}
+      />
+    ),
+    mediaAspectRatio: "16 / 9"
+  }
+};
+export const LightAndDark: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {(["light", "dark"] as const).map((theme) => (
+        <ThemeProvider
+          key={theme}
+          theme={theme}
+          style={{ background: "var(--meu-color-surface)", padding: 16 }}
+        >
+          <Card title={`${theme} 卡片`} description="独立操作区" footer={<Button>查看</Button>}>
+            内容区域不承担整卡点击。
+          </Card>
+        </ThemeProvider>
+      ))}
+    </div>
+  )
 };

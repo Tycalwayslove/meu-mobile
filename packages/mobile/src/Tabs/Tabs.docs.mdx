@@ -1,0 +1,141 @@
+---
+name: Tabs
+slug: tabs
+package: "@meu/mobile"
+exports: [Tabs]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "122:794"
+storyIds:
+  [
+    navigation-tabs--stretched,
+    navigation-tabs--scrollable,
+    navigation-tabs--manual-activation,
+    navigation-tabs--lazy-panels,
+    navigation-tabs--keyboard-interaction,
+    navigation-tabs--rtl
+  ]
+source: packages/mobile/src/Tabs
+---
+
+# Tabs
+
+## 当前能力
+
+完整 APG tablist/tab/tabpanel，支持 automatic/manual 激活、禁用跳过、Arrow/Home/End、RTL、滚动入视、受控/非受控及三种 panel 挂载策略。
+
+## 何时使用
+
+用于同一页面内同层级内容切换，标签数量应保持可扫描。
+
+## 何时不要使用
+
+一级路由使用 TabBar；步骤流程使用 Steps；大量动态筛选项使用 Selector。
+
+## 结构与状态
+
+`root → tablist → button[role=tab] + tabpanel`。状态为 active、inactive、disabled、focused；DOM id 由 useId 稳定关联。
+
+## 基础用法
+
+```tsx
+<Tabs aria-label="账户" items={[{ key: "profile", label: "资料", content: <Profile /> }]} />
+```
+
+## 受控与非受控
+
+传 `value`（含 null）即受控；否则从有效 `defaultValue` 或首个 enabled item 初始化。无效或禁用的受控值不选择 panel，但首个 enabled tab 仍保留 roving focus。非受控当前项被删除或禁用时会永久归一到首个 enabled item。
+
+## 表单集成
+
+不适用：Tabs 是内容导航，不提交表单值；tab button 固定 type=button。
+
+## Props
+
+`lazy=false,destroyInactive=false` 默认挂载并保留全部 panel。`lazy=true` 首次激活才挂载并随后保留；`destroyInactive=true` 每次离开都卸载，优先级最高并丢弃内部状态。
+
+## Events
+
+`onChange(key,event)` 在点击、automatic 方向键或 manual Enter/Space 激活新 key 后发出；受控状态不乐观改变。
+
+## Ref 与命令式方法
+
+ref 指向根 div；不公开切换方法，使用 value 或原生 tab focus。
+
+## 键盘操作
+
+| 按键                   | 行为                                        |
+| ---------------------- | ------------------------------------------- |
+| ArrowLeft / ArrowRight | 循环移动焦点并跳过 disabled；RTL 镜像       |
+| Home / End             | 首个/末个 enabled tab                       |
+| Enter / Space          | manual 模式激活聚焦项                       |
+| Tab                    | 从 tablist 的单一 roving tab stop 进入/离开 |
+
+## 触摸与手势
+
+每个 tab 高度至少 48px；横向列表原生滚动，不拦截滑动。
+
+## 无障碍
+
+tablist 有名称；tab 与 panel 通过 aria-controls/aria-labelledby 双向关联；aria-selected 与 roving tabindex 同步；disabled 使用原生 disabled。
+
+## 动效
+
+指示器仅 opacity/transform；reduced-motion 缩短到 1ms，切换不会等待动画。
+
+## 主题与定制
+
+使用 accent/muted/border token；forced-colors 提供边框与 Highlight。内部 class 不是 API。
+
+## SSR 与 Next.js
+
+useId 保持关联稳定；lazy SSR 只输出首个 active panel。首屏 items/value 必须一致，避免 hydration 结构变化。
+
+## RTL 与国际化
+
+左右键优先使用最近显式 `dir=ltr|rtl` 祖先，否则使用 ConfigProvider；局部 LTR 可覆盖外层 RTL。滚动和视觉顺序继承 dir，默认 tablist 名称支持中英文。
+
+## 浏览器与 WebView
+
+scrollIntoView 仅在方法存在时调用，旧 WebView 无该方法时仍完成焦点与激活。兼容目标 Chrome/WebView 70+、iOS 13+。
+
+## 边界情况与已知限制
+
+item.key 必须唯一稳定。动态删除 item 会清理其访问身份；同 key 后续再出现按新 panel 处理。销毁 inactive panel 会丢失未提升的输入/滚动状态；lazy 保留可能增加长期 DOM，应按内容成本选择。
+
+## 性能预算
+
+tab O(items)；默认 panel 也为 O(items)，lazy 可延迟昂贵内容但不自动回收。
+
+## 测试证据
+
+- Unit: APG 关联、禁用跳过、无效受控值、动态 remove/disable 归一、automatic/manual、controlled null、destroy、受控与非受控 lazy retain、嵌套 RTL/LTR、scrollIntoView
+- Story interaction: End 键焦点验证
+- Axe: 待 CI 报告
+- SSR/hydration: `Tabs.ssr.test.tsx`
+- RTL: Unit + Story
+- Reduced motion: CSS 实现
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 发布后建立
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+补 axe、双引擎、真机读屏与大量 tabs 滚动证据。
+
+### 已完成
+
+冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约。
+
+## 变更记录
+
+| 日期       | 版本   | 类型    | 内容                                   | 迁移说明         |
+| ---------- | ------ | ------- | -------------------------------------- | ---------------- |
+| 2026-08-29 | 未发布 | feature | lazy retain、RTL 键盘与 scrollIntoView | 默认挂载行为不变 |

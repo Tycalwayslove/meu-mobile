@@ -6,6 +6,11 @@ const sweep = keyframes({
   to: { transform: "translate3d(480%, 0, 0)" }
 });
 
+const sweepRtl = keyframes({
+  from: { transform: "translate3d(480%, 0, 0)" },
+  to: { transform: "translate3d(-180%, 0, 0)" }
+});
+
 export const textGroup = style({
   display: "grid",
   width: "var(--meu-skeleton-width)",
@@ -19,6 +24,8 @@ export const block = recipe({
     boxSizing: "border-box",
     overflow: "hidden",
     background: "var(--meu-color-subtle)",
+    aspectRatio: "var(--meu-skeleton-aspect-ratio)",
+    border: "1px solid transparent",
     selectors: {
       "&::after": {
         position: "absolute",
@@ -31,6 +38,12 @@ export const block = recipe({
         content: "",
         opacity: 0
       }
+    },
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "GrayText",
+        background: "Canvas"
+      }
     }
   },
   variants: {
@@ -41,6 +54,9 @@ export const block = recipe({
             opacity: 0.5,
             transform: "translate3d(150%, 0, 0)",
             animation: `${sweep} 1.4s var(--meu-motion-ease-standard) infinite`
+          },
+          '[dir="rtl"] &::after': {
+            animationName: sweepRtl
           }
         },
         "@media": {

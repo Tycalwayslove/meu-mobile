@@ -1,3 +1,4 @@
+import { style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 export const root = recipe({
@@ -65,4 +66,31 @@ export const dot = recipe({
     }
   ],
   defaultVariants: { active: false, direction: "horizontal", variant: "dot" }
+});
+
+export const button = style({
+  display: "inline-grid",
+  width: 44,
+  height: 44,
+  flex: "0 0 44px",
+  padding: 0,
+  placeItems: "center",
+  color: "inherit",
+  background: "transparent",
+  border: 0,
+  borderRadius: "var(--meu-radius-round)",
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+  selectors: {
+    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 }
+  },
+  "@media": {
+    "(forced-colors: active)": { color: "CanvasText" }
+  }
+});
+
+export const ellipsis = style({
+  minWidth: 12,
+  color: "var(--meu-color-muted)",
+  textAlign: "center"
 });

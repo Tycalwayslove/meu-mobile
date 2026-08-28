@@ -15,7 +15,14 @@ export const avatarRoot = recipe({
     fontFamily: "var(--meu-font-ui)",
     fontWeight: 600,
     lineHeight: 1,
-    verticalAlign: "middle"
+    verticalAlign: "middle",
+    "@media": {
+      "(forced-colors: active)": {
+        border: "1px solid CanvasText",
+        color: "CanvasText",
+        background: "Canvas"
+      }
+    }
   },
   variants: {
     shape: {

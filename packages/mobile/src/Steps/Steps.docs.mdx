@@ -1,0 +1,137 @@
+---
+name: Steps
+slug: steps
+package: "@meu/mobile"
+exports: [Steps]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "124:1080"
+storyIds:
+  [
+    information-steps--horizontal,
+    information-steps--vertical,
+    information-steps--error,
+    information-steps--long-responsive-titles,
+    information-steps--local-ltr-inside-rtl
+  ]
+source: packages/mobile/src/Steps
+---
+
+# Steps
+
+## 当前能力
+
+只读有序进度列表，支持 wait/process/finish/error、横竖布局、显式状态覆盖、长标题换行和窄屏横向滚动。
+
+## 何时使用
+
+用于订单、审批和任务的顺序进度。
+
+## 何时不要使用
+
+可点击的分步表单应由业务使用链接/按钮导航；Steps 不提供跳步交互。
+
+## 结构与状态
+
+`ol → li → indicator + content`；当前索引使用 `aria-current="step"`。单项 status 可覆盖视觉与读屏状态。
+
+## 基础用法
+
+```tsx
+<Steps current={1} items={[{ title: "提交" }, { title: "支付" }, { title: "完成" }]} />
+```
+
+## 受控与非受控
+
+不适用：组件无内部进度状态，`current` 始终由调用方提供。
+
+## 表单集成
+
+不适用：只展示进度，不提交值。
+
+## Props
+
+`current` 默认 0；显式 item.status 优先。非法 current 只参与派生，不伪造当前项。API 细节以 TSDoc 为准。
+
+## Events
+
+不适用：只读组件不发交互事件。
+
+## Ref 与命令式方法
+
+ref 指向 `HTMLOListElement`；无命令式跳步。
+
+## 键盘操作
+
+| 按键   | 行为                  |
+| ------ | --------------------- |
+| 不适用 | Steps 不进入 Tab 顺序 |
+
+## 触摸与手势
+
+不适用：没有点击或手势目标。
+
+## 无障碍
+
+原生 ol/li 公布顺序；当前项使用 aria-current=step；每项隐藏文本公布本地化状态，图标为装饰。
+
+## 动效
+
+无运行时动画；状态色变化随 React render 即时更新。reduced-motion 不适用。
+
+## 主题与定制
+
+使用 ink/muted/accent/danger/border token；forced-colors 下 indicator 使用系统色。
+
+## SSR 与 Next.js
+
+确定性有序列表，可直接 SSR；服务端与客户端 items/current 必须一致。
+
+## RTL 与国际化
+
+连接线使用 CSS 逻辑边界，按最近的 `dir` 祖先镜像；局部 LTR 可正确覆盖外层 RTL。状态文本支持 zh-CN/en-US。
+
+## 浏览器与 WebView
+
+基于 flex/grid 与原生滚动，兼容目标 Chrome/WebView 70+、iOS 13+。
+
+## 边界情况与已知限制
+
+水平长步骤会滚动而非压缩到不可读；自定义 icon 必须保持装饰性，状态仍由隐藏文本表达。
+
+## 性能预算
+
+O(items)，无监听、测量或第三方运行时。
+
+## 测试证据
+
+- Unit: 派生状态、current、error、横竖、本地化
+- Story interaction: 不适用，只读组件
+- Axe: 待 CI 报告
+- SSR/hydration: `Steps.ssr.test.tsx`
+- RTL: 逻辑边界 + 嵌套 RTL/LTR Story，真实截图待补
+- Reduced motion: 不适用
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 发布后建立
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+补双引擎、200% 字号与 RTL 截图。
+
+### 已完成
+
+确认 ol/li、aria-current、状态公告、长标题滚动响应与 forced-colors。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                     | 迁移说明    |
+| ---------- | ------ | -------- | ------------------------ | ----------- |
+| 2026-08-29 | 未发布 | behavior | 响应式长标题和高对比模式 | 无 API 破坏 |

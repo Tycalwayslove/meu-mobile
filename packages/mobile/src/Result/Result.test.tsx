@@ -26,8 +26,47 @@ describe("Result", () => {
       <Result status="warning" title="库存发生变化" icon={<span>库存</span>} />
     );
     expect(screen.getByText("库存")).toBeTruthy();
-    rerender(<Result status="error" title="提交失败" icon={null} />);
-    const result = screen.getByRole("status", { name: "提交失败" });
+    rerender(<Result status="error" title="提交失败" icon={null} role="alert" />);
+    const result = screen.getByRole("alert", { name: "提交失败" });
     expect(result.querySelector('[aria-hidden="true"]')).toBeNull();
+  });
+
+  it("renders a semantic heading and preserves the legacy waiting state", () => {
+    render(<Result status="waiting" headingLevel={3} title="等待确认" />);
+    const result = screen.getByRole("status", { name: "等待确认" });
+    expect(result.getAttribute("data-status")).toBe("waiting");
+    expect(result.getAttribute("aria-live")).toBe("polite");
+    expect(screen.getByRole("heading", { level: 3, name: "等待确认" })).toBeTruthy();
+  });
+
+  it("does not create a live region when the caller chooses a static group role", () => {
+    render(<Result role="group" status="info" title="订单说明" />);
+    const result = screen.getByRole("group", { name: "订单说明" });
+    expect(result.getAttribute("aria-live")).toBeNull();
+    expect(result.getAttribute("aria-atomic")).toBeNull();
+  });
+
+  it("merges external ID references and preserves an explicit atomic preference", () => {
+    render(
+      <>
+        <span id="result-context">支付流程</span>
+        <span id="result-hint">订单可在稍后重试</span>
+        <Result
+          aria-atomic="false"
+          aria-labelledby="result-context result-context"
+          aria-describedby="result-hint result-hint"
+          status="error"
+          title="支付失败"
+          description="银行卡暂不可用。"
+        />
+      </>
+    );
+    const result = screen.getByRole("status", { name: /支付失败.*支付流程|支付流程.*支付失败/ });
+    expect(result.getAttribute("aria-atomic")).toBe("false");
+    const labelledByValue = result.getAttribute("aria-labelledby");
+    const describedByValue = result.getAttribute("aria-describedby");
+    expect(labelledByValue && labelledByValue.split(/\s+/)).toContain("result-context");
+    expect(describedByValue && describedByValue.split(/\s+/)).toContain("result-hint");
+    expect(result.getAttribute("aria-describedby")).toContain("description");
   });
 });

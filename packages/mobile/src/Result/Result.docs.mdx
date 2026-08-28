@@ -1,0 +1,157 @@
+---
+name: Result
+slug: result
+package: "@meu/mobile"
+exports: [Result]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "133:112"
+storyIds:
+  [
+    feedback-result--success,
+    feedback-result--error,
+    feedback-result--warning,
+    feedback-result--info,
+    feedback-result--pending,
+    feedback-result--recovery-actions
+  ]
+source: packages/mobile/src/Result
+---
+
+# Result
+
+## 当前能力
+
+- 支持 success、warning、error、pending、info；legacy `waiting` 保留兼容并使用相同 pending 视觉。
+- 标题是真实 h1–h6，默认 h2；默认 `role=status`，关键且新发生的 error 可显式设 `role=alert`，标题作为 accessible name。
+- 支持说明、自定义/省略装饰图标与任意恢复操作；不内置路由、重试、计时或自动跳转。
+
+当前为 `implementation`；Unit、SSR、Story 已完成，axe、浏览器、视觉和真机证据未完成。
+
+## 何时使用
+
+用于一次流程或请求的明确结果，以及需等待外部确认的 pending 状态。标题先给结论，说明补充影响与恢复路径。
+
+## 何时不要使用
+
+正常无数据使用 Empty；短暂非阻断反馈使用 Toast；字段错误使用 Field。不要用 Result 包裹未捕获异常代替 Error Boundary。
+
+## 结构与状态
+
+结构为 decoration、heading、可选 description、可选 actions。根暴露传入的 `data-status`（包括兼容值 waiting）；操作状态由传入控件自己表达。
+
+## 基础用法
+
+```tsx
+<Result
+  status="error"
+  role="alert"
+  title="提交失败"
+  description="检查网络后可再次提交，或先保存草稿。"
+  actions={
+    <>
+      <Button onClick={retry}>重新提交</Button>
+      <Button variant="outline">保存草稿</Button>
+    </>
+  }
+/>
+```
+
+## 受控与非受控
+
+不适用；Result 是 props 驱动的状态视图，不拥有请求状态。
+
+## 表单集成
+
+不产生 FormData。调用方可传表单按钮，但应显式设置 type，并自行维护 pending/disabled/error。
+
+## Props
+
+`headingLevel` 只改变标题层级，不改变视觉尺寸。`role` 可覆盖默认语义；覆盖后调用方必须确认 live-region 行为。`waiting` 仅为兼容别名，新代码使用 `pending`。
+
+## Events
+
+组件无重试/返回事件。`actions` 中各控件拥有自己的回调、取消、loading 与事件顺序。
+
+## Ref 与命令式方法
+
+`ref` 指向根 div；无自动 focus、retry 或 navigate 方法。页面切换后的焦点策略由路由/业务层决定。
+
+## 键盘操作
+
+| 按键            | 行为                          |
+| --------------- | ----------------------------- |
+| Tab / Shift+Tab | 按 actions 的 DOM 顺序移动    |
+| Enter / Space   | 由传入的原生 button/link 处理 |
+
+## 触摸与手势
+
+Result 无手势。恢复操作必须自行满足触控目标和异步锁定要求。
+
+## 无障碍
+
+- 标题为真实 heading，并命名根 live region；说明经 `aria-describedby` 关联。
+- 默认 polite status 且 atomic；仅对新发生且需要立即打断的关键错误显式使用 `role=alert`。若状态频繁变化，不应反复挂载 Result。
+- 图标 aria-hidden，状态同时通过标题文字表达，不能只靠颜色/图形。
+
+## 动效
+
+pending 点使用轻量 opacity 动画；reduced-motion 下停止并保持静态可见。其他状态无进入动画。
+
+## 主题与定制
+
+使用公共语义色、surface、radius、spacing、typography Token。内部 class、图标形状和 pending 点不是公开 API。
+
+## SSR 与 Next.js
+
+`useId` 保持标题/说明关联，SSR 无浏览器全局。首屏 status/title/headingLevel 必须服务端与客户端一致。
+
+## RTL 与国际化
+
+操作按 DOM 逻辑顺序排列，文本可换行；组件不翻译业务结论。恢复动作顺序与文案由 locale/业务决定。
+
+## 浏览器与 WebView
+
+依赖基础 grid/flex 和 CSS animation；forced-colors 保留 currentColor 边框与系统色 pending 点。未声明真机结果。
+
+## 边界情况与已知限制
+
+不聚焦标题、不捕获异常、不执行重试/路由/倒计时。连续阶段性进度使用 Progress，不要反复切换多个 Result 造成公告风暴。
+
+## 性能预算
+
+常数 DOM；pending 仅动画三个 opacity。自定义 icon/actions 的成本由调用方负责。
+
+## 测试证据
+
+- Unit: 5 项，覆盖 live region/actions、显式 ARIA 属性、外部与内部 IDREF 合并、custom/omitted icon，以及 heading 与 waiting 兼容。
+- Story interaction: 未执行；不冒充业务恢复回调证据。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 1 项；hydration 未执行。
+- RTL: 逻辑顺序契约；未做 E2E。
+- Reduced motion: CSS 分支存在；未做浏览器 E2E。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: 未执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+- axe、路由后焦点示例、移动浏览器、Chromatic 与 VoiceOver/TalkBack 验证。
+
+### 已完成
+
+- 建立五态语义、真实标题、状态公告与恢复操作所有权边界。
+- 新增 pending，保留 waiting 兼容；补 reduced-motion、forced-colors 与 SSR 证据。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                     | 迁移说明                                                               |
+| ---------- | ------ | -------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 2026-08-29 | 未发布 | 兼容增强 | 新增 `pending`、`headingLevel`，保留 waiting 的 DOM 兼容 | 新代码将 `waiting` 改为 `pending`；关键动态错误可显式传 `role="alert"` |

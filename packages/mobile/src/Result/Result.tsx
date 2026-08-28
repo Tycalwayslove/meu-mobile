@@ -1,7 +1,7 @@
 "use client";
 
 import { MeuIconCheck, MeuIconX } from "@meu/icons-react";
-import { useId } from "react";
+import { createElement, useId } from "react";
 
 import {
   actions as actionsStyle,
@@ -14,11 +14,17 @@ import {
 } from "./Result.css";
 import type { ResultProps, ResultStatus } from "./types";
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const ids = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueIds = [...new Set(ids.filter(Boolean))];
+  return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
+}
+
 function getDefaultIcon(status: ResultStatus) {
   if (status === "success") return <MeuIconCheck size={28} strokeWidth={2.25} />;
   if (status === "error") return <MeuIconX size={28} strokeWidth={2.25} />;
   if (status === "warning") return "!";
-  if (status === "waiting") {
+  if (status === "pending" || status === "waiting") {
     return (
       <span className={waitingDots}>
         <span className={waitingDot} />
@@ -31,15 +37,18 @@ function getDefaultIcon(status: ResultStatus) {
 }
 
 export function Result({
+  "aria-atomic": ariaAtomic,
   "aria-describedby": ariaDescribedby,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
+  "aria-live": ariaLive,
   actions,
   className,
   description,
+  headingLevel = 2,
   icon,
   ref,
-  role = "status",
+  role,
   status = "info",
   title,
   ...props
@@ -48,18 +57,36 @@ export function Result({
   const titleId = `${generatedId}-title`;
   const descriptionId = `${generatedId}-description`;
   const resolvedIcon = icon === undefined ? getDefaultIcon(status) : icon;
+  const resolvedRole = role || "status";
 
   return (
     <div
       {...props}
       ref={ref}
       className={className ? `${root} ${className}` : root}
-      role={role}
-      aria-atomic={role === "status" ? "true" : undefined}
+      role={resolvedRole}
+      aria-live={
+        ariaLive !== undefined
+          ? ariaLive
+          : resolvedRole === "alert"
+            ? "assertive"
+            : resolvedRole === "status"
+              ? "polite"
+              : undefined
+      }
+      aria-atomic={
+        ariaAtomic !== undefined
+          ? ariaAtomic
+          : resolvedRole === "status" || resolvedRole === "alert"
+            ? "true"
+            : undefined
+      }
       aria-label={ariaLabel}
-      aria-labelledby={ariaLabel ? undefined : ariaLabelledby || titleId}
+      aria-labelledby={ariaLabel ? undefined : mergeIdReferences(titleId, ariaLabelledby)}
       aria-describedby={
-        description === undefined ? ariaDescribedby : ariaDescribedby || descriptionId
+        description === undefined
+          ? ariaDescribedby
+          : mergeIdReferences(descriptionId, ariaDescribedby)
       }
       data-meu-component="result"
       data-status={status}
@@ -69,9 +96,7 @@ export function Result({
           {resolvedIcon}
         </div>
       ) : null}
-      <div className={titleStyle} id={titleId}>
-        {title}
-      </div>
+      {createElement(`h${headingLevel}`, { className: titleStyle, id: titleId }, title)}
       {description !== undefined ? (
         <div className={descriptionStyle} id={descriptionId}>
           {description}

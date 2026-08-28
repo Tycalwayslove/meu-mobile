@@ -25,3 +25,23 @@ export const Error: Story = {
     items: items.map((item, index) => (index === 1 ? { ...item, status: "error" as const } : item))
   }
 };
+export const LongResponsiveTitles: Story = {
+  args: {
+    items: [
+      { title: "提交包含多件商品与优惠信息的订单", description: "系统正在校验库存与优惠" },
+      { title: "商家完成打包并交付承运商", description: "预计今天 18:00 前完成" },
+      { title: "确认收货并完成订单评价" }
+    ]
+  }
+};
+export const LocalLtrInsideRtl: Story = {
+  decorators: [
+    (Story) => (
+      <div dir="rtl">
+        <div dir="ltr">
+          <Story />
+        </div>
+      </div>
+    )
+  ]
+};

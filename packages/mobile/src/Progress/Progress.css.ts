@@ -6,6 +6,11 @@ const indeterminateMotion = keyframes({
   to: { transform: "translate3d(250%, 0, 0)" }
 });
 
+const indeterminateMotionRtl = keyframes({
+  from: { transform: "translate3d(250%, 0, 0)" },
+  to: { transform: "translate3d(-100%, 0, 0)" }
+});
+
 export const root = style({
   display: "grid",
   width: "100%",
@@ -43,8 +48,13 @@ export const track = recipe({
     position: "relative",
     width: "100%",
     overflow: "hidden",
+    boxSizing: "border-box",
     background: "var(--meu-color-subtle)",
-    borderRadius: "var(--meu-radius-round)"
+    border: "1px solid transparent",
+    borderRadius: "var(--meu-radius-round)",
+    "@media": {
+      "(forced-colors: active)": { borderColor: "GrayText" }
+    }
   },
   variants: {
     size: {
@@ -66,7 +76,14 @@ export const fill = recipe({
       "(prefers-reduced-motion: reduce)": {
         animation: "none",
         transitionDuration: "1ms"
+      },
+      "(forced-colors: active)": {
+        background: "Highlight",
+        forcedColorAdjust: "none"
       }
+    },
+    selectors: {
+      '[dir="rtl"] &': { transformOrigin: "right center" }
     }
   },
   variants: {
@@ -79,7 +96,12 @@ export const fill = recipe({
       indeterminate: {
         width: "40%",
         transform: "translate3d(75%, 0, 0)",
-        animation: `${indeterminateMotion} 1.2s var(--meu-motion-ease-standard) infinite`
+        animation: `${indeterminateMotion} 1.2s var(--meu-motion-ease-standard) infinite`,
+        selectors: {
+          '[dir="rtl"] &': {
+            animationName: indeterminateMotionRtl
+          }
+        }
       }
     },
     tone: {

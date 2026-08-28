@@ -20,6 +20,7 @@ export function Avatar({
   fallback,
   fit = "cover",
   imageRef,
+  initials,
   loading = "eager",
   onError,
   onLoad,
@@ -35,7 +36,12 @@ export function Avatar({
   const resolvedStyle: AvatarStyle = customSize
     ? { ...style, "--meu-avatar-size": `${safeSize}px` }
     : style || {};
-  const fallbackContent = fallback !== undefined ? fallback : deriveInitial(alt);
+  const fallbackContent =
+    fallback !== undefined
+      ? fallback
+      : initials !== undefined
+        ? initials.trim()
+        : deriveInitial(alt);
   const fallbackNode = <span className={avatarFallback}>{fallbackContent}</span>;
   const classes = avatarRoot({ shape, size: customSize ? "custom" : size });
 

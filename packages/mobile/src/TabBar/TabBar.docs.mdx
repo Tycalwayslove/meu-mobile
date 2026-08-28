@@ -1,0 +1,138 @@
+---
+name: TabBar
+slug: tab-bar
+package: "@meu/mobile"
+exports: [TabBar]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "123:767"
+storyIds:
+  [
+    navigation-tabbar--default,
+    navigation-tabbar--with-safe-area,
+    navigation-tabbar--route-interaction,
+    navigation-tabbar--landscape
+  ]
+source: packages/mobile/src/TabBar
+---
+
+# TabBar
+
+## 当前能力
+
+2–5 个一级目的地导航；href 使用原生 link，无 href 使用 button。支持 aria-current、受控路由、Badge 名称、安全区、禁用、横屏与 active-aware icon。
+
+## 何时使用
+
+用于移动 H5 的稳定一级页面入口。
+
+## 何时不要使用
+
+页面内部内容切换使用 Tabs；瞬时操作不要伪装成目的地；超过五项改用菜单或信息架构调整。
+
+## 结构与状态
+
+`nav → items → a|button → decorative icon + label`，可选 Badge 与底部 SafeArea。状态为 current、idle、disabled、pressed、focus-visible。
+
+## 基础用法
+
+```tsx
+<TabBar value={route} items={routes} onChange={(key) => navigate(key)} safeArea />
+```
+
+## 受控与非受控
+
+`value !== undefined` 时受控，null 或无效/禁用 key 表示无当前页；非受控从有效 defaultValue 或首个 enabled item 初始化。当前项被删除或禁用时会永久归一到首个 enabled item。路由框架应使用受控模式。
+
+## 表单集成
+
+不适用：button 固定 type=button，导航不会提交祖先 form。
+
+## Props
+
+item.href 决定 link/button；disabled href 会降为原生 disabled button。`badgeLabel` 为读屏补充未读/待办含义，`ariaLabel` 可覆盖整项名称。
+
+## Events
+
+item.onClick 先执行；调用 `event.preventDefault()` 会同时取消选择请求与链接导航。未取消时，`onChange(key,event)` 仅在新 enabled 项请求成为 current 时触发。
+
+## Ref 与命令式方法
+
+ref 指向 nav；无命令式路由 API。
+
+## 键盘操作
+
+| 按键            | 行为                                |
+| --------------- | ----------------------------------- |
+| Tab / Shift+Tab | 按 DOM 顺序遍历 enabled link/button |
+| Enter           | 激活 link 或 button                 |
+| Space           | 激活 button；link 保持原生行为      |
+
+## 触摸与手势
+
+每项至少 44px 高并均分宽度；无滑动或长按手势。
+
+## 无障碍
+
+nav 必须有名称；当前目的地使用 aria-current=page；icon aria-hidden；Badge 可通过 badgeLabel 提供状态含义；禁用项使用原生 disabled。
+
+## 动效
+
+颜色过渡使用 motion token；reduced-motion 缩短到 1ms。
+
+## 主题与定制
+
+使用 surface/border/muted/accent token；forced-colors 使用 LinkText/ButtonText/Highlight。
+
+## SSR 与 Next.js
+
+纯确定性 nav。Next Link 可由上层包装/路由适配，核心不依赖 next/navigation；首屏 value/items 应一致。
+
+## RTL 与国际化
+
+flex 顺序继承 dir；路由 key 不本地化，label/ariaLabel/badgeLabel 由业务翻译。默认 nav 名称支持中文/英文。
+
+## 浏览器与 WebView
+
+原生 link/button 与 flex，兼容 Chrome/WebView 70+、iOS 13+；横屏低高度保持至少 44px。
+
+## 边界情况与已知限制
+
+item.key 必须唯一。动态删除/禁用当前非受控项会清理旧身份，重新加入时不会意外跳回。组件不 fixed、不拥有浏览历史或路由 pending；异步导航失败时受控 value 应保持原路由。
+
+## 性能预算
+
+O(items)，建议最多五项；无监听、测量和第三方运行时。
+
+## 测试证据
+
+- Unit: link/button、current、controlled null、动态 remove/disable 归一、可取消点击、Badge 名称、安全区和 locale
+- Story interaction: button route current
+- Axe: 待 CI 报告
+- SSR/hydration: `TabBar.ssr.test.tsx`
+- RTL: 原生 flex 继承，视觉待补
+- Reduced motion: CSS 实现
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 发布后建立
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+补 Next 路由示例、双引擎、横屏真机与读屏证据。
+
+### 已完成
+
+冻结 link/button、aria-current、Badge、安全区、44px、横屏与 forced-colors 契约。
+
+## 变更记录
+
+| 日期       | 版本   | 类型    | 内容                              | 迁移说明           |
+| ---------- | ------ | ------- | --------------------------------- | ------------------ |
+| 2026-08-29 | 未发布 | feature | badgeLabel/ariaLabel 与横屏高对比 | 新属性可选，无破坏 |

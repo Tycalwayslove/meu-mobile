@@ -79,7 +79,6 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
       : controlled
         ? currentChecked
         : defaultChecked;
-  const invalidAttributes = invalid ? ({ "aria-invalid": true } as const) : {};
 
   useEffect(() => {
     const element = inputRef.current;
@@ -153,6 +152,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
               : "unchecked"
       }
     >
+      {/* aria-invalid is a global WAI-ARIA state that is valid on native radio inputs. */}
+      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */}
       <input
         {...props}
         ref={(element) => {
@@ -172,7 +173,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
         onChange={handleChange}
         aria-describedby={describedBy}
         aria-disabled={!inGroup && resolvedReadOnly ? true : undefined}
-        {...invalidAttributes}
+        aria-invalid={invalid || undefined}
       />
       <span
         className={indicator({

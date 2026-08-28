@@ -1,0 +1,148 @@
+---
+name: Empty
+slug: empty
+package: "@meu/mobile"
+exports: [Empty]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "131:25"
+storyIds:
+  [
+    feedback-empty--default,
+    feedback-empty--without-illustration,
+    feedback-empty--no-results-with-two-actions,
+    feedback-empty--no-action
+  ]
+source: packages/mobile/src/Empty
+---
+
+# Empty
+
+## 当前能力
+
+- 展示非错误空态的原因标题、说明、装饰插图、主操作与次操作。
+- `reason=no-data|no-results|not-configured` 为分析/测试提供稳定分类，不改变业务行为。
+- 标题命名根 group、说明通过 `aria-describedby` 关联；窄屏操作区改为单列，长文案可断行。
+
+当前为 `implementation`；Unit、SSR、Story 已完成，axe、移动浏览器、视觉和真机证据未完成。
+
+## 何时使用
+
+用于列表无数据、筛选无结果、功能尚未配置等正常业务分支。说明应回答“为什么为空”和“下一步是什么”。
+
+## 何时不要使用
+
+请求失败、权限错误、支付失败等使用 Result；加载中使用 Skeleton/Progress。Empty 不是 Error Boundary，也不捕获异常。
+
+## 结构与状态
+
+结构依次为 decoration、title、description、可选 actions。`data-reason` 分类原因；无 loading/error/disabled 状态，操作自身负责状态。
+
+## 基础用法
+
+```tsx
+<Empty
+  reason="no-results"
+  title="没有匹配的商品"
+  description="调整筛选条件，或返回全部商品。"
+  action={<Button onClick={clearFilters}>清除筛选</Button>}
+  secondaryAction={<Button variant="outline">查看全部</Button>}
+/>
+```
+
+## 受控与非受控
+
+不适用；所有内容由 props 直接决定，无内部业务状态。
+
+## 表单集成
+
+不适用。操作可由调用方传 submit button，但 Empty 不修改表单状态、不自动清空字段。
+
+## Props
+
+`title`、`description` 是内容事实源；`action`/`secondaryAction` 可省略。自定义 illustration 总是作为装饰隐藏，不能在其中放有意义的文字或交互。
+
+## Events
+
+组件自身无事件。操作事件由传入的 button/link 拥有，调用方负责 loading、失败与防重复。
+
+## Ref 与命令式方法
+
+`ref` 指向根 div；无 focus 或 retry 方法。
+
+## 键盘操作
+
+| 按键            | 行为                              |
+| --------------- | --------------------------------- |
+| Tab / Shift+Tab | 按传入操作的 DOM 顺序移动         |
+| Enter / Space   | 由具体 button/link 的原生语义处理 |
+
+## 触摸与手势
+
+Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次操作按 DOM 顺序纵向排列。
+
+## 无障碍
+
+默认 `role=group`，不会把正常空态作为错误或 live alert 公告。根由 title 命名并由 description 描述；`aria-label` 可覆盖名称。插图一律 aria-hidden。
+
+## 动效
+
+不适用；组件无内置动画。
+
+## 主题与定制
+
+使用公共 typography、spacing、color、radius Token。稳定槽位仅 actions 的 `data-meu-slot=actions`；内部 class 不公开。
+
+## SSR 与 Next.js
+
+`useId` 生成稳定关联 ID，SSR 无浏览器全局。首屏 title/description 必须一致，避免 hydration 差异。
+
+## RTL 与国际化
+
+文本居中且操作顺序保持 DOM 逻辑顺序；不自动翻译内容。长 CJK/URL 使用 anywhere 换行，调用方仍应提供本地化短标题。
+
+## 浏览器与 WebView
+
+使用 grid/flex wrap；窄于 360px 时 actions 单列。forced-colors 保留默认插图轮廓。未声明真机 WebView 结果。
+
+## 边界情况与已知限制
+
+不验证主次 action 的视觉层级，不内置路由、刷新、重试或埋点。复杂帮助内容应移到独立说明页。
+
+## 性能预算
+
+常数 DOM；自定义 illustration 的资源与性能由调用方负责。
+
+## 测试证据
+
+- Unit: 4 项，覆盖命名/说明、外部与内部 IDREF 合并、无插图，以及原因/双操作/无操作。
+- Story interaction: 未执行；操作仅展示，不冒充业务回调证据。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 1 项；hydration 未执行。
+- RTL: 逻辑顺序契约；未做 E2E。
+- Reduced motion: 不适用，无动画。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: 未执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+- axe、移动窄屏、200% 字号、Chromatic 与真机读屏验证。
+
+### 已完成
+
+- 明确非错误边界、原因分类、说明关系与主次操作槽位。
+- 增加窄屏长文案、forced-colors 和 SSR 契约。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                | 迁移说明       |
+| ---------- | ------ | -------- | --------------------------------------------------- | -------------- |
+| 2026-08-29 | 未发布 | 兼容增强 | `action` 改为可选，新增 `secondaryAction`、`reason` | 旧调用无需迁移 |

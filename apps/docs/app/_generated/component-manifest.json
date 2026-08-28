@@ -2609,10 +2609,12 @@
       "sourcePath": "packages/mobile/src/Avatar",
       "storyId": "information-avatar--image-avatar",
       "storyTitle": "Information/Avatar",
-      "declaredExports": [],
+      "declaredExports": [
+        "Avatar"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Avatar/Avatar.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -2651,10 +2653,12 @@
       "sourcePath": "packages/mobile/src/Badge",
       "storyId": "information-badge--count",
       "storyTitle": "Information/Badge",
-      "declaredExports": [],
+      "declaredExports": [
+        "Badge"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Badge/Badge.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -2897,10 +2901,12 @@
       "sourcePath": "packages/mobile/src/Card",
       "storyId": "information-card--outlined",
       "storyTitle": "Information/Card",
-      "declaredExports": [],
+      "declaredExports": [
+        "Card"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Card/Card.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -3487,10 +3493,12 @@
       "sourcePath": "packages/mobile/src/Empty",
       "storyId": "feedback-empty--default",
       "storyTitle": "Feedback/Empty",
-      "declaredExports": [],
+      "declaredExports": [
+        "Empty"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Empty/Empty.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4495,10 +4503,12 @@
       "sourcePath": "packages/mobile/src/PaginationDots",
       "storyId": "navigation-paginationdots--dots",
       "storyTitle": "Navigation/PaginationDots",
-      "declaredExports": [],
+      "declaredExports": [
+        "PaginationDots"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PaginationDots/PaginationDots.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4781,10 +4791,12 @@
       "sourcePath": "packages/mobile/src/Progress",
       "storyId": "feedback-progress--determinate",
       "storyTitle": "Feedback/Progress",
-      "declaredExports": [],
+      "declaredExports": [
+        "Progress"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Progress/Progress.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -4958,10 +4970,12 @@
       "sourcePath": "packages/mobile/src/Result",
       "storyId": "feedback-result--success",
       "storyTitle": "Feedback/Result",
-      "declaredExports": [],
+      "declaredExports": [
+        "Result"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Result/Result.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5222,10 +5236,12 @@
       "sourcePath": "packages/mobile/src/Skeleton",
       "storyId": "feedback-skeleton--paragraph",
       "storyTitle": "Feedback/Skeleton",
-      "declaredExports": [],
+      "declaredExports": [
+        "Skeleton"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Skeleton/Skeleton.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5376,10 +5392,12 @@
       "sourcePath": "packages/mobile/src/Steps",
       "storyId": "information-steps--horizontal",
       "storyTitle": "Information/Steps",
-      "declaredExports": [],
+      "declaredExports": [
+        "Steps"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Steps/Steps.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "type",
@@ -5512,10 +5530,12 @@
       "sourcePath": "packages/mobile/src/TabBar",
       "storyId": "navigation-tabbar--default",
       "storyTitle": "Navigation/TabBar",
-      "declaredExports": [],
+      "declaredExports": [
+        "TabBar"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TabBar/TabBar.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5546,10 +5566,12 @@
       "sourcePath": "packages/mobile/src/Tabs",
       "storyId": "navigation-tabs--stretched",
       "storyTitle": "Navigation/Tabs",
-      "declaredExports": [],
+      "declaredExports": [
+        "Tabs"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Tabs/Tabs.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -5584,10 +5606,12 @@
       "sourcePath": "packages/mobile/src/Tag",
       "storyId": "information-tag--soft",
       "storyTitle": "Information/Tag",
-      "declaredExports": [],
+      "declaredExports": [
+        "Tag"
+      ],
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Tag/Tag.docs.mdx",
-      "hasDocs": false,
+      "hasDocs": true,
       "publicExports": [
         {
           "kind": "value",
@@ -6116,7 +6140,7 @@
   ],
   "schemaVersion": 1,
   "summary": {
-    "documentedProducts": 27,
+    "documentedProducts": 39,
     "externalWildcardExports": 0,
     "packages": 4,
     "products": 68,
@@ -6125,7 +6149,7 @@
     "publicTypes": 369,
     "publicValues": 125,
     "undocumentedPublicExports": 6,
-    "unclaimedPublicValues": 64
+    "unclaimedPublicValues": 52
   },
   "undocumentedPublicExports": [
     {
@@ -6180,18 +6204,6 @@
     },
     {
       "kind": "value",
-      "name": "Avatar",
-      "sourcePath": "packages/mobile/src/Avatar",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Badge",
-      "sourcePath": "packages/mobile/src/Badge",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "BottomSheet",
       "sourcePath": "packages/mobile/src/BottomSheet",
       "packageName": "@meu/mobile"
@@ -6212,12 +6224,6 @@
       "kind": "value",
       "name": "calendarRange",
       "sourcePath": "packages/mobile/src/Calendar",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Card",
-      "sourcePath": "packages/mobile/src/Card",
       "packageName": "@meu/mobile"
     },
     {
@@ -6290,12 +6296,6 @@
       "kind": "value",
       "name": "Ellipsis",
       "sourcePath": "packages/mobile/src/Ellipsis",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Empty",
-      "sourcePath": "packages/mobile/src/Empty",
       "packageName": "@meu/mobile"
     },
     {
@@ -6384,12 +6384,6 @@
     },
     {
       "kind": "value",
-      "name": "PaginationDots",
-      "sourcePath": "packages/mobile/src/PaginationDots",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "Picker",
       "sourcePath": "packages/mobile/src/Picker",
       "packageName": "@meu/mobile"
@@ -6408,20 +6402,8 @@
     },
     {
       "kind": "value",
-      "name": "Progress",
-      "sourcePath": "packages/mobile/src/Progress",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "PullToRefresh",
       "sourcePath": "packages/mobile/src/PullToRefresh",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Result",
-      "sourcePath": "packages/mobile/src/Result",
       "packageName": "@meu/mobile"
     },
     {
@@ -6450,38 +6432,8 @@
     },
     {
       "kind": "value",
-      "name": "Skeleton",
-      "sourcePath": "packages/mobile/src/Skeleton",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Steps",
-      "sourcePath": "packages/mobile/src/Steps",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
       "name": "SwipeActions",
       "sourcePath": "packages/mobile/src/SwipeActions",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "TabBar",
-      "sourcePath": "packages/mobile/src/TabBar",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Tabs",
-      "sourcePath": "packages/mobile/src/Tabs",
-      "packageName": "@meu/mobile"
-    },
-    {
-      "kind": "value",
-      "name": "Tag",
-      "sourcePath": "packages/mobile/src/Tag",
       "packageName": "@meu/mobile"
     },
     {

@@ -28,4 +28,35 @@ describe("Skeleton", () => {
     const { container } = render(<Skeleton lines={Number.NaN} />);
     expect(container.querySelectorAll('[data-meu-component="skeleton"] span')).toHaveLength(1);
   });
+
+  it("reserves an explicit aspect ratio without exposing loading semantics", () => {
+    const { container } = render(
+      <Skeleton variant="rectangle" width="100%" height="auto" aspectRatio="16 / 9" />
+    );
+    const skeleton = container.querySelector<HTMLElement>('[data-meu-component="skeleton"]');
+    if (!skeleton) throw new Error("Expected Skeleton root");
+    expect(skeleton.style.getPropertyValue("--meu-skeleton-aspect-ratio")).toBe("16 / 9");
+    expect(skeleton.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("falls back deterministically for non-finite numeric dimensions", () => {
+    const { container } = render(
+      <Skeleton
+        variant="text"
+        width={Number.POSITIVE_INFINITY}
+        height={Number.NaN}
+        lines={2}
+        lineWidths={[Number.NaN, Number.POSITIVE_INFINITY]}
+      />
+    );
+    const skeleton = container.querySelector<HTMLElement>('[data-meu-component="skeleton"]');
+    if (!skeleton) {
+      throw new Error("Expected skeleton root");
+    }
+    expect(skeleton.style.getPropertyValue("--meu-skeleton-width")).toBe("100%");
+    expect(skeleton.style.getPropertyValue("--meu-skeleton-height")).toBe("16px");
+    const lines = Array.from(skeleton.querySelectorAll<HTMLElement>("span"));
+    expect(lines[0] && lines[0].style.getPropertyValue("--meu-skeleton-line-width")).toBe("100%");
+    expect(lines[1] && lines[1].style.getPropertyValue("--meu-skeleton-line-width")).toBe("72%");
+  });
 });

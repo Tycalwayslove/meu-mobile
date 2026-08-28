@@ -16,13 +16,14 @@ export function Tabs({
   defaultValue,
   destroyInactive = false,
   items,
+  lazy = false,
   onChange,
   ref,
   stretch = true,
   value,
   ...props
 }: TabsProps) {
-  const { locale } = useMeuConfig();
+  const { dir, locale } = useMeuConfig();
   const generatedId = useId();
   const controlled = value !== undefined;
   const firstEnabled = items.find((item) => !item.disabled);
@@ -33,22 +34,48 @@ export function Tabs({
   });
   const requestedValue = controlled ? value : uncontrolledValue;
   const activeItem = items.find((item) => item.key === requestedValue);
+  const normalizedValue =
+    activeItem && !activeItem.disabled ? requestedValue : firstEnabled ? firstEnabled.key : null;
   const currentValue = controlled
-    ? requestedValue
-    : activeItem && !activeItem.disabled
+    ? activeItem && !activeItem.disabled
       ? requestedValue
-      : firstEnabled
-        ? firstEnabled.key
-        : null;
-  const [focusedKey, setFocusedKey] = useState<string | null>(currentValue);
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const hasPanels = items.some((item) => item.content !== undefined);
+      : null
+    : normalizedValue;
+  if (!controlled && uncontrolledValue !== normalizedValue) {
+    setUncontrolledValue(normalizedValue);
+  }
   const enabledItems = items.filter((item) => !item.disabled);
+  const [focusedKey, setFocusedKey] = useState<string | null>(currentValue);
   const fallbackFocusKey = currentValue || (firstEnabled ? firstEnabled.key : null);
-  const rovingFocusKey =
-    focusedKey && enabledItems.some((item) => item.key === focusedKey)
-      ? focusedKey
-      : fallbackFocusKey;
+  const focusIsValid = enabledItems.some((item) => item.key === focusedKey);
+  if (!focusIsValid && focusedKey !== fallbackFocusKey) {
+    setFocusedKey(fallbackFocusKey);
+  }
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const itemKeySignature = JSON.stringify(items.map((item) => item.key));
+  const [visitedState, setVisitedState] = useState<{
+    activeKey: string | null | undefined;
+    itemKeySignature: string;
+    keys: readonly string[];
+  }>(() => ({
+    activeKey: currentValue,
+    itemKeySignature,
+    keys: currentValue ? [currentValue] : []
+  }));
+  let visitedKeys = visitedState.keys;
+  if (
+    visitedState.activeKey !== currentValue ||
+    visitedState.itemKeySignature !== itemKeySignature
+  ) {
+    const availableKeys = new Set(items.map((item) => item.key));
+    visitedKeys = visitedState.keys.filter((key) => availableKeys.has(key));
+    if (currentValue && !visitedKeys.includes(currentValue)) {
+      visitedKeys = [...visitedKeys, currentValue];
+    }
+    setVisitedState({ activeKey: currentValue, itemKeySignature, keys: visitedKeys });
+  }
+  const hasPanels = items.some((item) => item.content !== undefined);
+  const rovingFocusKey = focusIsValid && focusedKey ? focusedKey : fallbackFocusKey;
   const resolvedLabel =
     ariaLabel || (!ariaLabelledBy ? (locale === "en-US" ? "Content tabs" : "内容标签") : undefined);
 
@@ -57,6 +84,10 @@ export function Tabs({
     event: ReactMouseEvent<HTMLButtonElement> | ReactKeyboardEvent<HTMLButtonElement>
   ) {
     if (key === currentValue) return;
+    const target = tabRefs.current[key];
+    if (target && typeof target.scrollIntoView === "function") {
+      target.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
     if (!controlled) setUncontrolledValue(key);
     if (onChange) onChange(key, event);
   }
@@ -64,7 +95,12 @@ export function Tabs({
   function focusAndMaybeActivate(targetKey: string, event: ReactKeyboardEvent<HTMLButtonElement>) {
     setFocusedKey(targetKey);
     const target = tabRefs.current[targetKey];
-    if (target) target.focus();
+    if (target) {
+      target.focus();
+      if (typeof target.scrollIntoView === "function") {
+        target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+    }
     if (activationMode === "automatic") activate(targetKey, event);
   }
 
@@ -73,11 +109,20 @@ export function Tabs({
     const currentIndex = enabledItems.findIndex((item) => item.key === key);
     let targetKey: string | undefined;
 
+    const directionOwner = event.currentTarget.closest<HTMLElement>("[dir]");
+    const inheritedDirection = directionOwner ? directionOwner.dir : undefined;
+    const resolvedDirection =
+      inheritedDirection === "rtl" || inheritedDirection === "ltr" ? inheritedDirection : dir;
+
     if (event.key === "ArrowRight") {
-      const target = enabledItems[(currentIndex + 1 + enabledItems.length) % enabledItems.length];
+      const offset = resolvedDirection === "rtl" ? -1 : 1;
+      const target =
+        enabledItems[(currentIndex + offset + enabledItems.length) % enabledItems.length];
       targetKey = target ? target.key : undefined;
     } else if (event.key === "ArrowLeft") {
-      const target = enabledItems[(currentIndex - 1 + enabledItems.length) % enabledItems.length];
+      const offset = resolvedDirection === "rtl" ? 1 : -1;
+      const target =
+        enabledItems[(currentIndex + offset + enabledItems.length) % enabledItems.length];
       targetKey = target ? target.key : undefined;
     } else if (event.key === "Home") {
       const target = enabledItems[0];
@@ -99,7 +144,13 @@ export function Tabs({
   const classes = className ? `${root} ${className}` : root;
 
   return (
-    <div {...props} ref={ref} className={classes} data-meu-component="tabs">
+    <div
+      {...props}
+      ref={ref}
+      className={classes}
+      data-activation-mode={activationMode}
+      data-meu-component="tabs"
+    >
       <div
         className={tabList}
         role="tablist"
@@ -144,6 +195,7 @@ export function Tabs({
         ? items.map((item, index) => {
             const active = item.key === currentValue;
             if (destroyInactive && !active) return null;
+            if (lazy && !active && !visitedKeys.includes(item.key)) return null;
             const tabId = `${generatedId}-tab-${index}`;
             const panelId = `${generatedId}-panel-${index}`;
             return (

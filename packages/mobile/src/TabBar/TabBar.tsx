@@ -36,13 +36,16 @@ export function TabBar({
   });
   const requestedValue = controlled ? value : uncontrolledValue;
   const activeItem = items.find((item) => item.key === requestedValue);
+  const normalizedValue =
+    activeItem && !activeItem.disabled ? requestedValue : firstEnabled ? firstEnabled.key : null;
   const currentValue = controlled
-    ? requestedValue
-    : activeItem && !activeItem.disabled
+    ? activeItem && !activeItem.disabled
       ? requestedValue
-      : firstEnabled
-        ? firstEnabled.key
-        : null;
+      : null
+    : normalizedValue;
+  if (!controlled && uncontrolledValue !== normalizedValue) {
+    setUncontrolledValue(normalizedValue);
+  }
   const resolvedLabel = ariaLabel || (locale === "en-US" ? "Primary navigation" : "主导航");
   const classes = className ? `${root} ${className}` : root;
 
@@ -54,11 +57,14 @@ export function TabBar({
       event.preventDefault();
       return;
     }
+    if (candidate.onClick) {
+      candidate.onClick(event);
+      if (event.defaultPrevented) return;
+    }
     if (candidate.key !== currentValue) {
       if (!controlled) setUncontrolledValue(candidate.key);
       if (onChange) onChange(candidate.key, event);
     }
-    if (candidate.onClick) candidate.onClick(event);
   }
 
   return (
@@ -79,7 +85,11 @@ export function TabBar({
           const content = (
             <>
               {candidate.badge !== undefined && candidate.badge !== null ? (
-                <Badge content={candidate.badge} bordered>
+                <Badge
+                  content={candidate.badge}
+                  {...(candidate.badgeLabel ? { label: candidate.badgeLabel } : {})}
+                  bordered
+                >
                   <span className={iconStyle} aria-hidden="true">
                     {resolvedIcon}
                   </span>
@@ -97,6 +107,7 @@ export function TabBar({
             <a
               className={classesForItem}
               href={candidate.href}
+              aria-label={candidate.ariaLabel}
               aria-current={active ? "page" : undefined}
               onClick={(event) => publish(candidate, event)}
               key={candidate.key}
@@ -108,6 +119,7 @@ export function TabBar({
               className={classesForItem}
               type="button"
               disabled={candidate.disabled}
+              aria-label={candidate.ariaLabel}
               aria-current={active ? "page" : undefined}
               onClick={(event) => publish(candidate, event)}
               key={candidate.key}

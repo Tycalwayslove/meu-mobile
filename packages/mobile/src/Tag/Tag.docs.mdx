@@ -1,0 +1,160 @@
+---
+name: Tag
+slug: tag
+package: "@meu/mobile"
+exports: [Tag]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "77:2"
+storyIds:
+  [
+    information-tag--soft,
+    information-tag--solid,
+    information-tag--outline,
+    information-tag--interactive,
+    information-tag--filter,
+    information-tag--closable,
+    information-tag--long-text,
+    information-tag--light-and-dark
+  ]
+source: packages/mobile/src/Tag
+---
+
+# Tag
+
+Figma node `77:2` 是 Tag 页面参考；当前 FIGMA_SYNC 未能确定组件集主节点，不能把页面节点宣称为 component set。
+
+## 当前能力
+
+- 静态状态标签、原生 button 筛选标签、受控 selected/aria-pressed，以及独立原生 close button 模式。
+- onClick 与 onClose 同时存在时渲染两个并列按钮，避免嵌套 button；disabled 同时锁定两条动作路径。
+- 五种 tone、三种 variant/size、rounded、长文 24ch 视觉省略、RTL 逻辑间距、reduced-motion 和 forced-colors。
+- 交互与关闭目标均至少 44×44，原生 Enter/Space 键盘路径成立。
+
+状态为 `implementation`；axe、移动 E2E、Chromatic 和真机读屏待补。
+
+## 何时使用
+
+静态状态、短筛选条件或用户可移除的已选条件。筛选状态由业务受控保存。
+
+## 何时不要使用
+
+主要动作使用 Button；单选/多选表单使用 Radio/Checkbox/Selector；长说明使用 Text。不要把链接、输入框放进 children。
+
+## 结构与状态
+
+静态为 span；onClick 为 button；onClose 增加同级 close button 和 group wrapper。根暴露 component/size/state/selected/tone/variant，close 暴露 `data-meu-tag-close`。状态为 static/filter/selected/closable/filter-closable/disabled。
+
+## 基础用法
+
+```tsx
+<Tag selected={inStock} onClick={() => setInStock((value) => !value)}>
+  仅看有货
+</Tag>
+<Tag onClose={() => removeFilter("brand")} closeAriaLabel="移除品牌筛选">
+  Meu
+</Tag>
+```
+
+## 受控与非受控
+
+selected 完全受控，Tag 不自行切换。省略 selected 时筛选 button 不暴露 pressed 状态；静态/closable 模式没有选择状态。
+
+## 表单集成
+
+筛选和 close button 固定 `type=button`，不会意外提交表单。Tag 不写入 FormData；需要表单值时由 Checkbox/Selector 作为事实源。
+
+## Props
+
+API 由 `TagProps` 生成。onClick 启用筛选按钮；onClose 增加独立按钮。纯文本 children 会生成包含标签内容的本地化关闭名称；复杂内容应显式提供 closeAriaLabel。
+
+## Events
+
+- `onClick(event)`：主筛选按钮原生 click，发生在 Tag 状态变化之前；selected 是否改变由调用方决定。
+- `onClose(event)`：独立 close button 原生 click，不会同时触发 onClick。
+- disabled 时两事件均不触发。事件可通过原生 preventDefault 取消调用方默认逻辑，组件没有后续内部状态。
+
+## Ref 与命令式方法
+
+ref 指向实际布局根：closable 模式为包住两项动作的 span，其余模式为主 span 或筛选 button；永不指向 close button。筛选模式可原生 focus/click；close 无公开 ref。
+
+## 键盘操作
+
+| 按键            | 行为                                             |
+| --------------- | ------------------------------------------------ |
+| Tab / Shift+Tab | 经过筛选按钮；closable 时再经过独立 close button |
+| Enter / Space   | 激活当前原生按钮                                 |
+
+Delete/Backspace 不自动删除，避免用户编辑文本时误触；删除使用明确 close button。
+
+## 触摸与手势
+
+筛选与 close button 各自至少 44×44；无滑动、长按或 hover-only 动作。静态 chip 视觉高度可小于 44，但不可点击。closable 模式的 className/style/hidden/dir/id 与 ref 都作用于完整 group root。
+
+## 无障碍
+
+静态 span 由可见文本表达；筛选 button 使用 aria-pressed 表达 selected；close button 必须有 closeAriaLabel 或默认名称。tone/variant 不独立承载状态含义。省略文本由 CSS 完成，完整 DOM 文本仍可读。
+
+## 动效
+
+只对按压 transform 使用 exit motion；reduced-motion 缩短到 1ms，无循环和布局动画。
+
+## 主题与定制
+
+颜色、间距、圆角、字体和 motion 来自 Meu Token；forced-colors 恢复系统边框/文字。稳定入口为公开 props、className/style 和 data 属性。
+
+## SSR 与 Next.js
+
+只依据 props/ConfigProvider locale render，无 effect 或浏览器读取；服务端会确定输出 span/button 结构。服务端与客户端必须使用相同 onClick/onClose 模式避免 hydration 结构变化。
+
+## RTL 与国际化
+
+close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 close 名称随 ConfigProvider 中英文切换，纯文本 children 会包含在名称中；复杂内容应传包含实体名称的本地化 closeAriaLabel。
+
+## 浏览器与 WebView
+
+依赖原生 button、inline-flex 和 CSS 自定义属性，兼容 Chrome/WebView 70、iOS 13 语法基线。焦点增强使用 `:focus-visible`；不支持该伪类的旧 WebView 仍保留原生焦点行为，需在目标壳复验视觉。
+
+## 边界情况与已知限制
+
+- selected 不会自动更新；传 selected 却无 onClick 只改变视觉 data，不构成筛选控件。
+- 24ch 省略不自动提供 title；DOM 文本仍完整，鼠标 tooltip 需业务显式传 title。
+- onClick+onClose 会创建两个 Tab stop，这是避免嵌套交互的有意设计。
+
+## 性能预算
+
+每个 Tag 为常数节点，无监听/effect；大量筛选应使用 Selector 并避免数百 Tag 同屏。
+
+## 测试证据
+
+- Unit: `Tag.test.tsx` 覆盖静态、filter、selected、独立 close 键盘和 disabled 双动作。
+- Story interaction: Filter 切换并验证 aria-pressed；LightAndDark/LongText/Closable 覆盖关键状态。
+- Axe: 待补。
+- SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种 DOM 模式；hydration 专测待补。
+- RTL: 逻辑 CSS 已实现，专属截图待补。
+- Reduced motion: CSS 已实现，截图待补。
+- Mobile Chromium/WebKit E2E: 待补。
+- Chromatic Light/Dark: Story 已建立，基线待执行。
+- Real device: 待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 补 axe、RTL/长翻译/forced-colors 视觉、移动键盘和真机读屏验证。
+
+### 已完成
+
+- 分离静态、筛选、selected 与可关闭模式，避免嵌套按钮并冻结事件顺序。
+- 增加 44px close 目标、长文、reduced-motion、forced-colors、TSDoc、Unit/SSR/Story。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                                  | 迁移说明                        |
+| ---------- | ------ | -------- | ----------------------------------------------------- | ------------------------------- |
+| 2026-08-29 | 未发布 | behavior | 增加 selected/onClose/closeAriaLabel 并分离双动作语义 | 现有静态和 onClick 模式保持兼容 |

@@ -21,7 +21,11 @@ function clampValue(value: number) {
 }
 
 export function Progress({
+  "aria-atomic": ariaAtomic,
   "aria-label": ariaLabel,
+  "aria-live": ariaLive,
+  "aria-valuetext": ariaValueText,
+  announce = false,
   className,
   formatValue,
   indeterminate = false,
@@ -32,6 +36,7 @@ export function Progress({
   style,
   tone = "accent",
   value = 0,
+  valueText,
   ...props
 }: ProgressProps) {
   const { locale } = useMeuConfig();
@@ -53,6 +58,11 @@ export function Progress({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={indeterminate ? undefined : safeValue}
+      aria-valuetext={
+        indeterminate ? undefined : valueText !== undefined ? valueText : ariaValueText
+      }
+      aria-live={ariaLive !== undefined ? ariaLive : announce ? "polite" : undefined}
+      aria-atomic={ariaAtomic !== undefined ? ariaAtomic : announce ? "true" : undefined}
       data-meu-component="progress"
       data-size={size}
       data-state={state}

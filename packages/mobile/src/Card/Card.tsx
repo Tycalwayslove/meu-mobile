@@ -21,8 +21,10 @@ export function Card({
   description,
   extra,
   footer,
+  footerLayout = "content",
   leading,
   media,
+  mediaAspectRatio,
   padding = "medium",
   ref,
   title,
@@ -47,7 +49,15 @@ export function Card({
       data-padding={padding}
       data-variant={variant}
     >
-      {media !== undefined && media !== null ? <div className={mediaStyle}>{media}</div> : null}
+      {media !== undefined && media !== null ? (
+        <div
+          className={mediaStyle}
+          style={mediaAspectRatio === undefined ? undefined : { aspectRatio: mediaAspectRatio }}
+          data-meu-card-media
+        >
+          {media}
+        </div>
+      ) : null}
       {hasHeader ? (
         <div
           className={`${header({ divided: hasBody || hasFooter })} ${sectionPadding({ padding })}`}
@@ -68,8 +78,9 @@ export function Card({
       ) : null}
       {hasFooter ? (
         <div
-          className={`${footerStyle({ divided: hasHeader || hasBody })} ${sectionPadding({ padding })}`}
+          className={`${footerStyle({ actions: footerLayout === "actions", divided: hasHeader || hasBody })} ${sectionPadding({ padding })}`}
           data-meu-card-footer
+          data-layout={footerLayout}
         >
           {footer}
         </div>

@@ -2,6 +2,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Tabs } from "./Tabs";
 
 const items = [
@@ -61,5 +62,93 @@ describe("Tabs", () => {
     rerender(<Tabs items={items} value="settings" destroyInactive />);
     expect(screen.getByRole("tabpanel", { name: "设置" }).textContent).toBe("设置内容");
     expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(1);
+  });
+
+  it("keeps a valid roving target for invalid or disabled controlled values", () => {
+    const { rerender } = render(<Tabs items={items} value="missing" />);
+    const overview = screen.getByRole("tab", { name: "概览" });
+    expect(overview.getAttribute("tabindex")).toBe("0");
+    expect(document.querySelector('[role="tab"][aria-selected="true"]')).toBeNull();
+    expect(screen.queryByRole("tabpanel")).toBeNull();
+
+    rerender(<Tabs items={items} value="activity" />);
+    expect(screen.getByRole("tab", { name: "动态" }).getAttribute("aria-selected")).toBe("false");
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("tabindex")).toBe("0");
+  });
+
+  it("lazy-mounts panels once and retains visited panel state", () => {
+    render(<Tabs aria-label="延迟标签" items={items} lazy />);
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(1);
+    fireEvent.click(screen.getByRole("tab", { name: "设置" }));
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(2);
+    fireEvent.click(screen.getByRole("tab", { name: "概览" }));
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(2);
+  });
+
+  it("retains panels visited through controlled value updates", () => {
+    const { rerender } = render(<Tabs aria-label="受控标签" items={items} lazy value="overview" />);
+    rerender(<Tabs aria-label="受控标签" items={items} lazy value="settings" />);
+    rerender(<Tabs aria-label="受控标签" items={items} lazy value="overview" />);
+
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(2);
+  });
+
+  it("forgets removed uncontrolled identities before they are re-added", () => {
+    const enabledItems = items.filter((item) => !("disabled" in item) || !item.disabled);
+    const { rerender } = render(<Tabs items={enabledItems} defaultValue="settings" lazy />);
+    rerender(<Tabs items={enabledItems.slice(0, 1)} defaultValue="settings" lazy />);
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("aria-selected")).toBe("true");
+
+    rerender(<Tabs items={enabledItems} defaultValue="settings" lazy />);
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tab", { name: "设置" }).getAttribute("tabindex")).toBe("-1");
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(1);
+  });
+
+  it("normalizes an uncontrolled value when its item is disabled and later enabled", () => {
+    const { rerender } = render(<Tabs items={items} defaultValue="settings" />);
+    const disabledSettings = items.map((item) =>
+      item.key === "settings" ? { ...item, disabled: true } : item
+    );
+    rerender(<Tabs items={disabledSettings} defaultValue="settings" />);
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("aria-selected")).toBe("true");
+
+    rerender(<Tabs items={items} defaultValue="settings" />);
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("mirrors arrow navigation in RTL and scrolls the focused tab into view", () => {
+    render(
+      <div dir="rtl">
+        <Tabs items={items} />
+      </div>
+    );
+    const overview = screen.getByRole("tab", { name: "概览" });
+    const settings = screen.getByRole("tab", { name: "设置" });
+    const scrollIntoView = vi.fn();
+    settings.scrollIntoView = scrollIntoView;
+    overview.focus();
+    fireEvent.keyDown(overview, { key: "ArrowLeft" });
+    expect(document.activeElement).toBe(settings);
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", inline: "nearest" });
+  });
+
+  it("lets the nearest LTR ancestor override a RTL provider", () => {
+    const directionItems = [
+      { key: "first", label: "第一", content: "一" },
+      { key: "middle", label: "第二", content: "二" },
+      { key: "last", label: "第三", content: "三" }
+    ];
+    render(
+      <ConfigProvider dir="rtl">
+        <div dir="ltr">
+          <Tabs items={directionItems} defaultValue="middle" activationMode="manual" />
+        </div>
+      </ConfigProvider>
+    );
+    const middle = screen.getByRole("tab", { name: "第二" });
+    middle.focus();
+    fireEvent.keyDown(middle, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "第三" }));
   });
 });

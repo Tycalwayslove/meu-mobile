@@ -60,19 +60,26 @@ export const tab = recipe({
           "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)"
         ].join(", ")
       },
-      "&:focus": {
+      "&:focus-visible": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3
       }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": {
+        transitionDuration: "1ms",
+        selectors: { "&::after": { transitionDuration: "1ms" } }
+      },
+      "(forced-colors: active)": { color: "ButtonText", border: "1px solid ButtonText" }
+    }
   },
   variants: {
     active: {
       true: {
         color: "var(--meu-color-accent)",
-        selectors: { "&::after": { opacity: 1, transform: "scaleX(1)" } }
+        selectors: { "&::after": { opacity: 1, transform: "scaleX(1)" } },
+        "@media": { "(forced-colors: active)": { color: "Highlight", borderColor: "Highlight" } }
       },
       false: {}
     },

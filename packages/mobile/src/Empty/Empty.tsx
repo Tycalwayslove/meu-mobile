@@ -12,6 +12,12 @@ import {
 } from "./Empty.css";
 import type { EmptyProps } from "./types";
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const ids = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueIds = [...new Set(ids.filter(Boolean))];
+  return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
+}
+
 export function Empty({
   "aria-describedby": ariaDescribedby,
   "aria-label": ariaLabel,
@@ -20,8 +26,10 @@ export function Empty({
   className,
   description,
   illustration,
+  reason = "no-data",
   ref,
   role = "group",
+  secondaryAction,
   title,
   ...props
 }: EmptyProps) {
@@ -38,9 +46,10 @@ export function Empty({
       className={className ? `${root} ${className}` : root}
       role={role}
       aria-label={ariaLabel}
-      aria-labelledby={ariaLabel ? undefined : ariaLabelledby || titleId}
-      aria-describedby={ariaDescribedby || descriptionId}
+      aria-labelledby={ariaLabel ? undefined : mergeIdReferences(titleId, ariaLabelledby)}
+      aria-describedby={mergeIdReferences(descriptionId, ariaDescribedby)}
       data-meu-component="empty"
+      data-reason={reason}
     >
       {resolvedIllustration !== null && resolvedIllustration !== false ? (
         <div className={illustrationStyle} aria-hidden="true">
@@ -53,7 +62,12 @@ export function Empty({
       <div className={descriptionStyle} id={descriptionId}>
         {description}
       </div>
-      <div className={actionStyle}>{action}</div>
+      {action !== undefined || secondaryAction !== undefined ? (
+        <div className={actionStyle} data-meu-slot="actions">
+          {action}
+          {secondaryAction}
+        </div>
+      ) : null}
     </div>
   );
 }

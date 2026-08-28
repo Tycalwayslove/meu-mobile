@@ -1,0 +1,147 @@
+---
+name: Badge
+slug: badge
+package: "@meu/mobile"
+exports: [Badge]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "81:52"
+storyIds:
+  [
+    information-badge--count,
+    information-badge--overflow,
+    information-badge--dot,
+    information-badge--status-tones,
+    information-badge--light-and-dark
+  ]
+source: packages/mobile/src/Badge
+---
+
+# Badge
+
+## 当前能力
+
+- 支持 standalone/anchor overlay、dot、短内容、数字 max、showZero、bordered、逻辑 offset 和五种 tone。
+- 数字超过有限 max 显示 `max+`；0 默认隐藏、showZero 时显示。dot 不渲染 content。
+- 无 label 的 dot 装饰性隐藏；label 为 dot 提供状态含义，也可替换计数的可访问名称。
+- RTL 定位与 forced-colors 已处理；组件无动画。
+
+状态为 `implementation`；动态公告、axe、视觉基线和真机证据待补。
+
+## 何时使用
+
+用于未读数、短状态或锚点角标。状态 dot 必须配 label，或在相邻可见文本中表达同一含义。
+
+## 何时不要使用
+
+长提示用 Tag/Text；进度用 Progress；需要点击时让锚点自身成为 Button/Link，不给 Badge 增加点击处理。
+
+## 结构与状态
+
+根为 span，marker 为内部 span。带 children 时 marker 绝对定位；状态为 dot/content/empty/standalone，tone 单独通过 data 属性表达。
+
+## 基础用法
+
+```tsx
+<Badge content={128} max={99} label="99 条以上未读消息">
+  <IconButton aria-label="消息" />
+</Badge>
+```
+
+## 受控与非受控
+
+不适用。Badge 纯由 props 派生，不维护计数状态。
+
+## 表单集成
+
+不适用。Badge 不是表单控件。
+
+## Props
+
+API 由 `BadgeProps` 生成。number content 会截断并夹紧到零，非有限 count 归零；max 仅处理 number content，非有限 max 不截断。offset 为逻辑 inline-end、block-start 的像素偏移，非有限 offset 归零。
+
+## Events
+
+没有专有事件。根原生 span 事件可透传，但不应借此把 Badge 当按钮。
+
+## Ref 与命令式方法
+
+ref 指向根 span；无命令式方法。
+
+## 键盘操作
+
+| 按键   | 行为                                   |
+| ------ | -------------------------------------- |
+| 不适用 | Badge 不进入 Tab；锚点控件负责键盘操作 |
+
+## 触摸与手势
+
+Badge 不创建触摸目标。锚点若可操作必须自行满足至少 44×44。
+
+## 无障碍
+
+数字/文字 content 默认参与名称计算；label 可提供更完整含义。无 label dot 使用 aria-hidden，避免只朗读无意义图形。tone 不能独立承载成功/警告/失败语义。
+
+## 动效
+
+不适用。无进入、计数跳动或循环动画，因此 reduced-motion 无额外分支。
+
+## 主题与定制
+
+颜色与圆角来自 Meu Token；forced-colors 使用 CanvasText/Canvas。稳定入口为 tone、dot、bordered、offset、className/style 和 data 属性。
+
+## SSR 与 Next.js
+
+纯 props render，无 effect、随机 ID 或浏览器读取；服务端和客户端结构稳定。
+
+## RTL 与国际化
+
+marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化，复杂数字格式请直接传格式化后的 ReactNode 与 label。
+
+## 浏览器与 WebView
+
+依赖标准 inline-flex、逻辑定位和 CSS 自定义属性。Chrome/WebView 70、iOS 13 语法基线可用；非常旧 WebView 的逻辑属性需在目标设备复验。
+
+## 边界情况与已知限制
+
+- content 为长 ReactNode 时视觉限制为 12ch 并省略；读屏仍可读取 DOM 内容。
+- 不提供 live region；业务需要动态公告时在外部使用独立 `aria-live` 文本。
+- max 小于零被截为 0；NaN/Infinity max 不参与截断。
+
+## 性能预算
+
+常数节点，无监听器和布局测量；大量列表成本主要来自锚点内容。
+
+## 测试证据
+
+- Unit: `Badge.test.tsx` 覆盖 zero/max、dot label、tone 文本和 RTL offset。
+- Story interaction: 无状态交互不适用；状态矩阵与 LightAndDark Story 已建立。
+- Axe: 待补。
+- SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；hydration 专测待补。
+- RTL: Unit 覆盖 offset 数据归一化；逻辑定位由 CSS 实现，视觉截图待补。
+- Reduced motion: 无动画，不适用。
+- Mobile Chromium/WebKit E2E: 待补。
+- Chromatic Light/Dark: Story 已建立，基线待执行。
+- Real device: 待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 完成 axe、RTL/forced-colors/Light-Dark 视觉与真机状态朗读验证。
+
+### 已完成
+
+- 固化 dot/count/max/zero/label 边界；改用逻辑定位并增加高对比降级。
+- 补齐 TSDoc、Unit、SSR 与状态 Story。
+
+## 变更记录
+
+| 日期       | 版本   | 类型          | 内容                                                   | 迁移说明 |
+| ---------- | ------ | ------------- | ------------------------------------------------------ | -------- |
+| 2026-08-29 | 未发布 | accessibility | 明确 dot label、颜色之外的状态表达及 RTL/forced-colors | API 兼容 |

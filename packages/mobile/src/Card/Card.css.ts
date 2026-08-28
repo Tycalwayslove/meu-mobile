@@ -17,7 +17,13 @@ export const root = recipe({
     color: "var(--meu-color-ink)",
     background: "var(--meu-color-surface)",
     borderRadius: "var(--meu-radius-surface)",
-    fontFamily: "var(--meu-font-ui)"
+    fontFamily: "var(--meu-font-ui)",
+    "@media": {
+      "(forced-colors: active)": {
+        border: "1px solid CanvasText",
+        boxShadow: "none"
+      }
+    }
   },
   variants: {
     variant: {
@@ -33,7 +39,8 @@ export const media = style({
   display: "block",
   width: "100%",
   minWidth: 0,
-  overflow: "hidden"
+  overflow: "hidden",
+  background: "var(--meu-color-subtle)"
 });
 
 export const sectionPadding = recipe({
@@ -99,7 +106,7 @@ export const extra = style({
   flex: "0 0 auto",
   alignItems: "center",
   minHeight: 24,
-  marginLeft: "auto"
+  marginInlineStart: "auto"
 });
 
 export const body = style({ minWidth: 0, overflowWrap: "anywhere" });
@@ -107,10 +114,20 @@ export const body = style({ minWidth: 0, overflowWrap: "anywhere" });
 export const footer = recipe({
   base: { minWidth: 0 },
   variants: {
+    actions: {
+      true: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        flexWrap: "wrap",
+        gap: "var(--meu-space-2)"
+      },
+      false: {}
+    },
     divided: {
       true: { borderTop: "1px solid var(--meu-color-border)" },
       false: {}
     }
   },
-  defaultVariants: { divided: false }
+  defaultVariants: { actions: false, divided: false }
 });

@@ -19,7 +19,24 @@ type Story = StoryObj<typeof meta>;
 
 export const Success: Story = {};
 export const Error: Story = {
-  args: { description: "请检查网络后重试。", status: "error", title: "提交失败" }
+  args: { description: "请检查网络后重试。", role: "alert", status: "error", title: "提交失败" }
 };
 export const Warning: Story = { args: { status: "warning", title: "库存发生变化" } };
-export const Waiting: Story = { args: { status: "waiting", title: "正在等待商家确认" } };
+export const Info: Story = { args: { status: "info", title: "订单信息已更新" } };
+export const Pending: Story = { args: { status: "pending", title: "正在等待商家确认" } };
+export const RecoveryActions: Story = {
+  args: {
+    actions: (
+      <>
+        <Button size="small">重新提交</Button>
+        <Button size="small" variant="outline">
+          保存草稿
+        </Button>
+      </>
+    ),
+    description: "检查网络后可再次提交，或先保存本地草稿。",
+    role: "alert",
+    status: "error",
+    title: "提交失败"
+  }
+};

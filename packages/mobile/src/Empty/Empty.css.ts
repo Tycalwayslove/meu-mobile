@@ -51,6 +51,13 @@ export const defaultIllustration = style({
       borderRadius: "0 0 6px 6px",
       content: ""
     }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      borderColor: "CanvasText",
+      background: "Canvas",
+      forcedColorAdjust: "none"
+    }
   }
 });
 
@@ -76,5 +83,11 @@ export const action = style({
   flexWrap: "wrap",
   justifyContent: "center",
   gap: "var(--meu-space-2)",
-  marginTop: "var(--meu-space-5)"
+  marginTop: "var(--meu-space-5)",
+  "@media": {
+    "screen and (max-width: 360px)": {
+      display: "grid",
+      width: "100%"
+    }
+  }
 });

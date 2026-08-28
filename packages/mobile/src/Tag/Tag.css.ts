@@ -1,6 +1,13 @@
 import { style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
+export const tagGroup = style({
+  display: "inline-flex",
+  alignItems: "center",
+  maxWidth: "100%",
+  verticalAlign: "middle"
+});
+
 export const tagRoot = recipe({
   base: {
     position: "relative",
@@ -26,10 +33,11 @@ export const tagRoot = recipe({
         minHeight: 44,
         cursor: "pointer",
         selectors: {
-          "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 1 },
+          "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 1 },
           "&:active:not(:disabled)": { transform: "scale(0.98)" }
         },
-        transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)"
+        transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+        "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
       },
       false: {}
     }
@@ -48,12 +56,23 @@ export const tagChip = recipe({
     fontFamily: "var(--meu-font-ui)",
     fontWeight: 500,
     lineHeight: 1,
-    whiteSpace: "nowrap"
+    whiteSpace: "nowrap",
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "CanvasText",
+        color: "CanvasText",
+        background: "Canvas"
+      }
+    }
   },
   variants: {
     rounded: {
       true: { borderRadius: "var(--meu-radius-round)" },
       false: { borderRadius: 6 }
+    },
+    selected: {
+      true: { boxShadow: "inset 0 0 0 1px currentColor" },
+      false: {}
     },
     size: {
       small: { minHeight: 22, padding: "2px 7px", fontSize: 11 },
@@ -135,11 +154,49 @@ export const tagChip = recipe({
       style: { color: "var(--meu-color-danger)", borderColor: "var(--meu-color-danger)" }
     }
   ],
-  defaultVariants: { rounded: false, size: "medium", tone: "neutral", variant: "soft" }
+  defaultVariants: {
+    rounded: false,
+    selected: false,
+    size: "medium",
+    tone: "neutral",
+    variant: "soft"
+  }
 });
 
 export const tagContent = style({
   minWidth: 0,
+  maxWidth: "24ch",
   overflow: "hidden",
-  textOverflow: "ellipsis"
+  textOverflow: "ellipsis",
+  overflowWrap: "anywhere"
+});
+
+export const tagClose = style({
+  display: "inline-grid",
+  placeItems: "center",
+  flex: "0 0 auto",
+  boxSizing: "border-box",
+  width: 44,
+  minWidth: 44,
+  height: 44,
+  marginInlineStart: -4,
+  padding: 0,
+  color: "var(--meu-color-muted)",
+  background: "transparent",
+  border: 0,
+  borderRadius: "var(--meu-radius-round)",
+  font: "inherit",
+  fontSize: 20,
+  cursor: "pointer",
+  WebkitTapHighlightColor: "transparent",
+  selectors: {
+    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
+    "&:active:not(:disabled)": { transform: "scale(0.94)" },
+    "&:disabled": { cursor: "not-allowed", opacity: 0.55 }
+  },
+  transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+    "(forced-colors: active)": { color: "ButtonText", border: "1px solid ButtonText" }
+  }
 });

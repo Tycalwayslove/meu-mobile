@@ -1,0 +1,146 @@
+---
+name: Avatar
+slug: avatar
+package: "@meu/mobile"
+exports: [Avatar]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "83:88"
+storyIds:
+  [
+    information-avatar--image-avatar,
+    information-avatar--initial,
+    information-avatar--explicit-initials,
+    information-avatar--rounded,
+    information-avatar--image-failure,
+    information-avatar--light-and-dark
+  ]
+source: packages/mobile/src/Avatar
+---
+
+# Avatar
+
+## 当前能力
+
+- 基于 Image 的固定尺寸头像，支持 circle/rounded/square、三档预设和正有限数值尺寸。
+- 图片 loading/loaded/error、空源、失败回退、显式 initials、自定义 fallback、alt、loading 和 image/root ref 已验证。
+- loading 与 error 都保留相同 fallback，源变化由 Image 状态机重新开始；不自行重试或缓存失败。
+- RTL 无方向性布局；forced-colors 保留轮廓。图片淡入的 reduced-motion 降级由 Image 实现。
+
+状态为 `implementation`；axe、Chromatic、移动 E2E 与真机读屏尚未完成。
+
+## 何时使用
+
+用于人员、店铺或组织的紧凑身份图像。网络图像不可靠时传短 initials 或可识别 fallback。
+
+## 何时不要使用
+
+商品图、响应式内容图使用 Image；可点击账户入口应由 Link/Button 包裹，Avatar 自身不承担交互语义。
+
+## 结构与状态
+
+根为非交互 span，内部 Image 负责 loading/loaded/error。根暴露 `data-meu-component`、`data-shape`、`data-size`；Image 暴露 `data-state`。Avatar 没有 pressed/selected/disabled 状态。
+
+## 基础用法
+
+```tsx
+<Avatar src={user.avatarUrl} alt={user.displayName} initials="LX" loading="lazy" />
+```
+
+## 受控与非受控
+
+不适用。组件无业务状态；`src`、`alt`、`initials` 和 `fallback` 始终由调用方决定。
+
+## 表单集成
+
+不适用。Avatar 不是表单控件，不提交 FormData。
+
+## Props
+
+API 由 `AvatarProps` 生成。fallback 优先级为 `fallback`、显式 `initials`、alt 首字符；空 alt 表示装饰图像。数值 size 非有限时回退 44px，有限值最小 1px。
+
+## Events
+
+`onLoad`、`onError` 透传底层 img 事件，每个原生事件触发一次；事件不可由 Avatar 取消，且不会自动改写 src。
+
+## Ref 与命令式方法
+
+`ref` 指向稳定根 span；`imageRef` 在实际 img 存在时指向它。error/空源时 img 被卸载，imageRef 可能为 null。
+
+## 键盘操作
+
+| 按键   | 行为                                         |
+| ------ | -------------------------------------------- |
+| 不适用 | Avatar 不可聚焦；交互由外层 Link/Button 提供 |
+
+## 触摸与手势
+
+不适用。medium 为 44×44，但 small 为 32×32，不能把静态 Avatar 当独立触控目标；交互外层必须满足至少 44×44。
+
+## 无障碍
+
+非空 alt 为图像名称，失败回退仍以同一名称暴露；空 alt 时图像和文字 fallback 均装饰性隐藏。initials 不能替代准确 alt。
+
+## 动效
+
+Avatar 自身无动画；Image 的 opacity 淡入使用全局 motion，并在 reduced-motion 下缩短到 1ms。
+
+## 主题与定制
+
+背景、文字、圆角和字体来自 Meu Token；forced-colors 使用 Canvas/CanvasText。稳定入口为 shape、size、className/style 与 data 属性。
+
+## SSR 与 Next.js
+
+render 不读取浏览器全局。空源服务端直接输出可访问 fallback；有源时输出 loading 占位与 img，客户端 effect 只处理缓存图片完成状态。
+
+## RTL 与国际化
+
+无方向性排列。默认 fallback 仅取 alt 的首个 Unicode code point 并大写；复杂姓名缩写应显式传 initials，业务负责本地化。
+
+## 浏览器与 WebView
+
+依赖 React 19、原生 img loading/alt 与 CSS Grid。语法目标为 Chrome/WebView 70 和 iOS 13；原生 lazy loading 在较旧 WKWebView 可能退化为 eager，不影响内容正确性。
+
+## 边界情况与已知限制
+
+- 不内建跨域、srcSet、sizes、重试和上传；需要时直接使用 Image。
+- 自定义 fallback 应是短静态内容，不放按钮或链接。
+- 1–31px 数值头像可显示，但不满足触控或可读性建议。
+
+## 性能预算
+
+单个 Avatar 为常数节点；网络与解码成本属于图片资源。列表应使用 lazy loading、合理尺寸和 CDN 裁剪。
+
+## 测试证据
+
+- Unit: `Avatar.test.tsx` 覆盖派生/显式 initials、失败、loading、装饰 alt 和数值尺寸。
+- Story interaction: ImageFailure 触发 error 并验证 fallback；LightAndDark 提供关键状态。
+- Axe: 待补。
+- SSR/hydration: `Avatar.ssr.test.tsx` 验证无浏览器全局的稳定 fallback markup；hydration 专测待补。
+- RTL: 逻辑无关；专属自动化不适用。
+- Reduced motion: 继承 Image CSS，截图待补。
+- Mobile Chromium/WebKit E2E: 待补。
+- Chromatic Light/Dark: Story 已建立，基线待执行。
+- Real device: 待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 补 axe、Chromatic、移动端图片失败/lazy loading 与 VoiceOver/TalkBack 真机验证。
+
+### 已完成
+
+- 明确 fallback 优先级，增加 initials，补齐 alt/loading/error/ref 契约。
+- 增加 forced-colors、Unit、SSR、交互与 Light/Dark Story。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                 | 迁移说明                               |
+| ---------- | ------ | -------- | ------------------------------------ | -------------------------------------- |
+| 2026-08-29 | 未发布 | behavior | 增加显式 initials 与完整图片状态证据 | 现有 fallback 和派生首字符行为保持兼容 |

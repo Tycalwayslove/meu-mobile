@@ -1,0 +1,145 @@
+---
+name: Progress
+slug: progress
+package: "@meu/mobile"
+exports: [Progress]
+status: implementation
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "129:170"
+storyIds:
+  [
+    feedback-progress--determinate,
+    feedback-progress--indeterminate,
+    feedback-progress--success,
+    feedback-progress--large-warning,
+    feedback-progress--clamped-and-formatted,
+    feedback-progress--announced-danger
+  ]
+source: packages/mobile/src/Progress
+---
+
+# Progress
+
+## 当前能力
+
+- 支持 determinate 与 indeterminate；确定值将非有限数归零并夹紧到 0–100。
+- 支持三档厚度、四种 tone、可见标签/数值、`formatValue`、`valueText` 与显式 `announce`。
+- 使用 `role="progressbar"`；不确定状态省略 `aria-valuenow`，reduced-motion 下停止循环动画。
+
+当前为 `implementation`：Unit、SSR 和 Story 已建立；axe、移动 WebKit/Chromium、Chromatic 与真机读屏尚无证据。
+
+## 何时使用
+
+用于上传、同步、批处理等有持续时间的任务。能计算完成百分比时使用 determinate；不能计算时使用 indeterminate。
+
+## 何时不要使用
+
+不要用于静态评分、容量或业务指标；使用 Rate、meter 或数据展示。瞬时操作不要闪现进度条。
+
+## 结构与状态
+
+根 progressbar 包含可选 header 和装饰性 track/fill。根暴露 `data-size`、`data-tone`、`data-state=determinate|indeterminate`；内部 class 非公开 API。
+
+## 基础用法
+
+```tsx
+<Progress label="上传资料" value={64} showValue valueText="已上传百分之六十四" />
+```
+
+## 受控与非受控
+
+不适用。Progress 是只读派生视图，每次渲染完全服从 `value`/`indeterminate`。
+
+## 表单集成
+
+不适用。组件不提交 FormData，不代表表单字段；任务状态由业务层拥有。
+
+## Props
+
+`value` 固定表示百分比；`formatValue` 只改变可见内容，`valueText` 改变读屏值文本。`announce` 默认 false，避免高频更新制造 live-region 噪声。tone 不能作为唯一状态信息。
+
+## Events
+
+不适用。组件不发出完成事件；完成判断与副作用属于调用方。
+
+## Ref 与命令式方法
+
+`ref` 指向根 `HTMLDivElement`；无命令式方法。
+
+## 键盘操作
+
+| 按键   | 行为                               |
+| ------ | ---------------------------------- |
+| 不适用 | Progress 不可交互、不进入 Tab 顺序 |
+
+## 触摸与手势
+
+不适用；不得让用户拖动 fill。需要输入时使用 Slider。
+
+## 无障碍
+
+- accessible name 优先 `aria-label`，其次字符串 `label`，否则使用 locale fallback。
+- determinate 暴露 0/100 bounds 和夹紧后的 `aria-valuenow`；indeterminate 不暴露当前值。
+- 仅在更新频率低且确需公告时启用 `announce`；高频任务应由业务按阶段公告。
+
+## 动效
+
+determinate 使用 transform 过渡，indeterminate 使用循环位移动画。`prefers-reduced-motion: reduce` 下循环停止、过渡缩至 1ms。
+
+## 主题与定制
+
+使用公共颜色、圆角、间距与 motion Token。稳定属性为 `data-meu-component`、`data-size`、`data-state`、`data-tone`。
+
+## SSR 与 Next.js
+
+无浏览器全局读取，SSR 输出确定；组件带 `use client` 以读取 ConfigProvider locale。首屏服务端和客户端必须传同一 locale/value。
+
+## RTL 与国际化
+
+RTL 下确定进度从逻辑起点（右侧）增长。可见格式和 `valueText` 由业务负责 locale 数字与语序。
+
+## 浏览器与 WebView
+
+依赖基础 flex/grid、transform、CSS 自定义属性；forced-colors 使用系统 Highlight。未声明真机 WebView 验证。
+
+## 边界情况与已知限制
+
+固定范围 0–100；不支持分段、圆环、缓冲进度或自动节流公告。NaN/Infinity 视为 0。
+
+## 性能预算
+
+每实例常数 DOM；只动画 transform。高频进度应由调用方限频，避免每帧 React 渲染。
+
+## 测试证据
+
+- Unit: 5 项，覆盖 clamp、indeterminate、格式化、locale、announcement/valueText，以及显式 live-region 属性优先级。
+- Story interaction: 不适用；只读组件无确定性交互。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 1 项；hydration 未执行。
+- RTL: CSS 契约，未做浏览器 E2E。
+- Reduced motion: CSS 分支存在，未做浏览器媒体查询 E2E。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: 未执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+- axe、hydration、移动浏览器、Chromatic 与真机读屏矩阵。
+
+### 已完成
+
+- 固化 determinate/indeterminate、非有限值、可见格式与可访问值文本边界。
+- 增加显式公告开关、RTL 起点、forced-colors、reduced-motion 和 SSR 证据。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                             | 迁移说明                                |
+| ---------- | ------ | -------- | ------------------------------------------------ | --------------------------------------- |
+| 2026-08-29 | 未发布 | 兼容增强 | 新增 `announce`、`valueText` 与完整语义/SSR 契约 | 无需迁移；高频进度保持 `announce=false` |

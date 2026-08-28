@@ -4,18 +4,22 @@ import { block, textGroup } from "./Skeleton.css";
 import type { SkeletonProps } from "./types";
 
 type SkeletonStyle = CSSProperties & {
+  "--meu-skeleton-aspect-ratio"?: CSSProperties["aspectRatio"];
   "--meu-skeleton-height"?: string;
   "--meu-skeleton-line-width"?: string;
   "--meu-skeleton-width"?: string;
 };
 
 function resolveSize(value: CSSProperties["width"], fallback: string) {
-  if (typeof value === "number") return `${Math.max(0, value)}px`;
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? `${Math.max(0, value)}px` : fallback;
+  }
   return value === undefined ? fallback : value;
 }
 
 export function Skeleton({
   animated = false,
+  aspectRatio,
   className,
   height,
   lines = 1,
@@ -34,6 +38,7 @@ export function Skeleton({
     variant === "circle" ? circleHeight : resolveSize(height, variant === "text" ? "16px" : "80px");
   const resolvedStyle: SkeletonStyle = {
     ...style,
+    "--meu-skeleton-aspect-ratio": aspectRatio,
     "--meu-skeleton-height": resolvedHeight,
     "--meu-skeleton-width": resolvedWidth
   };

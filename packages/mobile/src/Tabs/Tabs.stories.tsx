@@ -21,3 +21,23 @@ type Story = StoryObj<typeof meta>;
 export const Stretched: Story = {};
 export const Scrollable: Story = { args: { stretch: false } };
 export const ManualActivation: Story = { args: { activationMode: "manual" } };
+export const LazyPanels: Story = { args: { lazy: true } };
+export const KeyboardInteraction: Story = {
+  args: { stretch: false },
+  play: ({ canvasElement }) => {
+    const tabs = canvasElement.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    const first = tabs.item(0);
+    first.focus();
+    first.dispatchEvent(new window.KeyboardEvent("keydown", { bubbles: true, key: "End" }));
+    if (document.activeElement !== tabs.item(tabs.length - 1)) {
+      throw new window.Error("End did not focus the last enabled tab");
+    }
+  }
+};
+export const RTL: Story = {
+  render: () => (
+    <div dir="rtl">
+      <Tabs aria-label="أقسام المتجر" items={items} stretch={false} />
+    </div>
+  )
+};

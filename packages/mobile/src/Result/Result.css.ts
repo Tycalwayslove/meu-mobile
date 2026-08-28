@@ -1,5 +1,10 @@
-import { style } from "@vanilla-extract/css";
+import { keyframes, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
+
+const pendingPulse = keyframes({
+  "0%, 100%": { opacity: 0.35 },
+  "50%": { opacity: 1 }
+});
 
 export const root = style({
   display: "grid",
@@ -32,6 +37,7 @@ export const icon = recipe({
       error: { color: "var(--meu-color-danger)", background: "var(--meu-color-subtle)" },
       info: { color: "var(--meu-color-accent)", background: "var(--meu-color-subtle)" },
       warning: { color: "var(--meu-color-warning)", background: "var(--meu-color-subtle)" },
+      pending: { color: "var(--meu-color-muted)", background: "var(--meu-color-subtle)" },
       waiting: { color: "var(--meu-color-muted)", background: "var(--meu-color-subtle)" }
     }
   },
@@ -49,10 +55,20 @@ export const waitingDot = style({
   width: 5,
   height: 5,
   borderRadius: "var(--meu-radius-round)",
-  background: "currentcolor"
+  background: "currentcolor",
+  animation: `${pendingPulse} 1.2s ease-in-out infinite`,
+  selectors: {
+    "&:nth-child(2)": { animationDelay: "160ms" },
+    "&:nth-child(3)": { animationDelay: "320ms" }
+  },
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { animation: "none", opacity: 0.7 },
+    "(forced-colors: active)": { background: "CanvasText" }
+  }
 });
 
 export const title = style({
+  margin: 0,
   maxWidth: 480,
   fontSize: 20,
   fontWeight: 600,

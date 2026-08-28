@@ -14,6 +14,15 @@ function resolveContent(content: ReactNode, max: number | undefined) {
   return content > safeMax ? `${safeMax}+` : content;
 }
 
+function normalizeNumericContent(content: ReactNode): ReactNode {
+  if (typeof content !== "number") return content;
+  return Number.isFinite(content) ? Math.max(0, Math.trunc(content)) : 0;
+}
+
+function finiteOffset(value: number): number {
+  return Number.isFinite(value) ? value : 0;
+}
+
 export function Badge({
   bordered = false,
   children,
@@ -29,18 +38,20 @@ export function Badge({
   tone = "danger",
   ...props
 }: BadgeProps) {
-  const numericZero = content === 0;
-  const visible = dot || Boolean(content) || (numericZero && showZero);
-  const resolvedContent = resolveContent(content, max);
+  const normalizedContent = normalizeNumericContent(content);
+  const numericZero = normalizedContent === 0;
+  const visible = dot || Boolean(normalizedContent) || (numericZero && showZero);
+  const resolvedContent = resolveContent(normalizedContent, max);
+  const hasAnchor = children !== undefined && children !== null && children !== false;
   const markerStyle: BadgeStyle | undefined = offset
     ? {
-        "--meu-badge-offset-x": `${offset[0]}px`,
-        "--meu-badge-offset-y": `${offset[1]}px`
+        "--meu-badge-offset-x": `${finiteOffset(offset[0])}px`,
+        "--meu-badge-offset-y": `${finiteOffset(offset[1])}px`
       }
     : undefined;
   const marker = visible ? (
     <span
-      className={badge({ bordered, dot, fixed: Boolean(children), tone })}
+      className={badge({ bordered, dot, fixed: hasAnchor, tone })}
       style={markerStyle}
       aria-label={label}
       aria-hidden={dot && !label ? true : undefined}
@@ -51,7 +62,7 @@ export function Badge({
     </span>
   ) : null;
 
-  if (!children) {
+  if (!hasAnchor) {
     if (!marker) return null;
     return (
       <span

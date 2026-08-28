@@ -41,18 +41,29 @@ export const item = recipe({
     WebkitTapHighlightColor: "transparent",
     transition: "color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
     selectors: {
-      "&:focus": {
+      "&:focus-visible": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3
       },
       "&:active": { background: "var(--meu-color-subtle)" }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { color: "LinkText", border: "1px solid ButtonText" },
+      "(orientation: landscape) and (max-height: 500px)": {
+        minHeight: 44,
+        paddingTop: 2,
+        paddingBottom: 2
+      }
+    }
   },
   variants: {
     active: {
-      true: { color: "var(--meu-color-accent)" },
+      true: {
+        color: "var(--meu-color-accent)",
+        "@media": { "(forced-colors: active)": { color: "Highlight" } }
+      },
       false: {}
     },
     disabled: {

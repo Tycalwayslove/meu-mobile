@@ -13,7 +13,12 @@ export const root = recipe({
   },
   variants: {
     direction: {
-      horizontal: { display: "flex", alignItems: "flex-start" },
+      horizontal: {
+        display: "flex",
+        alignItems: "flex-start",
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch"
+      },
       vertical: { display: "grid", gap: "var(--meu-space-3)" }
     }
   },
@@ -39,14 +44,15 @@ export const step = recipe({
       horizontal: {
         display: "grid",
         flex: "1 1 0",
+        minWidth: 96,
         justifyItems: "center",
         paddingInline: "var(--meu-space-1)",
         textAlign: "center",
         selectors: {
           "&::after": {
             top: 15,
-            right: "calc(-50% + 20px)",
-            left: "calc(50% + 20px)",
+            insetInlineStart: "calc(50% + 20px)",
+            insetInlineEnd: "calc(-50% + 20px)",
             height: 2
           }
         }
@@ -57,7 +63,7 @@ export const step = recipe({
         columnGap: "var(--meu-space-3)",
         minHeight: 56,
         selectors: {
-          "&::after": { top: 36, bottom: -12, left: 15, width: 2 }
+          "&::after": { top: 36, bottom: -12, insetInlineStart: 15, width: 2 }
         }
       }
     },
@@ -85,7 +91,14 @@ export const indicator = recipe({
     borderRadius: "var(--meu-radius-round)",
     fontSize: 13,
     fontWeight: 600,
-    lineHeight: 1
+    lineHeight: 1,
+    "@media": {
+      "(forced-colors: active)": {
+        color: "CanvasText",
+        background: "Canvas",
+        borderColor: "CanvasText"
+      }
+    }
   },
   variants: {
     status: {
@@ -97,7 +110,8 @@ export const indicator = recipe({
       process: {
         color: "var(--meu-color-accent-contrast)",
         background: "var(--meu-color-accent)",
-        borderColor: "var(--meu-color-accent)"
+        borderColor: "var(--meu-color-accent)",
+        "@media": { "(forced-colors: active)": { color: "HighlightText", background: "Highlight" } }
       },
       finish: {
         color: "var(--meu-color-accent)",
@@ -107,7 +121,8 @@ export const indicator = recipe({
       error: {
         color: "white",
         background: "var(--meu-color-danger)",
-        borderColor: "var(--meu-color-danger)"
+        borderColor: "var(--meu-color-danger)",
+        "@media": { "(forced-colors: active)": { borderColor: "Mark", color: "MarkText" } }
       }
     }
   },
