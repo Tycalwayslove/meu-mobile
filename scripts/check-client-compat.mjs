@@ -18,9 +18,24 @@ const checks = [
     extension: ".css",
     pattern: /:focus-visible\b/,
     message: ":focus-visible without a legacy fallback"
-  },
-  { extension: ".css", pattern: /:is\(/, message: ":is() selectors" }
+  }
 ];
+
+function hasUnsupportedIsSelector(source) {
+  const rules = [...source.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+    declarations: match[2].trim(),
+    selector: match[1].trim()
+  }));
+  const signatures = new Set(
+    rules.map(({ declarations, selector }) => `${selector}\u0000${declarations}`)
+  );
+
+  return rules.some(({ declarations, selector }) => {
+    if (!selector.includes(":is(")) return false;
+    const legacySelector = selector.replaceAll(":is(", ":-webkit-any(");
+    return !signatures.has(`${legacySelector}\u0000${declarations}`);
+  });
+}
 
 async function collect(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -47,6 +62,9 @@ for (const file of files) {
     if (extname(file) === check.extension && check.pattern.test(source)) {
       failures.push(`${relative(root, file)}: ${check.message}`);
     }
+  }
+  if (extname(file) === ".css" && hasUnsupportedIsSelector(source)) {
+    failures.push(`${relative(root, file)}: :is() selectors without a legacy fallback`);
   }
 }
 

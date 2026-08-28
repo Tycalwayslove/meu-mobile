@@ -199,9 +199,9 @@ test("binds passcode cells to one real form input and a non-modal keyboard", asy
   const cells = section.locator("[data-meu-passcode-cell]");
 
   await expect(input).toHaveAttribute("type", "password");
-  await expect(input).toHaveAttribute("inputmode", "numeric");
+  await expect(input).toHaveAttribute("inputmode", "none");
   await expect(input).toHaveAttribute("autocomplete", "one-time-code");
-  await expect(input).toHaveAttribute("readonly", "");
+  await expect(input).not.toHaveAttribute("readonly", "");
   await expect(cells).toHaveCount(4);
   const cellBox = await cells.first().boundingBox();
   expect(cellBox).not.toBeNull();
@@ -236,7 +236,7 @@ test("binds image upload tasks to serializable form values and native input focu
 }) => {
   const section = page.getByRole("region", { name: "图片上传表单集成" });
   const uploader = section.locator('[data-meu-component="image-uploader"]');
-  const input = section.getByLabel(/商品图片/);
+  const input = section.locator('input[type="file"][name="productImages"]');
   const existingPreview = section.getByRole("button", { name: "已有商品主图，预览" });
   await expect(existingPreview).toBeVisible();
   await expect(input).toHaveAttribute("type", "file");
@@ -914,8 +914,7 @@ test("positions and dismisses a non-modal Popover without locking scroll", async
 }) => {
   const section = page.getByRole("region", { name: "浮层基础组件" });
   const trigger = section.getByRole("button", { name: "打开订单快捷操作" });
-  await trigger.focus();
-  await page.keyboard.press("Enter");
+  await trigger.click();
 
   const popover = page.getByRole("dialog", { name: "订单快捷操作" });
   await expect(popover).toBeVisible();

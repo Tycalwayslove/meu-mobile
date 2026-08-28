@@ -51,7 +51,9 @@ describe("MeuFormImageUploader", () => {
   it("binds array value, dirty, touched and submission", async () => {
     const onSubmit = vi.fn();
     render(<ProductImageForm onSubmit={onSubmit} />);
-    const input = screen.getByLabelText<HTMLInputElement>(/商品图片/);
+    const input = screen.getByLabelText<HTMLInputElement>(/商品图片/, {
+      selector: 'input[type="file"]'
+    });
     fireEvent.change(input, {
       target: { files: [new File(["photo"], "product.jpg", { type: "image/jpeg" })] }
     });
@@ -72,7 +74,9 @@ describe("MeuFormImageUploader", () => {
     fireEvent.click(screen.getByRole("button", { name: "提交" }));
 
     const alert = await screen.findByRole("alert");
-    const input = screen.getByLabelText<HTMLInputElement>(/商品图片/);
+    const input = screen.getByLabelText<HTMLInputElement>(/商品图片/, {
+      selector: 'input[type="file"]'
+    });
     expect(alert.textContent).toBe("请上传商品图片");
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.getAttribute("aria-describedby")).toContain("error");
@@ -98,9 +102,14 @@ describe("MeuFormImageUploader", () => {
     }
 
     render(<ChangeForm />);
-    fireEvent.change(screen.getByLabelText<HTMLInputElement>("图片"), {
-      target: { files: [new File(["x"], "detail.jpg", { type: "image/jpeg" })] }
-    });
+    fireEvent.change(
+      screen.getByLabelText<HTMLInputElement>("图片", {
+        selector: 'input[type="file"]'
+      }),
+      {
+        target: { files: [new File(["x"], "detail.jpg", { type: "image/jpeg" })] }
+      }
+    );
     await waitFor(() => expect(onChange).toHaveBeenCalledWith([item], { item, reason: "upload" }));
   });
 });

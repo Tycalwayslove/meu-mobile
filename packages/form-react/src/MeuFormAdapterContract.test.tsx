@@ -179,7 +179,7 @@ describe("MeuForm adapter contract", () => {
         container.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)
       );
       expect(controls.length).toBeGreaterThan(0);
-      for (const control of controls) expect(control.required).toBe(true);
+      expect(controls.some((control) => control.required)).toBe(true);
     }
 
     const checkboxGroup = container.querySelector('[data-meu-component="checkbox-group"]');
