@@ -64,4 +64,18 @@ describe("ActionMenuProvider", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(onClose).toHaveBeenCalledWith({ reason: "clear" });
   });
+
+  it("settles active controller callbacks when the provider unmounts", async () => {
+    const onClose = vi.fn<(details: ActionMenuCloseDetails) => void>();
+    const { unmount } = render(
+      <ActionMenuProvider>
+        <Consumer onClose={onClose} />
+      </ActionMenuProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "打开菜单" }));
+    await waitFor(() => expect(screen.getByRole("dialog", { name: "订单操作" })).toBeTruthy());
+
+    unmount();
+    expect(onClose).toHaveBeenCalledWith({ reason: "programmatic" });
+  });
 });

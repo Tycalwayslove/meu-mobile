@@ -16,6 +16,13 @@ import {
 import type { EllipsisDirection, EllipsisProps } from "./types";
 
 type EllipsisStyle = CSSProperties & { "--meu-ellipsis-rows": number };
+type EllipsisMeasurement = {
+  collapsedContent: string;
+  content: string;
+  direction: EllipsisDirection;
+  ellipsed: boolean;
+  rows: number;
+};
 
 function buildCandidate(chars: string[], count: number, direction: EllipsisDirection) {
   if (count >= chars.length) return chars.join("");
@@ -45,13 +52,19 @@ export function Ellipsis({
   style,
   ...props
 }: EllipsisProps) {
-  const safeRows = Math.max(1, Math.trunc(rows) || 1);
+  const safeRows = Number.isFinite(rows) ? Math.max(1, Math.trunc(rows)) : 1;
   const controlled = expandedProp !== undefined;
   const [uncontrolledExpanded, setUncontrolledExpanded] = useState(defaultExpanded);
   const expanded = controlled ? expandedProp : uncontrolledExpanded;
-  const [ellipsed, setEllipsed] = useState(false);
-  const [measured, setMeasured] = useState(false);
-  const [collapsedContent, setCollapsedContent] = useState(content);
+  const [measurement, setMeasurement] = useState<EllipsisMeasurement | null>(null);
+  const measured = Boolean(
+    measurement &&
+    measurement.content === content &&
+    measurement.direction === direction &&
+    measurement.rows === safeRows
+  );
+  const ellipsed = measured && measurement ? measurement.ellipsed : false;
+  const collapsedContent = measured && measurement ? measurement.collapsedContent : content;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const measureRef = useRef<HTMLDivElement | null>(null);
   const measureTextRef = useRef<HTMLSpanElement | null>(null);
@@ -67,6 +80,7 @@ export function Ellipsis({
     if (!root || !mirror || !mirrorText) return;
 
     let frame = 0;
+    let disposed = false;
     function runMeasure() {
       if (!root || !mirror || !mirrorText) return;
       const width = root.clientWidth;
@@ -82,9 +96,13 @@ export function Ellipsis({
       const needsEllipsis = mirror.offsetHeight > maxHeight;
 
       if (!needsEllipsis) {
-        setCollapsedContent(content);
-        setEllipsed(false);
-        setMeasured(true);
+        setMeasurement({
+          collapsedContent: content,
+          content,
+          direction,
+          ellipsed: false,
+          rows: safeRows
+        });
         return;
       }
 
@@ -98,12 +116,17 @@ export function Ellipsis({
         if (mirror.offsetHeight <= maxHeight) low = middle;
         else high = middle - 1;
       }
-      setCollapsedContent(buildCandidate(chars, low, direction));
-      setEllipsed(true);
-      setMeasured(true);
+      setMeasurement({
+        collapsedContent: buildCandidate(chars, low, direction),
+        content,
+        direction,
+        ellipsed: true,
+        rows: safeRows
+      });
     }
 
     function scheduleMeasure() {
+      if (disposed) return;
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(runMeasure);
     }
@@ -116,6 +139,7 @@ export function Ellipsis({
     if (document.fonts) void document.fonts.ready.then(scheduleMeasure);
 
     return () => {
+      disposed = true;
       window.cancelAnimationFrame(frame);
       if (observer) observer.disconnect();
       if (!observer) window.removeEventListener("resize", scheduleMeasure);
@@ -128,7 +152,8 @@ export function Ellipsis({
     if (onEllipsisChange) onEllipsisChange(ellipsed);
   }, [ellipsed, measured, onEllipsisChange]);
 
-  const showAction = ellipsed && (expanded ? Boolean(collapseText) : Boolean(expandText));
+  const displayEllipsed = measured ? ellipsed : Boolean(measurement && measurement.ellipsed);
+  const showAction = displayEllipsed && (expanded ? Boolean(collapseText) : Boolean(expandText));
   const visualContent = expanded ? content : collapsedContent;
   const classes = className ? `${ellipsisRoot} ${className}` : ellipsisRoot;
 
@@ -144,7 +169,9 @@ export function Ellipsis({
       style={resolvedStyle}
       data-meu-component="ellipsis"
       data-direction={direction}
-      data-state={expanded ? "expanded" : ellipsed ? "collapsed" : "complete"}
+      data-state={
+        expanded ? "expanded" : !measured ? "pending" : ellipsed ? "collapsed" : "complete"
+      }
     >
       <VisuallyHidden>{content}</VisuallyHidden>
       <span

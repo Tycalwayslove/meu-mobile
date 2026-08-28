@@ -25,7 +25,8 @@ export const list = style({
   overflowX: "hidden",
   overflowY: "auto",
   background: "var(--meu-color-subtle)",
-  borderRight: "1px solid var(--meu-color-border)"
+  borderInlineEnd: "1px solid var(--meu-color-border)",
+  WebkitOverflowScrolling: "touch"
 });
 
 export const item = recipe({
@@ -50,8 +51,11 @@ export const item = recipe({
     textAlign: "center",
     cursor: "pointer",
     WebkitTapHighlightColor: "transparent",
+    "@media": {
+      "(forced-colors: active)": { borderBlockEnd: "1px solid CanvasText" }
+    },
     selectors: {
-      "&:focus": {
+      "&:focus-visible": {
         zIndex: 2,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -2
@@ -64,16 +68,24 @@ export const item = recipe({
         color: "var(--meu-color-ink)",
         background: "var(--meu-color-surface)",
         fontWeight: 600,
+        "@media": {
+          "(forced-colors: active)": {
+            color: "HighlightText",
+            background: "Highlight",
+            outline: "2px solid Highlight",
+            outlineOffset: -3
+          }
+        },
         selectors: {
           "&::before": {
             position: "absolute",
             top: 10,
             bottom: 10,
-            left: 0,
+            insetInlineStart: 0,
             width: 3,
             content: "",
             background: "var(--meu-color-accent)",
-            borderRadius: "0 var(--meu-radius-round) var(--meu-radius-round) 0"
+            borderRadius: "var(--meu-radius-round)"
           }
         }
       },
@@ -90,7 +102,8 @@ export const item = recipe({
 export const label = style({
   minWidth: 0,
   overflow: "hidden",
-  textOverflow: "ellipsis"
+  textOverflow: "ellipsis",
+  overflowWrap: "anywhere"
 });
 
 export const badge = style({
@@ -115,9 +128,10 @@ export const panel = style({
   padding: "var(--meu-space-4)",
   outline: "none",
   selectors: {
-    "&:focus": {
+    "&:focus-visible": {
       outline: "2px solid var(--meu-color-accent)",
       outlineOffset: -2
     }
-  }
+  },
+  "@media": { "(forced-colors: active)": { border: "1px solid CanvasText" } }
 });

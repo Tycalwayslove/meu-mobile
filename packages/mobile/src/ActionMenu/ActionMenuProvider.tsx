@@ -76,6 +76,9 @@ export function ActionMenuProvider({ children }: ActionMenuProviderProps) {
     () => () => {
       removeTimersRef.current.forEach((timer) => window.clearTimeout(timer));
       removeTimersRef.current.clear();
+      closeCallbacksRef.current.forEach((onClose) => {
+        if (onClose) onClose({ reason: "programmatic" });
+      });
       closeCallbacksRef.current.clear();
       activeIdsRef.current.clear();
     },

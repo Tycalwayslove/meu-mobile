@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { ThemeProvider } from "../ConfigProvider";
 import { Image } from "./Image";
 
 const meta = {
@@ -18,5 +19,28 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Loaded: Story = {};
-export const Fallback: Story = { args: { src: "", alt: "图片加载失败" } };
+export const Fallback: Story = {
+  args: { src: "/missing-image.jpg", alt: "图片加载失败", fallback: "暂时无法显示图片" },
+  play: async ({ canvasElement }) => {
+    const image = canvasElement.querySelector("img");
+    if (!image) throw new window.Error("Expected Image img element");
+    image.dispatchEvent(new window.Event("error", { bubbles: true }));
+    await Promise.resolve();
+    const content = canvasElement.textContent;
+    if (!content || !content.includes("暂时无法显示图片")) {
+      throw new window.Error("Image did not expose its fallback after an error");
+    }
+  }
+};
 export const Lazy: Story = { args: { loading: "lazy" } };
+export const LightAndDark: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {(["light", "dark"] as const).map((theme) => (
+        <ThemeProvider key={theme} theme={theme} style={{ padding: 16 }}>
+          <Image src="" alt={`${theme} 图片不可用`} width={280} height={160} radius="surface" />
+        </ThemeProvider>
+      ))}
+    </div>
+  )
+};

@@ -21,6 +21,7 @@ import { cloneElement, useId, useState, useSyncExternalStore } from "react";
 import type { CSSProperties } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useControllableOpen } from "../internal/useControllableOpen";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import { arrow as arrowClass, floating } from "./Popover.css";
@@ -146,9 +147,10 @@ export function Popover({
     tabIndex: -1
   });
   const referenceHidden = Boolean(middlewareData.hide && middlewareData.hide.referenceHidden);
-  const classes = className
-    ? `${floating({ state: visualState })} ${className}`
-    : floating({ state: visualState });
+  const configBoundary = getConfigBoundaryProps(config);
+  const classes = [floating({ state: visualState }), configBoundary.className, className]
+    .filter(Boolean)
+    .join(" ");
   const panelStyle: CSSProperties = {
     ...style,
     ...floatingStyles,
@@ -157,18 +159,19 @@ export function Popover({
   const panel = (
     <div
       {...floatingProps}
+      {...configBoundary}
       ref={floatingRef}
       className={classes}
       style={panelStyle}
       hidden={hidden}
-      lang={config.locale}
       data-meu-component="popover"
       data-meu-focus-branch={triggerId}
-      data-meu-theme={config.theme}
+      data-offset={resolvedOffset}
       data-placement={actualPlacement}
       data-positioned={isPositioned ? "true" : "false"}
       data-reference-hidden={referenceHidden ? "true" : undefined}
       data-state={visualState}
+      data-viewport-padding={resolvedViewportPadding}
     >
       {arrow ? (
         <FloatingArrow

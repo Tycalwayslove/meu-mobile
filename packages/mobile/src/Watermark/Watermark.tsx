@@ -76,14 +76,24 @@ export function Watermark({
     };
     const observer = new MutationObserver((records) => {
       observer.disconnect();
+      let tampered = false;
       for (const record of records) {
+        if (record.target === container) {
+          if (Array.from(record.removedNodes).includes(watermark)) {
+            container.appendChild(watermark);
+            tampered = true;
+          }
+          continue;
+        }
         if (record.type === "attributes" && record.attributeName) {
           const target = record.target as Element;
           if (record.oldValue === null) target.removeAttribute(record.attributeName);
           else target.setAttribute(record.attributeName, record.oldValue);
+          tampered = true;
         }
         if (record.type === "characterData" && record.oldValue !== null) {
           record.target.nodeValue = record.oldValue;
+          tampered = true;
         }
         if (record.type === "childList") {
           for (const added of Array.from(record.addedNodes)) {
@@ -94,9 +104,10 @@ export function Watermark({
               record.target.insertBefore(removed, record.nextSibling);
             }
           }
+          tampered = true;
         }
       }
-      if (onRemove) onRemove();
+      if (tampered && onRemove) onRemove();
       observe(observer);
     });
     observe(observer);

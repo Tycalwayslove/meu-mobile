@@ -24,7 +24,9 @@ export const title = style({
   color: "var(--meu-color-ink)",
   fontSize: 16,
   fontWeight: 700,
-  lineHeight: 1.4
+  lineHeight: 1.4,
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const description = style({
@@ -49,9 +51,9 @@ export const actionButton = style({
   padding: "var(--meu-space-3) var(--meu-space-5)",
   borderRadius: 0,
   background: "var(--meu-color-surface)",
-  textAlign: "left",
+  textAlign: "start",
   selectors: {
-    "&:focus": {
+    "&:focus-visible": {
       zIndex: 1,
       outlineOffset: -3
     },
@@ -66,12 +68,13 @@ export const actionContent = style({
   minWidth: 0,
   width: "100%",
   lineHeight: 1.35,
-  textAlign: "left"
+  textAlign: "start"
 });
 
 export const actionLabel = style({
   minWidth: 0,
-  overflowWrap: "anywhere"
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const actionDescription = style({
@@ -79,7 +82,8 @@ export const actionDescription = style({
   fontSize: 13,
   fontWeight: 400,
   lineHeight: 1.4,
-  overflowWrap: "anywhere"
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const cancelGroup = style({

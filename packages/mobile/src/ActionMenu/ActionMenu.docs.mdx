@@ -1,0 +1,137 @@
+---
+name: ActionMenu
+slug: action-menu
+package: "@meu/mobile"
+exports: [ActionMenu, ActionMenuProvider, useActionMenu]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "187:123"
+storyIds:
+  [
+    feedback-actionmenu--default,
+    feedback-actionmenu--with-description-and-danger,
+    feedback-actionmenu--async-action,
+    feedback-actionmenu--without-visible-title,
+    feedback-actionmenu--provider-scoped
+  ]
+source: packages/mobile/src/ActionMenu
+---
+
+# ActionMenu
+
+## 当前能力
+
+移动端底部模态动作面板，支持普通/危险分组、危险操作强制 Dialog 二次确认、异步串行回调、失败留场、取消/Mask/Escape/action 原因、Portal/焦点/滚动锁/安全区，以及 Provider 作用域命令式 show/clear。
+
+## 何时使用
+
+用于由明确用户意图触发的 2–4 个上下文动作，例如分享、复制和删除。
+
+## 何时不要使用
+
+它不是 menu/menuitem 复合控件，不用于选择态、子菜单或大量选项；长流程用 BottomSheet，选择用 Picker，单一确认直接用 Dialog。
+
+## 结构与状态
+
+`Popup[role=dialog] → ActionMenu root → header + neutral group + danger group + cancel group`；危险/显式 confirmation 会叠加 Dialog。状态包括 open/closed、pending action、confirmation。
+
+## 基础用法
+
+```tsx
+<ActionMenu
+  open={open}
+  title="订单操作"
+  actions={[
+    { key: "copy", label: "复制订单号" },
+    { key: "delete", label: "删除", tone: "danger" }
+  ]}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+传 open 即受控，否则使用 defaultOpen。`ActionMenuProvider/useActionMenu` 提供 show/controller.close/clear，保留当前 React tree 的主题、locale、Portal，并在 Provider 卸载时以 programmatic 原因结算 active controller。
+
+## 表单集成
+
+不绑定字段；动作回调可以提交业务表单，但 pending、失败与关闭由返回值契约决定。长表单不要放入 ActionMenu。
+
+## Props
+
+actions key 必须唯一；普通项保持顺序，danger 项移到独立组且始终确认。cancelText 默认本地化，传 null 隐藏。closeOnAction/Mask/Escape、lockScroll、restoreFocus、safeArea 默认 true；异步期间所有关闭入口禁用，外部关闭会废弃旧 token，重开后不会被旧 Promise 关闭。
+
+## Events
+
+执行固定为 `action.onPress → onAction`；任一步 false/reject 保持打开，reject 交给 onActionError。成功再按 item.closeOnPress 和组件 closeOnAction 发布 `{reason:"action",actionKey}`；其他原因是 mask/escape/cancel。
+
+## Ref 与命令式方法
+
+ref 指向动作内容根；模态 panel 由 Popup 管理。Provider API 为 `show(options):controller` 与 `clear()`；options.onClose 还可收到 programmatic/clear。
+
+## 键盘操作
+
+Tab 在最上层模态内循环；原生按钮支持 Enter/Space；Escape 在无 pending/confirmation 时关闭。确认 Dialog 默认聚焦安全取消项。
+
+## 触摸与手势
+
+每个动作至少 56px 高；不提供拖拽和 snap，避免与短动作选择混淆。Mask 点击默认允许，但 pending 时阻止。
+
+## 无障碍
+
+外层为有名称的 modal dialog，操作项为 native button 而非 menuitem；图标装饰，描述为可读文本。pending 使用 aria-busy 并禁用其他按钮。
+
+## 动效
+
+复用 Popup/Dialog 的 transform/opacity 与 reduced-motion；ActionMenu 自身不添加布局动画。
+
+## 主题与定制
+
+使用 surface/subtle/border/ink/muted/Button tokens；逻辑文本对齐支持 RTL，forced-colors 由 Popup/Button/Dialog 共同覆盖。
+
+## SSR 与 Next.js
+
+声明式 open 可 SSR 输出稳定 modal/action groups；Provider 首屏无记录，不使用模块级 createRoot。hydration 后 Portal 保持 Context。
+
+## RTL 与国际化
+
+动作分组不反转业务顺序，文本使用逻辑 start；取消与确认安全默认文案支持 zh-CN/en-US。
+
+## 浏览器与 WebView
+
+基于 Popup/Dialog/Button 原语，兼容 Chrome/WebView 70+、iOS 13+；长标识符提供 `word-break: break-word` 旧内核回退与现代 `overflow-wrap: anywhere`。真实 VoiceOver 双层模态切换待统一验证。
+
+## 边界情况与已知限制
+
+建议含取消不超过 4 项但不强制截断；调用方必须保证 key 唯一。无 onActionError 的 reject 保留 rejected promise；复杂重试界面应转 BottomSheet。
+
+## 性能预算
+
+O(actions) 分组；关闭 Provider 记录仅为退出动画短暂保留。confirmation 仅在请求时创建。
+
+## 测试证据
+
+- Unit: 语义/分组/焦点、pending 跨关闭重开隔离、Popup Portal RTL/motion、回调顺序、false/reject、强制确认、受控取消、forceMount、确认随关闭清理、Provider close/clear/unmount
+- SSR/hydration: `ActionMenu.ssr.test.tsx`；hydration 专测待补
+- Axe / 双引擎 / Chromatic / 真机读屏: 最终统一门禁
+
+## V2 优化记录
+
+### 待优化
+
+补 VoiceOver/TalkBack 双层模态、极长描述、Provider 多栈和慢网失败 Story 运行证据。
+
+### 已完成
+
+冻结底部动作面板而非 menu 语义，补危险确认、pending 全路径阻断、关闭同步清理、Provider 卸载结算、RTL、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                           | 迁移说明    |
+| ---------- | ------ | -------- | ------------------------------ | ----------- |
+| 2026-08-29 | 未发布 | behavior | 动作、确认、生命周期与文档加固 | 无 API 破坏 |

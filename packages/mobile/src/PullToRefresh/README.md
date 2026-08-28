@@ -1,5 +1,7 @@
 # PullToRefresh
 
+永久事实源见 [PullToRefresh.docs.mdx](./PullToRefresh.docs.mdx)。
+
 为现有页面或滚动容器增加下拉刷新状态，不创建新的滚动容器，也不绑定请求库。
 
 ```tsx

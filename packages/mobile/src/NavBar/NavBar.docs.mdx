@@ -1,0 +1,140 @@
+---
+name: NavBar
+slug: nav-bar
+package: "@meu/mobile"
+exports: [NavBar]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "111:673"
+storyIds:
+  [
+    navigation-navbar--default,
+    navigation-navbar--with-actions,
+    navigation-navbar--borderless,
+    navigation-navbar--safe-area,
+    navigation-navbar--back-action,
+    navigation-navbar--long-title-rtl
+  ]
+source: packages/mobile/src/NavBar
+---
+
+# NavBar
+
+## 当前能力
+
+普通文档流 header、视觉居中长标题、原生 back link/button、左右槽、可选底边与顶部 Safe Area；不绑定路由、history、fixed 或 sticky。
+
+## 何时使用
+
+用于移动 H5 二级页面页头。backHref 适合真实导航，onBack-only 适合业务动作。
+
+## 何时不要使用
+
+桌面站点全局导航、TabBar 一级入口或浏览器原生 chrome 不使用。需要吸顶时由页面布局容器负责 sticky 和占位。
+
+## 结构与状态
+
+`header → left(back? + slot) + title + right slot`。back 有 link/button、focus-visible、active；header 有 bordered/borderless 与 safe-area。
+
+## 基础用法
+
+```tsx
+<NavBar title={<h1>订单</h1>} backHref="/orders" right={<Button>帮助</Button>} />
+```
+
+## 受控与非受控
+
+不适用；NavBar 没有内部状态。
+
+## 表单集成
+
+back action 固定 type=button；左右业务控件遵守自身表单语义。NavBar 不提交值。
+
+## Props
+
+backHref 非空时输出 anchor；没有 href 且有 onBack 时输出 button；两者都无则不伪造控件。safeArea 只增加 `env(safe-area-inset-top)` 内边距，不定位组件。title 是 ReactNode，不自动制造标题层级。
+
+## Events
+
+onBack 接收原生 click。anchor handler 可 preventDefault 取消导航；组件先交给浏览器事件模型，不调用 history.back。
+
+## Ref 与命令式方法
+
+ref 指向 header；无 back/focus 命令式 API。
+
+## 键盘操作
+
+| 按键  | 行为                                  |
+| ----- | ------------------------------------- |
+| Tab   | 到达 back 与左右槽真实控件            |
+| Enter | 激活 back link/button                 |
+| Space | 激活 back button；link 遵守浏览器规则 |
+
+## 触摸与手势
+
+默认 back 目标至少 44×44px；组件不处理边缘返回手势或滚动。
+
+## 无障碍
+
+header 提供 banner 语义；back 有本地化 aria-label，图标隐藏。页面主标题需要调用方传适当 h1–h6，避免组件猜测文档层级。
+
+## 动效
+
+无动画，reduced-motion 不适用。
+
+## 主题与定制
+
+使用 surface/ink/border/accent/navbar-size Token；forced-colors 为 back 恢复边框。稳定入口为 bordered/safeArea/className/style/data 属性。
+
+## SSR 与 Next.js
+
+纯 props render，无 effect/browser API。可在 Next App Router Client 边界使用；路由 Link 由调用方在 left/right 组合，backHref 保持原生 anchor。
+
+## RTL 与国际化
+
+三列网格与 padding 使用逻辑方向，默认 back chevron 通过 :dir(rtl) 镜像；名称支持中英文，业务标题自行本地化。
+
+## 浏览器与 WebView
+
+Safe Area 使用带 fallback 的 env；不支持时按 0px。旧内核不支持 :dir 时仅图标方向降级，link/button 与布局可用。
+
+## 边界情况与已知限制
+
+极宽左右槽会压缩标题但保持两侧等宽轨道；业务应限制操作数量。backLabel 过长会 ellipsis。组件不判断外层是否已有 banner。
+
+## 性能预算
+
+无监听、测量或 effect，节点固定加 slots。
+
+## 测试证据
+
+- Unit: 原生 back button/link、无伪交互、本地化、取消导航、safe-area、heading slot
+- Story interaction: BackAction 验证调用方收到返回动作
+- Axe: 待 CI
+- SSR/hydration: `NavBar.ssr.test.tsx`；hydration 专测待补
+- RTL: LongTitleRTL Story
+- Reduced motion: 无动画，不适用
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 待建立
+- Real device: 待补 Safe Area 真机
+
+## V2 优化记录
+
+### 待优化
+
+补真机安全区、嵌套 landmark、长标题视觉和路由适配示例。
+
+### 已完成
+
+新增显式 safeArea，固化返回取消、标题层级边界、RTL、forced-colors 与 SSR。
+
+## 变更记录
+
+| 日期       | 版本   | 类型    | 内容                                  | 迁移说明                   |
+| ---------- | ------ | ------- | ------------------------------------- | -------------------------- |
+| 2026-08-29 | 未发布 | feature | 增加 safeArea 并完成 V2 语义/RTL 加固 | 默认 false，不改变现有布局 |

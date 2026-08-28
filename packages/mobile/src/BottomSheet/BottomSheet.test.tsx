@@ -2,6 +2,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { BottomSheet } from "./BottomSheet";
 
 function setViewportHeight(height: number) {
@@ -154,5 +155,64 @@ describe("BottomSheet", () => {
     expect(layer.hidden).toBe(true);
     expect(screen.queryByRole("dialog", { name: "保活面板" })).toBeNull();
     expect(screen.queryByRole("button", { name: "调整面板高度" })).toBeNull();
+  });
+
+  it("normalizes a removed uncontrolled snap point permanently", async () => {
+    setViewportHeight(800);
+    const { rerender } = render(
+      <BottomSheet open title="动态高度" defaultSnapPoint={0.75} snapPoints={[0.25, 0.75]}>
+        内容
+      </BottomSheet>
+    );
+    const sheet = screen.getByRole("dialog", { name: "动态高度" });
+    await waitFor(() => expect(sheet.getAttribute("data-snap-point")).toBe("0.75"));
+
+    rerender(
+      <BottomSheet open title="动态高度" defaultSnapPoint={0.75} snapPoints={[0.25]}>
+        内容
+      </BottomSheet>
+    );
+    expect(sheet.getAttribute("data-snap-point")).toBe("0.25");
+
+    rerender(
+      <BottomSheet open title="动态高度" defaultSnapPoint={0.75} snapPoints={[0.25, 0.75]}>
+        内容
+      </BottomSheet>
+    );
+    expect(sheet.getAttribute("data-snap-point")).toBe("0.25");
+  });
+
+  it("keeps numeric titles and localizes the handle position description", async () => {
+    setViewportHeight(800);
+    render(
+      <ConfigProvider locale="en-US">
+        <BottomSheet open title={0} snapPoints={[0.5]}>
+          Content
+        </BottomSheet>
+      </ConfigProvider>
+    );
+    expect(screen.getByRole("dialog", { name: "0" })).toBeTruthy();
+    const handle = screen.getByRole("button", { name: "Adjust sheet height" });
+    await waitFor(() => {
+      const descriptionId = handle.getAttribute("aria-describedby");
+      const description = descriptionId ? document.getElementById(descriptionId) : null;
+      expect(description && description.textContent).toBe("50%, position 1 of 1");
+    });
+  });
+
+  it("copies direction, theme and reduced motion across the default body portal", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <BottomSheet open title="Portal contract">
+          Content
+        </BottomSheet>
+      </ConfigProvider>
+    );
+    const layer = document.body.querySelector('[data-meu-overlay-layer="bottom-sheet"]');
+    if (!(layer instanceof HTMLElement)) throw new Error("Expected BottomSheet layer");
+    expect(layer.dir).toBe("rtl");
+    expect(layer.lang).toBe("en-US");
+    expect(layer.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(layer.getAttribute("data-meu-theme")).toBe("dark");
   });
 });

@@ -1,0 +1,144 @@
+---
+name: PullToRefresh
+slug: pull-to-refresh
+package: "@meu/mobile"
+exports: [PullToRefresh]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "289:155"
+storyIds:
+  [
+    gesture-pulltorefresh--default,
+    gesture-pulltorefresh--disabled,
+    gesture-pulltorefresh--custom-indicator
+  ]
+source: packages/mobile/src/PullToRefresh
+---
+
+# PullToRefresh
+
+## 当前能力
+
+- 增强现有滚动边界，不创建固定高度或新滚动容器；默认检测最近可滚动祖先是否位于顶部。
+- 状态为 idle、pulling、ready、refreshing、complete；阈值、阻尼、最大距离和完成停留均归一化。
+- 单指纵向 Touch Events；横向、反向、多指、touchcancel、禁用切换和卸载都会交还或复位。
+- focus 时显现的 44px 原生刷新按钮、busy 语义、原子 live status、失败回调与重复请求锁。
+
+## 何时使用
+
+用于移动列表或信息流的显式刷新增强；请求缓存、错误反馈和内容状态仍由业务持有。
+
+## 何时不要使用
+
+桌面唯一刷新入口、无滚动上下文、自动轮询或分页加载应使用普通 Button、查询策略或 InfiniteList。
+
+## 结构与状态
+
+root → focus-visible refresh button → status indicator → translated content。状态机 idle → pulling → ready → refreshing → complete → idle；短拉、取消和失败回到 idle。
+
+## 基础用法
+
+```tsx
+<PullToRefresh onRefresh={() => query.refetch()}>
+  <OrderList />
+</PullToRefresh>
+```
+
+## 受控与非受控
+
+不适用。瞬时手势和请求状态由组件持有；业务数据与错误由调用方持有。
+
+## 表单集成
+
+不适用。刷新不会提交、重置或修改表单字段。
+
+## Props
+
+API 表由 `PullToRefreshProps` 生成。`threshold/maxPullDistance/completeDelay/resistance` 会处理 NaN、Infinity、负值和倒置范围；`canPull` 用于复杂宿主边界判断。
+
+## Events
+
+`onStatusChange(status, details)` 只在状态实际变化时同步触发；真实刷新阶段带 `trigger: pull | keyboard`。`onRefresh` 同步抛出或 reject 时调用 `onRefreshError(error)` 并复位；事件不可取消。
+
+## Ref 与命令式方法
+
+ref 指向根 `HTMLDivElement`；不公开命令式刷新，业务主动刷新应直接调用请求层。
+
+## 键盘操作
+
+| 按键          | 行为                              |
+| ------------- | --------------------------------- |
+| Tab           | 聚焦隐藏到 focus 时显现的刷新按钮 |
+| Enter / Space | 通过原生 button 开始一次刷新      |
+
+## 触摸与手势
+
+只在单指、idle、滚动边界顶部记录起点；4px 后确认，横向意图不阻止滚动。确认向下后 non-passive touchmove 阻止默认滚动。多指、反向、touchcancel 和 disabled 切换取消；越过 resisted threshold 松手才刷新。
+
+## 无障碍
+
+手势不是唯一入口；原生 button 关联内容，refreshing 标记根和内容 `aria-busy`。indicator 使用 `role=status`、polite、atomic。失败的可操作提示由 `onRefreshError` 调用方提供。
+
+## 动效
+
+indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion token。reduced-motion 压缩到 1ms。
+
+## 主题与定制
+
+稳定入口为 `renderIndicator`、`actionLabel`、根 style/className 和全局 Token。自定义 indicator 不得放交互内容。forced-colors 保留替代按钮边界。
+
+## SSR 与 Next.js
+
+组件是 client component，但初始 idle DOM 可服务端确定输出；render 不读取 window/document。`onRefresh` 与自定义 renderer 应保持 hydration 前结构稳定。
+
+## RTL 与国际化
+
+纵向手势不随 RTL 改变。默认中英文文案来自 ConfigProvider；`actionLabel/renderIndicator` 可覆盖。
+
+## 浏览器与 WebView
+
+使用 iOS 13 和 Chrome/WebView 70 已支持的 Touch Events、passive listener、Promise、transform 与 overscroll-behavior；后者在部分旧 iOS 只作渐进增强，确认手势后的 preventDefault 是仲裁事实源。尚无目标 App 真机证明。
+
+## 边界情况与已知限制
+
+- 不拥有滚动容器；shadow root、iframe 或自定义滚动模型必须传 `canPull`。
+- 不提供 AbortSignal；请求取消由 transport 管理，卸载后只忽略结果。
+- complete 期间允许再次刷新；refreshing 期间严格去重。
+
+## 性能预算
+
+每次 touchmove 只更新距离和必要状态；自定义 indicator 应保持轻量。组件不观察 DOM 尺寸或列表数据。
+
+## 测试证据
+
+- Unit: `PullToRefresh.test.tsx`（阈值、短拉、边界、键盘、失败、多指/cancel/disabled）。
+- Story interaction: `PullToRefresh.stories.tsx` 已编写默认刷新按钮 play；runner 待执行。
+- Axe: 待补。
+- SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；真实 hydration 待补。
+- RTL: 纵向手势不适用；文案/排版待矩阵。
+- Reduced motion: CSS 契约已实现，浏览器断言待补。
+- Mobile Chromium/WebKit E2E: 待补滚动竞争。
+- Chromatic Light/Dark: stories 可采集，正式基线待确认。
+- Real device: 待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 补真实滚动容器的 Chromium/WebKit E2E、axe 与 hydration。
+- 验证目标 iOS WKWebView 的 overscroll/rubber-band。
+
+### 已完成
+
+- 固化滚动边界、方向锁、异常参数、请求锁、失败/取消/卸载清理、原生替代、live/busy、reduced-motion 与 SSR。
+
+## 变更记录
+
+| 日期       | 版本  | 类型      | 内容                                         | 迁移说明     |
+| ---------- | ----- | --------- | -------------------------------------------- | ------------ |
+| 2026-08-29 | 0.1.0 | hardening | 完成触摸仲裁、请求状态、键盘替代与兼容事实源 | 无破坏性变更 |

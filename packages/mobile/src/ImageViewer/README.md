@@ -1,5 +1,7 @@
 # ImageViewer
 
+完整、永久的组件契约与测试证据见 [ImageViewer.docs.mdx](./ImageViewer.docs.mdx)。
+
 用于商品图、评价图和凭证图片的全屏预览。单图与多图使用同一 API，并保留关闭、前后切换、缩放与复位的
 原生按钮，手势不是唯一操作路径。
 

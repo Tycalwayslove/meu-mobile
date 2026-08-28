@@ -24,7 +24,7 @@ export const pendingClamp = style({
 export const measure = style({
   position: "absolute",
   top: 0,
-  left: 0,
+  insetInlineStart: 0,
   width: "100%",
   visibility: "hidden",
   pointerEvents: "none",
@@ -48,8 +48,12 @@ export const action = style({
   minWidth: 44,
   minHeight: 44,
   boxSizing: "border-box",
-  margin: "-10px -4px -10px 0",
-  padding: "0 4px 0 8px",
+  marginBlock: -10,
+  marginInlineStart: 0,
+  marginInlineEnd: -4,
+  paddingBlock: 0,
+  paddingInlineStart: 8,
+  paddingInlineEnd: 4,
   color: "var(--meu-color-accent)",
   background: "transparent",
   border: 0,
@@ -61,7 +65,13 @@ export const action = style({
   verticalAlign: "middle",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
+    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
     "&:active": { color: "var(--meu-color-accent-pressed)" }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      color: "LinkText",
+      border: "1px solid ButtonText"
+    }
   }
 });

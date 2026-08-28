@@ -1,5 +1,7 @@
 # ImageUploader
 
+完整、永久的组件契约与测试证据见 [ImageUploader.docs.mdx](./ImageUploader.docs.mdx)。
+
 用于商品图、评价图和凭证图片的选择、上传、失败重试、删除与预览。组件只管理上传任务和展示，网络传输由
 调用方通过 `upload` 注入。
 

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
 import { Button } from "../Button";
+import { ThemeProvider } from "../ConfigProvider";
 import { ImageViewer } from "./ImageViewer";
 
 const images = [
@@ -71,4 +72,33 @@ export const Error: Story = {
     open: true,
     images: [{ alt: "加载失败的商品图", src: "/missing-image.jpg" }]
   }
+};
+
+export const KeyboardInteraction: Story = {
+  args: { images },
+  render: () => <Preview />,
+  play: async ({ canvasElement }) => {
+    const trigger = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!trigger) throw new window.Error("Expected ImageViewer trigger");
+    trigger.click();
+    await Promise.resolve();
+    const dialog = document.querySelector<HTMLElement>('[data-meu-component="image-viewer"]');
+    if (!dialog) throw new window.Error("ImageViewer did not open");
+    dialog.dispatchEvent(new window.KeyboardEvent("keydown", { key: "+", bubbles: true }));
+    if (dialog.getAttribute("data-scale") !== "1.5") {
+      throw new window.Error("ImageViewer keyboard zoom did not update scale");
+    }
+    dialog.dispatchEvent(new window.KeyboardEvent("keydown", { key: "0", bubbles: true }));
+    const close = document.querySelector<HTMLButtonElement>("button[aria-label='关闭图片预览']");
+    if (close) close.click();
+  }
+};
+
+export const DarkTheme: Story = {
+  args: { images },
+  render: () => (
+    <ThemeProvider theme="dark">
+      <ImageViewer open images={images} renderFooter={(item) => item.alt} />
+    </ThemeProvider>
+  )
 };

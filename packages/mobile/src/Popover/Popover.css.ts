@@ -21,6 +21,8 @@ export const floating = recipe({
     fontFamily: "var(--meu-font-ui)",
     fontSize: "var(--meu-font-label-font-size)",
     lineHeight: "var(--meu-font-label-line-height)",
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
     outline: "none",
     transform: "scale(0.96)",
     opacity: 0,
@@ -38,6 +40,12 @@ export const floating = recipe({
       "(prefers-reduced-motion: reduce)": {
         transform: "none",
         transitionDuration: "1ms"
+      },
+      "(forced-colors: active)": {
+        color: "CanvasText",
+        background: "Canvas",
+        borderColor: "CanvasText",
+        boxShadow: "none"
       }
     }
   },
@@ -58,5 +66,8 @@ export const floating = recipe({
 export const arrow = style({
   fill: "var(--meu-color-surface)",
   stroke: "var(--meu-color-border)",
-  pointerEvents: "none"
+  pointerEvents: "none",
+  "@media": {
+    "(forced-colors: active)": { fill: "Canvas", stroke: "CanvasText" }
+  }
 });

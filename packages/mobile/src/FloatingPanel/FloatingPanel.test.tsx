@@ -215,4 +215,96 @@ describe("FloatingPanel", () => {
     drag(handle, 300, 50);
     expect(onHeightChange).not.toHaveBeenCalled();
   });
+
+  it("disables the handle when normalization leaves fewer than two anchors", () => {
+    const onHeightChange = vi.fn();
+    const { rerender } = render(
+      <FloatingPanel anchors={[240, 240, Number.NaN]} onHeightChange={onHeightChange}>
+        Static content
+      </FloatingPanel>
+    );
+    const handle = screen.getByRole<HTMLButtonElement>("button", {
+      name: "调整浮动面板高度"
+    });
+    expect(handle.disabled).toBe(true);
+    fireEvent.click(handle);
+    fireEvent.keyDown(handle, { key: "End" });
+    expect(onHeightChange).not.toHaveBeenCalled();
+
+    rerender(
+      <FloatingPanel anchors={[]} onHeightChange={onHeightChange}>
+        Static content
+      </FloatingPanel>
+    );
+    expect(handle.disabled).toBe(true);
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
+
+  it("cancels a drag when pointer capture is lost", () => {
+    const onHeightChange = vi.fn();
+    render(
+      <FloatingPanel anchors={[200, 400, 600]} defaultHeight={400} onHeightChange={onHeightChange}>
+        内容
+      </FloatingPanel>
+    );
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+    preparePointerCapture(handle);
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientX: 20,
+      clientY: 300,
+      isPrimary: true,
+      pointerId: 7,
+      timeStamp: 0
+    });
+    fireEvent.pointerMove(handle, {
+      clientX: 20,
+      clientY: 180,
+      isPrimary: true,
+      pointerId: 7,
+      timeStamp: 100
+    });
+    const panel = handle.closest<HTMLElement>('[data-meu-component="floating-panel"]');
+    if (!panel) throw new Error("Expected FloatingPanel root");
+    expect(panel.getAttribute("data-dragging")).toBe("true");
+    fireEvent.lostPointerCapture(handle, { pointerId: 7 });
+    expect(panel.getAttribute("data-dragging")).toBeNull();
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
+
+  it("does not collapse from content and disables imperative requests", () => {
+    const panelRef = { current: null as FloatingPanelRef | null };
+    const onHeightChange = vi.fn();
+    const { container, rerender } = render(
+      <FloatingPanel
+        ref={panelRef}
+        anchors={[200, 400, 600]}
+        defaultHeight={400}
+        onHeightChange={onHeightChange}
+      >
+        非交互内容
+      </FloatingPanel>
+    );
+    const content = container.querySelector<HTMLElement>("[data-content-drag='true']")!;
+    drag(content, 200, 320);
+    expect(onHeightChange).not.toHaveBeenCalled();
+    expect(root(container).getAttribute("data-current-height")).toBe("400");
+
+    rerender(
+      <FloatingPanel
+        ref={panelRef}
+        anchors={[200, 400, 600]}
+        defaultHeight={400}
+        disabled
+        onHeightChange={onHeightChange}
+      >
+        非交互内容
+      </FloatingPanel>
+    );
+    act(() => {
+      if (panelRef.current) panelRef.current.setHeight(600);
+    });
+    expect(root(container).getAttribute("data-current-height")).toBe("400");
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
 });

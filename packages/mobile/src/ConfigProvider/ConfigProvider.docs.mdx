@@ -32,7 +32,7 @@ source: packages/mobile/src/ConfigProvider
 - `system` theme 和 motion 都通过 CSS media query 解析；渲染期间不读取 `window`、`document`、`matchMedia` 或本地存储。
 - `portalContainer` 函数仅作为惰性配置保存，ConfigProvider 渲染和 SSR 阶段不会调用它。
 
-当前为 V2 `implementation` 状态，尚未完成全部 Overlay 的跨 Portal 方向/动效传播、移动端 E2E、axe 与真机矩阵，不能标记为 commercial。
+当前为 V2 `implementation` 状态；核心 Mask/Dialog/Popup/BottomSheet/Popover 已完成跨 Portal 方向与动效传播，其余 Portal 消费者、移动端 E2E、axe 与真机矩阵仍待全库审计，不能标记为 commercial。
 
 ## 何时使用
 
@@ -121,7 +121,7 @@ Props 表由 TypeScript/TSDoc 与 API Extractor 生成。跨字段规则如下�
 - Provider 不增加 ARIA role，避免制造无意义的可访问性层级。
 - `motion="reduced"` 把进入/退出动效 Token 设为 `0ms`；`system` 通过 `prefers-reduced-motion` 自动降级。
 - `dir` 不会自动镜像有语义方向的图标；方向图标仍需由对应组件规则处理。
-- 渲染到 `document.body` 的 Portal 内容不是 Provider DOM 后代。具体 Overlay 必须显式复制 `lang`、`dir`、theme 与 motion；这项全库迁移尚未完成。
+- 渲染到 `document.body` 的 Portal 内容不是 Provider DOM 后代。核心 Overlay 通过统一 boundary helper 复制 `lang`、`dir`、theme、motion 与 motion class；新增 Portal 消费者必须复用该契约。
 
 ## 动效
 
@@ -156,7 +156,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 
 ## 边界情况与已知限制
 
-- 尚未为所有 body Portal 消费者复制 `dir` 与 `data-meu-motion`；Context 中已有值，但跨 DOM 层级的 CSS/语言继承需组件继续适配。
+- Mask/Dialog/Popup/BottomSheet/Popover 已覆盖 body Portal；ImageViewer、Picker、Toast 等其余 Portal 消费者仍需在对应批次核对并迁移统一 boundary。
 - `system` theme 不包含用户选择持久化；若产品允许手动选择，应用需保存值并在服务端提供相同初始值。
 - Context value 在配置值变化时更新；高频创建新 portal resolver 函数会使消费者重渲染，应保持函数引用稳定。
 - `className` 与 `style` 作用于新增的真实 `div`，Provider 不是无 DOM 包装器。
@@ -182,7 +182,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 
 ### 待优化
 
-- 推进所有 Overlay 在 body Portal 根节点复制 locale、dir、theme 与 motion。
+- 完成其余 Overlay 在 body Portal 根节点复用统一 locale、dir、theme 与 motion boundary。
 - 补移动 Chromium/WebKit 的 computed style、嵌套 Portal 与 hydration E2E。
 - 补 axe、强制色彩、高对比、200% 字号及 Android/iOS 真机证据。
 - 评估跨 Document/iframe Portal；在有真实业务需求前不扩展现有容器类型。

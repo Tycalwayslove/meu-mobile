@@ -4,6 +4,7 @@ import { Portal, useBodyScrollLock } from "@meu/primitives-react";
 import type { CSSProperties } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useControllableOpen } from "../internal/useControllableOpen";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import { backdrop, content as contentStyle, root } from "./Mask.css";
@@ -52,6 +53,7 @@ export function Mask({
   if (!shouldRender) return null;
 
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const configBoundary = getConfigBoundaryProps(config);
   const resolvedStyle: MaskStyle = {
     ...style,
     "--meu-mask-opacity": resolveOpacity(opacity)
@@ -61,17 +63,16 @@ export function Mask({
     <Portal container={portalContainer}>
       <div
         {...props}
+        {...configBoundary}
         ref={ref}
-        className={
-          className ? `${root({ state: visualState })} ${className}` : root({ state: visualState })
-        }
+        className={[root({ state: visualState }), configBoundary.className, className]
+          .filter(Boolean)
+          .join(" ")}
         style={resolvedStyle}
         hidden={hidden}
         aria-hidden="true"
-        lang={config.locale}
         data-dismissible={dismissible ? "true" : "false"}
         data-meu-component="mask"
-        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <button

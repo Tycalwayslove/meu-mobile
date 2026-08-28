@@ -83,6 +83,7 @@ export const actionButton = style({
   zIndex: 3,
   top: 0,
   right: 0,
+  insetInlineEnd: 0,
   display: "grid",
   width: 44,
   height: 44,
@@ -98,7 +99,16 @@ export const actionButton = style({
   WebkitTapHighlightColor: "transparent",
   selectors: {
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
-    "&:active": { background: "var(--meu-color-overlay)" }
+    "&:active": { background: "var(--meu-color-overlay)" },
+    "&:disabled": { cursor: "wait", opacity: 0.72 },
+    "[dir='rtl'] &": {
+      right: "auto",
+      left: 0,
+      borderRadius: "var(--meu-radius-control) 0 var(--meu-radius-control) 0"
+    }
+  },
+  "@media": {
+    "(forced-colors: active)": { border: "1px solid ButtonText" }
   }
 });
 
@@ -184,7 +194,10 @@ export const progressFill = style({
   background: "#FFFFFF",
   borderRadius: "inherit",
   transition: "width var(--meu-motion-enter) var(--meu-motion-ease-standard)",
-  "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+    "(forced-colors: active)": { background: "Highlight" }
+  }
 });
 
 export const retryButton = style({
@@ -200,5 +213,8 @@ export const retryButton = style({
   fontSize: 12,
   fontWeight: 650,
   cursor: "pointer",
-  selectors: { "&:focus": { outline: "2px solid #FFFFFF", outlineOffset: 2 } }
+  selectors: { "&:focus": { outline: "2px solid #FFFFFF", outlineOffset: 2 } },
+  "@media": {
+    "(forced-colors: active)": { color: "ButtonText", background: "Canvas" }
+  }
 });

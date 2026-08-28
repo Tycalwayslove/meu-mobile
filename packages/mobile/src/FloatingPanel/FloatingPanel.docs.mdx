@@ -1,0 +1,142 @@
+---
+name: FloatingPanel
+slug: floating-panel
+package: "@meu/mobile"
+exports: [FloatingPanel]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "335:215"
+storyIds:
+  [gesture-floatingpanel--bottom, gesture-floatingpanel--top, gesture-floatingpanel--disabled]
+source: packages/mobile/src/FloatingPanel
+---
+
+# FloatingPanel
+
+## 当前能力
+
+- 常驻、非模态的顶部或底部浮动面板；不创建 Mask、Portal、滚动锁或焦点圈定。
+- 正像素 anchors 会过滤、排序、去重并夹紧至 44px–visual viewport；支持受控/非受控高度。
+- 原生 44px handle 支持拖拽、点击、方向键、PageUp/PageDown、Home/End；非交互内容只辅助向更高 anchor 展开。
+- 有限速度投影；pointer cancel/lost capture、disabled 切换和卸载会清理临时拖拽状态。
+
+## 何时使用
+
+用于地图详情、行程卡片、筛选摘要等必须持续保留背景上下文的 modeless 页面。
+
+## 何时不要使用
+
+需要遮罩、关闭、焦点管理或背景不可交互时使用 BottomSheet/Dialog；普通页面区块不要固定到视口。
+
+## 结构与状态
+
+panel → handle button → scrollable body → visually hidden status。状态包括 measured、anchor index、dragging、disabled、immediate，以及 top/bottom placement。
+
+## 基础用法
+
+```tsx
+<FloatingPanel anchors={[180, 360, 620]} defaultHeight={180}>
+  <RouteDetails />
+</FloatingPanel>
+```
+
+## 受控与非受控
+
+`height` 存在即受控；交互只调用 `onHeightChange`，调用方未提交新值时仍以原值为准。非受控使用 `defaultHeight`。任意请求值映射到最近的归一化 anchor。
+
+## 表单集成
+
+不适用。面板高度不是业务字段，也不进入 FormData。
+
+## Props
+
+API 表由 `FloatingPanelProps` 生成。`anchors` 是物理像素高度；`placement` 是物理边。空值、非有限值和非正 anchor 被忽略，最终无有效 anchor 时使用视口高度的一半。
+
+## Events
+
+`onHeightChange(height, { index, reason })` 在请求不同 anchor 时同步触发；reason 为 `drag | handle | keyboard | imperative`。事件不可取消；受控调用方通过不更新 `height` 拒绝请求。
+
+## Ref 与命令式方法
+
+`nativeElement` 指向根节点；`setHeight(height, { immediate })` 请求最近 anchor。disabled 时命令式请求同样被忽略。
+
+## 键盘操作
+
+| 按键                 | 行为                          |
+| -------------------- | ----------------------------- |
+| Enter / Space        | handle 循环到下一个 anchor    |
+| Home / End           | 最低 / 最高 anchor            |
+| ArrowUp / PageUp     | bottom 面板升高；top 面板降低 |
+| ArrowDown / PageDown | bottom 面板降低；top 面板升高 |
+
+## 触摸与手势
+
+handle 在 6px 后锁定纵向，横向意图取消；pointer capture 丢失或 cancel 会回滚。内容区只在低于最高 anchor、起点非交互元素时接管向展开方向的拖拽；收起始终使用 handle。速度阈值 0.5px/ms，投影由 `inertiaFactor` 限制在 0–200ms。
+
+## 无障碍
+
+handle 是具名原生 button，关联 body 与实时高度说明；disabled 或归一化后不足两个 anchor 时使用原生 disabled，避免暴露无效操作。面板不宣称 dialog，也不移动、圈定或恢复焦点。
+
+## 动效
+
+高度由 transform 过渡；拖拽与 `immediate` 请求期间关闭过渡。reduced-motion 将过渡压缩到 1ms，中断时回到权威 anchor。
+
+## 主题与定制
+
+稳定入口为全局颜色、圆角、阴影、motion、安全区 Token 和根 `style/className`。内部 class/CSS 变量不是公开 API。forced-colors 保留 handle 边界。
+
+## SSR 与 Next.js
+
+组件是 client component。服务端输出确定的 50vh 隐藏 shell；挂载后读取 visual viewport、归一化 anchors 再显示，避免未测量位置闪现。anchors、placement 和 children 在 hydration 前必须稳定。
+
+## RTL 与国际化
+
+垂直手势不随 RTL 反转。内置中英文 handle/status 文案，业务可用 `handleLabel` 覆盖。top/bottom 是物理方向。
+
+## 浏览器与 WebView
+
+Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerHeight，pointer capture 缺失或抛错可降级。iOS 13.0–13.3 没有完整 Pointer Events，拖拽可能不可用，但原生 handle 点击和键盘仍可调整；iOS 13.4+ 才作为拖拽目标基线。尚无目标 App 真机证明。
+
+## 边界情况与已知限制
+
+- 不支持百分比/content anchor、弹簧、dismiss、嵌套面板或背景滚动锁。
+- 内容拖拽只展开；到最高 anchor 后完全交给原生滚动。
+- visual viewport resize 会重新夹紧 anchors，不伪造变更事件。
+
+## 性能预算
+
+拖拽只更新一个 transform 状态；anchors 应保持小数组。复杂 body 的渲染和列表虚拟化归调用方。
+
+## 测试证据
+
+- Unit: `FloatingPanel.test.tsx`（归一化、单 anchor 禁用、受控、速度/方向锁、cancel、disabled、键盘、ref）。
+- Story interaction: `FloatingPanel.stories.tsx` 已编写 Bottom handle 点击 play；runner 待执行。
+- Axe: 待补。
+- SSR/hydration: `FloatingPanel.ssr.test.tsx` 覆盖确定 shell；真实 hydration 待补。
+- RTL: 垂直方向不适用；排版矩阵待补。
+- Reduced motion: CSS 契约已实现，浏览器断言待补。
+- Mobile Chromium/WebKit E2E: 待补。
+- Chromatic Light/Dark: stories 可采集，正式基线待确认。
+- Real device: 待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 补 iOS 13.4+/Android WebView 的拖拽、visual viewport/键盘和滚动移交 E2E。
+- 补 axe、hydration 与主题视觉基线。
+
+### 已完成
+
+- 固化受控状态、异常 anchor、有限速度、原生 handle、内容展开边界、取消/卸载清理、reduced-motion、forced-colors 和 SSR。
+
+## 变更记录
+
+| 日期       | 版本  | 类型      | 内容                                               | 迁移说明     |
+| ---------- | ----- | --------- | -------------------------------------------------- | ------------ |
+| 2026-08-29 | 0.1.0 | hardening | 完成 modeless snap、手势取消、键盘替代与兼容事实源 | 无破坏性变更 |

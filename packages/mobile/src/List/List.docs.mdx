@@ -1,0 +1,140 @@
+---
+name: List
+slug: list
+package: "@meu/mobile"
+exports: [List]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "70:589"
+storyIds:
+  [
+    information-cell-list--card,
+    information-cell-list--plain,
+    information-cell-list--no-dividers,
+    information-cell-list--long-content-and-rtl
+  ]
+source: packages/mobile/src/List
+---
+
+# List
+
+## 当前能力
+
+List 提供具名 `role=list`、header/footer、plain/card 表面和三种分隔线，并组合独立文档化的 Cell。
+
+## 何时使用
+
+用于账户设置、订单摘要和信息分组等移动端行列表。整行导航使用 href；即时动作使用 onClick；纯展示保持静态。
+
+## 何时不要使用
+
+大量数据虚拟化使用 VirtualList；选择表单使用 Radio/Checkbox/Selector。交互 Cell 内不得再嵌套链接、按钮或表单控件。
+
+## 结构与状态
+
+`root → header? + body[role=list] → frame[role=listitem] → a|button|div + divider + footer?`。Cell 有 static、interactive、disabled、active、focus-visible；List 有 plain/card 与 inset/full/none。
+
+## 基础用法
+
+```tsx
+<List header="账户" mode="card">
+  <Cell title="地址" href="/address" />
+</List>
+```
+
+## 受控与非受控
+
+不适用；两者没有内部业务状态。
+
+## 表单集成
+
+action Cell 默认 `type=button`，不会意外提交表单；显式传 `type=submit` 才参与提交。List 不生成 name/value/FormData。
+
+## Props
+
+API 由 `ListProps` / `CellProps` 生成。非空 href 优先为 anchor；否则 clickable/onClick 为 button。header、footer、description、prefix、extra、suffix 保留数值 0。aria-label 优先于 header 的自动 aria-labelledby。
+
+## Events
+
+Cell 沿用原生 onClick。disabled button 不派发；disabled anchor 移除 href/Tab stop、阻止默认行为和冒泡，也不调用业务 onClick。
+
+## Ref 与命令式方法
+
+List ref 指向外层 div；Cell ref 是实际 a/button/div。无额外命令式 API。
+
+## 键盘操作
+
+| 按键  | 行为                                   |
+| ----- | -------------------------------------- |
+| Tab   | 只到达 enabled anchor/button           |
+| Enter | 激活 anchor 或 button                  |
+| Space | 激活 button；anchor 遵守浏览器滚动规则 |
+
+## 触摸与手势
+
+交互行最小高度 56px；使用原生点击，不拦截滚动或实现滑动。
+
+## 无障碍
+
+body 与 Cell frame 提供 list/listitem；真实交互节点保留原生语义。header 自动命名 list。箭头装饰隐藏；自定义前后槽内容若传语义节点会进入 accessible name。
+
+## 动效
+
+仅交互背景色过渡；reduced-motion 降到 1ms，无入场/退场动画。
+
+## 主题与定制
+
+使用 surface/ink/muted/border/accent 与 spacing/radius/motion Token。forced-colors 保留焦点/边界。稳定入口为 mode/divider/className/style 与 data 属性；内部 class 非 API。
+
+## SSR 与 Next.js
+
+useId 只用于 header 关联且 SSR 稳定；无 effect/browser API。Next Link 可通过业务组合，不由组件导入路由库。
+
+## RTL 与国际化
+
+间距、分隔线、文本对齐使用逻辑属性；默认 chevron 在 RTL 镜像。文案完全由调用方提供。
+
+## 浏览器与 WebView
+
+基础 flex/逻辑属性面向 Chrome/WebView 70+、iOS 13+；`:dir()` 图标镜像在旧内核可能降级为 LTR 图标，但 DOM 与操作不受影响。
+
+## 边界情况与已知限制
+
+List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获得 listitem。Cell 空 href 不视为导航。复杂尾部控件应放在静态 Cell，避免嵌套交互。
+
+## 性能预算
+
+无监听或测量，节点 O(children)。超长集合应改用虚拟化。
+
+## 测试证据
+
+- Unit: 静态/按钮/链接/disabled、list 命名、0 值 slots
+- Story interaction: Card 验证 action Cell 到业务 output 的事件链
+- Axe: 待 CI
+- SSR/hydration: `List.ssr.test.tsx` 覆盖原生结构；hydration 专测待补
+- RTL: LongContentAndRTL Story；自动视觉回归待补
+- Reduced motion: CSS 降级已实现
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 待建立
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+补 axe、双引擎、真机与嵌套内容开发期警告证据。
+
+### 已完成
+
+冻结原生根语义、disabled 链接、0 值槽位、逻辑方向、长内容、forced-colors 和 SSR 边界。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                         | 迁移说明                        |
+| ---------- | ------ | -------- | ---------------------------- | ------------------------------- |
+| 2026-08-29 | 未发布 | behavior | V2 语义、RTL、0 值和验证加固 | 现有 props 与根选择规则保持兼容 |

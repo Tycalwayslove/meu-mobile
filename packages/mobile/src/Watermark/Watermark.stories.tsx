@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 
 import { Card } from "../Card";
+import { ThemeProvider } from "../ConfigProvider";
 import { Watermark } from "./Watermark";
 
 const meuMark =
@@ -43,4 +45,45 @@ export const ImageWithFallback: Story = {
     width: 56,
     height: 56
   }
+};
+
+function DynamicContentPreview() {
+  const [revision, setRevision] = useState(1);
+  return (
+    <Watermark content="Meu dynamic">
+      <Card style={{ minHeight: 180 }}>
+        <p>业务内容版本：{revision}</p>
+        <button type="button" onClick={() => setRevision((value) => value + 1)}>
+          更新业务内容
+        </button>
+      </Card>
+    </Watermark>
+  );
+}
+
+export const DynamicContent: Story = {
+  render: () => <DynamicContentPreview />,
+  play: async ({ canvasElement }) => {
+    const button = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (button) button.click();
+    await Promise.resolve();
+    const content = canvasElement.textContent;
+    if (!content || !content.includes("业务内容版本：2")) {
+      throw new window.Error("Watermark blocked a legitimate child update");
+    }
+  }
+};
+
+export const LightAndDark: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {(["light", "dark"] as const).map((theme) => (
+        <ThemeProvider key={theme} theme={theme} style={{ padding: 16 }}>
+          <Watermark content={`Meu ${theme}`}>
+            <Card style={{ minHeight: 180 }}>主题预览</Card>
+          </Watermark>
+        </ThemeProvider>
+      ))}
+    </div>
+  )
 };

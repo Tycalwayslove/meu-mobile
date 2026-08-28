@@ -1,11 +1,20 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
-import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  Ref
+} from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { badge, item, label, list, panel, root } from "./SideNav.css";
 import type { SideNavProps } from "./types";
+
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
 
 export function SideNav({
   "aria-label": ariaLabel,
@@ -33,25 +42,58 @@ export function SideNav({
   });
   const requestedValue = controlled ? value : uncontrolledValue;
   const requestedItem = items.find((candidate) => candidate.key === requestedValue);
-  const currentValue = controlled
-    ? requestedValue
-    : requestedItem && !requestedItem.disabled
+  const normalizedValue =
+    requestedItem && !requestedItem.disabled
       ? requestedValue
       : firstEnabled
         ? firstEnabled.key
         : null;
+  const currentValue = controlled
+    ? requestedItem && !requestedItem.disabled
+      ? requestedValue
+      : null
+    : normalizedValue;
+  if (!controlled && uncontrolledValue !== normalizedValue) {
+    setUncontrolledValue(normalizedValue);
+  }
   const [focusedKey, setFocusedKey] = useState<string | null>(currentValue);
+  const rootRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const recoverFocusRef = useRef(false);
   const enabledItems = items.filter((candidate) => !candidate.disabled);
   const fallbackFocusKey = currentValue || (firstEnabled ? firstEnabled.key : null);
-  const rovingFocusKey =
-    focusedKey && enabledItems.some((candidate) => candidate.key === focusedKey)
-      ? focusedKey
-      : fallbackFocusKey;
+  const focusIsValid = enabledItems.some((candidate) => candidate.key === focusedKey);
+  if (!focusIsValid && focusedKey !== fallbackFocusKey) {
+    setFocusedKey(fallbackFocusKey);
+  }
+  const rovingFocusKey = focusIsValid && focusedKey ? focusedKey : fallbackFocusKey;
   const hasPanels = items.some((candidate) => candidate.content !== undefined);
+  const itemKeySignature = JSON.stringify(items.map((candidate) => candidate.key));
   const resolvedLabel =
     ariaLabel ||
     (!ariaLabelledBy ? (locale === "en-US" ? "Side navigation" : "侧边导航") : undefined);
+
+  useEffect(() => {
+    if (!currentValue) return;
+    const target = itemRefs.current[currentValue];
+    if (target && typeof target.scrollIntoView === "function") {
+      target.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [currentValue, itemKeySignature]);
+
+  useLayoutEffect(() => {
+    const activeElement = document.activeElement;
+    const activeKey =
+      activeElement instanceof HTMLElement ? activeElement.getAttribute("data-side-nav-key") : null;
+    const activeIsInvalid = Boolean(
+      activeKey && !enabledItems.some((candidate) => candidate.key === activeKey)
+    );
+    if ((recoverFocusRef.current || activeIsInvalid) && rovingFocusKey) {
+      const focusTarget = itemRefs.current[rovingFocusKey];
+      if (focusTarget) focusTarget.focus();
+    }
+    recoverFocusRef.current = false;
+  });
 
   function activate(
     key: string,
@@ -65,7 +107,12 @@ export function SideNav({
   function focusAndMaybeActivate(key: string, event: ReactKeyboardEvent<HTMLButtonElement>) {
     setFocusedKey(key);
     const target = itemRefs.current[key];
-    if (target) target.focus();
+    if (target) {
+      target.focus();
+      if (typeof target.scrollIntoView === "function") {
+        target.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+    }
     if (activationMode === "automatic") activate(key, event);
   }
 
@@ -100,7 +147,10 @@ export function SideNav({
   return (
     <div
       {...props}
-      ref={ref}
+      ref={(node) => {
+        rootRef.current = node;
+        assignRef(ref, node);
+      }}
       className={className ? `${classes} ${className}` : classes}
       data-meu-component="side-nav"
     >
@@ -118,6 +168,10 @@ export function SideNav({
           return (
             <button
               ref={(node) => {
+                const previousNode = itemRefs.current[candidate.key];
+                if (!node && previousNode && previousNode === document.activeElement) {
+                  recoverFocusRef.current = true;
+                }
                 itemRefs.current[candidate.key] = node;
               }}
               type="button"
@@ -128,15 +182,22 @@ export function SideNav({
               aria-controls={hasPanels ? panelId : undefined}
               aria-current={!hasPanels && active ? "page" : undefined}
               aria-selected={hasPanels ? active : undefined}
+              data-side-nav-key={candidate.key}
               tabIndex={candidate.disabled ? -1 : candidate.key === rovingFocusKey ? 0 : -1}
               onFocus={() => setFocusedKey(candidate.key)}
               onKeyDown={(event) => handleKeyDown(event, candidate.key)}
-              onClick={(event) => activate(candidate.key, event)}
+              onClick={(event) => {
+                setFocusedKey(candidate.key);
+                event.currentTarget.focus();
+                activate(candidate.key, event);
+              }}
               key={candidate.key}
             >
               <span className={label}>{candidate.label}</span>
               {candidate.badge !== undefined && candidate.badge !== null ? (
-                <span className={badge}>{candidate.badge}</span>
+                <span className={badge} aria-label={candidate.badgeLabel}>
+                  {candidate.badge}
+                </span>
               ) : null}
             </button>
           );

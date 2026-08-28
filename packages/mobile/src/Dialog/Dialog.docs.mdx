@@ -1,0 +1,131 @@
+---
+name: Dialog
+slug: dialog
+package: "@meu/mobile"
+exports: [Dialog, DialogProvider, useDialog]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "156:1019"
+storyIds: [feedback-dialog--confirm, feedback-dialog--danger, feedback-dialog--vertical-actions]
+source: packages/mobile/src/Dialog
+---
+
+# Dialog
+
+## 当前能力
+
+模态告知、确认和短交互容器，支持 alertdialog/dialog 语义、异步操作、操作失败留场、自动布局、Mask、Escape、焦点圈定/恢复、滚动锁、Portal 与 Provider 作用域命令式 API。
+
+## 何时使用
+
+用于必须明确响应的告知、二次确认或短小输入；危险操作使用 danger action，并优先聚焦较安全操作。
+
+## 何时不要使用
+
+长表单、连续流程和大量选择使用 BottomSheet/Picker；非模态锚定内容使用 Popover；短暂反馈使用 Toast。
+
+## 结构与状态
+
+`Portal → layer + Mask + panel[role=alertdialog|dialog] → content + native actions`。状态包括 open/closed、pending action、horizontal/vertical actions。
+
+## 基础用法
+
+```tsx
+<Dialog
+  open={open}
+  title="删除订单？"
+  description="删除后无法恢复。"
+  actions={[
+    { key: "cancel", label: "取消" },
+    { key: "delete", label: "删除", tone: "danger" }
+  ]}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+`open` 存在时受控，组件只发布意图；否则使用 `defaultOpen`。命令式 `alert/confirm/show` 必须放在 DialogProvider 内，保留当前 locale/theme/Portal 上下文。
+
+## 表单集成
+
+Dialog 不是字段 adapter；可在 `role="dialog"` body 中放短表单，但值、校验、提交与脏状态由业务/`@meu/form-react` 持有。操作按钮固定非 submit。
+
+## Props
+
+默认 `role=alertdialog` 且必须有 description；普通交互显式使用 `role=dialog`。`actionLayout=auto` 在 1–2 项横排、3+ 项纵排。actions key 必须唯一；`autoFocus` 优先，否则首个 enabled action。关闭 Mask 默认 false，Escape/scroll lock/focus restore 默认 true。
+
+## Events
+
+`onOpenChange` 原因是 escape、mask 或 `{reason:"action",actionKey}`。action.onPress 返回 false 或 reject 保持打开；reject 交给 onActionError，成功且 `closeOnPress!==false` 才发布关闭。
+
+## Ref 与命令式方法
+
+声明式 ref 指向 panel。`useDialog()` 提供 `alert():Promise<void>`、`confirm():Promise<boolean>`、`show():controller` 与 `clear()`；Provider 卸载会结算未完成 Promise。
+
+## 键盘操作
+
+Tab/Shift+Tab 在最上层 Dialog 内循环；Escape 在允许且无异步 pending 时关闭；原生按钮支持 Enter/Space。
+
+## 触摸与手势
+
+操作目标至少 44px；遮罩关闭默认禁用，避免移动端误触。组件无滑动手势。
+
+## 无障碍
+
+标题生成 aria-labelledby；alertdialog description 生成 aria-describedby；panel `aria-modal=true`。异步期间 `aria-busy=true` 并禁用其他入口；外部关闭会立即废弃 pending token，旧 Promise 不会污染或关闭重开的新会话。
+
+## 动效
+
+layer opacity + panel opacity/transform；reduced-motion 取消 transform 并缩短到 1ms，pending 不依赖动画。
+
+## 主题与定制
+
+使用 surface/ink/muted/border/shadow 与 Button tokens；forced-colors 使用 Canvas/CanvasText。className/style 作用于 panel。
+
+## SSR 与 Next.js
+
+Portal SSR 原地输出稳定关联，useId 保证标题/说明 ID；hydration 后迁移到目标容器。Provider 不使用模块级 createRoot。
+
+## RTL 与国际化
+
+操作顺序保持业务数组顺序，不按方向猜测取消/确认；内置 alert/confirm 文案支持 zh-CN/en-US。
+
+## 浏览器与 WebView
+
+兼容 Chrome/WebView 70+、iOS 13+；长标识符同时提供旧内核 `word-break: break-word` 与现代 `overflow-wrap: anywhere`，小高度视口降低外层 padding，内容区独立滚动。真实软键盘视口待最终双引擎验证。
+
+## 边界情况与已知限制
+
+Dialog 不校验重复 action key；调用方必须保证唯一。无 onActionError 的 reject 会保留 rejected promise 暴露错误。多个 Provider Dialog 的顶层焦点顺序由共享 focus-trap 栈控制。
+
+## 性能预算
+
+O(actions)，无布局测量；关闭记录仅为退出动画短暂保留。
+
+## 测试证据
+
+- Unit: 模态关系、焦点、Escape/Mask、pending 跨关闭重开隔离、Portal RTL/motion、false/reject、自动布局、Provider Promise/controller/clear
+- SSR/hydration: `Dialog.ssr.test.tsx`；hydration 专测待补
+- Axe / Mobile Chromium-WebKit / Chromatic / 真机读屏: 最终统一门禁
+
+## V2 优化记录
+
+### 待优化
+
+补软键盘、200% 字号、嵌套模态和 VoiceOver/TalkBack 证据。
+
+### 已完成
+
+冻结语义分支与异步生命周期，补长内容、小视口、forced-colors、TSDoc、SSR、Provider 和永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                         | 迁移说明    |
+| ---------- | ------ | -------- | ---------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior | 商用模态、异步与文档证据加固 | 无 API 破坏 |

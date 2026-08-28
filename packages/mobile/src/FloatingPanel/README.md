@@ -1,5 +1,7 @@
 # FloatingPanel
 
+永久事实源见 [FloatingPanel.docs.mdx](./FloatingPanel.docs.mdx)。
+
 页面内常驻的可变高度内容面板，适合地图、行程与筛选场景。它不是模态浮层，不使用 Portal、Mask、页面
 滚动锁或焦点圈定；需要这些能力时使用 `BottomSheet`。
 

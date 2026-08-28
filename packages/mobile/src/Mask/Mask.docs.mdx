@@ -1,0 +1,128 @@
+---
+name: Mask
+slug: mask
+package: "@meu/mobile"
+exports: [Mask]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "149:47"
+storyIds:
+  [
+    feedback-mask--default,
+    feedback-mask--thin,
+    feedback-mask--thick,
+    feedback-mask--with-decorative-content
+  ]
+source: packages/mobile/src/Mask
+---
+
+# Mask
+
+## 当前能力
+
+纯视觉全屏遮罩，支持受控/非受控可见性、三级或自定义透明度、Portal、引用计数滚动锁、退出保活以及可选指针关闭。它始终对无障碍树隐藏，不承担模态内容语义。
+
+## 何时使用
+
+作为 Dialog、Popup、BottomSheet 等浮层的背景遮罩，或表达短暂的视觉阻断状态。
+
+## 何时不要使用
+
+不要单独用 Mask 实现可访问 Dialog，也不要把 `dismissible` 当成唯一关闭路径；需要交互内容时使用对应 Overlay 组件。
+
+## 结构与状态
+
+`Portal → div[aria-hidden] → backdrop button + optional decorative content`。`data-state=open|closed` 表示进出场，closed forceMount 节点带 `hidden`。
+
+## 基础用法
+
+```tsx
+<Mask open={blocked} opacity="thick" lockScroll />
+```
+
+## 受控与非受控
+
+传 `open` 即受控，仅通过 `onOpenChange(false,{reason:"mask"})` 发出关闭意图；否则使用 `defaultOpen`，默认打开。
+
+## 表单集成
+
+不适用。Mask 不读取或提交值；装饰性 children 也不应包含需要操作的表单控件。
+
+## Props
+
+`opacity` 预设为 thin 0.24、default 0.48、thick 0.72；有限数字夹在 0–1，NaN/Infinity 回退 default。`container=null` 原地渲染，`forceMount` 保留关闭 DOM，`lockScroll` 默认 true，`dismissible` 默认 false。
+
+## Events
+
+只有可关闭遮罩点击会发布 `onOpenChange(false,{reason:"mask"})`；根节点不暴露混淆语义的 `onClick`。
+
+## Ref 与命令式方法
+
+ref 指向根 `HTMLDivElement`；没有命令式 open/close，使用状态 props。
+
+## 键盘操作
+
+Mask 不进入 Tab 顺序，也不处理 Escape；键盘关闭必须由拥有语义的父 Overlay 提供。
+
+## 触摸与手势
+
+`dismissible` 时整个 backdrop 接收一次原生点击；不处理滑动、长按和多指手势。
+
+## 无障碍
+
+根与 backdrop 均 `aria-hidden=true`，backdrop `tabIndex=-1`。children 仅可作为装饰或视觉状态，不会被读屏读取。
+
+## 动效
+
+只过渡 opacity；reduced-motion 缩短到 1ms。forceMount 退出后使用 `hidden` 隔离布局与指针。
+
+## 主题与定制
+
+使用 overlay token；forced-colors 下显式使用系统 CanvasText 并保留透明度。稳定定制入口为 className/style/opacity。
+
+## SSR 与 Next.js
+
+Portal 首次 SSR 原地输出确定性标记，hydration 后迁移到 body/配置容器；首屏 open 必须一致。
+
+## RTL 与国际化
+
+无方向性布局；Portal 根复制 ConfigProvider locale、dir、theme、motion 数据和动效 Token。组件无可见内置文案。
+
+## 浏览器与 WebView
+
+基于 fixed、opacity 和原生 button，兼容 Chrome/WebView 70+、iOS 13+；滚动锁由共享原语引用计数。
+
+## 边界情况与已知限制
+
+多个 Mask 的视觉叠层由拥有者的 z-index 决定。透明度 0 仍可能锁滚动和拦截指针；业务应显式选择是否需要遮挡。
+
+## 性能预算
+
+O(1) DOM，无测量、Observer 或持续监听；仅 open 且 lockScroll 时参与共享滚动锁。
+
+## 测试证据
+
+- Unit: Portal、透明度归一、滚动锁、关闭原因、forceMount、root props/ref
+- SSR/hydration: `Mask.ssr.test.tsx`；hydration 专测待补
+- Axe / Mobile Chromium-WebKit / Chromatic / 真机读屏: 最终统一门禁
+
+## V2 优化记录
+
+### 待优化
+
+补真实 iOS 滚动锁、嵌套 Overlay 和高对比视觉截图。
+
+### 已完成
+
+冻结装饰语义、数值归一、Portal/滚动锁/forceMount 契约，补 forced-colors、TSDoc、Unit、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                           | 迁移说明    |
+| ---------- | ------ | -------- | ------------------------------ | ----------- |
+| 2026-08-29 | 未发布 | behavior | 商用边界、强制颜色与证据链加固 | 无 API 破坏 |

@@ -65,6 +65,7 @@ export function PullToRefresh({
   const rootRef = useRef<HTMLDivElement>(null);
   const sessionRef = useRef<PullSession | null>(null);
   const completeTimerRef = useRef<number | null>(null);
+  const disabledResetFrameRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
   const statusRef = useRef<PullToRefreshStatus>("idle");
   const [distance, setDistance] = useState(0);
@@ -140,9 +141,26 @@ export function PullToRefresh({
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      sessionRef.current = null;
       if (completeTimerRef.current !== null) window.clearTimeout(completeTimerRef.current);
+      if (disabledResetFrameRef.current !== null) {
+        window.cancelAnimationFrame(disabledResetFrameRef.current);
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (!disabled) return;
+    sessionRef.current = null;
+    if (statusRef.current !== "pulling" && statusRef.current !== "ready") return;
+    if (disabledResetFrameRef.current !== null) {
+      window.cancelAnimationFrame(disabledResetFrameRef.current);
+    }
+    disabledResetFrameRef.current = window.requestAnimationFrame(() => {
+      disabledResetFrameRef.current = null;
+      if (mountedRef.current) reset();
+    });
+  }, [disabled, reset]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -157,7 +175,11 @@ export function PullToRefresh({
     };
 
     const handleTouchStart = (event: TouchEvent) => {
-      if (disabled || statusRef.current !== "idle" || event.touches.length !== 1) return;
+      if (event.touches.length !== 1) {
+        finish(true);
+        return;
+      }
+      if (disabled || statusRef.current !== "idle") return;
       const touch = event.touches[0];
       if (!touch) return;
       const allowed = canPull ? canPull() : defaultCanPull(node);
@@ -168,7 +190,11 @@ export function PullToRefresh({
     const handleTouchMove = (event: TouchEvent) => {
       const session = sessionRef.current;
       const touch = event.touches[0];
-      if (!session || !touch || event.touches.length !== 1) return;
+      if (!session) return;
+      if (!touch || event.touches.length !== 1) {
+        finish(true);
+        return;
+      }
       const deltaX = touch.clientX - session.startX;
       const deltaY = touch.clientY - session.startY;
       if (!session.active && Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -176,7 +202,7 @@ export function PullToRefresh({
         return;
       }
       if (deltaY <= 0) {
-        if (session.active) reset();
+        finish(true);
         return;
       }
       if (deltaY < 4) return;
@@ -187,7 +213,7 @@ export function PullToRefresh({
       publishStatus(nextDistance >= resolvedThreshold ? "ready" : "pulling", nextDistance, "pull");
     };
 
-    const handleTouchEnd = () => finish(false);
+    const handleTouchEnd = (event: TouchEvent) => finish(event.touches.length > 0);
     const handleTouchCancel = () => finish(true);
     node.addEventListener("touchstart", handleTouchStart, { passive: true });
     node.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -260,7 +286,7 @@ export function PullToRefresh({
       >
         {localizedActionLabel}
       </button>
-      <div className={`${indicator} ${motion}`} role="status" aria-live="polite">
+      <div className={`${indicator} ${motion}`} role="status" aria-atomic="true" aria-live="polite">
         {indicatorContent}
       </div>
       <div className={`${content} ${motion}`} id={contentId} aria-busy={status === "refreshing"}>

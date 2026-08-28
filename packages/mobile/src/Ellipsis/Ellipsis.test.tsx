@@ -70,4 +70,26 @@ describe("Ellipsis", () => {
     expect(onExpandedChange).toHaveBeenCalledWith(true, expect.anything());
     expect(screen.getByRole("button", { name: "展开" })).toBeTruthy();
   });
+
+  it("shows current content while a changed value is awaiting measurement", async () => {
+    mockMeasurements();
+    const { rerender } = render(<Ellipsis content={content} rows={1} />);
+    await screen.findByRole("button", { name: "展开" });
+    const nextContent = `${content}这是更新后的内容。`;
+    const action = screen.getByRole("button", { name: "展开" });
+    action.focus();
+    rerender(<Ellipsis content={nextContent} rows={1} />);
+    expect(document.activeElement).toBe(action);
+    expect(screen.getByRole("button", { name: "展开" })).toBe(action);
+    expect(screen.getAllByText(nextContent).length).toBeGreaterThan(0);
+    expect(screen.queryByText(content, { exact: true })).toBeNull();
+    expect(await screen.findByRole("button", { name: "展开" })).toBeTruthy();
+  });
+
+  it("normalizes non-finite rows", () => {
+    render(<Ellipsis content="短文本" rows={Number.POSITIVE_INFINITY} />);
+    const root = document.querySelector('[data-meu-component="ellipsis"]');
+    if (!root) throw new Error("Expected Ellipsis root");
+    expect(root.getAttribute("style")).toContain("--meu-ellipsis-rows: 1");
+  });
 });

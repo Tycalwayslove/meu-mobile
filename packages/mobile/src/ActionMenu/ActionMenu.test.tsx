@@ -147,6 +147,57 @@ describe("ActionMenu", () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
+  it("invalidates a pending action when a controlled menu closes and reopens", async () => {
+    const deferred = createDeferred<void>();
+    const onOpenChange = vi.fn();
+    const { rerender } = render(
+      <ActionMenu
+        open
+        title="第一条记录"
+        actions={[{ key: "save", label: "保存第一条", onPress: () => deferred.promise }]}
+        onOpenChange={onOpenChange}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "保存第一条" }));
+    expect(screen.getByRole("dialog").getAttribute("aria-busy")).toBe("true");
+
+    rerender(
+      <ActionMenu open={false} title="第一条记录" actions={[]} onOpenChange={onOpenChange} />
+    );
+    rerender(
+      <ActionMenu
+        open
+        title="第二条记录"
+        actions={[{ key: "save", label: "保存第二条" }]}
+        onOpenChange={onOpenChange}
+      />
+    );
+    expect(screen.getByRole("dialog", { name: "第二条记录" }).hasAttribute("aria-busy")).toBe(
+      false
+    );
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "保存第二条" }).disabled).toBe(
+      false
+    );
+
+    deferred.resolve();
+    await waitFor(() => expect(onOpenChange).not.toHaveBeenCalled());
+    expect(screen.getByRole("dialog", { name: "第二条记录" })).toBeTruthy();
+  });
+
+  it("inherits direction and reduced motion through Popup's body portal", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <ActionMenu open title="Actions" actions={[]} />
+      </ConfigProvider>
+    );
+    const layer = document.body.querySelector('[data-meu-overlay-layer="popup"]');
+    if (!(layer instanceof HTMLElement)) throw new Error("Expected Popup layer");
+    expect(layer.dir).toBe("rtl");
+    expect(layer.lang).toBe("en-US");
+    expect(layer.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(layer.getAttribute("data-meu-theme")).toBe("dark");
+  });
+
   it("always confirms danger actions with localized safe defaults", async () => {
     const onPress = vi.fn();
     const onOpenChange = vi.fn();
@@ -213,5 +264,15 @@ describe("ActionMenu", () => {
     expect(menu).toBeTruthy();
     const layer = menu && menu.closest('[data-meu-overlay-layer="popup"]');
     expect(layer && layer.hasAttribute("hidden")).toBe(true);
+  });
+
+  it("removes a nested confirmation immediately when the controlled menu closes", () => {
+    const actions = [{ key: "delete", label: "删除订单", tone: "danger" as const }];
+    const { rerender } = render(<ActionMenu open title="订单操作" actions={actions} />);
+    fireEvent.click(screen.getByRole("button", { name: "删除订单" }));
+    expect(screen.getByRole("alertdialog")).toBeTruthy();
+
+    rerender(<ActionMenu open={false} forceMount title="订单操作" actions={actions} />);
+    expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 });

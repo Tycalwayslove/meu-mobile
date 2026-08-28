@@ -1,3 +1,3 @@
 # Dialog
 
-Accessible alert and confirmation dialogs with async actions, focus containment, scroll locking, and a context-scoped imperative API.
+模态告知、确认和短交互组件。永久事实源见 [Dialog.docs.mdx](./Dialog.docs.mdx)。

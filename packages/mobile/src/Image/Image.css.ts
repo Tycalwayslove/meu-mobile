@@ -12,7 +12,10 @@ export const imageRoot = recipe({
     background: "var(--meu-color-subtle)",
     fontFamily: "var(--meu-font-ui)",
     lineHeight: 0,
-    verticalAlign: "middle"
+    verticalAlign: "middle",
+    "@media": {
+      "(forced-colors: active)": { border: "1px solid CanvasText" }
+    }
   },
   variants: {
     radius: {
@@ -32,7 +35,10 @@ export const imageElement = recipe({
     maxWidth: "100%",
     transition: "opacity var(--meu-motion-enter) var(--meu-motion-ease-standard)",
     selectors: { "&[data-pending='true']": { opacity: 0 } },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { forcedColorAdjust: "auto" }
+    }
   },
   variants: {
     fixedHeight: {

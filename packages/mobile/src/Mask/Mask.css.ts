@@ -34,7 +34,11 @@ export const backdrop = recipe({
     border: 0,
     transition: "opacity var(--meu-motion-enter) var(--meu-motion-ease-standard)",
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": {
+        background: "CanvasText",
+        forcedColorAdjust: "none"
+      }
     }
   },
   variants: {

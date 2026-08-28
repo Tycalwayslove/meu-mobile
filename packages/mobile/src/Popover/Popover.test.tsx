@@ -147,9 +147,9 @@ describe("Popover", () => {
     expect(panel.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("carries locale and theme into its body portal", async () => {
+  it("carries direction, locale, theme and reduced motion into its body portal", async () => {
     render(
-      <ConfigProvider locale="en-US" theme="dark">
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
         <Popover aria-label="Quick actions" content="Content" defaultOpen>
           <Button>Open</Button>
         </Popover>
@@ -158,6 +158,8 @@ describe("Popover", () => {
     await flushPosition();
     const panel = screen.getByRole("dialog", { name: "Quick actions" });
     expect(panel.getAttribute("data-meu-theme")).toBe("dark");
+    expect(panel.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(panel.getAttribute("dir")).toBe("rtl");
     expect(panel.getAttribute("lang")).toBe("en-US");
     expect(document.body.contains(panel)).toBe(true);
   });
@@ -179,5 +181,30 @@ describe("Popover", () => {
     branchAction.focus();
     fireEvent.focusIn(branchAction);
     expect(document.activeElement).toBe(branchAction);
+  });
+
+  it("normalizes invalid geometry and preserves panel root props", async () => {
+    const panelRef = createRef<HTMLDivElement>();
+    render(
+      <Popover
+        ref={panelRef}
+        aria-label="几何边界"
+        className="business-popover"
+        content="内容"
+        defaultOpen
+        offset={Number.NaN}
+        style={{ width: 240 }}
+        viewportPadding={Number.NEGATIVE_INFINITY}
+      >
+        <Button>边界触发器</Button>
+      </Popover>
+    );
+    await flushPosition();
+    const panel = screen.getByRole("dialog", { name: "几何边界" });
+    expect(panelRef.current).toBe(panel);
+    expect(panel.className).toContain("business-popover");
+    expect(panel.style.width).toBe("240px");
+    expect(panel.getAttribute("data-offset")).toBe("10");
+    expect(panel.getAttribute("data-viewport-padding")).toBe("16");
   });
 });

@@ -39,7 +39,8 @@ type DragSession = {
 function viewportHeight() {
   if (typeof window === "undefined") return 0;
   const visualViewport = window.visualViewport;
-  return Math.max(1, visualViewport ? visualViewport.height : window.innerHeight);
+  const height = visualViewport ? visualViewport.height : window.innerHeight;
+  return Number.isFinite(height) && height > 0 ? height : 1;
 }
 
 function normalizeAnchors(anchors: ReadonlyArray<number>, availableHeight: number) {
@@ -106,7 +107,9 @@ export function FloatingPanel({
   const bodyRef = useRef<HTMLDivElement>(null);
   const dragSessionRef = useRef<DragSession | null>(null);
   const suppressHandleClickRef = useRef(false);
+  const suppressHandleClickTimerRef = useRef<number | null>(null);
   const immediateFrameRef = useRef(0);
+  const cancelledDragFrameRef = useRef(0);
   const [availableHeight, setAvailableHeight] = useState(0);
   const [uncontrolledHeight, setUncontrolledHeight] = useState(defaultHeight);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
@@ -122,7 +125,8 @@ export function FloatingPanel({
   const activeHeight = resolvedAnchors[activeIndex] || 0;
   const minimumHeight = resolvedAnchors[0] || 0;
   const maximumHeight = resolvedAnchors[resolvedAnchors.length - 1] || 0;
-  const visibleHeight = dragHeight === null ? activeHeight : dragHeight;
+  const effectiveDragging = dragging && !disabled && resolvedAnchors.length > 1;
+  const visibleHeight = effectiveDragging && dragHeight !== null ? dragHeight : activeHeight;
   const translate = Math.max(0, maximumHeight - visibleHeight) * (placement === "top" ? -1 : 1);
   const normalizedInertia = Number.isFinite(inertiaFactor)
     ? Math.min(200, Math.max(0, inertiaFactor))
@@ -151,14 +155,34 @@ export function FloatingPanel({
   useEffect(
     () => () => {
       if (immediateFrameRef.current) window.cancelAnimationFrame(immediateFrameRef.current);
+      if (cancelledDragFrameRef.current) {
+        window.cancelAnimationFrame(cancelledDragFrameRef.current);
+      }
+      if (suppressHandleClickTimerRef.current !== null) {
+        window.clearTimeout(suppressHandleClickTimerRef.current);
+      }
+      dragSessionRef.current = null;
     },
     []
   );
 
+  useEffect(() => {
+    if (!disabled && resolvedAnchors.length > 1) return;
+    dragSessionRef.current = null;
+    if (cancelledDragFrameRef.current) {
+      window.cancelAnimationFrame(cancelledDragFrameRef.current);
+    }
+    cancelledDragFrameRef.current = window.requestAnimationFrame(() => {
+      cancelledDragFrameRef.current = 0;
+      setDragging(false);
+      setDragHeight(null);
+    });
+  }, [disabled, resolvedAnchors.length]);
+
   const requestHeight = useCallback(
     (nextIndex: number, reason: FloatingPanelHeightChangeReason, skipAnimation = false) => {
       const nextHeight = resolvedAnchors[nextIndex];
-      if (nextHeight === undefined || nextIndex === activeIndex) return;
+      if (disabled || nextHeight === undefined || nextIndex === activeIndex) return;
       if (skipAnimation) {
         setImmediate(true);
         if (immediateFrameRef.current) window.cancelAnimationFrame(immediateFrameRef.current);
@@ -170,7 +194,7 @@ export function FloatingPanel({
       if (!controlled) setUncontrolledHeight(nextHeight);
       if (onHeightChange) onHeightChange(nextHeight, { index: nextIndex, reason });
     },
-    [activeIndex, controlled, onHeightChange, resolvedAnchors]
+    [activeIndex, controlled, disabled, onHeightChange, resolvedAnchors]
   );
 
   useImperativeHandle(
@@ -230,6 +254,12 @@ export function FloatingPanel({
         session.active = true;
         setDragging(true);
       }
+      if (session.source === "content" && heightDelta(deltaY, placement) <= 0) {
+        dragSessionRef.current = null;
+        setDragging(false);
+        setDragHeight(null);
+        return;
+      }
       if (event.cancelable) event.preventDefault();
       setDragHeight(
         clamp(session.startHeight + heightDelta(deltaY, placement), minimumHeight, maximumHeight)
@@ -243,18 +273,27 @@ export function FloatingPanel({
       const session = dragSessionRef.current;
       if (!session || session.pointerId !== event.pointerId) return;
       dragSessionRef.current = null;
-      if (
-        typeof event.currentTarget.hasPointerCapture === "function" &&
-        event.currentTarget.hasPointerCapture(event.pointerId)
-      ) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
+      try {
+        if (
+          typeof event.currentTarget.hasPointerCapture === "function" &&
+          typeof event.currentTarget.releasePointerCapture === "function" &&
+          event.currentTarget.hasPointerCapture(event.pointerId)
+        ) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // Pointer capture can already be gone after a browser-level cancellation.
       }
       setDragging(false);
       setDragHeight(null);
-      if (!session.active || cancelled) return;
+      if (!session.active || cancelled || disabled) return;
       if (session.source === "handle") {
         suppressHandleClickRef.current = true;
-        window.setTimeout(() => {
+        if (suppressHandleClickTimerRef.current !== null) {
+          window.clearTimeout(suppressHandleClickTimerRef.current);
+        }
+        suppressHandleClickTimerRef.current = window.setTimeout(() => {
+          suppressHandleClickTimerRef.current = null;
           suppressHandleClickRef.current = false;
         }, 0);
       }
@@ -279,7 +318,15 @@ export function FloatingPanel({
       }
       requestHeight(nextIndex, "drag");
     },
-    [maximumHeight, minimumHeight, normalizedInertia, placement, requestHeight, resolvedAnchors]
+    [
+      disabled,
+      maximumHeight,
+      minimumHeight,
+      normalizedInertia,
+      placement,
+      requestHeight,
+      resolvedAnchors
+    ]
   );
 
   const moveBy = useCallback(
@@ -297,7 +344,7 @@ export function FloatingPanel({
       aria-describedby={statusId}
       aria-expanded={activeIndex === resolvedAnchors.length - 1}
       aria-label={localizedHandleLabel}
-      disabled={disabled}
+      disabled={disabled || resolvedAnchors.length < 2}
       onClick={() => {
         if (suppressHandleClickRef.current || disabled || resolvedAnchors.length < 2) return;
         requestHeight((activeIndex + 1) % resolvedAnchors.length, "handle");
@@ -313,16 +360,17 @@ export function FloatingPanel({
         } else handled = false;
         if (handled) event.preventDefault();
       }}
+      onLostPointerCapture={(event) => finishDrag(event, true)}
       onPointerCancel={(event) => finishDrag(event, true)}
       onPointerDown={(event) => beginDrag(event, "handle")}
       onPointerMove={moveDrag}
       onPointerUp={finishDrag}
     />
   );
-  const statusText = `${Math.round(activeHeight)} px，位置 ${activeIndex + 1}/${Math.max(
-    1,
-    resolvedAnchors.length
-  )}`;
+  const statusText =
+    config.locale === "en-US"
+      ? `${Math.round(activeHeight)} px, position ${activeIndex + 1} of ${Math.max(1, resolvedAnchors.length)}`
+      : `${Math.round(activeHeight)} px，位置 ${activeIndex + 1}/${Math.max(1, resolvedAnchors.length)}`;
   const panelStyle = {
     ...style,
     "--meu-floating-panel-translate": `${translate}px`,
@@ -343,7 +391,7 @@ export function FloatingPanel({
       data-anchor-index={activeIndex}
       data-current-height={Math.round(activeHeight * 1000) / 1000}
       data-disabled={disabled ? "true" : undefined}
-      data-dragging={dragging ? "true" : undefined}
+      data-dragging={effectiveDragging ? "true" : undefined}
       data-immediate={immediate ? "true" : undefined}
       data-meu-component="floating-panel"
       data-meu-theme={config.theme}
@@ -356,7 +404,8 @@ export function FloatingPanel({
         id={bodyId}
         className={body}
         data-content-drag={canDragFromContent ? "true" : undefined}
-        data-content-dragging={dragging ? "true" : undefined}
+        data-content-dragging={effectiveDragging ? "true" : undefined}
+        onLostPointerCapture={(event) => finishDrag(event, true)}
         onPointerCancel={(event) => finishDrag(event, true)}
         onPointerDown={(event) => beginDrag(event, "content")}
         onPointerMove={moveDrag}

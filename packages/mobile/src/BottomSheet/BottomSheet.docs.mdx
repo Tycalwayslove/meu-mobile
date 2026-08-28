@@ -1,0 +1,130 @@
+---
+name: BottomSheet
+slug: bottom-sheet
+package: "@meu/mobile"
+exports: [BottomSheet]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "178:102"
+storyIds:
+  [
+    feedback-bottomsheet--default,
+    feedback-bottomsheet--multiple-snap-points,
+    feedback-bottomsheet--controlled-snap-point,
+    feedback-bottomsheet--without-visible-title
+  ]
+source: packages/mobile/src/BottomSheet
+---
+
+# BottomSheet
+
+## 当前能力
+
+底部模态任务面板，支持受控/非受控可见性与 snap point、内容高度、手柄拖拽/点击/键盘、速度吸附、拖拽关闭、Mask/Escape/关闭按钮、Portal、焦点圈定恢复、滚动锁、安全区和动态视口/内容测量。
+
+## 何时使用
+
+用于移动端筛选、补充输入、分段信息和少量连续操作，需要比 Dialog 更大但仍属于临时任务的内容。
+
+## 何时不要使用
+
+短确认使用 Dialog，短动作列表使用 ActionMenu，非模态常驻内容使用 FloatingPanel，海量选项使用 Picker。
+
+## 结构与状态
+
+`Portal → layer + Mask + panel[role=dialog] → handle + header + scroll body`。状态包括 open/closed、snap index/value、dragging、受控/非受控。
+
+## 基础用法
+
+```tsx
+<BottomSheet open={open} title="筛选条件" snapPoints={[0.3, 0.5, 0.9]} onOpenChange={setOpen}>
+  <Filters />
+</BottomSheet>
+```
+
+## 受控与非受控
+
+open 与 snapPoint 分别独立受控；未传时使用 defaultOpen/defaultSnapPoint。无效或被动态移除的非受控 snap 会永久归一到最近有效点，重新加入旧值不会意外跳回。
+
+## 表单集成
+
+面板可承载表单，但不拥有业务 value/draft。建议打开时复制 draft、确认时提交、mask/escape/close/drag 时由 owner 决定回滚；与 `@meu/form-react` 的 dirty/touched/validation 保持业务层管理。
+
+## Props
+
+数字 snap 必须 `(0,1]`，`content` 使用固有内容高度；归一后按实际高度升序去重并限制为视觉视口 90%。dragHandle/dragToDismiss/safeArea/lockScroll/restoreFocus 默认 true；Mask 点击默认 false，Escape 默认 true；无 title 时必须提供 aria-label 或 aria-labelledby。
+
+## Events
+
+`onOpenChange` 原因是 escape、mask、close-button、drag。`onSnapPointChange(point,{index,reason})` 区分 drag/handle；受控模式只发布意图。
+
+## Ref 与命令式方法
+
+ref 指向 panel；无命令式 snap API，使用 snapPoint。测量由 visualViewport/window resize 与 ResizeObserver 自动更新。
+
+## 键盘操作
+
+Tab 在模态内循环；Escape 可关闭。手柄 Enter/Space 循环位置，ArrowUp/Down 相邻移动，Home/End 最低/最高。
+
+## 触摸与手势
+
+拖拽只从 44px handle 开始，`touch-action:none` 避免与内容滚动竞争；只接受主指针，cancel/lost capture 不提交。内容区保持原生纵向滚动与 overscroll contain。
+
+## 无障碍
+
+panel 为有名称的 `role=dialog aria-modal=true`；标题自动关联。handle 为原生 button，并通过隐藏说明公布本地化实际位置；关闭按钮有本地化名称。
+
+## 动效
+
+只过渡 transform；拖拽时 0ms 直接跟手，reduced-motion 缩短到 1ms。关闭 forceMount 节点 hidden 且 aria-hidden。
+
+## 主题与定制
+
+使用 surface/ink/border/shadow tokens、底部 safe-area env；forced-colors 使用 Canvas/CanvasText。className/style 作用于 panel，组件保留 height/offset 权威。
+
+## SSR 与 Next.js
+
+SSR 以 50vh 确定性壳输出，hydration 后根据 visualViewport 与内容重新计算；首屏 open/items 必须一致。Portal 可跟随 ConfigProvider 容器。
+
+## RTL 与国际化
+
+标题与关闭按钮使用逻辑间距；内置关闭、手柄与位置文案支持 zh-CN/en-US。高度与垂直手势不依赖方向。
+
+## 浏览器与 WebView
+
+兼容 Chrome/WebView 70+、iOS 13+；长标题提供 `word-break: break-word` 旧内核回退与现代 `overflow-wrap: anywhere`，visualViewport/ResizeObserver 缺失时分别回退 innerHeight/首帧测量。软键盘与旋转需最终真机验证。
+
+## 边界情况与已知限制
+
+传空/全非法 snapPoints 回退 content；受控非法点显示最近有效值但不修改 owner。内容内嵌套另一个纵向拖拽控件时应关闭 dragHandle 或规划手势区域。
+
+## 性能预算
+
+O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，拖拽每 pointermove 一次状态更新。
+
+## 测试证据
+
+- Unit: 模态名称/关闭原因、滚动锁、受控/非受控 snap、键盘、拖拽关闭、forceMount、动态 identity、本地化/数字标题
+- SSR/hydration: `BottomSheet.ssr.test.tsx`；测量 hydration 专测待补
+- Axe / 双引擎手势 / Chromatic / 真机软键盘读屏: 最终统一门禁
+
+## V2 优化记录
+
+### 待优化
+
+补 iOS rubber-band、Android WebView 多指、键盘弹起、旋转与真实速度吸附证据。
+
+### 已完成
+
+修复动态 snap 身份、数字标题、位置本地化、监听生命周期和主指针边界；补 forced-colors、RTL、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                            | 迁移说明    |
+| ---------- | ------ | -------- | ------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior | snap、手势、a11y 与生命周期加固 | 无 API 破坏 |

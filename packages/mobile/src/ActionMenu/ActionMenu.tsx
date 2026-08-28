@@ -108,6 +108,8 @@ export function ActionMenu({
   const generatedId = useId();
   const initialActionRef = useRef<HTMLButtonElement>(null);
   const resolvedOpenRef = useRef(false);
+  const actionTokenRef = useRef(0);
+  const openStateRef = useRef(false);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<PendingConfirmation | null>(null);
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
@@ -129,6 +131,15 @@ export function ActionMenu({
       ? ({ "aria-labelledby": resolvedLabelledby } as const)
       : ({ "aria-label": config.locale === "en-US" ? "Actions" : "操作" } as const);
   const dismissBlocked = pendingKey !== null || confirmation !== null;
+  if (openStateRef.current !== resolvedOpen) {
+    openStateRef.current = resolvedOpen;
+    resolvedOpenRef.current = resolvedOpen;
+    actionTokenRef.current += 1;
+    if (!resolvedOpen && pendingKey !== null) setPendingKey(null);
+  }
+  if (!resolvedOpen && confirmation !== null) {
+    setConfirmation(null);
+  }
   const groupedActions = useMemo(() => {
     const neutral: Array<{ action: ActionMenuAction; index: number }> = [];
     const danger: Array<{ action: ActionMenuAction; index: number }> = [];
@@ -142,7 +153,6 @@ export function ActionMenu({
 
   useEffect(() => {
     resolvedOpenRef.current = resolvedOpen;
-    if (!resolvedOpen) setConfirmation(null);
   }, [resolvedOpen]);
 
   useEffect(() => {
@@ -164,23 +174,30 @@ export function ActionMenu({
 
   const runAction = async (action: ActionMenuAction, index: number) => {
     if (pendingKey !== null || action.disabled) return false;
+    const actionToken = ++actionTokenRef.current;
+    const isCurrentAction = () => actionTokenRef.current === actionToken && openStateRef.current;
     setPendingKey(action.key);
     let result: boolean | void;
     try {
       result = action.onPress ? await action.onPress() : undefined;
+      if (!isCurrentAction()) return false;
       if (result === false) return false;
       result = onAction ? await onAction(action, index) : undefined;
+      if (!isCurrentAction()) return false;
       if (result === false) return false;
     } catch (error) {
+      if (!isCurrentAction()) return false;
       if (onActionError) {
         onActionError(error, action);
         return false;
       }
       throw error;
     } finally {
-      setPendingKey((currentKey) => (currentKey === action.key ? null : currentKey));
+      if (actionTokenRef.current === actionToken) {
+        setPendingKey((currentKey) => (currentKey === action.key ? null : currentKey));
+      }
     }
-    if (action.closeOnPress !== false && closeOnAction) {
+    if (isCurrentAction() && action.closeOnPress !== false && closeOnAction) {
       requestOpenChange(false, { actionKey: action.key, reason: "action" });
     }
     return undefined;

@@ -217,10 +217,12 @@ export function ImageViewer({
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        previous();
+        if (config.dir === "rtl") next();
+        else previous();
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
-        next();
+        if (config.dir === "rtl") previous();
+        else next();
       } else if ((event.key === "+" || event.key === "=") && zoom) {
         event.preventDefault();
         const handle = zoomRefs.current[currentIndex];
@@ -247,6 +249,7 @@ export function ImageViewer({
     <Portal container={portalContainer}>
       <div
         className={layer({ state: visualState })}
+        dir={config.dir}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="image-viewer"

@@ -114,7 +114,21 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { render: () => <SwipeActionsPreview /> };
+export const Default: Story = {
+  render: () => <SwipeActionsPreview />,
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]');
+    const reveal = Array.from(canvasElement.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => button.textContent === "显示右侧操作"
+    );
+    if (!root || !reveal) throw new window.Error("Expected SwipeActions reveal control");
+    reveal.click();
+    await Promise.resolve();
+    if (root.getAttribute("data-open-side") !== "right") {
+      throw new window.Error("SwipeActions did not reveal the right rail");
+    }
+  }
+};
 
 export const Controlled: Story = { render: () => <SwipeActionsPreview controlled /> };
 
@@ -124,4 +138,17 @@ export const LeftAndRight: Story = {
   args: {
     leftActions: [{ key: "pin", label: "置顶", tone: "accent" }]
   }
+};
+
+export const RTLPhysicalSides: Story = {
+  render: () => (
+    <div dir="rtl" style={{ width: "min(100%, 420px)" }}>
+      <SwipeActions
+        leftActions={[{ key: "pin", label: "تثبيت", tone: "accent" }]}
+        rightActions={[{ key: "delete", label: "حذف", tone: "danger" }]}
+      >
+        <Cell title="طلب" description="اليسار واليمين اتجاهان ماديان" />
+      </SwipeActions>
+    </div>
+  )
 };

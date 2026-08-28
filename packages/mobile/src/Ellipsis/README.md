@@ -1,3 +1,3 @@
 # Ellipsis
 
-按容器宽度测量头部、尾部或中部省略，支持受控/非受控展开，并始终向读屏器提供完整文本。
+完整契约、边界与验证证据见 [`Ellipsis.docs.mdx`](./Ellipsis.docs.mdx)。

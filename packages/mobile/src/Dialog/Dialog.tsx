@@ -7,6 +7,7 @@ import type { Ref } from "react";
 import { Button } from "../Button";
 import { useMeuConfig } from "../ConfigProvider";
 import { useControllableOpen } from "../internal/useControllableOpen";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import { Mask } from "../Mask";
 import {
@@ -68,6 +69,8 @@ export function Dialog({
   const generatedId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const initialActionRef = useRef<HTMLButtonElement>(null);
+  const actionTokenRef = useRef(0);
+  const openStateRef = useRef(false);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
     defaultOpen,
@@ -80,7 +83,14 @@ export function Dialog({
   const preferredActionKey = getPreferredActionKey(actions);
   const resolvedLayout = resolveActionLayout(actionLayout, actions.length);
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const configBoundary = getConfigBoundaryProps(config);
   const dismissBlocked = pendingKey !== null;
+
+  if (openStateRef.current !== resolvedOpen) {
+    openStateRef.current = resolvedOpen;
+    actionTokenRef.current += 1;
+    if (!resolvedOpen && pendingKey !== null) setPendingKey(null);
+  }
 
   useBodyScrollLock(resolvedOpen && lockScroll);
   useFocusTrap({
@@ -99,20 +109,26 @@ export function Dialog({
 
   const runAction = async (action: DialogAction) => {
     if (pendingKey !== null || action.disabled) return;
+    const actionToken = ++actionTokenRef.current;
+    const isCurrentAction = () => actionTokenRef.current === actionToken && openStateRef.current;
     setPendingKey(action.key);
     let result: boolean | void;
     try {
       result = action.onPress ? await action.onPress() : undefined;
+      if (!isCurrentAction()) return;
     } catch (error) {
+      if (!isCurrentAction()) return;
       if (onActionError) {
         onActionError(error, action);
         return;
       }
       throw error;
     } finally {
-      setPendingKey((currentKey) => (currentKey === action.key ? null : currentKey));
+      if (actionTokenRef.current === actionToken) {
+        setPendingKey((currentKey) => (currentKey === action.key ? null : currentKey));
+      }
     }
-    if (result !== false && action.closeOnPress !== false) {
+    if (isCurrentAction() && result !== false && action.closeOnPress !== false) {
       requestOpenChange(false, { actionKey: action.key, reason: "action" });
     }
   };
@@ -120,12 +136,11 @@ export function Dialog({
   return (
     <Portal container={portalContainer}>
       <div
-        className={layer({ state: visualState })}
+        {...configBoundary}
+        className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
-        lang={config.locale}
         data-meu-overlay-layer="dialog"
-        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <Mask

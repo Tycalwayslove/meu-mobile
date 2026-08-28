@@ -41,6 +41,11 @@ describe("Cell", () => {
     fireEvent.click(disabledLink);
     expect(onClick).not.toHaveBeenCalled();
   });
+
+  it("preserves intentional zero-valued slots", () => {
+    render(<Cell title="库存" description={0} extra={0} prefix={0} suffix={0} />);
+    expect(screen.getAllByText("0")).toHaveLength(4);
+  });
 });
 
 describe("List", () => {
@@ -54,5 +59,15 @@ describe("List", () => {
     expect(screen.getByRole("list", { name: "账户设置" })).toBeTruthy();
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getByText("修改后立即生效")).toBeTruthy();
+  });
+
+  it("accepts zero-valued group labels and footer content", () => {
+    render(
+      <List header={0} footer={0}>
+        <Cell title="项目" />
+      </List>
+    );
+    expect(screen.getByRole("list", { name: "0" })).toBeTruthy();
+    expect(screen.getAllByText("0")).toHaveLength(2);
   });
 });

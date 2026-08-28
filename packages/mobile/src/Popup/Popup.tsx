@@ -7,6 +7,7 @@ import type { Ref } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useControllableOpen } from "../internal/useControllableOpen";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import { Mask } from "../Mask";
 import { body, closeButton, layer, panel } from "./Popup.css";
@@ -55,6 +56,7 @@ export function Popup({
   const { hidden, shouldRender, visualState } = useOverlayPresence(resolvedOpen, forceMount);
   const localizedCloseLabel = closeLabel || (config.locale === "en-US" ? "Close" : "关闭");
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const configBoundary = getConfigBoundaryProps(config);
 
   useBodyScrollLock(resolvedOpen && lockScroll);
   useFocusTrap({
@@ -71,12 +73,11 @@ export function Popup({
   return (
     <Portal container={portalContainer}>
       <div
-        className={layer({ state: visualState })}
+        {...configBoundary}
+        className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
-        lang={config.locale}
         data-meu-overlay-layer="popup"
-        data-meu-theme={config.theme}
         data-state={visualState}
       >
         {mask ? (

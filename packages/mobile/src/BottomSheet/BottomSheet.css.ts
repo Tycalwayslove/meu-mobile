@@ -46,7 +46,12 @@ export const panel = recipe({
       "&[data-dragging='true']": { transitionDuration: "0ms", userSelect: "none" }
     },
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": {
+        color: "CanvasText",
+        background: "Canvas",
+        boxShadow: "none"
+      }
     }
   },
   variants: {
@@ -88,7 +93,7 @@ export const dragHandle = style({
       borderRadius: "var(--meu-radius-round)",
       transform: "translateX(-50%)"
     },
-    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
+    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
     "&:active": { cursor: "grabbing" }
   }
 });
@@ -104,11 +109,14 @@ export const header = style({
 
 export const title = style({
   minWidth: 0,
+  flex: "1 1 auto",
   margin: 0,
   padding: "var(--meu-space-2) 0",
   fontSize: "var(--meu-font-title-font-size)",
   fontWeight: "var(--meu-font-title-font-weight)",
-  lineHeight: "var(--meu-font-title-line-height)"
+  lineHeight: "var(--meu-font-title-line-height)",
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const closeButton = style({
@@ -117,7 +125,7 @@ export const closeButton = style({
   placeItems: "center",
   width: 44,
   height: 44,
-  marginLeft: "auto",
+  marginInlineStart: "auto",
   padding: 0,
   color: "var(--meu-color-muted)",
   background: "transparent",
@@ -125,7 +133,7 @@ export const closeButton = style({
   borderRadius: "var(--meu-radius-round)",
   cursor: "pointer",
   selectors: {
-    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 }
+    "&:focus-visible": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 }
   },
   "@media": {
     "(hover: hover)": {

@@ -1,0 +1,139 @@
+---
+name: Collapse
+slug: collapse
+package: "@meu/mobile"
+exports: [Collapse]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "106:34"
+storyIds:
+  [
+    information-collapse--multiple,
+    information-collapse--accordion,
+    information-collapse--plain,
+    information-collapse--long-content-rtl
+  ]
+source: packages/mobile/src/Collapse
+---
+
+# Collapse
+
+## 当前能力
+
+原生 disclosure button、受控/非受控多展开、accordion 单展开、disabled、持久挂载 panel、动态高度动画与 plain/card 表面。
+
+## 何时使用
+
+用于 FAQ、规则说明和次要详情的渐进披露；accordion 用于需要降低同时展开数量的场景。
+
+## 何时不要使用
+
+关键错误、主要操作或必须同时比较的内容不应折叠。页面导航使用 Tabs/SideNav。
+
+## 结构与状态
+
+`group → item → button[aria-expanded,aria-controls] + region[aria-labelledby]`。状态 collapsed、expanded、disabled；panel 保持挂载。
+
+## 基础用法
+
+```tsx
+<Collapse items={[{ value: "shipping", title: "配送", content: "全国配送" }]} />
+```
+
+## 受控与非受控
+
+value 存在即受控；否则从 defaultValue 初始化。未知/重复值被忽略，accordion 只保留第一个。非受控值在 item 删除或切换 accordion 后会永久归一，不会在旧 value 重现时跳回。
+
+## 表单集成
+
+不提交值；trigger 固定 `type=button`。panel 内表单状态因持久挂载而保留，收起时 inert/visibility 使控件退出交互。
+
+## Props
+
+item.value 必须唯一稳定；title/extra/arrow 不能放交互控件。arrow 函数接收 expanded。variant 只改变表面。
+
+## Events
+
+onChange(nextValue,event) 在 enabled trigger 点击计算后触发；非受控状态同一事件更新，受控状态等待调用方。事件不可由返回值取消。
+
+## Ref 与命令式方法
+
+ref 指向根 div；焦点使用原生 trigger ref 查询，无公开展开命令。
+
+## 键盘操作
+
+| 按键            | 行为                      |
+| --------------- | ------------------------- |
+| Tab / Shift+Tab | 顺序经过 enabled triggers |
+| Enter / Space   | 原生切换当前 disclosure   |
+
+不实现 accordion 可选方向键，避免劫持页面滚动。
+
+## 触摸与手势
+
+整行 trigger 最小 52px，不实现横滑或拖拽。
+
+## 无障碍
+
+每个 trigger 与 region 双向关联；collapsed panel 使用 aria-hidden、visibility 和 inert。disabled 使用原生属性；标题提供 accessible name。
+
+## 动效
+
+CSS grid rows + opacity 支持动态高度，无 JS 测量。reduced-motion 为 1ms 并立即切换 visibility。
+
+## 主题与定制
+
+使用 surface/border/ink/muted/accent 与 motion Token；forced-colors 保留边界。data-state/data-variant 稳定，内部 class 非 API。
+
+## SSR 与 Next.js
+
+useId 保持 trigger/panel 关联稳定；首屏 value/items/accordion 必须一致。无 Portal 或浏览器测量。
+
+## RTL 与国际化
+
+文本、extra 与间距使用逻辑方向。默认箭头的旧 WebView 镜像仅为视觉降级，展开语义不受影响；业务文案由调用方提供。
+
+## 浏览器与 WebView
+
+grid row 动画在 Chrome/WebView 70+、iOS 13+ 可用；inert 在旧内核缺失时由 visibility:hidden 继续阻止焦点和读屏。
+
+## 边界情况与已知限制
+
+重复 value 会造成 React key 与状态歧义，调用方必须保证唯一。全部 disabled 时无可展开项。嵌套 Collapse 可用，但内外 value/命名应独立，region 过多可能增加读屏 landmark 噪音。
+
+## 性能预算
+
+所有 panel 默认挂载，DOM O(items + content)。昂贵内容应由业务延迟加载数据，而不是依赖 Collapse 卸载。
+
+## 测试证据
+
+- Unit: disclosure 关联、状态保留、accordion、disabled、controlled、动态 value 清理、inert
+- Story interaction: Accordion 验证单展开切换
+- Axe: 待 CI
+- SSR/hydration: `Collapse.ssr.test.tsx`；hydration 专测待补
+- RTL: LongContentRTL Story
+- Reduced motion: CSS 实现
+- Mobile Chromium/WebKit E2E: 待补
+- Chromatic Light/Dark: 待建立
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+补 axe、真机读屏、嵌套 disclosure 与视觉动画基线。
+
+### 已完成
+
+动态 identity 归一、panel inert、逻辑方向、0 值 extra、forced-colors、SSR 和长内容覆盖。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                                  | 迁移说明                                     |
+| ---------- | ------ | -------- | ------------------------------------- | -------------------------------------------- |
+| 2026-08-29 | 未发布 | behavior | V2 动态状态、焦点隔离、RTL 与验证加固 | API 兼容；删除 item 后旧非受控展开值不再恢复 |

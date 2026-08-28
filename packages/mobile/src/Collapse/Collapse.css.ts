@@ -9,7 +9,8 @@ export const root = recipe({
     boxSizing: "border-box",
     color: "var(--meu-color-ink)",
     background: "var(--meu-color-surface)",
-    fontFamily: "var(--meu-font-ui)"
+    fontFamily: "var(--meu-font-ui)",
+    "@media": { "(forced-colors: active)": { borderColor: "CanvasText" } }
   },
   variants: {
     variant: {
@@ -29,7 +30,8 @@ export const root = recipe({
 export const item = style({
   position: "relative",
   minWidth: 0,
-  borderBottom: "1px solid var(--meu-color-border)"
+  borderBottom: "1px solid var(--meu-color-border)",
+  "@media": { "(forced-colors: active)": { borderColor: "CanvasText" } }
 });
 
 export const trigger = recipe({
@@ -47,19 +49,22 @@ export const trigger = recipe({
     borderRadius: 0,
     cursor: "pointer",
     font: "inherit",
-    textAlign: "left",
+    textAlign: "start",
     WebkitTapHighlightColor: "transparent",
     transition: "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
     selectors: {
       "&:active:not(:disabled)": { background: "var(--meu-color-subtle)" },
-      "&:focus": {
+      "&:focus-visible": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3
       },
       "&:disabled": { cursor: "not-allowed", opacity: 0.55 }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { outlineColor: "ButtonText" }
+    }
   },
   variants: {
     expanded: {
@@ -85,11 +90,11 @@ export const extra = style({
   alignItems: "center",
   maxWidth: "45%",
   minWidth: 0,
-  marginLeft: "var(--meu-space-3)",
+  marginInlineStart: "var(--meu-space-3)",
   color: "var(--meu-color-muted)",
   fontSize: 14,
   lineHeight: "20px",
-  textAlign: "right",
+  textAlign: "end",
   pointerEvents: "none"
 });
 
@@ -101,16 +106,20 @@ export const arrow = recipe({
     justifyContent: "center",
     width: 24,
     height: 24,
-    marginLeft: "var(--meu-space-2)",
+    marginInlineStart: "var(--meu-space-2)",
     color: "var(--meu-color-muted)",
     transform: "rotate(180deg)",
     transition: "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)",
     pointerEvents: "none",
+    selectors: { "&:dir(rtl)": { transform: "none" } },
     "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
   },
   variants: {
     expanded: {
-      true: { transform: "rotate(270deg)" },
+      true: {
+        transform: "rotate(270deg)",
+        selectors: { "&:dir(rtl)": { transform: "rotate(270deg)" } }
+      },
       false: {}
     }
   },

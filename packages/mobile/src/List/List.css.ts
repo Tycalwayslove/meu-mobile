@@ -45,7 +45,8 @@ export const body = recipe({
     minWidth: 0,
     boxSizing: "border-box",
     overflow: "hidden",
-    background: "var(--meu-color-surface)"
+    background: "var(--meu-color-surface)",
+    "@media": { "(forced-colors: active)": { borderColor: "CanvasText" } }
   },
   variants: {
     mode: {
@@ -79,18 +80,21 @@ export const row = recipe({
     border: 0,
     borderRadius: 0,
     font: "inherit",
-    textAlign: "left",
+    textAlign: "start",
     textDecoration: "none",
     WebkitTapHighlightColor: "transparent",
     transition: "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
     selectors: {
-      "&:focus": {
+      "&:focus-visible": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3
       }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { outlineColor: "ButtonText" }
+    }
   },
   variants: {
     interactive: {
@@ -118,7 +122,7 @@ export const prefix = style({
   alignItems: "center",
   justifyContent: "center",
   minWidth: 24,
-  marginRight: "var(--meu-space-3)",
+  marginInlineEnd: "var(--meu-space-3)",
   color: "var(--meu-color-accent)"
 });
 
@@ -147,11 +151,11 @@ export const extra = style({
   flex: "0 1 auto",
   maxWidth: "45%",
   minWidth: 0,
-  marginLeft: "var(--meu-space-3)",
+  marginInlineStart: "var(--meu-space-3)",
   color: "var(--meu-color-muted)",
   fontSize: 14,
   lineHeight: "20px",
-  textAlign: "right",
+  textAlign: "end",
   overflowWrap: "anywhere"
 });
 
@@ -159,30 +163,33 @@ export const suffix = style({
   display: "flex",
   flex: "0 0 auto",
   alignItems: "center",
-  marginLeft: "var(--meu-space-3)"
+  marginInlineStart: "var(--meu-space-3)"
 });
 
 export const arrow = style({
   display: "flex",
   flex: "0 0 auto",
   alignItems: "center",
-  marginLeft: "var(--meu-space-2)",
+  marginInlineStart: "var(--meu-space-2)",
   color: "var(--meu-color-muted)"
 });
 
-export const defaultArrowIcon = style({ transform: "rotate(180deg)" });
+export const defaultArrowIcon = style({
+  transform: "rotate(180deg)",
+  selectors: { "&:dir(rtl)": { transform: "none" } }
+});
 
 export const divider = recipe({
   base: {
     display: "block",
     height: 1,
-    marginRight: 0,
+    marginInlineEnd: 0,
     background: "var(--meu-color-border)",
     pointerEvents: "none"
   },
   variants: {
     kind: {
-      full: { marginLeft: 0 },
+      full: { marginInlineStart: 0 },
       inset: {}
     },
     prefix: {
@@ -191,8 +198,11 @@ export const divider = recipe({
     }
   },
   compoundVariants: [
-    { variants: { kind: "inset", prefix: false }, style: { marginLeft: "var(--meu-space-4)" } },
-    { variants: { kind: "inset", prefix: true }, style: { marginLeft: 52 } }
+    {
+      variants: { kind: "inset", prefix: false },
+      style: { marginInlineStart: "var(--meu-space-4)" }
+    },
+    { variants: { kind: "inset", prefix: true }, style: { marginInlineStart: 52 } }
   ],
   defaultVariants: { kind: "inset", prefix: false }
 });

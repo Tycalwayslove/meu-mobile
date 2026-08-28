@@ -50,4 +50,43 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const ManualActivation: Story = { args: { activationMode: "manual" } };
+export const KeyboardInteraction: Story = {
+  args: { activationMode: "manual" },
+  play: async ({ canvasElement }) => {
+    const tabs = canvasElement.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+    const first = tabs.item(0);
+    const second = tabs.item(1);
+    first.focus();
+    first.dispatchEvent(new window.KeyboardEvent("keydown", { bubbles: true, key: "ArrowDown" }));
+    await Promise.resolve();
+    if (
+      canvasElement.ownerDocument.activeElement !== second ||
+      second.getAttribute("aria-selected") !== "false"
+    ) {
+      throw new window.Error("Manual SideNav did not move focus without activating");
+    }
+    second.dispatchEvent(new window.KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
+    await Promise.resolve();
+    if (second.getAttribute("aria-selected") !== "true") {
+      throw new window.Error("Manual SideNav did not activate on Enter");
+    }
+  }
+};
 export const DestroyInactive: Story = { args: { destroyInactive: true } };
+export const LongScrollableRTL: Story = {
+  render: (args) => (
+    <div dir="rtl" style={{ width: 390, height: 280 }}>
+      <SideNav
+        {...args}
+        items={Array.from({ length: 14 }, (_, index) => ({
+          key: `category-${index}`,
+          label: `فئة طويلة رقم ${index + 1}`,
+          ...(index === 5 ? { badge: 12, badgeLabel: "12 عنصرًا" } : {}),
+          content: `محتوى الفئة ${index + 1}`
+        }))}
+        defaultValue="category-10"
+        style={{ height: "100%" }}
+      />
+    </div>
+  )
+};

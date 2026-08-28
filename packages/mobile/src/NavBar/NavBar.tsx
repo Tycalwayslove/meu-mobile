@@ -27,6 +27,7 @@ export function NavBar({
   onBack,
   ref,
   right,
+  safeArea = false,
   title,
   ...props
 }: NavBarProps) {
@@ -35,7 +36,7 @@ export function NavBar({
   const resolvedBackIcon =
     backIcon !== undefined ? backIcon : <MeuIconChevronLeft size={22} strokeWidth={2} />;
   const showBack = Boolean(backHref) || Boolean(onBack);
-  const classes = root({ bordered });
+  const classes = root({ bordered, safeArea });
 
   const backContent = (
     <>
@@ -55,6 +56,7 @@ export function NavBar({
       className={className ? `${classes} ${className}` : classes}
       data-meu-component="nav-bar"
       data-bordered={bordered ? "true" : "false"}
+      data-safe-area={safeArea ? "true" : "false"}
     >
       <div className={`${side} ${leftSide}`}>
         {showBack ? (

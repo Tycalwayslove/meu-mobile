@@ -7,7 +7,8 @@ import { defaultGlyph, imageElement, imageRoot, stateLayer } from "./Image.css";
 import type { ImageProps, ImageState } from "./types";
 
 function toCssLength(value: number | string | undefined) {
-  return typeof value === "number" ? `${value}px` : value;
+  if (typeof value !== "number") return value;
+  return `${Number.isFinite(value) ? Math.max(0, value) : 0}px`;
 }
 
 function assignRef<T>(ref: ImageProps["imageRef"], value: T | null) {

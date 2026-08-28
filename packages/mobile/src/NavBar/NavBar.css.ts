@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 export const root = recipe({
@@ -17,9 +17,16 @@ export const root = recipe({
     bordered: {
       true: { borderBottom: "1px solid var(--meu-color-border)" },
       false: { borderBottom: "1px solid transparent" }
+    },
+    safeArea: {
+      true: {
+        minHeight: "calc(var(--meu-size-navbar) + env(safe-area-inset-top, 0px))",
+        paddingBlockStart: "env(safe-area-inset-top, 0px)"
+      },
+      false: {}
     }
   },
-  defaultVariants: { bordered: true }
+  defaultVariants: { bordered: true, safeArea: false }
 });
 
 export const side = style({
@@ -50,16 +57,18 @@ export const back = style({
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus": {
+    "&:focus-visible": {
       outline: "2px solid var(--meu-color-accent)",
       outlineOffset: 1
     }
-  }
+  },
+  "@media": { "(forced-colors: active)": { border: "1px solid ButtonText" } }
 });
 
 export const backIcon = style({
   display: "inline-flex",
-  flex: "0 0 auto"
+  flex: "0 0 auto",
+  selectors: { "&:dir(rtl)": { transform: "scaleX(-1)" } }
 });
 
 export const backLabel = style({
@@ -86,4 +95,14 @@ export const title = style({
   fontSize: 17,
   fontWeight: 600,
   lineHeight: 1.4
+});
+
+globalStyle(`${title} > :is(h1, h2, h3, h4, h5, h6)`, {
+  margin: 0,
+  overflow: "inherit",
+  color: "inherit",
+  font: "inherit",
+  fontWeight: "inherit",
+  textOverflow: "inherit",
+  whiteSpace: "inherit"
 });

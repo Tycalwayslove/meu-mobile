@@ -34,7 +34,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Card: Story = { render: () => <ActionList /> };
+export const Card: Story = {
+  render: () => <ActionList />,
+  play: async ({ canvasElement }) => {
+    const action = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!action) throw new window.Error("Expected an action Cell");
+    action.click();
+    await Promise.resolve();
+    const output = canvasElement.querySelector("output");
+    if (!output || output.textContent !== "搜索商品") {
+      throw new window.Error("Cell action did not update the business-owned result");
+    }
+  }
+};
 export const Plain: Story = {
   render: () => (
     <List header="配送信息" divider="full">
@@ -49,5 +61,19 @@ export const NoDividers: Story = {
       <Cell title="第一项" />
       <Cell title="第二项" />
     </List>
+  )
+};
+export const LongContentAndRTL: Story = {
+  render: () => (
+    <div dir="rtl" style={{ width: 320 }}>
+      <List header="إعدادات الحساب ذات العنوان الطويل" mode="card">
+        <Cell
+          title="عنوان طويل يلتف دون إخفاء الإجراء الأصلي"
+          description="وصف طويل لا يعتمد على اتجاه يسار أو يمين ثابت"
+          extra="قيمة طويلة قابلة للالتفاف"
+          href="#details"
+        />
+      </List>
+    </div>
   )
 };

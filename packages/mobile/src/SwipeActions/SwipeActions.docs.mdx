@@ -1,0 +1,142 @@
+---
+name: SwipeActions
+slug: swipe-actions
+package: "@meu/mobile"
+exports: [SwipeActions]
+status: audit
+priority: P1
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "316:155"
+storyIds:
+  [gesture-swipeactions--default, gesture-swipeactions--controlled, gesture-swipeactions--disabled]
+source: packages/mobile/src/SwipeActions
+---
+
+# SwipeActions
+
+## 当前能力
+
+- 任意内容的物理 left/right 操作轨，支持受控/非受控 side、单/双侧、disabled 和宽度阈值。
+- Pointer Events 在 6px 后锁定横向，纵向交还页面；距离或 0.5px/ms 快速横扫决定开合，offset 限制在轨宽。
+- 动作是最少 44px 的原生 button，支持同步/异步结果、失败上报、重复锁和 false veto。
+- 隐藏轨不进 Tab 顺序；每侧有 focus 时显现的 reveal button，Escape、内容、外部 pointer/focus 均可关闭。
+
+## 何时使用
+
+用于移动列表行的次级快捷动作，并在 Cell 的“更多操作”中复制相同命令，保证可发现。
+
+## 何时不要使用
+
+不要作为唯一动作入口、危险确认、路由或数据层；复杂命令使用 ActionMenu，选择使用 Selector。
+
+## 结构与状态
+
+root → reveal buttons → left/right action groups → translated content。状态包括 none/left/right、dragging、loading、disabled；隐藏 group aria-hidden 且按钮 tabindex=-1。
+
+## 基础用法
+
+```tsx
+<SwipeActions rightActions={[{ key: "archive", label: "归档", onPress: archive }]}>
+  <OrderCell />
+</SwipeActions>
+```
+
+## 受控与非受控
+
+`openSide` 存在即受控；未提交请求时位移下一帧回到权威 side，键盘焦点不会进入被拒绝的隐藏轨。非受控使用 `defaultOpenSide`。动作被移除或切换 disabled 时，非受控 side 会永久归一为 null，恢复动作后不会意外重开。
+
+## 表单集成
+
+不适用。动作按钮固定 `type=button`，不隐式提交父表单。
+
+## Props
+
+API 表由 `SwipeActionsProps` 生成。action `key` 是轨内稳定 identity；`left/right` 是物理方向。`openThreshold` 夹紧到 0.1–0.9，NaN/Infinity 回退 0.35。
+
+## Events
+
+`onOpenSideChange` 区分 swipe、keyboard、content、outside、escape、action。`onPointerDown` 先执行，`preventDefault()` 可阻止内部起始；move/up/cancel/lost-capture 回调是观察器。item handler 先于 root `onAction`；任一返回 false 保持展开，throw/reject 调用 `onActionError`。
+
+## Ref 与命令式方法
+
+ref 指向根 `HTMLDivElement`。不公开命令式开合；程序化状态使用受控 `openSide`。
+
+## 键盘操作
+
+| 按键          | 行为                                                 |
+| ------------- | ---------------------------------------------------- |
+| Tab           | 进入 focus-visible reveal button；打开后进入动作按钮 |
+| Enter / Space | 打开轨或执行动作                                     |
+| Escape        | 关闭当前轨并恢复到对应 reveal button                 |
+
+## 触摸与手势
+
+只接受主指针和主按钮；6px 前不认领，纵向优势达到 6px 即取消，横向后 capture 并 preventDefault。pointercancel/lostpointercapture 回到权威 side；release 结合距离和速度。旧 WebView 在 capture 检查后丢失 capture 的异常会被安全吸收。动作按钮不启动滑动。
+
+## 无障碍
+
+轨为具名 group，动作和替代入口均为原生 button。隐藏轨 aria-hidden 且移出 Tab；受控拒绝、外部关闭或 disabled 不把焦点留在隐藏 subtree。危险 tone 只有视觉含义，确认必须由业务实现。
+
+## 动效
+
+内容 transform 使用 motion token，dragging 时无过渡，reduced-motion 1ms。取消和受控回滚可中断过渡。
+
+## 主题与定制
+
+稳定入口为 action tone/label、group/reveal accessible labels、根 style/className 和全局 Token。forced-colors 保留动作/reveal button 边界。
+
+## SSR 与 Next.js
+
+组件是 client component。服务端以 offset 0 输出关闭视觉；ResizeObserver 挂载后测量。`defaultOpenSide` 会在首次测量后展开，首屏必须打开的动作不应依赖 SSR 视觉。
+
+## RTL 与国际化
+
+left/right 是物理屏幕方向，不随 `dir` 重命名；正 offset 显示物理左轨。内置中英文文案，可覆盖。需要 start/end 时由业务按 RTL 映射数据。
+
+## 浏览器与 WebView
+
+Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window resize。iOS 13.0–13.3 没有完整 Pointer Events，滑动可能不可用，但 reveal/action 原生按钮仍可用；iOS 13.4+ 才作为滑动目标基线。尚无目标 App 真机证明。
+
+## 边界情况与已知限制
+
+- action key 必须轨内唯一；组件不自动确认危险动作。
+- 异步 handler 无 AbortSignal；卸载后忽略本地 loading 更新。
+- closed SSR 无轨宽，默认打开视觉在 layout measurement 后出现。
+- 多列表项仅通过 outside pointer/focus 互相关闭，无全局 provider。
+
+## 性能预算
+
+每行两个 ResizeObserver target，拖动只更新 transform。虚拟列表应只挂载可见行，并保持 actions 数组 identity 稳定。
+
+## 测试证据
+
+- Unit: `SwipeActions.test.tsx`（键盘、阈值、纵向仲裁、受控拒绝、动态动作归一、capture 异常、取消、outside/Escape、异步、disabled）。
+- Story interaction: `SwipeActions.stories.tsx` 已编写默认 reveal play；runner 待执行。
+- Axe: 待补。
+- SSR/hydration: `SwipeActions.ssr.test.tsx` 覆盖关闭 markup；测量 hydration 待补。
+- RTL: 物理方向契约已记录，浏览器矩阵待补。
+- Reduced motion: CSS 契约已实现，浏览器断言待补。
+- Mobile Chromium/WebKit E2E: 待补滑动/滚动竞争。
+- Chromatic Light/Dark: stories 可采集，正式基线待确认。
+- Real device: 待补。
+
+## V2 优化记录
+
+### 待优化
+
+- 补 iOS 13.4+/Android WebView 滑动、纵向滚动与多行列表 E2E。
+- 补 axe、ResizeObserver hydration 和主题视觉基线。
+
+### 已完成
+
+- 固化受控回滚、方向锁、速度/距离阈值、cancel/lost capture、异步锁、键盘替代、隐藏焦点、RTL 物理方向、reduced-motion、forced-colors 与 SSR。
+
+## 变更记录
+
+| 日期       | 版本  | 类型      | 内容                                         | 迁移说明                               |
+| ---------- | ----- | --------- | -------------------------------------------- | -------------------------------------- |
+| 2026-08-29 | 0.1.0 | hardening | 完成手势仲裁、受控焦点、异步动作与兼容事实源 | 新增可选 lost-pointer-capture 观察回调 |

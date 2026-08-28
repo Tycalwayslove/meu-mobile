@@ -70,10 +70,11 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
     function clamp(next: Transform) {
       const stage = stageRef.current;
       if (next.scale <= 1 || !stage) return initialTransform;
-      const maxX = (stage.clientWidth * (next.scale - 1)) / 2;
-      const maxY = (stage.clientHeight * (next.scale - 1)) / 2;
+      const normalizedScale = Math.min(maxZoom, Math.max(1, next.scale));
+      const maxX = (stage.clientWidth * (normalizedScale - 1)) / 2;
+      const maxY = (stage.clientHeight * (normalizedScale - 1)) / 2;
       return {
-        scale: Math.min(maxZoom, Math.max(1, next.scale)),
+        scale: normalizedScale,
         x: Math.min(maxX, Math.max(-maxX, next.x)),
         y: Math.min(maxY, Math.max(-maxY, next.y))
       };

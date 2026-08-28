@@ -60,4 +60,27 @@ describe("Collapse", () => {
     rerender(<Collapse items={items} value={["returns"]} onChange={onChange} />);
     expect(returns.getAttribute("aria-expanded")).toBe("true");
   });
+
+  it("forgets removed uncontrolled values before the item is re-added", () => {
+    const { rerender } = render(<Collapse items={items} defaultValue={["returns"]} accordion />);
+    rerender(<Collapse items={[items[0], items[2]]} defaultValue={["returns"]} accordion />);
+    expect(screen.getByRole("button", { name: "配送范围" }).getAttribute("aria-expanded")).toBe(
+      "false"
+    );
+
+    rerender(<Collapse items={items} defaultValue={["returns"]} accordion />);
+    expect(screen.getByRole("button", { name: "退换规则" }).getAttribute("aria-expanded")).toBe(
+      "false"
+    );
+  });
+
+  it("keeps collapsed interactive descendants inert", () => {
+    render(<Collapse items={items} />);
+    const trigger = screen.getByRole("button", { name: "配送范围" });
+    const panel = document.getElementById(trigger.getAttribute("aria-controls") || "");
+    if (!panel) throw new Error("Expected controlled Collapse panel");
+    expect(panel.hasAttribute("inert")).toBe(true);
+    fireEvent.click(trigger);
+    expect(panel.hasAttribute("inert")).toBe(false);
+  });
 });

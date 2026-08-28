@@ -35,10 +35,38 @@ const meta = {
   title: "Gesture/PullToRefresh",
   component: PullToRefresh,
   parameters: { layout: "padded" },
-  render: () => <PullToRefreshPreview />
+  args: { children: null, onRefresh: () => undefined }
 } satisfies Meta<typeof PullToRefresh>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { args: { children: null, onRefresh: () => undefined } };
+export const Default: Story = {
+  render: () => <PullToRefreshPreview />,
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="pull-to-refresh"]');
+    const button = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!root || !button) throw new window.Error("Expected PullToRefresh controls");
+    button.click();
+    await Promise.resolve();
+    if (!["refreshing", "complete"].includes(root.getAttribute("data-status") || "")) {
+      throw new window.Error("PullToRefresh did not start from its native button");
+    }
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    children: <p style={{ padding: 16 }}>离线内容</p>,
+    disabled: true,
+    onRefresh: () => undefined
+  }
+};
+
+export const CustomIndicator: Story = {
+  args: {
+    children: <p style={{ padding: 16 }}>库存列表</p>,
+    onRefresh: () => undefined,
+    renderIndicator: (status) => `库存状态：${status}`
+  }
+};

@@ -16,7 +16,8 @@ export const layer = recipe({
     padding: "var(--meu-space-6)",
     transition: "opacity var(--meu-motion-enter) var(--meu-motion-ease-standard)",
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(max-height: 480px)": { padding: "var(--meu-space-3)" }
     }
   },
   variants: {
@@ -55,7 +56,17 @@ export const panel = recipe({
       "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)"
     ].join(", "),
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": {
+        transform: "none",
+        transitionDuration: "1ms"
+      },
+      "(forced-colors: active)": {
+        color: "CanvasText",
+        background: "Canvas",
+        borderColor: "CanvasText",
+        boxShadow: "none"
+      },
+      "(max-height: 480px)": { maxHeight: "calc(100vh - 24px)" }
     }
   },
   variants: {
@@ -85,7 +96,9 @@ export const title = style({
   fontSize: 20,
   fontWeight: 700,
   lineHeight: 1.3,
-  letterSpacing: "-0.01em"
+  letterSpacing: "-0.01em",
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const description = style({
@@ -97,7 +110,10 @@ export const description = style({
 });
 
 export const body = style({
-  marginTop: "var(--meu-space-4)"
+  minWidth: 0,
+  marginTop: "var(--meu-space-4)",
+  overflowWrap: "anywhere",
+  wordBreak: "break-word"
 });
 
 export const actions = recipe({

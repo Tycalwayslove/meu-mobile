@@ -126,4 +126,45 @@ describe("PullToRefresh", () => {
       document.querySelector('[data-meu-component="pull-to-refresh"]')!.getAttribute("data-status")
     ).toBe("idle");
   });
+
+  it("cancels active pulls on multitouch, touch cancellation and disabling", async () => {
+    const onRefresh = vi.fn();
+    const { rerender } = render(
+      <PullToRefresh threshold={40} resistance={1} canPull={() => true} onRefresh={onRefresh}>
+        内容
+      </PullToRefresh>
+    );
+    const root = document.querySelector<HTMLElement>('[data-meu-component="pull-to-refresh"]')!;
+
+    pull(root, 60);
+    expect(root.getAttribute("data-status")).toBe("ready");
+    fireEvent.touchStart(root, {
+      touches: [
+        { clientX: 20, clientY: 80 },
+        { clientX: 40, clientY: 80 }
+      ]
+    });
+    expect(root.getAttribute("data-status")).toBe("idle");
+
+    pull(root, 60);
+    fireEvent.touchCancel(root, { touches: [] });
+    expect(root.getAttribute("data-status")).toBe("idle");
+
+    pull(root, 60);
+    rerender(
+      <PullToRefresh
+        disabled
+        threshold={40}
+        resistance={1}
+        canPull={() => true}
+        onRefresh={onRefresh}
+      >
+        内容
+      </PullToRefresh>
+    );
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(root.getAttribute("data-status")).toBe("idle");
+    fireEvent.touchEnd(root, { touches: [] });
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
 });

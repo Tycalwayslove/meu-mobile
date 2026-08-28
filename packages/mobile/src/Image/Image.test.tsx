@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { Image } from "./Image";
@@ -33,5 +34,15 @@ describe("Image", () => {
     rerender(<Image src="/broken.jpg" alt="加载失败" fallback="加载失败" />);
     fireEvent.error(screen.getByRole("img", { name: "加载失败" }));
     expect(screen.getByText("加载失败").closest('[data-state="error"]')).toBeTruthy();
+  });
+
+  it("server-renders stable native markup and normalizes unsafe numeric geometry", () => {
+    const markup = renderToString(
+      <Image src="/ssr.jpg" alt="服务端图片" width={Number.NaN} height={-24} />
+    );
+    expect(markup).toContain('data-meu-component="image"');
+    expect(markup).toContain("width:0px");
+    expect(markup).toContain("height:0px");
+    expect(markup).not.toContain("NaN");
   });
 });

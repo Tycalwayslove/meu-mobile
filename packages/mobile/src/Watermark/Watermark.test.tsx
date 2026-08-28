@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createRef } from "react";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { createWatermarkPattern, normalizeWatermarkLines } from "./pattern";
@@ -83,5 +84,30 @@ describe("Watermark", () => {
     expect(pattern.gapY).toBe(96);
     expect(pattern.offsetX).toBe(12);
     expect(pattern.offsetY).toBe(-32);
+  });
+
+  it("does not treat legitimate child updates as watermark tampering", async () => {
+    const onRemove = vi.fn();
+    const { rerender } = render(
+      <Watermark content="Meu" onRemove={onRemove}>
+        <span>第一版</span>
+      </Watermark>
+    );
+    rerender(
+      <Watermark content="Meu" onRemove={onRemove}>
+        <span>第二版</span>
+        <button type="button">新增操作</button>
+      </Watermark>
+    );
+    await waitFor(() => expect(screen.getByRole("button", { name: "新增操作" })).toBeTruthy());
+    expect(screen.getByText("第二版")).toBeTruthy();
+    expect(onRemove).not.toHaveBeenCalled();
+  });
+
+  it("server-renders a stable hidden SVG without browser globals", () => {
+    const markup = renderToString(<Watermark content="SSR">内容</Watermark>);
+    expect(markup).toContain('data-meu-component="watermark"');
+    expect(markup).toContain('aria-hidden="true"');
+    expect(markup).toContain("meu-watermark-");
   });
 });

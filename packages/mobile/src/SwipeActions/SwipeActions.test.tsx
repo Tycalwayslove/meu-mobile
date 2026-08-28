@@ -295,4 +295,100 @@ describe("SwipeActions", () => {
     drag(root, 200, 100);
     expect(onOpenSideChange).not.toHaveBeenCalled();
   });
+
+  it("permanently closes an uncontrolled side when actions disappear or the row is disabled", () => {
+    const { container, rerender } = render(
+      <SwipeActions defaultOpenSide="right" rightActions={rightActions}>
+        <span>订单</span>
+      </SwipeActions>
+    );
+    const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+    expect(root.getAttribute("data-open-side")).toBe("right");
+
+    rerender(
+      <SwipeActions defaultOpenSide="right" rightActions={[]}>
+        <span>订单</span>
+      </SwipeActions>
+    );
+    expect(root.getAttribute("data-open-side")).toBe("none");
+    rerender(
+      <SwipeActions defaultOpenSide="right" rightActions={rightActions}>
+        <span>订单</span>
+      </SwipeActions>
+    );
+    expect(root.getAttribute("data-open-side")).toBe("none");
+
+    fireEvent.click(screen.getByRole("button", { name: "显示右侧操作" }));
+    expect(root.getAttribute("data-open-side")).toBe("right");
+    rerender(
+      <SwipeActions disabled defaultOpenSide="right" rightActions={rightActions}>
+        <span>订单</span>
+      </SwipeActions>
+    );
+    expect(root.getAttribute("data-open-side")).toBe("none");
+    rerender(
+      <SwipeActions defaultOpenSide="right" rightActions={rightActions}>
+        <span>订单</span>
+      </SwipeActions>
+    );
+    expect(root.getAttribute("data-open-side")).toBe("none");
+  });
+
+  it("finishes a drag when an older WebView throws while releasing pointer capture", () => {
+    const { container } = renderSwipeActions();
+    const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+    Object.defineProperties(root, {
+      hasPointerCapture: { configurable: true, value: vi.fn(() => true) },
+      releasePointerCapture: {
+        configurable: true,
+        value: vi.fn(() => {
+          throw new DOMException("Pointer capture is already lost", "InvalidStateError");
+        })
+      },
+      setPointerCapture: { configurable: true, value: vi.fn() }
+    });
+
+    expect(() => drag(root, 200, 100)).not.toThrow();
+    expect(root.getAttribute("data-dragging")).toBe("false");
+    expect(root.getAttribute("data-open-side")).toBe("right");
+  });
+
+  it("cancels an active swipe when pointer capture is lost", async () => {
+    const { container } = renderSwipeActions();
+    const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+    await waitFor(() => expect(root.getAttribute("data-offset")).toBe("0"));
+    fireEvent.pointerDown(root, {
+      button: 0,
+      clientX: 200,
+      clientY: 20,
+      isPrimary: true,
+      pointerId: 9,
+      timeStamp: 0
+    });
+    fireEvent.pointerMove(root, {
+      clientX: 150,
+      clientY: 20,
+      isPrimary: true,
+      pointerId: 9,
+      timeStamp: 100
+    });
+    expect(root.getAttribute("data-dragging")).toBe("true");
+    fireEvent.lostPointerCapture(root, { pointerId: 9 });
+    expect(root.getAttribute("data-dragging")).toBe("false");
+    expect(root.getAttribute("data-offset")).toBe("0");
+    expect(root.getAttribute("data-open-side")).toBe("none");
+  });
+
+  it("does not focus an aria-hidden action when a controlled keyboard request is refused", async () => {
+    const user = userEvent.setup();
+    renderSwipeActions({ openSide: null, onOpenSideChange: vi.fn() });
+    const reveal = screen.getByRole("button", { name: "显示右侧操作" });
+    reveal.focus();
+    await user.keyboard("{Enter}");
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(document.activeElement).toBe(reveal);
+    expect(
+      screen.getByRole("button", { name: "归档", hidden: true }).getAttribute("tabindex")
+    ).toBe("-1");
+  });
 });

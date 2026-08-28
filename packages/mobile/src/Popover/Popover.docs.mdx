@@ -1,0 +1,130 @@
+---
+name: Popover
+slug: popover
+package: "@meu/mobile"
+exports: [Popover]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "172:264"
+storyIds:
+  [
+    feedback-popover--default,
+    feedback-popover--without-arrow,
+    feedback-popover--placement-overview,
+    feedback-popover--manual
+  ]
+source: packages/mobile/src/Popover
+---
+
+# Popover
+
+## 当前能力
+
+单触发器锚定的非模态交互浮层，支持 12 个首选位置、flip/shift/hide、箭头、点击/手动触发、受控状态、Portal、外部指针/Escape/focus-out 原因、焦点进入恢复与 Dialog 焦点分支。
+
+## 何时使用
+
+用于少量快捷操作、筛选辅助或需要交互的锚定内容。
+
+## 何时不要使用
+
+只读短说明用 Tooltip；桌面复合菜单需专用 Menu；危险操作、长任务和模态流程使用 ActionMenu/Dialog/BottomSheet。
+
+## 结构与状态
+
+`trigger[aria-haspopup=dialog] + FloatingPortal → panel[role=dialog]`。`data-placement` 是碰撞后的真实位置，`data-positioned/reference-hidden/state` 提供稳定调试状态。
+
+## 基础用法
+
+```tsx
+<Popover aria-label="订单操作" placement="bottom-end" content={<Button>复制订单号</Button>}>
+  <IconButton aria-label="更多操作" />
+</Popover>
+```
+
+## 受控与非受控
+
+传 `open` 即受控；否则由 `defaultOpen` 和 click trigger 管理。`trigger="manual"` 不响应触发器点击，只保留锚点与 ARIA 关联。
+
+## 表单集成
+
+不直接绑定表单；内容中的字段由业务持有。Popover 非模态、不锁背景滚动，提交/取消必须由内容提供。
+
+## Props
+
+placement 是首选值而非保证值；offset 默认 10、viewportPadding 默认 16，负值夹到 0，非有限值回退默认。arrow/autoFocus/closeOnEscape/closeOnOutsideClick/restoreFocus 默认 true，closeOnFocusOut 默认 false。
+
+## Events
+
+`onOpenChange(open,{reason})` 区分 trigger、outside、escape、focus-out。外部关闭以 pointerdown 判定，避免 click 延迟；受控调用方决定是否接受。
+
+## Ref 与命令式方法
+
+ref 指向 floating panel；触发器自身 ref 会与定位 ref 合并。无命令式定位方法，Floating UI 自动监听滚动/resize。
+
+## 键盘操作
+
+Enter/Space 通过原生触发器开关；打开后 Tab 进入内容，Escape 可关闭并按策略恢复焦点。非模态不圈定 Tab。
+
+## 触摸与手势
+
+使用原生点击与 pointerdown outside；不拦截滚动，不实现 hover-only 或长按触发。
+
+## 无障碍
+
+触发器获得 aria-haspopup/expanded/controls；panel 必须由 aria-label 或 aria-labelledby 命名。无 aria-modal、Mask 或 scroll lock；嵌套模态时注册合法 focus branch。
+
+## 动效
+
+仅 scale/opacity；transform-origin 随实际方向变化。reduced-motion 取消 scale 并缩短到 1ms。
+
+## 主题与定制
+
+使用 surface/ink/border/shadow token；forced-colors 覆盖 panel 与 arrow。className/style 作用于 panel，定位属性由组件保持权威。
+
+## SSR 与 Next.js
+
+SSR 只输出已关联触发器，浮层在 hydration 后挂载，避免服务端几何猜测。Next H5 页面可配置 Portal 容器。
+
+## RTL 与国际化
+
+Floating UI 按计算方向解释 start/end；内置无可见文案，panel lang/theme 来自 ConfigProvider。
+
+## 浏览器与 WebView
+
+Floating UI 提供滚动跟随和碰撞处理；兼容目标 Chrome/WebView 70+、iOS 13+。长标识符提供 `word-break: break-word` 旧内核回退与现代 `overflow-wrap: anywhere`；ResizeObserver/视觉定位由依赖降级处理。
+
+## 边界情况与已知限制
+
+触发器必须可聚焦并接受 ref/event props；Fragment、纯文本或不转发 ref 的组件不受支持。referenceHidden 时 panel 隐藏但状态仍由 owner 控制。
+
+## 性能预算
+
+打开时 O(1) DOM 和 Floating UI 的滚动/resize 订阅；关闭且未 forceMount 时无 panel/定位监听。
+
+## 测试证据
+
+- Unit: 触发/关联、outside/Escape、manual、焦点恢复、forceMount、RTL/theme/motion Portal、模态分支、异常几何与 ref
+- SSR/hydration: `Popover.ssr.test.tsx` 验证服务端仅关联 trigger
+- Axe / 双引擎定位 / Chromatic / 真机读屏: 最终统一门禁
+
+## V2 优化记录
+
+### 待优化
+
+补 12 placement 截图、嵌套滚动容器、软键盘和 iOS 外部焦点证据。
+
+### 已完成
+
+冻结非模态语义与关闭原因，补异常几何、forced-colors、长词、TSDoc、SSR 与永久文档。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                       | 迁移说明    |
+| ---------- | ------ | -------- | -------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior | 商用定位、焦点与证据链加固 | 无 API 破坏 |

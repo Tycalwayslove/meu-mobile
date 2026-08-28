@@ -1,0 +1,128 @@
+---
+name: Cell
+slug: cell
+package: "@meu/mobile"
+exports: [Cell]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "67:482"
+storyIds:
+  [
+    information-cell-list--card,
+    information-cell-list--plain,
+    information-cell-list--no-dividers,
+    information-cell-list--long-content-and-rtl
+  ]
+source: packages/mobile/src/List
+---
+
+# Cell
+
+## 当前能力
+
+移动端信息行，根据 `href`、点击能力或静态用途分别输出原生 anchor、button 或 div；支持 title/description/prefix/extra/suffix、箭头、禁用、RTL、长内容和 List 列表语义。
+
+## 何时使用
+
+用于设置入口、订单摘要、详情跳转和单次即时操作；整行语义与视觉点击区域保持一致。
+
+## 何时不要使用
+
+不要在交互 Cell 内嵌套另一个链接、按钮或表单控件；选择字段使用 Radio/Checkbox/Selector，大量数据使用 VirtualList。
+
+## 结构与状态
+
+`frame[role=listitem] → a|button|div + optional divider`。状态包括 static、interactive、disabled、active、focus-visible。
+
+## 基础用法
+
+```tsx
+<Cell title="收货地址" description="北京市朝阳区" href="/address" />
+```
+
+## 受控与非受控
+
+不适用；Cell 不持有业务选中值。active 仅表达调用方给定的当前视觉状态。
+
+## 表单集成
+
+动作模式默认 `type=button`，不会意外提交祖先表单；只有调用方显式使用 submit 才参与原生提交。
+
+## Props
+
+非空 href 优先渲染 anchor；否则 clickable/onClick 渲染 button。title、description、prefix、extra、suffix 保留数值 0。disabled anchor 移除 href 与 Tab stop；arrow 默认按可交互性显示。
+
+## Events
+
+沿用原生 onClick。disabled button 不派发；disabled anchor 阻止默认与冒泡，也不调用业务回调。
+
+## Ref 与命令式方法
+
+ref 指向实际 `HTMLAnchorElement | HTMLButtonElement | HTMLDivElement`；无额外命令式 API。
+
+## 键盘操作
+
+Tab 只到达 enabled anchor/button；Enter 激活二者；Space 激活 button，anchor 保持浏览器原生滚动行为。
+
+## 触摸与手势
+
+交互行最小高度 56px，使用原生点击，不拦截页面滚动或实现滑动动作。
+
+## 无障碍
+
+在 List 中 frame 提供 listitem，真实节点保留原生链接/按钮语义。箭头装饰隐藏；业务槽位中的语义内容会参与 accessible name。
+
+## 动效
+
+只使用短暂背景/颜色反馈；reduced-motion 不影响语义。无位移或高度动画。
+
+## 主题与定制
+
+使用 surface/subtle/ink/muted/border token；forced-colors 使用系统边界。逻辑间距支持 RTL。
+
+## SSR 与 Next.js
+
+根据 props 确定性输出原生节点；Next 路由可在业务适配层使用 href 或点击导航，不依赖 next/navigation。
+
+## RTL 与国际化
+
+prefix/suffix/arrow 使用逻辑端布局并随 dir 镜像；组件无内置可见文案。
+
+## 浏览器与 WebView
+
+基于 flex 与原生 a/button/div，兼容 Chrome/WebView 70+、iOS 13+。
+
+## 边界情况与已知限制
+
+key/路由身份由父列表管理；超长文本允许换行。自定义复杂 children 需避免破坏整行唯一交互目标原则。
+
+## 性能预算
+
+O(1) DOM，无测量、Observer 或监听；大量行应结合 VirtualList。
+
+## 测试证据
+
+- Unit: 静态/button/link、disabled link、0 值槽、RTL、长内容、List 语义
+- SSR/hydration: `List.ssr.test.tsx` 覆盖 Cell 原生节点；hydration 专测待补
+- Axe / 双引擎 / Chromatic / 真机读屏: 最终统一门禁
+
+## V2 优化记录
+
+### 待优化
+
+补 200% 字号、长多语言、VoiceOver 链接/按钮公告与真机触摸证据。
+
+### 已完成
+
+冻结原生节点选择、disabled link、0 值槽和 RTL/forced-colors 契约，补永久文档与 SSR 证据。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                         | 迁移说明    |
+| ---------- | ------ | -------- | ---------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior | 商用语义、兼容与文档证据加固 | 无 API 破坏 |

@@ -17,3 +17,33 @@ type Story = StoryObj<typeof meta>;
 export const End: Story = {};
 export const Middle: Story = { args: { direction: "middle", rows: 1 } };
 export const Start: Story = { args: { direction: "start", rows: 2 } };
+export const ControlledExpanded: Story = { args: { expanded: true, rows: 1 } };
+export const InteractiveExpansion: Story = {
+  render: () => (
+    <div style={{ width: 220, fontSize: 16, lineHeight: "24px" }}>
+      <Ellipsis content={content} rows={1} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    const action = canvasElement.querySelector<HTMLButtonElement>("button");
+    if (!action) throw new window.Error("Expected a measured Ellipsis action");
+    action.click();
+    await Promise.resolve();
+    if (action.getAttribute("aria-expanded") !== "true") {
+      throw new window.Error("Ellipsis did not expose its expanded state");
+    }
+  }
+};
+export const NarrowRTL: Story = {
+  render: (args) => (
+    <div dir="rtl" style={{ width: 240, fontSize: 16, lineHeight: "24px" }}>
+      <Ellipsis
+        {...args}
+        content="نص عربي طويل يختبر القياس والالتفاف وزر التوسيع في شاشة ضيقة"
+        rows={2}
+      />
+    </div>
+  )
+};

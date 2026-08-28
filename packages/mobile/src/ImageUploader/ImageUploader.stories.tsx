@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ThemeProvider } from "../ConfigProvider";
 import { ImageUploader } from "./ImageUploader";
 import type { ImageUploaderItem, ImageUploaderUploadContext } from "./types";
 
@@ -91,4 +92,34 @@ export const ValidationError: Story = {
     value: initialItems,
     status: "error"
   }
+};
+
+export const Interaction: Story = {
+  render: () => <ControlledPreview />,
+  play: async ({ canvasElement }) => {
+    const preview = canvasElement.querySelector<HTMLButtonElement>("button[aria-label$='预览']");
+    if (!preview) throw new window.Error("Expected an image preview button");
+    preview.click();
+    await Promise.resolve();
+    const close = document.querySelector<HTMLButtonElement>("button[aria-label='关闭图片预览']");
+    if (!close) throw new window.Error("ImageViewer did not open from ImageUploader");
+    close.click();
+  }
+};
+
+export const LightAndDark: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {(["light", "dark"] as const).map((theme) => (
+        <ThemeProvider key={theme} theme={theme} style={{ padding: 16 }}>
+          <ImageUploader
+            aria-label={`${theme} 商品图片`}
+            value={initialItems}
+            upload={simulateUpload}
+            maxCount={3}
+          />
+        </ThemeProvider>
+      ))}
+    </div>
+  )
 };

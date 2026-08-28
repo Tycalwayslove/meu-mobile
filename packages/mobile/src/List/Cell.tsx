@@ -54,13 +54,19 @@ export function Cell({
 
   const cellContent = (
     <>
-      {prefix ? <span className={prefixStyle}>{prefix}</span> : null}
+      {prefix !== undefined && prefix !== null ? (
+        <span className={prefixStyle}>{prefix}</span>
+      ) : null}
       <span className={content}>
         <span className={titleStyle}>{title}</span>
-        {description ? <span className={descriptionStyle}>{description}</span> : null}
+        {description !== undefined && description !== null ? (
+          <span className={descriptionStyle}>{description}</span>
+        ) : null}
       </span>
-      {extra ? <span className={extraStyle}>{extra}</span> : null}
-      {suffix ? <span className={suffixStyle}>{suffix}</span> : null}
+      {extra !== undefined && extra !== null ? <span className={extraStyle}>{extra}</span> : null}
+      {suffix !== undefined && suffix !== null ? (
+        <span className={suffixStyle}>{suffix}</span>
+      ) : null}
       {arrowNode ? (
         <span className={arrowStyle} aria-hidden="true">
           {arrowNode}
@@ -129,7 +135,10 @@ export function Cell({
       {rowNode}
       {listContext.insideList && listContext.divider !== "none" ? (
         <span
-          className={dividerStyle({ kind: listContext.divider, prefix: Boolean(prefix) })}
+          className={dividerStyle({
+            kind: listContext.divider,
+            prefix: prefix !== undefined && prefix !== null
+          })}
           aria-hidden="true"
           data-meu-cell-divider
         />

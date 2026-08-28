@@ -1,0 +1,148 @@
+---
+name: ImageUploader
+slug: image-uploader
+package: "@meu/mobile"
+exports: [ImageUploader]
+status: implementation
+priority: P2
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "388:72"
+storyIds:
+  [
+    data-entry-imageuploader--controlled,
+    data-entry-imageuploader--empty,
+    data-entry-imageuploader--full,
+    data-entry-imageuploader--read-only,
+    data-entry-imageuploader--validation-error,
+    data-entry-imageuploader--interaction,
+    data-entry-imageuploader--light-and-dark
+  ]
+source: packages/mobile/src/ImageUploader
+---
+
+# ImageUploader
+
+## 当前能力
+
+原生 file input、accept/maxSize/maxCount/beforeUpload 校验、调用方 transport、AbortSignal、进度、失败重试/取消、object URL 回收、受控/非受控成功值、异步删除 veto、ImageViewer 预览和 Field 关联。成功值与临时 File/task 严格分离。
+
+## 何时使用
+
+商品、评价、凭证等有限图片集合上传；transport 必须由业务提供，并负责鉴权、压缩、持久化与服务端校验。
+
+## 何时不要使用
+
+通用文件使用专用 FileUploader；即时相机/裁剪流程需业务编排。accept 只是选择器提示和客户端预检，不是安全边界。
+
+## 结构与状态
+
+命名 group → success cells / pending-uploading-error task cells / add cell → hidden native file input；可选 ImageViewer。状态包括 default/error、disabled/readOnly/full、task pending/uploading/error、异步 deleting。
+
+## 基础用法
+
+```tsx
+<ImageUploader value={images} upload={uploadImage} onChange={setImages} maxCount={6} multiple />
+```
+
+## 受控与非受控
+
+`value` 存在即受控，调用方必须在 `onChange` 后提交新数组；否则 UI 保持原值。非受控使用 `defaultValue`。任务队列始终由组件内部管理，不进入成功值。
+
+## 表单集成
+
+native input 只负责选取 File，选择后会清空，所以 `name` 不代表成功 URL 的 FormData。完整绑定使用 `MeuFormImageUploader`；它维护成功数组、dirty/touched 与 Field 错误。原生 form reset 不重置上传任务。
+
+## Props
+
+API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函数返回 true 表示拒绝。`beforeUpload` 返回 File 可替换文件，返回 null 拒绝。maxCount 同时计算成功值与非 error 活动任务。
+
+## Events
+
+- `onChange(items,{item,reason})`：成功 upload 或获准 remove 后触发。
+- `onReject({files,accepted,rejected,reason})`：每个校验阶段触发，不可取消。
+- `onDelete(item)`：在发布 remove 前 await；返回 false veto，期间删除按钮锁定以避免重复。
+- `onUploadQueueChange(tasks)`：任务状态 effect 后通知；只读快照不含 AbortController/object URL 所有权。
+- `onCountExceed(exceed)`：maxCount 截断时触发。
+
+## Ref 与命令式方法
+
+`chooseFiles`、`retry(taskId)`、`clearFailed()`、`input`、`nativeElement`。方法遵守 disabled/readOnly；卸载会 abort 并 revoke 未完成任务 URL。
+
+## 键盘操作
+
+| 按键          | 行为                                |
+| ------------- | ----------------------------------- |
+| Tab           | 依次进入预览、删除、重试、添加按钮  |
+| Enter / Space | 激活对应原生按钮或打开文件选择器    |
+| Escape        | 在 ImageViewer 打开时关闭并返回焦点 |
+
+## 触摸与手势
+
+添加、删除、重试至少 44×44；预览占满 cell。组件不实现拖拽排序、裁剪或手势删除。
+
+## 无障碍
+
+根 group 与 native input 同步接受 Field/显式名称和描述，invalid 保留在 native input 与根 `data-state`；每张成功图有独立预览/删除名称。上传任务使用 progressbar 数值语义，失败保留原生重试按钮。disabled 禁止全部预览与变更；readOnly 允许预览但禁止添加/删除/重试。
+
+## 动效
+
+仅进度条宽度过渡；reduced-motion 为 1ms。任务取消和删除不等待视觉动画。
+
+## 主题与定制
+
+网格、状态色、按钮和圆角来自 Token；forced-colors 保留操作边界和 Highlight 进度。稳定入口为 columns/renderItem/renderUpload/imageFit/className/style/data 属性。
+
+## SSR 与 Next.js
+
+服务端输出成功值与 file input，不创建 File、URL 或 AbortController，直到客户端选择文件。upload 函数不得在 render 执行；Next Server Component 边界外使用本 client component。
+
+## RTL 与国际化
+
+删除操作使用逻辑端定位，网格自然镜像；内置 zh-CN/en-US 文案来自 ConfigProvider。业务 alt、错误与 transport 文案自行本地化。
+
+## 浏览器与 WebView
+
+依赖 file input、File、AbortController、URL.createObjectURL。accept/capture 行为受 Android/iOS WebView 权限和系统 picker 决定；服务端仍必须重新验证 MIME、大小和内容。
+
+## 边界情况与已知限制
+
+- `beforeUpload` 和 transport 可异步；宿主应避免同时触发多个外部选择器。
+- 不内置压缩、EXIF 旋转、裁剪、分片、后台上传或离线恢复。
+- 受控调用方必须用稳定 key，且合并并发完成结果。
+- `showFailed=false` 只隐藏失败 cell，任务仍可由 ref 清理。
+
+## 性能预算
+
+建议 maxCount 有界；每任务最多一个 object URL，并在成功、删除或卸载时回收。大图解码/压缩必须放到调用方 worker/服务端。
+
+## 测试证据
+
+- Unit: `ImageUploader.test.tsx` 覆盖 SSR、原生选择、校验、进度、受控、删除 veto/防重、预览、abort、URL 回收、Field 语义。
+- Story interaction: Interaction 预览/关闭 play 已编写并通过 typecheck；Story runner 未执行。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 已覆盖；hydration 专测未执行。
+- RTL: 逻辑 CSS 已实现，浏览器截图待补。
+- Reduced motion: CSS 降级已实现。
+- Mobile Chromium/WebKit E2E: 未执行系统 picker 真机链路。
+- Chromatic Light/Dark: 关键状态 Story 已有，基线待执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+补 picker/camera 真机、并发 beforeUpload、服务端拒绝映射、axe 与 WebKit object URL 压力测试。
+
+### 已完成
+
+补齐 group/Field 语义、progressbar、逻辑方向、forced-colors 与异步删除防重；固化 transport 和表单所有权边界。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                         | 迁移说明         |
+| ---------- | ------ | -------- | ---------------------------- | ---------------- |
+| 2026-08-29 | 未发布 | behavior | 上传任务语义和异步删除锁完善 | 既有回调签名不变 |

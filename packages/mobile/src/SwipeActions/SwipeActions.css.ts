@@ -39,7 +39,7 @@ export const actionButton = recipe({
     height: "100%",
     padding: "var(--meu-space-2) var(--meu-space-4)",
     boxSizing: "border-box",
-    border: 0,
+    border: "1px solid transparent",
     borderRadius: 0,
     font: "inherit",
     fontWeight: 600,
@@ -58,6 +58,13 @@ export const actionButton = recipe({
         cursor: "not-allowed",
         color: "var(--meu-color-muted)",
         background: "var(--meu-color-subtle)"
+      }
+    },
+    "@media": {
+      "(forced-colors: active)": {
+        color: "ButtonText",
+        background: "ButtonFace",
+        borderColor: "ButtonText"
       }
     }
   },
@@ -126,7 +133,12 @@ export const keyboardAction = style({
     "&:disabled": { cursor: "not-allowed", opacity: 0 }
   },
   "@media": {
-    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      background: "ButtonFace",
+      border: "1px solid ButtonText"
+    }
   }
 });
 

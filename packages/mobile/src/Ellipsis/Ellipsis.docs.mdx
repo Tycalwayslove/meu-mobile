@@ -1,0 +1,139 @@
+---
+name: Ellipsis
+slug: ellipsis
+package: "@meu/mobile"
+exports: [Ellipsis]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "87:74"
+storyIds:
+  [
+    information-ellipsis--end,
+    information-ellipsis--middle,
+    information-ellipsis--start,
+    information-ellipsis--controlled-expanded,
+    information-ellipsis--interactive-expansion,
+    information-ellipsis--narrow-rtl
+  ]
+source: packages/mobile/src/Ellipsis
+---
+
+# Ellipsis
+
+## 当前能力
+
+按真实容器宽度对纯文本进行 start/end/middle、多行截断；受控/非受控展开；ResizeObserver 与 window resize fallback；SSR 原生 clamp 首帧；完整文本始终供读屏获取。
+
+## 何时使用
+
+用于卡片摘要、说明和长标识符的视觉压缩，且用户可选展开查看完整内容。
+
+## 何时不要使用
+
+法律文本、错误原因、主要操作说明不能默认隐藏。富文本、链接混排或需要保留 DOM 标记时不要使用，因为 content 仅接受 string。
+
+## 结构与状态
+
+`root → visually-hidden full text + aria-hidden visual text + action? + hidden measurement mirror`。状态 pending、complete、collapsed、expanded。
+
+## 基础用法
+
+```tsx
+<Ellipsis content={description} rows={2} direction="end" />
+```
+
+## 受控与非受控
+
+expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 content/direction/rows 身份隔离，prop 更新等待新测量时显示当前完整内容的 CSS clamp，不闪回旧文本。
+
+## 表单集成
+
+不提交值；展开按钮固定 type=button，可安全放入 form。
+
+## Props
+
+rows 归一为至少 1 的有限整数；非有限值回退 1。expandText/collapseText 为 falsy 时对应操作隐藏。direction 只控制保留文本片段，不改变文档方向。
+
+## Events
+
+onExpandedChange(next,event) 由按钮触发；受控状态不乐观改变。内容/行数/方向变化进入 pending 时保留上一轮操作按钮，避免仍需截断的重测过程卸载焦点。onEllipsisChange 仅在完成测量且布尔结果变化时触发。
+
+## Ref 与命令式方法
+
+ref 指向根 div，可用于测量/选择；无公开 remeasure 方法，容器 resize 与字体 ready 自动触发。
+
+## 键盘操作
+
+| 按键          | 行为                  |
+| ------------- | --------------------- |
+| Tab           | 聚焦可见展开/收起按钮 |
+| Enter / Space | 原生切换展开状态      |
+
+## 触摸与手势
+
+操作按钮至少 44×44px，不拦截滚动、长按选择或复制。
+
+## 无障碍
+
+完整文本通过 VisuallyHidden 暴露一次，视觉候选 aria-hidden，避免读出省略号或重复。按钮使用 aria-expanded；本地化按钮文案由调用方覆盖。
+
+## 动效
+
+无展开动画，状态立即替换，因此 reduced-motion 不适用。
+
+## 主题与定制
+
+按钮使用 accent Token；forced-colors 使用 LinkText/ButtonText。字体、line-height 与颜色继承容器；内部测量 class 非 API。
+
+## SSR 与 Next.js
+
+服务端输出完整 accessible text 与完整视觉文本的 CSS line-clamp fallback，不输出未经测量的按钮。hydration 初始结构一致，client effect 后再精确候选。
+
+## RTL 与国际化
+
+逻辑 margin/padding 支持 RTL；start/end 是文本数组的起止，不自动按 bidi 视觉顺序重排。复杂混合方向内容应先由业务确认显示策略。
+
+## 浏览器与 WebView
+
+ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测量。Array.from 按 Unicode code point 切分，但不保证 emoji ZWJ/组合字素完整，应避免对关键 emoji 标识做 middle 截断。
+
+## 边界情况与已知限制
+
+宽度为 0 时保持 pending，直到 resize；CSS/JS 测量受调用方字体与 line-height 影响。全选复制可能包含辅助隐藏文本与视觉文本，单独复制建议从业务原始 content 提供复制按钮。
+
+## 性能预算
+
+每次测量使用 O(log n) 次布局读取，每实例一个 ResizeObserver；大列表中应限制实例数量或预先截断非关键文本。
+
+## 测试证据
+
+- Unit: 测量、三向候选基础、受控展开、内容更新陈旧帧、非有限 rows
+- Story interaction: InteractiveExpansion 验证测量后展开状态
+- Axe: 待 CI
+- SSR/hydration: `Ellipsis.ssr.test.tsx` 验证稳定 fallback；hydration 专测待补
+- RTL: NarrowRTL Story
+- Reduced motion: 无动画，不适用
+- Mobile Chromium/WebKit E2E: 待补真实排版测量
+- Chromatic Light/Dark: 待建立
+- Real device: 待补
+
+## V2 优化记录
+
+### 待优化
+
+补 grapheme segmenter 可选策略、双引擎真实测量、复制体验与字体加载 E2E。
+
+### 已完成
+
+修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调；补 RTL/forced-colors/SSR 边界。
+
+## 变更记录
+
+| 日期       | 版本   | 类型 | 内容                              | 迁移说明                         |
+| ---------- | ------ | ---- | --------------------------------- | -------------------------------- |
+| 2026-08-29 | 未发布 | fix  | V2 测量身份、异常 rows 与兼容降级 | API 兼容；非有限 rows 现统一为 1 |

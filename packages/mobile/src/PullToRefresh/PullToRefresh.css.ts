@@ -62,6 +62,13 @@ export const keyboardAction = style({
       transform: "translate3d(-50%, 0, 0)"
     },
     "&:disabled": { cursor: "not-allowed", opacity: 0 }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      background: "ButtonFace",
+      border: "1px solid ButtonText"
+    }
   }
 });
 

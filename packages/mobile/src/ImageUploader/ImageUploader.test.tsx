@@ -229,11 +229,61 @@ describe("ImageUploader", () => {
         <ImageUploader value={[existingItem]} upload={vi.fn()} readOnly />
       </Field>
     );
-    const input = screen.getByLabelText<HTMLInputElement>(/商品图片/);
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error("Expected native file input");
     expect(input.disabled).toBe(true);
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.getAttribute("aria-describedby")).toContain("description");
     expect(input.getAttribute("aria-describedby")).toContain("error");
     expect(screen.queryByRole("button", { name: "删除 商品正面" })).toBeNull();
+    expect(screen.getByRole("group", { name: /商品图片/ }).getAttribute("data-state")).toBe(
+      "error"
+    );
+  });
+
+  it("exposes task progress semantics and locks an asynchronous delete", async () => {
+    let uploadContext: ImageUploaderUploadContext | undefined;
+    const upload = vi.fn(
+      (_file: File, context: ImageUploaderUploadContext) =>
+        new Promise<ImageUploaderItem>(() => {
+          uploadContext = context;
+        })
+    );
+    let approveDelete: (() => void) | undefined;
+    const onDelete = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          approveDelete = resolve;
+        })
+    );
+    render(
+      <ImageUploader
+        aria-label="商品图片"
+        defaultValue={[existingItem]}
+        upload={upload}
+        onDelete={onDelete}
+      />
+    );
+
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error("Expected native file input");
+    fireEvent.change(input, {
+      target: { files: [new File(["x"], "progress.jpg", { type: "image/jpeg" })] }
+    });
+    await waitFor(() => expect(uploadContext).toBeTruthy());
+    act(() => {
+      if (uploadContext) uploadContext.onProgress(42);
+    });
+    const progress = await screen.findByRole("progressbar", { name: "progress.jpg" });
+    expect(progress.getAttribute("aria-valuenow")).toBe("42");
+
+    const remove = screen.getByRole("button", { name: "删除 商品正面" });
+    fireEvent.click(remove);
+    await waitFor(() => expect(remove).toHaveProperty("disabled", true));
+    fireEvent.click(remove);
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    act(() => {
+      if (approveDelete) approveDelete();
+    });
   });
 });

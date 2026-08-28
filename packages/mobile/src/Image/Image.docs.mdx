@@ -1,0 +1,138 @@
+---
+name: Image
+slug: image
+package: "@meu/mobile"
+exports: [Image]
+status: implementation
+priority: P0
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "85:90"
+storyIds:
+  [
+    information-image--loaded,
+    information-image--fallback,
+    information-image--lazy,
+    information-image--light-and-dark
+  ]
+source: packages/mobile/src/Image
+---
+
+# Image
+
+## 当前能力
+
+原生 `img` 的 loading/loaded/error 状态封装，支持 placeholder/fallback、必填 alt、lazy/eager、async decoding、srcSet/sizes、object-fit、跨域与 referrer policy。固定尺寸在加载和失败期间保留，异常数值归一为 0；不自行请求、缓存或重试。
+
+## 何时使用
+
+商品图、内容图和需要稳定占位的响应式媒体。装饰图片显式传 `alt=""`。
+
+## 何时不要使用
+
+头像使用 Avatar；全屏手势查看使用 ImageViewer；Next Image 的服务端优化、CDN loader 和 blur data URL 由应用层负责。
+
+## 结构与状态
+
+root → loading placeholder / error fallback → native img。`data-state=loading|loaded|error`；root 公开 `data-meu-component=image`。组件本身非交互，没有 pressed/disabled/selected。
+
+## 基础用法
+
+```tsx
+<Image src={product.src} alt={product.name} width={320} height={180} loading="lazy" />
+```
+
+## 受控与非受控
+
+不适用。`src/srcSet` 是调用方事实源；源变化会进入新一轮 loading。内部只记录当前源的加载状态。
+
+## 表单集成
+
+不适用，不参与 FormData、dirty 或 validation。
+
+## Props
+
+API 由 `ImageProps` 生成。`width/height` 的 number 解释为非负 px；字符串原样进入 CSS。`style.width/height` 仅在对应 prop 未提供时生效。fallback/placeholder 可以是 ReactNode，但不应放交互控件。
+
+## Events
+
+`onLoad/onError` 在对应原生 img 事件之后更新视觉状态并透传事件；不可取消，也不自动重试。
+
+## Ref 与命令式方法
+
+`ref` 指向 root div；`imageRef` 指向当前 img。空源或 error 后 img 卸载，imageRef 为 null。无命令式重试。
+
+## 键盘操作
+
+| 按键   | 行为                                      |
+| ------ | ----------------------------------------- |
+| 不适用 | Image 非交互；链接/按钮语义由外层元素提供 |
+
+## 触摸与手势
+
+不拦截触摸。44×44 只用于默认状态层的可见性，不代表图片是触控目标。
+
+## 无障碍
+
+加载成功由原生 img/alt 提供语义；失败时 root 以相同 alt 暴露 `role=img`。空 alt 的失败状态 `aria-hidden`。loading root 使用 `aria-busy`，不建立 live region，避免列表批量播报。
+
+## 动效
+
+加载完成仅 opacity 淡入；`prefers-reduced-motion` 下缩为 1ms。没有循环动画。
+
+## 主题与定制
+
+背景、文字与圆角来自 Meu Token；forced-colors 增加系统色边界。稳定定制入口为 radius、fit、className/style、placeholder/fallback 与 data 属性。
+
+## SSR 与 Next.js
+
+首屏不读取浏览器全局；有源时 SSR 输出占位与 img，缓存完成检查在 effect 中执行。它不是 `next/image` 替代品，不提供预加载、loader 或服务端尺寸推导。
+
+## RTL 与国际化
+
+布局无方向性；alt/fallback 文案由调用方本地化。
+
+## 浏览器与 WebView
+
+依赖原生 img、object-fit、CSS Grid 与 requestAnimationFrame。旧 WKWebView 不支持 native lazy 时会退化为 eager；内容和错误状态仍正确。
+
+## 边界情况与已知限制
+
+- 未知尺寸仍可能产生 CLS，生产环境应提供 width/height 或稳定容器比例。
+- 失败后需改变 src/srcSet 才会重试；组件不做指数退避。
+- CSS 字符串尺寸的合法性由浏览器决定；仅 number 会做有限值与非负归一。
+
+## 性能预算
+
+常数 DOM；图片字节、解码、响应式候选和缓存策略属于调用方。长列表应使用 lazy 和 CDN 裁剪。
+
+## 测试证据
+
+- Unit: `Image.test.tsx` 覆盖原生属性、加载、失败、空源、异常尺寸。
+- Story interaction: Fallback play 与 LightAndDark 已编写并通过 typecheck；Story runner 未执行。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 覆盖稳定 markup；hydration 专测未执行。
+- RTL: 无方向性逻辑。
+- Reduced motion: CSS 降级已实现，浏览器截图待补。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: Story 已建立，基线待执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+补真实 CDN/srcSet、缓存命中 hydration、VoiceOver/TalkBack 与移动 WebView lazy 测试。
+
+### 已完成
+
+明确状态机、错误语义、SSR/Next 边界；归一异常数值尺寸并补 forced-colors/reduced-motion。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                               | 迁移说明         |
+| ---------- | ------ | -------- | ---------------------------------- | ---------------- |
+| 2026-08-29 | 未发布 | behavior | 异常数值尺寸稳定归零并完成 V2 契约 | 合法既有输入不变 |

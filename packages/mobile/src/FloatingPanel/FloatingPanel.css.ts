@@ -66,6 +66,7 @@ export const handle = style({
   flex: "0 0 44px",
   width: "100%",
   minHeight: 44,
+  boxSizing: "border-box",
   padding: 0,
   color: "var(--meu-color-muted)",
   background: "var(--meu-color-surface)",
@@ -87,6 +88,13 @@ export const handle = style({
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
     "&:active": { cursor: "grabbing" },
     "&:disabled": { cursor: "not-allowed", opacity: 0.55 }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      background: "ButtonFace",
+      border: "1px solid ButtonText"
+    }
   }
 });
 

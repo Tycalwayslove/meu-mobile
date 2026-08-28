@@ -1,0 +1,152 @@
+---
+name: ImageViewer
+slug: image-viewer
+package: "@meu/mobile"
+exports: [ImageViewer]
+status: implementation
+priority: P2
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "379:2919"
+storyIds:
+  [
+    feedback-imageviewer--gallery,
+    feedback-imageviewer--single,
+    feedback-imageviewer--minimal-controls,
+    feedback-imageviewer--empty,
+    feedback-imageviewer--error,
+    feedback-imageviewer--keyboard-interaction,
+    feedback-imageviewer--dark-theme
+  ]
+source: packages/mobile/src/ImageViewer
+---
+
+# ImageViewer
+
+## 当前能力
+
+Portal 全屏模态画廊，支持受控/非受控 open 与 index、scroll lock、focus trap/restore、计数、空/失败、footer、前后切换、pinch/双击/按钮/键盘缩放和放大后平移。所有关键手势都有按钮或键盘等价路径。
+
+## 何时使用
+
+查看商品、评价和凭证大图；单图与有限画廊共用同一组件。
+
+## 何时不要使用
+
+内嵌缩略图使用 Image；视频、PDF、编辑裁剪和无限媒体流不属于此组件。
+
+## 结构与状态
+
+Portal layer → Mask → dialog → close/counter → Carousel/ZoomableImage → zoom controls/footer。状态包括 open/closed presence、index、scale、loading/error/empty、full/minimal controls。
+
+## 基础用法
+
+```tsx
+<ImageViewer
+  open={open}
+  images={images}
+  index={index}
+  onIndexChange={setIndex}
+  onOpenChange={setOpen}
+/>
+```
+
+## 受控与非受控
+
+open 使用 `open/defaultOpen/onOpenChange`；index 使用 `index/defaultIndex/onIndexChange`。受控调用方不提交回调值时保持权威输入。越界、NaN 和 Infinity 会归一到有效索引；空数组为 0。
+
+## 表单集成
+
+不适用。Viewer 不修改字段值；Uploader/Form adapter 只在外层持有成功图片数组。
+
+## Props
+
+API 由 `ImageViewerProps` 生成。maxZoom 最小 1、非有限回退 3；doubleTapZoom 被限制在 1..maxZoom。每个 item 必须提供 src 与 alt；装饰图也应考虑画廊是否仍有可理解名称。
+
+## Events
+
+`onOpenChange(open,{reason})` 区分 close-button/escape；`onIndexChange(index,{reason})` 区分 drag/previous/next/imperative；`onScaleChange(scale,{index,reason})` 区分 double-tap/pinch/reset/zoom-in/zoom-out。只有实际变化才发布 index/scale。
+
+## Ref 与命令式方法
+
+`goTo/previous/next/resetZoom/nativeElement`。命令式导航仍经过 loop/clamp，并以 imperative reason 发布。
+
+## 键盘操作
+
+| 按键                   | 行为                           |
+| ---------------------- | ------------------------------ |
+| Escape                 | closeOnEscape 时请求关闭       |
+| ArrowLeft / ArrowRight | 按 LTR/RTL 视觉方向切换        |
+| + / = / -              | 放大 / 缩小                    |
+| 0                      | 重置缩放                       |
+| Tab / Shift+Tab        | 在模态内循环，关闭后恢复触发器 |
+
+## 触摸与手势
+
+双指缩放、双击切换缩放、放大后单指/鼠标平移；scale>1 时暂停 Carousel 横向拖动。控制按钮均为 44×44。实际 iOS 边缘返回、页面滚动和多指取消仍需真机验证。
+
+## 无障碍
+
+根为命名 `aria-modal` dialog，打开时锁滚动并圈定/恢复焦点。图片使用 item.alt；计数器 polite/atomic。空和错误状态保留关闭操作。minimal 只隐藏画廊与缩放控制，不隐藏关闭按钮。
+
+## 动效
+
+layer opacity 和 transform 使用 Meu motion；reduced-motion 缩为 1ms。手势交互中 transition 为 0，松手后立即 clamp。
+
+## 主题与定制
+
+Mask、surface、ink、border、shadow 与 focus 来自 Token；Portal 根同步 theme。稳定入口为 controls、labels、renderFooter、container 和 data 属性，内部 Carousel/ZoomableImage class 非 API。
+
+## SSR 与 Next.js
+
+关闭态服务端输出空字符串；打开态 Portal 在服务端按 primitive 契约降级，生产中建议 open 初值与客户端一致。图片数组 key/order 必须 hydration 稳定。
+
+## RTL 与国际化
+
+ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；键盘左右方向在 RTL 中翻转，Carousel 自身负责轨道方向。
+
+## 浏览器与 WebView
+
+依赖 Portal、focus trap、Pointer/Touch、pointer capture、CSS transform 与 visual viewport 宿主行为。目标为 Chrome/WebView 70 与 iOS 13；需继续验证系统缩放、地址栏和刘海安全区。
+
+## 边界情况与已知限制
+
+- 不支持旋转、下载、分享、版权鉴权或视频。
+- 平移边界按 stage 尺寸近似，不读取图片自然宽高。
+- footer 内容过长会在受限宽度内换行；交互 footer 需自行验证焦点顺序。
+- 外部直接改变受控 index 时，调用方应同步业务 footer 状态。
+
+## 性能预算
+
+当前 Carousel 会渲染全部 item；建议有限集合和响应式图片。超大画廊应在应用层分页，不把原图全量预载。
+
+## 测试证据
+
+- Unit: `ImageViewer.test.tsx` 覆盖 SSR、模态/焦点/滚动、受控导航、键盘/按钮/手势缩放、ref、空/错误、RTL。
+- Story interaction: KeyboardInteraction play 已编写并通过 typecheck；Story runner 未执行。
+- Axe: 未执行。
+- SSR/hydration: closed Node SSR 已验证；open hydration 未执行。
+- RTL: 键盘方向单测，视觉/drag 待 E2E。
+- Reduced motion: CSS 已实现，截图待补。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: 状态 Story 已有，基线待执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+补 iOS 边缘手势、Android 多指取消、RTL drag、axe、open hydration 与真机读屏。
+
+### 已完成
+
+修正极端 pinch 的平移边界；补 RTL 键盘和逻辑定位；固化 modal/gesture/SSR 契约。
+
+## 变更记录
+
+| 日期       | 版本   | 类型     | 内容                       | 迁移说明            |
+| ---------- | ------ | -------- | -------------------------- | ------------------- |
+| 2026-08-29 | 未发布 | behavior | RTL 键盘与极端缩放边界完善 | LTR 与既有 API 不变 |

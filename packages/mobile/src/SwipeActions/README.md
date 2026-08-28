@@ -1,5 +1,7 @@
 # SwipeActions
 
+永久事实源见 [SwipeActions.docs.mdx](./SwipeActions.docs.mdx)。
+
 面向移动列表的横向滑动操作容器。组件只负责动作轨道、手势与打开状态，不绑定 `Cell`、列表数据、路由或
 业务确认流程。
 

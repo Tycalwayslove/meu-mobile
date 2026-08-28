@@ -67,7 +67,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Bottom: Story = { render: () => <PanelPreview /> };
+export const Bottom: Story = {
+  render: () => <PanelPreview />,
+  play: async ({ canvasElement }) => {
+    const panel = canvasElement.querySelector<HTMLElement>('[data-meu-component="floating-panel"]');
+    const handle = canvasElement.querySelector<HTMLButtonElement>("button[aria-controls]");
+    if (!panel || !handle) throw new window.Error("Expected FloatingPanel handle");
+    handle.click();
+    await Promise.resolve();
+    if (panel.getAttribute("data-anchor-index") !== "1") {
+      throw new window.Error("FloatingPanel did not request the next controlled anchor");
+    }
+  }
+};
 
 export const Top: Story = { render: () => <PanelPreview placement="top" /> };
 

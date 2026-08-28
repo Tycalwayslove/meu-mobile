@@ -137,6 +137,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const tasksRef = useRef(tasks);
     const [previewIndex, setPreviewIndex] = useState(0);
     const [viewerOpen, setViewerOpen] = useState(false);
+    const [deletingKeys, setDeletingKeys] = useState<Set<string>>(() => new Set());
     const resolvedId =
       id || (fieldContext ? fieldContext.controlId : `meu-image-uploader-${generatedId}`);
     const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
@@ -316,13 +317,25 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     }
 
     async function requestDelete(item: ImageUploaderItem) {
-      const result = onDelete ? await onDelete(item) : undefined;
-      if (result === false) return;
-      publish(
-        itemsRef.current.filter((entry) => entry !== item),
-        item,
-        "remove"
-      );
+      const currentIndex = itemsRef.current.indexOf(item);
+      const deletionKey = String(itemKey(item, currentIndex));
+      if (deletingKeys.has(deletionKey)) return;
+      setDeletingKeys((current) => new Set(current).add(deletionKey));
+      try {
+        const result = onDelete ? await onDelete(item) : undefined;
+        if (result === false) return;
+        publish(
+          itemsRef.current.filter((entry) => entry !== item),
+          item,
+          "remove"
+        );
+      } finally {
+        setDeletingKeys((current) => {
+          const next = new Set(current);
+          next.delete(deletionKey);
+          return next;
+        });
+      }
     }
 
     useImperativeHandle(ref, () => ({
@@ -408,12 +421,17 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           className={className ? `${root} ${className}` : root}
           style={rootStyle}
           role="group"
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabel ? undefined : labelledBy}
+          aria-describedby={describedBy}
           data-disabled={disabled || undefined}
           data-meu-component="image-uploader"
           data-readonly={readOnly || undefined}
           data-state={invalid ? "error" : "default"}
         >
           {items.map((item, index) => {
+            const deletionKey = String(itemKey(item, index));
+            const deleting = deletingKeys.has(deletionKey);
             const imageNode = (
               <Image
                 src={item.thumbnailUrl || item.url}
@@ -449,6 +467,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                       type="button"
                       className={actionButton}
                       aria-label={`${localizedRemoveLabel} ${item.alt}`}
+                      aria-busy={deleting || undefined}
+                      disabled={deleting}
                       onClick={() => {
                         void requestDelete(item);
                       }}
@@ -502,7 +522,15 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                       </button>
                     ) : (
                       <>
-                        <span>{Math.round(task.progress)}%</span>
+                        <span
+                          role="progressbar"
+                          aria-label={task.name}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round(task.progress)}
+                        >
+                          {Math.round(task.progress)}%
+                        </span>
                         <span className={progressTrack} aria-hidden="true">
                           <span className={progressFill} style={progressStyle} />
                         </span>

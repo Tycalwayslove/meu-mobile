@@ -35,6 +35,10 @@ function normalizeValue(
   return result;
 }
 
+function sameValue(left: readonly string[], right: readonly string[]) {
+  return left.length === right.length && left.every((entry, index) => entry === right[index]);
+}
+
 export function Collapse({
   accordion = false,
   arrow,
@@ -53,7 +57,13 @@ export function Collapse({
   const [internalValue, setInternalValue] = useState(() =>
     normalizeValue(defaultValue, items, accordion)
   );
-  const activeValue = normalizeValue(controlled ? value : internalValue, items, accordion);
+  const normalizedInternalValue = normalizeValue(internalValue, items, accordion);
+  if (!controlled && !sameValue(internalValue, normalizedInternalValue)) {
+    setInternalValue(normalizedInternalValue);
+  }
+  const activeValue = controlled
+    ? normalizeValue(value, items, accordion)
+    : normalizedInternalValue;
   const classes = root({ variant });
 
   return (
@@ -99,7 +109,9 @@ export function Collapse({
               }}
             >
               <span className={titleStyle}>{item.title}</span>
-              {item.extra ? <span className={extraStyle}>{item.extra}</span> : null}
+              {item.extra !== undefined && item.extra !== null ? (
+                <span className={extraStyle}>{item.extra}</span>
+              ) : null}
               <span className={arrowStyle({ expanded })} aria-hidden="true">
                 {arrowNode || <MeuIconChevronLeft size={18} strokeWidth={2} />}
               </span>
@@ -110,6 +122,7 @@ export function Collapse({
               role="region"
               aria-hidden={!expanded}
               aria-labelledby={triggerId}
+              inert={!expanded}
             >
               <div className={panelInner}>
                 <div className={content}>{item.content}</div>

@@ -138,7 +138,7 @@ ThemeProvider 自身不执行主题过渡，避免大面积颜色动画、首屏
 
 - 不内置 localStorage/cookie 持久化、跨标签页同步或系统主题 JavaScript 事件。
 - system 在不支持 `prefers-color-scheme` 的环境中降级为浅色。
-- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；Overlay 需在 Portal 根复制 `data-meu-theme`。现有迁移覆盖度按各 Overlay 文档为准。
+- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；核心 Mask/Dialog/Popup/BottomSheet/Popover 已通过统一 boundary 复制 `data-meu-theme`，其余 Overlay 按对应批次继续审计。
 - 主题切换没有 transition；这是当前明确行为，不是缺失动画。
 - ThemeProvider 接受完整 ConfigProvider Props，因为它是兼容 alias；当前不通过收窄 Props 制造破坏性变化。
 
@@ -163,7 +163,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 ### 待优化
 
 - 建立应用壳层的 cookie/SSR 主题持久化参考方案，但不隐式加入组件运行时。
-- 完成 Overlay Portal 主题属性传播审计。
+- 完成其余 Overlay Portal 主题属性传播审计。
 - 补 forced-colors、高对比、system media emulation、Chromium/WebKit E2E 与真机证据。
 - 评估是否需要独立 ThemeProviderProps；没有迁移收益前维持 alias 兼容。
 

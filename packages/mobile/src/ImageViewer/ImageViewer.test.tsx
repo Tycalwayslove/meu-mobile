@@ -5,6 +5,7 @@ import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ImageViewer } from "./ImageViewer";
+import { ConfigProvider } from "../ConfigProvider";
 import type { ImageViewerRef } from "./types";
 
 const embla = vi.hoisted(() => {
@@ -215,5 +216,19 @@ describe("ImageViewer", () => {
     expect(screen.queryByRole("group", { name: "缩放控制" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "关闭图片预览" }));
     expect(onOpenChange).toHaveBeenCalledWith(false, { reason: "close-button" });
+  });
+
+  it("maps physical arrow keys to visual navigation in RTL", () => {
+    const onIndexChange = vi.fn();
+    render(
+      <ConfigProvider dir="rtl">
+        <ImageViewer open images={images} index={1} onIndexChange={onIndexChange} />
+      </ConfigProvider>
+    );
+    const close = screen.getByRole("button", { name: "关闭图片预览" });
+    fireEvent.keyDown(close, { key: "ArrowLeft" });
+    expect(onIndexChange).toHaveBeenLastCalledWith(2, { reason: "next" });
+    fireEvent.keyDown(close, { key: "ArrowRight" });
+    expect(onIndexChange).toHaveBeenLastCalledWith(0, { reason: "previous" });
   });
 });

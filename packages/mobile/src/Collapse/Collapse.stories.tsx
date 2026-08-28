@@ -18,5 +18,36 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Multiple: Story = {};
-export const Accordion: Story = { args: { accordion: true } };
+export const Accordion: Story = {
+  args: { accordion: true },
+  play: async ({ canvasElement }) => {
+    const buttons = canvasElement.querySelectorAll<HTMLButtonElement>("button");
+    const second = buttons.item(1);
+    second.click();
+    await Promise.resolve();
+    if (buttons.item(0).getAttribute("aria-expanded") !== "false") {
+      throw new window.Error("Accordion did not collapse the previous item");
+    }
+    if (second.getAttribute("aria-expanded") !== "true") {
+      throw new window.Error("Accordion did not expand the requested item");
+    }
+  }
+};
 export const Plain: Story = { args: { variant: "plain" } };
+export const LongContentRTL: Story = {
+  render: (args) => (
+    <div dir="rtl" style={{ width: 320 }}>
+      <Collapse
+        {...args}
+        items={[
+          {
+            value: "shipping",
+            title: "سياسة الشحن والاستلام ذات العنوان الطويل",
+            extra: "تفاصيل إضافية",
+            content: "محتوى طويل يلتف داخل المساحة المتاحة دون قص أو اتجاهات مادية ثابتة."
+          }
+        ]}
+      />
+    </div>
+  )
+};

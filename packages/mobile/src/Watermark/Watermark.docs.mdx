@@ -1,0 +1,142 @@
+---
+name: Watermark
+slug: watermark
+package: "@meu/mobile"
+exports: [Watermark]
+status: implementation
+priority: P2
+since: 0.1.0
+implementedVersion: null
+lastReviewed: 2026-08-29
+figma:
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "396:19"
+storyIds:
+  [
+    display-watermark--text,
+    display-watermark--multiline,
+    display-watermark--compact,
+    display-watermark--image-with-fallback,
+    display-watermark--dynamic-content,
+    display-watermark--light-and-dark
+  ]
+source: packages/mobile/src/Watermark
+---
+
+# Watermark
+
+## 当前能力
+
+同构 SVG 交错平铺，支持文本/多行/图片优先与失败回退、字体/尺寸/间距/偏移/旋转/透明度/zIndex，以及可关闭的弱篡改恢复。overlay 不阻止真实内容交互，也不进入无障碍树。
+
+## 何时使用
+
+版权提示、内部资料标识和泄露追踪；水印内容应包含最小必要、经脱敏的来源信息。
+
+## 何时不要使用
+
+不能用于鉴权、加密、防截图、防录屏、防 OCR 或法律意义上的 DRM。敏感内容仍依赖服务端访问控制和审计。
+
+## 结构与状态
+
+relative root → children → absolute aria-hidden SVG/defs/pattern/rect。状态为 text/multiline/image/image-fallback 与 tamper protection on/off；无交互、loading、disabled。
+
+## 基础用法
+
+```tsx
+<Watermark content={["Meu Mobile", operatorId]}>
+  <Receipt />
+</Watermark>
+```
+
+## 受控与非受控
+
+不适用。全部视觉输入由 props 派生；图片失败仅对当前 image URL 记录，URL 变化后重新尝试。
+
+## 表单集成
+
+不适用。children 中的表单保持原语义，overlay pointer-events none。
+
+## Props
+
+API 由 `WatermarkProps` 生成。正尺寸限制 1..2048；gap 为 0..2048；非有限值回退默认值；opacity clamp 到 0..1；content 的换行会拆为多行。image 存在时优先于 content。
+
+## Events
+
+`onImageError` 透传 SVG image error，随后回退文本；`onRemove` 只在 overlay 删除或自身属性/文本/子树被篡改并恢复时触发。业务 children 的正常增删不会触发。
+
+## Ref 与命令式方法
+
+`ref` 指向 root div；无命令式方法。
+
+## 键盘操作
+
+| 按键   | 行为                                        |
+| ------ | ------------------------------------------- |
+| 不适用 | overlay 不可聚焦，children 保持自身键盘行为 |
+
+## 触摸与手势
+
+overlay 固定 `pointer-events:none`，不截获点击、长按、滚动或手势。
+
+## 无障碍
+
+SVG 为 `aria-hidden=true`、`focusable=false`；水印文字不会被读屏重复播报。根的 aria 属性透传，真实内容语义完全由 children 提供。
+
+## 动效
+
+无动画，reduced-motion 不适用。
+
+## 主题与定制
+
+默认字体、颜色来自 Meu Token；font/color、opacity 和 geometry 可显式覆盖。forced-colors 下 overlay 仍是装饰信息，不作为状态唯一表达。稳定入口为 props、root className/style 与 data 属性。
+
+## SSR 与 Next.js
+
+useId 生成稳定 pattern id；render 不读取 window/document。MutationObserver 仅在客户端 layout effect 启动，服务端和客户端首屏 SVG 一致。
+
+## RTL 与国际化
+
+平铺无方向性；文本不自动翻译或双向隔离。混合 bidi、用户 ID 与本地化日期应由调用方预先格式化，必要时使用 Unicode isolate。
+
+## 浏览器与 WebView
+
+依赖 SVG pattern/image、CSS custom properties 和可选 MutationObserver。无 MutationObserver 时仅失去弱篡改恢复，水印仍显示。外链 SVG image 的 CORS/打印由宿主和浏览器策略决定。
+
+## 边界情况与已知限制
+
+- DOM 篡改者可关闭 JS、隐藏祖先、覆盖 CSS 或截图后编辑，tamperProtection 不构成安全承诺。
+- 极长文本不自动省略，可能超出 mark box；调用方应提供短标识。
+- 打印/导出 PDF、canvas 截图和跨域图片需要业务链路单独验证。
+
+## 性能预算
+
+固定三枚 mark 定义并由 SVG pattern 平铺，DOM 不随容器面积增长。MutationObserver 只保护 overlay 和其直接移除；高频业务 children 更新不触发修复。
+
+## 测试证据
+
+- Unit: `Watermark.test.tsx` 覆盖文本/图片回退、几何归一、ref、篡改恢复、动态 children 与 SSR。
+- Story interaction: DynamicContent play 已编写并通过 typecheck；Story runner 未执行。
+- Axe: 未执行。
+- SSR/hydration: Node SSR 已覆盖 stable pattern markup；hydration 专测未执行。
+- RTL: 无方向性布局；bidi 内容待真机。
+- Reduced motion: 不适用，无动画。
+- Mobile Chromium/WebKit E2E: 未执行。
+- Chromatic Light/Dark: Story 已建立，基线待执行。
+- Real device: 未执行。
+
+## V2 优化记录
+
+### 待优化
+
+补打印/PDF、跨域 SVG image、无 MutationObserver、bidi 与移动端截图链路验证。
+
+### 已完成
+
+修复篡改保护误回滚业务 children 的商用阻断；固化弱安全、SSR、性能和无障碍边界。
+
+## 变更记录
+
+| 日期       | 版本   | 类型 | 内容                                              | 迁移说明 |
+| ---------- | ------ | ---- | ------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | fix  | 篡改监听只保护水印 overlay，不再干预业务 children | 无需迁移 |

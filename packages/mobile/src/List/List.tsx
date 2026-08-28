@@ -21,7 +21,7 @@ export function List({
   const generatedHeaderId = `meu-list-header-${useId()}`;
   const resolvedLabelledBy = ariaLabel
     ? undefined
-    : ariaLabelledBy || (header ? generatedHeaderId : undefined);
+    : ariaLabelledBy || (header !== undefined && header !== null ? generatedHeaderId : undefined);
 
   return (
     <div
@@ -32,7 +32,7 @@ export function List({
       data-mode={mode}
       data-divider={divider}
     >
-      {header ? (
+      {header !== undefined && header !== null ? (
         <div id={generatedHeaderId} className={headerStyle({ mode })} data-meu-list-header>
           {header}
         </div>
@@ -48,7 +48,7 @@ export function List({
           {children}
         </ListContext.Provider>
       </div>
-      {footer ? (
+      {footer !== undefined && footer !== null ? (
         <div className={footerStyle({ mode })} data-meu-list-footer>
           {footer}
         </div>

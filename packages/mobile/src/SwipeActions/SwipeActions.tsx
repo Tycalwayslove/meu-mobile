@@ -72,6 +72,7 @@ export function SwipeActions({
   onActionError,
   onClickCapture,
   onKeyDownCapture,
+  onLostPointerCapture,
   onOpenSideChange,
   onPointerCancel,
   onPointerDown,
@@ -96,6 +97,9 @@ export function SwipeActions({
   const resolvedSide = disabled
     ? null
     : availableSide(requestedSide || null, leftActions, rightActions);
+  if (!controlled && uncontrolledSide !== resolvedSide) {
+    setUncontrolledSide(resolvedSide);
+  }
   const rootRef = useRef<HTMLDivElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
@@ -146,6 +150,13 @@ export function SwipeActions({
   }, [leftWidth, resolvedSide, rightWidth, updateOffset]);
 
   useEffect(() => {
+    if (!disabled) return;
+    dragSessionRef.current = null;
+    setDragging(false);
+    updateOffset(0);
+  }, [disabled, updateOffset]);
+
+  useEffect(() => {
     const measure = () => {
       const nextLeft = leftRef.current ? leftRef.current.getBoundingClientRect().width : 0;
       const nextRight = rightRef.current ? rightRef.current.getBoundingClientRect().width : 0;
@@ -170,7 +181,7 @@ export function SwipeActions({
 
   const requestSide = useCallback(
     (nextSide: SwipeActionsSide | null, details: SwipeActionsOpenChangeDetails) => {
-      const available = availableSide(nextSide, leftActions, rightActions);
+      const available = disabled ? null : availableSide(nextSide, leftActions, rightActions);
       const currentSide = sideRef.current;
       setDragging(false);
       updateOffset(sideOffset(available, widthsRef.current.left, widthsRef.current.right));
@@ -189,7 +200,7 @@ export function SwipeActions({
         });
       }
     },
-    [controlled, leftActions, onOpenSideChange, rightActions, updateOffset]
+    [controlled, disabled, leftActions, onOpenSideChange, rightActions, updateOffset]
   );
 
   useEffect(() => {
@@ -212,11 +223,16 @@ export function SwipeActions({
       const session = dragSessionRef.current;
       if (!session || session.pointerId !== event.pointerId) return;
       dragSessionRef.current = null;
-      if (
-        typeof event.currentTarget.hasPointerCapture === "function" &&
-        event.currentTarget.hasPointerCapture(event.pointerId)
-      ) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
+      try {
+        if (
+          typeof event.currentTarget.hasPointerCapture === "function" &&
+          typeof event.currentTarget.releasePointerCapture === "function" &&
+          event.currentTarget.hasPointerCapture(event.pointerId)
+        ) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // Older WebViews can lose capture between the check and release.
       }
       setDragging(false);
       if (!session.active || cancelled) {
@@ -327,16 +343,21 @@ export function SwipeActions({
     finishDrag(event, true);
   };
 
-  const focusRevealControl = (side: SwipeActionsSide) => {
-    window.requestAnimationFrame(() => {
-      const control = side === "left" ? leftRevealRef.current : rightRevealRef.current;
-      if (control) control.focus();
-    });
-  };
+  const focusRevealControl = useCallback(
+    (side: SwipeActionsSide) => {
+      window.requestAnimationFrame(() => {
+        if (!mountedRef.current || disabled || sideRef.current !== null) return;
+        const control = side === "left" ? leftRevealRef.current : rightRevealRef.current;
+        if (control) control.focus();
+      });
+    },
+    [disabled]
+  );
 
   const revealWithKeyboard = (side: SwipeActionsSide) => {
     requestSide(side, { reason: "keyboard" });
     window.requestAnimationFrame(() => {
+      if (!mountedRef.current || sideRef.current !== side) return;
       const group = side === "left" ? leftRef.current : rightRef.current;
       const firstAction = group
         ? group.querySelector<HTMLButtonElement>("button:not(:disabled)")
@@ -344,6 +365,18 @@ export function SwipeActions({
       if (firstAction) firstAction.focus();
     });
   };
+
+  useEffect(() => {
+    const activeElement = document.activeElement;
+    if (!(activeElement instanceof HTMLElement)) return;
+    const group = activeElement.closest<HTMLElement>("[data-meu-swipe-actions-group]");
+    const focusedSide = group
+      ? (group.dataset.meuSwipeActionsGroup as SwipeActionsSide | undefined)
+      : undefined;
+    if (!focusedSide || focusedSide === resolvedSide) return;
+    if (disabled) activeElement.blur();
+    else focusRevealControl(focusedSide);
+  }, [disabled, focusRevealControl, resolvedSide]);
 
   const pressAction = async (action: SwipeActionsAction, index: number, side: SwipeActionsSide) => {
     if (disabled || action.disabled || loadingKey !== null) return;
@@ -435,6 +468,10 @@ export function SwipeActions({
           focusRevealControl(activeSide);
         }
         if (onKeyDownCapture) onKeyDownCapture(event);
+      }}
+      onLostPointerCapture={(event) => {
+        if (onLostPointerCapture) onLostPointerCapture(event);
+        finishDrag(event, true);
       }}
       onPointerCancel={handlePointerCancel}
       onPointerDown={handlePointerDown}

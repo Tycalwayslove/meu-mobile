@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Dialog } from "./Dialog";
 
 function createDeferred<T>() {
@@ -131,6 +133,68 @@ describe("Dialog", () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
+  it("invalidates a pending action when a controlled dialog closes and reopens", async () => {
+    const deferred = createDeferred<void>();
+    const onOpenChange = vi.fn();
+    const { rerender } = render(
+      <Dialog
+        open
+        title="第一条记录"
+        description="第一条说明"
+        actions={[{ key: "save", label: "保存第一条", onPress: () => deferred.promise }]}
+        onOpenChange={onOpenChange}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "保存第一条" }));
+    expect(screen.getByRole("alertdialog").getAttribute("aria-busy")).toBe("true");
+
+    rerender(
+      <Dialog
+        open={false}
+        title="第一条记录"
+        description="第一条说明"
+        actions={[]}
+        onOpenChange={onOpenChange}
+      />
+    );
+    rerender(
+      <Dialog
+        open
+        title="第二条记录"
+        description="第二条说明"
+        actions={[{ key: "save", label: "保存第二条" }]}
+        onOpenChange={onOpenChange}
+      />
+    );
+    expect(screen.getByRole("alertdialog", { name: "第二条记录" }).hasAttribute("aria-busy")).toBe(
+      false
+    );
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "保存第二条" }).disabled).toBe(
+      false
+    );
+
+    deferred.resolve();
+    await waitFor(() => expect(onOpenChange).not.toHaveBeenCalled());
+    expect(screen.getByRole("alertdialog", { name: "第二条记录" })).toBeTruthy();
+  });
+
+  it("copies direction, theme and reduced motion across the default body portal", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <Dialog open title="Portal contract" description="Portal description" actions={[]} />
+      </ConfigProvider>
+    );
+    const layer = document.body.querySelector('[data-meu-overlay-layer="dialog"]');
+    if (!(layer instanceof HTMLElement)) throw new Error("Expected Dialog layer");
+    expect(layer.dir).toBe("rtl");
+    expect(layer.lang).toBe("en-US");
+    expect(layer.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(layer.getAttribute("data-meu-theme")).toBe("dark");
+    const mask = layer.querySelector('[data-meu-component="mask"]');
+    expect(mask && mask.getAttribute("dir")).toBe("rtl");
+    expect(mask && mask.getAttribute("data-meu-motion")).toBe("reduced");
+  });
+
   it("uses vertical action layout for three or more actions", () => {
     render(
       <Dialog
@@ -145,5 +209,33 @@ describe("Dialog", () => {
       />
     );
     expect(screen.getByRole("dialog").getAttribute("data-action-layout")).toBe("vertical");
+  });
+
+  it("supports a force-mounted non-alert dialog with body content and a public ref", () => {
+    const ref = createRef<HTMLDivElement>();
+    const { rerender } = render(
+      <Dialog
+        ref={ref}
+        role="dialog"
+        open
+        title="编辑备注"
+        actions={[]}
+        className="business-dialog"
+      >
+        <label>
+          备注
+          <input />
+        </label>
+      </Dialog>
+    );
+    const dialog = screen.getByRole("dialog", { name: "编辑备注" });
+    expect(ref.current).toBe(dialog);
+    expect(dialog.className).toContain("business-dialog");
+    expect(dialog.hasAttribute("aria-describedby")).toBe(false);
+
+    rerender(
+      <Dialog ref={ref} role="dialog" open={false} forceMount title="编辑备注" actions={[]} />
+    );
+    expect(screen.queryByRole("dialog", { name: "编辑备注" })).toBeNull();
   });
 });

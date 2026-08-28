@@ -8,6 +8,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent, Ref } from "reac
 import { useMeuConfig } from "../ConfigProvider";
 import { VisuallyHidden } from "../internal/VisuallyHidden";
 import { useControllableOpen } from "../internal/useControllableOpen";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import { Mask } from "../Mask";
 import {
@@ -97,7 +98,16 @@ function findPointIndex(
   return closestIndex;
 }
 
-function snapPointText(point: BottomSheetSnapPoint, index: number, total: number) {
+function snapPointText(
+  point: BottomSheetSnapPoint,
+  index: number,
+  total: number,
+  locale: "en-US" | "zh-CN"
+) {
+  if (locale === "en-US") {
+    const value = point === "content" ? "Content height" : `${Math.round(point * 100)}%`;
+    return `${value}, position ${index + 1} of ${total}`;
+  }
   if (point === "content") return `内容高度，位置 ${index + 1}/${total}`;
   return `${Math.round(point * 100)}%，位置 ${index + 1}/${total}`;
 }
@@ -166,6 +176,9 @@ export function BottomSheet({
     contentHeight
   );
   const activePoint = resolvedSnapPoints[activeIndex];
+  if (!controlledSnap && activePoint && uncontrolledSnapPoint !== activePoint.value) {
+    setUncontrolledSnapPoint(activePoint.value);
+  }
   const minimumHeight = resolvedSnapPoints[0] ? resolvedSnapPoints[0].height : 0;
   const maximumHeight = resolvedSnapPoints[resolvedSnapPoints.length - 1]
     ? resolvedSnapPoints[resolvedSnapPoints.length - 1]!.height
@@ -177,8 +190,10 @@ export function BottomSheet({
   const localizedCloseLabel = closeLabel || (config.locale === "en-US" ? "Close" : "关闭");
   const localizedHandleLabel =
     dragHandleLabel || (config.locale === "en-US" ? "Adjust sheet height" : "调整面板高度");
-  const resolvedLabelledby = ariaLabelledby || (!ariaLabel && title ? titleId : undefined);
+  const hasTitle = title !== undefined && title !== null;
+  const resolvedLabelledby = ariaLabelledby || (!ariaLabel && hasTitle ? titleId : undefined);
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const configBoundary = getConfigBoundaryProps(config);
 
   useBodyScrollLock(resolvedOpen && lockScroll);
   useFocusTrap({
@@ -191,6 +206,7 @@ export function BottomSheet({
   });
 
   useEffect(() => {
+    if (!shouldRender) return undefined;
     const updateViewport = () => {
       const visualViewport = window.visualViewport;
       setViewportHeight(visualViewport ? visualViewport.height : window.innerHeight);
@@ -203,7 +219,7 @@ export function BottomSheet({
       window.removeEventListener("resize", updateViewport);
       if (visualViewport) visualViewport.removeEventListener("resize", updateViewport);
     };
-  }, []);
+  }, [shouldRender]);
 
   useEffect(() => {
     if (!shouldRender) return undefined;
@@ -220,6 +236,7 @@ export function BottomSheet({
     if (typeof ResizeObserver !== "undefined" && bodyRef.current) {
       observer = new ResizeObserver(measure);
       observer.observe(bodyRef.current);
+      if (contentRef.current) observer.observe(contentRef.current);
     }
     return () => {
       window.cancelAnimationFrame(frame);
@@ -304,18 +321,17 @@ export function BottomSheet({
     height: maximumHeight > 0 ? `${maximumHeight}px` : "50vh"
   } as CSSProperties;
   const statusText = activePoint
-    ? snapPointText(activePoint.value, activeIndex, resolvedSnapPoints.length)
+    ? snapPointText(activePoint.value, activeIndex, resolvedSnapPoints.length, config.locale)
     : "";
 
   return (
     <Portal container={portalContainer}>
       <div
-        className={layer({ state: visualState })}
+        {...configBoundary}
+        className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
         aria-hidden={resolvedOpen ? undefined : "true"}
-        lang={config.locale}
         data-meu-overlay-layer="bottom-sheet"
-        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <Mask
@@ -385,7 +401,13 @@ export function BottomSheet({
                 }
               }}
               onPointerDown={(event) => {
-                if (event.button !== 0 || maximumHeight <= 0 || !activePoint) return;
+                if (
+                  event.button !== 0 ||
+                  (Boolean(event.pointerType) && event.isPrimary === false) ||
+                  maximumHeight <= 0 ||
+                  !activePoint
+                )
+                  return;
                 event.currentTarget.setPointerCapture(event.pointerId);
                 dragSessionRef.current = {
                   moved: false,
@@ -409,9 +431,9 @@ export function BottomSheet({
             />
           ) : null}
           <VisuallyHidden id={statusId}>{statusText}</VisuallyHidden>
-          {title || showCloseButton ? (
+          {hasTitle || showCloseButton ? (
             <div className={header}>
-              {title ? (
+              {hasTitle ? (
                 <h2 className={titleClass} id={titleId}>
                   {title}
                 </h2>

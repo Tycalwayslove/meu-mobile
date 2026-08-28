@@ -1,5 +1,7 @@
 # Watermark
 
+完整、永久的组件契约与测试证据见 [Watermark.docs.mdx](./Watermark.docs.mdx)。
+
 用于移动 H5 内容的版权提示与泄露追踪。它在容器内绘制不可交互的重复 SVG 图案，不改变子内容语义，也不进入表单绑定层。
 
 ```tsx

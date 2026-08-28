@@ -149,8 +149,11 @@ export const closeButton = style({
   position: "absolute",
   zIndex: 4,
   top: "calc(var(--meu-space-3) + env(safe-area-inset-top, 0px))",
-  right: "var(--meu-space-3)"
+  right: "var(--meu-space-3)",
+  insetInlineEnd: "var(--meu-space-3)"
 });
+
+globalStyle(`[dir='rtl'] ${closeButton}`, { right: "auto", left: "var(--meu-space-3)" });
 
 export const counter = style({
   position: "absolute",
@@ -175,10 +178,13 @@ export const zoomControls = style({
   position: "absolute",
   zIndex: 4,
   right: "var(--meu-space-3)",
+  insetInlineEnd: "var(--meu-space-3)",
   bottom: "calc(var(--meu-space-3) + env(safe-area-inset-bottom, 0px))",
   display: "flex",
   gap: "var(--meu-space-2)"
 });
+
+globalStyle(`[dir='rtl'] ${zoomControls}`, { right: "auto", left: "var(--meu-space-3)" });
 
 export const zoomButton = style(floatingControl);
 
@@ -192,8 +198,10 @@ export const footer = style({
   position: "absolute",
   zIndex: 3,
   right: 180,
+  insetInlineEnd: 180,
   bottom: "calc(var(--meu-space-3) + env(safe-area-inset-bottom, 0px))",
   left: "var(--meu-space-3)",
+  insetInlineStart: "var(--meu-space-3)",
   minHeight: 44,
   boxSizing: "border-box",
   padding: "var(--meu-space-2) var(--meu-space-3)",
@@ -202,7 +210,10 @@ export const footer = style({
   border: "1px solid var(--meu-color-border)",
   borderRadius: "var(--meu-radius-surface)",
   fontSize: 13,
-  lineHeight: 1.45
+  lineHeight: 1.45,
+  selectors: {
+    "[dir='rtl'] &": { right: "var(--meu-space-3)", left: 180 }
+  }
 });
 
 export const empty = style({
