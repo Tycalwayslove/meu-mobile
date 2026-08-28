@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { componentDocs } from "./_data/components";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://meu-mobile.vercel.app").replace(
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://meu-mobile-docs.vercel.app").replace(
     /\/$/,
     ""
   );

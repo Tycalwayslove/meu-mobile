@@ -6,7 +6,7 @@ import { SiteHeader } from "./_components/SiteHeader";
 import { SiteProviders } from "./_components/SiteProviders";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://meu-mobile.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://meu-mobile-docs.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

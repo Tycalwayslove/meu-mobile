@@ -11,7 +11,7 @@
 1. 在 Vercel 导入 `Tycalwayslove/meu-mobile`。
 2. Root Directory 选择 `apps/docs`，并允许读取根目录外的工作区文件。
 3. Framework Preset 选择 Next.js。构建命令由 `apps/docs/vercel.json` 提供。
-4. 首次部署完成后，将 Vercel 分配的生产域名写入 `NEXT_PUBLIC_SITE_URL`。
+4. 默认生产域名为 `https://meu-mobile-docs.vercel.app`；绑定自定义域名后，再用 `NEXT_PUBLIC_SITE_URL` 覆盖。
 5. 配置 `NEXT_PUBLIC_STORYBOOK_URL=https://main--6a9133bdbb1019a4752cf46f.chromatic.com` 并重新部署。
 
 Vercel 会为 `main` 生成生产部署，并为 pull request 生成 Preview Deployment。
