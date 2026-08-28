@@ -11,8 +11,8 @@
 1. 在 Vercel 导入 `Tycalwayslove/meu-mobile`。
 2. Root Directory 选择 `apps/docs`，并允许读取根目录外的工作区文件。
 3. Framework Preset 选择 Next.js。构建命令由 `apps/docs/vercel.json` 提供。
-4. 配置 `NEXT_PUBLIC_SITE_URL` 为官网正式地址。
-5. Chromatic 上线后，配置 `NEXT_PUBLIC_STORYBOOK_URL` 并重新部署。
+4. 首次部署完成后，将 Vercel 分配的生产域名写入 `NEXT_PUBLIC_SITE_URL`。
+5. 配置 `NEXT_PUBLIC_STORYBOOK_URL=https://main--6a9133bdbb1019a4752cf46f.chromatic.com` 并重新部署。
 
 Vercel 会为 `main` 生成生产部署，并为 pull request 生成 Preview Deployment。
 
@@ -21,7 +21,7 @@ Vercel 会为 `main` 生成生产部署，并为 pull request 生成 Preview Dep
 1. 在 Chromatic 中从同一个 GitHub 仓库创建项目。
 2. 将项目 token 保存为仓库 Secret：`CHROMATIC_PROJECT_TOKEN`。
 3. push 到 `main` 或创建 pull request；`.github/workflows/storybook.yml` 会构建并发布 Storybook。
-4. 将 Chromatic 提供的固定站点地址写入 Vercel 的 `NEXT_PUBLIC_STORYBOOK_URL`。
+4. 官网使用 `main` 分支固定地址：`https://main--6a9133bdbb1019a4752cf46f.chromatic.com`。
 
 本地构建验证：
 
