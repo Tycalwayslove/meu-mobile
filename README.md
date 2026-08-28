@@ -1,6 +1,6 @@
 # Meu Mobile
 
-Meu Mobile 是面向移动 Web、PWA 与 Hybrid WebView 的 React 组件库。设计契约来自相邻的
+Meu Mobile 是面向移动 Web、PWA 与 Hybrid WebView 的 React 组件库。设计契约来自仓库内的
 `meu-design`，目标消费者包含 MeuMall Next.js H5；当前开发只在仓库内的隔离消费者验证，不接入业务工程。
 
 ## 工程基线
@@ -10,7 +10,7 @@ Meu Mobile 是面向移动 Web、PWA 与 Hybrid WebView 的 React 组件库。�
 - Rollup + Vanilla Extract
 - Vitest + Testing Library
 - Storybook + Next.js 独立文档站
-- Chrome/WebView 70+、iOS Safari 13+
+- 旧语法扫描目标为 Chrome/WebView 70+、iOS Safari 13+；完整运行时支持范围按 V2 兼容矩阵验收
 
 ## 常用命令
 
@@ -45,3 +45,12 @@ SSR/hydration、主题、表单绑定、移动布局和触控目标。
 
 组件按“通用与布局 → 信息录入 → 展示与导航 → 反馈与浮层 → 选择器 → 手势与高成本组件”分批交付，
 详见 [`docs/COMPONENT_ROADMAP.md`](docs/COMPONENT_ROADMAP.md)。
+
+## V2 商用化
+
+V1 路线图只表示第一版组件已经具备基础实现。第二版以真实商用为目标，要求每个公开组件同时完成 API、样式、状态、动效、触摸、无障碍、SSR、RTL、WebView、性能、测试和官网文档验收。
+
+- [V2 总体计划](docs/v2/README.md)
+- [V2 启动审计](docs/v2/AUDIT.md)
+- [68 个组件优化台账](docs/v2/COMPONENT_PLAN.md)
+- [单组件留存文档模板](docs/v2/COMPONENT_DOC_TEMPLATE.md)
