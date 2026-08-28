@@ -75,9 +75,22 @@ export const NativeFormReset: Story = {
   play: async ({ canvasElement }) => {
     const textArea = canvasElement.querySelector("textarea");
     const form = canvasElement.querySelector("form");
+    const resetButton = canvasElement.querySelector("button[type='reset']");
     if (!(textArea instanceof HTMLTextAreaElement) || !(form instanceof HTMLFormElement)) {
       throw new window.Error("Expected TextArea reset story controls");
     }
+    if (!(resetButton instanceof HTMLButtonElement)) {
+      throw new window.Error("Expected TextArea reset button");
+    }
+
+    const waitFor = async (predicate: () => boolean, message: string) => {
+      const deadline = window.performance.now() + 2_000;
+      while (!predicate()) {
+        if (window.performance.now() >= deadline) throw new window.Error(message);
+        await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
+      }
+    };
+
     const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value");
     if (valueDescriptor && valueDescriptor.set) {
       valueDescriptor.set.call(textArea, "修改后的商品说明");
@@ -85,13 +98,20 @@ export const NativeFormReset: Story = {
       textArea.value = "修改后的商品说明";
     }
     textArea.dispatchEvent(new Event("input", { bubbles: true }));
-    form.reset();
-    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    await waitFor(
+      () => canvasElement.querySelector("[data-meu-slot='count']")?.textContent === "8 / 100",
+      "TextArea input event did not update the uncontrolled value and count"
+    );
 
-    const count = canvasElement.querySelector("[data-meu-slot='count']");
-    if (textArea.value !== "初始说明" || !count || count.textContent !== "4 / 100") {
-      throw new window.Error("Native reset did not restore TextArea value and count");
-    }
+    resetButton.click();
+    await waitFor(
+      () =>
+        textArea.value === "初始说明" &&
+        canvasElement.querySelector("[data-meu-slot='count']")?.textContent === "4 / 100",
+      "Native reset did not restore TextArea value and count"
+    );
+
+    if (form.elements.length !== 2) throw new window.Error("Unexpected reset story form controls");
   }
 };
 
