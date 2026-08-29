@@ -7,7 +7,7 @@ export type SkeletonVariant = "text" | "rectangle" | "circle";
 export type SkeletonProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   /** Enables a decorative shimmer, disabled by reduced-motion preferences. @defaultValue false */
   animated?: boolean;
-  /** Reserves a stable aspect ratio when explicit height is not appropriate. */
+  /** Reserves a stable aspect ratio when explicit height is not appropriate. Non-positive or non-finite numeric values are omitted. */
   aspectRatio?: CSSProperties["aspectRatio"];
   /** Reserved block height. Numbers are pixels. */
   height?: CSSProperties["height"];

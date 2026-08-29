@@ -141,7 +141,7 @@ flex 与逻辑 Badge 偏移继承最近的 `dir`；Safe Area 使用物理 left/r
 - 构建与客户端兼容：`pnpm --filter @meu/mobile build` 通过；随后 `pnpm compat:check` 对 199 个构建文件通过 Chrome 70 / iOS 13 静态基线检查。发布 CSS 不含 TabBar 的 `:focus-visible` 选择器。
 - Story/play 源码：`RouteInteraction`、`ControlledRouter`、`DisabledDestination` 含交互断言；`WithSafeArea`、`NarrowLongLabels`、`RTL`、旋转 viewport 的 `Landscape` 覆盖表现面。本轮未运行 Storybook 浏览器 runner、axe 或截图矩阵，需在合入候选上复验。
 - 包级 typecheck：`pnpm --filter @meu/mobile typecheck` 最终重跑通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4833 B / 32768 B 预算，组合 Brotli 4281 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4860 B / 32768 B 预算，组合 Brotli 4308 B；共享样式由应用单独导入一次。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖 current、原生目标与动态切换，批次整页 Light/Dark axe WCAG A/AA 也通过。
 - Reduced motion / forced-colors / RTL / Safe Area：有代码与 Story 覆盖，本轮没有真实浏览器视觉证据。
 - Chromatic Light/Dark：本轮按统一部署策略不运行；全部组件冻结后集中验证。

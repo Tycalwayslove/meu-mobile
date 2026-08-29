@@ -59,7 +59,8 @@ export const waitingDot = style({
   animation: `${pendingPulse} 1.2s ease-in-out infinite`,
   selectors: {
     "&:nth-child(2)": { animationDelay: "160ms" },
-    "&:nth-child(3)": { animationDelay: "320ms" }
+    "&:nth-child(3)": { animationDelay: "320ms" },
+    '[data-meu-motion="reduced"] &': { animation: "none", opacity: 0.7 }
   },
   "@media": {
     "(prefers-reduced-motion: reduce)": { animation: "none", opacity: 0.7 },

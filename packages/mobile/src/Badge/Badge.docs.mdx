@@ -28,6 +28,7 @@ source: packages/mobile/src/Badge
 
 - 支持 standalone/anchor overlay、dot、短内容、数字 max、showZero、bordered、逻辑 offset 和五种 tone。
 - 数字超过有限 max 显示 `max+`；0 默认隐藏、showZero 时显示。dot 不渲染 content。
+- `null`、boolean、空数组与空字符串不生成空 marker；仅有这些空节点的 children 不会误进入锚点定位。
 - 无 label 的 dot 装饰性隐藏；label 为 dot 提供状态含义，也可替换计数的可访问名称。
 - RTL 定位与 forced-colors 已处理；组件无动画。
 
@@ -63,7 +64,7 @@ source: packages/mobile/src/Badge
 
 ## Props
 
-API 由 `BadgeProps` 生成。number content 会截断并夹紧到零，非有限 count 归零；max 仅处理 number content，非有限 max 不截断。offset 为逻辑 inline-end、block-start 的像素偏移，非有限 offset 归零。
+API 由 `BadgeProps` 生成。number content 会截断并夹紧到零，非有限 count 归零；max 仅处理 number content，非有限 max 不截断。offset 为逻辑 inline-end、block-start 的像素偏移，非有限 offset 归零。React 空节点不创建空角标或伪锚点。
 
 ## Events
 
@@ -119,11 +120,11 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 
 ## 测试证据
 
-- Unit: `Badge.test.tsx` 覆盖 zero/max、dot label、tone 文本和 RTL offset。
+- Unit: `Badge.test.tsx` 覆盖 zero/max、dot label、tone 文本、RTL offset 与空 ReactNode 归一化。
 - Story interaction: `Count` 验证独立计数与 accessibility tree 暴露；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2100 B / 32768 B 预算，组合 Brotli 1875 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2127 B / 32768 B 预算，组合 Brotli 1897 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；隔离 Next 16 hydration 后 99+ 与 dot accessible label 保持一致，0 hydration/runtime error。
 - RTL: Unit 覆盖 offset 数据归一化；逻辑定位由 CSS 实现，视觉截图待补。
 - Reduced motion: 无动画，不适用。
@@ -142,6 +143,7 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 - 固化 dot/count/max/zero/label 边界；改用逻辑定位并增加高对比降级。
 - 补齐 TSDoc、Unit、SSR 与状态 Story。
 - 在隔离 Next H5 中补 overflow count、dot label、组合与 hydration 双引擎证据。
+- 空 ReactNode 不再创建不可见 marker 或错误的 absolute anchor 状态。
 
 ## 变更记录
 
@@ -149,3 +151,4 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 | ---------- | ------ | ------------- | ------------------------------------------------------ | -------- |
 | 2026-08-29 | 未发布 | accessibility | 明确 dot label、颜色之外的状态表达及 RTL/forced-colors | API 兼容 |
 | 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 count/dot/hydration 证据           | 无       |
+| 2026-08-29 | 未发布 | hardening     | 归一空 ReactNode 的 marker 与 anchor 派生              | API 兼容 |

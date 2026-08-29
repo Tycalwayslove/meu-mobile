@@ -17,6 +17,11 @@ function resolveSize(value: CSSProperties["width"], fallback: string) {
   return value === undefined ? fallback : value;
 }
 
+function resolveAspectRatio(value: CSSProperties["aspectRatio"]) {
+  if (typeof value !== "number") return value;
+  return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
 /**
  * Renders an inert loading placeholder with shape and motion variants.
  *
@@ -43,7 +48,7 @@ export function Skeleton({
     variant === "circle" ? circleHeight : resolveSize(height, variant === "text" ? "16px" : "80px");
   const resolvedStyle: SkeletonStyle = {
     ...style,
-    "--meu-skeleton-aspect-ratio": aspectRatio,
+    "--meu-skeleton-aspect-ratio": resolveAspectRatio(aspectRatio),
     "--meu-skeleton-height": resolvedHeight,
     "--meu-skeleton-width": resolvedWidth
   };

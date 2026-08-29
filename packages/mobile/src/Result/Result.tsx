@@ -1,7 +1,7 @@
 "use client";
 
 import { MeuIconCheck, MeuIconX } from "@meu/icons-react";
-import { createElement, useId } from "react";
+import { Children, createElement, useId } from "react";
 
 import {
   actions as actionsStyle,
@@ -36,6 +36,15 @@ function getDefaultIcon(status: ResultStatus) {
   return "i";
 }
 
+function hasRenderableContent(value: ResultProps["actions"]): boolean {
+  return value !== "" && Children.toArray(value).length > 0;
+}
+
+function normalizeHeadingLevel(value: ResultProps["headingLevel"]): 1 | 2 | 3 | 4 | 5 | 6 {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 2;
+  return Math.min(6, Math.max(1, Math.trunc(value))) as 1 | 2 | 3 | 4 | 5 | 6;
+}
+
 /**
  * Renders a semantic outcome state with optional description and actions.
  *
@@ -63,6 +72,10 @@ export function Result({
   const descriptionId = `${generatedId}-description`;
   const resolvedIcon = icon === undefined ? getDefaultIcon(status) : icon;
   const resolvedRole = role || "status";
+  const resolvedHeadingLevel = normalizeHeadingLevel(headingLevel);
+  const hasDescription = hasRenderableContent(description);
+  const hasIcon = hasRenderableContent(resolvedIcon);
+  const hasActions = hasRenderableContent(actions);
 
   return (
     <div
@@ -89,25 +102,23 @@ export function Result({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabel ? undefined : mergeIdReferences(titleId, ariaLabelledby)}
       aria-describedby={
-        description === undefined
-          ? ariaDescribedby
-          : mergeIdReferences(descriptionId, ariaDescribedby)
+        !hasDescription ? ariaDescribedby : mergeIdReferences(descriptionId, ariaDescribedby)
       }
       data-meu-component="result"
       data-status={status}
     >
-      {resolvedIcon !== null && resolvedIcon !== false ? (
+      {hasIcon ? (
         <div className={iconStyle({ status })} aria-hidden="true">
           {resolvedIcon}
         </div>
       ) : null}
-      {createElement(`h${headingLevel}`, { className: titleStyle, id: titleId }, title)}
-      {description !== undefined ? (
+      {createElement(`h${resolvedHeadingLevel}`, { className: titleStyle, id: titleId }, title)}
+      {hasDescription ? (
         <div className={descriptionStyle} id={descriptionId}>
           {description}
         </div>
       ) : null}
-      {actions !== undefined ? <div className={actionsStyle}>{actions}</div> : null}
+      {hasActions ? <div className={actionsStyle}>{actions}</div> : null}
     </div>
   );
 }

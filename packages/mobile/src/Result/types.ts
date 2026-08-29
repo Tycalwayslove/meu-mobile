@@ -12,7 +12,7 @@ export type ResultProps = Omit<
   actions?: ReactNode;
   /** Supporting outcome details. */
   description?: ReactNode;
-  /** Heading level used for the result title. @defaultValue 2 */
+  /** Heading level used for the result title. Runtime numeric values are truncated and clamped to 1–6. @defaultValue 2 */
   headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
   /** Decorative status icon; pass `null` to omit it. */
   icon?: ReactNode;

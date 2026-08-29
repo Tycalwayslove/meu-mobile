@@ -81,4 +81,16 @@ describe("Empty", () => {
     expect(describedBy.filter((id) => id === "external-empty-hint")).toHaveLength(1);
     expect(describedBy.some((id) => id.includes("description"))).toBe(true);
   });
+
+  it("does not reserve an action row for empty React nodes", () => {
+    render(
+      <Empty
+        title="没有可用动作"
+        description="业务稍后再提供恢复入口。"
+        action={null}
+        secondaryAction={false}
+      />
+    );
+    expect(document.querySelector('[data-meu-slot="actions"]')).toBeNull();
+  });
 });

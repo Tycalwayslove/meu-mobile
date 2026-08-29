@@ -59,4 +59,16 @@ describe("Skeleton", () => {
     expect(lines[0] && lines[0].style.getPropertyValue("--meu-skeleton-line-width")).toBe("100%");
     expect(lines[1] && lines[1].style.getPropertyValue("--meu-skeleton-line-width")).toBe("72%");
   });
+
+  it("omits invalid numeric aspect ratios and preserves finite positive ratios", () => {
+    const { container, rerender } = render(
+      <Skeleton aspectRatio={Number.POSITIVE_INFINITY} height="auto" variant="rectangle" />
+    );
+    const skeleton = container.querySelector<HTMLElement>('[data-meu-component="skeleton"]');
+    if (!skeleton) throw new Error("Expected Skeleton root");
+    expect(skeleton.style.getPropertyValue("--meu-skeleton-aspect-ratio")).toBe("");
+
+    rerender(<Skeleton aspectRatio={1.5} height="auto" variant="rectangle" />);
+    expect(skeleton.style.getPropertyValue("--meu-skeleton-aspect-ratio")).toBe("1.5");
+  });
 });

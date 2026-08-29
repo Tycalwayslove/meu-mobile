@@ -73,4 +73,20 @@ describe("Badge", () => {
     expect(marker && marker.style.getPropertyValue("--meu-badge-offset-x")).toBe("0px");
     expect(marker && marker.style.getPropertyValue("--meu-badge-offset-y")).toBe("0px");
   });
+
+  it("does not render empty React content as a marker or positioned anchor", () => {
+    const { rerender } = render(<Badge content={false} />);
+    expect(document.querySelector('[data-meu-component="badge"]')).toBeNull();
+
+    rerender(
+      <Badge content={3}>
+        {true}
+        {null}
+      </Badge>
+    );
+    const badge = document.querySelector<HTMLElement>('[data-meu-component="badge"]');
+    const marker = document.querySelector<HTMLElement>("[data-meu-badge-marker]");
+    expect(badge && badge.getAttribute("data-state")).toBe("standalone");
+    expect(marker && marker.style.position).toBe("");
+  });
 });

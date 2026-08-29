@@ -1175,15 +1175,18 @@ export function ConsumerScenario() {
               <Progress announce aria-label="低动态 RTL 同步" indeterminate />
             </ConfigProvider>
           </div>
-          <div
-            className="integration-loading"
-            role="status"
-            aria-label="订单摘要加载中"
-            aria-busy="true"
-          >
-            <Skeleton variant="rectangle" height={88} animated />
-            <Skeleton lines={3} lineWidths={["100%", "86%", "58%"]} animated />
-          </div>
+          <ConfigProvider motion="reduced">
+            <div
+              className="integration-loading"
+              role="status"
+              aria-label="订单摘要加载中"
+              aria-busy="true"
+            >
+              <Skeleton variant="rectangle" height={88} animated />
+              <Skeleton lines={3} lineWidths={["100%", "86%", "58%"]} animated />
+            </div>
+            <Result status="pending" title="等待库存确认" />
+          </ConfigProvider>
           <Empty
             title="没有待处理订单"
             description="当前筛选条件下没有可处理的订单。"

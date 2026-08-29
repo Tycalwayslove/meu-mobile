@@ -1,3 +1,4 @@
+import { Children } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 import { badge, badgeContent, badgeWrapper } from "./Badge.css";
@@ -23,6 +24,10 @@ function finiteOffset(value: number): number {
   return Number.isFinite(value) ? value : 0;
 }
 
+function hasRenderableContent(value: ReactNode): boolean {
+  return value !== "" && Children.toArray(value).length > 0;
+}
+
 /**
  * Renders compact semantic status or count content.
  *
@@ -45,9 +50,9 @@ export function Badge({
 }: BadgeProps) {
   const normalizedContent = normalizeNumericContent(content);
   const numericZero = normalizedContent === 0;
-  const visible = dot || Boolean(normalizedContent) || (numericZero && showZero);
+  const visible = dot || (numericZero ? showZero : hasRenderableContent(normalizedContent));
   const resolvedContent = resolveContent(normalizedContent, max);
-  const hasAnchor = children !== undefined && children !== null && children !== false;
+  const hasAnchor = hasRenderableContent(children);
   const markerStyle: BadgeStyle | undefined = offset
     ? {
         "--meu-badge-offset-x": `${finiteOffset(offset[0])}px`,

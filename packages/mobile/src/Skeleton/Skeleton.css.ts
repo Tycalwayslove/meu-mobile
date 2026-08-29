@@ -57,6 +57,10 @@ export const block = recipe({
           },
           '[dir="rtl"] &::after': {
             animationName: sweepRtl
+          },
+          '[data-meu-motion="reduced"] &::after': {
+            opacity: 0,
+            animation: "none"
           }
         },
         "@media": {

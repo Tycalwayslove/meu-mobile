@@ -69,4 +69,23 @@ describe("Result", () => {
     expect(describedByValue && describedByValue.split(/\s+/)).toContain("result-hint");
     expect(result.getAttribute("aria-describedby")).toContain("description");
   });
+
+  it("omits empty optional slots and normalizes runtime heading levels", () => {
+    render(
+      <Result
+        actions={false}
+        description={null}
+        headingLevel={8 as 6}
+        icon={false}
+        status="info"
+        title="运行时输入已归一"
+      />
+    );
+    const result = screen.getByRole("status", { name: "运行时输入已归一" });
+    expect(screen.getByRole("heading", { level: 6 })).toBeTruthy();
+    expect(result.getAttribute("aria-describedby")).toBeNull();
+    expect(result.querySelector('[aria-hidden="true"]')).toBeNull();
+    expect(result.querySelector("button")).toBeNull();
+    expect(result.children).toHaveLength(1);
+  });
 });

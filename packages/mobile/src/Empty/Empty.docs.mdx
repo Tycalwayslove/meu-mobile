@@ -28,6 +28,7 @@ source: packages/mobile/src/Empty
 - 展示非错误空态的原因标题、说明、装饰插图、主操作与次操作。
 - `reason=no-data|no-results|not-configured` 为分析/测试提供稳定分类，不改变业务行为。
 - 标题命名根 group、说明通过 `aria-describedby` 关联；窄屏操作区改为单列，长文案可断行。
+- `action`/`secondaryAction` 的 null、boolean、空数组或空字符串不会预留空操作区。
 
 当前为 `verification`；Unit、SSR、Story 与全库移动浏览器门禁已完成，最终视觉审批和真机证据未完成。
 
@@ -65,7 +66,7 @@ source: packages/mobile/src/Empty
 
 ## Props
 
-`title`、`description` 是内容事实源；`action`/`secondaryAction` 可省略。自定义 illustration 总是作为装饰隐藏，不能在其中放有意义的文字或交互。
+`title`、`description` 是内容事实源；`action`/`secondaryAction` 可省略或返回空 ReactNode，空值不会产生额外间距。自定义 illustration 总是作为装饰隐藏，不能在其中放有意义的文字或交互。
 
 ## Events
 
@@ -120,11 +121,11 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 
 ## 测试证据
 
-- Unit: 4 项，覆盖命名/说明、外部与内部 IDREF 合并、无插图，以及原因/双操作/无操作。
+- Unit: 5 项，覆盖命名/说明、外部与内部 IDREF 合并、无插图、原因/双操作/无操作，以及空 ReactNode 操作归一化。
 - Story interaction: `Default` 验证命名 group、说明关系与操作文案，不冒充业务回调证据；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 824 B / 32768 B 预算，组合 Brotli 729 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 884 B / 32768 B 预算，组合 Brotli 769 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后 group 名称、说明和 action 保持一致，0 hydration/runtime error。
 - RTL: 逻辑顺序契约；未做 E2E。
 - Reduced motion: 不适用，无动画。
@@ -143,6 +144,7 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 - 明确非错误边界、原因分类、说明关系与主次操作槽位。
 - 增加窄屏长文案、forced-colors 和 SSR 契约。
 - 在隔离 Next H5 中补命名、说明、action 与 hydration 双引擎证据。
+- 空 ReactNode 操作不再生成无内容但占据布局的 actions 容器。
 
 ## 变更记录
 
@@ -150,3 +152,4 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 | ---------- | ------ | ------------ | --------------------------------------------------- | -------------- |
 | 2026-08-29 | 未发布 | 兼容增强     | `action` 改为可选，新增 `secondaryAction`、`reason` | 旧调用无需迁移 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 group/action/hydration 证据     | 无             |
+| 2026-08-29 | 未发布 | hardening    | 空 ReactNode 操作不再预留 actions 布局              | API 兼容       |

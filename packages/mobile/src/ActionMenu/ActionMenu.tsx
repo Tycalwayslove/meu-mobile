@@ -112,6 +112,7 @@ export function ActionMenu({
   const config = useMeuConfig();
   const generatedId = useId();
   const initialActionRef = useRef<HTMLButtonElement>(null);
+  const confirmationReturnTargetRef = useRef<HTMLButtonElement | null>(null);
   const resolvedOpenRef = useRef(false);
   const actionTokenRef = useRef(0);
   const openStateRef = useRef(false);
@@ -159,6 +160,23 @@ export function ActionMenu({
   useEffect(() => {
     resolvedOpenRef.current = resolvedOpen;
   }, [resolvedOpen]);
+
+  useEffect(() => {
+    if (!resolvedOpen) {
+      confirmationReturnTargetRef.current = null;
+      return undefined;
+    }
+    if (confirmation !== null) return undefined;
+    const returnTarget = confirmationReturnTargetRef.current;
+    if (!returnTarget) return undefined;
+    confirmationReturnTargetRef.current = null;
+    const frame = window.requestAnimationFrame(() => {
+      if (resolvedOpenRef.current && returnTarget.isConnected && !returnTarget.disabled) {
+        returnTarget.focus({ preventScroll: true });
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [confirmation, resolvedOpen]);
 
   useEffect(() => {
     if (!resolvedOpen) return undefined;
@@ -223,8 +241,10 @@ export function ActionMenu({
         tone={action.tone === "danger" ? "danger" : "neutral"}
         variant="ghost"
         onClick={(event) => {
-          if (needsConfirmation) setConfirmation({ action, index, trigger: event.currentTarget });
-          else void runAction(action, index);
+          if (needsConfirmation) {
+            confirmationReturnTargetRef.current = null;
+            setConfirmation({ action, index, trigger: event.currentTarget });
+          } else void runAction(action, index);
         }}
       >
         <span className={actionContent}>
@@ -338,11 +358,8 @@ export function ActionMenu({
           restoreFocus={false}
           onOpenChange={(nextOpen) => {
             if (!nextOpen) {
-              const returnTarget = confirmation.trigger;
+              confirmationReturnTargetRef.current = confirmation.trigger;
               setConfirmation(null);
-              window.requestAnimationFrame(() => {
-                if (resolvedOpenRef.current) returnTarget.focus();
-              });
             }
           }}
         />

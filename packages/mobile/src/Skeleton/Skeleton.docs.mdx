@@ -29,7 +29,7 @@ source: packages/mobile/src/Skeleton
 
 - 支持 text（1–20 行）、rectangle、circle，数字尺寸按 px 解析。
 - 支持逐行宽度、稳定 width/height、`aspectRatio` 与多实例组合；始终 `aria-hidden=true`。
-- shimmer 为显式 opt-in，reduced-motion 下关闭；forced-colors 保留占位轮廓。
+- shimmer 为显式 opt-in，系统偏好或 `ConfigProvider motion="reduced"` 下关闭；forced-colors 保留占位轮廓。
 
 当前为 `verification`；Unit、SSR、Story 与全库浏览器场景矩阵已完成，最终视觉审批和真机证据未完成。
 
@@ -64,7 +64,7 @@ source: packages/mobile/src/Skeleton
 
 ## Props
 
-text 的 `lines` 夹紧到 1–20，最后一行缺省 72%；circle 缺一边尺寸时复用另一边。`aspectRatio` 用于预留媒体比例，但调用方仍应给出确定 width/容器约束。
+text 的 `lines` 夹紧到 1–20，最后一行缺省 72%；circle 缺一边尺寸时复用另一边。`aspectRatio` 用于预留媒体比例，非正或非有限数字会被省略；调用方仍应给出确定 width/容器约束。
 
 ## Events
 
@@ -90,7 +90,7 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 
 ## 动效
 
-`animated=false` 默认静态。shimmer 只改变伪元素 transform；reduced-motion 下动画和高光透明度关闭。
+`animated=false` 默认静态。shimmer 只改变伪元素 transform；系统 reduced-motion 与 `ConfigProvider motion="reduced"` 均关闭动画和高光透明度。
 
 ## 主题与定制
 
@@ -118,14 +118,14 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 
 ## 测试证据
 
-- Unit: 5 项，覆盖多行、circle 尺寸、非法行数、非有限尺寸回退，以及 aspect ratio/aria-hidden。
+- Unit: 6 项，覆盖多行、circle 尺寸、非法行数、非有限尺寸回退、非法 aspect ratio 与 aria-hidden。
 - Story interaction: `ComposedCard` 验证 loading boundary、装饰性隐藏与占位结构；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2005 B / 32768 B 预算，组合 Brotli 1780 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2042 B / 32768 B 预算，组合 Brotli 1817 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后两种组合占位保持装饰性隐藏且无 hydration/runtime error。
 - RTL: 结构无方向依赖；未做 E2E。
-- Reduced motion: CSS 分支存在；未做浏览器 E2E。
+- Reduced motion: 系统媒体查询与 ConfigProvider 分支均存在；隔离 Next H5 在 Chromium/WebKit 中验证显式 reduced 配置的伪元素 animation-name=none。
 - Mobile Chromium/WebKit E2E: 反馈场景在两种引擎断言命名 loading boundary、`aria-busy=true`、rectangle/lines 两个 Skeleton 及各自 `aria-hidden=true`。
 - Chromatic Light/Dark: 未执行。
 - Real device: 未执行。
@@ -141,6 +141,7 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 - 固化组合形状、调用方 aria-busy 边界、确定几何与 reduced-motion/forced-colors 契约。
 - 新增 `aspectRatio` 和 SSR 证据。
 - 在隔离 Next H5 中补 loading boundary、组合占位与 hydration 双引擎证据。
+- 补齐 ConfigProvider 低动态分支并拒绝无效数值比例，避免无限 shimmer 与非法 CSS。
 
 ## 变更记录
 
@@ -148,3 +149,4 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 | ---------- | ------ | ------------ | -------------------------------------------------- | -------------- |
 | 2026-08-29 | 未发布 | 兼容增强     | 新增 `aspectRatio`，完善 CLS、组合与无障碍边界     | 旧调用无需迁移 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎组合/aria-hidden/hydration 证据 | 无             |
+| 2026-08-29 | 未发布 | hardening    | 同步 Provider 低动态并归一非法数值比例             | API 兼容       |

@@ -1086,6 +1086,18 @@ test("renders progress, skeleton, empty and result feedback contracts", async ({
   await expect(skeletons).toHaveCount(2);
   await expect(skeletons.nth(0)).toHaveAttribute("aria-hidden", "true");
   await expect(skeletons.nth(1)).toHaveAttribute("aria-hidden", "true");
+  await expect(
+    loading.locator('xpath=ancestor::*[@data-meu-component="config-provider"][1]')
+  ).toHaveAttribute("data-meu-motion", "reduced");
+  await expect
+    .poll(() =>
+      skeletons.nth(0).evaluate((node) => window.getComputedStyle(node, "::after").animationName)
+    )
+    .toBe("none");
+
+  const pending = section.getByRole("status", { name: "等待库存确认" });
+  const waitingDot = pending.locator('[aria-hidden="true"] span span').first();
+  await expect(waitingDot).toHaveCSS("animation-name", "none");
 
   const empty = section.getByRole("group", { name: "没有待处理订单" });
   await expect(empty).toContainText("当前筛选条件下没有可处理的订单。");

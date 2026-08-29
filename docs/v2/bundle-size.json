@@ -6,9 +6,9 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 20199,
-    "gzipBytes": 24412,
-    "rawBytes": 190410,
+    "brotliBytes": 20244,
+    "gzipBytes": 24433,
+    "rawBytes": 190616,
     "files": [
       {
         "filePath": "packages/tokens/dist/theme.css",
@@ -294,9 +294,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 11680,
-      "gzipBytes": 13264,
-      "rawBytes": 60111,
+      "brotliBytes": 11736,
+      "gzipBytes": 13330,
+      "rawBytes": 60791,
       "docsPath": "packages/mobile/src/ActionMenu/ActionMenu.docs.mdx",
       "name": "ActionMenu",
       "packageName": "@meu/mobile",
@@ -305,17 +305,17 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 11096,
-          "gzipBytes": 12586,
-          "rawBytes": 57156,
+          "brotliBytes": 11172,
+          "gzipBytes": 12652,
+          "rawBytes": 57836,
           "name": "ActionMenu",
           "passesBudget": true
         },
         {
           "budgetBytes": 32768,
-          "brotliBytes": 11634,
-          "gzipBytes": 13180,
-          "rawBytes": 59774,
+          "brotliBytes": 11676,
+          "gzipBytes": 13245,
+          "rawBytes": 60454,
           "name": "ActionMenuProvider",
           "passesBudget": true
         },
@@ -352,9 +352,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 1875,
-      "gzipBytes": 2100,
-      "rawBytes": 6550,
+      "brotliBytes": 1897,
+      "gzipBytes": 2127,
+      "rawBytes": 6664,
       "docsPath": "packages/mobile/src/Badge/Badge.docs.mdx",
       "name": "Badge",
       "packageName": "@meu/mobile",
@@ -363,9 +363,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 1875,
-          "gzipBytes": 2100,
-          "rawBytes": 6550,
+          "brotliBytes": 1897,
+          "gzipBytes": 2127,
+          "rawBytes": 6664,
           "name": "Badge",
           "passesBudget": true
         }
@@ -816,9 +816,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 729,
-      "gzipBytes": 824,
-      "rawBytes": 2121,
+      "brotliBytes": 769,
+      "gzipBytes": 884,
+      "rawBytes": 2286,
       "docsPath": "packages/mobile/src/Empty/Empty.docs.mdx",
       "name": "Empty",
       "packageName": "@meu/mobile",
@@ -827,9 +827,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 729,
-          "gzipBytes": 824,
-          "rawBytes": 2121,
+          "brotliBytes": 769,
+          "gzipBytes": 884,
+          "rawBytes": 2286,
           "name": "Empty",
           "passesBudget": true
         }
@@ -1302,9 +1302,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2972,
-      "gzipBytes": 3333,
-      "rawBytes": 10696,
+      "brotliBytes": 3104,
+      "gzipBytes": 3470,
+      "rawBytes": 11140,
       "docsPath": "packages/mobile/src/Result/Result.docs.mdx",
       "name": "Result",
       "packageName": "@meu/mobile",
@@ -1313,9 +1313,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2972,
-          "gzipBytes": 3333,
-          "rawBytes": 10696,
+          "brotliBytes": 3104,
+          "gzipBytes": 3470,
+          "rawBytes": 11140,
           "name": "Result",
           "passesBudget": true
         }
@@ -1428,9 +1428,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 1780,
-      "gzipBytes": 2005,
-      "rawBytes": 6251,
+      "brotliBytes": 1817,
+      "gzipBytes": 2042,
+      "rawBytes": 6435,
       "docsPath": "packages/mobile/src/Skeleton/Skeleton.docs.mdx",
       "name": "Skeleton",
       "packageName": "@meu/mobile",
@@ -1439,9 +1439,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 1780,
-          "gzipBytes": 2005,
-          "rawBytes": 6251,
+          "brotliBytes": 1817,
+          "gzipBytes": 2042,
+          "rawBytes": 6435,
           "name": "Skeleton",
           "passesBudget": true
         }
@@ -1575,9 +1575,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4281,
-      "gzipBytes": 4833,
-      "rawBytes": 17809,
+      "brotliBytes": 4308,
+      "gzipBytes": 4860,
+      "rawBytes": 17899,
       "docsPath": "packages/mobile/src/TabBar/TabBar.docs.mdx",
       "name": "TabBar",
       "packageName": "@meu/mobile",
@@ -1586,9 +1586,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4281,
-          "gzipBytes": 4833,
-          "rawBytes": 17809,
+          "brotliBytes": 4308,
+          "gzipBytes": 4860,
+          "rawBytes": 17899,
           "name": "TabBar",
           "passesBudget": true
         }
@@ -1596,9 +1596,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4271,
-      "gzipBytes": 4839,
-      "rawBytes": 17967,
+      "brotliBytes": 4300,
+      "gzipBytes": 4867,
+      "rawBytes": 18057,
       "docsPath": "packages/mobile/src/Tabs/Tabs.docs.mdx",
       "name": "Tabs",
       "packageName": "@meu/mobile",
@@ -1607,9 +1607,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4271,
-          "gzipBytes": 4839,
-          "rawBytes": 17967,
+          "brotliBytes": 4300,
+          "gzipBytes": 4867,
+          "rawBytes": 18057,
           "name": "Tabs",
           "passesBudget": true
         }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { Children, useId } from "react";
 
 import {
   action as actionStyle,
@@ -16,6 +16,10 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   const ids = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
   const uniqueIds = [...new Set(ids.filter(Boolean))];
   return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
+}
+
+function hasRenderableContent(value: EmptyProps["action"]): boolean {
+  return value !== "" && Children.toArray(value).length > 0;
 }
 
 /**
@@ -43,6 +47,7 @@ export function Empty({
   const descriptionId = `${generatedId}-description`;
   const resolvedIllustration =
     illustration === undefined ? <span className={defaultIllustration} /> : illustration;
+  const hasActions = hasRenderableContent(action) || hasRenderableContent(secondaryAction);
 
   return (
     <div
@@ -67,7 +72,7 @@ export function Empty({
       <div className={descriptionStyle} id={descriptionId}>
         {description}
       </div>
-      {action !== undefined || secondaryAction !== undefined ? (
+      {hasActions ? (
         <div className={actionStyle} data-meu-slot="actions">
           {action}
           {secondaryAction}
