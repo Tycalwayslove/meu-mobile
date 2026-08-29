@@ -33,7 +33,7 @@ function isScrollable(node: HTMLElement) {
 }
 
 function defaultCanPull(rootNode: HTMLElement) {
-  let current = rootNode.parentElement;
+  let current: HTMLElement | null = rootNode;
   while (current && current !== document.body && current !== document.documentElement) {
     if (isScrollable(current)) return current.scrollTop <= 0;
     current = current.parentElement;
@@ -202,6 +202,7 @@ export function PullToRefresh({
       }
       const deltaX = touch.clientX - session.startX;
       const deltaY = touch.clientY - session.startY;
+      if (!session.active && Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 4) return;
       if (!session.active && Math.abs(deltaX) > Math.abs(deltaY)) {
         sessionRef.current = null;
         return;
@@ -210,7 +211,6 @@ export function PullToRefresh({
         finish(true);
         return;
       }
-      if (deltaY < 4) return;
       session.active = true;
       event.preventDefault();
       const nextDistance = Math.min(resolvedMaximum, deltaY * resolvedResistance);

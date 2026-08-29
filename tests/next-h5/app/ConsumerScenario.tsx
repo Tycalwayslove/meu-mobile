@@ -297,6 +297,8 @@ export function ConsumerScenario() {
   const [primarySection, setPrimarySection] = useState("home");
   const [feedbackProgress, setFeedbackProgress] = useState(64);
   const [refreshCount, setRefreshCount] = useState(0);
+  const [refreshRequestCount, setRefreshRequestCount] = useState(0);
+  const [refreshPending, setRefreshPending] = useState(false);
   const [infinitePage, setInfinitePage] = useState(1);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
@@ -326,6 +328,7 @@ export function ConsumerScenario() {
   const imageViewerTriggerRef = useRef<HTMLButtonElement>(null);
   const virtualListRef = useRef<VirtualListRef>(null);
   const portalTargetRef = useRef<HTMLDivElement>(null);
+  const refreshResolveRef = useRef<(() => void) | null>(null);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -424,14 +427,39 @@ export function ConsumerScenario() {
         <section className="integration-refresh" aria-label="下拉刷新">
           <PullToRefresh
             actionLabel="刷新订单数据"
-            canPull={() => true}
             onRefresh={async () => {
-              await new Promise<void>((resolve) => window.setTimeout(resolve, 100));
+              setRefreshRequestCount((current) => current + 1);
+              setRefreshPending(true);
+              await new Promise<void>((resolve) => {
+                refreshResolveRef.current = resolve;
+              });
               setRefreshCount((current) => current + 1);
             }}
           >
-            <strong>可刷新订单摘要</strong>
-            <p>刷新次数：{refreshCount}</p>
+            <div className="integration-refresh-content">
+              <strong>可刷新订单摘要</strong>
+              <p>刷新次数：{refreshCount}</p>
+              <p>请求开始次数：{refreshRequestCount}</p>
+              <Button
+                size="small"
+                type="button"
+                variant="outline"
+                disabled={!refreshPending}
+                onClick={() => {
+                  const resolve = refreshResolveRef.current;
+                  refreshResolveRef.current = null;
+                  setRefreshPending(false);
+                  if (resolve) resolve();
+                }}
+              >
+                完成刷新请求
+              </Button>
+              {Array.from({ length: 6 }, (_, index) => (
+                <div className="integration-refresh-row" key={index}>
+                  刷新订单 {index + 1}
+                </div>
+              ))}
+            </div>
           </PullToRefresh>
         </section>
 

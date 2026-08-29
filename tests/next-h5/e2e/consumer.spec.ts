@@ -223,9 +223,102 @@ test("searches and clears with the SearchField contract", async ({ page }) => {
   await expect(search).toBeFocused();
 });
 
-test("refreshes through pull and keyboard-equivalent paths", async ({ page }) => {
+test("arbitrates a real scroll container and keyboard-equivalent refresh paths", async ({
+  page
+}) => {
   const section = page.getByRole("region", { name: "下拉刷新" });
   const root = section.locator('[data-meu-component="pull-to-refresh"]');
+  const dispatchGesture = (points: Array<{ x: number; y: number }>) =>
+    root.evaluate((node, gesturePoints) => {
+      const dispatch = (type: string, point: { x: number; y: number }, touching: boolean) => {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, "touches", {
+          value: touching ? [{ clientX: point.x, clientY: point.y }] : []
+        });
+        node.dispatchEvent(event);
+        return event.defaultPrevented;
+      };
+
+      const [start, ...moves] = gesturePoints;
+      if (!start) throw new Error("Expected at least one gesture point");
+      dispatch("touchstart", start, true);
+      const moveResults = moves.map((point) => dispatch("touchmove", point, true));
+      dispatch("touchend", moves.at(-1) || start, false);
+      return moveResults;
+    }, points);
+
+  const scrollMetrics = await section.evaluate((node) => ({
+    clientHeight: node.clientHeight,
+    scrollHeight: node.scrollHeight
+  }));
+  expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+
+  await section.evaluate((node) => {
+    node.scrollTop = 80;
+  });
+  await expect.poll(() => section.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+  const blockedMoveResults = await dispatchGesture([
+    { x: 20, y: 20 },
+    { x: 20, y: 220 }
+  ]);
+  expect(blockedMoveResults).toEqual([false]);
+  await expect(root).toHaveAttribute("data-status", "idle");
+  await expect(root).toContainText("刷新次数：0");
+
+  await section.evaluate((node) => {
+    node.scrollTop = 0;
+  });
+  const horizontalMoveResults = await dispatchGesture([
+    { x: 20, y: 20 },
+    { x: 180, y: 40 }
+  ]);
+  expect(horizontalMoveResults).toEqual([false]);
+  await expect(root).toHaveAttribute("data-status", "idle");
+
+  const landingJitterMoveResults = await dispatchGesture([
+    { x: 20, y: 20 },
+    { x: 22, y: 19 },
+    { x: 20, y: 50 }
+  ]);
+  expect(landingJitterMoveResults).toEqual([false, true]);
+  await expect(root).toHaveAttribute("data-status", "idle");
+  await expect(root).toContainText("请求开始次数：0");
+
+  const pullMoveResults = await dispatchGesture([
+    { x: 20, y: 20 },
+    { x: 20, y: 220 }
+  ]);
+  expect(pullMoveResults).toEqual([true]);
+  await expect(root).toHaveAttribute("data-status", "refreshing");
+  await expect(root).toContainText("请求开始次数：1");
+
+  const keyboardAction = section.getByRole("button", { name: "刷新订单数据" });
+  await expect(keyboardAction).toBeDisabled();
+
+  const lockedMoveResults = await dispatchGesture([
+    { x: 20, y: 20 },
+    { x: 20, y: 220 }
+  ]);
+  expect(lockedMoveResults).toEqual([false]);
+  await expect(root).toContainText("请求开始次数：1");
+
+  await root.getByRole("button", { name: "完成刷新请求" }).click();
+  await expect(root).toContainText("刷新次数：1");
+
+  await keyboardAction.focus();
+  await keyboardAction.press("Enter");
+  await expect(root).toHaveAttribute("aria-busy", "true");
+  await expect(root).toContainText("请求开始次数：2");
+  await root.getByRole("button", { name: "完成刷新请求" }).click();
+  await expect(root).toContainText("刷新次数：2");
+});
+
+test("cancels a pull when the active touch sequence is interrupted", async ({ page }) => {
+  const section = page.getByRole("region", { name: "下拉刷新" });
+  const root = section.locator('[data-meu-component="pull-to-refresh"]');
+  await section.evaluate((node) => {
+    node.scrollTop = 0;
+  });
   await root.evaluate((node) => {
     const dispatch = (type: string, y: number, touching: boolean) => {
       const event = new Event(type, { bubbles: true, cancelable: true });
@@ -236,16 +329,11 @@ test("refreshes through pull and keyboard-equivalent paths", async ({ page }) =>
     };
     dispatch("touchstart", 20, true);
     dispatch("touchmove", 220, true);
-    dispatch("touchend", 220, false);
+    dispatch("touchcancel", 220, false);
   });
-  await expect(root).toHaveAttribute("data-status", /refreshing|complete|idle/);
-  await expect(section.getByText("刷新次数：1")).toBeVisible();
-
-  const keyboardAction = section.getByRole("button", { name: "刷新订单数据" });
-  await keyboardAction.focus();
-  await keyboardAction.press("Enter");
-  await expect(root).toHaveAttribute("aria-busy", "true");
-  await expect(section.getByText("刷新次数：2")).toBeVisible();
+  await expect(root).toHaveAttribute("data-status", "idle");
+  await expect(root).toHaveAttribute("data-pull-distance", "0");
+  await expect(root).toContainText("刷新次数：0");
 });
 
 test("loads infinite pages manually, locks each request and reaches completion", async ({

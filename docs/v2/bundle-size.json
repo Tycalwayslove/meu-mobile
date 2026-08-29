@@ -1231,9 +1231,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2423,
-      "gzipBytes": 2810,
-      "rawBytes": 10690,
+      "brotliBytes": 2438,
+      "gzipBytes": 2819,
+      "rawBytes": 10733,
       "docsPath": "packages/mobile/src/PullToRefresh/PullToRefresh.docs.mdx",
       "name": "PullToRefresh",
       "packageName": "@meu/mobile",
@@ -1242,9 +1242,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2423,
-          "gzipBytes": 2810,
-          "rawBytes": 10690,
+          "brotliBytes": 2438,
+          "gzipBytes": 2819,
+          "rawBytes": 10733,
           "name": "PullToRefresh",
           "passesBudget": true
         }

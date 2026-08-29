@@ -11,7 +11,7 @@ export type PullToRefreshStatusChangeDetails = {
   distance: number;
   /** New lifecycle state. */
   status: PullToRefreshStatus;
-  /** Present when the transition belongs to an actual refresh attempt. */
+  /** Input path that caused this transition; omitted for directionless resets such as idle. */
   trigger?: PullToRefreshTrigger;
 };
 

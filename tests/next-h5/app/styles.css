@@ -134,8 +134,9 @@ textarea {
 }
 
 .integration-refresh {
+  height: 180px;
   margin-bottom: 24px;
-  overflow: hidden;
+  overflow-y: auto;
   border: 1px solid var(--meu-color-border);
   border-radius: var(--meu-radius-surface);
 }
@@ -207,6 +208,15 @@ textarea {
 .integration-refresh p {
   margin-top: 8px;
   color: var(--meu-color-muted);
+}
+
+.integration-refresh-row {
+  padding: 12px 0;
+  border-top: 1px solid var(--meu-color-border);
+}
+
+.integration-refresh-row:first-of-type {
+  margin-top: 16px;
 }
 
 .integration-list {
