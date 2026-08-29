@@ -32,7 +32,7 @@ source: packages/mobile/src/Radio
 - Field label/description/error/required 与调用方 IDREF 无损组合。
 - 选择目标至少 44×44；RTL 使用自然文档流；forced-colors 和 reduced-motion 有静态降级。
 
-状态为 `verification`；Unit/SSR/Story contract 与本地 axe 已建立，移动浏览器、Chromatic 主题矩阵和真机读屏尚未达到发布证据线。
+状态为 `verification`；Unit/SSR/Story contract、本地 axe 与 Next H5 移动 Chromium/WebKit 的基础选择路径已建立，Chromatic 主题最终审批和真机读屏尚未达到发布证据线。
 
 ## 主流基线与取舍
 
@@ -150,13 +150,14 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3743 B / 32768 B 预算；最大单值 `Radio` 为 3137 B / 32768 B 预算，组合 Brotli 3327 B；共享样式由应用单独导入一次。
 - Touch target: CSS `minWidth/minHeight: 44`
 - RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补
-- 移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
+- Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证从“标准配送”聚焦后按 ArrowRight，原生 radio 选择“急速配送”，随后表单提交值为 `express`；页面内 Radio 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
+- readOnly 方向键回滚、原生 validation bubble 的目标 WebView 路径：待补；Chromatic Light/Dark 最终审批及 VoiceOver/TalkBack 真机：待补
 
 ## V2 优化记录
 
 ### 待优化
 
-- 完成移动双引擎、真机读屏、200% 字号和强制色彩验收。
+- 完成 200% 字号、强制色彩、Chromatic 最终视觉审批与真机读屏验收。
 - 验证各目标 WebView 对只读方向键回滚和原生 validation bubble 的一致性。
 
 ### 已完成
@@ -167,6 +168,7 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                               | 迁移说明                                      |
-| ---------- | ------ | -------- | -------------------------------------------------- | --------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | required/invalid、reset、readOnly 与兼容性细节完善 | 无破坏；只读场景可用 `readOnly` 替代 disabled |
+| 日期       | 版本   | 类型         | 内容                                                                           | 迁移说明                                      |
+| ---------- | ------ | ------------ | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的方向键选择、表单值、hydration 与 44px 证据 | 无                                            |
+| 2026-08-28 | 未发布 | behavior     | required/invalid、reset、readOnly 与兼容性细节完善                             | 无破坏；只读场景可用 `readOnly` 替代 disabled |

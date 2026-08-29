@@ -163,7 +163,7 @@ Form 不生成文案。Field、组件默认 label、日期格式和错误消息�
 
 ## 浏览器与 WebView
 
-核心依赖原生 form 和 React Hook Form。V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；观察档不能只依赖静态语法扫描。软键盘、自动填充、密码管理、IME、原生 reset 和首次错误滚动需在移动浏览器验证。
+核心依赖原生 form 和 React Hook Form。隔离 Next H5 消费端会在 Pixel 5 mobile Chromium 与 iPhone 13 mobile WebKit 项目中运行；现有断言覆盖提交、客户端校验、清除、复杂值确认/取消、部分原生序列化和图片字段错误聚焦。软键盘、自动填充、密码管理、IME、原生 reset，以及首个错误滚动到可视区域仍需移动浏览器或真机验证。
 
 ## 边界情况与已知限制
 
@@ -179,15 +179,15 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、DOM 顺序聚焦、全局 disabled、required、事件顺序、FormData、嵌套、数组、dirty/touched，以及原生 reset 同步与取消
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局 disabled、required、事件顺序、嵌套、数组和 dirty/touched；原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦。
 - Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 102314 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 34200 B / 65536 B 预算，组合 Brotli 80827 B；共享样式由应用单独导入一次。
-- SSR/hydration: 底层输入已有部分证据，Form 专属待补
+- SSR/hydration: 隔离 Next H5 消费端会等待含 MeuForm 的页面完成 hydration，并要求每条用例都没有 `pageerror` 或 `console.error`；服务端/客户端默认值切换的 Form 专项矩阵待补
 - RTL: 待补
 - Reduced motion: Form 无自有动效，组合矩阵待补
-- Mobile Chromium/WebKit E2E: 隔离 H5 有基础提交路径，本批次专项待补
+- Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接覆盖空提交后的错误与 `aria-invalid`、TextInput 清除、有效值提交；Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker 覆盖取消不提交草稿、确认提交值和关闭后恢复焦点。ImageUploader 路径还断言 hidden `productImages` 初始序列化、删除后省略、上传完成后恢复，以及必填错误聚焦真实 file input；自定义 JSON serializer、原生 reset、服务端错误映射与首次错误滚动尚无移动 E2E。
 - Chromatic Light/Dark: 有静态 Story，待交互矩阵
 - Real device: 待补 iOS Safari/VoiceOver 与 Android Chrome/TalkBack
 
@@ -197,7 +197,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 - 冻结所有 overlay/复合 adapter 的 touched、ref 与 disabled/readOnly/required 矩阵。
 - 冻结复杂值 serializer 的后端版本迁移策略，并在真实业务接入时记录服务端解析样例。
-- 补 SSR、RTL、移动 E2E、Chromatic Light/Dark 与真机记录。
+- 补服务端/客户端默认值切换、RTL、移动端原生 reset/服务端错误滚动、Chromatic Light/Dark 与真机输入记录。
 
 ### 已完成
 
@@ -211,9 +211,10 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                 | 迁移说明                                                             |
-| ---------- | ------ | -------- | ---------------------------------------------------- | -------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | disabled、required 与复合控件 touched 契约统一       | 全局 disabled 现在会真实禁用 adapter；required 进入原生语义          |
-| 2026-08-28 | 未发布 | types    | 字段 path 按值类型收紧，支持 Zod transform 输入/输出 | 误绑定到不兼容字段的代码会出现类型错误                               |
-| 2026-08-28 | 未发布 | breaking | 移除 RHF wildcard，服务端辅助函数迁移到 `/server`    | 从 `react-hook-form` 直接导入上游 API；改用 `@meu/form-react/server` |
-| 2026-08-28 | 未发布 | build    | 排除 Story declaration，增加 sideEffects 声明        | 无                                                                   |
+| 日期       | 版本   | 类型         | 内容                                                                                | 迁移说明                                                                    |
+| ---------- | ------ | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior     | disabled、required 与复合控件 touched 契约统一                                      | 全局 disabled 现在会真实禁用 adapter；required 进入原生语义                 |
+| 2026-08-28 | 未发布 | types        | 字段 path 按值类型收紧，支持 Zod transform 输入/输出                                | 误绑定到不兼容字段的代码会出现类型错误                                      |
+| 2026-08-28 | 未发布 | breaking     | 移除 RHF wildcard，服务端辅助函数迁移到 `/server`                                   | 从 `react-hook-form` 直接导入上游 API；改用 `@meu/form-react/server`        |
+| 2026-08-28 | 未发布 | build        | 排除 Story declaration，增加 sideEffects 声明                                       | 无                                                                          |
+| 2026-08-29 | 未发布 | verification | 记录 mobile Chromium/WebKit 已覆盖的提交、清除、确认/取消、图片序列化与错误聚焦证据 | 状态保持 `verification`；原生 reset、服务端错误滚动、IME 与真机读屏仍待验证 |

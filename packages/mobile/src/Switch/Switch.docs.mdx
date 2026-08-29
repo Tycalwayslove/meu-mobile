@@ -34,7 +34,7 @@ source: packages/mobile/src/Switch
 - 调用方与 Field IDREF 合并，Field invalid/required 进入原生控件。
 - thumb 使用逻辑 margin 移动，RTL 自动镜像；reduced-motion、forced-colors 和兼容旧 WebView 的焦点环有明确降级。
 
-状态为 `verification`。Unit、SSR、Story contract 与本地 axe 已补齐；发布前仍需移动双引擎、Chromatic 主题矩阵及 VoiceOver/TalkBack 证据。
+状态为 `verification`。Unit、SSR、Story contract、本地 axe 与 Next H5 移动 Chromium/WebKit 的基础切换路径已补齐；发布前仍需异步/冻结态的目标 WebView 场景、Chromatic 最终审批及 VoiceOver/TalkBack 真机证据。
 
 ## 主流基线与取舍
 
@@ -149,13 +149,14 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3042 B / 32768 B 预算，组合 Brotli 2697 B；共享样式由应用单独导入一次。
 - Touch target: 三尺寸 root 最小 44×44
 - RTL/reduced-motion/forced-colors：CSS 和 Story 已建；浏览器视觉证据待补
-- 移动 Chromium/WebKit、Chromatic Light/Dark 视觉基线、VoiceOver/TalkBack：待补
+- Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击“消息通知”后，表单提交值由 `notifications:true` 更新为 `notifications:false`；页面内 Switch 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
+- loading/readOnly、快速点击、失败回滚与卸载竞态的目标 WebView 场景：待补；Chromatic Light/Dark 最终审批及 VoiceOver/TalkBack 真机：待补
 
 ## V2 优化记录
 
 ### 待优化
 
-- 完成 200% 字号、移动双引擎、强制色彩截图与真机读屏验证。
+- 完成 200% 字号、强制色彩、Chromatic 最终视觉审批与真机读屏验证。
 - 用隔离 H5 请求场景验证快速点击、loading 切换、失败回滚和页面卸载竞态。
 
 ### 已完成
@@ -166,6 +167,7 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                | 迁移说明                                                         |
-| ---------- | ------ | -------- | --------------------------------------------------- | ---------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | loading 表单语义、readOnly、reset、RTL 与兼容性细化 | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled` |
+| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                                                         |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的布尔切换、表单值、hydration 与 44px 证据 | 无                                                               |
+| 2026-08-28 | 未发布 | behavior     | loading 表单语义、readOnly、reset、RTL 与兼容性细化                          | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled` |

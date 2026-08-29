@@ -25,7 +25,7 @@ source: packages/mobile/src/Button
 - loading 时保留内容宽度、设置 `aria-busy` 并禁用点击。
 - 使用兼容 WebView 70 的焦点环、逻辑间距，并在 reduced-motion 下显示静态 loading ring。
 
-当前能力来自源码与单测；V2 状态为 `verification`，不等于已完成商用验收。
+当前能力由源码、Unit、Story 与隔离 Next H5 证据支撑；V2 状态为 `verification`，不等于已完成商用验收。
 
 ## 何时使用
 
@@ -121,10 +121,10 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1957 B / 32768 B 预算，组合 Brotli 1742 B；共享样式由应用单独导入一次。
-- SSR/hydration: 隔离消费者覆盖，待增加组件级证明
+- SSR/hydration: Next 16 隔离消费者完成 production SSR/hydration；hydration 后 Button 可切换主题并提交表单，且全程无 `pageerror` / `console.error`
 - RTL: 已改用 flex gap，待浏览器视觉证明
 - Reduced motion: CSS 已静态降级，待 Story/浏览器证明
-- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均直接验证“普通操作”Button 默认 `type="button"`、点击结果与 44×44 CSS px 目标，并覆盖 Button 驱动的主题切换、表单提交和结果反馈；页面全部原生 `button` 目标高度均不小于 43.99 CSS px（兼容 WebKit 对 44px transform 的浮点取值）。loading/disabled 异步生命周期仍待专属双引擎场景
 - Chromatic Light/Dark: 有视觉快照，待建立显式矩阵
 - Real device: 待补
 
@@ -132,7 +132,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 ### 待优化
 
-- 补齐 Autodocs；验证 44px、字号放大、高对比和 RTL。
+- 补齐 Autodocs；继续验证各 size 的 44px、字号放大、高对比和 RTL 视觉细节。
 - 明确 loading 的读屏策略、宽度稳定性和异步错误恢复示例。
 - 评估是否需要 `loadingText`，没有真实场景证据前不新增 API。
 
@@ -143,6 +143,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 ## 变更记录
 
-| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
-| ---------- | ----- | ---- | -------------------- | -------- |
-| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |
+| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明 |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的按钮激活、提交、hydration 与触控目标证据 | 无       |
+| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                                         | 无       |

@@ -121,10 +121,10 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2810 B / 32768 B 预算，组合 Brotli 2423 B；共享样式由应用单独导入一次。
-- SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；真实 hydration 待补。
+- SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 刷新场景中保持 0 `pageerror` / `console.error`，独立最小化 hydration 专测仍待补。
 - RTL: 纵向手势不适用；文案/排版待矩阵。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
-- Mobile Chromium/WebKit E2E: 待补滚动竞争。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎用合成 Touch Events 直接验证越过阈值后触发一次刷新并更新计数，同时验证原生替代按钮经焦点 + Enter 触发第二次刷新、根节点进入 `aria-busy=true`。该场景显式 `canPull={() => true}`，因此不证明真实滚动祖先竞争、方向 handoff、iOS rubber-band 或持续手势表现。
 - Chromatic Light/Dark: stories 可采集，正式基线待确认。
 - Real device: 待补。
 
@@ -132,15 +132,17 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 
 ### 待优化
 
-- 补真实滚动容器的 Chromium/WebKit E2E 与 hydration。
+- 补真实滚动容器竞争、方向 handoff 的 Chromium/WebKit E2E 与独立最小化 hydration 专测。
 - 验证目标 iOS WKWebView 的 overscroll/rubber-band。
 
 ### 已完成
 
 - 固化滚动边界、方向锁、异常参数、请求锁、失败/取消/卸载清理、原生替代、live/busy、reduced-motion 与 SSR。
+- 增加 Next H5 双引擎合成下拉、键盘替代、busy 与刷新计数证据；真实滚动竞争和 rubber-band 不在该证据范围内。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型      | 内容                                         | 迁移说明     |
-| ---------- | ----- | --------- | -------------------------------------------- | ------------ |
-| 2026-08-29 | 0.1.0 | hardening | 完成触摸仲裁、请求状态、键盘替代与兼容事实源 | 无破坏性变更 |
+| 日期       | 版本   | 类型         | 内容                                                   | 迁移说明     |
+| ---------- | ------ | ------------ | ------------------------------------------------------ | ------------ |
+| 2026-08-29 | 0.1.0  | hardening    | 完成触摸仲裁、请求状态、键盘替代与兼容事实源           | 无破坏性变更 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎合成触摸、键盘替代与 hydration 证据 | 无           |

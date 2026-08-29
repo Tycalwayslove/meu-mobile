@@ -154,13 +154,14 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3824 B / 32768 B 预算；最大单值 `Checkbox` 为 3233 B / 32768 B 预算，组合 Brotli 3408 B；共享样式由应用单独导入一次。
 - Touch target: CSS root `minWidth/minHeight: 44`
 - Reduced motion / forced colors / RTL: CSS 和专属 Story 已建立；真实浏览器视觉证据待补
-- 移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补
+- Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击 CheckboxGroup 的“到店自提”后，表单提交值由 `delivery` 更新为 `delivery,pickup`；页面内 Checkbox 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
+- Mixed、readOnly、disabled 与原生 constraint validation 的移动双引擎专属路径：待补；Chromatic Light/Dark 最终审批及 VoiceOver/TalkBack 真机：待补
 
 ## V2 优化记录
 
 ### 待优化
 
-- 接入移动 WebKit/Chromium、200% 字号、强制色彩截图和真机读屏验收。
+- 补充 mixed、readOnly、disabled 与原生 constraint validation 的移动双引擎场景，并完成强制色彩截图和真机读屏验收。
 - 基于真实业务再评估 Group min/max 与 select-all API；当前不提前固化。
 
 ### 已完成
@@ -172,6 +173,7 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                              | 迁移说明                                      |
-| ---------- | ------ | -------- | ------------------------------------------------- | --------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | reset、readOnly、IDREF、触控/高对比与验证证据完善 | 无破坏；只读场景可用 `readOnly` 替代 disabled |
+| 日期       | 版本   | 类型         | 内容                                                                            | 迁移说明                                      |
+| ---------- | ------ | ------------ | ------------------------------------------------------------------------------- | --------------------------------------------- |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的 Group 选择、表单值、hydration 与 44px 证据 | 无                                            |
+| 2026-08-28 | 未发布 | behavior     | reset、readOnly、IDREF、触控/高对比与验证证据完善                               | 无破坏；只读场景可用 `readOnly` 替代 disabled |

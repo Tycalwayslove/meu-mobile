@@ -127,10 +127,10 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31929 B / 49152 B 预算，组合 Brotli 27800 B；共享样式由应用单独导入一次。
-- SSR/hydration: Node SSR 已覆盖；hydration 专测未执行。
+- SSR/hydration: Node SSR 已覆盖；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 上传场景中保持 0 `pageerror` / `console.error`，独立最小化 hydration 专测仍未执行。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。
-- Mobile Chromium/WebKit E2E: 未执行系统 picker 真机链路。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证已有成功值的 hidden input 序列化、原生 file input 的 `accept` 与无业务 `name`、预览/删除/添加目标尺寸及不重叠、删除后 required 校验聚焦与 `aria-invalid`；再通过 `setInputFiles` 注入本地 JPEG，验证 uploading/35% 进度、成功预览、成功值重新序列化及表单提交。系统 picker/camera、权限弹窗与真机 object URL 行为未执行。
 - Chromatic Light/Dark: 关键状态 Story 已有，基线待执行。
 - Real device: 未执行。
 
@@ -138,15 +138,16 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ### 待优化
 
-补 picker/camera 真机、服务端拒绝映射与 WebKit object URL 压力测试。
+补系统 picker/camera 真机、权限拒绝映射、服务端拒绝映射与 WebKit object URL 压力测试。
 
 ### 已完成
 
-补齐 group/Field 语义、progressbar、逻辑方向、forced-colors、并发容量预留与异步 rejection 收敛；固化 transport 和表单所有权边界。
+补齐 group/Field 语义、progressbar、逻辑方向、forced-colors、并发容量预留与异步 rejection 收敛；固化 transport 和表单所有权边界；增加 Next H5 双引擎本地文件上传、校验聚焦、成功值序列化与提交证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                         | 迁移说明         |
-| ---------- | ------ | -------- | ---------------------------- | ---------------- |
-| 2026-08-29 | 未发布 | bugfix   | 失败任务容量与异步 hook 安全 | 既有回调签名不变 |
-| 2026-08-29 | 未发布 | behavior | 上传任务语义和异步删除锁完善 | 既有回调签名不变 |
+| 日期       | 版本   | 类型         | 内容                                                  | 迁移说明         |
+| ---------- | ------ | ------------ | ----------------------------------------------------- | ---------------- |
+| 2026-08-29 | 未发布 | bugfix       | 失败任务容量与异步 hook 安全                          | 既有回调签名不变 |
+| 2026-08-29 | 未发布 | behavior     | 上传任务语义和异步删除锁完善                          | 既有回调签名不变 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎本地上传、校验聚焦与表单序列化证据 | 无               |

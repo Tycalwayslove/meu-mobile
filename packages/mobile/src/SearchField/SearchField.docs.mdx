@@ -36,7 +36,7 @@ source: packages/mobile/src/SearchField
 - 有 `onSearch` 时组件独占 Enter 并阻止原生 form submit；没有 `onSearch` 时 Enter 完全交还原生 form。
 - loading 时输入仍可编辑，但会隐藏 clear、公告搜索中状态，并阻止 Enter 产生重复回调或原生提交。
 
-当前状态为 `verification`。单元、SSR、Story play 与本地 axe 已补齐；完整 Light/Dark 视觉审批、RTL/字号矩阵、移动 WebKit/Chromium 专属 E2E 和真机读屏尚未完成，因此不能标记为 commercial。
+当前状态为 `verification`。单元、SSR、Story play、本地 axe，以及 mobile Chromium/WebKit 的 Enter 搜索与清除路径已有证据；完整 Light/Dark 视觉审批、移动浏览器原生 form/details 专项、真机 IME 与读屏尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -120,7 +120,7 @@ API 表由 `SearchFieldProps`、`SearchFieldSize`、`SearchFieldStatus` 与事�
 | `onSearch`  | `(value, details)`        | enter  | consumer keydown 未取消且非组合输入、非 repeat/loading 时触发；默认行为已阻止 |
 | `onKeyDown` | 原生 React keyboard event | 不适用 | 总是先于 SearchField 的 Enter 逻辑；`preventDefault()` 可取消后续搜索         |
 
-details 中的 `event` 是 React SyntheticEvent。不要把 DOM event 序列化进日志；异步任务只保存需要的 value/source。
+details 中的 `event` 是 React SyntheticEvent。单元测试直接断言 input、Enter 和 clear 的 `source` 与 event：clear 产生的 `onChange` 与 `onClear` 共享同一个 details 对象；这些 payload 尚未在移动 E2E 中采集。不要把 DOM event 序列化进日志；异步任务只保存需要的 value/source。
 
 ## Ref 与命令式方法
 
@@ -158,7 +158,7 @@ ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()
 
 ## SSR 与 Next.js
 
-渲染不读取 window/document，SSR 单测证明会输出真实 search input、name、value 与 readOnly 状态。组件包含 `"use client"`，应从 Next Client Component 使用；服务端与首次客户端的 `value/defaultValue/loading/readOnly` 必须一致以避免 hydration mismatch。
+渲染不读取 window/document，SSR 单测证明会输出真实 search input、name、value 与 readOnly 状态。隔离 Next H5 消费端还会等待包含 SearchField 的页面完成 hydration，并要求没有 `pageerror` 或 `console.error`；它没有覆盖服务端与首次客户端使用不同 `value/defaultValue/loading/readOnly` 的状态切换。组件包含 `"use client"`，应从 Next Client Component 使用。
 
 ## RTL 与国际化
 
@@ -188,15 +188,15 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 ## 测试证据
 
-- Unit: `SearchField.test.tsx` 覆盖事件首参/details、clear 顺序与焦点、readOnly、disabled、loading、IME、repeat、consumer cancellation、原生/回调 form 所有权和受控 live native value
+- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 clear 请求空值后恢复焦点、readOnly/disabled/loading、模拟 composition、repeat Enter、consumer cancellation 与受控 live native value。它还证明未传 `onSearch` 时原生 form 收到一次 submit，传入 `onSearch` 时只有搜索回调收到一次 Enter，不会双重提交。
 - Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4560 B / 32768 B 预算，组合 Brotli 4018 B；共享样式由应用单独导入一次。
-- SSR/hydration: `renderToString` 覆盖 native type/name/value/readOnly；hydration 专项待补
+- SSR/hydration: `renderToString` 覆盖 native type/name/value/readOnly；隔离 Next H5 会断言 hydration 完成且无运行时错误，服务端/客户端状态不一致矩阵待补
 - RTL: 使用 logical CSS；浏览器矩阵待补
 - Reduced motion: CSS 静态 ring 已实现；浏览器 computed-style 证明待补
-- Mobile Chromium/WebKit E2E: 现有隔离 H5 搜索/清除路径可复用，V2 details/form/IME 专项待补
+- Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接输入字符串 `TextArea` 并按 Enter，断言 `onSearch` 结果只显示该实时值；随后点击内置 clear，断言值为空且焦点回到 searchbox。details payload、无 `onSearch` 时的原生 form submit、loading/repeat/cancellation 与 IME 尚无这两个移动项目的专项断言。
 - Chromatic Light/Dark: Story 集已覆盖状态入口，显式双主题审批待补
 - Real device: 待补
 
@@ -204,7 +204,7 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 ### 待优化
 
-- 增加 hydration、RTL、强制色、200% 字号、Light/Dark Chromatic 与移动双浏览器专项证据。
+- 增加服务端/客户端状态切换、RTL、强制色、200% 字号、Light/Dark Chromatic，以及移动双浏览器的原生 form/details/loading/repeat/cancellation 专项证据。
 - 在真实 iOS 中文输入法、Android Gboard、VoiceOver 与 TalkBack 验证 Enter、loading 公告和 tap-clear 键盘保持。
 - 与 Field V2 契约合并 required、显式 id、description/error 和 composite label 修复后的集成证据。
 - Figma 暂缺可追溯 file key/node ID，设计资产补齐后更新 frontmatter。
@@ -219,6 +219,7 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 ## 变更记录
 
-| 日期       | 版本  | 类型           | 内容                                                                   | 迁移说明                                                              |
-| ---------- | ----- | -------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| 2026-08-28 | 0.1.0 | implementation | 增加 details、单一 Enter 所有权、IME/readOnly/loading/focus 与动效契约 | 旧单参回调继续可用；依赖 onSearch+form 双触发的代码迁移到单一请求入口 |
+| 日期       | 版本   | 类型           | 内容                                                                                            | 迁移说明                                                                         |
+| ---------- | ------ | -------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 2026-08-28 | 0.1.0  | implementation | 增加 details、单一 Enter 所有权、IME/readOnly/loading/focus 与动效契约                          | 旧单参回调继续可用；依赖 onSearch+form 双触发的代码迁移到单一请求入口            |
+| 2026-08-29 | 未发布 | verification   | 记录 mobile Chromium/WebKit 已覆盖 Enter 搜索、清除与焦点恢复；区分 details/form 单测和移动证据 | 状态保持 `verification`；IME、真机读屏及未设 `onSearch` 的移动 form 路径仍待验证 |

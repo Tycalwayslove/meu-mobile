@@ -140,7 +140,7 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 - SSR/hydration: 实现无浏览器分支，尚无独立 hydration 测试
 - RTL: 规则已文档化，拥有方向语义的上层组件仍需逐项验证
 - Reduced motion: 不适用；没有内建动效
-- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 `MeuIconSearch` 输出 `data-meu-icon="search"`、装饰态 `aria-hidden=true` / `focusable=false`、20×20 尺寸，并由 44×44 以上 IconButton 经焦点 + Enter 激活；页面 hydration 后保持 0 `pageerror` / `console.error`。语义图标的真实 VoiceOver/TalkBack 公告仍未执行。
 - Chromatic Light/Dark: Catalog 与 SemanticIcon Story 可构建，显式 Light/Dark 快照矩阵待补
 - Real device: 待补
 
@@ -157,10 +157,12 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 - 允许 `title`、`aria-label`、`aria-labelledby`，并保留显式 `aria-hidden` 优先级。
 - 固定 Lucide npm 归档、Git commit 与逐文件 checksum；加入上游 snapshot、离线生成/漂移检查和显式联网归档验证。
 - 逐项记录 Meu ID、上游名称、React 导出、几何 checksum 与 ISC/MIT 文件，不再用 Meu 命名遮蔽来源。
+- 增加 Next H5 双引擎装饰 SVG 属性、尺寸、宿主键盘激活与 hydration 证据；该技术证据不替代来源许可法务意见或真机读屏。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型       | 内容                                     | 迁移说明 |
-| ---------- | ------ | ---------- | ---------------------------------------- | -------- |
-| 2026-08-28 | 0.1.0  | hardening  | 完善语义模式、命名、TSDoc 与来源审计记录 | 无       |
-| 2026-08-29 | 未发布 | provenance | 固定上游并加入可复现生成、漂移与许可证据 | 无       |
+| 日期       | 版本   | 类型         | 内容                                                         | 迁移说明 |
+| ---------- | ------ | ------------ | ------------------------------------------------------------ | -------- |
+| 2026-08-28 | 0.1.0  | hardening    | 完善语义模式、命名、TSDoc 与来源审计记录                     | 无       |
+| 2026-08-29 | 未发布 | provenance   | 固定上游并加入可复现生成、漂移与许可证据                     | 无       |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎装饰属性、尺寸、键盘宿主与 hydration 证据 | 无       |

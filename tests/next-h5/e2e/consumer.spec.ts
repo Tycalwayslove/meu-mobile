@@ -40,7 +40,21 @@ test("composes layout, icon action, custom portal and hidden accessible text", a
   await expect(space).toHaveAttribute("data-gap", "3");
   await expect(space).toHaveAttribute("data-wrap", "true");
 
+  const normalAction = section.getByRole("button", { name: "普通操作" });
+  await expect(normalAction).toHaveAttribute("type", "button");
+  const normalActionBox = await normalAction.boundingBox();
+  expect(normalActionBox).not.toBeNull();
+  expect(normalActionBox ? normalActionBox.width : 0).toBeGreaterThanOrEqual(44);
+  expect(normalActionBox ? normalActionBox.height : 0).toBeGreaterThanOrEqual(44);
+  await normalAction.click();
+  await expect(section.getByText("普通按钮已执行")).toBeVisible();
+
   const iconAction = section.getByRole("button", { name: "刷新基础组件" });
+  const decorativeIcon = iconAction.locator('svg[data-meu-icon="search"]');
+  await expect(decorativeIcon).toHaveAttribute("aria-hidden", "true");
+  await expect(decorativeIcon).toHaveAttribute("focusable", "false");
+  await expect(decorativeIcon).toHaveAttribute("width", "20");
+  await expect(decorativeIcon).toHaveAttribute("height", "20");
   const iconActionBox = await iconAction.boundingBox();
   expect(iconActionBox).not.toBeNull();
   expect(iconActionBox ? iconActionBox.width : 0).toBeGreaterThanOrEqual(44);

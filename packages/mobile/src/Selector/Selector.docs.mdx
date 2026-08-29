@@ -191,13 +191,14 @@ render 为 O(options × selected values)，建议规模不超过 20 项；无全
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4395 B / 32768 B 预算，组合 Brotli 3919 B；共享样式由应用单独导入一次。
 - RTL / reduced motion / forced colors: CSS 契约已实现，专属自动化与截图矩阵待补。
-- 移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
+- Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击“优先配送”后，`MeuFormSelector` 提交值由 `standard` 更新为 `fast`；页面内 Selector 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
+- 20+ options 的替代方案、single clear 与 multiple 键盘路径仍待更完整的目标 WebView 场景；VoiceOver/TalkBack 真机与 Chromatic 最终视觉审批：待补
 
 ## V2 优化记录
 
 ### 待优化
 
-- 接入 Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
+- 完成 Light/Dark/forced-colors/200% 字号的最终视觉审批，并补充 single clear 与 multiple 键盘的目标 WebView 场景。
 - 在真机确认 iOS VoiceOver 与 Android TalkBack 对 radio group、option description 和 clear 动作的公告。
 - 若真实业务出现 20+ options，另立 searchable/virtualized 组件，不向 Selector 叠加复杂检索。
 
@@ -210,10 +211,11 @@ render 为 O(options × selected values)，建议规模不超过 20 项；无全
 
 ## 维护规则
 
-修改公开类型、值归一化、input 语义、required、键盘、DOM/data 属性或样式状态时，必须在同一变更中更新本文件、README、Story、Unit/SSR 与 API 报告。新状态没有自动化或真机证据时保持 `status: implementation`。
+修改公开类型、值归一化、input 语义、required、键盘、DOM/data 属性或样式状态时，必须在同一变更中更新本文件、README、Story、Unit/SSR 与 API 报告。新状态没有完整自动化与真机证据时保持 `status: verification`，不得提前提升为 `commercial`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                                | 迁移说明                                                                                      |
-| ---------- | ------ | -------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | 完成 identity、Field/required、form/reset、键盘、兼容和永久文档加固 | 重复 value 后续项不再渲染；required single 不再允许清空；onChange 新增可选第三个 details 参数 |
+| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                                                                                      |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的表单选择、提交值、hydration 与 44px 证据 | 无                                                                                            |
+| 2026-08-28 | 未发布 | behavior     | 完成 identity、Field/required、form/reset、键盘、兼容和永久文档加固          | 重复 value 后续项不再渲染；required single 不再允许清空；onChange 新增可选第三个 details 参数 |
