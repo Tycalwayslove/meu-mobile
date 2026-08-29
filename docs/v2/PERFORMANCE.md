@@ -46,20 +46,25 @@ pnpm bundle:size:check
 
 隔离 Next H5 production build 的 `/performance` 路由在 Playwright Pixel 5 Chromium 与 iPhone 13 WebKit 两个项目中执行同一组预算：
 
-| 场景                  |              数据规模 | 本地门禁                                                                                  |
-| --------------------- | --------------------: | ----------------------------------------------------------------------------------------- |
-| VirtualList 远距跳转  | 10,000 行、overscan=3 | 挂载 DOM ≤20 行；跳至第 9,001 行并完成两帧提交 ≤500ms；跳转后仍 ≤20 行                    |
-| TreeSelect 打开       |      1,500 个平铺节点 | 打开并完成两帧提交 ≤750ms；虚拟 treeitem DOM ≤30                                          |
-| TreeSelect 搜索       |      1,500 个平铺节点 | 精确筛选并完成两帧提交 ≤500ms                                                             |
-| SwipeActions 高频移动 |   单行、右侧双 action | 连续分发 240 次 pointermove 加 settle 的同步主线程成本 ≤250ms，并正确进入 right open 状态 |
+| 场景                  |                              数据规模 | 本地门禁                                                                                  |
+| --------------------- | ------------------------------------: | ----------------------------------------------------------------------------------------- |
+| VirtualList 远距跳转  |                 10,000 行、overscan=3 | 挂载 DOM ≤20 行；跳至第 9,001 行并完成两帧提交 ≤500ms；跳转后仍 ≤20 行                    |
+| VirtualList 加速耐久  |              10,000 行、40 次首尾往返 | 全过程挂载 DOM ≤20 行；40 次双帧提交总耗时 ≤5,000ms                                       |
+| TreeSelect 打开       |                      1,500 个平铺节点 | 打开并完成两帧提交 ≤750ms；虚拟 treeitem DOM ≤30                                          |
+| TreeSelect 搜索       |                      1,500 个平铺节点 | 精确筛选并完成两帧提交 ≤500ms                                                             |
+| SwipeActions 高频移动 |                   单行、右侧双 action | 连续分发 240 次 pointermove 加 settle 的同步主线程成本 ≤250ms，并正确进入 right open 状态 |
+| 手势取消恢复          | SwipeActions + FloatingPanel 各 40 轮 | 每轮 pointerdown/move/cancel 后仍能完成有效手势；无残留 dragging；组合同步成本 ≤1,000ms   |
 
-`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 6/6 通过。完整隔离 Next H5 套件共 104/104 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
+同一路由还包含确定性网络恢复模型：Image 的不可解码响应→换源恢复、InfiniteList 的首次业务失败→显式重试→恰好两次请求，以及 ImageUploader 的失败任务重试与 pending task 主动取消。模型使用可控本地响应，不冒充慢 3G、离线或丢包实测。
+
+`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 14/14 通过，并完成 3 轮重复共 42/42。完整隔离 Next H5 套件共 112/112 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
 
 ## 仍需独立证明
 
-- VirtualList 动态高度快速滚动、滚动锚定、峰值内存与长任务；
-- Carousel、BottomSheet、ImageViewer 的持续手势帧率、pointer cancel 与中断恢复；
-- 图片上传的并发、Abort、object URL 回收与弱网内存；
+- VirtualList 动态高度滚动、滚动锚定、真实 60 秒采样、峰值内存与长任务；
+- Carousel、BottomSheet、ImageViewer 的持续手势帧率；SwipeActions/FloatingPanel 的真实触摸与滚动竞争；
+- 图片上传的并发大图、object URL 回收与弱网内存；确定性失败、retry 和 Abort 已覆盖；
+- 慢 3G、离线与丢包条件下 Image/InfiniteList/ImageUploader 的真实请求时序；
 - iOS Safari/WKWebView 与 Android Chrome/WebView 真机上的启动、滚动和键盘性能。
 
 这些运行时证据应记录到对应组件的永久文档中；只有体积门禁通过不能把组件状态提升为 `commercial`。

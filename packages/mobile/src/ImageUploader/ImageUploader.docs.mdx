@@ -132,7 +132,7 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 - SSR/hydration: Node SSR 与独立 hydrateRoot 已覆盖成功项、原生 input DOM 复用和零 transport 副作用；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 上传场景中保持 0 `pageerror` / `console.error`。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。
-- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证已有成功值的 hidden input 序列化、原生 file input 的 `accept` 与无业务 `name`、预览/删除/添加目标尺寸及不重叠、删除后 required 校验聚焦与 `aria-invalid`；再通过 `setInputFiles` 注入本地 JPEG，验证 uploading/35% 进度、成功预览、成功值重新序列化及表单提交。系统 picker/camera、权限弹窗与真机 object URL 行为未执行。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证已有成功值的 hidden input 序列化、原生 file input 的 `accept` 与无业务 `name`、预览/删除/添加目标尺寸及不重叠、删除后 required 校验聚焦与 `aria-invalid`；再通过 `setInputFiles` 注入本地 JPEG，验证 uploading/35% 进度、成功预览、成功值重新序列化及表单提交。性能专页进一步验证确定性业务失败保留任务、显式 retry 恢复且恰好两次请求，以及删除 pending task 后 AbortSignal 阻止延迟响应写入陈旧成功；两种引擎各重复 3 轮通过。系统 picker/camera、权限弹窗、并发大图内存与真机 object URL 行为未执行。
 - Chromatic Light/Dark: 关键状态 Story 已有，基线待执行。
 - Real device: 未执行。
 
@@ -140,7 +140,7 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ### 待优化
 
-补系统 picker/camera 真机、权限拒绝映射、服务端拒绝映射与 WebKit object URL 压力测试。
+补系统 picker/camera 真机、权限拒绝映射、真实服务端错误/慢 3G、并发大图内存与 WebKit object URL 压力测试；确定性失败重试和 pending Abort 已覆盖。
 
 ### 已完成
 

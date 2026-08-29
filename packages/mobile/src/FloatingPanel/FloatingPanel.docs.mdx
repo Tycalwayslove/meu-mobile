@@ -122,7 +122,7 @@ handle 是具名原生 button，关联 body 与实时高度说明；disabled 或
 - SSR/hydration: `FloatingPanel.ssr.test.tsx` 在 Node 覆盖确定 shell；隔离 Next production 的 Chromium/WebKit 聚合检查确认组件已挂载且无 `pageerror` / `console.error`，尚未单独断言服务端根节点复用、`data-measured` 或初始 300px 高度。
 - RTL: 垂直方向不适用；排版矩阵待补。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
-- Mobile Chromium/WebKit E2E: 键盘 snap、合成 pointer 拖动、最高点的内容拖拽标记移交和受控高度输出均通过；尚未用真实 touch 或 `scrollTop` 断言原生滚动恢复。
+- Mobile Chromium/WebKit E2E: 键盘 snap、合成 pointer 拖动、最高点的内容拖拽标记移交和受控高度输出均通过；另与 SwipeActions 组合执行 40 轮 pointercancel 后再次完成有效拖拽，确认无残留 dragging 状态，组合同步成本 ≤1,000ms，两种引擎各重复 3 轮通过。尚未用真实 touch、60 秒帧率或 `scrollTop` 断言原生滚动恢复。
 - Chromatic Light/Dark: stories 可采集，正式基线待确认。
 - Real device: 待补。
 

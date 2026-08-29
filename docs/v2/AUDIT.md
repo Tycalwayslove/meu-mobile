@@ -133,9 +133,9 @@ V2 采用以下事实源：
 - 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
 - 官网生产构建通过 68 个组件页和首页、入门、基础、组件索引、实验室、许可、隐私、使用说明 8 个公共页面的 Light/Dark 本地浏览器门禁，覆盖主题恢复、页面结构、组件预览/API/状态、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 152 个场景，0 违规、0 `pageerror`、0 `console.error`。
 - `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 25,021 B / 32 KiB，逐组件结果已同步到留存文档。
-- 隔离 Next H5：Next 16 production build 通过；完整套件在移动 Chromium/WebKit 中 104/104 通过，包含 loading 点击阻断、standalone Radio 同步、Slider readOnly meter/FormData，以及既有 Portal、hydration、手势和性能链路。
+- 隔离 Next H5：Next 16 production build 通过；完整套件在移动 Chromium/WebKit 中 112/112 通过，包含 loading 点击阻断、standalone Radio 同步、Slider readOnly meter/FormData，以及 Portal、hydration、手势、加速耐久和确定性网络恢复链路。
 - 本批全量 `pnpm test` 为 19/19 个任务通过，其中 mobile 为 149 files / 958 tests，form-react 为 19 files / 70 tests；API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle、类型与兼容性检查均已本地验证。Storybook 与官网浏览器矩阵也已在冻结候选上完成本地全量复验。
-- 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 240 次 pointermove 均在仓库预算内，详见 `PERFORMANCE.md`。
+- 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect、SwipeActions 240 次 pointermove、VirtualList 40 次首尾往返，以及 SwipeActions/FloatingPanel 各 40 轮取消恢复均在仓库预算内；Image、InfiniteList、ImageUploader 的确定性失败/重试/取消也在双引擎通过，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 199 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 
 仍阻断 `commercial` 的共性事项：真实 iOS/Android 与读屏记录、旧 WebView 运行时抽测、持续手势帧率/内存/弱网专项、图标许可与分发方式的法务复核，以及最终集中执行的 Chromatic 视觉审批和 Vercel 官网发布。设备矩阵、场景与记录格式见 [`DEVICE_VERIFICATION.md`](./DEVICE_VERIFICATION.md)，最终候选签字表见 [`RELEASE_ACCEPTANCE.md`](./RELEASE_ACCEPTANCE.md)。

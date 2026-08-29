@@ -131,13 +131,13 @@ DOM 数量约为可见行加双侧 overscan；默认 overscan=3，最大归一�
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 13701 B / 32768 B 预算，组合 Brotli 12049 B；共享样式由应用单独导入一次。
 - SSR/hydration: `VirtualList.ssr.test.tsx` 覆盖确定性初始子集；隔离 Next production `/hydration?case=virtual-list` 在 Chromium/WebKit 中完成真实 hydration，0 `pageerror`、0 `console.error`。
 - RTL/forced-colors/reduced-motion: 逻辑 CSS或无动画契约完成，视觉证据待补。
-- Mobile Chromium/WebKit E2E: 10,000 条动态行的远距跳转与焦点保留通过；性能专页要求 DOM ≤20、跳至第 9,001 行并完成两帧提交 ≤500ms，两种引擎均通过。Chromatic 与 real device 延后到发布批次。
+- Mobile Chromium/WebKit E2E: 10,000 条动态行的远距跳转与焦点保留通过；性能专页要求 DOM ≤20、跳至第 9,001 行并完成两帧提交 ≤500ms。新增 40 次首尾双向加速滚动，要求全过程 DOM ≤20 且总耗时 ≤5,000ms；两种引擎各重复 3 轮通过。Chromatic、真实 60 秒滚动、峰值内存与 real device 延后到发布批次。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补真实 ResizeObserver、快速滚动、字体切换、10k 数据和含输入控件行的浏览器/真机证据。
+- 补真实 ResizeObserver、字体切换、含输入控件行、60 秒持续滚动、峰值内存和真机证据；40 次双向加速滚动已覆盖自动化回收边界。
 
 ### 已完成
 

@@ -122,7 +122,7 @@ left/right 是物理屏幕方向，不随 `dir` 重命名；正 offset 显示物
 - SSR/hydration: `SwipeActions.ssr.test.tsx` 覆盖关闭 markup 与未测宽 default-open 的隐藏语义；隔离 Next production 以服务端 `defaultOpenSide=right` 状态在 Chromium/WebKit 完成 hydration，0 `pageerror`、0 `console.error`。
 - RTL: 物理方向契约已记录，浏览器矩阵待补。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
-- Mobile Chromium/WebKit E2E: 受控键盘替代、触摸 pointer 序列、异步 action 与等价菜单通过；240 次 pointermove + settle 同步成本预算 ≤250ms，两种引擎均通过。真实滚动容器竞争留待真机。
+- Mobile Chromium/WebKit E2E: 受控键盘替代、触摸 pointer 序列、异步 action 与等价菜单通过；240 次 pointermove + settle 同步成本预算 ≤250ms。另与 FloatingPanel 组合执行 40 轮 pointercancel 后再次完成有效手势，组合同步成本 ≤1,000ms；两种引擎各重复 3 轮通过。真实 60 秒帧率与滚动容器竞争留待真机。
 - Chromatic Light/Dark: stories 可采集，正式基线待确认。
 - Real device: 待补。
 

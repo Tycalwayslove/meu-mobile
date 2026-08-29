@@ -17,13 +17,13 @@
 
 ## 当前可复查状态
 
-- 移动 Chromium/WebKit 隔离 Next H5：104/104 通过，逐用例断言 0 `pageerror`、0 `console.error`。
+- 移动 Chromium/WebKit 隔离 Next H5：112/112 通过，逐用例断言 0 `pageerror`、0 `console.error`；其中性能/恢复专页 14/14，并完成 3 轮重复共 42/42。
 - Storybook：444 个 Story × 7 场景，共 3,108 个组合通过。
 - 官网：68 个组件页和 8 个公共页面 × Light/Dark，共 152 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
 - 客户端静态兼容扫描：199 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。
 - 当前开发机安装了 iOS 18.3 与 18.6 Simulator；尚未把模拟器目视结果登记为真机证据。
 - Android SDK/ADB 可用，但尚无已配置 AVD；Android 真机与 Emulator 均未登记。
-- VoiceOver、TalkBack、WKWebView 宿主、旧 WebView 和弱网/内存记录：待补。
+- VoiceOver、TalkBack、WKWebView 宿主、旧 WebView 和真实慢 3G/离线/丢包与内存记录：待补；本地确定性失败/重试/取消模型不计作真机或真实网络通过。
 
 ## 每次验收必须记录
 

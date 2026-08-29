@@ -205,7 +205,7 @@ loading → loaded 仅使用 opacity 淡入；`prefers-reduced-motion` 或 `Conf
 - Hydration: `Image.hydration.test.tsx` 覆盖有源与无源首帧节点复用、原生属性保持和 0 hydration console error。
 - Story interaction: `PlaceholderToLoaded`、`Fallback`、`FallbackSource` 分别覆盖加载完成、最终错误与来源回退；`ResponsiveCrop`、`Lazy`、`LightAndDark` 提供视觉/兼容场景。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3264 B / 32768 B 预算，组合 Brotli 2923 B；共享样式由应用单独导入一次。
-- 隔离 Next H5 production build 与 `renders atomic display components with native actions and fallbacks` 已在 mobile Chromium/WebKit 通过，覆盖 srcSet/sizes/position、primary→fallback source、200 响应但不可解码资源和 0 runtime console/page error；独立 hydration 场景同样在两种引擎通过。
+- 隔离 Next H5 production build 与 `renders atomic display components with native actions and fallbacks` 已在 mobile Chromium/WebKit 通过，覆盖 srcSet/sizes/position、primary→fallback source、200 响应但不可解码资源和 0 runtime console/page error；性能专页进一步验证不可解码响应进入 error、调用方更换 source 后恢复 loaded，两种引擎各重复 3 轮通过。独立 hydration 场景同样在两种引擎通过。
 - 仓库既有 Storybook 390×844 的 Light/Dark、locale、RTL、reduced-motion、200% 字体与 forced-colors 矩阵；新增 API 仍需随下一次发布候选完整视觉矩阵复跑。
 - Chromatic、真实 iOS/Android、VoiceOver/TalkBack、旧 WebView 弱网/离线：未在本次组件级优化中执行，不写成通过。
 
@@ -223,7 +223,7 @@ loading → loaded 仅使用 opacity 淡入；`prefers-reduced-motion` 或 `Conf
 
 ### 待优化
 
-- 真实 CDN 多密度候选、缓存命中、慢网/离线和 fallback source 时序专项。
+- 真实 CDN 多密度候选、缓存命中、慢 3G/离线和 fallback source 时序专项；确定性不可解码失败与换源恢复已自动化覆盖。
 - VoiceOver/TalkBack 对 informative/decorative 失败语义的真机验收。
 - iOS/Android WebView native lazy、aspect-ratio 降级和图片内存压力记录。
 - 下一发布候选的完整 Storybook 矩阵、Chromatic 和真实设备签字。
