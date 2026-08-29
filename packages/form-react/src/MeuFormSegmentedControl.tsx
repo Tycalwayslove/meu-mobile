@@ -1,12 +1,19 @@
 "use client";
 
 import { Field, SegmentedControl } from "@meu/mobile";
-import type { SegmentedControlProps, SegmentedControlValue } from "@meu/mobile";
+import type {
+  SegmentedControlBaseProps,
+  SegmentedControlRadioProps,
+  SegmentedControlValue
+} from "@meu/mobile";
 import { Controller, useFormContext } from "react-hook-form";
 import type { FieldValues, UseControllerProps } from "react-hook-form";
 import type { ReactNode } from "react";
 
 import type { MeuSelectionFieldPath } from "./adapter-types";
+
+type MeuFormSegmentedRadioProps<TValue extends SegmentedControlValue> =
+  SegmentedControlBaseProps<TValue> & SegmentedControlRadioProps<TValue>;
 
 /**
  * Props for a segmented control bound to a scalar React Hook Form field.
@@ -16,7 +23,10 @@ import type { MeuSelectionFieldPath } from "./adapter-types";
 export type MeuFormSegmentedControlProps<
   TFieldValues extends FieldValues,
   TValue extends SegmentedControlValue = SegmentedControlValue
-> = Omit<SegmentedControlProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
+> = Omit<
+  MeuFormSegmentedRadioProps<TValue>,
+  "defaultValue" | "mode" | "name" | "onChange" | "value"
+> & {
   /** Supporting content rendered with the field and associated with the segmented control. */
   description?: ReactNode;
   /** Visible group label rendered by the surrounding `Field`. */
@@ -24,7 +34,7 @@ export type MeuFormSegmentedControlProps<
   /** Path of the scalar React Hook Form field controlled by this segmented control. */
   name: MeuSelectionFieldPath<TFieldValues, TValue>;
   /** Called after the form value changes; receives the selected value and input event. */
-  onChange?: SegmentedControlProps<TValue>["onChange"];
+  onChange?: MeuFormSegmentedRadioProps<TValue>["onChange"];
   /** Shows the required affordance and sets the control's native `required` state. */
   required?: boolean;
   /** React Hook Form validation and value-processing rules registered for this field. */
@@ -69,6 +79,7 @@ export function MeuFormSegmentedControl<
           <SegmentedControl<TValue>
             {...segmentedControlProps}
             disabled={Boolean(segmentedControlProps.disabled || field.disabled)}
+            mode="radiogroup"
             name={field.name}
             ref={field.ref}
             required={required}

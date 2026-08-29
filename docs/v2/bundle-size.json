@@ -6,9 +6,9 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 19567,
-    "gzipBytes": 23580,
-    "rawBytes": 184164,
+    "brotliBytes": 19891,
+    "gzipBytes": 23972,
+    "rawBytes": 187186,
     "files": [
       {
         "filePath": "packages/tokens/dist/theme.css",
@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 114688,
-      "brotliBytes": 84277,
-      "gzipBytes": 107986,
-      "rawBytes": 567429,
+      "brotliBytes": 86648,
+      "gzipBytes": 110824,
+      "rawBytes": 583276,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -71,9 +71,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 30506,
-          "gzipBytes": 35042,
-          "rawBytes": 153586,
+          "brotliBytes": 31379,
+          "gzipBytes": 36048,
+          "rawBytes": 159205,
           "name": "MeuFormImageUploader",
           "passesBudget": true
         },
@@ -215,9 +215,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5250,
-          "gzipBytes": 5891,
-          "rawBytes": 23208,
+          "brotliBytes": 6960,
+          "gzipBytes": 7825,
+          "rawBytes": 33494,
           "name": "MeuFormSegmentedControl",
           "passesBudget": true
         },
@@ -521,9 +521,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 16658,
-      "gzipBytes": 18910,
-      "rawBytes": 78627,
+      "brotliBytes": 17554,
+      "gzipBytes": 19950,
+      "rawBytes": 84246,
       "docsPath": "packages/mobile/src/Carousel/Carousel.docs.mdx",
       "name": "Carousel",
       "packageName": "@meu/mobile",
@@ -532,9 +532,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 16658,
-          "gzipBytes": 18910,
-          "rawBytes": 78627,
+          "brotliBytes": 17554,
+          "gzipBytes": 19950,
+          "rawBytes": 84246,
           "name": "Carousel",
           "passesBudget": true
         }
@@ -613,9 +613,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3218,
-      "gzipBytes": 3662,
-      "rawBytes": 11953,
+      "brotliBytes": 5179,
+      "gzipBytes": 5846,
+      "rawBytes": 22360,
       "docsPath": "packages/mobile/src/Collapse/Collapse.docs.mdx",
       "name": "Collapse",
       "packageName": "@meu/mobile",
@@ -624,9 +624,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3218,
-          "gzipBytes": 3662,
-          "rawBytes": 11953,
+          "brotliBytes": 5179,
+          "gzipBytes": 5846,
+          "rawBytes": 22360,
           "name": "Collapse",
           "passesBudget": true
         }
@@ -921,9 +921,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 28593,
-      "gzipBytes": 32833,
-      "rawBytes": 144690,
+      "brotliBytes": 29428,
+      "gzipBytes": 33858,
+      "rawBytes": 150309,
       "docsPath": "packages/mobile/src/ImageUploader/ImageUploader.docs.mdx",
       "name": "ImageUploader",
       "packageName": "@meu/mobile",
@@ -932,9 +932,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 28593,
-          "gzipBytes": 32833,
-          "rawBytes": 144690,
+          "brotliBytes": 29428,
+          "gzipBytes": 33858,
+          "rawBytes": 150309,
           "name": "ImageUploader",
           "passesBudget": true
         }
@@ -942,9 +942,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 25064,
-      "gzipBytes": 28789,
-      "rawBytes": 125388,
+      "brotliBytes": 25920,
+      "gzipBytes": 29826,
+      "rawBytes": 131007,
       "docsPath": "packages/mobile/src/ImageViewer/ImageViewer.docs.mdx",
       "name": "ImageViewer",
       "packageName": "@meu/mobile",
@@ -953,9 +953,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 25064,
-          "gzipBytes": 28789,
-          "rawBytes": 125388,
+          "brotliBytes": 25920,
+          "gzipBytes": 29826,
+          "rawBytes": 131007,
           "name": "ImageViewer",
           "passesBudget": true
         }
@@ -1097,9 +1097,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2377,
-      "gzipBytes": 2699,
-      "rawBytes": 8720,
+      "brotliBytes": 3491,
+      "gzipBytes": 3954,
+      "rawBytes": 14356,
       "docsPath": "packages/mobile/src/PaginationDots/PaginationDots.docs.mdx",
       "name": "PaginationDots",
       "packageName": "@meu/mobile",
@@ -1108,9 +1108,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2377,
-          "gzipBytes": 2699,
-          "rawBytes": 8720,
+          "brotliBytes": 3491,
+          "gzipBytes": 3954,
+          "rawBytes": 14356,
           "name": "PaginationDots",
           "passesBudget": true
         }
@@ -1365,9 +1365,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3595,
-      "gzipBytes": 4041,
-      "rawBytes": 15594,
+      "brotliBytes": 5417,
+      "gzipBytes": 6099,
+      "rawBytes": 26195,
       "docsPath": "packages/mobile/src/SegmentedControl/SegmentedControl.docs.mdx",
       "name": "SegmentedControl",
       "packageName": "@meu/mobile",
@@ -1376,9 +1376,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3595,
-          "gzipBytes": 4041,
-          "rawBytes": 15594,
+          "brotliBytes": 5417,
+          "gzipBytes": 6099,
+          "rawBytes": 26195,
           "name": "SegmentedControl",
           "passesBudget": true
         }
@@ -1407,9 +1407,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3071,
-      "gzipBytes": 3471,
-      "rawBytes": 12834,
+      "brotliBytes": 4349,
+      "gzipBytes": 4923,
+      "rawBytes": 19746,
       "docsPath": "packages/mobile/src/SideNav/SideNav.docs.mdx",
       "name": "SideNav",
       "packageName": "@meu/mobile",
@@ -1418,9 +1418,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3071,
-          "gzipBytes": 3471,
-          "rawBytes": 12834,
+          "brotliBytes": 4349,
+          "gzipBytes": 4923,
+          "rawBytes": 19746,
           "name": "SideNav",
           "passesBudget": true
         }

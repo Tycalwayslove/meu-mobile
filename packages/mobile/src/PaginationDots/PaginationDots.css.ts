@@ -31,11 +31,18 @@ export const dot = recipe({
       "opacity var(--meu-motion-exit) var(--meu-motion-ease-standard)",
       "color var(--meu-motion-exit) var(--meu-motion-ease-standard)"
     ].join(", "),
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { color: "GrayText", opacity: 1 }
+    }
   },
   variants: {
     active: {
-      true: { color: "var(--meu-color-accent)", opacity: 1 },
+      true: {
+        color: "var(--meu-color-accent)",
+        opacity: 1,
+        "@media": { "(forced-colors: active)": { color: "Highlight" } }
+      },
       false: {}
     },
     direction: {
@@ -80,17 +87,21 @@ export const button = style({
   border: 0,
   borderRadius: "var(--meu-radius-round)",
   cursor: "pointer",
+  touchAction: "manipulation",
+  userSelect: "none",
   WebkitTapHighlightColor: "transparent",
   selectors: {
-    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 }
+    "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
+    "&:disabled": { cursor: "default" }
   },
   "@media": {
-    "(forced-colors: active)": { color: "CanvasText" }
+    "(forced-colors: active)": { color: "ButtonText" }
   }
 });
 
 export const ellipsis = style({
   minWidth: 12,
   color: "var(--meu-color-muted)",
-  textAlign: "center"
+  textAlign: "center",
+  "@media": { "(forced-colors: active)": { color: "GrayText" } }
 });

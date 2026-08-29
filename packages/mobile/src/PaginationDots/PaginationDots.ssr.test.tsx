@@ -11,4 +11,22 @@ describe("PaginationDots SSR", () => {
     expect(html).toContain("…");
     expect(html).not.toContain("<button");
   });
+
+  it("preserves labelled interactive and disabled semantics before hydration", () => {
+    const html = renderToString(
+      <PaginationDots
+        aria-labelledby="pagination-heading"
+        activeIndex={2}
+        count={8}
+        interactive
+        disabled
+      />
+    );
+    expect(html).toContain('role="group"');
+    expect(html).toContain('aria-labelledby="pagination-heading"');
+    expect(html).not.toContain('aria-label="第 3 页，共 8 页"');
+    expect(html).toContain('aria-disabled="true"');
+    expect(html).toContain("disabled");
+    expect(html).toContain('tabindex="-1"');
+  });
 });

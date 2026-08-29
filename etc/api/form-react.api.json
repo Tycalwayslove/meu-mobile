@@ -5414,12 +5414,12 @@
             },
             {
               "kind": "Reference",
-              "text": "SegmentedControlProps",
-              "canonicalReference": "@meu/mobile!SegmentedControlProps:type"
+              "text": "MeuFormSegmentedRadioProps",
+              "canonicalReference": "@meu/form-react!~MeuFormSegmentedRadioProps:type"
             },
             {
               "kind": "Content",
-              "text": "<TValue>, \"defaultValue\" | \"name\" | \"onChange\" | \"value\"> & {\n    description?: "
+              "text": "<TValue>, \"defaultValue\" | \"mode\" | \"name\" | \"onChange\" | \"value\"> & {\n    description?: "
             },
             {
               "kind": "Reference",
@@ -5450,8 +5450,8 @@
             },
             {
               "kind": "Reference",
-              "text": "SegmentedControlProps",
-              "canonicalReference": "@meu/mobile!SegmentedControlProps:type"
+              "text": "MeuFormSegmentedRadioProps",
+              "canonicalReference": "@meu/form-react!~MeuFormSegmentedRadioProps:type"
             },
             {
               "kind": "Content",

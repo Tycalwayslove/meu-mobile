@@ -10,6 +10,7 @@ import { MeuFormRadioGroup } from "./MeuFormRadioGroup";
 import { MeuFormRate } from "./MeuFormRate";
 import { MeuFormSearchField } from "./MeuFormSearchField";
 import { MeuFormSegmentedControl } from "./MeuFormSegmentedControl";
+import type { MeuFormSegmentedControlProps } from "./MeuFormSegmentedControl";
 import { MeuFormSelector } from "./MeuFormSelector";
 import { MeuFormSlider } from "./MeuFormSlider";
 import { MeuFormStepper } from "./MeuFormStepper";
@@ -58,7 +59,13 @@ const numberPath: MeuNumberFieldPath<AdapterValues> = "quantity";
 const collectionPath: MeuCollectionFieldPath<AdapterValues, string> = "services";
 // @ts-expect-error Text adapters must not bind a numeric field.
 const invalidStringPath: MeuStringFieldPath<AdapterValues> = "quantity";
-void [stringPath, booleanPath, numberPath, collectionPath, invalidStringPath];
+const invalidSegmentedMode: MeuFormSegmentedControlProps<AdapterValues, string> = {
+  name: "view",
+  options: [{ label: "List", value: "list" }],
+  // @ts-expect-error The form adapter intentionally excludes navigation tabs.
+  mode: "tabs"
+};
+void [stringPath, booleanPath, numberPath, collectionPath, invalidStringPath, invalidSegmentedMode];
 
 function AdapterMatrix({ disabled = false, required = false }) {
   const form = useMeuForm<AdapterValues>({ defaultValues, disabled });

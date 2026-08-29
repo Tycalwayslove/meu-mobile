@@ -340,6 +340,7 @@ export function ConsumerScenario() {
   const [activeIndexKey, setActiveIndexKey] = useState("A");
   const [sideNavKey, setSideNavKey] = useState("featured");
   const [previewMode, setPreviewMode] = useState<"summary" | "detail">("summary");
+  const [previewPanel, setPreviewPanel] = useState<"overview" | "metrics">("overview");
   const [previewPage, setPreviewPage] = useState(1);
   const [contentTab, setContentTab] = useState("overview");
   const [primarySection, setPrimarySection] = useState("home");
@@ -802,6 +803,43 @@ export function ConsumerScenario() {
             value={previewMode}
             onChange={setPreviewMode}
           />
+          <SegmentedControl
+            aria-label="预览面板"
+            block
+            mode="tabs"
+            options={[
+              {
+                label: "订单概况",
+                value: "overview",
+                tabId: "preview-overview-tab",
+                panelId: "preview-overview-panel"
+              },
+              {
+                label: "经营指标",
+                value: "metrics",
+                tabId: "preview-metrics-tab",
+                panelId: "preview-metrics-panel"
+              }
+            ]}
+            value={previewPanel}
+            onChange={setPreviewPanel}
+          />
+          <div
+            id="preview-overview-panel"
+            role="tabpanel"
+            aria-labelledby="preview-overview-tab"
+            hidden={previewPanel !== "overview"}
+          >
+            今日订单概况
+          </div>
+          <div
+            id="preview-metrics-panel"
+            role="tabpanel"
+            aria-labelledby="preview-metrics-tab"
+            hidden={previewPanel !== "metrics"}
+          >
+            今日经营指标
+          </div>
           <Tabs
             aria-label="订单内容"
             stretch={false}
@@ -836,6 +874,14 @@ export function ConsumerScenario() {
               上一页
             </Button>
             <PaginationDots count={4} activeIndex={previewPage} variant="line" />
+            <PaginationDots
+              aria-label="商品页跳转"
+              count={4}
+              activeIndex={previewPage}
+              variant="line"
+              interactive
+              onChange={setPreviewPage}
+            />
             <Button
               size="small"
               variant="outline"

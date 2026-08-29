@@ -2,6 +2,7 @@ import { MeuIconCheck } from "@meu/icons-react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Field } from "../Field";
 import { SegmentedControl } from "./SegmentedControl";
 
@@ -55,6 +56,67 @@ export const RtlAndLongContent: Story = {
         ]}
       />
     </div>
+  )
+};
+
+function TabModeExample() {
+  const [value, setValue] = useState<string | number | null>("summary");
+  const tabOptions = [
+    {
+      label: "订单摘要",
+      panelId: "summary-panel",
+      tabId: "summary-tab",
+      value: "summary"
+    },
+    {
+      label: "配送进度",
+      panelId: "delivery-panel",
+      tabId: "delivery-tab",
+      value: "delivery"
+    },
+    {
+      disabled: true,
+      label: "售后记录",
+      panelId: "service-panel",
+      tabId: "service-tab",
+      value: "service"
+    }
+  ];
+  return (
+    <div style={{ display: "grid", gap: 16, maxWidth: 390 }}>
+      <SegmentedControl
+        mode="tabs"
+        aria-label="订单详情"
+        block
+        options={tabOptions}
+        value={value}
+        onChange={setValue}
+      />
+      {tabOptions.map((item) => (
+        <section
+          key={item.value}
+          id={item.panelId}
+          role="tabpanel"
+          aria-labelledby={item.tabId}
+          hidden={value !== item.value}
+          tabIndex={value === item.value ? 0 : -1}
+        >
+          {item.value === "summary" ? "订单金额与商品概览" : "包裹正在配送途中"}
+        </section>
+      ))}
+    </div>
+  );
+}
+
+export const TabsMode: Story = {
+  render: () => <TabModeExample />
+};
+
+export const ReducedMotion: Story = {
+  render: () => (
+    <ConfigProvider motion="reduced">
+      <SegmentedControl block aria-label="视图密度" options={options} defaultValue="card" />
+    </ConfigProvider>
   )
 };
 

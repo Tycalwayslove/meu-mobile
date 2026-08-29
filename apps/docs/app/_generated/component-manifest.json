@@ -375,6 +375,11 @@
         },
         {
           "kind": "type",
+          "name": "CollapseHeadingLevel",
+          "sourcePath": "packages/mobile/src/Collapse"
+        },
+        {
+          "kind": "type",
           "name": "CollapseItem",
           "sourcePath": "packages/mobile/src/Collapse"
         },
@@ -1420,6 +1425,21 @@
         },
         {
           "kind": "type",
+          "name": "SegmentedControlBaseProps",
+          "sourcePath": "packages/mobile/src/SegmentedControl"
+        },
+        {
+          "kind": "type",
+          "name": "SegmentedControlChangeEvent",
+          "sourcePath": "packages/mobile/src/SegmentedControl"
+        },
+        {
+          "kind": "type",
+          "name": "SegmentedControlMode",
+          "sourcePath": "packages/mobile/src/SegmentedControl"
+        },
+        {
+          "kind": "type",
           "name": "SegmentedControlOption",
           "sourcePath": "packages/mobile/src/SegmentedControl"
         },
@@ -1430,12 +1450,22 @@
         },
         {
           "kind": "type",
+          "name": "SegmentedControlRadioProps",
+          "sourcePath": "packages/mobile/src/SegmentedControl"
+        },
+        {
+          "kind": "type",
           "name": "SegmentedControlSize",
           "sourcePath": "packages/mobile/src/SegmentedControl"
         },
         {
           "kind": "type",
           "name": "SegmentedControlStatus",
+          "sourcePath": "packages/mobile/src/SegmentedControl"
+        },
+        {
+          "kind": "type",
+          "name": "SegmentedControlTabsProps",
           "sourcePath": "packages/mobile/src/SegmentedControl"
         },
         {
@@ -1486,6 +1516,11 @@
         {
           "kind": "type",
           "name": "SideNavActivationMode",
+          "sourcePath": "packages/mobile/src/SideNav"
+        },
+        {
+          "kind": "type",
+          "name": "SideNavChangeEvent",
           "sourcePath": "packages/mobile/src/SideNav"
         },
         {
@@ -2052,8 +2087,8 @@
       "externalWildcardExports": [],
       "packageName": "@meu/mobile",
       "stats": {
-        "total": 409,
-        "types": 318,
+        "total": 416,
+        "types": 325,
         "values": 91
       }
     },
@@ -3171,6 +3206,10 @@
         {
           "kind": "type",
           "name": "CollapseArrow"
+        },
+        {
+          "kind": "type",
+          "name": "CollapseHeadingLevel"
         },
         {
           "kind": "type",
@@ -5232,6 +5271,18 @@
         },
         {
           "kind": "type",
+          "name": "SegmentedControlBaseProps"
+        },
+        {
+          "kind": "type",
+          "name": "SegmentedControlChangeEvent"
+        },
+        {
+          "kind": "type",
+          "name": "SegmentedControlMode"
+        },
+        {
+          "kind": "type",
           "name": "SegmentedControlOption"
         },
         {
@@ -5240,11 +5291,19 @@
         },
         {
           "kind": "type",
+          "name": "SegmentedControlRadioProps"
+        },
+        {
+          "kind": "type",
           "name": "SegmentedControlSize"
         },
         {
           "kind": "type",
           "name": "SegmentedControlStatus"
+        },
+        {
+          "kind": "type",
+          "name": "SegmentedControlTabsProps"
         },
         {
           "kind": "type",
@@ -5333,6 +5392,10 @@
         {
           "kind": "type",
           "name": "SideNavActivationMode"
+        },
+        {
+          "kind": "type",
+          "name": "SideNavChangeEvent"
         },
         {
           "kind": "type",
@@ -6286,8 +6349,8 @@
     "packages": 4,
     "products": 68,
     "productsWithoutPublicExports": 0,
-    "publicExports": 497,
-    "publicTypes": 372,
+    "publicExports": 504,
+    "publicTypes": 379,
     "publicValues": 125,
     "undocumentedPublicExports": 0,
     "unclaimedPublicValues": 0

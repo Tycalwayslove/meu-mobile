@@ -4516,7 +4516,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ accordion, arrow, className, defaultValue, items, onChange, ref, role, value, variant, ...props }",
+              "parameterName": "{ \"aria-disabled\": ariaDisabled, accordion, arrow, className, defaultValue, dir: dirProp, disabled, headingLevel, items, keyboardNavigation, onBlurCapture, onChange, onFocusCapture, ref, region, role, value, variant, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -4576,6 +4576,32 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!CollapseHeadingLevel:type",
+          "docComment": "/**\n * Valid document-outline level for accordion headers.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type CollapseHeadingLevel = "
+            },
+            {
+              "kind": "Content",
+              "text": "1 | 2 | 3 | 4 | 5 | 6"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Collapse/types.ts",
+          "releaseTag": "Public",
+          "name": "CollapseHeadingLevel",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CollapseItem:type",
           "docComment": "/**\n * One disclosure item. `value` must be unique and stable within the group.\n *\n * @public\n */\n",
           "excerptTokens": [
@@ -4585,7 +4611,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    content: "
+              "text": "{\n    ariaLabel?: string;\n    content: "
             },
             {
               "kind": "Reference",
@@ -4647,21 +4673,12 @@
             },
             {
               "kind": "Reference",
-              "text": "HTMLAttributes",
-              "canonicalReference": "@types/react!React.HTMLAttributes:interface"
+              "text": "ComponentProps",
+              "canonicalReference": "@types/react!React.ComponentProps:type"
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLDivElement",
-              "canonicalReference": "!HTMLDivElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">, \"children\" | \"defaultValue\" | \"onChange\"> & {\n    accordion?: boolean;\n    arrow?: "
+              "text": "<\"div\">, \"children\" | \"defaultValue\" | \"onChange\"> & {\n    accordion?: boolean;\n    arrow?: "
             },
             {
               "kind": "Reference",
@@ -4670,7 +4687,16 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    defaultValue?: readonly string[];\n    items: readonly "
+              "text": ";\n    defaultValue?: readonly string[];\n    disabled?: boolean;\n    headingLevel?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CollapseHeadingLevel",
+              "canonicalReference": "@meu/mobile!CollapseHeadingLevel:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    items: readonly "
             },
             {
               "kind": "Reference",
@@ -4679,7 +4705,7 @@
             },
             {
               "kind": "Content",
-              "text": "[];\n    onChange?: (value: string[], event: "
+              "text": "[];\n    keyboardNavigation?: boolean;\n    onChange?: (value: string[], event: "
             },
             {
               "kind": "Reference",
@@ -4697,7 +4723,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    ref?: "
+              "text": ">) => void;\n    region?: boolean;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -12176,7 +12202,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, activeIndex, className, count, direction, getPageLabel, interactive, maxVisible, onChange, ref, variant, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, \"aria-disabled\": ariaDisabled, activeIndex, className, count, dir: explicitDir, direction, disabled, getPageLabel, interactive, maxVisible, onBlurCapture, onChange, onFocusCapture, ref, variant, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -12245,7 +12271,7 @@
             },
             {
               "kind": "Content",
-              "text": "<\"div\">, \"children\"> & {\n    activeIndex: number;\n    count: number;\n    direction?: "
+              "text": "<\"div\">, \"children\" | \"onChange\" | \"role\"> & {\n    activeIndex: number;\n    count: number;\n    direction?: "
             },
             {
               "kind": "Reference",
@@ -12254,7 +12280,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    getPageLabel?: (index: number, count: number) => string;\n    interactive?: boolean;\n    maxVisible?: number;\n    onChange?: (index: number, event: "
+              "text": ";\n    disabled?: boolean;\n    getPageLabel?: (index: number, count: number) => string;\n    interactive?: boolean;\n    maxVisible?: number;\n    onChange?: (index: number, event: "
             },
             {
               "kind": "Reference",
@@ -16182,7 +16208,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!SegmentedControl:function(1)",
-          "docComment": "/**\n * Compact mutually exclusive switch backed by a native radio group for keyboard and form behavior.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Compact mutually exclusive switch with native radio or APG tablist semantics.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16242,7 +16268,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, block, className, defaultValue, disabled, form, id, name, onChange, onFocus, options, ref, required, size, status, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, block, className, defaultValue, disabled, form, id, mode, name, onBlur, onChange, onFocus, options, ref, required, size, status, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -16275,87 +16301,12 @@
         },
         {
           "kind": "TypeAlias",
-          "canonicalReference": "@meu/mobile!SegmentedControlOption:type",
-          "docComment": "/**\n * One mutually exclusive native radio option.\n *\n * @public\n */\n",
+          "canonicalReference": "@meu/mobile!SegmentedControlBaseProps:type",
+          "docComment": "/**\n * Props shared by radio-group and tab-list SegmentedControl modes.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export type SegmentedControlOption<TValue extends "
-            },
-            {
-              "kind": "Reference",
-              "text": "SegmentedControlValue",
-              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
-            },
-            {
-              "kind": "Content",
-              "text": " = "
-            },
-            {
-              "kind": "Reference",
-              "text": "SegmentedControlValue",
-              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
-            },
-            {
-              "kind": "Content",
-              "text": "> = "
-            },
-            {
-              "kind": "Content",
-              "text": "{\n    ariaLabel?: string;\n    disabled?: boolean;\n    icon?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ReactNode",
-              "canonicalReference": "@types/react!React.ReactNode:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    label: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ReactNode",
-              "canonicalReference": "@types/react!React.ReactNode:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    value: TValue;\n}"
-            },
-            {
-              "kind": "Content",
-              "text": ";"
-            }
-          ],
-          "fileUrlPath": "src/SegmentedControl/types.ts",
-          "releaseTag": "Public",
-          "name": "SegmentedControlOption",
-          "typeParameters": [
-            {
-              "typeParameterName": "TValue",
-              "constraintTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              },
-              "defaultTypeTokenRange": {
-                "startIndex": 3,
-                "endIndex": 4
-              }
-            }
-          ],
-          "typeTokenRange": {
-            "startIndex": 5,
-            "endIndex": 10
-          }
-        },
-        {
-          "kind": "TypeAlias",
-          "canonicalReference": "@meu/mobile!SegmentedControlProps:type",
-          "docComment": "/**\n * Props for the native radio-backed SegmentedControl.\n *\n * @public\n */\n",
-          "excerptTokens": [
-            {
-              "kind": "Content",
-              "text": "export type SegmentedControlProps<TValue extends "
+              "text": "export type SegmentedControlBaseProps<TValue extends "
             },
             {
               "kind": "Reference",
@@ -16400,34 +16351,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    block?: boolean;\n    defaultValue?: TValue;\n    disabled?: boolean;\n    form?: string;\n    name?: string;\n    onChange?: (value: TValue, event: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ChangeEvent",
-              "canonicalReference": "@types/react!React.ChangeEvent:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLInputElement",
-              "canonicalReference": "!HTMLInputElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">) => void;\n    options: readonly "
-            },
-            {
-              "kind": "Reference",
-              "text": "SegmentedControlOption",
-              "canonicalReference": "@meu/mobile!SegmentedControlOption:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<TValue>[];\n    ref?: "
+              "text": ">, \"children\" | \"defaultValue\" | \"onChange\" | \"role\"> & {\n    block?: boolean;\n    defaultValue?: TValue;\n    disabled?: boolean;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -16445,7 +16369,7 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    required?: boolean;\n    size?: "
+              "text": ">;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -16472,6 +16396,263 @@
           ],
           "fileUrlPath": "src/SegmentedControl/types.ts",
           "releaseTag": "Public",
+          "name": "SegmentedControlBaseProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 19
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SegmentedControlChangeEvent:type",
+          "docComment": "/**\n * User event that requested a new SegmentedControl value.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SegmentedControlChangeEvent = "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChangeEvent",
+              "canonicalReference": "@types/react!React.ChangeEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "KeyboardEvent",
+              "canonicalReference": "@types/react!React.KeyboardEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SegmentedControl/types.ts",
+          "releaseTag": "Public",
+          "name": "SegmentedControlChangeEvent",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 13
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SegmentedControlMode:type",
+          "docComment": "/**\n * Semantic pattern used by the segmented options.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SegmentedControlMode = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"radiogroup\" | \"tabs\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SegmentedControl/types.ts",
+          "releaseTag": "Public",
+          "name": "SegmentedControlMode",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SegmentedControlOption:type",
+          "docComment": "/**\n * One mutually exclusive radio or tab option.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SegmentedControlOption<TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    ariaLabel?: string;\n    disabled?: boolean;\n    icon?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    label: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    panelId?: string;\n    tabId?: string;\n    value: TValue;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SegmentedControl/types.ts",
+          "releaseTag": "Public",
+          "name": "SegmentedControlOption",
+          "typeParameters": [
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 5,
+            "endIndex": 10
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SegmentedControlProps:type",
+          "docComment": "/**\n * Props for the native radio- or APG tab-backed SegmentedControl.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SegmentedControlProps<TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": " = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlBaseProps",
+              "canonicalReference": "@meu/mobile!SegmentedControlBaseProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> & ("
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlRadioProps",
+              "canonicalReference": "@meu/mobile!SegmentedControlRadioProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlTabsProps",
+              "canonicalReference": "@meu/mobile!SegmentedControlTabsProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>)"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SegmentedControl/types.ts",
+          "releaseTag": "Public",
           "name": "SegmentedControlProps",
           "typeParameters": [
             {
@@ -16488,7 +16669,82 @@
           ],
           "typeTokenRange": {
             "startIndex": 5,
-            "endIndex": 25
+            "endIndex": 11
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SegmentedControlRadioProps:type",
+          "docComment": "/**\n * Native form and event contract for the default radio-group mode.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SegmentedControlRadioProps<TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    form?: string;\n    mode?: \"radiogroup\";\n    name?: string;\n    onChange?: (value: TValue, event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ChangeEvent",
+              "canonicalReference": "@types/react!React.ChangeEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    options: readonly "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlOption",
+              "canonicalReference": "@meu/mobile!SegmentedControlOption:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>[];\n    required?: boolean;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SegmentedControl/types.ts",
+          "releaseTag": "Public",
+          "name": "SegmentedControlRadioProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 10
           }
         },
         {
@@ -16541,6 +16797,108 @@
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SegmentedControlTabsProps:type",
+          "docComment": "/**\n * Navigation and panel-association contract for the tab-list mode.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SegmentedControlTabsProps<TValue extends "
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlValue",
+              "canonicalReference": "@meu/mobile!SegmentedControlValue:type"
+            },
+            {
+              "kind": "Content",
+              "text": "> = "
+            },
+            {
+              "kind": "Content",
+              "text": "{\n    mode: \"tabs\";\n    form?: never;\n    name?: never;\n    onChange?: (value: TValue, event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "KeyboardEvent",
+              "canonicalReference": "@types/react!React.KeyboardEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    options: readonly ("
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SegmentedControlOption",
+              "canonicalReference": "@meu/mobile!SegmentedControlOption:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TValue>, \"panelId\" | \"tabId\"> & {\n        panelId: string;\n        tabId: string;\n    })[];\n    required?: never;\n}"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SegmentedControl/types.ts",
+          "releaseTag": "Public",
+          "name": "SegmentedControlTabsProps",
+          "typeParameters": [
+            {
+              "typeParameterName": "TValue",
+              "constraintTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 3,
+            "endIndex": 16
           }
         },
         {
@@ -17064,7 +17422,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!SideNav:function(1)",
-          "docComment": "/**\n * Renders route-agnostic side navigation or vertical tabs.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Renders native side navigation destinations or accessible vertical tabs.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17102,7 +17460,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, activationMode, className, defaultValue, destroyInactive, items, onChange, ref, value, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, activationMode, className, defaultValue, destroyInactive, items, onChange, ref, sticky, stickyOffset, style, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -17148,6 +17506,73 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!SideNavChangeEvent:type",
+          "docComment": "/**\n * Native user event that requested a SideNav selection change.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type SideNavChangeEvent = "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLAnchorElement",
+              "canonicalReference": "!HTMLAnchorElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": " | "
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "KeyboardEvent",
+              "canonicalReference": "@types/react!React.KeyboardEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/SideNav/types.ts",
+          "releaseTag": "Public",
+          "name": "SideNavChangeEvent",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 11
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SideNavItem:type",
           "docComment": "/**\n * One side-navigation destination. Keys must be unique and stable.\n *\n * @public\n */\n",
           "excerptTokens": [
@@ -17157,7 +17582,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    badge?: "
+              "text": "{\n    ariaLabel?: string;\n    badge?: "
             },
             {
               "kind": "Reference",
@@ -17175,7 +17600,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    disabled?: boolean;\n    key: string;\n    label: "
+              "text": ";\n    disabled?: boolean;\n    href?: string;\n    key: string;\n    label: "
             },
             {
               "kind": "Reference",
@@ -17184,7 +17609,25 @@
             },
             {
               "kind": "Content",
-              "text": ";\n}"
+              "text": ";\n    rel?: string;\n    target?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "AnchorHTMLAttributes",
+              "canonicalReference": "@types/react!React.AnchorHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLAnchorElement",
+              "canonicalReference": "!HTMLAnchorElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"target\"];\n}"
             },
             {
               "kind": "Content",
@@ -17196,13 +17639,13 @@
           "name": "SideNavItem",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 8
+            "endIndex": 12
           }
         },
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SideNavProps:type",
-          "docComment": "/**\n * Props for route-agnostic vertical tabs or a side navigation rail.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Props for accessible vertical tabs or a native side-navigation rail.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -17255,39 +17698,12 @@
             },
             {
               "kind": "Reference",
-              "text": "MouseEvent",
-              "canonicalReference": "@types/react!React.MouseEvent:interface"
+              "text": "SideNavChangeEvent",
+              "canonicalReference": "@meu/mobile!SideNavChangeEvent:type"
             },
             {
               "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLButtonElement",
-              "canonicalReference": "!HTMLButtonElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "> | "
-            },
-            {
-              "kind": "Reference",
-              "text": "KeyboardEvent",
-              "canonicalReference": "@types/react!React.KeyboardEvent:interface"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLButtonElement",
-              "canonicalReference": "!HTMLButtonElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">) => void;\n    ref?: "
+              "text": ") => void;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -17305,7 +17721,16 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    value?: string | null;\n}"
+              "text": ">;\n    sticky?: boolean;\n    stickyOffset?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CSSProperties",
+              "canonicalReference": "@types/react!React.CSSProperties:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"insetBlockStart\"];\n    value?: string | null;\n}"
             },
             {
               "kind": "Content",
@@ -17317,7 +17742,7 @@
           "name": "SideNavProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 23
+            "endIndex": 19
           }
         },
         {

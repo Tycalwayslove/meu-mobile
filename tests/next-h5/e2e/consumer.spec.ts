@@ -918,17 +918,42 @@ test("composes Card slots and controls accessible Collapse panels", async ({ pag
   await expect(controlledPanel).toHaveAttribute("aria-hidden", "false");
 });
 
-test("uses native navigation actions, radio segments and read-only page dots", async ({ page }) => {
+test("uses native navigation actions, radio and tab segments, and controlled page dots", async ({
+  page
+}) => {
   const section = page.getByRole("region", { name: "导航组件" });
   await section.getByRole("button", { name: "返回" }).click();
   await section.getByText("详情", { exact: true }).click();
   await expect(section.getByText("已触发返回 / 详情")).toBeVisible();
 
+  const segmentedTabs = section.getByRole("tablist", { name: "预览面板" });
+  const overviewTab = segmentedTabs.getByRole("tab", { name: "订单概况" });
+  const metricsTab = segmentedTabs.getByRole("tab", { name: "经营指标" });
+  await expect(overviewTab).toHaveAttribute("aria-selected", "true");
+  await overviewTab.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(metricsTab).toBeFocused();
+  await expect(metricsTab).toHaveAttribute("aria-selected", "true");
+  await expect(section.getByRole("tabpanel", { name: "经营指标" })).toContainText("今日经营指标");
+
   const dots = section.getByRole("img", { name: "第 2 页，共 4 页" });
   await expect(dots).toHaveAttribute("data-variant", "line");
   await expect(dots.getByRole("button")).toHaveCount(0);
-  await section.getByRole("button", { name: "下一页" }).click();
+
+  const pagination = section.getByRole("group", { name: "商品页跳转" });
+  const currentPage = pagination.getByRole("button", { name: "前往第 2 页，共 4 页" });
+  await expect(currentPage).toHaveAttribute("aria-current", "page");
+  await expect(currentPage).toHaveAttribute("tabindex", "0");
+  await currentPage.focus();
+  await page.keyboard.press("ArrowRight");
+  const pageThree = pagination.getByRole("button", { name: "前往第 3 页，共 4 页" });
+  await expect(pageThree).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(pageThree).toHaveAttribute("aria-current", "page");
   await expect(section.getByRole("img", { name: "第 3 页，共 4 页" })).toBeVisible();
+
+  await section.getByRole("button", { name: "下一页" }).click();
+  await expect(section.getByRole("img", { name: "第 4 页，共 4 页" })).toBeVisible();
 });
 
 test("connects tab panels, primary navigation and read-only progress semantics", async ({

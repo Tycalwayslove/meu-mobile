@@ -48,7 +48,8 @@ import type { ReactNode } from 'react';
 import type { Ref } from 'react';
 import type { Resolver } from 'react-hook-form';
 import type { SearchFieldProps } from '@meu/mobile';
-import type { SegmentedControlProps } from '@meu/mobile';
+import type { SegmentedControlBaseProps } from '@meu/mobile';
+import type { SegmentedControlRadioProps } from '@meu/mobile';
 import type { SegmentedControlValue } from '@meu/mobile';
 import type { SelectorProps } from '@meu/mobile';
 import type { SelectorValue } from '@meu/mobile';
@@ -393,12 +394,14 @@ export type MeuFormSearchFieldProps<TFieldValues extends FieldValues> = Omit<Sea
 // @public
 export function MeuFormSegmentedControl<TFieldValues extends FieldValues, TValue extends SegmentedControlValue = SegmentedControlValue>(input: MeuFormSegmentedControlProps<TFieldValues, TValue>): JSX.Element;
 
+// Warning: (ae-forgotten-export) The symbol "MeuFormSegmentedRadioProps" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type MeuFormSegmentedControlProps<TFieldValues extends FieldValues, TValue extends SegmentedControlValue = SegmentedControlValue> = Omit<SegmentedControlProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
+export type MeuFormSegmentedControlProps<TFieldValues extends FieldValues, TValue extends SegmentedControlValue = SegmentedControlValue> = Omit<MeuFormSegmentedRadioProps<TValue>, "defaultValue" | "mode" | "name" | "onChange" | "value"> & {
     description?: ReactNode;
     label?: ReactNode;
     name: MeuSelectionFieldPath<TFieldValues, TValue>;
-    onChange?: SegmentedControlProps<TValue>["onChange"];
+    onChange?: MeuFormSegmentedRadioProps<TValue>["onChange"];
     required?: boolean;
     rules?: UseControllerProps<TFieldValues, MeuSelectionFieldPath<TFieldValues, TValue>>["rules"];
 };

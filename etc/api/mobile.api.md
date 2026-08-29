@@ -4,6 +4,7 @@
 
 ```ts
 
+import type { AnchorHTMLAttributes } from 'react';
 import { ButtonHTMLAttributes } from 'react';
 import type { ChangeEvent } from 'react';
 import type { ComponentProps } from 'react';
@@ -497,7 +498,11 @@ export function Collapse(input: CollapseProps): JSX.Element;
 export type CollapseArrow = ReactNode | ((expanded: boolean) => ReactNode);
 
 // @public
+export type CollapseHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
+// @public
 export type CollapseItem = {
+    ariaLabel?: string;
     content: ReactNode;
     disabled?: boolean;
     extra?: ReactNode;
@@ -506,12 +511,16 @@ export type CollapseItem = {
 };
 
 // @public
-export type CollapseProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange"> & {
+export type CollapseProps = Omit<ComponentProps<"div">, "children" | "defaultValue" | "onChange"> & {
     accordion?: boolean;
     arrow?: CollapseArrow;
     defaultValue?: readonly string[];
+    disabled?: boolean;
+    headingLevel?: CollapseHeadingLevel;
     items: readonly CollapseItem[];
+    keyboardNavigation?: boolean;
     onChange?: (value: string[], event: MouseEvent_2<HTMLButtonElement>) => void;
+    region?: boolean;
     ref?: Ref<HTMLDivElement>;
     value?: readonly string[];
     variant?: CollapseVariant;
@@ -1351,10 +1360,11 @@ export function PaginationDots(input: PaginationDotsProps): JSX.Element;
 export type PaginationDotsDirection = "horizontal" | "vertical";
 
 // @public
-export type PaginationDotsProps = Omit<ComponentProps<"div">, "children"> & {
+export type PaginationDotsProps = Omit<ComponentProps<"div">, "children" | "onChange" | "role"> & {
     activeIndex: number;
     count: number;
     direction?: PaginationDotsDirection;
+    disabled?: boolean;
     getPageLabel?: (index: number, count: number) => string;
     interactive?: boolean;
     maxVisible?: number;
@@ -1777,28 +1787,44 @@ export type SearchFieldStatus = "default" | "error";
 export function SegmentedControl<TValue extends SegmentedControlValue = SegmentedControlValue>(input: SegmentedControlProps<TValue>): JSX.Element;
 
 // @public
+export type SegmentedControlBaseProps<TValue extends SegmentedControlValue = SegmentedControlValue> = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange" | "role"> & {
+    block?: boolean;
+    defaultValue?: TValue;
+    disabled?: boolean;
+    ref?: Ref<HTMLDivElement>;
+    size?: SegmentedControlSize;
+    status?: SegmentedControlStatus;
+    value?: TValue | null;
+};
+
+// @public
+export type SegmentedControlChangeEvent = ChangeEvent<HTMLInputElement> | MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement>;
+
+// @public
+export type SegmentedControlMode = "radiogroup" | "tabs";
+
+// @public
 export type SegmentedControlOption<TValue extends SegmentedControlValue = SegmentedControlValue> = {
     ariaLabel?: string;
     disabled?: boolean;
     icon?: ReactNode;
     label: ReactNode;
+    panelId?: string;
+    tabId?: string;
     value: TValue;
 };
 
 // @public
-export type SegmentedControlProps<TValue extends SegmentedControlValue = SegmentedControlValue> = Omit<HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> & {
-    block?: boolean;
-    defaultValue?: TValue;
-    disabled?: boolean;
+export type SegmentedControlProps<TValue extends SegmentedControlValue = SegmentedControlValue> = SegmentedControlBaseProps<TValue> & (SegmentedControlRadioProps<TValue> | SegmentedControlTabsProps<TValue>);
+
+// @public
+export type SegmentedControlRadioProps<TValue extends SegmentedControlValue> = {
     form?: string;
+    mode?: "radiogroup";
     name?: string;
     onChange?: (value: TValue, event: ChangeEvent<HTMLInputElement>) => void;
     options: readonly SegmentedControlOption<TValue>[];
-    ref?: Ref<HTMLDivElement>;
     required?: boolean;
-    size?: SegmentedControlSize;
-    status?: SegmentedControlStatus;
-    value?: TValue | null;
 };
 
 // @public
@@ -1806,6 +1832,19 @@ export type SegmentedControlSize = "small" | "medium" | "large";
 
 // @public
 export type SegmentedControlStatus = "default" | "error";
+
+// @public
+export type SegmentedControlTabsProps<TValue extends SegmentedControlValue> = {
+    mode: "tabs";
+    form?: never;
+    name?: never;
+    onChange?: (value: TValue, event: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement>) => void;
+    options: readonly (Omit<SegmentedControlOption<TValue>, "panelId" | "tabId"> & {
+        panelId: string;
+        tabId: string;
+    })[];
+    required?: never;
+};
 
 // @public
 export type SegmentedControlValue = string | number;
@@ -1866,13 +1905,20 @@ export function SideNav(input: SideNavProps): JSX.Element;
 export type SideNavActivationMode = "automatic" | "manual";
 
 // @public
+export type SideNavChangeEvent = MouseEvent_2<HTMLAnchorElement | HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement>;
+
+// @public
 export type SideNavItem = {
+    ariaLabel?: string;
     badge?: ReactNode;
     badgeLabel?: string;
     content?: ReactNode;
     disabled?: boolean;
+    href?: string;
     key: string;
     label: ReactNode;
+    rel?: string;
+    target?: AnchorHTMLAttributes<HTMLAnchorElement>["target"];
 };
 
 // @public
@@ -1881,8 +1927,10 @@ export type SideNavProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "de
     defaultValue?: string;
     destroyInactive?: boolean;
     items: readonly SideNavItem[];
-    onChange?: (key: string, event: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement>) => void;
+    onChange?: (key: string, event: SideNavChangeEvent) => void;
     ref?: Ref<HTMLDivElement>;
+    sticky?: boolean;
+    stickyOffset?: CSSProperties["insetBlockStart"];
     value?: string | null;
 };
 

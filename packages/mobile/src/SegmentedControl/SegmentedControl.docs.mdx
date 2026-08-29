@@ -19,6 +19,8 @@ storyIds:
     navigation-segmentedcontrol--disabled,
     navigation-segmentedcontrol--required-error,
     navigation-segmentedcontrol--rtl-and-long-content,
+    navigation-segmentedcontrol--tabs-mode,
+    navigation-segmentedcontrol--reduced-motion,
     navigation-segmentedcontrol--controlled-interaction
   ]
 source: packages/mobile/src/SegmentedControl
@@ -28,31 +30,34 @@ source: packages/mobile/src/SegmentedControl
 
 ## 当前能力
 
-- 用同名原生 radio 实现 2–5 个互斥同层级视图或筛选切换，保留浏览器 radio group 的 Tab、方向键、Space 和 FormData 行为。
+- `mode="radiogroup"`（默认）用同名原生 radio 实现 2–5 个业务选项，保留浏览器 radio group 的 Tab、方向键、Space、constraint validation 和 FormData 行为。
+- `mode="tabs"` 输出真实 `tablist` / `tab`，通过 `tabId` / `panelId` 连接调用方拥有的 tabpanel；支持单一 roving tab stop、Home/End、方向键、跳过禁用项和 RTL 反向移动。
 - 支持受控 scalar、受控 `null`、非受控默认值、首个可用项回退、选项级/整体禁用、block、三档尺寸、图标和错误态。
 - `value` 同时作为 option identity 和原生表单值；string/number 分开识别，重复 identity 只保留第一项。
 - 支持 Field label/description/error/required 无损合并、原生 required、外部 form 关联、reset、root ref 与 React Hook Form adapter。
-- 每项至少 44×44 CSS px；支持 RTL、长文截断但保留完整无障碍名称、reduced motion、forced colors、SSR 和移动 WebView。
+- 选中 indicator 根据真实 item 几何滑动，支持内容宽度、block、动态选项、RTL 与 resize；每项至少 44 px 高，并支持 reduced motion、forced colors、SSR/hydration 和移动 WebView。
 
-当前状态为 `verification`。全库移动 Chromium/WebKit E2E 与本地 Light/Dark 场景矩阵已完成；最终 Chromatic 审批与真机读屏验证待完成，不能标记为 commercial。
+当前状态为 `verification`。radiogroup 与 tabs 已有移动 Chromium/WebKit 定点证据，indicator 几何与动态焦点已有 Unit/SSR/hydration 回归；仍需在最终统一阶段补全 Light/Dark/forced-colors/200% 字号截图、全量 axe、Chromatic 审批与真机读屏，因此不能标记为 commercial。
 
 ## 何时使用
 
-用于在同一上下文即时切换列表/卡片、日/周/月等少量互斥视图。选项地位相同，切换应立即生效且无需单独提交按钮。
+用于在同一上下文即时切换列表/卡片、日/周/月等少量互斥状态。业务选择、筛选或可提交值使用默认 radiogroup；切换紧邻内容 panel 且需要读屏 tab 关系时使用 tabs。选项地位相同，切换应立即生效且无需单独提交按钮。
 
 ## 何时不要使用
 
-页面主导航使用 Tabs、TabBar 或链接；需要提交的业务选择优先 RadioGroup/Selector；超过 5 项、文案差异大或需要说明时使用 Selector、Picker。SegmentedControl 不应用作表单提交按钮组。
+页面主导航使用 Tabs、TabBar 或链接；复杂、跨页、需要 lazy panel 状态管理的标签页使用 Tabs；需要提交且标签带说明的业务选择优先 RadioGroup/Selector。超过 5 项、文案差异大或需要说明时使用 Selector、Picker。SegmentedControl 不应用作表单提交按钮组。
 
 ## 结构与状态
 
-根为 `role="radiogroup"`，每项含真实 radio 和对应 label。根暴露：
+根根据 `mode` 输出 `role="radiogroup"` 或 `role="tablist"`；前者每项含真实 radio 与 label，后者每项为 `button[role=tab]`。根暴露：
 
 - `data-meu-component="segmented-control"`
+- `data-mode="radiogroup|tabs"`
+- `data-motion="system|reduced"`
 - `data-size="small|medium|large"`
 - `data-state="default|disabled|error"`
 
-每项暴露 `data-selected` 与 `data-disabled`。选中态通过 native checked、surface 形状、文字对比和轻量阴影同时表达；强制色彩模式使用系统 Highlight。
+每项暴露 `data-selected` 与 `data-disabled`。选中态通过 native checked 或 `aria-selected`、滑动 surface indicator 和文字对比同时表达；强制色彩模式使用系统 Highlight。indicator 为 `aria-hidden`，不制造重复读屏内容。
 
 ## 基础用法
 
@@ -67,6 +72,22 @@ source: packages/mobile/src/SegmentedControl
   defaultValue="list"
   onChange={(value, event) => console.log(value, event.type)}
 />
+```
+
+关联内容 panel：
+
+```tsx
+<SegmentedControl
+  mode="tabs"
+  aria-label="订单详情"
+  options={[
+    { label: "摘要", value: "summary", tabId: "summary-tab", panelId: "summary-panel" },
+    { label: "配送", value: "delivery", tabId: "delivery-tab", panelId: "delivery-panel" }
+  ]}
+  value={section}
+  onChange={setSection}
+/>
+<section id="summary-panel" role="tabpanel" aria-labelledby="summary-tab" />
 ```
 
 填满容器：
@@ -86,8 +107,9 @@ source: packages/mobile/src/SegmentedControl
 - `value` 未定义时为非受控。有效 `defaultValue` 优先，否则选择首个 enabled option；全部禁用或 options 为空时为 `null`。
 - `value` 为 scalar 时受控，交互只触发 `onChange`，视觉继续服从 props。
 - `value={null}` 是明确的受控空值，不会自动选择首项，适合 required 错误态和异步初始化。
-- 非受控当前 identity 被删除时自动回退到首个 enabled option；仅变为 disabled 时保留当前选中，避免异步权限变化抹掉事实值。
+- 非受控当前 identity 被删除或该 option 变为 disabled 时自动回退到首个 enabled option；整体 `disabled` 只锁定交互并保留选中事实。
 - controlled 传入未知 identity 时不显示选中，也不自动回写。
+- 当键盘焦点所在 option 被动态删除或禁用时，两种模式都把焦点恢复到当前有效选项，或首个 enabled option；组件外焦点不会被抢回。
 
 ## 表单集成
 
@@ -95,7 +117,8 @@ source: packages/mobile/src/SegmentedControl
 - `required` 放到首个 enabled radio，并在 radiogroup 输出合法 `aria-required`；浏览器按 radio group 规则要求任一同名项选中。
 - `form` 可关联组件外部 `<form id>`；未传则使用最近祖先 form。
 - 原生 reset 将非受控值恢复到首次有效 `defaultValue`，无有效默认值时回到当前 options 的首个 enabled option；受控值由调用方 reset。
-- `MeuFormSegmentedControl` 连接 React Hook Form 的 scalar value、dirty、touched、disabled、required、error 与 root focus。
+- `MeuFormSegmentedControl` 固定使用 radiogroup，并连接 React Hook Form 的 scalar value、dirty、touched、disabled、required、error 与 root focus；导航 tabs 应直接使用本组件。
+- `mode="tabs"` 在类型层禁止 `name`、`form` 与 `required`，运行时也不输出 radio 或表单属性；tabs 是内容导航关系，不是表单字段。
 
 ## Props
 
@@ -104,43 +127,47 @@ API 表由 API Extractor 根据 `SegmentedControlProps` 和 `SegmentedControlOpt
 - `options[].value` 是唯一 identity；`1` 与 `"1"` 在组件内不同，但 FormData 文本相同。
 - 重复 identity 的后续项不会渲染，避免一个值对应多个可见标签。
 - `icon` 视为装饰并 `aria-hidden`；每项仍必须有可访问的 `label`，复杂 label 可用 `ariaLabel` 覆盖名称。
+- tabs 模式在类型层要求每项提供 `panelId` 与 `tabId`：前者写入 tab 的 `aria-controls`，后者让对应 panel 用 `aria-labelledby` 回指 tab。没有 panel 的普通业务切换应使用默认 radiogroup。
 - `aria-label` 优先于 Field label；调用方和 Field 的 `aria-labelledby` / `aria-describedby` 会按 token 合并去重。
 - `block=true` 让每项等分可用宽度；false 时按内容收缩但不会超出容器。
 
 ## Events
 
-`onChange(value, event)` 只在用户选择 enabled radio 时触发。初始化、options 收敛、disabled 变化和 form reset 不触发；事件为 React `ChangeEvent<HTMLInputElement>`，可读取原生 name/value/form。
+`onChange(value, event)` 只在用户选择新的 enabled option 时触发。初始化、options 收敛、disabled 变化和 form reset 不触发。Props 按 mode 判别：默认 radiogroup 保持原有 `ChangeEvent<HTMLInputElement>` 精确类型；tabs 点击为 `MouseEvent<HTMLButtonElement>`，方向键自动激活为 `KeyboardEvent<HTMLButtonElement>`。需要跨模式保存处理器类型时可使用公开 `SegmentedControlChangeEvent` 联合。
 
 ## Ref 与命令式方法
 
-ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 供表单库错误聚焦；正常用户 Tab 进入原生 radio。组件不提供命令式 setValue/focusOption，业务用受控状态和 DOM ref 完成。
+ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 供表单库错误聚焦；调用 root `focus()` 会转交给选中或首个 enabled control，正常用户 Tab 直接进入 radio group 或 tablist 的 roving tab。组件不提供命令式 setValue/focusOption，业务用受控状态和 DOM ref 完成。
 
 ## 键盘操作
 
-| 按键            | 行为                                                                 |
-| --------------- | -------------------------------------------------------------------- |
-| Tab / Shift+Tab | 进入或离开整个原生 radio group，浏览器保持一个 group tab stop        |
-| Arrow keys      | 在 enabled radio 间移动并选择；禁用项跳过，方向与宿主浏览器/RTL 一致 |
-| Space           | 选择当前 radio                                                       |
+| 模式       | 按键             | 行为                                                               |
+| ---------- | ---------------- | ------------------------------------------------------------------ |
+| radiogroup | Tab / Shift+Tab  | 进入或离开原生 radio group，浏览器保持一个 group tab stop          |
+| radiogroup | Arrow keys/Space | 浏览器在 enabled radio 间移动并选择；RTL 细节服从宿主平台          |
+| tabs       | Tab / Shift+Tab  | 进入或离开整个 tablist，只有当前选中或首个 enabled tab 为 tab stop |
+| tabs       | Left/Right       | 移动并立即激活，跳过 disabled；RTL 中物理方向反转并循环            |
+| tabs       | Home/End         | 移动并立即激活首个/最后一个 enabled tab                            |
+| tabs       | Enter/Space      | 使用原生 button click 激活当前 tab                                 |
 
-不额外实现 roving tabindex。原生同名 radio 已提供标准 roving/focus/selection 行为，自定义 keydown 会产生重复 change 或破坏 WebView 平台一致性。
+radiogroup 不重复实现 roving tabindex；tabs 按 WAI-ARIA APG 使用单一 roving tab stop 和自动激活。两个模式都不会拦截 Tab。
 
 ## 触摸与手势
 
-每个 label 是完整触摸目标，small/medium 为 44 px，large 为 48 px；`touch-action: manipulation`，无依赖 hover 的功能、滑动或长按。
+每个 radio label 或 tab button 都是完整触摸目标，最小 44×44 px，large 高 48 px；`touch-action: manipulation`，无依赖 hover 的功能、滑动或长按。
 
 ## 无障碍
 
-- radiogroup 必须由 `aria-label`、`aria-labelledby` 或 Field label 命名；单项名称来自可见 label，图标不重复朗读。
-- description/error 同时关联 root 与 radio；invalid 位于 radiogroup，并有 Field 错误文字。
-- 无 Field/status error 时保留 radiogroup 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉。Field/status error 优先输出 `true`，token 不复制到子 radio。
+- radiogroup/tablist 优先由 `aria-label`、`aria-labelledby` 或 Field label 命名；都未提供时使用本地化通用名称“分段选择”/“Segmented control”。单项名称来自可见 label，图标不重复朗读。
+- description/error 同时关联 semantic root 与各 radio/tab；invalid 位于根，并有 Field 错误文字。
+- 无 Field/status error 时保留根上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉。Field/status error 优先输出 `true`，token 不复制到子控件。
 - 整体 disabled 输出 root `aria-disabled` 与每项 native disabled，选中事实保留。
-- 焦点落在真实 1px 裁剪 input，label 绘制 2px focus outline；不会让 `display:none` 控件退出读屏/键盘树。
-- forced colors 使用 ButtonText、Highlight、HighlightText、GrayText；reduced motion 把 transition 降为 1 ms。
+- radiogroup 焦点落在真实 1px 裁剪 input 并由 label 绘制 2px outline；tabs button 直接绘制 outline。控件不会用 `display:none` 退出读屏/键盘树。
+- forced colors 使用 Canvas、ButtonText、Highlight 边框与 GrayText；`ConfigProvider motion="reduced"` 直接移除 indicator transition，系统 reduced-motion 将过渡降为 1 ms。
 
 ## 动效
 
-仅在选中态切换背景、文字与 3px 以内轻阴影，使用全局 exit 时长。无滑块位移动画，因此动态 option 宽度、RTL 和文本缩放不会产生错误几何；reduced motion 下近乎即时。
+选中 indicator 使用 transform 在真实 item 的物理位置间移动，宽度由当前 item 几何即时同步；不动画化 root/item 布局。进入使用全局 enter 时长，隐藏使用 exit 时长。ResizeObserver 监听 root 与各 item，文字、字体和容器尺寸变化后会重新对齐；reduced motion 下无位移动画。
 
 ## 主题与定制
 
@@ -148,15 +175,15 @@ ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 供表单库错误聚焦�
 
 ## SSR 与 Next.js
 
-首次 render 仅使用 props、React state 和 `useId`，不读取 window/document。reset 关联在 effect 中执行；服务端输出真实 radio/name/value/checked/required，可在 Next App Router client component 中 SSR。服务端和客户端首帧必须使用相同 options 顺序。
+首次 render 仅使用 props、React state 和 `useId`，不读取 window/document。reset 与 indicator 测量在 effect/layout effect 中执行；服务端可输出真实 radio/name/value/checked/required 或 tablist/tab/aria-selected。hydration 保持原控件节点并在提交前完成 indicator 对齐。服务端和客户端首帧必须使用相同 mode、options 顺序和默认值。
 
 ## RTL 与国际化
 
-inline-flex 自动遵循文档 `dir`，图标与文字顺序随 RTL 反转。label 单行省略但完整 DOM 文本仍是 accessible name；复杂或非文字 label 应提供本地化 `ariaLabel`。200% 字号时保持 44 px 下限，block 布局可收缩。
+inline-flex 自动遵循文档 `dir`，图标与文字顺序随 RTL 反转；tabs 方向键优先读取最近显式 `dir`，再读取 ConfigProvider。label 单行省略但完整 DOM 文本仍是 accessible name；复杂或非文字 label 应提供本地化 `ariaLabel`。200% 字号时保持 44 px 下限，block 布局可收缩。
 
 ## 浏览器与 WebView
 
-目标为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。实现依赖成熟的 radio/label/FormData/constraint validation，不使用 CSS anchor、popover、pointer capture、ResizeObserver 或 UA sniffing。宿主浏览器负责方向键对 RTL 的平台细节。
+目标为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。核心交互依赖成熟的 radio/label/button/FormData/constraint validation；indicator 使用该范围已支持的 ResizeObserver，并在缺失时回退到 window resize。未使用 CSS anchor、popover、pointer capture 或 UA sniffing。radiogroup 的 RTL 方向键由宿主浏览器处理，tabs 由组件明确处理。
 
 ## 边界情况与已知限制
 
@@ -165,21 +192,24 @@ inline-flex 自动遵循文档 `dir`，图标与文字顺序随 RTL 反转。lab
 - 长标签会视觉省略；如果用户必须比较完整长文，不应使用 SegmentedControl，应改为 Selector 或 RadioGroup。
 - icon 只装饰，不可独立承担状态或 accessible name。
 - radio 原生方向键会立即改变选择并触发 change，不提供“移动焦点后 Enter 确认”的手动激活模式。
+- tabs 为自动激活且只管理 tablist；panel 的挂载、隐藏、lazy/destroyInactive 与内部焦点归调用方。需要这些能力时使用 Tabs。
+- indicator 的初始 SSR markup 不包含测量值；禁用 JavaScript 时仍保留完整选择语义与文字选中状态，但没有滑动 surface。
 
 ## 性能预算
 
-render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控模式只在 options identity 集合变化时收敛一次，并在所属 form 注册一个 reset 监听。
+render 为 O(options)，预期 2–5 项。indicator 每次更新只读取 root 与当前 item 两个 rect，并以一个 ResizeObserver 观察 root 和 item；不在循环内交错读写布局。无 ResizeObserver 时注册一个 window resize 监听。非受控 radiogroup 另注册一个 document reset 监听，卸载时全部清理。
 
 ## 测试证据
 
-- Unit: `SegmentedControl.test.tsx` 覆盖默认/controlled null、identity/duplicate、disabled、Field/required、ARIA invalid token/优先级、FormData、外部 form、reset、option 删除回退、ref 和 native keyboard path。
-- SSR: `SegmentedControl.ssr.test.tsx` 覆盖无浏览器全局的 radio/name/value/checked/required 与 radiogroup token 输出。
-- Story interaction: `ControlledInteraction` 验证选择状态与回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4041 B / 32768 B 预算，组合 Brotli 3595 B；共享样式由应用单独导入一次。
+- Unit: `SegmentedControl.test.tsx` 覆盖默认/controlled null、identity/duplicate、disabled、Field/required、ARIA invalid、FormData、外部 form、reset、动态 option 回退与焦点恢复、radiogroup/tablist 语义、LTR/RTL 键盘、indicator 几何、motion、ref 和原生属性。
+- SSR: `SegmentedControl.ssr.test.tsx` 覆盖无浏览器全局的 radio/name/value/checked/required 与 tablist/tab/controls/selected 输出。
+- Hydration: `SegmentedControl.hydration.test.tsx` 使用 `onRecoverableError` 证明 radio/tab DOM identity 保留、两种模式交互继续有效且无 recoverable mismatch。
+- Story interaction: `ControlledInteraction` 验证受控选择状态与回调；`TabsMode` 和 `ReducedMotion` 补充本轮语义与动效场景。静态 Storybook 索引与最终视觉矩阵按开发期策略留到全组件完成后统一重建。
+- Storybook 历史基线：此前 390×844 的 Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors 矩阵通过 axe WCAG A/AA；该结果早于本轮 tabs/indicator 变更，只能作为回归基线，不能证明新增场景。
+- 隔离 Next H5：production build 后，radiogroup 受控切换、tabs 方向键/焦点/panel 关联及表单 adapter 路径在移动 Chromium/WebKit 通过；indicator 精确几何由组件 Unit 覆盖，最终视觉基线待统一建立。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 6099 B / 32768 B 预算，组合 Brotli 5417 B；共享样式由应用单独导入一次。
 - RTL / reduced motion / forced colors: 实现已落地，专属快照矩阵待补。
-- 移动 Chromium/WebKit E2E：`uses native navigation actions, radio segments and read-only page dots` 验证原生 radio 选择与受控输出；表单场景验证 adapter 提交，双引擎通过。VoiceOver/TalkBack 真机待补。
+- 移动 Chromium/WebKit E2E：`uses native navigation actions, radio and tab segments, and controlled page dots` 验证原生 radio 选择、tabs ArrowRight 自动激活、焦点与 caller-owned tabpanel；表单场景验证固定 radiogroup adapter。indicator 视觉基线与 VoiceOver/TalkBack 真机待补。
 
 ## V2 优化记录
 
@@ -196,6 +226,9 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 - 明确使用 native radio roving，而非重复实现 keydown/focus 算法。
 - 补齐 44 px 目标、RTL、long content、reduced motion、forced colors、SSR、TSDoc、Story 与 Unit。
 - 在隔离 Next H5 中补原生 radio 选择、表单提交、44px 目标与 hydration 双引擎证据。
+- 新增真实 tabs 模式、panel 关系、APG 键盘与动态 option 焦点恢复；不再用 radio 角色伪装 tab。
+- 新增按真实宽度移动的选中 indicator，并同时遵守 ConfigProvider 与系统 reduced motion。
+- 在隔离 Next H5 的移动 Chromium/WebKit 中补齐 tabs 与外部 panel 的定点消费证据。
 
 ## 维护规则
 
@@ -203,8 +236,9 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                                | 迁移说明                                                                   |
-| ---------- | ------ | ------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior      | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固   | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option |
-| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎选择/form/hydration 证据                         | 无                                                                         |
-| 2026-08-29 | 未发布 | accessibility | 保留 radiogroup ARIA invalid token 并统一 Field/status error 优先级 | 无                                                                         |
+| 日期       | 版本   | 类型          | 内容                                                                | 迁移说明                                                                    |
+| ---------- | ------ | ------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固   | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option  |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎选择/form/hydration 证据                         | 无                                                                          |
+| 2026-08-29 | 未发布 | accessibility | 保留 radiogroup ARIA invalid token 并统一 Field/status error 优先级 | 无                                                                          |
+| 2026-08-29 | 未发布 | behavior      | 新增 tabs 模式、APG 键盘、动态焦点恢复与真实宽度 indicator          | 内容导航显式传 `mode="tabs"`，每个 panel 必须设置匹配的 `tabId` / `panelId` |

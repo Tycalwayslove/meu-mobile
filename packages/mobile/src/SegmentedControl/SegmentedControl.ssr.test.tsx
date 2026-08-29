@@ -33,4 +33,34 @@ describe("SegmentedControl SSR", () => {
     expect(markup).toContain("checked");
     expect(markup).toContain("required");
   });
+
+  it("renders deterministic tablist markup without radio or form attributes", () => {
+    const markup = renderToString(
+      <SegmentedControl
+        mode="tabs"
+        aria-label="Period"
+        defaultValue="day"
+        options={[
+          { label: "Day", panelId: "day-panel", tabId: "day-tab", value: "day" },
+          {
+            disabled: true,
+            label: "Month",
+            panelId: "month-panel",
+            tabId: "month-tab",
+            value: "month"
+          }
+        ]}
+      />
+    );
+
+    expect(markup).toContain('role="tablist"');
+    expect(markup).toContain('role="tab"');
+    expect(markup).toContain('id="day-tab"');
+    expect(markup).toContain('aria-controls="day-panel"');
+    expect(markup).toContain('aria-selected="true"');
+    expect(markup).toContain('aria-orientation="horizontal"');
+    expect(markup).not.toContain('type="radio"');
+    expect(markup).not.toContain(" name=");
+    expect(markup).not.toContain("required");
+  });
 });

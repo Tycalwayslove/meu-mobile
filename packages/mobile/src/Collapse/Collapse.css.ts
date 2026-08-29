@@ -34,6 +34,11 @@ export const item = style({
   "@media": { "(forced-colors: active)": { borderColor: "CanvasText" } }
 });
 
+export const heading = style({
+  minWidth: 0,
+  margin: 0
+});
+
 export const trigger = recipe({
   base: {
     display: "flex",
@@ -59,11 +64,18 @@ export const trigger = recipe({
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3
       },
-      "&:disabled": { cursor: "not-allowed", opacity: 0.55 }
+      "&:disabled": {
+        color: "var(--meu-color-muted)",
+        background: "var(--meu-color-subtle)",
+        cursor: "not-allowed"
+      }
     },
     "@media": {
       "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
-      "(forced-colors: active)": { outlineColor: "ButtonText" }
+      "(forced-colors: active)": {
+        forcedColorAdjust: "auto",
+        outlineColor: "ButtonText"
+      }
     }
   },
   variants: {
@@ -95,6 +107,7 @@ export const extra = style({
   fontSize: 14,
   lineHeight: "20px",
   textAlign: "end",
+  overflowWrap: "anywhere",
   pointerEvents: "none"
 });
 
@@ -108,22 +121,25 @@ export const arrow = recipe({
     height: 24,
     marginInlineStart: "var(--meu-space-2)",
     color: "var(--meu-color-muted)",
-    transform: "rotate(180deg)",
     transition: "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)",
+    lineHeight: 0,
     pointerEvents: "none",
-    selectors: { "&:dir(rtl)": { transform: "none" } },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { color: "ButtonText", forcedColorAdjust: "auto" }
+    }
   },
   variants: {
+    direction: {
+      ltr: { transform: "rotate(180deg)" },
+      rtl: { transform: "none" }
+    },
     expanded: {
-      true: {
-        transform: "rotate(270deg)",
-        selectors: { "&:dir(rtl)": { transform: "rotate(270deg)" } }
-      },
+      true: { transform: "rotate(270deg)" },
       false: {}
     }
   },
-  defaultVariants: { expanded: false }
+  defaultVariants: { direction: "ltr", expanded: false }
 });
 
 export const panel = recipe({

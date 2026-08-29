@@ -15,6 +15,7 @@ storyIds:
   [
     navigation-paginationdots--dots,
     navigation-paginationdots--interactive,
+    navigation-paginationdots--disabled,
     navigation-paginationdots--compressed,
     navigation-paginationdots--rtl
   ]
@@ -25,7 +26,7 @@ source: packages/mobile/src/PaginationDots
 
 ## 当前能力
 
-默认是只读页位摘要；显式 `interactive` 后才渲染原生页码按钮。支持 dot/line、横竖、RTL、超多页压缩和本地化名称。
+默认是只读页位摘要；显式 `interactive` 后才渲染原生页码按钮。支持 dot/line、横竖、RTL、超多页压缩、本地化名称、整组禁用、单一 Tab 停靠点和方向键浏览。动态压缩移除当前聚焦按钮时，焦点会回到受控当前页。
 
 ## 何时使用
 
@@ -37,7 +38,7 @@ source: packages/mobile/src/PaginationDots
 
 ## 结构与状态
 
-只读为 `div[role=img] → marker`；交互为 `div[role=group] → button + ellipsis`。状态包含 current、idle 与 compressed。
+只读为 `div[role=img] → marker`；交互为 `div[role=group] → button + ellipsis`。状态包含 current、idle、compressed 与 disabled。组件保留稳定的根 `div`，不会因 `interactive` 状态改变之外的业务更新切换页按钮元素类型。
 
 ## 基础用法
 
@@ -55,11 +56,11 @@ source: packages/mobile/src/PaginationDots
 
 ## Props
 
-`maxVisible` 归一到 5–99、默认 7；超大 count 归一到安全整数上限，所有渲染路径都保持固定 DOM 上限。`getPageLabel(index,count)` 只覆盖交互按钮名称。
+`maxVisible` 归一到 5–99、默认 7；超大 count 归一到安全整数上限，所有渲染路径都保持固定 DOM 上限。`getPageLabel(index,count)` 只覆盖交互按钮名称。`disabled` 仅锁定 interactive 页按钮并在 group 暴露 `aria-disabled`，不改变只读摘要。根节点接受 `aria-label` 或 `aria-labelledby`；两者同时提供时显式 `aria-label` 优先。`role` 被公开类型排除，因为只读 `img` 与交互 `group` 是组件语义契约，不能由调用方静默覆盖。
 
 ## Events
 
-`onChange(index,event)` 仅在 interactive 且点击非当前页时触发；状态仍由调用方更新。
+`onChange(index,event)` 仅在 interactive 且点击/Enter/Space 激活非当前页时触发；方向键只移动焦点，不触发事件，状态仍由调用方更新。该业务回调已从根 `div` 的原生 form change 类型中显式分离，不再形成不可用的交叉签名。
 
 ## Ref 与命令式方法
 
@@ -67,42 +68,47 @@ ref 指向根 `HTMLDivElement`；无命令式翻页 API。
 
 ## 键盘操作
 
-| 按键            | 行为                                  |
-| --------------- | ------------------------------------- |
-| Tab / Shift+Tab | 仅 interactive 模式逐个进入可见页按钮 |
-| Enter / Space   | 激活聚焦页按钮                        |
+| 按键            | 行为                                           |
+| --------------- | ---------------------------------------------- |
+| Tab / Shift+Tab | interactive 模式只进入受控当前页一个停靠点     |
+| ← / →           | 横向模式按物理方向移动可见页焦点；RTL 自动反转 |
+| ↑ / ↓           | 纵向模式移动可见页焦点                         |
+| Home / End      | 移至当前压缩窗口首个/最后一个可见页按钮        |
+| Enter / Space   | 激活聚焦页按钮并发布 `onChange`                |
+
+方向键只移动焦点，不替调用方提交页码；这避免用户浏览按钮时意外翻页。省略号不是交互目标，也不进入读屏或键盘序列。
 
 ## 触摸与手势
 
-交互按钮为 44×44 CSS px；组件不处理滑动手势。
+交互按钮为 44×44 CSS px，设置 `touch-action: manipulation` 并移除点击高亮；组件不持有 pointer、不处理滑动手势，也不会与 Carousel 横向拖动竞争。
 
 ## 无障碍
 
-只读模式提供“当前页/总页数”单一摘要。交互按钮提供完整页码名称，当前项使用 `aria-current="page"`；ellipsis 隐藏于读屏。
+只读模式提供“当前页/总页数”单一摘要。交互按钮提供完整页码名称，当前项使用 `aria-current="page"`；ellipsis 隐藏于读屏。交互模式使用 roving tabindex，禁用时所有按钮使用原生 `disabled`。调用方使用 `aria-labelledby` 时组件不再添加竞争的默认名称。
 
 ## 动效
 
-marker 尺寸和颜色过渡使用 motion token；reduced-motion 缩短到 1ms。
+marker 尺寸和颜色过渡使用 motion token；`ConfigProvider motion="reduced"` 将 token 时长归零，系统 `prefers-reduced-motion` 也把残余过渡压缩到 1ms。焦点移动使用原生同步 focus，不做滚动动画。
 
 ## 主题与定制
 
-颜色使用 accent/muted token；forced-colors 使用系统颜色。稳定入口为 props 与 data 属性。
+颜色使用 accent/muted token；forced-colors 下当前页使用 `Highlight`、其余 marker/省略号使用系统文字色，焦点轮廓保持可见。稳定入口为 props 与 data 属性，内部 class 不是 API。
 
 ## SSR 与 Next.js
 
-纯确定性标记；不访问浏览器全局。服务端与客户端需提供一致 count/index。
+服务端输出纯确定性标记；布局 effect 只在 hydration 后维护动态焦点。服务端与客户端需提供一致 count/index/interactive/disabled。direct hydration 测试覆盖零 recoverable error、ref 恢复与首个业务点击。
 
 ## RTL 与国际化
 
-flex 自动遵循继承方向；页码逻辑仍为零基索引。默认中文/英文名称可由 aria-label/getPageLabel 覆盖。
+flex 自动遵循 DOM/`ConfigProvider dir`；横向方向键按实际 LTR/RTL 物理方向解释，`dir="auto"` 仍原样透传并以 ConfigProvider 作为键盘方向的稳定回退。页码逻辑保持零基索引。默认中文/英文名称可由 aria-label、aria-labelledby 和 getPageLabel 覆盖。
 
 ## 浏览器与 WebView
 
-仅使用原生 button、flex 与基础 CSS，兼容 Chrome/WebView 70+、iOS 13+；无 ResizeObserver 依赖。
+完整运行时支持档为 Chrome/Android WebView 89+ 与 iOS Safari/WKWebView 15+，这些版本包含当前 flex gap 与按钮能力。Chrome 70 / iOS 13 仅作为构建产物静态语法观察档，不承诺 marker 间距和全部视觉细节一致；组件无 ResizeObserver 依赖。
 
 ## 边界情况与已知限制
 
-压缩后只渲染首尾、当前邻近页和省略号；不可见页仍可通过业务的前后翻页入口抵达。重复业务页身份不由组件处理。
+压缩后只渲染首尾、当前邻近页和省略号；方向键只遍历这些可见按钮，不跨越省略号逐页生成隐藏 DOM。不可见页需通过业务的前后翻页、Carousel 手势或受控状态抵达。`onChange` 不自动写回 `activeIndex`；父级未更新时视觉 current 保持不变。组件不提供异步 loading，提交期间应设置 `disabled`。
 
 ## 性能预算
 
@@ -110,15 +116,14 @@ DOM 数量压缩为 O(maxVisible)，不随巨大 count 线性增长。
 
 ## 测试证据
 
-- Unit: clamp、非有限/极大输入、固定分配上限、空状态、interactive、压缩、RTL 名称与事件
-- Story interaction: `Interactive.play` 验证点击页码；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2699 B / 32768 B 预算，组合 Brotli 2377 B；共享样式由应用单独导入一次。
-- SSR/hydration: `PaginationDots.ssr.test.tsx`
-- RTL: Unit + Story
-- Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: `uses native navigation actions, radio segments and read-only page dots` 在两种引擎断言只读 `img` 语义、variant、无伪按钮，并验证外部翻页后的 accessible name
+- Unit：clamp、非有限/极大输入、固定分配上限、空状态、interactive、禁用、单一 Tab stop、LTR/RTL/vertical 方向键、Home、压缩焦点恢复、labelledby/ref/原生 focus 回调与事件。
+- SSR/direct hydration：`PaginationDots.ssr.test.tsx` 与 `PaginationDots.hydration.test.tsx` 覆盖确定性只读/交互/disabled 标记、无 hydration recoverable error、ref 与首个业务事件。
+- Story：受控 `Interactive.play` 验证页码写回和 roving tabIndex；另有 disabled、compressed、vertical、RTL、dot/line 场景。新增 Story 尚未构建进静态索引，最终发布批次统一执行链接、axe 与视觉矩阵。
+- Storybook 历史基线：本轮修改前的静态索引曾覆盖 374 个 Story × 7 场景；该数字不是当前源码的验收结论。
+- 官网 Next 运行时：本轮修改前的 68 页 Light/Dark 全量矩阵是历史基线；当前 Next 16 production build 后，只读与 interactive 受控消费路径均已通过 Chromium/WebKit 定点验证。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3954 B / 32768 B 预算，组合 Brotli 3491 B；共享样式由应用单独导入一次。
+- RTL / reduced-motion / forced-colors：Unit、Story 与 CSS 静态契约；最终浏览器矩阵延后到统一发布批次。
+- Mobile Chromium/WebKit E2E: `uses native navigation actions, radio and tab segments, and controlled page dots` 在两种引擎断言只读 `img` 语义、interactive roving tab stop、ArrowRight 焦点、Enter 激活、`aria-current=page` 和外部翻页后的 accessible name
 - Chromatic Light/Dark: 发布后建立
 - Real device: 待补
 
@@ -126,15 +131,19 @@ DOM 数量压缩为 O(maxVisible)，不随巨大 count 线性增长。
 
 ### 待优化
 
-补 interactive 模式专项双引擎与真机读屏证据；只读消费路径已完成。
+补 interactive 模式专项 Chromium/WebKit、最终 Storybook axe/视觉矩阵与真机读屏证据；这些统一留到全部组件完成后的发布批次。
 
 ### 已完成
 
 冻结只读默认；新增显式交互、压缩、44px、页码名称、RTL、forced-colors 与 SSR；补只读 Next H5/hydration 证据。
 
+本轮补齐 interactive 的整组 disabled、roving tabindex、LTR/RTL/vertical 方向键、Home/End、动态压缩焦点恢复、`aria-labelledby`、ref/event 组合和 direct hydration。forced-colors 明确区分 current 与 idle marker。
+
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                       | 迁移说明             |
-| ---------- | ------ | ------------ | ------------------------------------------ | -------------------- |
-| 2026-08-29 | 未发布 | feature      | interactive、压缩与可访问页码              | 默认仍为只读，无破坏 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎只读页码/hydration 证据 | 无                   |
+| 日期       | 版本   | 类型         | 内容                                               | 迁移说明                                  |
+| ---------- | ------ | ------------ | -------------------------------------------------- | ----------------------------------------- |
+| 2026-08-29 | 未发布 | feature      | interactive、压缩与可访问页码                      | 默认仍为只读，无破坏                      |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎只读页码/hydration 证据         | 无                                        |
+| 2026-08-29 | 未发布 | hardening    | disabled、roving 键盘、动态焦点与 direct hydration | interactive 调用方可在提交期设置 disabled |
+| 2026-08-29 | 未发布 | type-fix     | `onChange` 不再与原生 div change 回调交叉          | 继续使用 `(index, event)`，无需运行时迁移 |

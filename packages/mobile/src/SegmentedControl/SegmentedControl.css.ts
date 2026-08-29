@@ -3,6 +3,7 @@ import { recipe } from "@vanilla-extract/recipes";
 
 export const root = recipe({
   base: {
+    position: "relative",
     display: "inline-flex",
     alignItems: "stretch",
     gap: 2,
@@ -13,7 +14,8 @@ export const root = recipe({
     background: "var(--meu-color-subtle)",
     border: "1px solid transparent",
     borderRadius: "var(--meu-radius-control)",
-    fontFamily: "var(--meu-font-ui)"
+    fontFamily: "var(--meu-font-ui)",
+    isolation: "isolate"
   },
   variants: {
     block: {
@@ -29,9 +31,50 @@ export const root = recipe({
 });
 
 export const item = recipe({
-  base: { position: "relative", minWidth: 0 },
+  base: { position: "relative", zIndex: 1, minWidth: 0 },
   variants: { block: { true: { flex: "1 1 0" }, false: { flex: "0 1 auto" } } },
   defaultVariants: { block: false }
+});
+
+export const indicator = recipe({
+  base: {
+    position: "absolute",
+    zIndex: 0,
+    top: 2,
+    bottom: 2,
+    left: 0,
+    width: "var(--meu-segmented-indicator-width, 0px)",
+    boxSizing: "border-box",
+    opacity: "var(--meu-segmented-indicator-opacity, 0)",
+    background: "var(--meu-color-surface)",
+    borderRadius: "calc(var(--meu-radius-control) - 2px)",
+    boxShadow: "0 1px 3px var(--meu-color-border)",
+    pointerEvents: "none",
+    transform: "translate3d(var(--meu-segmented-indicator-x, 0px), 0, 0)",
+    "@media": {
+      "(forced-colors: active)": {
+        background: "Canvas",
+        border: "2px solid Highlight",
+        boxShadow: "none",
+        forcedColorAdjust: "none"
+      }
+    }
+  },
+  variants: {
+    motion: {
+      system: {
+        transition: [
+          "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)",
+          "opacity var(--meu-motion-exit) var(--meu-motion-ease-standard)"
+        ].join(", "),
+        "@media": {
+          "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+        }
+      },
+      reduced: { transition: "none" }
+    }
+  },
+  defaultVariants: { motion: "system" }
 });
 
 export const input = style({
@@ -52,7 +95,8 @@ export const option = recipe({
     alignItems: "center",
     justifyContent: "center",
     gap: "var(--meu-space-1)",
-    minWidth: 0,
+    minWidth: 44,
+    width: "100%",
     minHeight: 44,
     boxSizing: "border-box",
     color: "var(--meu-color-muted)",
@@ -61,6 +105,10 @@ export const option = recipe({
     fontWeight: 500,
     lineHeight: 1.3,
     cursor: "pointer",
+    appearance: "none",
+    border: 0,
+    font: "inherit",
+    textAlign: "center",
     touchAction: "manipulation",
     userSelect: "none",
     WebkitTapHighlightColor: "transparent",
@@ -71,6 +119,10 @@ export const option = recipe({
     ].join(", "),
     selectors: {
       [`${input}:focus + &`]: {
+        outline: "2px solid var(--meu-color-accent)",
+        outlineOffset: -2
+      },
+      "&:focus": {
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -2
       },
@@ -98,13 +150,11 @@ export const option = recipe({
     active: {
       true: {
         color: "var(--meu-color-ink)",
-        background: "var(--meu-color-surface)",
-        boxShadow: "0 1px 3px var(--meu-color-border)",
+        background: "transparent",
         "@media": {
           "(forced-colors: active)": {
-            color: "HighlightText",
-            background: "Highlight",
-            borderColor: "Highlight",
+            color: "ButtonText",
+            background: "transparent",
             boxShadow: "none"
           }
         }

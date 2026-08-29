@@ -108,7 +108,13 @@ export type { EllipsisDirection, EllipsisProps } from "./Ellipsis";
 export { Card } from "./Card";
 export type { CardPadding, CardProps, CardVariant } from "./Card";
 export { Collapse } from "./Collapse";
-export type { CollapseArrow, CollapseItem, CollapseProps, CollapseVariant } from "./Collapse";
+export type {
+  CollapseArrow,
+  CollapseHeadingLevel,
+  CollapseItem,
+  CollapseProps,
+  CollapseVariant
+} from "./Collapse";
 export { NavBar } from "./NavBar";
 export type { NavBarPosition, NavBarProps } from "./NavBar";
 export { IndexList } from "./IndexList";
@@ -121,13 +127,23 @@ export type {
   IndexListSection
 } from "./IndexList";
 export { SideNav } from "./SideNav";
-export type { SideNavActivationMode, SideNavItem, SideNavProps } from "./SideNav";
+export type {
+  SideNavActivationMode,
+  SideNavChangeEvent,
+  SideNavItem,
+  SideNavProps
+} from "./SideNav";
 export { SegmentedControl } from "./SegmentedControl";
 export type {
+  SegmentedControlBaseProps,
   SegmentedControlOption,
   SegmentedControlProps,
+  SegmentedControlChangeEvent,
+  SegmentedControlMode,
+  SegmentedControlRadioProps,
   SegmentedControlSize,
   SegmentedControlStatus,
+  SegmentedControlTabsProps,
   SegmentedControlValue
 } from "./SegmentedControl";
 export { PaginationDots } from "./PaginationDots";

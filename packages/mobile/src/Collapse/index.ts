@@ -1,2 +1,8 @@
 export { Collapse } from "./Collapse";
-export type { CollapseArrow, CollapseItem, CollapseProps, CollapseVariant } from "./types";
+export type {
+  CollapseArrow,
+  CollapseHeadingLevel,
+  CollapseItem,
+  CollapseProps,
+  CollapseVariant
+} from "./types";

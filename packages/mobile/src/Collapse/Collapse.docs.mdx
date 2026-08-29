@@ -16,7 +16,11 @@ storyIds:
     information-collapse--multiple,
     information-collapse--accordion,
     information-collapse--plain,
-    information-collapse--long-content-rtl
+    information-collapse--keyboard-navigation,
+    information-collapse--controlled-dynamic,
+    information-collapse--nested,
+    information-collapse--long-content-rtl,
+    information-collapse--reduced-motion
   ]
 source: packages/mobile/src/Collapse
 ---
@@ -25,118 +29,209 @@ source: packages/mobile/src/Collapse
 
 ## 当前能力
 
-原生 disclosure button、受控/非受控多展开、accordion 单展开、disabled、持久挂载 panel、动态高度动画与 plain/card 表面。
+Collapse 是基于原生 `button` 的 disclosure group，支持多项展开和 accordion 单项展开、受控与非受控状态、条目或整组禁用、稳定 ARIA 关联、动态条目、外接键盘标题导航、嵌套、未知高度展开动画、RTL、SSR/hydration 和 React 19 ref。
+
+组件会持续挂载 panel，因此输入值、滚动位置和子组件状态在收起后仍然保留。收起 panel 同时使用 `inert`、`aria-hidden`、`visibility: hidden` 和零行网格，避免隐藏控件进入焦点或读屏顺序。
 
 ## 何时使用
 
-用于 FAQ、规则说明和次要详情的渐进披露；accordion 用于需要降低同时展开数量的场景。
+- FAQ、配送或售后规则、筛选说明等可按需阅读的次要内容。
+- 多项内容彼此独立时使用默认 multiple 模式。
+- 内容较长且通常只需要阅读一项时使用 `accordion`。
 
 ## 何时不要使用
 
-关键错误、主要操作或必须同时比较的内容不应折叠。页面导航使用 Tabs/SideNav。
-
-## 结构与状态
-
-`group → item → button[aria-expanded,aria-controls] + region[aria-labelledby]`。状态 collapsed、expanded、disabled；panel 保持挂载。
+- 关键错误、付款结果、主要操作和用户必须同时比较的内容不应隐藏。
+- 页面级导航使用 Tabs、SideNav 或 NavBar。
+- 仅有一段可展开内容时，可以直接使用原生 `details/summary`；Collapse 的价值在于组状态、受控协调和统一视觉。
 
 ## 基础用法
 
 ```tsx
-<Collapse items={[{ value: "shipping", title: "配送", content: "全国配送" }]} />
+import { Collapse } from "@meu/mobile";
+
+<Collapse
+  aria-label="配送与售后"
+  defaultValue={["delivery"]}
+  items={[
+    { value: "delivery", title: "配送范围", content: "支持中国大陆大部分城市配送。" },
+    { value: "returns", title: "退换规则", content: "签收后 7 天内可申请退换。" }
+  ]}
+/>;
 ```
 
 ## 受控与非受控
 
-value 存在即受控；否则从 defaultValue 初始化。未知/重复值被忽略，accordion 只保留第一个。非受控值在 item 删除或切换 accordion 后会永久归一，不会在旧 value 重现时跳回。
+```tsx
+const [openItems, setOpenItems] = useState<readonly string[]>(["delivery"]);
+
+<Collapse accordion items={items} value={openItems} onChange={setOpenItems} />;
+```
+
+- 提供 `value` 时为受控模式，视觉状态只跟随调用方下一次传入的值。
+- 未提供 `value` 时，`defaultValue` 只在首次挂载读取。
+- 默认允许多个 panel 同时展开；`accordion` 将有效值归一为最多一项，并允许再次点击后全部收起。
+- 未知值和重复状态值会被忽略。重复 item `value` 采用 first-wins，只渲染第一项，避免重复 React key、DOM ID 和 ARIA 关系。
+- 非受控模式中，已删除 item 的展开值在布局提交后永久清理；同值 item 再加入时不会意外恢复旧状态。
 
 ## 表单集成
 
-不提交值；trigger 固定 `type=button`。panel 内表单状态因持久挂载而保留，收起时 inert/visibility 使控件退出交互。
+Collapse 本身不提交值，所有 trigger 固定为 `type="button"`。panel 持续挂载，因此内部表单值、dirty/touched 和局部状态在收起后保留；收起时 `inert`、`aria-hidden` 与 `visibility` 共同把内部控件移出交互和读屏路径。
+
+## Items
+
+| 字段        | 类型        | 默认值  | 说明                                                             |
+| ----------- | ----------- | ------- | ---------------------------------------------------------------- |
+| `value`     | `string`    | 必填    | 唯一且稳定的业务身份，同时用于状态、React key 和稳定 ARIA ID     |
+| `title`     | `ReactNode` | 必填    | trigger 可见标题，不得包含按钮、链接或其他交互元素               |
+| `content`   | `ReactNode` | 必填    | 持续挂载的 panel 内容，可以包含表单或嵌套 Collapse               |
+| `extra`     | `ReactNode` | -       | 非交互尾部元数据；`0` 和空字符串会保留                           |
+| `disabled`  | `boolean`   | `false` | 禁用当前 trigger；若当前 panel 已展开，其内容仍保持可用          |
+| `ariaLabel` | `string`    | -       | 图标标题等无法从可见内容得到名称时，覆盖 trigger accessible name |
 
 ## Props
 
-item.value 必须唯一稳定；title/extra/arrow 不能放交互控件。arrow 函数接收 expanded。variant 只改变表面。
+| Prop                 | 类型                                                              | 默认值    | 说明                                                           |
+| -------------------- | ----------------------------------------------------------------- | --------- | -------------------------------------------------------------- |
+| `items`              | `readonly CollapseItem[]`                                         | 必填      | disclosure 条目；重复 value first-wins                         |
+| `value`              | `readonly string[]`                                               | -         | 受控展开值                                                     |
+| `defaultValue`       | `readonly string[]`                                               | `[]`      | 非受控初始展开值                                               |
+| `accordion`          | `boolean`                                                         | `false`   | 最多展开一项                                                   |
+| `disabled`           | `boolean`                                                         | `false`   | 禁用所有 trigger，不强制隐藏已展开内容                         |
+| `headingLevel`       | `1 \| 2 \| 3 \| 4 \| 5 \| 6`                                      | `3`       | 每个 accordion header 的文档大纲级别                           |
+| `keyboardNavigation` | `boolean`                                                         | `true`    | 启用标题间 ArrowUp/ArrowDown/Home/End 焦点导航                 |
+| `region`             | `boolean`                                                         | `true`    | panel 是否声明 `role=region`；超过约 6 个并行 panel 时建议关闭 |
+| `arrow`              | `ReactNode \| (expanded: boolean) => ReactNode`                   | Meu 箭头  | 装饰性尾部指示器；包装层负责方向与展开旋转                     |
+| `variant`            | `"plain" \| "card"`                                               | `"plain"` | 只改变表面边界，不改变行为                                     |
+| `onChange`           | `(value: string[], event: MouseEvent<HTMLButtonElement>) => void` | -         | enabled trigger 计算下一值后触发                               |
+| `ref`                | `Ref<HTMLDivElement>`                                             | -         | 指向根 `div`                                                   |
+| 原生 `div` 属性      | `ComponentProps<"div">`                                           | -         | `id`、`role`、`dir`、ARIA、data 属性和根事件均透传             |
+
+`children`、原生 `defaultValue` 和原生 `onChange` 被组件契约替换。`data-meu-component`、`data-state`、`data-disabled`、`data-variant` 可用于测试和观测；生成的 class 名不是公共 API。
 
 ## Events
 
-onChange(nextValue,event) 在 enabled trigger 点击计算后触发；非受控状态同一事件更新，受控状态等待调用方。事件不可由返回值取消。
+`onChange(nextValue, event)` 同时覆盖点击、Enter 和 Space 的原生 button 激活。它不是可取消事件：
+
+- 非受控模式在同一次激活中更新内部值并回调。
+- 受控模式只回调；调用方决定是否接受 `nextValue`。
+- 原生 disabled trigger 不派发激活回调。
+- ArrowUp、ArrowDown、Home 和 End 只移动焦点，不改变展开值，也不调用 `onChange`。
 
 ## Ref 与命令式方法
 
-ref 指向根 div；焦点使用原生 trigger ref 查询，无公开展开命令。
+React 19 `ref` 指向根 `HTMLDivElement`。组件不暴露命令式 open/close 方法；业务可以通过 `value` 驱动状态，通过根 ref 查询 `[data-meu-collapse-trigger]` 完成少量原生聚焦需求。根 `onFocusCapture` 和 `onBlurCapture` 会在内部焦点追踪后继续调用传入的处理器。
 
 ## 键盘操作
 
-| 按键            | 行为                      |
-| --------------- | ------------------------- |
-| Tab / Shift+Tab | 顺序经过 enabled triggers |
-| Enter / Space   | 原生切换当前 disclosure   |
+| 按键              | 行为                                                   |
+| ----------------- | ------------------------------------------------------ |
+| `Tab / Shift+Tab` | 按 DOM 顺序经过 enabled triggers 和已展开 panel 内控件 |
+| `Enter / Space`   | 原生切换当前 disclosure                                |
+| `ArrowDown`       | 聚焦下一个 enabled header，末尾循环到开头              |
+| `ArrowUp`         | 聚焦上一个 enabled header，开头循环到末尾              |
+| `Home / End`      | 聚焦第一个或最后一个 enabled header                    |
 
-不实现 accordion 可选方向键，避免劫持页面滚动。
+动态更新时，value 派生的 trigger/panel ID 不随重排改变。若当前聚焦 header 被删除或禁用，焦点移动到原索引之后最近的 enabled header，找不到时回退到之前最后一项；用户已经把焦点移到 Collapse 外部时不会抢回。嵌套 Collapse 只处理自己最近的根节点，不会驱动外层 header。
 
-## 触摸与手势
+如宿主页面要自行绑定这些方向键，可设置 `keyboardNavigation={false}`。垂直标题导航不按 RTL 交换 ArrowUp/ArrowDown。
 
-整行 trigger 最小 52px，不实现横滑或拖拽。
+## 结构与状态
+
+DOM 结构为 `group → item → heading → button + region`：
+
+- heading 只包含 trigger button，级别由 `headingLevel` 决定。
+- button 提供 `aria-expanded` 和 `aria-controls`。
+- panel 通过 `aria-labelledby` 回指 button。
+- `region={false}` 只移除 panel landmark，不影响 disclosure 关联、隐藏或动画。
+- item 和 group disabled 都落实为各 trigger 的原生 button `disabled`。根不自动设置 `aria-disabled`，因为已展开 panel 内的链接、输入和按钮仍然可用；把 `aria-disabled` 放在共同祖先上会错误地把这些后代也声明为不可用。
 
 ## 无障碍
 
-每个 trigger 与 region 双向关联；collapsed panel 使用 aria-hidden、visibility 和 inert。disabled 使用原生属性；标题提供 accessible name。
+每个 heading 只包装一个原生 button，button 与 panel 通过 `aria-controls` / `aria-labelledby` 双向关联；展开状态使用 `aria-expanded`。inactive panel 不从 DOM 移除，但会退出焦点和可访问性树。条目多于约六项时可设置 `region={false}`，减少 landmark 噪音。
+
+## 嵌套
+
+嵌套 Collapse 可以放在外层 `content` 中。为内外组使用不同的 `aria-label`，并让内层 `headingLevel` 比外层更深。内层 value、ID、键盘与焦点恢复均独立。如果页面存在很多展开 panel，关闭内层或大列表的 `region`，避免读屏 landmark 噪音。
 
 ## 动效
 
-CSS grid rows + opacity 支持动态高度，无 JS 测量。reduced-motion 为 1ms 并立即切换 visibility。
+panel 使用 CSS Grid `0fr → 1fr` 和 opacity 过渡，不读取 `scrollHeight`，因此文字换行、异步内容和嵌套内容的未知高度可以自然展开，也不会产生 JS 测量循环。进入使用 `--meu-motion-enter`，退出使用 `--meu-motion-exit`；收起完成前延迟切换 visibility。
 
-## 主题与定制
+`ConfigProvider motion="reduced"` 会把 motion Token 归零，系统 `prefers-reduced-motion: reduce` 也将过渡压缩到 1ms。组件不会循环播放动效。
 
-使用 surface/border/ink/muted/accent 与 motion Token；forced-colors 保留边界。data-state/data-variant 稳定，内部 class 非 API。
+## 触摸与手势
 
-## SSR 与 Next.js
-
-useId 保持 trigger/panel 关联稳定；首屏 value/items/accordion 必须一致。无 Portal 或浏览器测量。
+整行 trigger 的最小高度为 52 CSS px，符合 44×44 最小目标。标题和 extra 都允许换行、`overflow-wrap:anywhere`，不会依赖固定宽度截断；内容也可以自然增长。`extra` 仅用于简短元数据，复杂操作应放进 panel，避免在 button 内嵌交互控件。
 
 ## RTL 与国际化
 
-文本、extra 与间距使用逻辑方向。默认箭头的旧 WebView 镜像仅为视觉降级，展开语义不受影响；业务文案由调用方提供。
+- 标题、extra、padding 和间距使用逻辑方向。
+- 默认箭头从 `ConfigProvider dir` 或根的显式 `dir="ltr|rtl"` 决定收起方向，展开时统一向下。
+- `dir="auto"` 会原样透传给根文本方向，但装饰箭头使用 ConfigProvider 方向；需要确定箭头方向时传明确的 `ltr` 或 `rtl`。
+
+可见标题、extra、panel 内容与 trigger `ariaLabel` 都由调用方本地化；组件不拼接业务状态句子。
+
+## 主题与定制
+
+- 颜色、边界、圆角和 motion 全部使用 Meu Token。
+- forced colors 中保留 CanvasText 分隔线、ButtonText 焦点和箭头；disabled 不使用 opacity 作为唯一表达。
+
+## SSR 与 Next.js
+
+组件无 Portal、ResizeObserver 或服务端浏览器访问。`useId` 提供实例前缀，item value 的 Unicode code point 提供与位置无关的后缀，因此相同首屏 props 下 SSR/hydration 关系一致，hydration 后重排也不会改变 ID。
 
 ## 浏览器与 WebView
 
-grid row 动画在 Chrome/WebView 70+、iOS 13+ 可用；inert 在旧内核缺失时由 visibility:hidden 继续阻止焦点和读屏。
-
-## 边界情况与已知限制
-
-重复 value 会造成 React key 与状态歧义，调用方必须保证唯一。全部 disabled 时无可展开项。嵌套 Collapse 可用，但内外 value/命名应独立，region 过多可能增加读屏 landmark 噪音。
+完整动态高度插值依赖浏览器支持 CSS Grid track animation，因此属于渐进增强，不作为 iOS 15 / Chrome 89 静态支持档的硬保证；不支持插值的内核会离散切换，并可能在过渡中途出现一次高度跳变，但 button/region/inert/visibility 语义保持不变。`inert` 缺失时，`visibility:hidden` 仍阻止收起 panel 的聚焦与读屏暴露。
 
 ## 性能预算
 
-所有 panel 默认挂载，DOM O(items + content)。昂贵内容应由业务延迟加载数据，而不是依赖 Collapse 卸载。
+默认所有 panel 持续挂载，DOM 规模为 `O(items + content)`，这是表单状态保留和流畅退出动画的明确取舍。对大量或昂贵内容，应由业务分页、虚拟化或延迟获取数据；不要把数百个富内容 panel 同时放入一个 Collapse。公共 bundle 数值由全库最终批次统一重新生成，本批不触发发布构建、Chromatic 或 Vercel。
+
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5846 B / 32768 B 预算，组合 Brotli 5179 B；共享样式由应用单独导入一次。
 
 ## 测试证据
 
-- Unit: disclosure 关联、状态保留、accordion、disabled、controlled、动态 value 清理、inert
-- Story interaction: `Accordion` 验证单展开切换；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3662 B / 32768 B 预算，组合 Brotli 3218 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Collapse.ssr.test.tsx`；隔离 Next 16 hydration 后 disclosure/panel 关联与受控 accordion 状态保持一致，0 hydration/runtime error
-- RTL: LongContentRTL Story
-- Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: Card/Collapse 场景在两种引擎断言 `aria-expanded`、disabled、accordion 切换、旧 panel 关闭、新 panel region 与业务输出
-- Chromatic Light/Dark: 待建立
-- Real device: 待补
+- Unit：原生 disclosure、single/multiple、受控/非受控、item/group disabled、重复值 first-wins、动态值清理、稳定 ID、键盘循环、焦点恢复、外部焦点不抢占、嵌套隔离、region 关闭、ref/原生属性、零值 arrow、inert。
+- SSR：heading、ARIA 关系、collapsed inert、Unicode value ID、重复 value 过滤、重排 ID 稳定。
+- Hydration：真实 `renderToString → hydrateRoot`，DOM 身份复用、0 recoverable error、Unicode ID 与重排后关系稳定、hydration 后受控回调。
+- Story：multiple、accordion play、plain、keyboard play、controlled dynamic、nested、长文案 RTL、explicit reduced motion。
+- 隔离 Next H5：production build 后，移动 Chromium/WebKit 定点验证受控 accordion、disabled trigger、双向 ARIA 关系、panel 显隐与业务输出。
+- 全库 Storybook、Chromatic、Vercel、真实设备 VoiceOver/TalkBack 在全部 68 个组件完成后统一执行。
+
+## 边界情况与已知限制
+
+- `value` 必须是稳定业务身份。修改 value 等价于删除旧 item 并创建新 item，panel React 状态会重置。
+- `title`、`extra` 和 `arrow` 都在 button 内，不允许嵌套 button、link、input 或其他交互元素。
+- 当前没有 lazy/destroyInactive 模式，收起不释放内容 DOM；这保证退出动画和表单状态一致。
+- 动态内容在“已展开”状态下改变高度会直接重新排版；进入/退出过程才应用 disclosure 过渡。
+- 真机 VoiceOver/TalkBack 和高 item 数性能记录仍待最终发布候选批次补齐。
 
 ## V2 优化记录
 
-### 待优化
-
-补真机读屏、嵌套 disclosure 与视觉动画基线；基础双引擎 accordion 路径已完成。
-
 ### 已完成
 
-动态 identity 归一、panel inert、逻辑方向、0 值 extra、forced-colors、SSR、长内容与隔离 Next H5 覆盖。
+- 使用 APG accordion header/trigger/panel 结构，增加可配置 heading level 和可关闭 region landmark。
+- 增加 ArrowUp/ArrowDown/Home/End 可选键盘导航，并隔离嵌套组。
+- 删除 render-phase 状态写入；动态 item/accordion 清理由 layout commit 完成。
+- ID 从数组 index 改为 Unicode-safe value identity，重排保持稳定；重复 item value 改为 first-wins。
+- 增加 focused item 删除/禁用后的邻近焦点恢复，不抢占已经离开组件的焦点。
+- 增加整组 disabled、item accessible-name override、React 19 ref 和根原生属性证据。
+- RTL 箭头改为显式方向 recipe，移除旧 WebView 不支持的 `:dir()` 依赖。
+- 补齐长文案、forced colors、reduced motion、SSR/hydration、嵌套和动态 Story。
+
+### 待完成
+
+- 全库完成后统一跑 Storybook 扩展矩阵、Chromatic、Vercel 官网与真机 VoiceOver/TalkBack。
+- 若真实业务出现数百个重内容 panel，再以独立提案评估 lazy/destroyInactive；不能在没有退出生命周期契约时直接卸载。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                         | 迁移说明                                     |
-| ---------- | ------ | ------------ | -------------------------------------------- | -------------------------------------------- |
-| 2026-08-29 | 未发布 | behavior     | V2 动态状态、焦点隔离、RTL 与验证加固        | API 兼容；删除 item 后旧非受控展开值不再恢复 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 accordion/hydration 证据 | 无                                           |
+| 日期       | 版本   | 类型          | 内容                                                                            | 迁移说明                                                   |
+| ---------- | ------ | ------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 2026-08-29 | 未发布 | feature       | 增加 headingLevel、keyboardNavigation、region、group disabled 与 ariaLabel      | 全部为向后兼容可选项；默认添加 level 3 heading 语义        |
+| 2026-08-29 | 未发布 | accessibility | group disabled 只禁用 triggers，不在仍含可用 panel 内容的根上声明 aria-disabled | panel 内现有表单和操作继续可用                             |
+| 2026-08-29 | 未发布 | behavior      | 重复 item value first-wins，ID 在 reorder 后稳定，动态焦点自动恢复              | 依赖重复 value 或 index 派生 DOM ID 的代码需改用唯一 value |
+| 2026-08-29 | 未发布 | compatibility | 移除 `:dir()` 依赖，完善 reduced-motion 与 forced-colors                        | RTL 应使用 ConfigProvider 或根显式 dir                     |
+| 2026-08-29 | 未发布 | verification  | 增加 unit、SSR、hydration、nested、dynamic、keyboard Stories                    | 无                                                         |

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 
 import { Cell, List } from "../List";
 import { SideNav } from "./SideNav";
@@ -73,19 +74,45 @@ export const KeyboardInteraction: Story = {
   }
 };
 export const DestroyInactive: Story = { args: { destroyInactive: true } };
+
+function NavigationLinksExample() {
+  const [value, setValue] = useState("featured");
+  return (
+    <SideNav
+      aria-label="商品频道"
+      value={value}
+      items={[
+        { key: "featured", label: "精选", href: "#featured" },
+        { key: "food", label: "食品与饮料", href: "#food", badge: 3, badgeLabel: "3 项更新" },
+        { key: "home", label: "家居生活", href: "#home" },
+        { key: "unavailable", label: "暂未开放", href: "#unavailable", disabled: true }
+      ]}
+      onChange={(nextValue, event) => {
+        event.preventDefault();
+        setValue(nextValue);
+      }}
+    />
+  );
+}
+
+export const NavigationLinks: Story = {
+  render: () => <NavigationLinksExample />
+};
+
 export const LongScrollableRTL: Story = {
   render: (args) => (
-    <div dir="rtl" style={{ width: 390, height: 280 }}>
+    <div dir="rtl" style={{ width: 390, minHeight: 960 }}>
       <SideNav
         {...args}
-        items={Array.from({ length: 14 }, (_, index) => ({
+        items={Array.from({ length: 24 }, (_, index) => ({
           key: `category-${index}`,
-          label: `فئة طويلة رقم ${index + 1}`,
+          label: `فئة منزلية طويلة رقم ${index + 1}`,
           ...(index === 5 ? { badge: 12, badgeLabel: "12 عنصرًا" } : {}),
           content: `محتوى الفئة ${index + 1}`
         }))}
-        defaultValue="category-10"
-        style={{ height: "100%" }}
+        defaultValue="category-18"
+        sticky
+        stickyOffset={16}
       />
     </div>
   )

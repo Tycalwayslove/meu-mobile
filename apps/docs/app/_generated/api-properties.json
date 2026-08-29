@@ -2916,6 +2916,13 @@
       ],
       "CollapseItem": [
         {
+          "name": "ariaLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible name override for an icon-only or otherwise non-text trigger title."
+        },
+        {
           "name": "content",
           "type": "ReactNode",
           "required": true,
@@ -2974,6 +2981,21 @@
           "description": "Initial expanded values for uncontrolled usage."
         },
         {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Disables every disclosure trigger while leaving already expanded content available."
+        },
+        {
+          "name": "headingLevel",
+          "type": "CollapseHeadingLevel",
+          "required": false,
+          "event": false,
+          "description": "Semantic heading level wrapping each trigger.",
+          "defaultValue": "3"
+        },
+        {
           "name": "items",
           "type": "readonly CollapseItem[]",
           "required": true,
@@ -2981,11 +3003,27 @@
           "description": "Disclosure items. Values must be unique."
         },
         {
+          "name": "keyboardNavigation",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Enables ArrowUp/ArrowDown/Home/End focus navigation between enabled triggers.",
+          "defaultValue": "true"
+        },
+        {
           "name": "ref",
           "type": "Ref<HTMLDivElement>",
           "required": false,
           "event": false,
-          "description": "Ref to the disclosure-group root element."
+          "description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref).\nReact 19 ref to the disclosure-group root `HTMLDivElement`."
+        },
+        {
+          "name": "region",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Adds `role=\"region\"` to panels. Disable it for groups with many simultaneously visible panels.",
+          "defaultValue": "true"
         },
         {
           "name": "value",
@@ -3247,6 +3285,13 @@
       ],
       "SideNavItem": [
         {
+          "name": "ariaLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible name when the visible label is not plain descriptive text."
+        },
+        {
           "name": "badge",
           "type": "ReactNode",
           "required": false,
@@ -3275,6 +3320,13 @@
           "description": "Removes the item from keyboard navigation and selection."
         },
         {
+          "name": "href",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Native destination used by navigation mode. Omit it to render an action button."
+        },
+        {
           "name": "key",
           "type": "string",
           "required": true,
@@ -3287,6 +3339,20 @@
           "required": true,
           "event": false,
           "description": "Visible navigation label and accessible tab name."
+        },
+        {
+          "name": "rel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Native link relationship used only when `href` is present in navigation mode."
+        },
+        {
+          "name": "target",
+          "type": "HTMLAttributeAnchorTarget",
+          "required": false,
+          "event": false,
+          "description": "Native link browsing context used only when `href` is present in navigation mode."
         }
       ],
       "SideNavProps": [
@@ -3326,6 +3392,20 @@
           "description": "Ref to the root side-navigation element."
         },
         {
+          "name": "sticky",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Keeps the rail within its nearest scrolling ancestor and bounds long item lists."
+        },
+        {
+          "name": "stickyOffset",
+          "type": "Property.InsetBlockStart<string | number>",
+          "required": false,
+          "event": false,
+          "description": "Logical block-start offset for a sticky rail."
+        },
+        {
           "name": "value",
           "type": "string",
           "required": false,
@@ -3334,10 +3414,65 @@
         },
         {
           "name": "onChange",
-          "type": "(key: string, event: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLButtonElement>) => void",
+          "type": "(key: string, event: SideNavChangeEvent) => void",
           "required": false,
           "event": true,
           "description": "Called after an enabled item computes a new key. Controlled state remains caller-owned."
+        }
+      ],
+      "SegmentedControlBaseProps": [
+        {
+          "name": "block",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Expands all options evenly across the available inline width.",
+          "defaultValue": "false"
+        },
+        {
+          "name": "defaultValue",
+          "type": "TValue",
+          "required": false,
+          "event": false,
+          "description": "Initial identity for an uncontrolled control; the first enabled option is used when omitted."
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Disables every option without discarding selection.",
+          "defaultValue": "false"
+        },
+        {
+          "name": "ref",
+          "type": "Ref<HTMLDivElement>",
+          "required": false,
+          "event": false,
+          "description": "Root element ref. Calling `focus()` forwards focus to the selected or first enabled control."
+        },
+        {
+          "name": "size",
+          "type": "SegmentedControlSize",
+          "required": false,
+          "event": false,
+          "description": "Controls minimum touch-target height and typography.",
+          "defaultValue": "\"medium\""
+        },
+        {
+          "name": "status",
+          "type": "SegmentedControlStatus",
+          "required": false,
+          "event": false,
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the semantic root.",
+          "defaultValue": "\"default\""
+        },
+        {
+          "name": "value",
+          "type": "TValue",
+          "required": false,
+          "event": false,
+          "description": "Selected identity for a controlled control; `null` intentionally leaves every option unchecked."
         }
       ],
       "SegmentedControlOption": [
@@ -3369,6 +3504,20 @@
           "required": true,
           "event": false,
           "description": "Visible option content. Do not include nested interactive elements."
+        },
+        {
+          "name": "panelId",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Id of the tab panel controlled by this option when `mode=\"tabs\"`."
+        },
+        {
+          "name": "tabId",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Stable DOM id for the tab when a panel needs to reference it with `aria-labelledby`."
         },
         {
           "name": "value",
@@ -3407,35 +3556,43 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Associates all native radios with a form by id, including outside that form."
+          "description": "Associates all native radios with a form by id, including outside that form.\nUnavailable in tabs mode because tabs do not participate in form ownership."
+        },
+        {
+          "name": "mode",
+          "type": "\"radiogroup\" | \"tabs\"",
+          "required": false,
+          "event": false,
+          "description": "Uses native radio-group semantics and form behavior.\nUses APG tablist/tab semantics. Form-only props are intentionally unavailable.",
+          "defaultValue": "\"radiogroup\""
         },
         {
           "name": "name",
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Native form field name shared by the radios. A stable private name is generated when omitted."
+          "description": "Native form field name shared by the radios. A stable private name is generated when omitted.\nUnavailable in tabs mode because tabs are navigation, not a submitted field."
         },
         {
           "name": "options",
-          "type": "readonly SegmentedControlOption<TValue>[]",
+          "type": "readonly SegmentedControlOption<TValue>[] | readonly (Omit<SegmentedControlOption<TValue>, \"panelId\" | \"tabId\"> & { panelId: string; tabId: string; })[]",
           "required": true,
           "event": false,
-          "description": "Available options. Values are identities and must be unique; the first duplicate wins."
+          "description": "Available radio options. Values are identities and must be unique; the first duplicate wins.\nTabs with stable ids that form a two-way relationship with caller-owned tabpanels."
         },
         {
           "name": "ref",
           "type": "Ref<HTMLDivElement>",
           "required": false,
           "event": false,
-          "description": "Root element ref. Calling `focus()` forwards focus to the checked or first enabled native radio."
+          "description": "Root element ref. Calling `focus()` forwards focus to the selected or first enabled control."
         },
         {
           "name": "required",
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Requires one selection using native radio-group constraint validation.",
+          "description": "Requires one selection using native radio-group constraint validation.\nUnavailable in tabs mode because required is a form constraint.",
           "defaultValue": "false"
         },
         {
@@ -3451,7 +3608,7 @@
           "type": "SegmentedControlStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the radiogroup.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the semantic root.",
           "defaultValue": "\"default\""
         },
         {
@@ -3463,10 +3620,100 @@
         },
         {
           "name": "onChange",
+          "type": "((value: TValue, event: ChangeEvent<HTMLInputElement>) => void) | ((value: TValue, event: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLButtonElement>) => void)",
+          "required": false,
+          "event": true,
+          "description": "Called with the original native-radio change event after the user selects a new enabled option.\nCalled with the button mouse/keyboard event after the user activates a new enabled tab."
+        }
+      ],
+      "SegmentedControlRadioProps": [
+        {
+          "name": "form",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Associates all native radios with a form by id, including outside that form."
+        },
+        {
+          "name": "mode",
+          "type": "\"radiogroup\"",
+          "required": false,
+          "event": false,
+          "description": "Uses native radio-group semantics and form behavior.",
+          "defaultValue": "\"radiogroup\""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Native form field name shared by the radios. A stable private name is generated when omitted."
+        },
+        {
+          "name": "options",
+          "type": "readonly SegmentedControlOption<TValue>[]",
+          "required": true,
+          "event": false,
+          "description": "Available radio options. Values are identities and must be unique; the first duplicate wins."
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Requires one selection using native radio-group constraint validation.",
+          "defaultValue": "false"
+        },
+        {
+          "name": "onChange",
           "type": "(value: TValue, event: ChangeEvent<HTMLInputElement>) => void",
           "required": false,
           "event": true,
-          "description": "Called after the user selects an enabled option."
+          "description": "Called with the original native-radio change event after the user selects a new enabled option."
+        }
+      ],
+      "SegmentedControlTabsProps": [
+        {
+          "name": "form",
+          "type": "never",
+          "required": false,
+          "event": false,
+          "description": "Unavailable in tabs mode because tabs do not participate in form ownership."
+        },
+        {
+          "name": "mode",
+          "type": "\"tabs\"",
+          "required": true,
+          "event": false,
+          "description": "Uses APG tablist/tab semantics. Form-only props are intentionally unavailable."
+        },
+        {
+          "name": "name",
+          "type": "never",
+          "required": false,
+          "event": false,
+          "description": "Unavailable in tabs mode because tabs are navigation, not a submitted field."
+        },
+        {
+          "name": "options",
+          "type": "readonly (Omit<SegmentedControlOption<TValue>, \"panelId\" | \"tabId\"> & { panelId: string; tabId: string; })[]",
+          "required": true,
+          "event": false,
+          "description": "Tabs with stable ids that form a two-way relationship with caller-owned tabpanels."
+        },
+        {
+          "name": "required",
+          "type": "never",
+          "required": false,
+          "event": false,
+          "description": "Unavailable in tabs mode because required is a form constraint."
+        },
+        {
+          "name": "onChange",
+          "type": "(value: TValue, event: MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLButtonElement>) => void",
+          "required": false,
+          "event": true,
+          "description": "Called with the button mouse/keyboard event after the user activates a new enabled tab."
         }
       ],
       "PaginationDotsProps": [
@@ -3491,6 +3738,13 @@
           "event": false,
           "description": "Visual flow direction.",
           "defaultValue": "\"horizontal\""
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Disables every interactive page target without changing the read-only summary."
         },
         {
           "name": "getPageLabel",
@@ -3531,10 +3785,10 @@
         },
         {
           "name": "onChange",
-          "type": "ChangeEventHandler<HTMLDivElement, Element> & ((index: number, event: MouseEvent<HTMLButtonElement>) => void)",
+          "type": "(index: number, event: MouseEvent<HTMLButtonElement>) => void",
           "required": false,
           "event": true,
-          "description": "Called after an enabled page button is activated."
+          "description": "Called after an enabled, non-current page button is activated."
         }
       ],
       "TabsItem": [
@@ -16980,14 +17234,14 @@
           "type": "readonly SegmentedControlOption<TValue>[]",
           "required": true,
           "event": false,
-          "description": "Available options. Values are identities and must be unique; the first duplicate wins."
+          "description": "Available radio options. Values are identities and must be unique; the first duplicate wins."
         },
         {
           "name": "ref",
           "type": "Ref<HTMLDivElement>",
           "required": false,
           "event": false,
-          "description": "Root element ref. Calling `focus()` forwards focus to the checked or first enabled native radio."
+          "description": "Root element ref. Calling `focus()` forwards focus to the selected or first enabled control."
         },
         {
           "name": "required",
@@ -17017,7 +17271,7 @@
           "type": "SegmentedControlStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the radiogroup.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the semantic root.",
           "defaultValue": "\"default\""
         },
         {
@@ -17151,11 +17405,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2290,
-    "eventFields": 237,
-    "exportedTypes": 372,
-    "exportedTypesWithFields": 222,
-    "fields": 2290,
+    "documentedFields": 2324,
+    "eventFields": 239,
+    "exportedTypes": 379,
+    "exportedTypesWithFields": 225,
+    "fields": 2324,
     "packages": 4
   }
 }
