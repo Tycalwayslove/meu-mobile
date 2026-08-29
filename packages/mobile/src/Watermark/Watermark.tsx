@@ -12,6 +12,11 @@ function classNames(...values: Array<string | undefined>) {
   return values.filter(Boolean).join(" ");
 }
 
+/**
+ * Renders a repeated text or image watermark over protected content.
+ *
+ * @public
+ */
 export function Watermark({
   children,
   className,

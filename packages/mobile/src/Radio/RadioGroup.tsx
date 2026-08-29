@@ -19,6 +19,11 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
+/**
+ * Coordinates selection, form naming, and accessibility for descendant radios.
+ *
+ * @public
+ */
 export function RadioGroup<TValue extends RadioValue = RadioValue>({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,

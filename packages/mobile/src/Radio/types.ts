@@ -1,10 +1,29 @@
 import type { HTMLAttributes, InputHTMLAttributes, ReactNode, Ref } from "react";
 
+/**
+ * Visual and touch-target size for Radio.
+ *
+ * @public
+ */
 export type RadioSize = "small" | "medium" | "large";
+/**
+ * Visual validation state for Radio.
+ *
+ * @public
+ */
 export type RadioStatus = "default" | "error";
+/**
+ * Primitive value supported by RadioGroup.
+ *
+ * @public
+ */
 export type RadioValue = string | number;
 
-/** Props accepted by {@link Radio}. */
+/**
+ * Props accepted by {@link Radio}.
+ *
+ * @public
+ */
 export type RadioProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "checked" | "children" | "defaultChecked" | "onChange" | "size" | "type" | "value"
@@ -27,7 +46,11 @@ export type RadioProps = Omit<
   value?: RadioValue;
 };
 
-/** Props accepted by {@link RadioGroup}. */
+/**
+ * Props accepted by {@link RadioGroup}.
+ *
+ * @public
+ */
 export type RadioGroupProps<TValue extends RadioValue = RadioValue> = Omit<
   HTMLAttributes<HTMLDivElement>,
   "defaultValue" | "onChange"

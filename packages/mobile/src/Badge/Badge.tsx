@@ -23,6 +23,11 @@ function finiteOffset(value: number): number {
   return Number.isFinite(value) ? value : 0;
 }
 
+/**
+ * Renders compact semantic status or count content.
+ *
+ * @public
+ */
 export function Badge({
   bordered = false,
   children,

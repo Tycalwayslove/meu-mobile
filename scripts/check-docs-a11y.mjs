@@ -107,6 +107,10 @@ try {
       page.on("pageerror", (error) => {
         failures.push({ path: activePath, theme, error: `pageerror: ${error.message}` });
       });
+      page.on("console", (message) => {
+        if (message.type() !== "error") return;
+        failures.push({ path: activePath, theme, error: `console.error: ${message.text()}` });
+      });
       while (cursor < paths.length) {
         const path = paths[cursor++];
         activePath = path;
@@ -116,15 +120,24 @@ try {
             waitUntil: "networkidle"
           });
           if (!response?.ok()) throw new Error(`HTTP ${response?.status()}`);
-          const [headingCount, previewCount, apiCount] = await Promise.all([
+          const [headingCount, previewCount, apiCount, documentStatus] = await Promise.all([
             page.locator("h1").count(),
             page.locator(".preview-frame").count(),
-            page.locator("#api-reference").count()
+            page.locator("#api-reference").count(),
+            page.locator(".component-document__meta dd[data-status]").getAttribute("data-status")
           ]);
           if (headingCount !== 1 || previewCount !== 1 || apiCount !== 1) {
             throw new Error(
               `Expected h1/preview/API once, received ${headingCount}/${previewCount}/${apiCount}`
             );
+          }
+          if (
+            !documentStatus ||
+            !["audit", "design", "implementation", "verification", "commercial"].includes(
+              documentStatus
+            )
+          ) {
+            throw new Error(`Missing or invalid component document status: ${documentStatus}`);
           }
           const selectedTheme = await page.locator(".theme-select select").inputValue();
           if (selectedTheme !== theme) {

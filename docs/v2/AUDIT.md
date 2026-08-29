@@ -124,11 +124,16 @@ V2 采用以下事实源：
 已由当前仓库命令重新生成或执行的证据：
 
 - `docs:manifest:report`：68 个产品条目、125 个公开值、369 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
-- `api:properties:check`：222 个结构化类型、2250 个字段、838 个已描述字段、232 个事件；字段说明和 374 个 release-tag 警告仍待继续收口。
+- 68/68 个产品条目状态为 `verification`；尚无条目提前标记为 `commercial`。
+- `api:properties:strict`：222 个结构化类型、2250 个字段、2250 个已描述字段、232 个事件，公开字段文档覆盖率 100%。
+- `api:extract:strict`：mobile、form-react、icons-react、primitives-react 四包均为 0 warning；公开声明全部具有明确 release tag。
 - `storybook:validate-links`：68 个组件链接、374 个 Story、342 个文档 Story ID 全部有效；Autodocs 覆盖所有链接标题，80 个标题均至少有一项关键 `play`。
-- `check-storybook-a11y.mjs`：390×844 视口逐一运行 374 个 Story 的 Light/Dark；有 `play` 时必须先成功结束，再执行 axe WCAG A/AA，748 个场景全部通过。
-- 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览；最终内容、构建和浏览器验收仍需继续完成。
-- 官网生产构建已通过 68 个组件页 × Light/Dark 的本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构与 axe WCAG A/AA，共 136 个场景。
+- `check-storybook-a11y.mjs`：390×844 视口逐一运行 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors）；有 `play` 时必须先成功结束，再执行 axe WCAG A/AA，2,618 个组合全部通过且无 `pageerror`。
+- 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
+- 官网生产构建已通过 68 个组件页 × Light/Dark 的本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景。
+- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 22,670 B / 32 KiB，逐组件结果已同步到留存文档。
+- 隔离 Next H5：完整消费套件在移动 Chromium/WebKit 中 82/82 通过，每条用例均断言 0 `pageerror`、0 `console.error`；8 个初始 open Portal/测量/手势 hydration 案例在两种引擎均通过。
+- 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 240 次 pointermove 均在仓库预算内，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 197 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 
-仍阻断 `commercial` 的共性事项：公开字段 TSDoc 完整度、组件级 hydration 广度、真实 iOS/Android 与读屏记录、RTL/200% 字号/强制色彩的完整矩阵、性能与 bundle 预算，以及最终集中执行的 Chromatic 视觉审批和 Vercel 官网发布。
+仍阻断 `commercial` 的共性事项：真实 iOS/Android 与读屏记录、旧 WebView 运行时抽测、持续手势帧率/内存/弱网专项，以及最终集中执行的 Chromatic 视觉审批和 Vercel 官网发布。

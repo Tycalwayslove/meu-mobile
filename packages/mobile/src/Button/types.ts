@@ -1,9 +1,29 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
+/**
+ * Surface treatment applied to a button.
+ *
+ * @public
+ */
 export type ButtonVariant = "solid" | "outline" | "ghost" | "text";
+/**
+ * Semantic color applied to a button.
+ *
+ * @public
+ */
 export type ButtonTone = "accent" | "neutral" | "danger";
+/**
+ * Preset control size for a button.
+ *
+ * @public
+ */
 export type ButtonSize = "small" | "medium" | "large";
 
+/**
+ * Props accepted by {@link Button}.
+ *
+ * @public
+ */
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   /** Expands the button to the available inline width. @defaultValue false */
   block?: boolean;

@@ -77,6 +77,11 @@ function resolveConfirmation(
   };
 }
 
+/**
+ * Renders a focus-managed bottom action sheet with optional per-action confirmation.
+ *
+ * @public
+ */
 export function ActionMenu({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,

@@ -2,14 +2,30 @@ import type { ChangeEvent, InputHTMLAttributes, KeyboardEvent } from "react";
 
 import type { NumberKeyboardProps } from "../NumberKeyboard";
 
-/** Visual flow direction for passcode cells. */
+/**
+ * Visual flow direction for passcode cells.
+ *
+ * @public
+ */
 export type PasscodeInputDirection = "ltr" | "rtl";
-/** Validation presentation state. */
+/**
+ * Validation presentation state.
+ *
+ * @public
+ */
 export type PasscodeInputStatus = "default" | "error";
-/** Origin of a value proposal emitted by {@link PasscodeInput}. */
+/**
+ * Origin of a value proposal emitted by {@link PasscodeInput}.
+ *
+ * @public
+ */
 export type PasscodeInputChangeSource = "delete" | "hardware" | "keyboard" | "native";
 
-/** Metadata accompanying a passcode value proposal. */
+/**
+ * Metadata accompanying a passcode value proposal.
+ *
+ * @public
+ */
 export type PasscodeInputChangeDetails = {
   /** Native React event when the proposal originated from the hidden input. */
   event?: ChangeEvent<HTMLInputElement> | KeyboardEvent<HTMLInputElement>;
@@ -19,7 +35,11 @@ export type PasscodeInputChangeDetails = {
   source: PasscodeInputChangeSource;
 };
 
-/** Options for composing the non-modal Meu NumberKeyboard. */
+/**
+ * Options for composing the non-modal Meu NumberKeyboard.
+ *
+ * @public
+ */
 export type PasscodeInputKeyboardOptions = Omit<
   NumberKeyboardProps,
   | "aria-label"
@@ -50,14 +70,25 @@ export type PasscodeInputKeyboardOptions = Omit<
   title?: string;
 };
 
-/** Imperative handle exposing the real native input without leaking visual-cell internals. */
+/**
+ * Imperative handle exposing the real native input without leaking visual-cell internals.
+ *
+ * @public
+ */
 export type PasscodeInputRef = {
+  /** Removes focus from the real input and, when configured, hides NumberKeyboard. */
   blur: () => void;
+  /** Moves focus to the real input. */
   focus: () => void;
+  /** Current native input element, or `null` before mount and after unmount. */
   input: HTMLInputElement | null;
 };
 
-/** Props for the real-input-backed passcode/OTP control. */
+/**
+ * Props for the real-input-backed passcode/OTP control.
+ *
+ * @public
+ */
 export type PasscodeInputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   | "defaultValue"

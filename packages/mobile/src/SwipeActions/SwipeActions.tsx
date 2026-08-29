@@ -59,6 +59,11 @@ function availableSide(
   return side;
 }
 
+/**
+ * Renders swipe-revealed action rails with equivalent keyboard controls.
+ *
+ * @public
+ */
 export function SwipeActions({
   children,
   className,

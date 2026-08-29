@@ -7,10 +7,30 @@ import type {
   Ref
 } from "react";
 
+/**
+ * Preset or pixel size for an avatar.
+ *
+ * @public
+ */
 export type AvatarSize = "small" | "medium" | "large" | number;
+/**
+ * Outline used to clip avatar content.
+ *
+ * @public
+ */
 export type AvatarShape = "circle" | "rounded" | "square";
+/**
+ * CSS object-fit mode applied to an avatar image.
+ *
+ * @public
+ */
 export type AvatarFit = NonNullable<CSSProperties["objectFit"]>;
 
+/**
+ * Props accepted by {@link Avatar}.
+ *
+ * @public
+ */
 export type AvatarProps = Omit<
   HTMLAttributes<HTMLSpanElement>,
   "children" | "dangerouslySetInnerHTML" | "onError" | "onLoad"

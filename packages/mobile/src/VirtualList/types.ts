@@ -1,23 +1,43 @@
 import type { FocusEvent as ReactFocusEvent, HTMLAttributes, Key, ReactNode, Ref } from "react";
 
-/** Alignment used by {@link VirtualListRef.scrollToIndex}. */
+/**
+ * Alignment used by {@link VirtualListRef.scrollToIndex}.
+ *
+ * @public
+ */
 export type VirtualListAlign = "start" | "center" | "end" | "auto";
-/** Native scroll behavior supported by VirtualList imperative methods. */
+/**
+ * Native scroll behavior supported by VirtualList imperative methods.
+ *
+ * @public
+ */
 export type VirtualListScrollBehavior = "auto" | "smooth";
 
-/** Options shared by VirtualList imperative scrolling methods. */
+/**
+ * Options shared by VirtualList imperative scrolling methods.
+ *
+ * @public
+ */
 export type VirtualListScrollOptions = {
   /** Native scroll behavior; dynamic measurements can correct a smooth destination. */
   behavior?: VirtualListScrollBehavior;
 };
 
-/** Options for {@link VirtualListRef.scrollToIndex}. */
+/**
+ * Options for {@link VirtualListRef.scrollToIndex}.
+ *
+ * @public
+ */
 export type VirtualListScrollToIndexOptions = VirtualListScrollOptions & {
   /** Position of the target row in the owned viewport. */
   align?: VirtualListAlign;
 };
 
-/** Visible and mounted window reported by {@link VirtualList}. */
+/**
+ * Visible and mounted window reported by {@link VirtualList}.
+ *
+ * @public
+ */
 export type VirtualListRange = {
   /** Last mounted overscan index, inclusive. */
   overscanEndIndex: number;
@@ -29,7 +49,11 @@ export type VirtualListRange = {
   visibleStartIndex: number;
 };
 
-/** Imperative handle exposed by {@link VirtualList}. */
+/**
+ * Imperative measurement and scrolling handle exposed by {@link VirtualList}.
+ *
+ * @public
+ */
 export type VirtualListRef = {
   /** Re-measures every currently mounted row. */
   measure: () => void;
@@ -42,8 +66,18 @@ export type VirtualListRef = {
 };
 
 type VirtualListAccessibleName =
-  | { "aria-label": string; "aria-labelledby"?: never }
-  | { "aria-label"?: never; "aria-labelledby": string };
+  | {
+      /** Direct accessible name for the list viewport. */
+      "aria-label": string;
+      /** Mutually exclusive with `aria-label`. */
+      "aria-labelledby"?: never;
+    }
+  | {
+      /** Mutually exclusive with `aria-labelledby`. */
+      "aria-label"?: never;
+      /** ID of the element that labels the list viewport. */
+      "aria-labelledby": string;
+    };
 
 type VirtualListBaseProps<T> = Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -77,5 +111,9 @@ type VirtualListBaseProps<T> = Omit<
   renderItem: (item: T, index: number) => ReactNode;
 };
 
-/** Props for the vertical-only {@link VirtualList}. A list accessible name is required. */
+/**
+ * Props for the vertical-only {@link VirtualList}; an accessible list name is required.
+ *
+ * @public
+ */
 export type VirtualListProps<T> = VirtualListBaseProps<T> & VirtualListAccessibleName;

@@ -17,23 +17,43 @@ function padded(value: number) {
   return String(value).padStart(2, "0");
 }
 
+/**
+ * Creates a stable `YYYY-MM-DD` key from an adapter value.
+ *
+ * @public
+ */
 export function calendarDayKey<TDate>(adapter: DateAdapter<TDate>, value: TDate) {
   const parts = adapter.getParts(value);
   return `${parts.year}-${padded(parts.month)}-${padded(parts.day)}`;
 }
 
+/**
+ * Normalizes a valid adapter value to the start of its day.
+ *
+ * @public
+ */
 export function normalizeCalendarDay<TDate>(adapter: DateAdapter<TDate>, value: TDate) {
   if (!adapter.isValid(value)) return null;
   const normalized = adapter.startOf(value, "day");
   return adapter.isValid(normalized) ? normalized : null;
 }
 
+/**
+ * Normalizes a valid adapter value to the start of its month.
+ *
+ * @public
+ */
 export function normalizeCalendarMonth<TDate>(adapter: DateAdapter<TDate>, value: TDate) {
   if (!adapter.isValid(value)) return null;
   const normalized = adapter.startOf(value, "month");
   return adapter.isValid(normalized) ? normalized : null;
 }
 
+/**
+ * Compares two adapter values at calendar-day precision.
+ *
+ * @public
+ */
 export function compareCalendarDays<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate) {
   const normalizedLeft = normalizeCalendarDay(adapter, left);
   const normalizedRight = normalizeCalendarDay(adapter, right);
@@ -41,6 +61,11 @@ export function compareCalendarDays<TDate>(adapter: DateAdapter<TDate>, left: TD
   return adapter.compare(normalizedLeft, normalizedRight);
 }
 
+/**
+ * Tests whether two optional adapter values represent the same valid day.
+ *
+ * @public
+ */
 export function sameCalendarDay<TDate>(
   adapter: DateAdapter<TDate>,
   left: TDate | null | undefined,
@@ -58,6 +83,11 @@ export function sameCalendarDay<TDate>(
   return compareCalendarDays(adapter, left, right) === 0;
 }
 
+/**
+ * Tests whether two adapter values share a calendar year and month.
+ *
+ * @public
+ */
 export function sameCalendarMonth<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate) {
   const leftParts = adapter.getParts(left);
   const rightParts = adapter.getParts(right);
@@ -103,6 +133,11 @@ export function selectedCalendarDays<TDate>(
   return Array.isArray(value) ? uniqueSortedDays(adapter, value as ReadonlyArray<TDate>) : [];
 }
 
+/**
+ * Normalizes a calendar value to its earliest and latest selected days.
+ *
+ * @public
+ */
 export function calendarRange<TDate>(
   adapter: DateAdapter<TDate>,
   value: CalendarValue<TDate>
@@ -128,6 +163,11 @@ export function calendarDateFromParts<TDate>(
   });
 }
 
+/**
+ * Builds the full-week day grid for a visible month.
+ *
+ * @public
+ */
 export function createCalendarGrid<TDate>(
   adapter: DateAdapter<TDate>,
   month: TDate,

@@ -24,8 +24,9 @@ jobs:
       - run: pnpm test:component-manifest
       - run: pnpm docs:manifest:verify
       - run: pnpm build:packages
-      - run: pnpm api:extract
-      - run: pnpm api:properties:check
+      - run: pnpm api:extract:strict
+      - run: pnpm api:properties:strict
+      - run: node scripts/check-bundle-size.mjs --check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test

@@ -1,9 +1,23 @@
 import type { InputHTMLAttributes } from "react";
 
+/**
+ * Visual and touch-target size for Stepper.
+ *
+ * @public
+ */
 export type StepperSize = "small" | "medium" | "large";
+/**
+ * Visual validation state for Stepper.
+ *
+ * @public
+ */
 export type StepperStatus = "default" | "error";
 
-/** Props accepted by {@link Stepper}. */
+/**
+ * Props accepted by {@link Stepper}.
+ *
+ * @public
+ */
 export type StepperProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "defaultValue" | "onChange" | "size" | "type" | "value"

@@ -8,19 +8,36 @@ import type { ReactNode } from "react";
 
 import type { MeuStringFieldPath } from "./adapter-types";
 
+/**
+ * Props for a text area bound to a string-valued React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormTextAreaProps<TFieldValues extends FieldValues> = Omit<
   TextAreaProps,
   "defaultValue" | "name" | "onBlur" | "onChange" | "value"
 > & {
+  /** Supporting content rendered with the field and associated with the text area. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the string-valued React Hook Form field controlled by this text area. */
   name: MeuStringFieldPath<TFieldValues>;
+  /** Called after React Hook Form marks the field as touched; receives the textarea blur event. */
   onBlur?: TextAreaProps["onBlur"];
+  /** Called after React Hook Form receives the edited value; receives the native change event. */
   onChange?: TextAreaProps["onChange"];
+  /** Shows the required affordance and sets the textarea's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuStringFieldPath<TFieldValues>>["rules"];
 };
 
+/**
+ * Binds a text area's value, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormTextArea<TFieldValues extends FieldValues>({
   description,
   label,

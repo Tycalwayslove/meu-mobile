@@ -69,6 +69,11 @@ function updateFocusableDescendants(slideNode: HTMLElement, active: boolean) {
   });
 }
 
+/**
+ * Renders an accessible, draggable slide gallery with optional autoplay.
+ *
+ * @public
+ */
 export function Carousel({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,

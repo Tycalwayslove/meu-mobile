@@ -3,11 +3,11 @@ name: RadioGroup
 slug: radio-group
 package: "@meu/mobile"
 exports: [Radio, RadioGroup]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: null
@@ -32,7 +32,7 @@ source: packages/mobile/src/Radio
 - Field label/description/error/required 与调用方 IDREF 无损组合。
 - 选择目标至少 44×44；RTL 使用自然文档流；forced-colors 和 reduced-motion 有静态降级。
 
-状态为 `implementation`；Unit/SSR/Story contract 与本地 axe 已建立，移动浏览器、Chromatic 主题矩阵和真机读屏尚未达到发布证据线。
+状态为 `verification`；Unit/SSR/Story contract 与本地 axe 已建立，移动浏览器、Chromatic 主题矩阵和真机读屏尚未达到发布证据线。
 
 ## 主流基线与取舍
 
@@ -145,7 +145,9 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 - Unit: `Radio.test.tsx`，8 项，覆盖单项、controlled empty、disabled/readOnly、Field、required、FormData 与 reset
 - SSR: `Radio.ssr.test.tsx`，覆盖 generated name、radiogroup、required 和 checked markup
 - Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3743 B / 32768 B 预算；最大单值 `Radio` 为 3137 B / 32768 B 预算，组合 Brotli 3327 B；共享样式由应用单独导入一次。
 - Touch target: CSS `minWidth/minHeight: 44`
 - RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补
 - 移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补

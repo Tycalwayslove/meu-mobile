@@ -8,19 +8,36 @@ import type { ReactNode } from "react";
 
 import type { MeuBooleanFieldPath } from "./adapter-types";
 
+/**
+ * Props for a checkbox bound to a boolean React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormCheckboxProps<TFieldValues extends FieldValues> = Omit<
   CheckboxProps,
   "checked" | "defaultChecked" | "name" | "onBlur" | "onChange"
 > & {
+  /** Supporting content rendered with the field and associated with the checkbox. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the boolean React Hook Form field that controls the checked state. */
   name: MeuBooleanFieldPath<TFieldValues>;
+  /** Called after React Hook Form marks the field as touched; receives the checkbox blur event. */
   onBlur?: CheckboxProps["onBlur"];
+  /** Called after the form value changes; receives the checked state and native change event. */
   onChange?: CheckboxProps["onChange"];
+  /** Shows the required affordance and sets the checkbox's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuBooleanFieldPath<TFieldValues>>["rules"];
 };
 
+/**
+ * Binds a checkbox's checked state, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormCheckbox<TFieldValues extends FieldValues>({
   description,
   label,

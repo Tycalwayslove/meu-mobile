@@ -3,11 +3,11 @@ name: Checkbox
 slug: checkbox
 package: "@meu/mobile"
 exports: [Checkbox, CheckboxGroup]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: null
@@ -149,7 +149,9 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 - Unit: `Checkbox.test.tsx`，10 项，覆盖 mixed、disabled/readOnly、受控单项/Group、Field、FormData 和 reset
 - SSR: `Checkbox.ssr.test.tsx`，覆盖稳定 group/name/value/checked markup
 - Story interaction: `NativeFormContract` 覆盖点击、重复 FormData 与 reset；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3824 B / 32768 B 预算；最大单值 `Checkbox` 为 3233 B / 32768 B 预算，组合 Brotli 3408 B；共享样式由应用单独导入一次。
 - Touch target: CSS root `minWidth/minHeight: 44`
 - Reduced motion / forced colors / RTL: CSS 和专属 Story 已建立；真实浏览器视觉证据待补
 - 移动 Chromium/WebKit、Chromatic Light/Dark、VoiceOver/TalkBack：待补

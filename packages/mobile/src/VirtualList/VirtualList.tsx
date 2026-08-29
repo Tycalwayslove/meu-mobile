@@ -44,7 +44,11 @@ function findItemIndex(target: EventTarget | null) {
   return Number.isInteger(value) ? value : null;
 }
 
-/** Renders a vertical, dynamically measured window over a caller-owned item collection. */
+/**
+ * Renders a vertical, dynamically measured window over a caller-owned item collection.
+ *
+ * @public
+ */
 export function VirtualList<T>({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,

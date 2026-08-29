@@ -15,6 +15,10 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator('[data-hydrated="true"]')).toBeAttached();
 });
 
+test.afterEach(({ page }) => {
+  expect(runtimeErrorsByPage.get(page), "runtime console/page errors").toEqual([]);
+});
+
 test("renders the isolated Next consumer without hydration errors", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Next H5 集成测试" })).toBeVisible();
   await expect(page.locator('[data-meu-component="config-provider"]')).toHaveAttribute(

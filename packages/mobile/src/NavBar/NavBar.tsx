@@ -16,6 +16,11 @@ import {
 } from "./NavBar.css";
 import type { NavBarProps } from "./types";
 
+/**
+ * Renders a route-agnostic mobile page header with optional back navigation.
+ *
+ * @public
+ */
 export function NavBar({
   backAriaLabel,
   backHref,

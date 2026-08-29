@@ -14,6 +14,11 @@ function deriveInitial(alt: string) {
   return firstCharacter ? firstCharacter.toLocaleUpperCase() : null;
 }
 
+/**
+ * Renders an image, initials, or fallback avatar within a fixed shape.
+ *
+ * @public
+ */
 export function Avatar({
   alt,
   className,

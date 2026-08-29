@@ -84,7 +84,9 @@ source: packages/mobile/src/ComponentName
 
 - Unit:
 - Story interaction:
-- Axe:
+- Storybook 浏览器矩阵:
+- 官网 Next 运行时:
+- Bundle:
 - SSR/hydration:
 - RTL:
 - Reduced motion:
@@ -112,4 +114,5 @@ source: packages/mobile/src/ComponentName
 - 破坏性变更需先进入弃用周期，记录替代 API 与迁移示例。
 - 测试链接只能指向已运行的证据，不能用计划项冒充完成项。
 - Story interaction 必须说明覆盖的是“每个标题的关键路径”还是“每个 Story”；Axe 必须记录视口、主题、规则级别，以及是否在 `play` 完成后执行，禁止用静态 Story 数量冒充交互证明。
+- Bundle 数值必须由 `scripts/check-bundle-size.mjs` 生成并与 `docs/v2/bundle-size.json` 一致；不得手工调整证据行或只提高预算掩盖回归。
 - Story ID、Figma node、公开导出和 docs entry 的映射必须通过 CI，不允许用字符串猜测链接。

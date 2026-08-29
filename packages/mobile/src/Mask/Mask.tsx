@@ -26,6 +26,11 @@ function resolveOpacity(opacity: MaskOpacity) {
   return opacityValues[opacity];
 }
 
+/**
+ * Renders a portal-aware backdrop with optional dismissal and scroll locking.
+ *
+ * @public
+ */
 export function Mask({
   children,
   className,

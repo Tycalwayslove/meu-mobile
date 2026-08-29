@@ -43,7 +43,11 @@ function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement |
   else if (ref) ref.current = node;
 }
 
-/** A native single-value range control with mobile pointer, keyboard and form semantics. */
+/**
+ * Renders a native single-value range control with pointer, keyboard, and form semantics.
+ *
+ * @public
+ */
 export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   {
     "aria-describedby": ariaDescribedBy,

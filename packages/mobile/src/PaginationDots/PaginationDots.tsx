@@ -7,6 +7,11 @@ import type { PaginationDotsProps } from "./types";
 const MAX_SAFE_COUNT = Number.MAX_SAFE_INTEGER;
 const MAX_VISIBLE_MARKERS = 99;
 
+/**
+ * Renders compact page-position markers with optional page buttons.
+ *
+ * @public
+ */
 export function PaginationDots({
   "aria-label": ariaLabel,
   activeIndex,

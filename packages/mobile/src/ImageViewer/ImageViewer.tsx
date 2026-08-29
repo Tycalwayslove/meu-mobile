@@ -44,6 +44,11 @@ function normalizeDoubleTapZoom(value: number, maxZoom: number) {
   return Math.min(maxZoom, Math.max(1, value));
 }
 
+/**
+ * Renders a modal image gallery with navigation, panning, and zoom.
+ *
+ * @public
+ */
 export function ImageViewer({
   "aria-label": ariaLabel,
   className,
@@ -251,6 +256,7 @@ export function ImageViewer({
         className={layer({ state: visualState })}
         dir={config.dir}
         hidden={hidden}
+        inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="image-viewer"
         data-meu-theme={config.theme}

@@ -4,6 +4,11 @@ import type { ReactNode } from "react";
 import type { PickerColumn } from "../Picker";
 import type { DatePickerFilter } from "./types";
 
+/**
+ * Date-picker column order from coarsest to finest precision.
+ *
+ * @public
+ */
 export const datePickerPrecisions = [
   "year",
   "month",

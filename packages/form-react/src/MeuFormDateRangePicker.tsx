@@ -14,6 +14,11 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
 
+/**
+ * Date range picker props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormDateRangePickerAdapterProps<TDate> = Omit<
   DateRangePickerProps<TDate>,
   | "aria-label"
@@ -30,36 +35,65 @@ export type MeuFormDateRangePickerAdapterProps<TDate> = Omit<
   | "value"
 >;
 
+/**
+ * React Hook Form paths whose values can hold a two-date range or an empty value.
+ *
+ * @public
+ */
 export type MeuDateRangePickerFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null>
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null | undefined>;
 
+/**
+ * Props for a date range picker whose confirmed range is stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormDateRangePickerProps<
   TFieldValues extends FieldValues,
   TDate = Date
 > = MeuFormDateRangePickerAdapterProps<TDate> & {
+  /** Initial popup state when `open` does not control the range picker. */
   defaultOpen?: boolean;
+  /** Supporting content rendered with the field and associated with the picker trigger. */
   description?: ReactNode;
+  /** Renders a valid two-date form value in the trigger with the active date adapter. */
   formatValue?: (
     value: CalendarRange<TDate>,
     details: { adapter: DateAdapter<TDate> }
   ) => ReactNode;
+  /** Visible field label; also supplies the default popup title. */
   label?: ReactNode;
+  /** Path of a React Hook Form field that stores a date pair or `null`. */
   name: MeuDateRangePickerFieldPath<TFieldValues, TDate>;
+  /** Called when the user cancels without committing a new form value. */
   onCancel?: DateRangePickerProps<TDate>["onCancel"];
+  /** Called after the confirmed date pair is written to the form. */
   onConfirm?: DateRangePickerProps<TDate>["onConfirm"];
+  /** Called when popup visibility is requested to change, with the next state and reason. */
   onOpenChange?: (open: boolean, details: DateRangePickerOpenChangeDetails) => void;
+  /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
+  /** Accessible popup name used only when neither `pickerTitle` nor a label supplies a title. */
   pickerAriaLabel?: string;
+  /** Popup heading; defaults to `label`, and suppresses the fallback accessible name. */
   pickerTitle?: ReactNode;
+  /** Shows the required affordance; enforce required validation through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for the date range. */
   rules?: UseControllerProps<
     TFieldValues,
     MeuDateRangePickerFieldPath<TFieldValues, TDate>
   >["rules"];
+  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
+/**
+ * Binds a date range picker's confirmed value, validation state, and trigger to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate = Date>({
   adapter,
   defaultOpen = false,

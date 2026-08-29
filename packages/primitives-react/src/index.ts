@@ -1,3 +1,8 @@
+/**
+ * Low-level React accessibility, portal, focus and scroll primitives shared by Meu packages.
+ *
+ * @packageDocumentation
+ */
 export { Portal } from "./Portal";
 export type { PortalContainer, PortalProps } from "./Portal";
 export { VisuallyHidden } from "./VisuallyHidden";

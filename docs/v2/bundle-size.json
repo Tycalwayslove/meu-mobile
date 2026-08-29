@@ -1,0 +1,1921 @@
+{
+  "schemaVersion": 1,
+  "assumptions": {
+    "css": "Required token, primitive and mobile styles imported once per application.",
+    "javascript": "Rollup tree-shaken ESM production bundle for each documented product; package peer dependencies remain external."
+  },
+  "css": {
+    "budgetBytes": 32768,
+    "brotliBytes": 18839,
+    "gzipBytes": 22670,
+    "rawBytes": 175731,
+    "files": [
+      {
+        "filePath": "packages/tokens/dist/theme.css",
+        "packageName": "@meu/tokens"
+      },
+      {
+        "filePath": "packages/primitives-react/dist/styles.css",
+        "packageName": "@meu/primitives-react"
+      },
+      {
+        "filePath": "packages/mobile/dist/styles.css",
+        "packageName": "@meu/mobile"
+      }
+    ],
+    "passesBudget": true
+  },
+  "products": [
+    {
+      "budgetBytes": 114688,
+      "brotliBytes": 82874,
+      "gzipBytes": 105390,
+      "rawBytes": 537774,
+      "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
+      "name": "Form",
+      "packageName": "@meu/form-react",
+      "passesBudget": true,
+      "slug": "form",
+      "valueBundles": [
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 338,
+          "gzipBytes": 422,
+          "rawBytes": 753,
+          "name": "MeuForm",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 4624,
+          "gzipBytes": 5181,
+          "rawBytes": 17388,
+          "name": "MeuFormTextInput",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 11396,
+          "gzipBytes": 13249,
+          "rawBytes": 57384,
+          "name": "MeuFormNumberKeyboard",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 12970,
+          "gzipBytes": 15001,
+          "rawBytes": 65912,
+          "name": "MeuFormPasscodeInput",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 32453,
+          "gzipBytes": 37473,
+          "rawBytes": 166485,
+          "name": "MeuFormImageUploader",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5229,
+          "gzipBytes": 5884,
+          "rawBytes": 22378,
+          "name": "MeuFormTextArea",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5447,
+          "gzipBytes": 6143,
+          "rawBytes": 21601,
+          "name": "MeuFormSearchField",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 4464,
+          "gzipBytes": 4991,
+          "rawBytes": 19180,
+          "name": "MeuFormCheckbox",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 4142,
+          "gzipBytes": 4666,
+          "rawBytes": 17106,
+          "name": "MeuFormCheckboxGroup",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 4134,
+          "gzipBytes": 4653,
+          "rawBytes": 17016,
+          "name": "MeuFormRadioGroup",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 4258,
+          "gzipBytes": 4795,
+          "rawBytes": 17864,
+          "name": "MeuFormSwitch",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5644,
+          "gzipBytes": 6354,
+          "rawBytes": 24512,
+          "name": "MeuFormStepper",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5465,
+          "gzipBytes": 6075,
+          "rawBytes": 22897,
+          "name": "MeuFormSlider",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5506,
+          "gzipBytes": 6164,
+          "rawBytes": 22291,
+          "name": "MeuFormRate",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5541,
+          "gzipBytes": 6226,
+          "rawBytes": 24287,
+          "name": "MeuFormSelector",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 30693,
+          "gzipBytes": 36335,
+          "rawBytes": 160186,
+          "name": "MeuFormTreeSelect",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 16706,
+          "gzipBytes": 19294,
+          "rawBytes": 85187,
+          "name": "MeuFormPicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 17322,
+          "gzipBytes": 20061,
+          "rawBytes": 90171,
+          "name": "MeuFormCascadePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 20598,
+          "gzipBytes": 23728,
+          "rawBytes": 107865,
+          "name": "MeuFormDatePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 22356,
+          "gzipBytes": 26042,
+          "rawBytes": 119201,
+          "name": "MeuFormDateRangePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 10893,
+          "gzipBytes": 12327,
+          "rawBytes": 52838,
+          "name": "MeuFormCalendar",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 19288,
+          "gzipBytes": 22273,
+          "rawBytes": 100518,
+          "name": "MeuFormTimePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 5161,
+          "gzipBytes": 5779,
+          "rawBytes": 22591,
+          "name": "MeuFormSegmentedControl",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 65536,
+          "brotliBytes": 1469,
+          "gzipBytes": 1642,
+          "rawBytes": 4099,
+          "name": "useMeuForm",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1151,
+      "gzipBytes": 1340,
+      "rawBytes": 3623,
+      "docsPath": "packages/icons-react/src/MeuIcon.docs.mdx",
+      "name": "Icon",
+      "packageName": "@meu/icons-react",
+      "passesBudget": true,
+      "slug": "icon",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1134,
+          "gzipBytes": 1308,
+          "rawBytes": 3444,
+          "name": "MeuIcon",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1130,
+          "gzipBytes": 1311,
+          "rawBytes": 3482,
+          "name": "MeuIconChevronLeft",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1140,
+          "gzipBytes": 1316,
+          "rawBytes": 3470,
+          "name": "MeuIconCheck",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1139,
+          "gzipBytes": 1314,
+          "rawBytes": 3468,
+          "name": "MeuIconPlus",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1138,
+          "gzipBytes": 1315,
+          "rawBytes": 3472,
+          "name": "MeuIconSearch",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1129,
+          "gzipBytes": 1314,
+          "rawBytes": 3462,
+          "name": "MeuIconX",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 10078,
+      "gzipBytes": 11426,
+      "rawBytes": 51007,
+      "docsPath": "packages/mobile/src/ActionMenu/ActionMenu.docs.mdx",
+      "name": "ActionMenu",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "action-menu",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 9476,
+          "gzipBytes": 10750,
+          "rawBytes": 48052,
+          "name": "ActionMenu",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 9992,
+          "gzipBytes": 11341,
+          "rawBytes": 50670,
+          "name": "ActionMenuProvider",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 220,
+          "gzipBytes": 257,
+          "rawBytes": 436,
+          "name": "useActionMenu",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2814,
+      "gzipBytes": 3175,
+      "rawBytes": 10551,
+      "docsPath": "packages/mobile/src/Avatar/Avatar.docs.mdx",
+      "name": "Avatar",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "avatar",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2814,
+          "gzipBytes": 3175,
+          "rawBytes": 10551,
+          "name": "Avatar",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1875,
+      "gzipBytes": 2100,
+      "rawBytes": 6550,
+      "docsPath": "packages/mobile/src/Badge/Badge.docs.mdx",
+      "name": "Badge",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "badge",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1875,
+          "gzipBytes": 2100,
+          "rawBytes": 6550,
+          "name": "Badge",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 8374,
+      "gzipBytes": 9503,
+      "rawBytes": 38975,
+      "docsPath": "packages/mobile/src/BottomSheet/BottomSheet.docs.mdx",
+      "name": "BottomSheet",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "bottom-sheet",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 8374,
+          "gzipBytes": 9503,
+          "rawBytes": 38975,
+          "name": "BottomSheet",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1742,
+      "gzipBytes": 1957,
+      "rawBytes": 6370,
+      "docsPath": "packages/mobile/src/Button/Button.docs.mdx",
+      "name": "Button",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "button",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1742,
+          "gzipBytes": 1957,
+          "rawBytes": 6370,
+          "name": "Button",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 9323,
+      "gzipBytes": 10555,
+      "rawBytes": 44907,
+      "docsPath": "packages/mobile/src/Calendar/Calendar.docs.mdx",
+      "name": "Calendar",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "calendar",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 9297,
+          "gzipBytes": 10526,
+          "rawBytes": 44753,
+          "name": "Calendar",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 178,
+          "gzipBytes": 232,
+          "rawBytes": 339,
+          "name": "calendarDayKey",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 464,
+          "gzipBytes": 548,
+          "rawBytes": 1372,
+          "name": "calendarRange",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 278,
+          "gzipBytes": 312,
+          "rawBytes": 739,
+          "name": "compareCalendarDays",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 692,
+          "gzipBytes": 811,
+          "rawBytes": 2221,
+          "name": "createCalendarGrid",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 164,
+          "gzipBytes": 207,
+          "rawBytes": 335,
+          "name": "normalizeCalendarDay",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 165,
+          "gzipBytes": 209,
+          "rawBytes": 343,
+          "name": "normalizeCalendarMonth",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 355,
+          "gzipBytes": 402,
+          "rawBytes": 1144,
+          "name": "sameCalendarDay",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 164,
+          "gzipBytes": 209,
+          "rawBytes": 356,
+          "name": "sameCalendarMonth",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1916,
+      "gzipBytes": 2144,
+      "rawBytes": 7317,
+      "docsPath": "packages/mobile/src/Card/Card.docs.mdx",
+      "name": "Card",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "card",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1916,
+          "gzipBytes": 2144,
+          "rawBytes": 7317,
+          "name": "Card",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 16099,
+      "gzipBytes": 18254,
+      "rawBytes": 75646,
+      "docsPath": "packages/mobile/src/Carousel/Carousel.docs.mdx",
+      "name": "Carousel",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "carousel",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 16099,
+          "gzipBytes": 18254,
+          "rawBytes": 75646,
+          "name": "Carousel",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 10229,
+      "gzipBytes": 11562,
+      "rawBytes": 49768,
+      "docsPath": "packages/mobile/src/CascadePicker/CascadePicker.docs.mdx",
+      "name": "CascadePicker",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "cascade-picker",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 10229,
+          "gzipBytes": 11562,
+          "rawBytes": 49768,
+          "name": "CascadePicker",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3193,
+      "gzipBytes": 3607,
+      "rawBytes": 12128,
+      "docsPath": "packages/mobile/src/List/Cell.docs.mdx",
+      "name": "Cell",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "cell",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3193,
+          "gzipBytes": 3607,
+          "rawBytes": 12128,
+          "name": "Cell",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3408,
+      "gzipBytes": 3824,
+      "rawBytes": 16090,
+      "docsPath": "packages/mobile/src/Checkbox/Checkbox.docs.mdx",
+      "name": "Checkbox",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "checkbox",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2889,
+          "gzipBytes": 3233,
+          "rawBytes": 11955,
+          "name": "Checkbox",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2514,
+          "gzipBytes": 2843,
+          "rawBytes": 9650,
+          "name": "CheckboxGroup",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3141,
+      "gzipBytes": 3577,
+      "rawBytes": 11688,
+      "docsPath": "packages/mobile/src/Collapse/Collapse.docs.mdx",
+      "name": "Collapse",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "collapse",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3141,
+          "gzipBytes": 3577,
+          "rawBytes": 11688,
+          "name": "Collapse",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 623,
+      "gzipBytes": 723,
+      "rawBytes": 2097,
+      "docsPath": "packages/mobile/src/ConfigProvider/ConfigProvider.docs.mdx",
+      "name": "ConfigProvider",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "config-provider",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 602,
+          "gzipBytes": 674,
+          "rawBytes": 1924,
+          "name": "ConfigProvider",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 208,
+          "gzipBytes": 260,
+          "rawBytes": 430,
+          "name": "useMeuConfig",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 13797,
+      "gzipBytes": 15540,
+      "rawBytes": 68609,
+      "docsPath": "packages/mobile/src/DatePicker/DatePicker.docs.mdx",
+      "name": "DatePicker",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "date-picker",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 13796,
+          "gzipBytes": 15536,
+          "rawBytes": 68587,
+          "name": "DatePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 141,
+          "gzipBytes": 165,
+          "rawBytes": 228,
+          "name": "datePickerPrecisions",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 15735,
+      "gzipBytes": 18033,
+      "rawBytes": 80175,
+      "docsPath": "packages/mobile/src/DateRangePicker/DateRangePicker.docs.mdx",
+      "name": "DateRangePicker",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "date-range-picker",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 15723,
+          "gzipBytes": 18023,
+          "rawBytes": 80117,
+          "name": "DateRangePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 573,
+          "gzipBytes": 662,
+          "rawBytes": 2224,
+          "name": "dateRangeIsSelectable",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 371,
+          "gzipBytes": 447,
+          "rawBytes": 1262,
+          "name": "normalizeDateRange",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 507,
+          "gzipBytes": 608,
+          "rawBytes": 2209,
+          "name": "sameDateRange",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 7426,
+      "gzipBytes": 8382,
+      "rawBytes": 34545,
+      "docsPath": "packages/mobile/src/Dialog/Dialog.docs.mdx",
+      "name": "Dialog",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "dialog",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 6408,
+          "gzipBytes": 7250,
+          "rawBytes": 28512,
+          "name": "Dialog",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 7362,
+          "gzipBytes": 8309,
+          "rawBytes": 34258,
+          "name": "DialogProvider",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 201,
+          "gzipBytes": 245,
+          "rawBytes": 386,
+          "name": "useDialog",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1560,
+      "gzipBytes": 1764,
+      "rawBytes": 5349,
+      "docsPath": "packages/mobile/src/Divider/Divider.docs.mdx",
+      "name": "Divider",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "divider",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1560,
+          "gzipBytes": 1764,
+          "rawBytes": 5349,
+          "name": "Divider",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1891,
+      "gzipBytes": 2177,
+      "rawBytes": 7580,
+      "docsPath": "packages/mobile/src/Ellipsis/Ellipsis.docs.mdx",
+      "name": "Ellipsis",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "ellipsis",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1891,
+          "gzipBytes": 2177,
+          "rawBytes": 7580,
+          "name": "Ellipsis",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 729,
+      "gzipBytes": 824,
+      "rawBytes": 2121,
+      "docsPath": "packages/mobile/src/Empty/Empty.docs.mdx",
+      "name": "Empty",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "empty",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 729,
+          "gzipBytes": 824,
+          "rawBytes": 2121,
+          "name": "Empty",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1684,
+      "gzipBytes": 1921,
+      "rawBytes": 6191,
+      "docsPath": "packages/mobile/src/Field/Field.docs.mdx",
+      "name": "Field",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "field",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1684,
+          "gzipBytes": 1921,
+          "rawBytes": 6191,
+          "name": "Field",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 4434,
+      "gzipBytes": 5025,
+      "rawBytes": 19505,
+      "docsPath": "packages/mobile/src/FloatingPanel/FloatingPanel.docs.mdx",
+      "name": "FloatingPanel",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "floating-panel",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 4434,
+          "gzipBytes": 5025,
+          "rawBytes": 19505,
+          "name": "FloatingPanel",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1693,
+      "gzipBytes": 1918,
+      "rawBytes": 6159,
+      "docsPath": "packages/mobile/src/IconButton/IconButton.docs.mdx",
+      "name": "IconButton",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "icon-button",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1693,
+          "gzipBytes": 1918,
+          "rawBytes": 6159,
+          "name": "IconButton",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2325,
+      "gzipBytes": 2602,
+      "rawBytes": 8296,
+      "docsPath": "packages/mobile/src/Image/Image.docs.mdx",
+      "name": "Image",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "image",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2325,
+          "gzipBytes": 2602,
+          "rawBytes": 8296,
+          "name": "Image",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 26494,
+      "gzipBytes": 30434,
+      "rawBytes": 132069,
+      "docsPath": "packages/mobile/src/ImageUploader/ImageUploader.docs.mdx",
+      "name": "ImageUploader",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "image-uploader",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 26494,
+          "gzipBytes": 30434,
+          "rawBytes": 132069,
+          "name": "ImageUploader",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 23210,
+      "gzipBytes": 26652,
+      "rawBytes": 114500,
+      "docsPath": "packages/mobile/src/ImageViewer/ImageViewer.docs.mdx",
+      "name": "ImageViewer",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "image-viewer",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 23210,
+          "gzipBytes": 26652,
+          "rawBytes": 114500,
+          "name": "ImageViewer",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3150,
+      "gzipBytes": 3559,
+      "rawBytes": 12943,
+      "docsPath": "packages/mobile/src/IndexList/IndexList.docs.mdx",
+      "name": "IndexList",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "index-list",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3150,
+          "gzipBytes": 3559,
+          "rawBytes": 12943,
+          "name": "IndexList",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2204,
+      "gzipBytes": 2564,
+      "rawBytes": 9048,
+      "docsPath": "packages/mobile/src/InfiniteList/InfiniteList.docs.mdx",
+      "name": "InfiniteList",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "infinite-list",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2204,
+          "gzipBytes": 2564,
+          "rawBytes": 9048,
+          "name": "InfiniteList",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1765,
+      "gzipBytes": 1999,
+      "rawBytes": 6472,
+      "docsPath": "packages/mobile/src/List/List.docs.mdx",
+      "name": "List",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "list",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1765,
+          "gzipBytes": 1999,
+          "rawBytes": 6472,
+          "name": "List",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3463,
+      "gzipBytes": 3928,
+      "rawBytes": 13298,
+      "docsPath": "packages/mobile/src/Mask/Mask.docs.mdx",
+      "name": "Mask",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "mask",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3463,
+          "gzipBytes": 3928,
+          "rawBytes": 13298,
+          "name": "Mask",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2828,
+      "gzipBytes": 3196,
+      "rawBytes": 9776,
+      "docsPath": "packages/mobile/src/NavBar/NavBar.docs.mdx",
+      "name": "NavBar",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "nav-bar",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2828,
+          "gzipBytes": 3196,
+          "rawBytes": 9776,
+          "name": "NavBar",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 4719,
+      "gzipBytes": 5356,
+      "rawBytes": 19452,
+      "docsPath": "packages/mobile/src/NumberKeyboard/NumberKeyboard.docs.mdx",
+      "name": "NumberKeyboard",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "number-keyboard",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 4194,
+          "gzipBytes": 4769,
+          "rawBytes": 17145,
+          "name": "NumberKeyboard",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1994,
+          "gzipBytes": 2255,
+          "rawBytes": 7160,
+          "name": "NumberKeyboardTrigger",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2377,
+      "gzipBytes": 2699,
+      "rawBytes": 8720,
+      "docsPath": "packages/mobile/src/PaginationDots/PaginationDots.docs.mdx",
+      "name": "PaginationDots",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "pagination-dots",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2377,
+          "gzipBytes": 2699,
+          "rawBytes": 8720,
+          "name": "PaginationDots",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 6959,
+      "gzipBytes": 7898,
+      "rawBytes": 31400,
+      "docsPath": "packages/mobile/src/PasscodeInput/PasscodeInput.docs.mdx",
+      "name": "PasscodeInput",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "passcode-input",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 6959,
+          "gzipBytes": 7898,
+          "rawBytes": 31400,
+          "name": "PasscodeInput",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 10224,
+      "gzipBytes": 11608,
+      "rawBytes": 47765,
+      "docsPath": "packages/mobile/src/Picker/Picker.docs.mdx",
+      "name": "Picker",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "picker",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 9647,
+          "gzipBytes": 10913,
+          "rawBytes": 45012,
+          "name": "Picker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 1865,
+          "gzipBytes": 2109,
+          "rawBytes": 6352,
+          "name": "PickerTrigger",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 38970,
+      "gzipBytes": 46278,
+      "rawBytes": 186057,
+      "docsPath": "packages/mobile/src/Popover/Popover.docs.mdx",
+      "name": "Popover",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "popover",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 38970,
+          "gzipBytes": 46278,
+          "rawBytes": 186057,
+          "name": "Popover",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 6205,
+      "gzipBytes": 7029,
+      "rawBytes": 26463,
+      "docsPath": "packages/mobile/src/Popup/Popup.docs.mdx",
+      "name": "Popup",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "popup",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 6205,
+          "gzipBytes": 7029,
+          "rawBytes": 26463,
+          "name": "Popup",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2035,
+      "gzipBytes": 2310,
+      "rawBytes": 6959,
+      "docsPath": "packages/mobile/src/Progress/Progress.docs.mdx",
+      "name": "Progress",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "progress",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2035,
+          "gzipBytes": 2310,
+          "rawBytes": 6959,
+          "name": "Progress",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2423,
+      "gzipBytes": 2810,
+      "rawBytes": 10690,
+      "docsPath": "packages/mobile/src/PullToRefresh/PullToRefresh.docs.mdx",
+      "name": "PullToRefresh",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "pull-to-refresh",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2423,
+          "gzipBytes": 2810,
+          "rawBytes": 10690,
+          "name": "PullToRefresh",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3327,
+      "gzipBytes": 3743,
+      "rawBytes": 15435,
+      "docsPath": "packages/mobile/src/Radio/Radio.docs.mdx",
+      "name": "RadioGroup",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "radio-group",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2796,
+          "gzipBytes": 3137,
+          "rawBytes": 11233,
+          "name": "Radio",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2516,
+          "gzipBytes": 2830,
+          "rawBytes": 9428,
+          "name": "RadioGroup",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3943,
+      "gzipBytes": 4433,
+      "rawBytes": 15442,
+      "docsPath": "packages/mobile/src/Rate/Rate.docs.mdx",
+      "name": "Rate",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "rate",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3943,
+          "gzipBytes": 4433,
+          "rawBytes": 15442,
+          "name": "Rate",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2909,
+      "gzipBytes": 3251,
+      "rawBytes": 10431,
+      "docsPath": "packages/mobile/src/Result/Result.docs.mdx",
+      "name": "Result",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "result",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2909,
+          "gzipBytes": 3251,
+          "rawBytes": 10431,
+          "name": "Result",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1521,
+      "gzipBytes": 1723,
+      "rawBytes": 4987,
+      "docsPath": "packages/mobile/src/SafeArea/SafeArea.docs.mdx",
+      "name": "SafeArea",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "safe-area",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1521,
+          "gzipBytes": 1723,
+          "rawBytes": 4987,
+          "name": "SafeArea",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3937,
+      "gzipBytes": 4477,
+      "rawBytes": 14690,
+      "docsPath": "packages/mobile/src/SearchField/SearchField.docs.mdx",
+      "name": "SearchField",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "search-field",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3937,
+          "gzipBytes": 4477,
+          "rawBytes": 14690,
+          "name": "SearchField",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3508,
+      "gzipBytes": 3949,
+      "rawBytes": 15104,
+      "docsPath": "packages/mobile/src/SegmentedControl/SegmentedControl.docs.mdx",
+      "name": "SegmentedControl",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "segmented-control",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3508,
+          "gzipBytes": 3949,
+          "rawBytes": 15104,
+          "name": "SegmentedControl",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3919,
+      "gzipBytes": 4395,
+      "rawBytes": 16920,
+      "docsPath": "packages/mobile/src/Selector/Selector.docs.mdx",
+      "name": "Selector",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "selector",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3919,
+          "gzipBytes": 4395,
+          "rawBytes": 16920,
+          "name": "Selector",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3071,
+      "gzipBytes": 3471,
+      "rawBytes": 12834,
+      "docsPath": "packages/mobile/src/SideNav/SideNav.docs.mdx",
+      "name": "SideNav",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "side-nav",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3071,
+          "gzipBytes": 3471,
+          "rawBytes": 12834,
+          "name": "SideNav",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1780,
+      "gzipBytes": 2005,
+      "rawBytes": 6251,
+      "docsPath": "packages/mobile/src/Skeleton/Skeleton.docs.mdx",
+      "name": "Skeleton",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "skeleton",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1780,
+          "gzipBytes": 2005,
+          "rawBytes": 6251,
+          "name": "Skeleton",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3769,
+      "gzipBytes": 4232,
+      "rawBytes": 15479,
+      "docsPath": "packages/mobile/src/Slider/Slider.docs.mdx",
+      "name": "Slider",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "slider",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3769,
+          "gzipBytes": 4232,
+          "rawBytes": 15479,
+          "name": "Slider",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 1538,
+      "gzipBytes": 1724,
+      "rawBytes": 5182,
+      "docsPath": "packages/mobile/src/Space/Space.docs.mdx",
+      "name": "Space",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "space",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1538,
+          "gzipBytes": 1724,
+          "rawBytes": 5182,
+          "name": "Space",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 4068,
+      "gzipBytes": 4606,
+      "rawBytes": 17499,
+      "docsPath": "packages/mobile/src/Stepper/Stepper.docs.mdx",
+      "name": "Stepper",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "stepper",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 4068,
+          "gzipBytes": 4606,
+          "rawBytes": 17499,
+          "name": "Stepper",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3128,
+      "gzipBytes": 3563,
+      "rawBytes": 11239,
+      "docsPath": "packages/mobile/src/Steps/Steps.docs.mdx",
+      "name": "Steps",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "steps",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3128,
+          "gzipBytes": 3563,
+          "rawBytes": 11239,
+          "name": "Steps",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 4723,
+      "gzipBytes": 5346,
+      "rawBytes": 22298,
+      "docsPath": "packages/mobile/src/SwipeActions/SwipeActions.docs.mdx",
+      "name": "SwipeActions",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "swipe-actions",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 4723,
+          "gzipBytes": 5346,
+          "rawBytes": 22298,
+          "name": "SwipeActions",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2697,
+      "gzipBytes": 3042,
+      "rawBytes": 10651,
+      "docsPath": "packages/mobile/src/Switch/Switch.docs.mdx",
+      "name": "Switch",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "switch",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2697,
+          "gzipBytes": 3042,
+          "rawBytes": 10651,
+          "name": "Switch",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3255,
+      "gzipBytes": 3675,
+      "rawBytes": 12449,
+      "docsPath": "packages/mobile/src/TabBar/TabBar.docs.mdx",
+      "name": "TabBar",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "tab-bar",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3255,
+          "gzipBytes": 3675,
+          "rawBytes": 12449,
+          "name": "TabBar",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3668,
+      "gzipBytes": 4150,
+      "rawBytes": 15149,
+      "docsPath": "packages/mobile/src/Tabs/Tabs.docs.mdx",
+      "name": "Tabs",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "tabs",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3668,
+          "gzipBytes": 4150,
+          "rawBytes": 15149,
+          "name": "Tabs",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2304,
+      "gzipBytes": 2618,
+      "rawBytes": 9687,
+      "docsPath": "packages/mobile/src/Tag/Tag.docs.mdx",
+      "name": "Tag",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "tag",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2304,
+          "gzipBytes": 2618,
+          "rawBytes": 9687,
+          "name": "Tag",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3583,
+      "gzipBytes": 4047,
+      "rawBytes": 15179,
+      "docsPath": "packages/mobile/src/TextArea/TextArea.docs.mdx",
+      "name": "TextArea",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "text-area",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3583,
+          "gzipBytes": 4047,
+          "rawBytes": 15179,
+          "name": "TextArea",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 3082,
+      "gzipBytes": 3475,
+      "rawBytes": 10541,
+      "docsPath": "packages/mobile/src/TextInput/TextInput.docs.mdx",
+      "name": "TextInput",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "text-input",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3082,
+          "gzipBytes": 3475,
+          "rawBytes": 10541,
+          "name": "TextInput",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 671,
+      "gzipBytes": 776,
+      "rawBytes": 2152,
+      "docsPath": "packages/mobile/src/ConfigProvider/ThemeProvider.docs.mdx",
+      "name": "ThemeProvider",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "theme-provider",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 671,
+          "gzipBytes": 776,
+          "rawBytes": 2152,
+          "name": "ThemeProvider",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 12340,
+      "gzipBytes": 13914,
+      "rawBytes": 60729,
+      "docsPath": "packages/mobile/src/TimePicker/TimePicker.docs.mdx",
+      "name": "TimePicker",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "time-picker",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 12128,
+          "gzipBytes": 13663,
+          "rawBytes": 59650,
+          "name": "TimePicker",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 533,
+          "gzipBytes": 642,
+          "rawBytes": 1585,
+          "name": "formatTimeValue",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 225,
+          "gzipBytes": 284,
+          "rawBytes": 591,
+          "name": "isValidTimeValue",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 253,
+          "gzipBytes": 309,
+          "rawBytes": 592,
+          "name": "timePickerColumns",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 134,
+          "gzipBytes": 147,
+          "rawBytes": 186,
+          "name": "timePickerPrecisions",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 4817,
+      "gzipBytes": 5440,
+      "rawBytes": 21037,
+      "docsPath": "packages/mobile/src/Toast/Toast.docs.mdx",
+      "name": "Toast",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "toast",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 3831,
+          "gzipBytes": 4323,
+          "rawBytes": 15563,
+          "name": "Toast",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 4739,
+          "gzipBytes": 5348,
+          "rawBytes": 20745,
+          "name": "ToastProvider",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 205,
+          "gzipBytes": 251,
+          "rawBytes": 391,
+          "name": "useToast",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 49152,
+      "brotliBytes": 23785,
+      "gzipBytes": 27728,
+      "rawBytes": 119831,
+      "docsPath": "packages/mobile/src/TreeSelect/TreeSelect.docs.mdx",
+      "name": "TreeSelect",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "tree-select",
+      "valueBundles": [
+        {
+          "budgetBytes": 49152,
+          "brotliBytes": 23785,
+          "gzipBytes": 27728,
+          "rawBytes": 119831,
+          "name": "TreeSelect",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 12049,
+      "gzipBytes": 13701,
+      "rawBytes": 60099,
+      "docsPath": "packages/mobile/src/VirtualList/VirtualList.docs.mdx",
+      "name": "VirtualList",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "virtual-list",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 12049,
+          "gzipBytes": 13701,
+          "rawBytes": 60099,
+          "name": "VirtualList",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2391,
+      "gzipBytes": 2719,
+      "rawBytes": 9011,
+      "docsPath": "packages/mobile/src/Watermark/Watermark.docs.mdx",
+      "name": "Watermark",
+      "packageName": "@meu/mobile",
+      "passesBudget": true,
+      "slug": "watermark",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 2391,
+          "gzipBytes": 2719,
+          "rawBytes": 9011,
+          "name": "Watermark",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 2225,
+      "gzipBytes": 2623,
+      "rawBytes": 9864,
+      "docsPath": "packages/primitives-react/src/Portal.docs.mdx",
+      "name": "Portal",
+      "packageName": "@meu/primitives-react",
+      "passesBudget": true,
+      "slug": "portal",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 483,
+          "gzipBytes": 604,
+          "rawBytes": 1394,
+          "name": "Portal",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 818,
+          "gzipBytes": 979,
+          "rawBytes": 3137,
+          "name": "useBodyScrollLock",
+          "passesBudget": true
+        },
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 1234,
+          "gzipBytes": 1477,
+          "rawBytes": 5424,
+          "name": "useFocusTrap",
+          "passesBudget": true
+        }
+      ]
+    },
+    {
+      "budgetBytes": 32768,
+      "brotliBytes": 258,
+      "gzipBytes": 331,
+      "rawBytes": 534,
+      "docsPath": "packages/primitives-react/src/VisuallyHidden.docs.mdx",
+      "name": "VisuallyHidden",
+      "packageName": "@meu/primitives-react",
+      "passesBudget": true,
+      "slug": "visually-hidden",
+      "valueBundles": [
+        {
+          "budgetBytes": 32768,
+          "brotliBytes": 258,
+          "gzipBytes": 331,
+          "rawBytes": 534,
+          "name": "VisuallyHidden",
+          "passesBudget": true
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "documentedProducts": 68,
+    "overBudgetProducts": 0,
+    "overBudgetValues": 0,
+    "productsWithinBudget": 68,
+    "publicValues": 125
+  }
+}

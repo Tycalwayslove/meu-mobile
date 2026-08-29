@@ -21,6 +21,11 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
   }
 }
 
+/**
+ * Renders a modal edge panel with focus trapping and an optional mask.
+ *
+ * @public
+ */
 export function Popup({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -76,6 +81,7 @@ export function Popup({
         {...configBoundary}
         className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
+        inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="popup"
         data-state={visualState}

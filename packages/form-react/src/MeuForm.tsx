@@ -15,9 +15,13 @@ export type MeuFormProps<
   TContext = unknown,
   TTransformedValues = TFieldValues
 > = Omit<FormHTMLAttributes<HTMLFormElement>, "onSubmit"> & {
+  /** React Hook Form instance exposed to this form subtree through `FormProvider`. */
   form: UseFormReturn<TFieldValues, TContext, TTransformedValues>;
+  /** Called after a submit attempt fails validation, with the current field errors and event. */
   onInvalid?: SubmitErrorHandler<TFieldValues>;
+  /** Called with validated, transformed values after a successful native form submission. */
   onSubmit: SubmitHandler<TTransformedValues>;
+  /** Ref forwarded to the underlying native `form` element. */
   ref?: Ref<HTMLFormElement>;
 };
 

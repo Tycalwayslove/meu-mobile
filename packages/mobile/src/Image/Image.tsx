@@ -16,6 +16,11 @@ function assignRef<T>(ref: ImageProps["imageRef"], value: T | null) {
   else if (ref) ref.current = value as HTMLImageElement | null;
 }
 
+/**
+ * Renders an image with explicit loading, loaded, and failure states.
+ *
+ * @public
+ */
 export function Image({
   alt,
   className,

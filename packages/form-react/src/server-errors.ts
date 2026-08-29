@@ -7,6 +7,11 @@ export type MeuFormServerErrors<TFieldValues extends FieldValues> = Partial<
 
 /** @public */
 export type ApplyMeuFormErrorsOptions = {
+  /**
+   * Focuses the first invalid registered field in DOM order after applying server errors.
+   *
+   * @defaultValue true
+   */
   shouldFocusFirst?: boolean;
 };
 

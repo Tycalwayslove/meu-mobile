@@ -3,11 +3,11 @@ name: Switch
 slug: switch
 package: "@meu/mobile"
 exports: [Switch]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: null
@@ -34,7 +34,7 @@ source: packages/mobile/src/Switch
 - 调用方与 Field IDREF 合并，Field invalid/required 进入原生控件。
 - thumb 使用逻辑 margin 移动，RTL 自动镜像；reduced-motion、forced-colors 和兼容旧 WebView 的焦点环有明确降级。
 
-状态为 `implementation`。Unit、SSR、Story contract 与本地 axe 已补齐；发布前仍需移动双引擎、Chromatic 主题矩阵及 VoiceOver/TalkBack 证据。
+状态为 `verification`。Unit、SSR、Story contract 与本地 axe 已补齐；发布前仍需移动双引擎、Chromatic 主题矩阵及 VoiceOver/TalkBack 证据。
 
 ## 主流基线与取舍
 
@@ -144,7 +144,9 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 - Unit: `Switch.test.tsx`，8 项，覆盖受控/非受控、Field、loading/readOnly、FormData、reset、required 与 IDREF
 - SSR: `Switch.ssr.test.tsx`，覆盖 role/checked/name/value markup
 - Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3042 B / 32768 B 预算，组合 Brotli 2697 B；共享样式由应用单独导入一次。
 - Touch target: 三尺寸 root 最小 44×44
 - RTL/reduced-motion/forced-colors：CSS 和 Story 已建；浏览器视觉证据待补
 - 移动 Chromium/WebKit、Chromatic Light/Dark 视觉基线、VoiceOver/TalkBack：待补

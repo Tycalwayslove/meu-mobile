@@ -8,19 +8,36 @@ import type { ReactNode } from "react";
 
 import type { MeuNumberFieldPath } from "./adapter-types";
 
+/**
+ * Props for a rating control bound to a numeric React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormRateProps<TFieldValues extends FieldValues> = Omit<
   RateProps,
   "defaultValue" | "name" | "onBlur" | "onChange" | "value"
 > & {
+  /** Supporting content rendered with the field and associated with the rating control. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the numeric React Hook Form field controlled by this rating input. */
   name: MeuNumberFieldPath<TFieldValues>;
+  /** Called after React Hook Form marks the field as touched; receives the control's blur event. */
   onBlur?: RateProps["onBlur"];
+  /** Called after the form value changes; receives the next numeric rating. */
   onChange?: RateProps["onChange"];
+  /** Shows the required affordance and sets the rating input's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuNumberFieldPath<TFieldValues>>["rules"];
 };
 
+/**
+ * Binds a rating control's value, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormRate<TFieldValues extends FieldValues>({
   description,
   label,

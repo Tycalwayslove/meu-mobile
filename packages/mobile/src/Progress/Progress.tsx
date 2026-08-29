@@ -20,6 +20,11 @@ function clampValue(value: number) {
   return Math.min(100, Math.max(0, value));
 }
 
+/**
+ * Renders a bounded linear progress indicator with optional live announcements.
+ *
+ * @public
+ */
 export function Progress({
   "aria-atomic": ariaAtomic,
   "aria-label": ariaLabel,

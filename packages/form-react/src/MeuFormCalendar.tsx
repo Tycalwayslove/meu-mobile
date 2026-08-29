@@ -15,19 +15,39 @@ import type { ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
 
+/**
+ * Calendar props accepted by the form adapter after removing form-controlled value and ref fields.
+ *
+ * @public
+ */
 export type MeuFormCalendarAdapterProps<TDate> = Omit<
   CalendarBaseProps<TDate>,
   "defaultValue" | "onChange" | "ref" | "selectionMode" | "value"
 >;
 
+/**
+ * React Hook Form paths whose values can hold one selected date or an empty value.
+ *
+ * @public
+ */
 export type MeuFormCalendarSingleFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, NoInfer<TDate> | null>
   | FieldPathByValue<TFieldValues, NoInfer<TDate> | null | undefined>;
 
+/**
+ * React Hook Form paths whose values can hold an array of selected dates.
+ *
+ * @public
+ */
 export type MeuFormCalendarMultipleFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, ReadonlyArray<NoInfer<TDate>>>
   | FieldPathByValue<TFieldValues, ReadonlyArray<NoInfer<TDate>> | undefined>;
 
+/**
+ * React Hook Form paths whose values can hold a selected date range or an empty value.
+ *
+ * @public
+ */
 export type MeuFormCalendarRangeFieldPath<TFieldValues extends FieldValues, TDate> =
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null>
   | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null | undefined>;
@@ -37,56 +57,101 @@ type CalendarFieldPath<TFieldValues extends FieldValues, TDate> =
   | MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>
   | MeuFormCalendarRangeFieldPath<TFieldValues, TDate>;
 
+/**
+ * Field presentation and calendar behavior shared by every selection mode.
+ *
+ * @public
+ */
 export type MeuFormCalendarCommonProps<TDate> = MeuFormCalendarAdapterProps<TDate> & {
+  /** Supporting content rendered with the field and associated with the calendar. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Shows the required affordance; enforce required validation through mode-specific `rules`. */
   required?: boolean;
 };
 
+/**
+ * Props for a calendar bound to a single-date React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormCalendarSingleProps<
   TFieldValues extends FieldValues,
   TDate
 > = MeuFormCalendarCommonProps<TDate> & {
+  /** Path of a form field that stores one date or `null`. */
   name: MeuFormCalendarSingleFieldPath<TFieldValues, TDate>;
+  /** Called after the form receives the next date, with the calendar change details. */
   onChange?: CalendarSingleProps<TDate>["onChange"];
+  /** React Hook Form validation and value-processing rules for the single-date field. */
   rules?: UseControllerProps<
     TFieldValues,
     MeuFormCalendarSingleFieldPath<TFieldValues, TDate>
   >["rules"];
+  /** Selects single-date behavior; omitted values also use this default mode. */
   selectionMode?: "single";
 };
 
+/**
+ * Props for a calendar bound to a multiple-date React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormCalendarMultipleProps<
   TFieldValues extends FieldValues,
   TDate
 > = MeuFormCalendarCommonProps<TDate> & {
+  /** Path of a form field that stores the selected date array. */
   name: MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>;
+  /** Called after the form receives the next date array, with the calendar change details. */
   onChange?: CalendarMultipleProps<TDate>["onChange"];
+  /** React Hook Form validation and value-processing rules for the multiple-date field. */
   rules?: UseControllerProps<
     TFieldValues,
     MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>
   >["rules"];
+  /** Selects multiple-date behavior and the corresponding form value shape. */
   selectionMode: "multiple";
 };
 
+/**
+ * Props for a calendar bound to a date-range React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormCalendarRangeProps<
   TFieldValues extends FieldValues,
   TDate
 > = MeuFormCalendarCommonProps<TDate> & {
+  /** Path of a form field that stores a two-date range or `null`. */
   name: MeuFormCalendarRangeFieldPath<TFieldValues, TDate>;
+  /** Called after the form receives the next range, with the calendar change details. */
   onChange?: CalendarRangeProps<TDate>["onChange"];
+  /** React Hook Form validation and value-processing rules for the date-range field. */
   rules?: UseControllerProps<
     TFieldValues,
     MeuFormCalendarRangeFieldPath<TFieldValues, TDate>
   >["rules"];
+  /** Selects date-range behavior and the corresponding form value shape. */
   selectionMode: "range";
 };
 
+/**
+ * Mode-discriminated props for a calendar controlled by React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormCalendarProps<TFieldValues extends FieldValues, TDate = Date> =
   | MeuFormCalendarSingleProps<TFieldValues, TDate>
   | MeuFormCalendarMultipleProps<TFieldValues, TDate>
   | MeuFormCalendarRangeProps<TFieldValues, TDate>;
 
+/**
+ * Binds a calendar's value, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
   props: MeuFormCalendarProps<TFieldValues, TDate>
 ) {

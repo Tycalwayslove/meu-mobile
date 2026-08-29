@@ -19,6 +19,11 @@ function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
   else if (ref) ref.current = value;
 }
 
+/**
+ * Renders a native checkbox with controlled or uncontrolled checked state.
+ *
+ * @public
+ */
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
   {
     "aria-describedby": ariaDescribedBy,

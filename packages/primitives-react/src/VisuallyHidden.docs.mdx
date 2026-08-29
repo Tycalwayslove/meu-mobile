@@ -3,11 +3,11 @@ name: VisuallyHidden
 slug: visually-hidden
 package: "@meu/primitives-react"
 exports: [VisuallyHidden]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: null
@@ -25,7 +25,7 @@ source: packages/primitives-react/src/VisuallyHidden
 - 保留 caller class，并在 forced-colors 模式维持裁剪规则。
 - SSR 输出完整文本与语义属性。
 
-当前状态为 `implementation`；尚未完成 Windows High Contrast、VoiceOver/TalkBack 真机验收，不能标记为 commercial。
+当前状态为 `verification`；尚未完成 Windows High Contrast、VoiceOver/TalkBack 真机验收，不能标记为 commercial。
 
 ## 何时使用
 
@@ -125,7 +125,9 @@ legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；fo
 
 - Unit: `VisuallyHidden.test.tsx` 覆盖 SSR 文本/语义、class 合并和不设置 aria-hidden
 - Story interaction: `AccessibleIconButton` 验证纯图标按钮由隐藏文本获得可访问名称；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 331 B / 32768 B 预算，组合 Brotli 258 B；共享样式由应用单独导入一次。
 - SSR/hydration: SSR 单测已覆盖；独立 hydration 断言待补
 - RTL: 样式无方向依赖；文案 locale 待集成层验证
 - Reduced motion: 不适用，无动画

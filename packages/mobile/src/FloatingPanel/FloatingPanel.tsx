@@ -83,6 +83,11 @@ function isInteractiveContent(target: EventTarget | null, boundary: HTMLElement 
   return interactive ? boundary.contains(interactive) : false;
 }
 
+/**
+ * Renders a persistent modeless panel with draggable height anchors.
+ *
+ * @public
+ */
 export function FloatingPanel({
   anchors,
   children,

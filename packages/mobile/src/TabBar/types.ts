@@ -6,6 +6,11 @@ import type {
   Ref
 } from "react";
 
+/**
+ * One primary destination in a TabBar.
+ *
+ * @public
+ */
 export type TabBarItem = {
   /** Overrides the link/button accessible name when the visual label is insufficient. */
   ariaLabel?: string;
@@ -27,6 +32,11 @@ export type TabBarItem = {
   onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
 };
 
+/**
+ * Props for primary mobile destination navigation.
+ *
+ * @public
+ */
 export type TabBarProps = Omit<ComponentProps<"nav">, "children" | "onChange"> & {
   /** Initial uncontrolled route key. */
   defaultValue?: string;

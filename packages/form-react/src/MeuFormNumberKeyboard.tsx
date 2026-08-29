@@ -15,6 +15,11 @@ import type {
 } from "@meu/mobile";
 import { HiddenFormValues } from "./HiddenFormValues";
 
+/**
+ * Number keyboard props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormNumberKeyboardAdapterProps = Omit<
   NumberKeyboardProps,
   | "aria-label"
@@ -30,32 +35,64 @@ export type MeuFormNumberKeyboardAdapterProps = Omit<
   | "title"
 >;
 
+/**
+ * Reasons reported when the number keyboard requests an open-state change.
+ *
+ * @public
+ */
 export type MeuFormNumberKeyboardOpenChangeDetails =
-  NumberKeyboardOpenChangeDetails | { reason: "trigger" };
+  | NumberKeyboardOpenChangeDetails
+  | {
+      /** Identifies a request caused by activating the form field's trigger button. */
+      reason: "trigger";
+    };
 
+/**
+ * Props for a number keyboard whose edited string is stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormNumberKeyboardProps<TFieldValues extends FieldValues> =
   MeuFormNumberKeyboardAdapterProps & {
+    /** Initial keyboard state when `open` does not control visibility. */
     defaultOpen?: boolean;
+    /** Supporting content rendered with the field and associated with the trigger. */
     description?: ReactNode;
+    /** Renders the trigger value from the current string stored in the form. */
     formatValue?: (value: string) => ReactNode;
+    /** Accessible keyboard name used when `keyboardTitle` does not render a heading. */
     keyboardAriaLabel?: string;
+    /** Keyboard heading; a string `label` supplies the default when this is omitted. */
     keyboardTitle?: string;
+    /** Visible field label rendered by the surrounding `Field`. */
     label?: ReactNode;
+    /** Maximum stored string length after each transformed key input. */
     maxLength?: number;
+    /** React Hook Form field path that stores the keyboard's string value. */
     name: Path<TFieldValues>;
+    /** Called after confirmation marks the field as touched, with the current form value. */
     onConfirm?: (value: string) => void;
+    /** Called after one character is removed from the form value, with delete-source details. */
     onDelete?: (details: NumberKeyboardDeleteDetails) => void;
+    /** Called after handling a key, with the raw input and its source details. */
     onInput?: (value: string, details: NumberKeyboardInputDetails) => void;
+    /** Called when keyboard visibility is requested to change, with the next state and reason. */
     onOpenChange?: (open: boolean, details: MeuFormNumberKeyboardOpenChangeDetails) => void;
+    /** Controls keyboard visibility; omit to let the component manage it from `defaultOpen`. */
     open?: boolean;
+    /** Content shown in the trigger when the form value renders empty. */
     placeholder?: ReactNode;
+    /** Shows the required affordance; enforce required validation through `rules` when needed. */
     required?: boolean;
+    /** React Hook Form validation and value-processing rules registered for this field. */
     rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+    /** Produces the next form value from the current string, raw key input, and input details. */
     transformInput?: (
       currentValue: string,
       input: string,
       details: NumberKeyboardInputDetails
     ) => string;
+    /** Props forwarded to the trigger except state, value, status, ref, and ARIA wiring managed here. */
     triggerProps?: Omit<
       NumberKeyboardTriggerProps,
       "aria-controls" | "open" | "ref" | "status" | "value"
@@ -76,6 +113,11 @@ function defaultTransformInput(
   return `${currentValue}${input}`;
 }
 
+/**
+ * Binds number-key input, validation state, and trigger behavior to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
   defaultOpen = false,
   description,

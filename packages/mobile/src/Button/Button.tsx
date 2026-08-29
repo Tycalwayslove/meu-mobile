@@ -5,6 +5,11 @@ import { forwardRef } from "react";
 import { button, buttonItem, spinner } from "./Button.css";
 import type { ButtonProps } from "./types";
 
+/**
+ * Renders a native button with Meu sizing, tone, loading, and icon treatments.
+ *
+ * @public
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     block = false,

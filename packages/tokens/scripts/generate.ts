@@ -138,6 +138,26 @@ function buildCss(tokens: TokenTree): string {
   );
   const shared = collectDeclarations(nonColorTokens, tokens);
   const light = [...shared, ...lightColors];
+  const forcedColors: Array<[string, string]> = [
+    ["--meu-color-canvas", "Canvas"],
+    ["--meu-color-surface", "Canvas"],
+    ["--meu-color-ink", "CanvasText"],
+    ["--meu-color-muted", "CanvasText"],
+    ["--meu-color-border", "CanvasText"],
+    ["--meu-color-subtle", "Canvas"],
+    ["--meu-color-accent", "Highlight"],
+    ["--meu-color-accent-pressed", "Highlight"],
+    ["--meu-color-accent-contrast", "HighlightText"],
+    ["--meu-color-overlay", "CanvasText"],
+    ["--meu-color-overlay-contrast", "Canvas"],
+    ["--meu-color-success", "CanvasText"],
+    ["--meu-color-success-contrast", "Canvas"],
+    ["--meu-color-warning", "CanvasText"],
+    ["--meu-color-warning-contrast", "Canvas"],
+    ["--meu-color-danger", "CanvasText"],
+    ["--meu-color-danger-contrast", "Canvas"],
+    ["--meu-shadow-floating", "none"]
+  ];
 
   return [
     declarationBlock(":root, [data-meu-theme='light'], [data-meu-theme='system']", light),
@@ -146,6 +166,16 @@ function buildCss(tokens: TokenTree): string {
     "",
     "@media (prefers-color-scheme: dark) {",
     declarationBlock("  [data-meu-theme='system']", darkColors)
+      .split("\n")
+      .map((line) => `  ${line}`)
+      .join("\n"),
+    "}",
+    "",
+    "@media (forced-colors: active) {",
+    declarationBlock(
+      "  :root, [data-meu-theme='light'], [data-meu-theme='dark'], [data-meu-theme='system']",
+      forcedColors
+    )
       .split("\n")
       .map((line) => `  ${line}`)
       .join("\n"),

@@ -42,6 +42,11 @@ function getPreferredActionKey(actions: ReadonlyArray<DialogAction>) {
   return firstEnabledAction ? firstEnabledAction.key : undefined;
 }
 
+/**
+ * Renders a modal dialog with asynchronous native-button actions.
+ *
+ * @public
+ */
 export function Dialog({
   actionLayout = "auto",
   actions,
@@ -139,6 +144,7 @@ export function Dialog({
         {...configBoundary}
         className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
+        inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="dialog"
         data-state={visualState}

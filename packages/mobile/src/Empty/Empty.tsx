@@ -18,6 +18,11 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
 }
 
+/**
+ * Renders an empty-state illustration, explanation, and optional actions.
+ *
+ * @public
+ */
 export function Empty({
   "aria-describedby": ariaDescribedby,
   "aria-label": ariaLabel,

@@ -18,6 +18,11 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
+/**
+ * Renders a native checkbox with switch semantics and Field integration.
+ *
+ * @public
+ */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   {
     "aria-describedby": ariaDescribedBy,

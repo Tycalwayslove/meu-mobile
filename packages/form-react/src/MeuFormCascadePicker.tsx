@@ -15,6 +15,11 @@ import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
 import { HiddenFormValues } from "./HiddenFormValues";
 
+/**
+ * Cascade picker props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormCascadePickerAdapterProps<TValue extends PickerValue> = Omit<
   CascadePickerProps<TValue>,
   | "aria-label"
@@ -31,26 +36,45 @@ export type MeuFormCascadePickerAdapterProps<TValue extends PickerValue> = Omit<
   | "value"
 >;
 
+/**
+ * Props for a cascade picker whose selected path is stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormCascadePickerProps<
   TFieldValues extends FieldValues,
   TValue extends PickerValue = PickerValue
 > = MeuFormCascadePickerAdapterProps<TValue> & {
+  /** Initial popup state when `open` does not control the picker. */
   defaultOpen?: boolean;
+  /** Supporting content rendered with the field and associated with the picker trigger. */
   description?: ReactNode;
+  /** Renders the trigger value from the controlled path and its resolved options. */
   formatValue?: (
     value: ReadonlyArray<TValue | null>,
     options: ReadonlyArray<CascadePickerOption<TValue> | null>
   ) => ReactNode;
+  /** Visible field label; also supplies the default popup title. */
   label?: ReactNode;
+  /** React Hook Form field path that stores the selected cascade path. */
   name: Path<TFieldValues>;
+  /** Called when the user cancels without committing a new form value. */
   onCancel?: CascadePickerProps<TValue>["onCancel"];
+  /** Called after the confirmed path is written to the form, with its resolved options. */
   onConfirm?: CascadePickerProps<TValue>["onConfirm"];
+  /** Called when popup visibility is requested to change, with the next state and reason. */
   onOpenChange?: (open: boolean, details: PickerOpenChangeDetails) => void;
+  /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
+  /** Accessible popup name used only when neither `pickerTitle` nor a label supplies a title. */
   pickerAriaLabel?: string;
+  /** Popup heading; defaults to `label`, and suppresses the fallback accessible name. */
   pickerTitle?: ReactNode;
+  /** Shows the required affordance; enforce required validation through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -88,6 +112,11 @@ function defaultFormattedValue<TValue extends PickerValue>(
   ));
 }
 
+/**
+ * Binds a cascade picker's confirmed path, validation state, and trigger to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormCascadePicker<
   TFieldValues extends FieldValues,
   TValue extends PickerValue = PickerValue

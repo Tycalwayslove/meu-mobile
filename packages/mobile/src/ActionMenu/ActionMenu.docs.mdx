@@ -3,7 +3,7 @@ name: ActionMenu
 slug: action-menu
 package: "@meu/mobile"
 exports: [ActionMenu, ActionMenuProvider, useActionMenu]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -118,7 +118,9 @@ O(actions) 分组；关闭 Provider 记录仅为退出动画短暂保留。confi
 
 - Unit: 语义/分组/焦点、pending 跨关闭重开隔离、Popup Portal RTL/motion、回调顺序、false/reject、强制确认、受控取消、forceMount、确认随关闭清理、Provider close/clear/unmount
 - Story interaction: `Default` 验证打开、首操作聚焦、动作关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 11426 B / 32768 B 预算；最大单值 `ActionMenuProvider` 为 11341 B / 32768 B 预算，组合 Brotli 10078 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ActionMenu.ssr.test.tsx`；hydration 专测待补
 - 双引擎 / Chromatic / 真机读屏: 最终统一门禁
 

@@ -1,9 +1,23 @@
 import type { InputHTMLAttributes } from "react";
 
+/**
+ * Visual and touch-target size for Switch.
+ *
+ * @public
+ */
 export type SwitchSize = "small" | "medium" | "large";
+/**
+ * Visual validation state for Switch.
+ *
+ * @public
+ */
 export type SwitchStatus = "default" | "error";
 
-/** Props accepted by {@link Switch}. */
+/**
+ * Props accepted by {@link Switch}.
+ *
+ * @public
+ */
 export type SwitchProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "checked" | "children" | "defaultChecked" | "onChange" | "size" | "type"

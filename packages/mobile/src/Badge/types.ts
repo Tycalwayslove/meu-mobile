@@ -1,7 +1,17 @@
 import type { HTMLAttributes, ReactNode, Ref } from "react";
 
+/**
+ * Semantic color applied to a badge.
+ *
+ * @public
+ */
 export type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
+/**
+ * Props accepted by {@link Badge}.
+ *
+ * @public
+ */
 export type BadgeProps = Omit<
   HTMLAttributes<HTMLSpanElement>,
   "children" | "content" | "dangerouslySetInnerHTML"

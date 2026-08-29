@@ -2,6 +2,11 @@ import type { HTMLAttributes, ReactElement, ReactNode, Ref, RefObject } from "re
 
 import type { OverlayContainer } from "../overlayTypes";
 
+/**
+ * Preferred panel placement before collision handling.
+ *
+ * @public
+ */
 export type PopoverPlacement =
   | "top"
   | "top-start"
@@ -16,12 +21,35 @@ export type PopoverPlacement =
   | "left-start"
   | "left-end";
 
+/**
+ * Trigger behavior managed by Popover.
+ *
+ * @public
+ */
 export type PopoverTrigger = "click" | "manual";
 
+/**
+ * Interaction that requested a popover visibility change.
+ *
+ * @public
+ */
 export type PopoverOpenChangeReason = "trigger" | "escape" | "outside" | "focus-out";
 
-export type PopoverOpenChangeDetails = { reason: PopoverOpenChangeReason };
+/**
+ * Metadata emitted with a popover visibility request.
+ *
+ * @public
+ */
+export type PopoverOpenChangeDetails = {
+  /** Interaction that requested the visibility change. */
+  reason: PopoverOpenChangeReason;
+};
 
+/**
+ * Focusable element shape accepted as the Popover trigger.
+ *
+ * @public
+ */
 export type PopoverTriggerElement = ReactElement<{
   disabled?: boolean;
   id?: string;
@@ -29,8 +57,18 @@ export type PopoverTriggerElement = ReactElement<{
 }>;
 
 type PopoverAccessibleName =
-  | { "aria-label": string; "aria-labelledby"?: never }
-  | { "aria-label"?: never; "aria-labelledby": string };
+  | {
+      /** Direct accessible name for the popover panel. */
+      "aria-label": string;
+      /** Mutually exclusive with `aria-label`. */
+      "aria-labelledby"?: never;
+    }
+  | {
+      /** Mutually exclusive with `aria-labelledby`. */
+      "aria-label"?: never;
+      /** ID of the element that labels the popover panel. */
+      "aria-labelledby": string;
+    };
 
 type PopoverBaseProps = Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -76,4 +114,9 @@ type PopoverBaseProps = Omit<
   viewportPadding?: number;
 };
 
+/**
+ * Props for the anchored non-modal dialog.
+ *
+ * @public
+ */
 export type PopoverProps = PopoverBaseProps & PopoverAccessibleName;

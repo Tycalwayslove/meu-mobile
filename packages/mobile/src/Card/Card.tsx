@@ -15,6 +15,11 @@ import {
 } from "./Card.css";
 import type { CardProps } from "./types";
 
+/**
+ * Renders a structured surface with optional header, body, and footer regions.
+ *
+ * @public
+ */
 export function Card({
   children,
   className,

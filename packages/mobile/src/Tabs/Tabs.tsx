@@ -8,6 +8,11 @@ import { useMeuConfig } from "../ConfigProvider";
 import { label, panel, root, tab, tabList } from "./Tabs.css";
 import type { TabsProps } from "./types";
 
+/**
+ * Renders an accessible tab list with optional associated panels.
+ *
+ * @public
+ */
 export function Tabs({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,

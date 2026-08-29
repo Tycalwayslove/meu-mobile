@@ -1,10 +1,35 @@
 import type { HTMLAttributes, MouseEventHandler, ReactNode, Ref } from "react";
 
+/**
+ * Semantic visual tone for Tag.
+ *
+ * @public
+ */
 export type TagTone = "neutral" | "accent" | "success" | "warning" | "danger";
+/**
+ * Surface treatment for Tag.
+ *
+ * @public
+ */
 export type TagVariant = "solid" | "soft" | "outline";
+/**
+ * Visual and touch-target size for Tag.
+ *
+ * @public
+ */
 export type TagSize = "small" | "medium" | "large";
+/**
+ * Native root element exposed by Tag's active rendering mode.
+ *
+ * @public
+ */
 export type TagRef = HTMLSpanElement | HTMLButtonElement;
 
+/**
+ * Props for a label, filter, or closable chip.
+ *
+ * @public
+ */
 export type TagProps = Omit<
   HTMLAttributes<HTMLSpanElement>,
   "children" | "dangerouslySetInnerHTML" | "onClick"

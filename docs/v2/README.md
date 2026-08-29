@@ -13,13 +13,16 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 ## 当前基线
 
 - Manifest 登记 68 个组件族、125 个公开值、369 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
-- API 属性清单已覆盖 222 个结构化类型、2250 个字段与 232 个事件；其中 838 个字段已有 TSDoc，剩余字段和 374 个 API Extractor release-tag 警告仍需收口。
+- 68/68 个组件族已由 `audit/implementation` 进入 `verification`；这表示本地实现与自动化证据齐全到可执行最终验收，不代表已越过真机、Chromatic 和发布门禁。
+- API 属性清单已覆盖 222 个结构化类型、2250 个字段与 232 个事件；2250/2250 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
 - Storybook 当前包含 80 个标题、374 个 Story；68 个官网组件链接、342 个留存文档 Story ID 与对应 Autodocs entry 均通过静态校验。
-- 80 个 Storybook 标题均至少包含一项关键 `play` 交互；本地浏览器门禁会等待交互成功，再对 374 个 Story 的 Light/Dark、390×844 视口执行 axe WCAG A/AA，共 748 个场景，最近一次结果为 0 违规。
-- 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；最终内容与浏览器验收仍在进行。
-- 官网生产构建会由独立本地门禁验证 68 个组件页面的 Light/Dark、主题恢复、页面结构和 axe WCAG A/AA；当前 136 个页面/主题场景为 0 违规。
+- 80 个 Storybook 标题均至少包含一项关键 `play` 交互；本地浏览器门禁会等待交互成功，再在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合，最近一次结果为 0 违规、0 `pageerror`。
+- 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；Props / Events 来自完整的生成 API 模型。
+- 官网生产构建由独立本地门禁验证 68 个组件页面的 Light/Dark、主题恢复、页面结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA；当前 136 个页面/主题场景全部通过。
+- Bundle 门禁对 68 个产品族和 125 个公开运行时值分别执行 Rollup tree-shaking；当前全部在分级 gzip 预算内，共享 CSS 为 22,670 B / 32 KiB 预算。
 - `@meu/test-utils` 已提供 a11y、SSR/hydration、表单、手势、locale/RTL 与 reduced-motion 辅助能力；单元、隔离 Next H5 Chromium/WebKit 与旧语法扫描已有本地门禁。
-- 真实 iOS Safari/VoiceOver、Android Chrome/TalkBack、旧 WebView 运行时、全组件 hydration、性能预算和最终 Chromatic 视觉审批仍是发布阻断项。
+- 隔离 Next H5 已为初始 open Portal、测量与手势边界建立 8 案例 × 2 引擎专项 hydration；10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 高频 pointer 预算也已通过。
+- 真实 iOS Safari/VoiceOver、Android Chrome/TalkBack、旧 WebView 运行时、持续手势帧率/内存/弱网专项，以及最终 Chromatic 视觉审批仍是发布阻断项。
 
 这些数字是当前仓库可重复生成的证据，不等同于组件已经达到 `commercial`。每个组件仍需按模板补齐剩余适用项并完成最终发布验收。
 
@@ -109,7 +112,7 @@ audit → design → implementation → verification → commercial
 
 每个组件完成时，同一个变更必须包含：实现、类型 JSDoc、单测、Story/交互、视觉基线、留存文档、官网页面和变更记录。不得把文档留到所有代码完成后集中补写。
 
-逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
+逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
 
 ## 发布门禁
 

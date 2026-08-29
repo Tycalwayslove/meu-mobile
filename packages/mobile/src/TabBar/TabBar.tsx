@@ -15,6 +15,11 @@ import {
 } from "./TabBar.css";
 import type { TabBarItem, TabBarProps } from "./types";
 
+/**
+ * Renders primary mobile destinations as accessible links or buttons.
+ *
+ * @public
+ */
 export function TabBar({
   "aria-label": ariaLabel,
   className,

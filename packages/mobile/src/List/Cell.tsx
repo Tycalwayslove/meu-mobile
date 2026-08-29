@@ -19,6 +19,11 @@ import {
 import { useListContext } from "./ListContext";
 import type { CellProps } from "./types";
 
+/**
+ * Renders a semantic list row as an anchor, button, or static element.
+ *
+ * @public
+ */
 export function Cell({
   arrow,
   className,

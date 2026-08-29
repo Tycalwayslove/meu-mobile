@@ -42,6 +42,11 @@ function defaultCanPull(rootNode: HTMLElement) {
   return scrollingElement.scrollTop <= 0;
 }
 
+/**
+ * Adds touch and keyboard refresh actions at a scroll boundary.
+ *
+ * @public
+ */
 export function PullToRefresh({
   actionLabel,
   canPull,

@@ -3,6 +3,11 @@ import type { DateAdapter } from "@meu/date-adapter";
 import { compareCalendarDays, normalizeCalendarDay, sameCalendarDay } from "../Calendar";
 import type { CalendarDisabledDateDetails, CalendarRange } from "../Calendar";
 
+/**
+ * Normalizes two valid endpoints to ascending calendar-day order.
+ *
+ * @public
+ */
 export function normalizeDateRange<TDate>(
   adapter: DateAdapter<TDate>,
   value: CalendarRange<TDate> | null | undefined
@@ -16,6 +21,11 @@ export function normalizeDateRange<TDate>(
     : ([second, first] as const);
 }
 
+/**
+ * Tests whether two optional ranges have the same normalized endpoints.
+ *
+ * @public
+ */
 export function sameDateRange<TDate>(
   adapter: DateAdapter<TDate>,
   left: CalendarRange<TDate> | null | undefined,
@@ -32,6 +42,11 @@ export function sameDateRange<TDate>(
   );
 }
 
+/**
+ * Tests whether both endpoints satisfy the picker's bounds and disabled-date rule.
+ *
+ * @public
+ */
 export function dateRangeIsSelectable<TDate>(
   adapter: DateAdapter<TDate>,
   value: CalendarRange<TDate> | null,

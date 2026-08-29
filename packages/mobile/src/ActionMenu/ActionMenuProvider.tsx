@@ -28,6 +28,11 @@ type ActionMenuRecord = {
 const exitDuration = 180;
 const ActionMenuContext = createContext<ActionMenuApi | null>(null);
 
+/**
+ * Provides the imperative action-menu API to its React subtree.
+ *
+ * @public
+ */
 export function ActionMenuProvider({ children }: ActionMenuProviderProps) {
   const [records, setRecords] = useState<ActionMenuRecord[]>([]);
   const activeIdsRef = useRef(new Set<number>());
@@ -104,6 +109,11 @@ export function ActionMenuProvider({ children }: ActionMenuProviderProps) {
   );
 }
 
+/**
+ * Returns the imperative action-menu API from the nearest provider.
+ *
+ * @public
+ */
 export function useActionMenu() {
   const actionMenu = useContext(ActionMenuContext);
   if (!actionMenu) {

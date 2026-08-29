@@ -15,6 +15,7 @@ const packageEntries = [
   ["@meu/primitives-react", "packages/primitives-react/src/index.ts"]
 ];
 const check = new Set(process.argv.slice(2)).has("--check");
+const strict = new Set(process.argv.slice(2)).has("--strict");
 
 function normalizedPath(filePath) {
   return path.resolve(filePath).split(path.sep).join("/");
@@ -109,6 +110,7 @@ let exportedTypesWithFields = 0;
 let fields = 0;
 let documentedFields = 0;
 let eventFields = 0;
+const missingDocumentation = [];
 
 for (const [packageName, entryPath] of packageEntries) {
   const sourceFile = program.getSourceFile(path.join(workspaceRoot, entryPath));
@@ -133,6 +135,11 @@ for (const [packageName, entryPath] of packageEntries) {
     fields += properties.length;
     documentedFields += properties.filter((property) => property.description).length;
     eventFields += properties.filter((property) => property.event).length;
+    for (const property of properties) {
+      if (!property.description) {
+        missingDocumentation.push(`${packageName}:${exportedSymbol.getName()}.${property.name}`);
+      }
+    }
     entries[exportedSymbol.getName()] = properties;
   }
   packages[packageName] = entries;
@@ -173,3 +180,13 @@ console.log(
     `${eventFields} events`
   ].join(" · ")
 );
+
+if (strict && missingDocumentation.length > 0) {
+  console.error(
+    [
+      `Public API documentation is incomplete: ${missingDocumentation.length} field(s) are missing TSDoc.`,
+      ...missingDocumentation.map((entry) => `- ${entry}`)
+    ].join("\n")
+  );
+  process.exitCode = 1;
+}

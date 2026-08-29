@@ -16,12 +16,22 @@ import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-ho
 
 import { HiddenFormValues } from "./HiddenFormValues";
 
+/**
+ * React Hook Form paths whose values can hold a structured time or an empty value.
+ *
+ * @public
+ */
 export type MeuTimePickerFieldPath<TFieldValues extends FieldValues> =
   | FieldPathByValue<TFieldValues, TimeValue>
   | FieldPathByValue<TFieldValues, TimeValue | null>
   | FieldPathByValue<TFieldValues, TimeValue | undefined>
   | FieldPathByValue<TFieldValues, TimeValue | null | undefined>;
 
+/**
+ * Time picker props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormTimePickerAdapterProps = Omit<
   TimePickerProps,
   | "aria-label"
@@ -38,27 +48,51 @@ export type MeuFormTimePickerAdapterProps = Omit<
   | "value"
 >;
 
+/**
+ * Props for a time picker whose confirmed `TimeValue` is stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormTimePickerProps<TFieldValues extends FieldValues> =
   MeuFormTimePickerAdapterProps & {
+    /** Initial popup state when `open` does not control the time picker. */
     defaultOpen?: boolean;
+    /** Supporting content rendered with the field and associated with the picker trigger. */
     description?: ReactNode;
+    /** Renders a valid form value in the trigger with the active hour cycle and precision. */
     formatValue?: (
       value: TimeValue,
       details: { hourCycle: TimePickerHourCycle; precision: TimePickerPrecision }
     ) => ReactNode;
+    /** Visible field label; also supplies the default popup title. */
     label?: ReactNode;
+    /** Path of a React Hook Form field that stores a `TimeValue` or an empty value. */
     name: MeuTimePickerFieldPath<TFieldValues>;
+    /** Called when the user cancels without committing a new form value. */
     onCancel?: TimePickerProps["onCancel"];
+    /** Called after the confirmed time is written to the form. */
     onConfirm?: TimePickerProps["onConfirm"];
+    /** Called when popup visibility is requested to change, with the next state and reason. */
     onOpenChange?: (open: boolean, details: TimePickerOpenChangeDetails) => void;
+    /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
     open?: boolean;
+    /** Accessible popup name used only when neither `pickerTitle` nor a label supplies a title. */
     pickerAriaLabel?: string;
+    /** Popup heading; defaults to `label`, and suppresses the fallback accessible name. */
     pickerTitle?: ReactNode;
+    /** Shows the required affordance; enforce required validation through `rules` when needed. */
     required?: boolean;
+    /** React Hook Form validation and value-processing rules registered for this field. */
     rules?: UseControllerProps<TFieldValues, MeuTimePickerFieldPath<TFieldValues>>["rules"];
+    /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
     triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
   };
 
+/**
+ * Binds a time picker's confirmed value, validation state, and trigger to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormTimePicker<TFieldValues extends FieldValues>({
   defaultOpen = false,
   description,

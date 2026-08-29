@@ -37,6 +37,11 @@ function buildCandidate(chars: string[], count: number, direction: EllipsisDirec
   return `${chars.slice(0, count).join("")}…`;
 }
 
+/**
+ * Renders measured multi-line truncation with accessible expand and collapse controls.
+ *
+ * @public
+ */
 export function Ellipsis({
   className,
   collapseText = "收起",

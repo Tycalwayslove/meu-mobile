@@ -3,7 +3,7 @@ name: Tag
 slug: tag
 package: "@meu/mobile"
 exports: [Tag]
-status: implementation
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -36,7 +36,7 @@ Figma node `77:2` 是 Tag 页面参考；当前 FIGMA_SYNC 未能确定组件集
 - 五种 tone、三种 variant/size、rounded、长文 24ch 视觉省略、RTL 逻辑间距、reduced-motion 和 forced-colors。
 - 交互与关闭目标均至少 44×44，原生 Enter/Space 键盘路径成立。
 
-状态为 `implementation`；移动 E2E、Chromatic 视觉基线和真机读屏待补。
+状态为 `verification`；移动 E2E、Chromatic 视觉基线和真机读屏待补。
 
 ## 何时使用
 
@@ -134,7 +134,9 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 
 - Unit: `Tag.test.tsx` 覆盖静态、filter、selected、独立 close 键盘和 disabled 双动作。
 - Story interaction: `Filter` 切换并验证 `aria-pressed`；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2618 B / 32768 B 预算，组合 Brotli 2304 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种 DOM 模式；hydration 专测待补。
 - RTL: 逻辑 CSS 已实现，专属截图待补。
 - Reduced motion: CSS 已实现，截图待补。

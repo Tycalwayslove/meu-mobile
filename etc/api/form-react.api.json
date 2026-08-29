@@ -317,7 +317,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuDateRangePickerFieldPath:type",
-          "docComment": "",
+          "docComment": "/**\n * React Hook Form paths whose values can hold a two-date range or an empty value.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -549,7 +549,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormCalendar:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a calendar's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -646,7 +646,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Calendar props accepted by the form adapter after removing form-controlled value and ref fields.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -699,7 +699,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarCommonProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Field presentation and calendar behavior shared by every selection mode.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -761,7 +761,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarMultipleFieldPath:type",
-          "docComment": "",
+          "docComment": "/**\n * React Hook Form paths whose values can hold an array of selected dates.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -870,7 +870,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarMultipleProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a calendar bound to a multiple-date React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -970,7 +970,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Mode-discriminated props for a calendar controlled by React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1061,7 +1061,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarRangeFieldPath:type",
-          "docComment": "",
+          "docComment": "/**\n * React Hook Form paths whose values can hold a selected date range or an empty value.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1170,7 +1170,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarRangeProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a calendar bound to a date-range React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1270,7 +1270,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarSingleFieldPath:type",
-          "docComment": "",
+          "docComment": "/**\n * React Hook Form paths whose values can hold one selected date or an empty value.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1361,7 +1361,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCalendarSingleProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a calendar bound to a single-date React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1461,7 +1461,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormCascadePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a cascade picker's confirmed path, validation state, and trigger to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1575,7 +1575,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCascadePickerAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Cascade picker props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1637,7 +1637,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCascadePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a cascade picker whose selected path is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1854,7 +1854,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormCheckbox:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a checkbox's checked state, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -1939,7 +1939,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormCheckboxGroup:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a checkbox group's selections, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2053,7 +2053,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCheckboxGroupProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a checkbox group bound to an array-valued React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2198,7 +2198,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormCheckboxProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a checkbox bound to a boolean React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2323,7 +2323,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormDatePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a date picker's confirmed value, validation state, and trigger to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2428,7 +2428,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormDatePickerAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Date picker props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2481,7 +2481,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormDatePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a date picker whose confirmed value is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2680,7 +2680,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormDateRangePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a date range picker's confirmed value, validation state, and trigger to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2785,7 +2785,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormDateRangePickerAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Date range picker props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -2838,7 +2838,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormDateRangePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a date range picker whose confirmed range is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3037,7 +3037,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormImageUploader:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds an image uploader's items, validation state, and input ref to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3122,7 +3122,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormImageUploaderProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for an image uploader whose item array is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3265,7 +3265,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormNumberKeyboard:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds number-key input, validation state, and trigger behavior to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3350,7 +3350,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Number keyboard props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3390,7 +3390,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardOpenChangeDetails:type",
-          "docComment": "",
+          "docComment": "/**\n * Reasons reported when the number keyboard requests an open-state change.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3421,7 +3421,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormNumberKeyboardProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a number keyboard whose edited string is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3591,7 +3591,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormPasscodeInput:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a passcode input's value, validation state, and hidden input ref to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3676,7 +3676,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormPasscodeInputProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a passcode input whose string value is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3810,7 +3810,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormPicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a picker's confirmed values, validation state, and trigger to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3924,7 +3924,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormPickerAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Picker props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -3986,7 +3986,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormPickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a column picker whose confirmed values are stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4357,7 +4357,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormRadioGroup:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a radio group's selection, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4471,7 +4471,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormRadioGroupProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a radio group bound to a scalar React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4616,7 +4616,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormRate:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a rating control's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4701,7 +4701,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormRateProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a rating control bound to a numeric React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4826,7 +4826,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormSearchField:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a search input's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -4911,7 +4911,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormSearchFieldProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a search input bound to a string-valued React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5036,7 +5036,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormSegmentedControl:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a segmented control's selection, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5150,7 +5150,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormSegmentedControlProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a segmented control bound to a scalar React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5295,7 +5295,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormSelector:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a selector's values, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5409,7 +5409,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormSelectorProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a selector bound to an array-valued React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5554,7 +5554,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormSlider:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a slider's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5639,7 +5639,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormSliderProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a slider bound to a numeric React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5764,7 +5764,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormStepper:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a stepper's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5849,7 +5849,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormStepperProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a stepper bound to a numeric React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -5974,7 +5974,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormSwitch:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a switch's checked state, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6059,7 +6059,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormSwitchProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a switch bound to a boolean React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6184,7 +6184,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormTextArea:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a text area's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6269,7 +6269,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormTextAreaProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a text area bound to a string-valued React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6394,7 +6394,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormTextInput:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a text input's value, validation state, and focus target to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6479,7 +6479,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormTextInputProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a text input bound to a string-valued React Hook Form field.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6604,7 +6604,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormTimePicker:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a time picker's confirmed value, validation state, and trigger to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6689,7 +6689,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormTimePickerAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Time picker props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6729,7 +6729,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormTimePickerProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a time picker whose confirmed `TimeValue` is stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -6917,7 +6917,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!MeuFormTreeSelect:function(1)",
-          "docComment": "",
+          "docComment": "/**\n * Binds a tree selector's confirmed values, validation state, and trigger to React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7031,7 +7031,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormTreeSelectAdapterProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Tree selector props accepted after removing state managed by the form adapter.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7093,7 +7093,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormTreeSelectProps:type",
-          "docComment": "",
+          "docComment": "/**\n * Props for a tree selector whose confirmed values are stored in React Hook Form.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7480,7 +7480,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuTimePickerFieldPath:type",
-          "docComment": "",
+          "docComment": "/**\n * React Hook Form paths whose values can hold a structured time or an empty value.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

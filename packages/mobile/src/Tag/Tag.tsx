@@ -6,6 +6,11 @@ import { useMeuConfig } from "../ConfigProvider";
 import { tagChip, tagClose, tagContent, tagGroup, tagRoot } from "./Tag.css";
 import type { TagProps } from "./types";
 
+/**
+ * Renders a compact label, filter, or closable chip.
+ *
+ * @public
+ */
 export function Tag({
   "aria-label": ariaLabel,
   children,

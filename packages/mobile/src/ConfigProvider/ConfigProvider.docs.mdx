@@ -3,11 +3,11 @@ name: ConfigProvider
 slug: config-provider
 package: "@meu/mobile"
 exports: [ConfigProvider, useMeuConfig]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: null
   nodeId: null
@@ -170,7 +170,9 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 
 - Unit: `ConfigProvider.test.tsx` 覆盖默认值、DOM 属性、className、逐字段嵌套继承、显式覆盖、Portal null/惰性函数和 ThemeProvider 身份。
 - Story interaction: `NestedConfiguration` 验证逐字段覆盖与继承边界；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 723 B / 32768 B 预算；最大单值 `ConfigProvider` 为 674 B / 32768 B 预算，组合 Brotli 623 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
 - Reduced motion: 单元测试覆盖嵌套策略，CSS media/reduced class 已实现；真实浏览器 computed style 待 E2E。

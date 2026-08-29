@@ -19,6 +19,11 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
+/**
+ * Coordinates checkbox values and shared accessibility state for a group.
+ *
+ * @public
+ */
 export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,

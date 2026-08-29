@@ -1,19 +1,35 @@
+/** Calendar or clock unit accepted by adapter arithmetic. @public */
 export type DateUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "year";
 
+/** Finest editable unit used by date and time picker columns. @public */
 export type DatePrecision = "year" | "month" | "day" | "hour" | "minute" | "second";
 
+/**
+ * Platform-neutral civil date and time fields. Months are one-based.
+ *
+ * @public
+ */
 export type DateParts = {
+  /** Day of month in the inclusive range supported by the selected month. */
   day: number;
+  /** Hour of day using the 24-hour range 0–23. */
   hour: number;
+  /** Millisecond within the current second, from 0 to 999. */
   millisecond: number;
+  /** Minute within the current hour, from 0 to 59. */
   minute: number;
+  /** One-based calendar month, where January is 1 and December is 12. */
   month: number;
+  /** Second within the current minute, from 0 to 59. */
   second: number;
+  /** Full signed calendar year rather than a two-digit year. */
   year: number;
 };
 
+/** Calendar fields required to determine the length of a month. @public */
 export type DateCalendarParts = Pick<DateParts, "month" | "year">;
 
+/** Contract revision implemented by this adapter package. @public */
 export const meuDateAdapterContractVersion = "2" as const;
 
 /**
@@ -22,18 +38,31 @@ export const meuDateAdapterContractVersion = "2" as const;
  * Month values are one-based (January is 1). Weekdays use the JavaScript convention where
  * Sunday is 0 and Saturday is 6. Implementations own their timezone semantics; Meu's native
  * adapter uses the host's local civil time.
+ *
+ * @public
  */
 export interface DateAdapter<TDate> {
+  /** Returns a new value moved by a signed amount without mutating the input. */
   add(value: TDate, amount: number, unit: DateUnit): TDate;
+  /** Orders two values chronologically using a negative, zero, or positive result. */
   compare(left: TDate, right: TDate): number;
+  /** Formats a valid value with the adapter's documented token pattern and optional locale. */
   format(value: TDate, pattern: string, locale?: string): string;
+  /** Creates a value from validated civil fields, or `null` when the fields cannot form a date. */
   fromParts(parts: DateParts): TDate | null;
+  /** Returns the JavaScript weekday index, where Sunday is 0 and Saturday is 6. */
   getDayOfWeek(value: TDate): number;
+  /** Returns the number of days in the supplied one-based month and full year. */
   getDaysInMonth(parts: DateCalendarParts): number;
+  /** Decomposes a value into platform-neutral local civil fields. */
   getParts(value: TDate): DateParts;
+  /** Reports whether the value can safely participate in adapter operations. */
   isValid(value: TDate): boolean;
+  /** Returns the adapter's current instant using its configured timezone semantics. */
   now(): TDate;
+  /** Parses a string with the documented token pattern, returning `null` for invalid input. */
   parse(value: string, pattern: string, locale?: string): TDate | null;
+  /** Returns a new value truncated to the beginning of the requested unit. */
   startOf(value: TDate, unit: DateUnit): TDate;
 }
 
@@ -47,10 +76,12 @@ const datePartKeys: ReadonlyArray<keyof DateParts> = [
   "millisecond"
 ];
 
+/** Compares every civil field without converting through a platform date object. @public */
 export function sameDateParts(left: DateParts, right: DateParts) {
   return datePartKeys.every((key) => left[key] === right[key]);
 }
 
+/** Builds complete civil fields with January 1 at midnight as the omitted-field defaults. @public */
 export function createDateParts(parts: Partial<DateParts> & Pick<DateParts, "year">): DateParts {
   return {
     day: parts.day === undefined ? 1 : parts.day,
@@ -267,6 +298,11 @@ function parseToken(token: FormatToken, value: number, parts: DateParts) {
   }
 }
 
+/**
+ * Date adapter backed by JavaScript `Date` and the host's local civil timezone.
+ *
+ * @public
+ */
 export const nativeDateAdapter: DateAdapter<Date> = {
   add(value, amount, unit) {
     const next = new Date(value.getTime());

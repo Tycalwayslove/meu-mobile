@@ -13,11 +13,15 @@ export type MeuUseFormProps<
 > = Omit<UseFormProps<TFieldValues, TContext, TTransformedValues>, "resolver"> &
   (
     | {
+        /** Unavailable when `schema` supplies the Zod-based resolver. */
         resolver?: never;
+        /** Zod schema used to validate inputs and produce the submitted value shape. */
         schema: ZodType<TTransformedValues, TFieldValues>;
       }
     | {
+        /** Custom React Hook Form resolver; mutually exclusive with `schema`. */
         resolver?: Resolver<TFieldValues, TContext, TTransformedValues>;
+        /** Unavailable when a custom `resolver` is supplied. */
         schema?: never;
       }
   );

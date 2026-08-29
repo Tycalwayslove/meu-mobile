@@ -32,7 +32,11 @@ type ToastRecord = {
 const exitDuration = 160;
 const ToastContext = createContext<ToastApi | null>(null);
 
-/** Provides a scoped FIFO queue for command-driven Toast feedback. */
+/**
+ * Provides a scoped FIFO queue for command-driven Toast feedback.
+ *
+ * @public
+ */
 export function ToastProvider({ children }: ToastProviderProps) {
   const config = useMeuConfig();
   const [records, setRecords] = useState<ToastRecord[]>([]);
@@ -194,7 +198,11 @@ export function ToastProvider({ children }: ToastProviderProps) {
   );
 }
 
-/** Returns the FIFO Toast command API from the nearest {@link ToastProvider}. */
+/**
+ * Returns the FIFO Toast command API from the nearest {@link ToastProvider}.
+ *
+ * @public
+ */
 export function useToast() {
   const toast = useContext(ToastContext);
   if (!toast) throw new Error("useToast must be used within a ToastProvider");

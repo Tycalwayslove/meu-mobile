@@ -9,7 +9,7 @@ import { JSX } from 'react';
 import type { ReactNode } from 'react';
 import type { RefObject } from 'react';
 
-// @public (undocumented)
+// @public
 export type FocusTrapOptions = {
     active: boolean;
     containerRef: RefObject<HTMLElement | null>;
@@ -42,7 +42,5 @@ export function VisuallyHidden(input: VisuallyHiddenProps): JSX.Element;
 
 // @public
 export type VisuallyHiddenProps = HTMLAttributes<HTMLSpanElement>;
-
-// (No @packageDocumentation comment for this package)
 
 ```

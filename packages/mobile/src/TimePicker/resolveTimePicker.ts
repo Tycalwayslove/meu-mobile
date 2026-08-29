@@ -12,6 +12,11 @@ import type {
   TimeValue
 } from "./types";
 
+/**
+ * Ordered time units from coarsest to finest precision.
+ *
+ * @public
+ */
 export const timePickerPrecisions = [
   "hour",
   "minute",
@@ -53,6 +58,11 @@ function cloneTime(value: TimeValue): TimeValue {
   return { hour: value.hour, minute: value.minute, second: value.second };
 }
 
+/**
+ * Checks that a value contains integer hour, minute, and second fields in their canonical ranges.
+ *
+ * @public
+ */
 export function isValidTimeValue(value: TimeValue | null | undefined): value is TimeValue {
   return Boolean(
     value &&
@@ -72,6 +82,11 @@ function precisionIndex(precision: TimePickerPrecision) {
   return timePickerPrecisions.indexOf(precision);
 }
 
+/**
+ * Returns the ordered wheel identities required by a precision and hour cycle.
+ *
+ * @public
+ */
 export function timePickerColumns(
   precision: TimePickerPrecision,
   hourCycle: TimePickerHourCycle
@@ -315,6 +330,11 @@ function padded(value: number) {
   return String(value).padStart(2, "0");
 }
 
+/**
+ * Formats a valid canonical time for compact display, returning an empty string for invalid input.
+ *
+ * @public
+ */
 export function formatTimeValue(value: TimeValue, options: FormatTimeValueOptions = {}) {
   if (!isValidTimeValue(value)) return "";
   const hourCycle = options.hourCycle || "h23";

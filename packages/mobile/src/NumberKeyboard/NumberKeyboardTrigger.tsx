@@ -4,6 +4,11 @@ import { useFieldContext } from "../Field/FieldContext";
 import { trigger, triggerPlaceholder, triggerSuffix, triggerValue } from "./NumberKeyboard.css";
 import type { NumberKeyboardTriggerProps } from "./types";
 
+/**
+ * Renders a Field-aware button that opens a NumberKeyboard.
+ *
+ * @public
+ */
 export function NumberKeyboardTrigger({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,

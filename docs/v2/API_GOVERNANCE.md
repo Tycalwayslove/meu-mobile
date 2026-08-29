@@ -28,14 +28,15 @@ pnpm api:properties
 # 校验逐字段文档模型没有落后于源码
 pnpm api:properties:check
 
+# 严格校验每个公开字段都有 TSDoc
+pnpm api:properties:strict
+
 # 严格门禁：除快照一致外，任何 API/TSDoc warning 也会失败
 pnpm api:extract:strict
 ```
 
-`pnpm api:extract` 与 `pnpm api:properties:check` 已加入 Quality CI，并位于
-`pnpm build:packages` 之后。前者不会因为迁移期已有的
-`ae-missing-release-tag` 警告让普通 CI 失败，但仍会统计并显示债务总数。API report 或 doc model
-没有更新时，普通校验会失败。
+`pnpm api:extract:strict` 与 `pnpm api:properties:strict` 已加入 Quality CI，并位于
+`pnpm build:packages` 之后。API report、doc model、release tag 或字段说明任何一项缺失、过期或产生 warning 都会失败。
 
 官网的 Props / Events 表由 `scripts/generate-api-properties.mjs` 通过 TypeScript 类型检查器生成，
 字段包含名称、类型、必填、默认值和 TSDoc 说明。生成产物为
@@ -44,9 +45,8 @@ pnpm api:extract:strict
 
 ## 当前迁移基线
 
-首次建立快照时共有 463 个 `ae-missing-release-tag` 警告；当前普通校验已降至 374 个。
-以每次 `pnpm api:extract` 输出的 deferred warning 总数为实时基线，避免人工维护的分包表与声明面漂移。
-该数量按 API Extractor 的公开声明诊断计数，不等同于组件数量或 Props 字段数量；它是严格门禁启用前必须归零的 API 注释债务。
+首次建立快照时共有 463 个 `ae-missing-release-tag` 警告，阶段中期为 374 个；当前已归零。
+四个运行时包的严格提取均为 0 warning，2250/2250 个生成字段具有 TSDoc。该结果由命令实时生成，不再维护人工分包债务表。
 
 ## 维护流程
 
@@ -55,12 +55,12 @@ pnpm api:extract:strict
 3. 执行 `pnpm api:properties`，检查官网 Props / Events 字段、默认值和说明是否准确。
 4. 确认变化后执行 `pnpm api:extract:update`，把对应 `.api.md`、`.api.json` 与生成的逐字段模型一起提交。
 5. 新增或修改的公开声明必须写 TSDoc，并标记 `@public`、`@beta`、`@alpha` 或 `@internal`。
-6. 每一批组件完成时执行 `pnpm api:extract:strict`；旧债务可以按批次清理，但不允许引入新的 warning。
+6. 每一批组件完成时执行 `pnpm api:extract:strict` 与 `pnpm api:properties:strict`；任何新增 warning 或无说明公开字段都阻断合入。
 
-## 迁移期例外
+## 已关闭的迁移期例外
 
-- 普通 CI 暂时忽略且仅忽略 `ae-missing-release-tag` 对退出码的影响；编译错误、API 快照变化和 doc model 变化仍会失败。
-- 严格命令不应用上述例外，适合作为单组件或单批次达到 V2 商用状态的验收门禁。
+- 普通校验命令仍保留兼容入口，但 Quality CI 已不再忽略 `ae-missing-release-tag`；历史例外于 2026-08-29 关闭。
+- API Extractor strict 与属性 strict 都是持续门禁，不再只用于单组件或单批次抽查。
 - API Extractor 只证明声明面稳定，不能替代运行时行为、无障碍、浏览器、WebView、视觉回归或 E2E 验证。
 
 ## Doc model 边界

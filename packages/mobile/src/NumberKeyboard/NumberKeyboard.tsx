@@ -40,8 +40,7 @@ function shuffleDigits() {
   return next;
 }
 
-function inputSource(value: string, mode: "number" | "decimal"):
-  NumberKeyboardInputSource {
+function inputSource(value: string, mode: "number" | "decimal"): NumberKeyboardInputSource {
   if (/^\d$/.test(value)) return "digit";
   if (mode === "decimal" && value === ".") return "decimal";
   return "extra";
@@ -60,6 +59,11 @@ function resolveExtraKey(
   return null;
 }
 
+/**
+ * Renders a non-modal, locale-aware numeric keyboard in a portal.
+ *
+ * @public
+ */
 export function NumberKeyboard({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -243,7 +247,9 @@ export function NumberKeyboard({
       onPointerLeave={finishDeleteRepeat}
       onPointerUp={finishDeleteRepeat}
     >
-      <span className={backspaceGlyph} aria-hidden="true">⌫</span>
+      <span className={backspaceGlyph} aria-hidden="true">
+        ⌫
+      </span>
     </button>
   );
 
@@ -252,6 +258,7 @@ export function NumberKeyboard({
       <div
         className={layer({ state: visualState })}
         hidden={hidden}
+        inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         lang={config.locale}
         data-meu-overlay-layer="number-keyboard"

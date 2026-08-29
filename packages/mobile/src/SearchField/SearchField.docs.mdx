@@ -3,11 +3,11 @@ name: SearchField
 slug: search-field
 package: "@meu/mobile"
 exports: [SearchField]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: null
   nodeId: null
@@ -36,7 +36,7 @@ source: packages/mobile/src/SearchField
 - 有 `onSearch` 时组件独占 Enter 并阻止原生 form submit；没有 `onSearch` 时 Enter 完全交还原生 form。
 - loading 时输入仍可编辑，但会隐藏 clear、公告搜索中状态，并阻止 Enter 产生重复回调或原生提交。
 
-当前状态为 `implementation`。单元、SSR、Story play 与本地 axe 已补齐；完整 Light/Dark 视觉审批、RTL/字号矩阵、移动 WebKit/Chromium 专属 E2E 和真机读屏尚未完成，因此不能标记为 commercial。
+当前状态为 `verification`。单元、SSR、Story play 与本地 axe 已补齐；完整 Light/Dark 视觉审批、RTL/字号矩阵、移动 WebKit/Chromium 专属 E2E 和真机读屏尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -190,7 +190,9 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 - Unit: `SearchField.test.tsx` 覆盖事件首参/details、clear 顺序与焦点、readOnly、disabled、loading、IME、repeat、consumer cancellation、原生/回调 form 所有权和受控 live native value
 - Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4477 B / 32768 B 预算，组合 Brotli 3937 B；共享样式由应用单独导入一次。
 - SSR/hydration: `renderToString` 覆盖 native type/name/value/readOnly；hydration 专项待补
 - RTL: 使用 logical CSS；浏览器矩阵待补
 - Reduced motion: CSS 静态 ring 已实现；浏览器 computed-style 证明待补

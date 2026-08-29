@@ -6,6 +6,11 @@ import { body, footer as footerStyle, header as headerStyle, root } from "./List
 import { ListContext } from "./ListContext";
 import type { ListProps } from "./types";
 
+/**
+ * Renders an accessible group of cells with shared dividers and surface styling.
+ *
+ * @public
+ */
 export function List({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,

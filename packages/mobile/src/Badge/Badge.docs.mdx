@@ -3,7 +3,7 @@ name: Badge
 slug: badge
 package: "@meu/mobile"
 exports: [Badge]
-status: implementation
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -31,7 +31,7 @@ source: packages/mobile/src/Badge
 - 无 label 的 dot 装饰性隐藏；label 为 dot 提供状态含义，也可替换计数的可访问名称。
 - RTL 定位与 forced-colors 已处理；组件无动画。
 
-状态为 `implementation`；动态公告、视觉基线和真机证据待补。
+状态为 `verification`；动态公告、视觉基线和真机证据待补。
 
 ## 何时使用
 
@@ -121,7 +121,9 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 
 - Unit: `Badge.test.tsx` 覆盖 zero/max、dot label、tone 文本和 RTL offset。
 - Story interaction: `Count` 验证独立计数与 accessibility tree 暴露；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2100 B / 32768 B 预算，组合 Brotli 1875 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；hydration 专测待补。
 - RTL: Unit 覆盖 offset 数据归一化；逻辑定位由 CSS 实现，视觉截图待补。
 - Reduced motion: 无动画，不适用。

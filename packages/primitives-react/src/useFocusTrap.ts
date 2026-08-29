@@ -3,6 +3,11 @@
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 
+/**
+ * Configuration for the shared nested-modal focus manager.
+ *
+ * @public
+ */
 export type FocusTrapOptions = {
   /** Whether this trap participates in the global nested-trap stack. */
   active: boolean;

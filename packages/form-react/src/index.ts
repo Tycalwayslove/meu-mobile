@@ -1,3 +1,8 @@
+/**
+ * React Hook Form adapters that bind Meu Mobile inputs without duplicating business state.
+ *
+ * @packageDocumentation
+ */
 "use client";
 
 export type {

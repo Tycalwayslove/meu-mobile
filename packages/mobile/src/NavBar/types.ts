@@ -1,6 +1,10 @@
 import type { ComponentProps, MouseEventHandler, ReactNode, Ref } from "react";
 
-/** Props for a route-agnostic mobile page header. */
+/**
+ * Props for a route-agnostic mobile page header.
+ *
+ * @public
+ */
 export type NavBarProps = Omit<ComponentProps<"header">, "children" | "title"> & {
   /** Accessible name of the back link/button. Defaults to the configured locale. */
   backAriaLabel?: string;

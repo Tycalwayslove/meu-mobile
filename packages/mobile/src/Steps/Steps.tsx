@@ -19,6 +19,11 @@ const statusLabels = {
   "en-US": { wait: "Not started", process: "In progress", finish: "Completed", error: "Error" }
 } as const;
 
+/**
+ * Renders an ordered, read-only sequence of process steps.
+ *
+ * @public
+ */
 export function Steps({
   "aria-label": ariaLabel,
   className,

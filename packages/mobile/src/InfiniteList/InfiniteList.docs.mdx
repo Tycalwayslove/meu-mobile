@@ -3,7 +3,7 @@ name: InfiniteList
 slug: infinite-list
 package: "@meu/mobile"
 exports: [InfiniteList]
-status: audit
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -119,7 +119,9 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 
 - Unit: `InfiniteList.test.tsx` 覆盖 root discovery、并发锁、失败/重试、完成、Observer 降级、disabled、自定义视觉和陈旧 rejection。
 - Story interaction: `ErrorAndRetry.play` 验证失败、重试和恢复状态；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2564 B / 32768 B 预算，组合 Brotli 2204 B；共享样式由应用单独导入一次。
 - SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖 idle/complete；Observer hydration 待补。
 - Reduced motion/forced-colors/RTL: CSS 或无方向契约完成，视觉证据待补。
 - Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。

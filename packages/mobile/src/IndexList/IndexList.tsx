@@ -7,7 +7,11 @@ import { useMeuConfig } from "../ConfigProvider";
 import { body, content, heading, indexButton, rail, root, section } from "./IndexList.css";
 import type { IndexListChangeDetails, IndexListProps, IndexListScrollOptions } from "./types";
 
-/** Renders a bounded, sectioned list with an accessible keyboard and touch index rail. */
+/**
+ * Renders a bounded, sectioned list with an accessible keyboard and touch index rail.
+ *
+ * @public
+ */
 export function IndexList({
   className,
   indexAriaLabel,

@@ -3,7 +3,7 @@ name: TimePicker
 slug: time-picker
 package: "@meu/mobile"
 exports: [TimePicker, formatTimeValue, isValidTimeValue, timePickerColumns, timePickerPrecisions]
-status: implementation
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -118,7 +118,9 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 - Unit：隐藏位归零、bounds/steps/filter、12h/period、seconds、自定义 label、取消/确认、受控、动态受控模式、矛盾边界、格式化。
 - SSR：TimePicker.ssr.test.tsx 覆盖稳定 dialog/listbox 与 AM/PM。
 - Story interaction: `Default` 验证 Portal 打开、draft 选择、确认回调与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 13914 B / 49152 B 预算；最大单值 `TimePicker` 为 13663 B / 49152 B 预算，组合 Brotli 12340 B；共享样式由应用单独导入一次。
 - Figma：Meu/TimePicker 245:2；8 variants、48px options、12/24h Light/Dark QA。
 - 双引擎、Chromatic 视觉回归、真机滚轮/读屏：待发布门禁。
 

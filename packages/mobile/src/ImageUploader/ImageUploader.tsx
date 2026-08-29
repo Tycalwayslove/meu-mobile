@@ -78,6 +78,11 @@ function itemKey(item: ImageUploaderItem, index: number) {
   return item.key === undefined ? `${item.url}-${index}` : item.key;
 }
 
+/**
+ * Renders an asynchronous image upload queue with previews and retries.
+ *
+ * @public
+ */
 export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
   function ImageUploader(
     {

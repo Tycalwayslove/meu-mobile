@@ -8,6 +8,11 @@ import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
 import { clearButton, input, wrapper } from "./TextInput.css";
 
+/**
+ * Props for a Field-aware native text input with an optional clear action.
+ *
+ * @public
+ */
 export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
   /** Shows a native button that clears the current value. @defaultValue false */
   clearable?: boolean;
@@ -27,6 +32,11 @@ function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
   }
 }
 
+/**
+ * Renders a Field-aware native text input with an optional clear action.
+ *
+ * @public
+ */
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function TextInput(
   {
     "aria-describedby": ariaDescribedBy,

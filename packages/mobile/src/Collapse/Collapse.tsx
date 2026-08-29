@@ -39,6 +39,11 @@ function sameValue(left: readonly string[], right: readonly string[]) {
   return left.length === right.length && left.every((entry, index) => entry === right[index]);
 }
 
+/**
+ * Renders a disclosure group with optional single-item accordion behavior.
+ *
+ * @public
+ */
 export function Collapse({
   accordion = false,
   arrow,

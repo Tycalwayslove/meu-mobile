@@ -16,7 +16,11 @@ function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement |
   else if (ref) ref.current = node;
 }
 
-/** A touch-friendly rating control backed by native range semantics. */
+/**
+ * Renders a touch-friendly rating control backed by native range semantics.
+ *
+ * @public
+ */
 export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   {
     "aria-describedby": ariaDescribedBy,

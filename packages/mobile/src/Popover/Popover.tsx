@@ -42,6 +42,11 @@ function mapOpenChangeReason(reason: string | undefined): PopoverOpenChangeDetai
   return { reason: "trigger" };
 }
 
+/**
+ * Renders a positioned non-modal dialog anchored to one trigger element.
+ *
+ * @public
+ */
 export function Popover({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -164,6 +169,7 @@ export function Popover({
       className={classes}
       style={panelStyle}
       hidden={hidden}
+      inert={!resolvedOpen}
       data-meu-component="popover"
       data-meu-focus-branch={triggerId}
       data-offset={resolvedOffset}

@@ -1,10 +1,29 @@
 import type { HTMLAttributes, InputHTMLAttributes, ReactNode, Ref } from "react";
 
+/**
+ * Preset control size for a checkbox.
+ *
+ * @public
+ */
 export type CheckboxSize = "small" | "medium" | "large";
+/**
+ * Validation state displayed by a checkbox or checkbox group.
+ *
+ * @public
+ */
 export type CheckboxStatus = "default" | "error";
+/**
+ * Stable scalar identity for a checkbox-group option.
+ *
+ * @public
+ */
 export type CheckboxValue = string | number;
 
-/** Props accepted by {@link Checkbox}. */
+/**
+ * Props accepted by {@link Checkbox}.
+ *
+ * @public
+ */
 export type CheckboxProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "checked" | "children" | "defaultChecked" | "onChange" | "size" | "type" | "value"
@@ -29,7 +48,11 @@ export type CheckboxProps = Omit<
   value?: CheckboxValue;
 };
 
-/** Props accepted by {@link CheckboxGroup}. */
+/**
+ * Props accepted by {@link CheckboxGroup}.
+ *
+ * @public
+ */
 export type CheckboxGroupProps<TValue extends CheckboxValue = CheckboxValue> = Omit<
   HTMLAttributes<HTMLDivElement>,
   "defaultValue" | "onChange"

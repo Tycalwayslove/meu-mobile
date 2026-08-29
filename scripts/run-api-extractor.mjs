@@ -38,6 +38,7 @@ if (unknownArguments.length > 0) {
   let hasStaleDocModels = false;
   let totalWarnings = 0;
   let migrationWarnings = 0;
+  const missingReleaseTags = [];
 
   for (const { folder, artifact } of packages) {
     const configPath = resolve(workspaceRoot, `packages/${folder}/api-extractor.json`);
@@ -50,6 +51,12 @@ if (unknownArguments.length > 0) {
       messageCallback(message) {
         if (message.messageId === "ae-missing-release-tag") {
           migrationWarnings += 1;
+          missingReleaseTags.push({
+            packageName: `@meu/${folder}`,
+            filePath: message.sourceFilePath,
+            line: message.sourceFileLine,
+            text: message.text
+          });
           if (!strict) {
             message.logLevel = ExtractorLogLevel.None;
           }
@@ -88,6 +95,17 @@ if (unknownArguments.length > 0) {
   if (hasErrors || hasStaleDocModels) {
     process.exitCode = 1;
   } else if (strict && totalWarnings > 0) {
+    if (missingReleaseTags.length > 0) {
+      console.error(
+        [
+          `Missing release tags (${missingReleaseTags.length}):`,
+          ...missingReleaseTags.map(({ packageName, filePath, line, text }) => {
+            const location = filePath ? `${filePath}${line ? `:${line}` : ""}` : packageName;
+            return `- ${location}: ${text}`;
+          })
+        ].join("\n")
+      );
+    }
     console.error(
       `[api-extractor] Strict gate failed with ${totalWarnings} warning(s). Add TSDoc/release tags or explicitly resolve the reported API debt.`
     );

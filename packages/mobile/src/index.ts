@@ -1,3 +1,8 @@
+/**
+ * React 19 mobile web components, providers and behavior contracts for Meu applications.
+ *
+ * @packageDocumentation
+ */
 "use client";
 
 export { Button } from "./Button";

@@ -1,9 +1,23 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 
+/**
+ * Visual and touch-target size for Rate.
+ *
+ * @public
+ */
 export type RateSize = "small" | "medium" | "large";
+/**
+ * Visual validation state for Rate.
+ *
+ * @public
+ */
 export type RateStatus = "default" | "error";
 
-/** Props accepted by {@link Rate}. Native range attributes are forwarded in interactive mode. */
+/**
+ * Props accepted by {@link Rate}. Native range attributes are forwarded in interactive mode.
+ *
+ * @public
+ */
 export type RateProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"

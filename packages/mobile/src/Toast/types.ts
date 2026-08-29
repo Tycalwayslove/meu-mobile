@@ -2,12 +2,24 @@ import type { HTMLAttributes, ReactNode, Ref } from "react";
 
 import type { OverlayContainer } from "../overlayTypes";
 
-/** Semantic visual tone and live-region urgency for Toast. */
+/**
+ * Semantic visual tone and live-region urgency for Toast.
+ *
+ * @public
+ */
 export type ToastTone = "neutral" | "success" | "warning" | "danger";
-/** Viewport placement for Toast. */
+/**
+ * Viewport placement for Toast.
+ *
+ * @public
+ */
 export type ToastPosition = "top" | "center" | "bottom";
 
-/** Optional action rendered beside a Toast message. */
+/**
+ * Optional action rendered beside a Toast message.
+ *
+ * @public
+ */
 export type ToastAction = {
   /** Keeps the Toast open after a successful action when false. */
   closeOnPress?: boolean;
@@ -17,11 +29,35 @@ export type ToastAction = {
   onPress?: () => boolean | void | Promise<boolean | void>;
 };
 
-/** Reasons emitted by a declarative Toast close request. */
-export type ToastOpenChangeDetails = { reason: "timeout" } | { reason: "action" };
-/** Reasons emitted by provider-owned Toast records. */
+/**
+ * Reasons emitted by a declarative Toast close request.
+ *
+ * @public
+ */
+export type ToastOpenChangeDetails =
+  | {
+      /** Automatic duration expiry requested closure. */
+      reason: "timeout";
+    }
+  | {
+      /** A successful action requested closure. */
+      reason: "action";
+    };
+/**
+ * Reasons emitted by provider-owned Toast records.
+ *
+ * @public
+ */
 export type ToastCloseDetails =
-  ToastOpenChangeDetails | { reason: "programmatic" } | { reason: "clear" };
+  | ToastOpenChangeDetails
+  | {
+      /** A controller explicitly closed the record. */
+      reason: "programmatic";
+    }
+  | {
+      /** {@link ToastApi.clear} closed the record. */
+      reason: "clear";
+    };
 
 /**
  * Properties accepted by one declarative Toast component.
@@ -62,7 +98,11 @@ export type ToastProps = Omit<
 
 type WithoutOpenState<T> = Omit<T, "defaultOpen" | "onOpenChange" | "open">;
 
-/** Options accepted by {@link ToastApi.show}. */
+/**
+ * Options accepted by {@link ToastApi.show}.
+ *
+ * @public
+ */
 export type ToastShowOptions = WithoutOpenState<ToastProps> & {
   /** Stable queue identity; showing the same active id updates instead of enqueueing. */
   id?: string;
@@ -70,10 +110,18 @@ export type ToastShowOptions = WithoutOpenState<ToastProps> & {
   onClose?: (details: ToastCloseDetails) => void;
 };
 
-/** Partial update accepted by a {@link ToastController}. */
+/**
+ * Partial update accepted by a {@link ToastController}.
+ *
+ * @public
+ */
 export type ToastUpdateOptions = Partial<Omit<ToastShowOptions, "id">>;
 
-/** Controller for one provider-owned Toast record. */
+/**
+ * Controller for one provider-owned Toast record.
+ *
+ * @public
+ */
 export type ToastController = {
   /** Closes the active or queued record programmatically. */
   close: () => void;
@@ -83,19 +131,36 @@ export type ToastController = {
   update: (options: ToastUpdateOptions) => void;
 };
 
-/** Tone-specific show options. */
+/**
+ * Options for a Toast API method that fixes the visual tone.
+ *
+ * @public
+ */
 export type ToastToneOptions = Omit<ToastShowOptions, "tone">;
 
-/** FIFO command API exposed by {@link ToastProvider}. */
+/**
+ * FIFO command API exposed by {@link ToastProvider}.
+ *
+ * @public
+ */
 export type ToastApi = {
+  /** Closes every active and queued provider record with reason `clear`. */
   clear: () => void;
+  /** Enqueues or updates a danger-tone Toast and returns its controller. */
   danger: (options: ToastToneOptions) => ToastController;
+  /** Enqueues or updates a Toast and returns its controller. */
   show: (options: ToastShowOptions) => ToastController;
+  /** Enqueues or updates a success-tone Toast and returns its controller. */
   success: (options: ToastToneOptions) => ToastController;
+  /** Enqueues or updates a warning-tone Toast and returns its controller. */
   warning: (options: ToastToneOptions) => ToastController;
 };
 
-/** Props for {@link ToastProvider}. */
+/**
+ * Props for {@link ToastProvider}.
+ *
+ * @public
+ */
 export type ToastProviderProps = {
   /** React subtree that can call {@link useToast}. */
   children: ReactNode;

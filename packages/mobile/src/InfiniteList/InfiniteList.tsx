@@ -38,7 +38,11 @@ function findScrollRoot(node: HTMLElement) {
   return null;
 }
 
-/** Renders a concurrency-safe pagination sentinel with automatic and manual request paths. */
+/**
+ * Renders a concurrency-safe pagination sentinel with automatic and manual request paths.
+ *
+ * @public
+ */
 export function InfiniteList({
   autoLoad = true,
   className,

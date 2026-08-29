@@ -7,7 +7,11 @@ import type {
   Ref
 } from "react";
 
-/** A stable, addressable section rendered by {@link IndexList}. */
+/**
+ * A stable, addressable section rendered by {@link IndexList}.
+ *
+ * @public
+ */
 export type IndexListSection = {
   /** Accessible name for the index button when the stable key is not user-facing. */
   ariaLabel?: string;
@@ -21,10 +25,18 @@ export type IndexListSection = {
   title?: ReactNode;
 };
 
-/** Origin of an active-section change. */
+/**
+ * Origin of an active-section change.
+ *
+ * @public
+ */
 export type IndexListChangeSource = "index" | "scroll";
 
-/** Details reported with an active-section change. */
+/**
+ * Details reported with an active-section change.
+ *
+ * @public
+ */
 export type IndexListChangeDetails = {
   /** Original input event when the change came from the index rail. */
   event?:
@@ -33,7 +45,11 @@ export type IndexListChangeDetails = {
   source: IndexListChangeSource;
 };
 
-/** Options for {@link IndexListRef.scrollTo}. */
+/**
+ * Options for {@link IndexListRef.scrollTo}.
+ *
+ * @public
+ */
 export type IndexListScrollOptions = {
   /** Native scroll behavior; defaults to `auto`. */
   behavior?: ScrollBehavior;
@@ -41,13 +57,21 @@ export type IndexListScrollOptions = {
   focusIndex?: boolean;
 };
 
-/** Imperative handle exposed by {@link IndexList}. */
+/**
+ * Imperative handle exposed by {@link IndexList}.
+ *
+ * @public
+ */
 export type IndexListRef = {
   /** Scrolls to a section and returns false when the key is not currently present. */
   scrollTo: (key: string, options?: IndexListScrollOptions) => boolean;
 };
 
-/** Props for {@link IndexList}. */
+/**
+ * Props for {@link IndexList}.
+ *
+ * @public
+ */
 export type IndexListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange"> & {
   /** Accessible name for the index navigation rail. */
   indexAriaLabel?: string;

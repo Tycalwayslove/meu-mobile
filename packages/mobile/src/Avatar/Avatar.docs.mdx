@@ -3,7 +3,7 @@ name: Avatar
 slug: avatar
 package: "@meu/mobile"
 exports: [Avatar]
-status: implementation
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -32,7 +32,7 @@ source: packages/mobile/src/Avatar
 - loading 与 error 都保留相同 fallback，源变化由 Image 状态机重新开始；不自行重试或缓存失败。
 - RTL 无方向性布局；forced-colors 保留轮廓。图片淡入的 reduced-motion 降级由 Image 实现。
 
-状态为 `implementation`；Chromatic、移动 E2E 与真机读屏尚未完成。
+状态为 `verification`；Chromatic、移动 E2E 与真机读屏尚未完成。
 
 ## 何时使用
 
@@ -120,7 +120,9 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 
 - Unit: `Avatar.test.tsx` 覆盖派生/显式 initials、失败、loading、装饰 alt 和数值尺寸。
 - Story interaction: `ImageFailure` 触发 error 并验证 fallback；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3175 B / 32768 B 预算，组合 Brotli 2814 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Avatar.ssr.test.tsx` 验证无浏览器全局的稳定 fallback markup；hydration 专测待补。
 - RTL: 逻辑无关；专属自动化不适用。
 - Reduced motion: 继承 Image CSS，截图待补。

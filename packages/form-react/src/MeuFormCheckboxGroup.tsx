@@ -8,18 +8,34 @@ import type { ReactNode } from "react";
 
 import type { MeuCollectionFieldPath } from "./adapter-types";
 
+/**
+ * Props for a checkbox group bound to an array-valued React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormCheckboxGroupProps<
   TFieldValues extends FieldValues,
   TValue extends CheckboxValue = CheckboxValue
 > = Omit<CheckboxGroupProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
+  /** Supporting content rendered with the field and associated with the checkbox group. */
   description?: ReactNode;
+  /** Visible group label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the array-valued React Hook Form field controlled by this group. */
   name: MeuCollectionFieldPath<TFieldValues, TValue>;
+  /** Called after React Hook Form stores the next array; receives the selected values. */
   onChange?: CheckboxGroupProps<TValue>["onChange"];
+  /** Shows the required affordance; enforce minimum selection through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuCollectionFieldPath<TFieldValues, TValue>>["rules"];
 };
 
+/**
+ * Binds a checkbox group's selections, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormCheckboxGroup<
   TFieldValues extends FieldValues,
   TValue extends CheckboxValue = CheckboxValue

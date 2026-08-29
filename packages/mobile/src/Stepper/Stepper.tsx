@@ -18,7 +18,11 @@ function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement |
   else if (ref) ref.current = node;
 }
 
-/** A numeric text field with accessible decrement and increment controls. */
+/**
+ * Renders a numeric text field with accessible decrement and increment controls.
+ *
+ * @public
+ */
 export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepper(
   {
     "aria-describedby": ariaDescribedBy,

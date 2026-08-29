@@ -1,8 +1,23 @@
 import type { ComponentProps, MouseEvent, Ref } from "react";
 
+/**
+ * Layout direction for pagination markers.
+ *
+ * @public
+ */
 export type PaginationDotsDirection = "horizontal" | "vertical";
+/**
+ * Visual shape used for pagination markers.
+ *
+ * @public
+ */
 export type PaginationDotsVariant = "dot" | "line";
 
+/**
+ * Props for compact page-position markers.
+ *
+ * @public
+ */
 export type PaginationDotsProps = Omit<ComponentProps<"div">, "children"> & {
   /** Zero-based active page. Non-finite values become zero; other values are clamped. */
   activeIndex: number;

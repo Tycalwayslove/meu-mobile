@@ -36,6 +36,4 @@ export const MeuIconSearch: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "n
 // @public
 export const MeuIconX: ForwardRefExoticComponent<Omit<Omit<MeuIconProps, "name" | "icon">, "ref"> & RefAttributes<SVGSVGElement>>;
 
-// (No @packageDocumentation comment for this package)
-
 ```

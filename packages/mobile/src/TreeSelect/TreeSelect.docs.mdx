@@ -3,7 +3,7 @@ name: TreeSelect
 slug: tree-select
 package: "@meu/mobile"
 exports: [TreeSelect]
-status: implementation
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -138,11 +138,13 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 - Unit: single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window 与 aria-invalid
 - Story interaction: `Single` 验证 Portal 打开、draft 选择、确认提交与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
-- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏；浏览器 hydration 专测待补
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 27728 B / 49152 B 预算，组合 Brotli 23785 B；共享样式由应用单独导入一次。
+- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
 - RTL: RightToLeft Story 与 unit
 - Reduced motion: CSS 静态规则；浏览器 computed-style 待补
-- Mobile Chromium/WebKit E2E: 待补搜索、虚拟焦点和 async cancel
+- Mobile Chromium/WebKit E2E: 搜索、虚拟焦点、draft 确认/回滚与焦点恢复通过；1,500 节点性能门禁要求打开 ≤750ms、搜索 ≤500ms、DOM treeitem ≤30，两种引擎均通过。async cancel 由 unit 覆盖。
 - Chromatic Light/Dark: Figma 已验收，统一发布批次再运行
 - Real device: 待补 VoiceOver/TalkBack 虚拟树可用性
 

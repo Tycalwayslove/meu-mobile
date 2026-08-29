@@ -15,6 +15,11 @@ import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
 import { HiddenFormValues } from "./HiddenFormValues";
 
+/**
+ * Tree selector props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormTreeSelectAdapterProps<TValue extends TreeSelectValue> = Omit<
   TreeSelectProps<TValue>,
   | "aria-label"
@@ -31,26 +36,45 @@ export type MeuFormTreeSelectAdapterProps<TValue extends TreeSelectValue> = Omit
   | "value"
 >;
 
+/**
+ * Props for a tree selector whose confirmed values are stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormTreeSelectProps<
   TFieldValues extends FieldValues,
   TValue extends TreeSelectValue = TreeSelectValue
 > = MeuFormTreeSelectAdapterProps<TValue> & {
+  /** Initial popup state when `open` does not control the tree selector. */
   defaultOpen?: boolean;
+  /** Supporting content rendered with the field and associated with the picker trigger. */
   description?: ReactNode;
+  /** Renders the trigger value from selected form values and their resolved tree options. */
   formatValue?: (
     value: ReadonlyArray<TValue>,
     options: ReadonlyArray<TreeSelectOption<TValue>>
   ) => ReactNode;
+  /** Visible field label; also supplies the default popup title. */
   label?: ReactNode;
+  /** React Hook Form field path that stores the selected tree values. */
   name: Path<TFieldValues>;
+  /** Called when the user cancels without committing a new form value. */
   onCancel?: TreeSelectProps<TValue>["onCancel"];
+  /** Called after confirmation with the selected values and options; read-only mode skips form updates. */
   onConfirm?: TreeSelectProps<TValue>["onConfirm"];
+  /** Called when popup visibility is requested to change, with the next state and reason. */
   onOpenChange?: (open: boolean, details: { reason: TreeSelectOpenChangeReason }) => void;
+  /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
+  /** Shows the required affordance; enforce required validation through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  /** Accessible name for the tree itself, independent of the popup's title. */
   treeAriaLabel?: string;
+  /** Popup heading; defaults to `label`, with `treeAriaLabel` used when no heading is present. */
   treeTitle?: ReactNode;
+  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -78,6 +102,11 @@ function defaultFormattedValue<TValue extends TreeSelectValue>(
   ));
 }
 
+/**
+ * Binds a tree selector's confirmed values, validation state, and trigger to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormTreeSelect<
   TFieldValues extends FieldValues,
   TValue extends TreeSelectValue = TreeSelectValue

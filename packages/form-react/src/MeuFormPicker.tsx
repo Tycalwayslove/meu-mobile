@@ -15,6 +15,11 @@ import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
 import { HiddenFormValues } from "./HiddenFormValues";
 
+/**
+ * Picker props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormPickerAdapterProps<TValue extends PickerValue> = Omit<
   PickerProps<TValue>,
   | "aria-label"
@@ -31,26 +36,45 @@ export type MeuFormPickerAdapterProps<TValue extends PickerValue> = Omit<
   | "value"
 >;
 
+/**
+ * Props for a column picker whose confirmed values are stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormPickerProps<
   TFieldValues extends FieldValues,
   TValue extends PickerValue = PickerValue
 > = MeuFormPickerAdapterProps<TValue> & {
+  /** Initial popup state when `open` does not control the picker. */
   defaultOpen?: boolean;
+  /** Supporting content rendered with the field and associated with the picker trigger. */
   description?: ReactNode;
+  /** Renders the trigger value from the controlled form value and resolved options. */
   formatValue?: (
     value: ReadonlyArray<TValue | null>,
     options: ReadonlyArray<PickerOption<TValue> | null>
   ) => ReactNode;
+  /** Visible field label; also supplies the default popup title. */
   label?: ReactNode;
+  /** React Hook Form field path that stores one value per picker column. */
   name: Path<TFieldValues>;
+  /** Called when the user cancels without committing a new form value. */
   onCancel?: PickerProps<TValue>["onCancel"];
+  /** Called after the confirmed values are written to the form, with their resolved options. */
   onConfirm?: PickerProps<TValue>["onConfirm"];
+  /** Called when popup visibility is requested to change, with the next state and reason. */
   onOpenChange?: (open: boolean, details: PickerOpenChangeDetails) => void;
+  /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
+  /** Accessible popup name used only when neither `pickerTitle` nor a label supplies a title. */
   pickerAriaLabel?: string;
+  /** Popup heading; defaults to `label`, and suppresses the fallback accessible name. */
   pickerTitle?: ReactNode;
+  /** Shows the required affordance; enforce required validation through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -75,6 +99,11 @@ function defaultFormattedValue<TValue extends PickerValue>(
   ));
 }
 
+/**
+ * Binds a picker's confirmed values, validation state, and trigger to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormPicker<
   TFieldValues extends FieldValues,
   TValue extends PickerValue = PickerValue

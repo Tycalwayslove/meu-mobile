@@ -3,11 +3,11 @@ name: Carousel
 slug: carousel
 package: "@meu/mobile"
 exports: [Carousel]
-status: audit
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "302:122"
@@ -125,7 +125,9 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 - Unit: `Carousel.test.tsx`
 - Story interaction: `Default` 验证前进按钮、索引更新与活动 slide 的可访问状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Axe: 本地扫描器在 390×844 视口逐一打开 374 个 story 的 Light/Dark，共 748 场景；有 play 的 story 先收到 `storyFinished=success`，再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 18254 B / 49152 B 预算，组合 Brotli 16099 B；共享样式由应用单独导入一次。
 - SSR/hydration: 待补组件级证明
 - RTL: 待补
 - Reduced motion: 有单测覆盖，待真实浏览器证明

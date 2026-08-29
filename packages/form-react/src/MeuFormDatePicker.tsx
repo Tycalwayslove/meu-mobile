@@ -14,6 +14,11 @@ import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 
+/**
+ * Date picker props accepted after removing state managed by the form adapter.
+ *
+ * @public
+ */
 export type MeuFormDatePickerAdapterProps<TDate> = Omit<
   DatePickerProps<TDate>,
   | "aria-label"
@@ -30,26 +35,45 @@ export type MeuFormDatePickerAdapterProps<TDate> = Omit<
   | "value"
 >;
 
+/**
+ * Props for a date picker whose confirmed value is stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormDatePickerProps<
   TFieldValues extends FieldValues,
   TDate = Date
 > = MeuFormDatePickerAdapterProps<TDate> & {
+  /** Initial popup state when `open` does not control the date picker. */
   defaultOpen?: boolean;
+  /** Supporting content rendered with the field and associated with the picker trigger. */
   description?: ReactNode;
+  /** Renders a valid form value in the trigger, with the active adapter and precision. */
   formatValue?: (
     value: TDate,
     details: { adapter: DateAdapter<TDate>; precision: DatePrecision }
   ) => ReactNode;
+  /** Visible field label; also supplies the default popup title. */
   label?: ReactNode;
+  /** React Hook Form field path that stores the selected date or `null`. */
   name: Path<TFieldValues>;
+  /** Called when the user cancels without committing a new form value. */
   onCancel?: DatePickerProps<TDate>["onCancel"];
+  /** Called after the confirmed date is written to the form. */
   onConfirm?: DatePickerProps<TDate>["onConfirm"];
+  /** Called when popup visibility is requested to change, with the next state and reason. */
   onOpenChange?: (open: boolean, details: DatePickerOpenChangeDetails) => void;
+  /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
+  /** Accessible popup name used only when neither `pickerTitle` nor a label supplies a title. */
   pickerAriaLabel?: string;
+  /** Popup heading; defaults to `label`, and suppresses the fallback accessible name. */
   pickerTitle?: ReactNode;
+  /** Shows the required affordance; enforce required validation through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -62,6 +86,11 @@ const formatPatterns: Record<DatePrecision, string> = {
   year: "YYYY"
 };
 
+/**
+ * Binds a date picker's confirmed value, validation state, and trigger to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date>({
   adapter,
   defaultOpen = false,

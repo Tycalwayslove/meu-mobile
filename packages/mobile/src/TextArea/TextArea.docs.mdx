@@ -3,11 +3,11 @@ name: TextArea
 slug: text-area
 package: "@meu/mobile"
 exports: [TextArea]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: null
   nodeId: null
@@ -209,7 +209,9 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 
 - Unit: `TextArea.test.tsx` 11 项覆盖 ARIA 合并/去重、无 live counter、UTF-16、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权和 readOnly；另有 1 项 SSR 测试。
 - Story interaction: `NativeFormReset` 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4047 B / 32768 B 预算，组合 Brotli 3583 B；共享样式由应用单独导入一次。
 - SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；隔离 Next hydration 待补。
 - RTL: 依赖原生 textarea/逻辑布局，待移动浏览器视觉证明。
 - Reduced motion: 无动效，不适用；仍待 E2E 证明无 height transition。

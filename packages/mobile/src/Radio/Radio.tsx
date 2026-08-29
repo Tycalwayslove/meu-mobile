@@ -19,6 +19,11 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
+/**
+ * Renders a native radio input with Meu styling and Field integration.
+ *
+ * @public
+ */
 export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
   {
     "aria-describedby": ariaDescribedBy,

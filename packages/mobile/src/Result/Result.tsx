@@ -36,6 +36,11 @@ function getDefaultIcon(status: ResultStatus) {
   return "i";
 }
 
+/**
+ * Renders a semantic outcome state with optional description and actions.
+ *
+ * @public
+ */
 export function Result({
   "aria-atomic": ariaAtomic,
   "aria-describedby": ariaDescribedby,

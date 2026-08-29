@@ -14,10 +14,18 @@ import {
 } from "./Field.css";
 import { FieldContext } from "./FieldContext";
 
-/** Controls how the visible field label names the direct child control. */
+/**
+ * Controls how the visible field label names the direct child control.
+ *
+ * @public
+ */
 export type FieldLabelAssociation = "auto" | "native" | "aria";
 
-/** Props accepted by {@link Field}. */
+/**
+ * Configures a labeled control with optional help, validation, and required-state content.
+ *
+ * @public
+ */
 export type FieldProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   /**
    * The control rendered by the field. A single direct React element receives the generated
@@ -103,6 +111,8 @@ function resolveLabelAssociation(
  * Composes one control with its visible label, supporting text, validation feedback and shared
  * accessibility state. The ref points to the root `HTMLDivElement`, while the child keeps its own
  * native or component ref.
+ *
+ * @public
  */
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   {

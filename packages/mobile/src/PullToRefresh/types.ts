@@ -16,7 +16,12 @@ export type PullToRefreshStatusChangeDetails = {
 };
 
 /** Values passed to a custom indicator renderer. @public */
-export type PullToRefreshIndicatorDetails = { distance: number; threshold: number };
+export type PullToRefreshIndicatorDetails = {
+  /** Current resisted pull distance in CSS pixels. */
+  distance: number;
+  /** Resisted distance in CSS pixels required to enter the ready state. */
+  threshold: number;
+};
 
 /** Props for a scroll-boundary-aware pull-to-refresh enhancement. @public */
 export type PullToRefreshProps = Omit<

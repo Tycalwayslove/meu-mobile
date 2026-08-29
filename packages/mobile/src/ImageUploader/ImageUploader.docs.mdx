@@ -3,7 +3,7 @@ name: ImageUploader
 slug: image-uploader
 package: "@meu/mobile"
 exports: [ImageUploader]
-status: implementation
+status: verification
 priority: P2
 since: 0.1.0
 implementedVersion: null
@@ -123,7 +123,9 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 - Unit: `ImageUploader.test.tsx` 覆盖 SSR、原生选择、校验、进度、受控、删除 veto/防重、预览、abort、URL 回收、Field 语义。
 - Story interaction: `Interaction.play` 验证预览与关闭链路；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 30434 B / 49152 B 预算，组合 Brotli 26494 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 已覆盖；hydration 专测未执行。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。

@@ -37,8 +37,15 @@ export type SwipeActionsAction = {
 
 /** Why a rail-open state request occurred. @public */
 export type SwipeActionsOpenChangeDetails =
-  | { reason: "swipe" | "keyboard" | "content" | "outside" | "escape" }
-  | { actionKey: Key; reason: "action" };
+  | {
+      /** Interaction that requested the rail state change. */
+      reason: "swipe" | "keyboard" | "content" | "outside" | "escape";
+    }
+  | {
+      actionKey: Key;
+      /** A successful action requested the rail to close. */
+      reason: "action";
+    };
 
 /** Props for horizontal swipe action rails with native keyboard alternatives. @public */
 export type SwipeActionsProps = Omit<
@@ -73,8 +80,11 @@ export type SwipeActionsProps = Omit<
     action: SwipeActionsAction,
     details: SwipeActionsActionPressDetails
   ) => SwipeActionsActionResult;
+  /** Receives a rejected action handler value; the action rail remains open. */
   onActionError?: (error: unknown, action: SwipeActionsAction) => void;
+  /** Root capture observer called after internal click-suppression handling. */
   onClickCapture?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  /** Root capture observer called after internal Escape and arrow-key handling. */
   onKeyDownCapture?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   /** Root lost-pointer-capture observer; internal cancellation runs afterward. */
   onLostPointerCapture?: (event: ReactPointerEvent<HTMLDivElement>) => void;
@@ -83,9 +93,13 @@ export type SwipeActionsProps = Omit<
     side: SwipeActionsSide | null,
     details: SwipeActionsOpenChangeDetails
   ) => void;
+  /** Root pointer-cancel observer called before the component resets the drag. */
   onPointerCancel?: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  /** Root pointer-down observer; prevent the event to veto swipe tracking. */
   onPointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  /** Root pointer-move observer called before swipe movement is applied. */
   onPointerMove?: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  /** Root pointer-up observer called before the component settles the rail. */
   onPointerUp?: (event: ReactPointerEvent<HTMLDivElement>) => void;
   /** Authoritative physical rail for controlled use. */
   openSide?: SwipeActionsSide | null;

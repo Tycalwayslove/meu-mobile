@@ -8,18 +8,34 @@ import type { ReactNode } from "react";
 
 import type { MeuCollectionFieldPath } from "./adapter-types";
 
+/**
+ * Props for a selector bound to an array-valued React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormSelectorProps<
   TFieldValues extends FieldValues,
   TValue extends SelectorValue = SelectorValue
 > = Omit<SelectorProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
+  /** Supporting content rendered with the field and associated with the selector. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the array-valued React Hook Form field controlled by this selector. */
   name: MeuCollectionFieldPath<TFieldValues, TValue>;
+  /** Called after the form value changes; receives selected values and their option records. */
   onChange?: SelectorProps<TValue>["onChange"];
+  /** Shows the required affordance and sets the selector's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuCollectionFieldPath<TFieldValues, TValue>>["rules"];
 };
 
+/**
+ * Binds a selector's values, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormSelector<
   TFieldValues extends FieldValues,
   TValue extends SelectorValue = SelectorValue

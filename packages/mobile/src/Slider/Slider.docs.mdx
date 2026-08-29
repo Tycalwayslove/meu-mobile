@@ -3,11 +3,11 @@ name: Slider
 slug: slider
 package: "@meu/mobile"
 exports: [Slider]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: null
   nodeId: null
@@ -162,7 +162,9 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 - Unit 7 项：原生 change/complete、Field/marks、bounds/step、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
 - SSR 1 项：无浏览器全局时确定输出 range/value/output。
 - Story interaction: `NativeFormReset` 验证输入后恢复默认值；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4232 B / 32768 B 预算，组合 Brotli 3769 B；共享样式由应用单独导入一次。
 - 待补：移动 Chromium/WebKit pointer+keyboard、200% 字号、forced-colors 截图、Chromatic Light/Dark、iOS VoiceOver/Android TalkBack。
 
 ## V2 优化记录

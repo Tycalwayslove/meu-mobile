@@ -3,11 +3,11 @@ name: PasscodeInput
 slug: passcode-input
 package: "@meu/mobile"
 exports: [PasscodeInput]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "372:2"
@@ -258,7 +258,9 @@ SMS autofill 属浏览器策略，不能仅凭桌面模拟证明。`inputMode="n
 - Form adapter: `MeuFormPasscodeInput.test.tsx` 覆盖 RHF dirty、提交、错误关联、native label 与失败聚焦。
 - Story interaction: `NativeFormReset.play` 在真实 Story 浏览器验证 input → reset 过渡；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Story states: connected/separated、partial/complete、native/custom keyboard、plain/error/readOnly/disabled/RTL。
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe；CI 独立报告仍待固化。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 7898 B / 32768 B 预算，组合 Brotli 6959 B；共享样式由应用单独导入一次。
 - Mobile Chromium/WebKit E2E: 通用 H5 表单已覆盖，OTP autofill/paste/系统键盘仍需专属真机记录。
 - Chromatic Light/Dark: Story 发布后建立视觉基线；Figma 组件集已通过 Light/Dark AA 与目标尺寸 QA。
 - Real device: iOS Safari/WKWebView、Android Chrome/WebView、VoiceOver/TalkBack 待记录。

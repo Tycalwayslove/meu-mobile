@@ -1,11 +1,23 @@
 import type { HTMLAttributes, ReactNode, Ref } from "react";
 
-/** Visual and request state exposed by {@link InfiniteList}. */
+/**
+ * Visual and request state exposed by {@link InfiniteList}.
+ *
+ * @public
+ */
 export type InfiniteListStatus = "idle" | "loading" | "error" | "complete";
-/** Entry point that initiated a pagination request. */
+/**
+ * Entry point that initiated a pagination request.
+ *
+ * @public
+ */
 export type InfiniteListTrigger = "auto" | "manual" | "retry";
 
-/** Details reported with an {@link InfiniteListStatus} transition. */
+/**
+ * Details reported with an {@link InfiniteListStatus} transition.
+ *
+ * @public
+ */
 export type InfiniteListStatusChangeDetails = {
   /** Rejection value when entering the error state. */
   error?: unknown;
@@ -13,7 +25,11 @@ export type InfiniteListStatusChangeDetails = {
   trigger?: InfiniteListTrigger;
 };
 
-/** Props for {@link InfiniteList}. */
+/**
+ * Props for {@link InfiniteList}.
+ *
+ * @public
+ */
 export type InfiniteListProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
   /** Enables IntersectionObserver preloading while preserving the manual button. */
   autoLoad?: boolean;

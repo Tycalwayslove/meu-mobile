@@ -96,7 +96,11 @@ function usePausableTimer({
   return { pause, resume };
 }
 
-/** Renders one declarative non-modal feedback message in a context-preserving Portal. */
+/**
+ * Renders one declarative non-modal feedback message in a context-preserving Portal.
+ *
+ * @public
+ */
 export function Toast({
   action,
   className,
@@ -194,6 +198,7 @@ export function Toast({
         {...configBoundary}
         className={`${viewport({ position })} ${configBoundary.className}`}
         hidden={hidden}
+        inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="toast"
         data-position={position}

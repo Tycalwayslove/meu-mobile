@@ -112,6 +112,11 @@ function snapPointText(
   return `${Math.round(point * 100)}%，位置 ${index + 1}/${total}`;
 }
 
+/**
+ * Renders a modal bottom sheet with draggable snap points.
+ *
+ * @public
+ */
 export function BottomSheet({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
@@ -330,6 +335,7 @@ export function BottomSheet({
         {...configBoundary}
         className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
+        inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="bottom-sheet"
         data-state={visualState}

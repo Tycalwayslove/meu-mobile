@@ -34,10 +34,10 @@ import type { RefObject } from 'react';
 import type { SVGProps } from 'react';
 import { TextareaHTMLAttributes } from 'react';
 
-// @public (undocumented)
+// @public
 export function ActionMenu(input: ActionMenuProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ActionMenuAction = {
     closeOnPress?: boolean;
     confirmation?: ActionMenuConfirmation;
@@ -50,21 +50,21 @@ export type ActionMenuAction = {
     tone?: ActionMenuActionTone;
 };
 
-// @public (undocumented)
+// @public
 export type ActionMenuActionTone = "neutral" | "danger";
 
-// @public (undocumented)
+// @public
 export type ActionMenuApi = {
     clear: () => void;
     show: (options: ActionMenuShowOptions) => ActionMenuController;
 };
 
-// @public (undocumented)
+// @public
 export type ActionMenuCloseDetails = ActionMenuOpenChangeDetails | {
     reason: "clear" | "programmatic";
 };
 
-// @public (undocumented)
+// @public
 export type ActionMenuConfirmation = {
     cancelText?: ReactNode;
     confirmText?: ReactNode;
@@ -72,12 +72,12 @@ export type ActionMenuConfirmation = {
     title?: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export type ActionMenuController = {
     close: () => void;
 };
 
-// @public (undocumented)
+// @public
 export type ActionMenuOpenChangeDetails = {
     reason: "cancel" | "escape" | "mask";
 } | {
@@ -88,31 +88,31 @@ export type ActionMenuOpenChangeDetails = {
 // Warning: (ae-forgotten-export) The symbol "ActionMenuBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ActionMenuAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type ActionMenuProps = ActionMenuBaseProps & ActionMenuAccessibleName;
 
-// @public (undocumented)
+// @public
 export function ActionMenuProvider(input: ActionMenuProviderProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ActionMenuProviderProps = {
     children: ReactNode;
 };
 
 // Warning: (ae-forgotten-export) The symbol "WithoutOpenState_2" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type ActionMenuShowOptions = WithoutOpenState_2<ActionMenuProps> & {
     onClose?: (details: ActionMenuCloseDetails) => void;
 };
 
-// @public (undocumented)
+// @public
 export function Avatar(input: AvatarProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type AvatarFit = NonNullable<CSSProperties["objectFit"]>;
 
-// @public (undocumented)
+// @public
 export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "dangerouslySetInnerHTML" | "onError" | "onLoad"> & {
     alt: string;
     fallback?: ReactNode;
@@ -128,16 +128,16 @@ export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "da
     src?: string;
 };
 
-// @public (undocumented)
+// @public
 export type AvatarShape = "circle" | "rounded" | "square";
 
-// @public (undocumented)
+// @public
 export type AvatarSize = "small" | "medium" | "large" | number;
 
-// @public (undocumented)
+// @public
 export function Badge(input: BadgeProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type BadgeProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "content" | "dangerouslySetInnerHTML"> & {
     bordered?: boolean;
     children?: ReactNode;
@@ -151,39 +151,39 @@ export type BadgeProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "con
     tone?: BadgeTone;
 };
 
-// @public (undocumented)
+// @public
 export type BadgeTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
-// @public (undocumented)
+// @public
 export function BottomSheet(input: BottomSheetProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type BottomSheetOpenChangeDetails = {
     reason: BottomSheetOpenChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type BottomSheetOpenChangeReason = "escape" | "mask" | "close-button" | "drag";
 
 // Warning: (ae-forgotten-export) The symbol "BottomSheetBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "BottomSheetAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type BottomSheetProps = BottomSheetBaseProps & BottomSheetAccessibleName;
 
-// @public (undocumented)
+// @public
 export type BottomSheetSnapChangeDetails = {
     index: number;
     reason: BottomSheetSnapChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type BottomSheetSnapChangeReason = "drag" | "handle";
 
-// @public (undocumented)
+// @public
 export type BottomSheetSnapPoint = number | "content";
 
-// @public (undocumented)
+// @public
 export const Button: ForwardRefExoticComponent<Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
 block?: boolean;
 children: ReactNode;
@@ -195,7 +195,7 @@ trailingIcon?: ReactNode;
 variant?: ButtonVariant;
 } & RefAttributes<HTMLButtonElement>>;
 
-// @public (undocumented)
+// @public
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
     block?: boolean;
     children: ReactNode;
@@ -207,13 +207,13 @@ export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "childre
     variant?: ButtonVariant;
 };
 
-// @public (undocumented)
+// @public
 export type ButtonSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type ButtonTone = "accent" | "neutral" | "danger";
 
-// @public (undocumented)
+// @public
 export type ButtonVariant = "solid" | "outline" | "ghost" | "text";
 
 // @public
@@ -221,7 +221,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>): JSX.Element
 
 // Warning: (ae-forgotten-export) The symbol "CalendarNativeProps" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type CalendarBaseProps<TDate> = CalendarNativeProps & {
     adapter?: DateAdapter<TDate>;
     allowClear?: boolean;
@@ -243,7 +243,7 @@ export type CalendarBaseProps<TDate> = CalendarNativeProps & {
     weekStartsOn?: CalendarWeekStartsOn;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarChangeDetails<TDate> = {
     complete: boolean;
     date: TDate;
@@ -251,7 +251,7 @@ export type CalendarChangeDetails<TDate> = {
     reason: "clear" | "select";
 };
 
-// @public (undocumented)
+// @public
 export type CalendarDayDetails<TDate> = {
     date: TDate;
     disabled: boolean;
@@ -264,24 +264,24 @@ export type CalendarDayDetails<TDate> = {
     today: boolean;
 };
 
-// @public (undocumented)
+// @public
 export function calendarDayKey<TDate>(adapter: DateAdapter<TDate>, value: TDate): string;
 
-// @public (undocumented)
+// @public
 export type CalendarDisabledDateDetails<TDate> = {
     adapter: DateAdapter<TDate>;
     outside: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarMonthChangeDetails = {
     reason: CalendarMonthChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type CalendarMonthChangeReason = "keyboard" | "next-month" | "outside-day" | "previous-month" | "today";
 
-// @public (undocumented)
+// @public
 export type CalendarMultipleProps<TDate> = CalendarBaseProps<TDate> & {
     defaultValue?: ReadonlyArray<TDate>;
     onChange?: (value: ReadonlyArray<TDate>, details: CalendarChangeDetails<TDate>) => void;
@@ -295,10 +295,10 @@ export type CalendarProps<TDate = Date> = CalendarSingleProps<TDate> | CalendarM
 // @public
 export type CalendarRange<TDate> = readonly [TDate, TDate];
 
-// @public (undocumented)
+// @public
 export function calendarRange<TDate>(adapter: DateAdapter<TDate>, value: CalendarValue<TDate>): CalendarRange<TDate> | null;
 
-// @public (undocumented)
+// @public
 export type CalendarRangeProps<TDate> = CalendarBaseProps<TDate> & {
     defaultValue?: CalendarRange<TDate> | null;
     onChange?: (value: CalendarRange<TDate> | null, details: CalendarChangeDetails<TDate>) => void;
@@ -316,7 +316,7 @@ export type CalendarRef<TDate> = {
 // @public
 export type CalendarSelectionMode = "single" | "multiple" | "range";
 
-// @public (undocumented)
+// @public
 export type CalendarSingleProps<TDate> = CalendarBaseProps<TDate> & {
     defaultValue?: TDate | null;
     onChange?: (value: TDate | null, details: CalendarChangeDetails<TDate>) => void;
@@ -330,13 +330,13 @@ export type CalendarValue<TDate> = TDate | ReadonlyArray<TDate> | CalendarRange<
 // @public
 export type CalendarWeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-// @public (undocumented)
+// @public
 export function Card(input: CardProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type CardPadding = "none" | "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type CardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onClick" | "title"> & {
     children?: ReactNode;
     description?: ReactNode;
@@ -352,28 +352,28 @@ export type CardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onCli
     variant?: CardVariant;
 };
 
-// @public (undocumented)
+// @public
 export type CardVariant = "outlined" | "filled" | "elevated";
 
-// @public (undocumented)
+// @public
 export function Carousel(input: CarouselProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type CarouselIndexChangeDetails = {
     reason: CarouselIndexChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type CarouselIndexChangeReason = "autoplay" | "drag" | "next" | "previous";
 
-// @public (undocumented)
+// @public
 export type CarouselItem = {
     ariaLabel?: string;
     content: ReactNode;
     key: Key;
 };
 
-// @public (undocumented)
+// @public
 export type CarouselProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onChange" | "onFocusCapture" | "onMouseEnter" | "onMouseLeave"> & {
     allowDrag?: boolean;
     autoplay?: boolean;
@@ -408,10 +408,10 @@ export type CascadePickerOption<TValue extends PickerValue = PickerValue> = Pick
 // Warning: (ae-forgotten-export) The symbol "CascadePickerBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PickerAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type CascadePickerProps<TValue extends PickerValue = PickerValue> = CascadePickerBaseProps<TValue> & PickerAccessibleName;
 
-// @public (undocumented)
+// @public
 export function Cell(input: CellProps): JSX.Element;
 
 // @public
@@ -433,10 +433,10 @@ export type CellProps = Omit<HTMLAttributes<CellRef>, "children" | "dangerouslyS
     type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 };
 
-// @public (undocumented)
+// @public
 export type CellRef = HTMLAnchorElement | HTMLButtonElement | HTMLDivElement;
 
-// @public (undocumented)
+// @public
 export const Checkbox: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "children" | "type" | "value" | "defaultChecked" | "onChange" | "checked"> & {
 checked?: boolean;
 children?: ReactNode;
@@ -449,7 +449,7 @@ status?: CheckboxStatus;
 value?: CheckboxValue;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>(input: CheckboxGroupProps<TValue>): JSX.Element;
 
 // @public
@@ -479,19 +479,19 @@ export type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "checked
     value?: CheckboxValue;
 };
 
-// @public (undocumented)
+// @public
 export type CheckboxSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type CheckboxStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type CheckboxValue = string | number;
 
-// @public (undocumented)
+// @public
 export function Collapse(input: CollapseProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type CollapseArrow = ReactNode | ((expanded: boolean) => ReactNode);
 
 // @public
@@ -515,10 +515,10 @@ export type CollapseProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "d
     variant?: CollapseVariant;
 };
 
-// @public (undocumented)
+// @public
 export type CollapseVariant = "plain" | "card";
 
-// @public (undocumented)
+// @public
 export function compareCalendarDays<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate): number;
 
 // @public
@@ -538,7 +538,7 @@ export type ConfigProviderProps = {
 
 // Warning: (ae-forgotten-export) The symbol "CalendarGridDay" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export function createCalendarGrid<TDate>(adapter: DateAdapter<TDate>, month: TDate, weekStartsOn: CalendarWeekStartsOn, fixedWeeks: boolean): CalendarGridDay<TDate>[];
 
 export { DateAdapter }
@@ -551,22 +551,22 @@ export function DatePicker<TDate = Date>(input: DatePickerProps<TDate>): JSX.Ele
 // @public
 export type DatePickerFilter<TDate> = Partial<Record<DatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>;
 
-// @public (undocumented)
+// @public
 export type DatePickerFilterDetails<TDate> = {
     date: TDate | null;
     parts: DateParts;
     precision: DatePrecision;
 };
 
-// @public (undocumented)
+// @public
 export type DatePickerLabelDetails<TDate> = DatePickerFilterDetails<TDate> & {
     locale: "en-US" | "zh-CN";
 };
 
-// @public (undocumented)
+// @public
 export type DatePickerOpenChangeDetails = PickerOpenChangeDetails;
 
-// @public (undocumented)
+// @public
 export const datePickerPrecisions: readonly ["year", "month", "day", "hour", "minute", "second"];
 
 // Warning: (ae-forgotten-export) The symbol "DatePickerBaseProps" needs to be exported by the entry point index.d.ts
@@ -574,14 +574,14 @@ export const datePickerPrecisions: readonly ["year", "month", "day", "hour", "mi
 // @public
 export type DatePickerProps<TDate = Date> = DatePickerBaseProps<TDate> & PickerAccessibleName;
 
-// @public (undocumented)
+// @public
 export type DatePickerSelectDetails = PickerSelectDetails & {
     precision: DatePrecision;
 };
 
 export { DatePrecision }
 
-// @public (undocumented)
+// @public
 export function dateRangeIsSelectable<TDate>(adapter: DateAdapter<TDate>, value: CalendarRange<TDate> | null, options: {
     disabled?: boolean;
     disabledDate?: (date: TDate, details: CalendarDisabledDateDetails<TDate>) => boolean;
@@ -592,19 +592,19 @@ export function dateRangeIsSelectable<TDate>(adapter: DateAdapter<TDate>, value:
 // @public
 export function DateRangePicker<TDate = Date>(input: DateRangePickerProps<TDate>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type DateRangePickerCalendarSelectDetails<TDate> = {
     complete: boolean;
     date: TDate;
     reason: "calendar";
 };
 
-// @public (undocumented)
+// @public
 export type DateRangePickerOpenChangeDetails = {
     reason: DateRangePickerOpenChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type DateRangePickerOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
 // @public
@@ -615,7 +615,7 @@ export type DateRangePickerPreset<TDate> = {
     value: CalendarRange<TDate>;
 };
 
-// @public (undocumented)
+// @public
 export type DateRangePickerPresetSelectDetails = {
     complete: true;
     presetKey: string;
@@ -628,13 +628,13 @@ export type DateRangePickerPresetSelectDetails = {
 // @public
 export type DateRangePickerProps<TDate = Date> = DateRangePickerBaseProps<TDate> & DateRangePickerAccessibleName;
 
-// @public (undocumented)
+// @public
 export type DateRangePickerSelectDetails<TDate> = DateRangePickerCalendarSelectDetails<TDate> | DateRangePickerPresetSelectDetails;
 
-// @public (undocumented)
+// @public
 export function Dialog(input: DialogProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type DialogAction = {
     autoFocus?: boolean;
     closeOnPress?: boolean;
@@ -653,13 +653,13 @@ export type DialogActionTone = "neutral" | "accent" | "danger";
 
 // Warning: (ae-forgotten-export) The symbol "DialogPromptBase" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type DialogAlertOptions = DialogPromptBase & {
     confirmText?: ReactNode;
     onConfirm?: () => boolean | void | Promise<boolean | void>;
 };
 
-// @public (undocumented)
+// @public
 export type DialogApi = {
     alert: (options: DialogAlertOptions) => Promise<void>;
     clear: () => void;
@@ -667,7 +667,7 @@ export type DialogApi = {
     show: (options: DialogShowOptions) => DialogController;
 };
 
-// @public (undocumented)
+// @public
 export type DialogConfirmOptions = DialogPromptBase & {
     cancelText?: ReactNode;
     confirmText?: ReactNode;
@@ -676,12 +676,12 @@ export type DialogConfirmOptions = DialogPromptBase & {
     onConfirm?: () => boolean | void | Promise<boolean | void>;
 };
 
-// @public (undocumented)
+// @public
 export type DialogController = {
     close: () => void;
 };
 
-// @public (undocumented)
+// @public
 export type DialogOpenChangeDetails = {
     reason: "escape";
 } | {
@@ -694,20 +694,20 @@ export type DialogOpenChangeDetails = {
 // Warning: (ae-forgotten-export) The symbol "DialogBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "DialogSemantics" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type DialogProps = DialogBaseProps & DialogSemantics;
 
-// @public (undocumented)
+// @public
 export function DialogProvider(input: DialogProviderProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type DialogProviderProps = {
     children: ReactNode;
 };
 
 // Warning: (ae-forgotten-export) The symbol "WithoutOpenState" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type DialogShowOptions = WithoutOpenState<DialogProps>;
 
 // @public
@@ -724,10 +724,10 @@ export type DividerProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     direction?: "horizontal" | "vertical";
 };
 
-// @public (undocumented)
+// @public
 export function Ellipsis(input: EllipsisProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type EllipsisDirection = "start" | "end" | "middle";
 
 // @public
@@ -744,7 +744,7 @@ export type EllipsisProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "d
     rows?: number;
 };
 
-// @public (undocumented)
+// @public
 export function Empty(input: EmptyProps): JSX.Element;
 
 // @public
@@ -787,7 +787,7 @@ export type FieldProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     requiredText?: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export function FloatingPanel(input: FloatingPanelProps): JSX.Element;
 
 // @public
@@ -829,10 +829,10 @@ export type FloatingPanelSetHeightOptions = {
     immediate?: boolean;
 };
 
-// @public (undocumented)
+// @public
 export function formatTimeValue(value: TimeValue, options?: FormatTimeValueOptions): string;
 
-// @public (undocumented)
+// @public
 export type FormatTimeValueOptions = {
     hourCycle?: TimePickerHourCycle;
     locale?: "en-US" | "zh-CN";
@@ -866,14 +866,14 @@ export type IconButtonTone = "accent" | "neutral" | "danger";
 // @public
 export type IconButtonVariant = "solid" | "outline" | "ghost";
 
-// @public (undocumented)
+// @public
 function Image_2(input: ImageProps): JSX.Element;
 export { Image_2 as Image }
 
-// @public (undocumented)
+// @public
 export type ImageFit = NonNullable<CSSProperties["objectFit"]>;
 
-// @public (undocumented)
+// @public
 export type ImageProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML" | "onError" | "onLoad"> & {
     alt: string;
     crossOrigin?: ImgHTMLAttributes<HTMLImageElement>["crossOrigin"];
@@ -896,25 +896,25 @@ export type ImageProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dang
     width?: number | string;
 };
 
-// @public (undocumented)
+// @public
 export type ImageRadius = "none" | "control" | "surface" | "round";
 
-// @public (undocumented)
+// @public
 export type ImageState = "loading" | "loaded" | "error";
 
-// @public (undocumented)
+// @public
 export const ImageUploader: ForwardRefExoticComponent<Omit<ImageUploaderProps, "ref"> & RefAttributes<ImageUploaderRef>>;
 
-// @public (undocumented)
+// @public
 export type ImageUploaderChangeDetails = {
     item: ImageUploaderItem;
     reason: ImageUploaderChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type ImageUploaderChangeReason = "remove" | "upload";
 
-// @public (undocumented)
+// @public
 export type ImageUploaderItem = {
     alt: string;
     key?: Key;
@@ -923,7 +923,7 @@ export type ImageUploaderItem = {
     url: string;
 };
 
-// @public (undocumented)
+// @public
 export type ImageUploaderProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "defaultValue" | "onBlur" | "onChange" | "onError" | "onProgress"> & {
     accept?: string;
     addLabel?: string;
@@ -958,7 +958,7 @@ export type ImageUploaderProps = Omit<HTMLAttributes<HTMLDivElement>, "children"
     value?: readonly ImageUploaderItem[];
 };
 
-// @public (undocumented)
+// @public
 export type ImageUploaderRef = {
     chooseFiles: () => void;
     clearFailed: () => void;
@@ -967,7 +967,7 @@ export type ImageUploaderRef = {
     retry: (taskId: string) => void;
 };
 
-// @public (undocumented)
+// @public
 export type ImageUploaderRejectDetails = {
     accepted: readonly File[];
     files: readonly File[];
@@ -975,13 +975,13 @@ export type ImageUploaderRejectDetails = {
     rejected: readonly File[];
 };
 
-// @public (undocumented)
+// @public
 export type ImageUploaderRejectReason = "accept" | "before-upload" | "max-count" | "max-size";
 
-// @public (undocumented)
+// @public
 export type ImageUploaderStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type ImageUploaderTask = {
     error?: unknown;
     file: File;
@@ -992,31 +992,31 @@ export type ImageUploaderTask = {
     status: ImageUploaderTaskStatus;
 };
 
-// @public (undocumented)
+// @public
 export type ImageUploaderTaskStatus = "pending" | "uploading" | "error";
 
-// @public (undocumented)
+// @public
 export type ImageUploaderUploadContext = {
     onProgress: (progress: number) => void;
     signal: AbortSignal;
     taskId: string;
 };
 
-// @public (undocumented)
+// @public
 export function ImageViewer(input: ImageViewerProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type ImageViewerControls = "full" | "minimal";
 
-// @public (undocumented)
+// @public
 export type ImageViewerIndexChangeDetails = {
     reason: ImageViewerIndexChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type ImageViewerIndexChangeReason = "drag" | "imperative" | "next" | "previous";
 
-// @public (undocumented)
+// @public
 export type ImageViewerItem = {
     alt: string;
     crossOrigin?: ImgHTMLAttributes<HTMLImageElement>["crossOrigin"];
@@ -1027,15 +1027,15 @@ export type ImageViewerItem = {
     srcSet?: string;
 };
 
-// @public (undocumented)
+// @public
 export type ImageViewerOpenChangeDetails = {
     reason: ImageViewerOpenChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type ImageViewerOpenChangeReason = "close-button" | "escape";
 
-// @public (undocumented)
+// @public
 export type ImageViewerProps = Omit<HTMLAttributes<HTMLDivElement>, "aria-label" | "children" | "dangerouslySetInnerHTML" | "role"> & {
     "aria-label"?: string;
     closeLabel?: string;
@@ -1069,7 +1069,7 @@ export type ImageViewerProps = Omit<HTMLAttributes<HTMLDivElement>, "aria-label"
     zoomOutLabel?: string;
 };
 
-// @public (undocumented)
+// @public
 export type ImageViewerRef = {
     goTo: (index: number) => void;
     nativeElement: HTMLDivElement | null;
@@ -1078,13 +1078,13 @@ export type ImageViewerRef = {
     resetZoom: () => void;
 };
 
-// @public (undocumented)
+// @public
 export type ImageViewerScaleChangeDetails = {
     index: number;
     reason: ImageViewerScaleChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type ImageViewerScaleChangeReason = "double-tap" | "pinch" | "reset" | "zoom-in" | "zoom-out";
 
 // @public
@@ -1161,16 +1161,16 @@ export type InfiniteListStatusChangeDetails = {
 // @public
 export type InfiniteListTrigger = "auto" | "manual" | "retry";
 
-// @public (undocumented)
+// @public
 export function isValidTimeValue(value: TimeValue | null | undefined): value is TimeValue;
 
-// @public (undocumented)
+// @public
 export function List(input: ListProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type ListDivider = "inset" | "full" | "none";
 
-// @public (undocumented)
+// @public
 export type ListMode = "plain" | "card";
 
 // @public
@@ -1183,13 +1183,13 @@ export type ListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dange
     ref?: Ref<HTMLDivElement>;
 };
 
-// @public (undocumented)
+// @public
 export function Mask(input: MaskProps): JSX.Element | null;
 
 // @public
 export type MaskOpacity = "thin" | "default" | "thick" | number;
 
-// @public (undocumented)
+// @public
 export type MaskProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onClick"> & {
     children?: ReactNode;
     container?: OverlayContainer;
@@ -1218,7 +1218,7 @@ export type MeuLocale = "zh-CN" | "en-US";
 // @public
 export type MeuTheme = "light" | "dark" | "system";
 
-// @public (undocumented)
+// @public
 export function NavBar(input: NavBarProps): JSX.Element;
 
 // @public
@@ -1236,24 +1236,24 @@ export type NavBarProps = Omit<ComponentProps<"header">, "children" | "title"> &
     title?: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export function normalizeCalendarDay<TDate>(adapter: DateAdapter<TDate>, value: TDate): TDate | null;
 
-// @public (undocumented)
+// @public
 export function normalizeCalendarMonth<TDate>(adapter: DateAdapter<TDate>, value: TDate): TDate | null;
 
-// @public (undocumented)
+// @public
 export function normalizeDateRange<TDate>(adapter: DateAdapter<TDate>, value: CalendarRange<TDate> | null | undefined): CalendarRange<TDate> | null;
 
-// @public (undocumented)
+// @public
 export function NumberKeyboard(input: NumberKeyboardProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardDeleteDetails = {
     repeated: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardExtraKey = {
     ariaLabel?: string;
     disabled?: boolean;
@@ -1261,26 +1261,26 @@ export type NumberKeyboardExtraKey = {
     value: string;
 };
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardInputDetails = {
     source: NumberKeyboardInputSource;
 };
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardInputSource = "digit" | "decimal" | "extra";
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardMode = "number" | "decimal";
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardOpenChangeDetails = {
     reason: NumberKeyboardOpenChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardOpenChangeReason = "close-button" | "confirm" | "escape";
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onInput" | "onMouseDown" | "role" | "title"> & {
     backspaceLabel?: string;
     closeLabel?: string;
@@ -1307,10 +1307,10 @@ export type NumberKeyboardProps = Omit<HTMLAttributes<HTMLDivElement>, "children
     title?: string;
 };
 
-// @public (undocumented)
+// @public
 export function NumberKeyboardTrigger(input: NumberKeyboardTriggerProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-required" | "children" | "value"> & {
     open?: boolean;
     placeholder?: ReactNode;
@@ -1319,27 +1319,27 @@ export type NumberKeyboardTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonEle
     value?: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export type NumberKeyboardTriggerStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type OverlayContainer = HTMLElement | (() => HTMLElement) | null;
 
-// @public (undocumented)
+// @public
 export type OverlayDismissReason = "mask" | "escape" | "close-button";
 
-// @public (undocumented)
+// @public
 export type OverlayOpenChangeDetails = {
     reason: OverlayDismissReason;
 };
 
-// @public (undocumented)
+// @public
 export function PaginationDots(input: PaginationDotsProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type PaginationDotsDirection = "horizontal" | "vertical";
 
-// @public (undocumented)
+// @public
 export type PaginationDotsProps = Omit<ComponentProps<"div">, "children"> & {
     activeIndex: number;
     count: number;
@@ -1352,10 +1352,10 @@ export type PaginationDotsProps = Omit<ComponentProps<"div">, "children"> & {
     variant?: PaginationDotsVariant;
 };
 
-// @public (undocumented)
+// @public
 export type PaginationDotsVariant = "dot" | "line";
 
-// @public (undocumented)
+// @public
 export const PasscodeInput: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "dir" | "inputMode" | "onChange" | "maxLength" | "minLength"> & {
 caret?: boolean;
 defaultValue?: string;
@@ -1425,12 +1425,12 @@ export function Picker<TValue extends PickerValue = PickerValue>(input: PickerPr
 // @public
 export type PickerColumn<TValue extends PickerValue = PickerValue> = ReadonlyArray<PickerOption<TValue>>;
 
-// @public (undocumented)
+// @public
 export type PickerOpenChangeDetails = {
     reason: PickerOpenChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type PickerOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
 // @public
@@ -1443,22 +1443,22 @@ export type PickerOption<TValue extends PickerValue = PickerValue> = {
 
 // Warning: (ae-forgotten-export) The symbol "PickerBaseProps" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type PickerProps<TValue extends PickerValue = PickerValue> = PickerBaseProps<TValue> & PickerAccessibleName;
 
-// @public (undocumented)
+// @public
 export type PickerSelectDetails = {
     columnIndex: number;
     reason: PickerSelectReason;
 };
 
-// @public (undocumented)
+// @public
 export type PickerSelectReason = "keyboard" | "pointer" | "scroll";
 
 // @public
 export function PickerTrigger(input: PickerTriggerProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type PickerTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-required" | "children" | "value"> & {
     open?: boolean;
     placeholder?: ReactNode;
@@ -1467,55 +1467,55 @@ export type PickerTriggerProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "
     value?: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export type PickerTriggerStatus = "default" | "error";
 
 // @public
 export type PickerValue = string | number;
 
-// @public (undocumented)
+// @public
 export function Popover(input: PopoverProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type PopoverOpenChangeDetails = {
     reason: PopoverOpenChangeReason;
 };
 
-// @public (undocumented)
+// @public
 export type PopoverOpenChangeReason = "trigger" | "escape" | "outside" | "focus-out";
 
-// @public (undocumented)
+// @public
 export type PopoverPlacement = "top" | "top-start" | "top-end" | "right" | "right-start" | "right-end" | "bottom" | "bottom-start" | "bottom-end" | "left" | "left-start" | "left-end";
 
 // Warning: (ae-forgotten-export) The symbol "PopoverBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PopoverAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type PopoverProps = PopoverBaseProps & PopoverAccessibleName;
 
-// @public (undocumented)
+// @public
 export type PopoverTrigger = "click" | "manual";
 
-// @public (undocumented)
+// @public
 export type PopoverTriggerElement = ReactElement<{
     disabled?: boolean;
     id?: string;
     ref?: Ref<HTMLElement>;
 }>;
 
-// @public (undocumented)
+// @public
 export function Popup(input: PopupProps): JSX.Element | null;
 
-// @public (undocumented)
+// @public
 export type PopupPosition = "top" | "right" | "bottom" | "left";
 
 // Warning: (ae-forgotten-export) The symbol "PopupBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PopupAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type PopupProps = PopupBaseProps & PopupAccessibleName;
 
-// @public (undocumented)
+// @public
 export function Progress(input: ProgressProps): JSX.Element;
 
 // @public
@@ -1538,7 +1538,7 @@ export type ProgressSize = "small" | "medium" | "large";
 // @public
 export type ProgressTone = "accent" | "success" | "warning" | "danger";
 
-// @public (undocumented)
+// @public
 export function PullToRefresh(input: PullToRefreshProps): JSX.Element;
 
 // @public
@@ -1577,7 +1577,7 @@ export type PullToRefreshStatusChangeDetails = {
 // @public
 export type PullToRefreshTrigger = "keyboard" | "pull";
 
-// @public (undocumented)
+// @public
 export const Radio: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "children" | "type" | "value" | "defaultChecked" | "onChange" | "checked"> & {
 checked?: boolean;
 children?: ReactNode;
@@ -1589,7 +1589,7 @@ status?: RadioStatus;
 value?: RadioValue;
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export function RadioGroup<TValue extends RadioValue = RadioValue>(input: RadioGroupProps<TValue>): JSX.Element;
 
 // @public
@@ -1619,13 +1619,13 @@ export type RadioProps = Omit<InputHTMLAttributes<HTMLInputElement>, "checked" |
     value?: RadioValue;
 };
 
-// @public (undocumented)
+// @public
 export type RadioSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type RadioStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type RadioValue = string | number;
 
 // @public
@@ -1658,13 +1658,13 @@ export type RateProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValu
     value?: number;
 };
 
-// @public (undocumented)
+// @public
 export type RateSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type RateStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export function Result(input: ResultProps): JSX.Element;
 
 // @public
@@ -1693,13 +1693,13 @@ export type SafeAreaProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
     position?: SafeAreaPosition;
 };
 
-// @public (undocumented)
+// @public
 export function sameCalendarDay<TDate>(adapter: DateAdapter<TDate>, left: TDate | null | undefined, right: TDate | null | undefined): boolean;
 
-// @public (undocumented)
+// @public
 export function sameCalendarMonth<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate): boolean;
 
-// @public (undocumented)
+// @public
 export function sameDateRange<TDate>(adapter: DateAdapter<TDate>, left: CalendarRange<TDate> | null | undefined, right: CalendarRange<TDate> | null | undefined): boolean;
 
 // @public
@@ -1846,10 +1846,10 @@ export type SelectorStatus = "default" | "error";
 // @public
 export type SelectorValue = string | number;
 
-// @public (undocumented)
+// @public
 export function SideNav(input: SideNavProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type SideNavActivationMode = "automatic" | "manual";
 
 // @public
@@ -1873,7 +1873,7 @@ export type SideNavProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "de
     value?: string | null;
 };
 
-// @public (undocumented)
+// @public
 export function Skeleton(input: SkeletonProps): JSX.Element;
 
 // @public
@@ -1929,10 +1929,10 @@ export type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultVa
     value?: number;
 };
 
-// @public (undocumented)
+// @public
 export type SliderSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type SliderStatus = "default" | "error";
 
 // @public
@@ -1956,7 +1956,7 @@ export type SpaceProps = HTMLAttributes<HTMLDivElement> & {
     wrap?: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type StepItem = {
     description?: ReactNode;
     icon?: ReactNode;
@@ -1996,19 +1996,19 @@ export type StepperProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultV
     value?: number | null;
 };
 
-// @public (undocumented)
+// @public
 export type StepperSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type StepperStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export function Steps(input: StepsProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type StepsDirection = "horizontal" | "vertical";
 
-// @public (undocumented)
+// @public
 export type StepsProps = Omit<ComponentProps<"ol">, "children"> & {
     current?: number;
     direction?: StepsDirection;
@@ -2016,10 +2016,10 @@ export type StepsProps = Omit<ComponentProps<"ol">, "children"> & {
     ref?: Ref<HTMLOListElement>;
 };
 
-// @public (undocumented)
+// @public
 export type StepStatus = "wait" | "process" | "finish" | "error";
 
-// @public (undocumented)
+// @public
 export function SwipeActions(input: SwipeActionsProps): JSX.Element;
 
 // @public
@@ -2084,7 +2084,7 @@ export type SwipeActionsProps = Omit<HTMLAttributes<HTMLDivElement>, "children" 
 // @public
 export type SwipeActionsSide = "left" | "right";
 
-// @public (undocumented)
+// @public
 export const Switch: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "children" | "type" | "defaultChecked" | "onChange" | "checked"> & {
 checked?: boolean;
 defaultChecked?: boolean;
@@ -2106,16 +2106,16 @@ export type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, "checked" 
     status?: SwitchStatus;
 };
 
-// @public (undocumented)
+// @public
 export type SwitchSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type SwitchStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export function TabBar(input: TabBarProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type TabBarItem = {
     ariaLabel?: string;
     badge?: ReactNode;
@@ -2128,7 +2128,7 @@ export type TabBarItem = {
     onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
 };
 
-// @public (undocumented)
+// @public
 export type TabBarProps = Omit<ComponentProps<"nav">, "children" | "onChange"> & {
     defaultValue?: string;
     items: readonly TabBarItem[];
@@ -2138,13 +2138,13 @@ export type TabBarProps = Omit<ComponentProps<"nav">, "children" | "onChange"> &
     value?: string | null;
 };
 
-// @public (undocumented)
+// @public
 export function Tabs(input: TabsProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type TabsActivationMode = "automatic" | "manual";
 
-// @public (undocumented)
+// @public
 export type TabsItem = {
     badge?: ReactNode;
     content?: ReactNode;
@@ -2153,7 +2153,7 @@ export type TabsItem = {
     label: ReactNode;
 };
 
-// @public (undocumented)
+// @public
 export type TabsProps = Omit<ComponentProps<"div">, "children" | "defaultValue" | "onChange"> & {
     activationMode?: TabsActivationMode;
     defaultValue?: string;
@@ -2166,10 +2166,10 @@ export type TabsProps = Omit<ComponentProps<"div">, "children" | "defaultValue" 
     value?: string | null;
 };
 
-// @public (undocumented)
+// @public
 export function Tag(input: TagProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type TagProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "dangerouslySetInnerHTML" | "onClick"> & {
     children: ReactNode;
     closeAriaLabel?: string;
@@ -2184,16 +2184,16 @@ export type TagProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "dange
     variant?: TagVariant;
 };
 
-// @public (undocumented)
+// @public
 export type TagRef = HTMLSpanElement | HTMLButtonElement;
 
-// @public (undocumented)
+// @public
 export type TagSize = "small" | "medium" | "large";
 
-// @public (undocumented)
+// @public
 export type TagTone = "neutral" | "accent" | "success" | "warning" | "danger";
 
-// @public (undocumented)
+// @public
 export type TagVariant = "solid" | "soft" | "outline";
 
 // @public
@@ -2224,7 +2224,7 @@ export type TextAreaSize = "small" | "medium" | "large";
 // @public
 export type TextAreaStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export const TextInput: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
 clearable?: boolean;
 onClear?: () => void;
@@ -2232,7 +2232,7 @@ size?: "small" | "medium" | "large";
 status?: "default" | "error";
 } & RefAttributes<HTMLInputElement>>;
 
-// @public (undocumented)
+// @public
 export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
     clearable?: boolean;
     onClear?: () => void;
@@ -2246,29 +2246,29 @@ export const ThemeProvider: typeof ConfigProvider;
 // @public
 export function TimePicker(input: TimePickerProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type TimePickerColumn = TimePickerPrecision | "period";
 
-// @public (undocumented)
+// @public
 export function timePickerColumns(precision: TimePickerPrecision, hourCycle: TimePickerHourCycle): ReadonlyArray<TimePickerColumn>;
 
-// @public (undocumented)
+// @public
 export type TimePickerColumnValue = number | TimePickerPeriod;
 
 // @public
 export type TimePickerFilter = Partial<Record<TimePickerPrecision, (value: number, details: TimePickerFilterDetails) => boolean>>;
 
-// @public (undocumented)
+// @public
 export type TimePickerFilterDetails = {
     hourCycle: TimePickerHourCycle;
     precision: TimePickerPrecision;
     time: TimeValue | null;
 };
 
-// @public (undocumented)
+// @public
 export type TimePickerHourCycle = "h23" | "h12";
 
-// @public (undocumented)
+// @public
 export type TimePickerLabelDetails = {
     column: TimePickerColumn;
     hourCycle: TimePickerHourCycle;
@@ -2276,16 +2276,16 @@ export type TimePickerLabelDetails = {
     time: TimeValue | null;
 };
 
-// @public (undocumented)
+// @public
 export type TimePickerOpenChangeDetails = PickerOpenChangeDetails;
 
-// @public (undocumented)
+// @public
 export type TimePickerPeriod = "am" | "pm";
 
-// @public (undocumented)
+// @public
 export type TimePickerPrecision = "hour" | "minute" | "second";
 
-// @public (undocumented)
+// @public
 export const timePickerPrecisions: readonly ["hour", "minute", "second"];
 
 // Warning: (ae-forgotten-export) The symbol "TimePickerBaseProps" needs to be exported by the entry point index.d.ts
@@ -2293,13 +2293,17 @@ export const timePickerPrecisions: readonly ["hour", "minute", "second"];
 // @public
 export type TimePickerProps = TimePickerBaseProps & PickerAccessibleName;
 
-// @public (undocumented)
+// @public
 export type TimePickerSelectDetails = PickerSelectDetails & {
     column: TimePickerColumn;
 };
 
 // @public
-export type TimeValue = Pick<DateParts, "hour" | "minute" | "second">;
+export type TimeValue = Pick<DateParts, "hour" | "minute" | "second"> & {
+    hour: DateParts["hour"];
+    minute: DateParts["minute"];
+    second: DateParts["second"];
+};
 
 // @public
 export function Toast(input: ToastProps): JSX.Element | null;
@@ -2389,7 +2393,7 @@ export type ToastUpdateOptions = Partial<Omit<ToastShowOptions, "id">>;
 // @public
 export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>(input: TreeSelectProps<TValue>): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type TreeSelectChangeDetails<TValue extends TreeSelectValue = TreeSelectValue> = {
     option: TreeSelectOption<TValue>;
     path: TreeSelectPath<TValue>;
@@ -2397,7 +2401,7 @@ export type TreeSelectChangeDetails<TValue extends TreeSelectValue = TreeSelectV
     selected: boolean;
 };
 
-// @public (undocumented)
+// @public
 export type TreeSelectExpandDetails<TValue extends TreeSelectValue = TreeSelectValue> = {
     expanded: boolean;
     option: TreeSelectOption<TValue>;
@@ -2405,18 +2409,18 @@ export type TreeSelectExpandDetails<TValue extends TreeSelectValue = TreeSelectV
     reason: TreeSelectInteractionReason;
 };
 
-// @public (undocumented)
+// @public
 export type TreeSelectFilter<TValue extends TreeSelectValue = TreeSelectValue> = (query: string, option: TreeSelectOption<TValue>, path: TreeSelectPath<TValue>) => boolean;
 
-// @public (undocumented)
+// @public
 export type TreeSelectInteractionReason = "keyboard" | "pointer";
 
-// @public (undocumented)
+// @public
 export type TreeSelectLoadContext = {
     signal: AbortSignal;
 };
 
-// @public (undocumented)
+// @public
 export type TreeSelectOpenChangeReason = "cancel" | "confirm" | "escape" | "mask" | "trigger";
 
 // @public
@@ -2431,28 +2435,28 @@ export type TreeSelectOption<TValue extends TreeSelectValue = TreeSelectValue> =
     value: TValue;
 };
 
-// @public (undocumented)
+// @public
 export type TreeSelectPath<TValue extends TreeSelectValue = TreeSelectValue> = ReadonlyArray<TreeSelectOption<TValue>>;
 
 // Warning: (ae-forgotten-export) The symbol "TreeSelectBaseProps" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "TreeSelectAccessibleName" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type TreeSelectProps<TValue extends TreeSelectValue = TreeSelectValue> = TreeSelectBaseProps<TValue> & TreeSelectAccessibleName;
 
-// @public (undocumented)
+// @public
 export type TreeSelectSelectionMode = "any" | "leaf";
 
-// @public (undocumented)
+// @public
 export type TreeSelectStatus = "default" | "error";
 
-// @public (undocumented)
+// @public
 export type TreeSelectValue = string | number;
 
-// @public (undocumented)
+// @public
 export function useActionMenu(): ActionMenuApi;
 
-// @public (undocumented)
+// @public
 export function useDialog(): DialogApi;
 
 // @public
@@ -2502,10 +2506,10 @@ export type VirtualListScrollToIndexOptions = VirtualListScrollOptions & {
     align?: VirtualListAlign;
 };
 
-// @public (undocumented)
+// @public
 export function Watermark(input: WatermarkProps): JSX.Element;
 
-// @public (undocumented)
+// @public
 export type WatermarkFont = {
     color?: string;
     fontFamily?: string;
@@ -2515,7 +2519,7 @@ export type WatermarkFont = {
     lineHeight?: number;
 };
 
-// @public (undocumented)
+// @public
 export type WatermarkProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "content" | "onError"> & {
     children?: ReactNode;
     content?: string | ReadonlyArray<string>;
@@ -2537,7 +2541,7 @@ export type WatermarkProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "
 
 // Warnings were encountered during analysis:
 //
-// src/Card/types.ts:17:3 - (ae-forgotten-export) The symbol "CardFooterLayout" needs to be exported by the entry point index.d.ts
+// src/Card/types.ts:32:3 - (ae-forgotten-export) The symbol "CardFooterLayout" needs to be exported by the entry point index.d.ts
 // src/SafeArea/SafeArea.tsx:23:22 - (ae-forgotten-export) The symbol "SafeAreaPosition" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

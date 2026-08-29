@@ -17,6 +17,11 @@ function resolveSize(value: CSSProperties["width"], fallback: string) {
   return value === undefined ? fallback : value;
 }
 
+/**
+ * Renders an inert loading placeholder with shape and motion variants.
+ *
+ * @public
+ */
 export function Skeleton({
   animated = false,
   aspectRatio,

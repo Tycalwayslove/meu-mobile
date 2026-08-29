@@ -8,19 +8,36 @@ import type { ReactNode } from "react";
 
 import type { MeuNumberFieldPath } from "./adapter-types";
 
+/**
+ * Props for a stepper bound to a numeric React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormStepperProps<TFieldValues extends FieldValues> = Omit<
   StepperProps,
   "defaultValue" | "name" | "onBlur" | "onChange" | "value"
 > & {
+  /** Supporting content rendered with the field and associated with the stepper. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the numeric React Hook Form field controlled by this stepper. */
   name: MeuNumberFieldPath<TFieldValues>;
+  /** Called after React Hook Form marks the field as touched; receives the input blur event. */
   onBlur?: StepperProps["onBlur"];
+  /** Called after the form value changes; receives the next numeric value. */
   onChange?: StepperProps["onChange"];
+  /** Shows the required affordance and sets the stepper input's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuNumberFieldPath<TFieldValues>>["rules"];
 };
 
+/**
+ * Binds a stepper's value, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormStepper<TFieldValues extends FieldValues>({
   description,
   label,

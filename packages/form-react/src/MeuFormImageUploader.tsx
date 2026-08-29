@@ -13,19 +13,36 @@ import type {
   ImageUploaderRef
 } from "@meu/mobile";
 
+/**
+ * Props for an image uploader whose item array is stored in React Hook Form.
+ *
+ * @public
+ */
 export type MeuFormImageUploaderProps<TFieldValues extends FieldValues> = Omit<
   ImageUploaderProps,
   "defaultValue" | "name" | "onBlur" | "onChange" | "ref" | "status" | "value"
 > & {
+  /** Supporting content rendered with the field and associated with the uploader. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** React Hook Form field path that stores the current uploader item array. */
   name: Path<TFieldValues>;
+  /** Called after React Hook Form marks the field as touched; receives the file input blur event. */
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  /** Called after the form value and touched state update; receives all items and change details. */
   onChange?: (items: ImageUploaderItem[], details: ImageUploaderChangeDetails) => void;
+  /** Shows the required affordance; enforce required validation through `rules` when needed. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
 };
 
+/**
+ * Binds an image uploader's items, validation state, and input ref to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormImageUploader<TFieldValues extends FieldValues>({
   description,
   disabled,

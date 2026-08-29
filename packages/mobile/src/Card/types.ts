@@ -1,9 +1,24 @@
 import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from "react";
 
+/**
+ * Surface treatment applied to a card.
+ *
+ * @public
+ */
 export type CardVariant = "outlined" | "filled" | "elevated";
+/**
+ * Preset inner spacing for a card.
+ *
+ * @public
+ */
 export type CardPadding = "none" | "small" | "medium" | "large";
 export type CardFooterLayout = "content" | "actions";
 
+/**
+ * Props accepted by {@link Card}.
+ *
+ * @public
+ */
 export type CardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onClick" | "title"> & {
   /** Main non-interactive card content. */
   children?: ReactNode;

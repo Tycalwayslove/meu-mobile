@@ -8,18 +8,34 @@ import type { ReactNode } from "react";
 
 import type { MeuSelectionFieldPath } from "./adapter-types";
 
+/**
+ * Props for a radio group bound to a scalar React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormRadioGroupProps<
   TFieldValues extends FieldValues,
   TValue extends RadioValue = RadioValue
 > = Omit<RadioGroupProps<TValue>, "defaultValue" | "name" | "onChange" | "value"> & {
+  /** Supporting content rendered with the field and associated with the radio group. */
   description?: ReactNode;
+  /** Visible group label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the scalar React Hook Form field controlled by this group. */
   name: MeuSelectionFieldPath<TFieldValues, TValue>;
+  /** Called after the form value changes; receives the selected value and input event. */
   onChange?: RadioGroupProps<TValue>["onChange"];
+  /** Shows the required affordance and sets the group's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuSelectionFieldPath<TFieldValues, TValue>>["rules"];
 };
 
+/**
+ * Binds a radio group's selection, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormRadioGroup<
   TFieldValues extends FieldValues,
   TValue extends RadioValue = RadioValue

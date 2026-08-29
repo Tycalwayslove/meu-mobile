@@ -7,9 +7,18 @@ import type {
   Ref
 } from "react";
 
+/**
+ * Element rendered by a Cell according to its navigation and interaction props.
+ *
+ * @public
+ */
 export type CellRef = HTMLAnchorElement | HTMLButtonElement | HTMLDivElement;
 
-/** Props for a semantic information row. The rendered root depends on `href` and interaction props. */
+/**
+ * Props for a semantic information row. The rendered root depends on `href` and interaction props.
+ *
+ * @public
+ */
 export type CellProps = Omit<
   HTMLAttributes<CellRef>,
   "children" | "dangerouslySetInnerHTML" | "onClick" | "prefix" | "title"
@@ -22,18 +31,23 @@ export type CellProps = Omit<
   description?: ReactNode;
   /** Disables native button interaction or removes an anchor from navigation and the tab order. */
   disabled?: boolean;
+  /** Native anchor download hint; used only when `href` renders the Cell as a link. */
   download?: boolean | string;
   /** Short trailing value or status. Do not place interactive controls in this slot. */
   extra?: ReactNode;
   /** Non-empty navigation target; causes Cell to render a native anchor. */
   href?: string;
+  /** Activates an action Cell and receives its rendered anchor or button; disabled Cells suppress it. */
   onClick?: MouseEventHandler<CellRef>;
   /** Leading decorative or semantic content. Do not nest controls when the row is interactive. */
   prefix?: ReactNode;
+  /** Ref to the rendered anchor, button, or static `div`, depending on `href` and interaction props. */
   ref?: Ref<CellRef>;
+  /** Native anchor relationship metadata; used only when `href` renders the Cell as a link. */
   rel?: string;
   /** Trailing display content before the disclosure arrow. */
   suffix?: ReactNode;
+  /** Native anchor browsing-context target; used only when `href` renders the Cell as a link. */
   target?: HTMLAttributeAnchorTarget;
   /** Main accessible row content. */
   title: ReactNode;
@@ -41,14 +55,29 @@ export type CellProps = Omit<
   type?: ButtonHTMLAttributes<HTMLButtonElement>["type"];
 };
 
+/**
+ * Surface treatment applied to a list group.
+ *
+ * @public
+ */
 export type ListMode = "plain" | "card";
+/**
+ * Divider treatment between direct Cell children.
+ *
+ * @public
+ */
 export type ListDivider = "inset" | "full" | "none";
 
-/** Props for a semantic group of Cell rows. */
+/**
+ * Props for a semantic group of Cell rows.
+ *
+ * @public
+ */
 export type ListProps = Omit<
   HTMLAttributes<HTMLDivElement>,
   "children" | "dangerouslySetInnerHTML" | "title"
 > & {
+  /** Cell rows or other content rendered inside the element with `role="list"`. */
   children?: ReactNode;
   /** Divider treatment between direct Cell children. */
   divider?: ListDivider;
@@ -58,5 +87,6 @@ export type ListProps = Omit<
   header?: ReactNode;
   /** Full-width plain surface or inset bordered card. */
   mode?: ListMode;
+  /** Ref to the outer group element; the nested body carries `role="list"`. */
   ref?: Ref<HTMLDivElement>;
 };

@@ -178,7 +178,7 @@
   },
   "kind": "Package",
   "canonicalReference": "@meu/primitives-react!",
-  "docComment": "",
+  "docComment": "/**\n * Low-level React accessibility, portal, focus and scroll primitives shared by Meu packages.\n *\n * @packageDocumentation\n */\n",
   "name": "@meu/primitives-react",
   "preserveMemberOrder": false,
   "members": [
@@ -191,7 +191,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/primitives-react!FocusTrapOptions:type",
-          "docComment": "",
+          "docComment": "/**\n * Configuration for the shared nested-modal focus manager.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

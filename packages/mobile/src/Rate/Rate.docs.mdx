@@ -3,11 +3,11 @@ name: Rate
 slug: rate
 package: "@meu/mobile"
 exports: [Rate]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: null
   nodeId: null
@@ -160,7 +160,9 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 - Unit 8 项：半值 change、readOnly meter/Field 值语义、规范化、RTL 重复清除、readOnly FormData/ref、同步原生 reset 与取消边界。
 - SSR 1 项：interactive range 与 readOnly meter/hidden form markup。
 - Story interaction: `NativeFormReset.play` 验证原生 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4433 B / 32768 B 预算，组合 Brotli 3943 B；共享样式由应用单独导入一次。
 - 待补：pointer drag/keyboard 移动 E2E、forced-colors/200%/Light-Dark、VoiceOver/TalkBack。
 
 ## V2 优化记录

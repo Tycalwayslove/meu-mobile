@@ -3,11 +3,11 @@ name: Space
 slug: space
 package: "@meu/mobile"
 exports: [Space]
-status: implementation
+status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-28
+lastReviewed: 2026-08-29
 figma:
   fileKey: null
   nodeId: null
@@ -30,7 +30,7 @@ source: packages/mobile/src/Space
 - 支持 horizontal/vertical、5 种 cross-axis 对齐、wrap，以及 9 档 Meu spacing token gap。
 - horizontal 的开始方向跟随容器 `dir`，没有物理 left/right 布局 API。
 
-当前状态为 `implementation`，尚未完成旧 WebView 与真机商用验收。
+当前状态为 `verification`，尚未完成旧 WebView 与真机商用验收。
 
 ## 何时使用
 
@@ -125,7 +125,9 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 
 - Unit: `Space.test.tsx` 覆盖顺序、方向、QA 属性、原生属性与 ref
 - Story interaction: `Wrapped` 验证方向、gap、wrap 与子项顺序；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1724 B / 32768 B 预算，组合 Brotli 1538 B；共享样式由应用单独导入一次。
 - SSR/hydration: 实现无环境分支，尚无独立 hydration 测试
 - RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
 - Reduced motion: 不适用；没有内建动效

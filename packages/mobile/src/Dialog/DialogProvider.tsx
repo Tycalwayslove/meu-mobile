@@ -38,6 +38,11 @@ type Lifecycle = {
 const exitDuration = 180;
 const DialogContext = createContext<DialogApi | null>(null);
 
+/**
+ * Provides the imperative dialog API to its React subtree.
+ *
+ * @public
+ */
 export function DialogProvider({ children }: DialogProviderProps) {
   const config = useMeuConfig();
   const [records, setRecords] = useState<DialogRecord[]>([]);
@@ -213,6 +218,11 @@ export function DialogProvider({ children }: DialogProviderProps) {
   );
 }
 
+/**
+ * Returns the imperative dialog API from the nearest provider.
+ *
+ * @public
+ */
 export function useDialog() {
   const dialog = useContext(DialogContext);
   if (!dialog) throw new Error("useDialog must be used within a DialogProvider");

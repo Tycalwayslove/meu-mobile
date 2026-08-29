@@ -57,6 +57,11 @@ function cellPosition(index: number, length: number, separated: boolean) {
   return "middle" as const;
 }
 
+/**
+ * Renders an OTP or passcode control backed by one native input.
+ *
+ * @public
+ */
 export const PasscodeInput = forwardRef<PasscodeInputRef, PasscodeInputProps>(
   function PasscodeInput(
     {

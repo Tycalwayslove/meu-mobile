@@ -57,6 +57,75 @@ try {
   const requestedTheme = globalThis.process.env.MEU_STORYBOOK_THEME || "all";
   const themes =
     requestedTheme === "light" || requestedTheme === "dark" ? [requestedTheme] : ["light", "dark"];
+  const matrix = globalThis.process.env.MEU_STORYBOOK_MATRIX || "default";
+  let scenarios = themes.map((theme) => ({
+    dir: "ltr",
+    forcedColors: "none",
+    fontScale: 1,
+    key: `${theme}-ltr-zh-CN-system`,
+    locale: "zh-CN",
+    motion: "system",
+    theme
+  }));
+  if (matrix === "extended") {
+    scenarios.push(
+      {
+        dir: "rtl",
+        forcedColors: "none",
+        fontScale: 1,
+        key: "light-rtl-zh-CN-system",
+        locale: "zh-CN",
+        motion: "system",
+        theme: "light"
+      },
+      {
+        dir: "ltr",
+        forcedColors: "none",
+        fontScale: 1,
+        key: "light-ltr-en-US-system",
+        locale: "en-US",
+        motion: "system",
+        theme: "light"
+      },
+      {
+        dir: "ltr",
+        forcedColors: "none",
+        fontScale: 1,
+        key: "light-ltr-zh-CN-reduced",
+        locale: "zh-CN",
+        motion: "reduced",
+        theme: "light"
+      },
+      {
+        dir: "ltr",
+        forcedColors: "none",
+        fontScale: 2,
+        key: "light-ltr-zh-CN-font-200",
+        locale: "zh-CN",
+        motion: "system",
+        theme: "light"
+      },
+      {
+        dir: "ltr",
+        forcedColors: "active",
+        fontScale: 1,
+        key: "light-ltr-zh-CN-forced-colors",
+        locale: "zh-CN",
+        motion: "system",
+        theme: "light"
+      }
+    );
+  }
+  const requestedScenario = globalThis.process.env.MEU_STORYBOOK_SCENARIO;
+  if (requestedScenario) {
+    const normalizedScenario = requestedScenario.toLowerCase();
+    scenarios = scenarios.filter((scenario) =>
+      scenario.key.toLowerCase().includes(normalizedScenario)
+    );
+    if (scenarios.length === 0) {
+      throw new Error(`No Storybook scenario matched ${requestedScenario}`);
+    }
+  }
   let stories = Object.values(storybookIndex.entries)
     .filter((entry) => entry.type === "story")
     .filter((entry) => !match || entry.id.includes(match) || entry.title.includes(match));
@@ -70,6 +139,15 @@ try {
 
   async function scanBatch(workerIndex) {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    let activeScenario = "";
+    let activeStory = "";
+    page.on("pageerror", (error) => {
+      renderErrors.push({
+        story: activeStory,
+        scenario: activeScenario,
+        error: `pageerror: ${error.message}`
+      });
+    });
     await page.addInitScript({ content: axeSource });
     await page.addInitScript({
       content: `
@@ -98,9 +176,16 @@ try {
     });
     for (let storyIndex = workerIndex; storyIndex < stories.length; storyIndex += workerCount) {
       const story = stories[storyIndex];
-      for (const theme of themes) {
+      for (const scenario of scenarios) {
+        activeStory = story.id;
+        activeScenario = scenario.key;
         try {
-          const globals = `theme:${theme};dir:ltr;locale:zh-CN;motion:system`;
+          await page.emulateMedia({
+            colorScheme: scenario.theme,
+            forcedColors: scenario.forcedColors,
+            reducedMotion: scenario.motion === "reduced" ? "reduce" : "no-preference"
+          });
+          const globals = `theme:${scenario.theme};dir:${scenario.dir};locale:${scenario.locale};motion:${scenario.motion}`;
           const url = `${origin}/iframe.html?id=${encodeURIComponent(story.id)}&viewMode=story&globals=${encodeURIComponent(globals)}`;
           await page.goto(url, { timeout: 20_000, waitUntil: "domcontentloaded" });
           await page.waitForFunction(
@@ -116,8 +201,28 @@ try {
             result: globalThis.__MEU_STORYBOOK_RESULT__
           }));
           if (!storyResult.result || storyResult.result.status !== "success") {
+            const compactReporters = (storyResult.result?.reporters || []).map((reporter) => {
+              if (reporter.type !== "a11y") return { type: reporter.type };
+              return {
+                type: reporter.type,
+                incomplete: (reporter.result?.incomplete || []).map((entry) => entry.id),
+                violations: (reporter.result?.violations || []).map((violation) => ({
+                  id: violation.id,
+                  impact: violation.impact,
+                  nodes: violation.nodes.map((node) => ({
+                    failureSummary: node.failureSummary,
+                    html: node.html,
+                    target: node.target
+                  }))
+                }))
+              };
+            });
             throw new Error(
-              `Story interaction failed: ${JSON.stringify(storyResult.error || storyResult.result)}`
+              `Story interaction failed: ${JSON.stringify({
+                error: storyResult.error,
+                reporters: compactReporters,
+                status: storyResult.result?.status
+              })}`
             );
           }
           await page.waitForFunction(
@@ -129,6 +234,12 @@ try {
             { timeout: 10_000 }
           );
           await page.waitForTimeout(250);
+          if (scenario.fontScale !== 1) {
+            await page.evaluate((fontScale) => {
+              globalThis.document.documentElement.style.fontSize = `${fontScale * 100}%`;
+            }, scenario.fontScale);
+            await page.waitForTimeout(100);
+          }
           const result = await page.evaluate(async () => {
             const report = await globalThis.axe.run(globalThis.document, {
               runOnly: {
@@ -146,9 +257,15 @@ try {
               }))
             }));
           });
-          if (result.length > 0) violations.push({ story: story.id, theme, violations: result });
+          if (result.length > 0) {
+            violations.push({ story: story.id, scenario: scenario.key, violations: result });
+          }
         } catch (error) {
-          renderErrors.push({ story: story.id, theme, error: String(error).slice(0, 500) });
+          renderErrors.push({
+            story: story.id,
+            scenario: scenario.key,
+            error: String(error).slice(0, 2_000)
+          });
         }
       }
       completed += 1;
@@ -165,12 +282,12 @@ try {
   if (renderErrors.length > 0 || violations.length > 0) {
     globalThis.process.stderr.write(`${JSON.stringify({ renderErrors, violations }, null, 2)}\n`);
     globalThis.process.stderr.write(
-      `Storybook accessibility failed: ${renderErrors.length} render errors, ${violations.length} story/theme violations.\n`
+      `Storybook accessibility failed: ${renderErrors.length} render errors, ${violations.length} story/scenario violations.\n`
     );
     globalThis.process.exitCode = 1;
   } else {
     globalThis.process.stdout.write(
-      `Storybook accessibility passed: ${stories.length} stories × ${themes.length} theme(s).\n`
+      `Storybook accessibility passed: ${stories.length} stories × ${scenarios.length} scenario(s).\n`
     );
   }
 } finally {

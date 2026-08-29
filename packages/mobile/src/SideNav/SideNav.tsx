@@ -16,6 +16,11 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
   else if (ref) ref.current = value;
 }
 
+/**
+ * Renders route-agnostic side navigation or vertical tabs.
+ *
+ * @public
+ */
 export function SideNav({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,

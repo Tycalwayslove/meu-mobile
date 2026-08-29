@@ -178,7 +178,7 @@
   },
   "kind": "Package",
   "canonicalReference": "@meu/icons-react!",
-  "docComment": "",
+  "docComment": "/**\n * Meu-branded React icon renderer and the curated first-party icon set.\n *\n * @packageDocumentation\n */\n",
   "name": "@meu/icons-react",
   "preserveMemberOrder": false,
   "members": [

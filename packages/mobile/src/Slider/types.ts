@@ -1,9 +1,23 @@
 import type { ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
 
+/**
+ * Visual and touch-target size for Slider.
+ *
+ * @public
+ */
 export type SliderSize = "small" | "medium" | "large";
+/**
+ * Visual validation state for Slider.
+ *
+ * @public
+ */
 export type SliderStatus = "default" | "error";
 
-/** A decorative label anchored to one value on the slider track. */
+/**
+ * A decorative label anchored to one value on the slider track.
+ *
+ * @public
+ */
 export type SliderMark = {
   /** Optional visual label. Marks are presentation-only and are not announced as choices. */
   label?: ReactNode;
@@ -11,7 +25,11 @@ export type SliderMark = {
   value: number;
 };
 
-/** Props accepted by {@link Slider}. Native range attributes are forwarded unless specialized here. */
+/**
+ * Props accepted by {@link Slider}. Native range attributes are forwarded unless specialized here.
+ *
+ * @public
+ */
 export type SliderProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"

@@ -3,7 +3,7 @@ name: VirtualList
 slug: virtual-list
 package: "@meu/mobile"
 exports: [VirtualList]
-status: audit
+status: verification
 priority: P2
 since: 0.1.0
 implementedVersion: null
@@ -126,10 +126,12 @@ DOM 数量约为可见行加双侧 overscan；默认 overscan=3，最大归一�
 
 - Unit: `VirtualList.test.tsx` 覆盖窗口、完整 ARIA、动态测量、远距焦点、定位、空态和 stable-key 排序保留。
 - Story interaction: `TenThousandRows` 验证有限渲染窗口、完整集合 ARIA 与键盘焦点；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Axe: 本地 scanner 在 390×844 逐一检查 374 stories 的 Light/Dark（748 场景）；有 play 的 Story 均在 `storyFinished=success` 后再运行 axe，WCAG A/AA 0 违规。
-- SSR/hydration: `VirtualList.ssr.test.tsx` 和 unit SSR 覆盖初始子集；真实 ResizeObserver hydration 待补。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 13701 B / 32768 B 预算，组合 Brotli 12049 B；共享样式由应用单独导入一次。
+- SSR/hydration: `VirtualList.ssr.test.tsx` 覆盖确定性初始子集；隔离 Next production `/hydration?case=virtual-list` 在 Chromium/WebKit 中完成真实 hydration，0 `pageerror`、0 `console.error`。
 - RTL/forced-colors/reduced-motion: 逻辑 CSS或无动画契约完成，视觉证据待补。
-- Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。
+- Mobile Chromium/WebKit E2E: 10,000 条动态行的远距跳转与焦点保留通过；性能专页要求 DOM ≤20、跳至第 9,001 行并完成两帧提交 ≤500ms，两种引擎均通过。Chromatic 与 real device 延后到发布批次。
 
 ## V2 优化记录
 

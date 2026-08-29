@@ -3,7 +3,7 @@ name: PullToRefresh
 slug: pull-to-refresh
 package: "@meu/mobile"
 exports: [PullToRefresh]
-status: audit
+status: verification
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -118,7 +118,9 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 
 - Unit: `PullToRefresh.test.tsx`（阈值、短拉、边界、键盘、失败、多指/cancel/disabled）。
 - Story interaction: `Default.play` 验证替代刷新按钮与完成状态；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Axe: 本地 scanner 在 390×844 下逐 Story 扫描 Light/Dark；374 个 Story 共 748 个场景均为 WCAG A/AA 0 违规；含 play 的 Story 仅在 `storyFinished=success` 后执行 axe。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2810 B / 32768 B 预算，组合 Brotli 2423 B；共享样式由应用单独导入一次。
 - SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；真实 hydration 待补。
 - RTL: 纵向手势不适用；文案/排版待矩阵。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。

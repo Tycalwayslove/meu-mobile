@@ -8,19 +8,36 @@ import type { ReactNode } from "react";
 
 import type { MeuNumberFieldPath } from "./adapter-types";
 
+/**
+ * Props for a slider bound to a numeric React Hook Form field.
+ *
+ * @public
+ */
 export type MeuFormSliderProps<TFieldValues extends FieldValues> = Omit<
   SliderProps,
   "defaultValue" | "name" | "onBlur" | "onChange" | "value"
 > & {
+  /** Supporting content rendered with the field and associated with the slider. */
   description?: ReactNode;
+  /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /** Path of the numeric React Hook Form field controlled by this slider. */
   name: MeuNumberFieldPath<TFieldValues>;
+  /** Called after React Hook Form marks the field as touched; receives the slider blur event. */
   onBlur?: SliderProps["onBlur"];
+  /** Called after the form value changes; receives the next number and input event. */
   onChange?: SliderProps["onChange"];
+  /** Shows the required affordance and sets the slider input's native `required` state. */
   required?: boolean;
+  /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, MeuNumberFieldPath<TFieldValues>>["rules"];
 };
 
+/**
+ * Binds a slider's value, validation state, and focus target to React Hook Form.
+ *
+ * @public
+ */
 export function MeuFormSlider<TFieldValues extends FieldValues>({
   description,
   label,
