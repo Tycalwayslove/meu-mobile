@@ -14,8 +14,11 @@ figma:
 storyIds:
   [
     information-image--loaded,
+    information-image--placeholder-to-loaded,
     information-image--fallback,
     information-image--lazy,
+    information-image--fallback-source,
+    information-image--responsive-crop,
     information-image--light-and-dark
   ]
 source: packages/mobile/src/Image
@@ -25,117 +28,215 @@ source: packages/mobile/src/Image
 
 ## 当前能力
 
-原生 `img` 的 loading/loaded/error 状态封装，支持 placeholder/fallback、必填 alt、lazy/eager、async decoding、srcSet/sizes、object-fit、跨域与 referrer policy。固定尺寸在加载和失败期间保留，异常数值归一为 0；不自行请求、缓存或重试。
+Image 是保留原生 `img` 语义的状态型图片原语：
+
+- `loading → loaded → error` 三态、加载 placeholder、最终 fallback，以及一次 primary → `fallbackSrc` 来源回退。
+- 原生 `alt`、`src/srcSet/sizes`、`loading`、`decoding`、`fetchPriority`、CORS、referrer policy、拖拽和受约束的 `imageProps`。
+- `fit`/`position` 裁切、`aspectRatio` 比例预留、数字或 CSS 字符串宽高、四种圆角。
+- 空源、失败、缓存完成、SSR 与 hydration 的确定性行为；不自行 fetch、缓存、重试或推导 CDN URL。
+
+状态仍为 `verification`：仓库自动化已覆盖核心语义，真实 iOS/Android、VoiceOver/TalkBack、旧 WebView 弱网和最终视觉基线仍按发布签字表执行。
 
 ## 何时使用
 
-商品图、内容图和需要稳定占位的响应式媒体。装饰图片显式传 `alt=""`。
+用于商品图、内容图、卡片媒体和需要稳定占位、响应式候选或错误回退的图片。装饰图片必须显式传 `alt=""`。
 
 ## 何时不要使用
 
-头像使用 Avatar；全屏手势查看使用 ImageViewer；Next Image 的服务端优化、CDN loader 和 blur data URL 由应用层负责。
+- 人物或店铺头像使用 Avatar。
+- 全屏缩放、手势浏览使用 ImageViewer。
+- Next.js 图片优化、CDN loader、预加载和 blur data URL 由应用层的 `next/image` 或媒体服务负责。
+- 需要 `<picture>`/`source media`/格式协商时，由业务渲染原生 `<picture>`；Image 当前只封装单个 `img`。
 
 ## 结构与状态
 
-root → loading placeholder / error fallback → native img。`data-state=loading|loaded|error`；root 公开 `data-meu-component=image`。组件本身非交互，没有 pressed/disabled/selected。
+```text
+root[data-state][data-source]
+├─ loading: placeholder overlay + native img
+├─ loaded: native img
+└─ error: accessible fallback（native img 卸载）
+```
+
+`data-state` 为 `loading | loaded | error`，`data-source` 为 `primary | fallback`，root 固定公开 `data-meu-component="image"`。有 primary 时先请求 `src/srcSet`；其原生 error 事件触发后，有效 `fallbackSrc` 会作为单一 `src` 请求，并移除 primary `srcSet`。第二次失败才进入最终 error。primary 缺失但 `fallbackSrc` 有效时，SSR 首帧直接从 fallback source 开始。
 
 ## 基础用法
 
 ```tsx
-<Image src={product.src} alt={product.name} width={320} height={180} loading="lazy" />
+<Image
+  src={product.src}
+  srcSet={`${product.small} 480w, ${product.large} 960w`}
+  sizes="(max-width: 480px) 100vw, 480px"
+  alt={product.name}
+  width="100%"
+  aspectRatio="16 / 9"
+  intrinsicWidth={960}
+  intrinsicHeight={540}
+  loading="lazy"
+/>
+```
+
+## 比例裁切与来源回退
+
+```tsx
+<Image
+  src={product.cdnUrl}
+  fallbackSrc={product.originalUrl}
+  alt={product.name}
+  width="100%"
+  aspectRatio="4 / 3"
+  fit="cover"
+  position="70% center"
+  placeholder="图片加载中…"
+  fallback="暂时无法显示图片"
+/>
 ```
 
 ## 受控与非受控
 
-不适用。`src/srcSet` 是调用方事实源；源变化会进入新一轮 loading。内部只记录当前源的加载状态。
+不适用。`src`、`srcSet` 和 `fallbackSrc` 是调用方事实源；任一来源变化都会同步派生为新周期的首帧 `loading`/`error`。内部只记录当前来源周期和 primary/fallback 阶段，不缓存历史成功或失败。
 
 ## 表单集成
 
-不适用，不参与 FormData、dirty 或 validation。
+不适用。Image 不参与 FormData、dirty 或 validation，也不创建交互控件。
 
 ## Props
 
-API 由 `ImageProps` 生成。`width/height` 的 number 解释为非负 px；字符串原样进入 CSS。`style.width/height` 仅在对应 prop 未提供时生效。fallback/placeholder 可以是 ReactNode，但不应放交互控件。
+| Prop                                           | 类型                                  | 默认值          | 契约                                                                              |
+| ---------------------------------------------- | ------------------------------------- | --------------- | --------------------------------------------------------------------------------- |
+| `alt`                                          | `string`                              | 必填            | 原生替代文本；装饰图片传空字符串                                                  |
+| `src`                                          | `string`                              | —               | primary URL；空白字符串视为缺失                                                   |
+| `srcSet`                                       | `string`                              | —               | 原生响应式候选；可在无 `src` 时独立提供 primary                                   |
+| `sizes`                                        | `string`                              | —               | 与 primary `srcSet` 配套的原生尺寸提示                                            |
+| `fallbackSrc`                                  | `string`                              | —               | primary 失败后最多请求一次的备用 URL；primary 缺失时直接使用                      |
+| `placeholder`                                  | `ReactNode`                           | 默认图片 glyph  | loading 覆盖层；不得包含交互控件                                                  |
+| `fallback`                                     | `ReactNode`                           | 默认图片 glyph  | 最终 error 视觉；不得包含交互控件或另一套图片语义                                 |
+| `loading`                                      | `"eager" \| "lazy"`                   | `"eager"`       | 原生加载策略，不内建 IntersectionObserver                                         |
+| `decoding`                                     | 原生值                                | `"async"`       | 浏览器解码提示                                                                    |
+| `fetchPriority`                                | 原生值                                | —               | 请求优先级提示；只给真正的 LCP 图片使用 `high`                                    |
+| `crossOrigin` / `referrerPolicy` / `draggable` | 原生值                                | — / — / `false` | 直接传给每次底层 `img` 请求                                                       |
+| `width` / `height`                             | `number \| string`                    | —               | root CSS 尺寸；正数 number 对会自动形成可收缩比例盒，并作为默认原生尺寸           |
+| `intrinsicWidth` / `intrinsicHeight`           | `number`                              | —               | 单独覆盖 native img 固有尺寸，推荐与响应式 root 尺寸配合                          |
+| `aspectRatio`                                  | CSS `aspect-ratio`                    | —               | 在字节到达前预留比例；配合响应式宽度降低 CLS                                      |
+| `fit`                                          | CSS `object-fit`                      | `"cover"`       | 图片适配方式                                                                      |
+| `position`                                     | CSS `object-position`                 | `"50% 50%"`     | 裁切焦点                                                                          |
+| `radius`                                       | `none \| control \| surface \| round` | `none`          | root 与图片裁切圆角                                                               |
+| `imageProps`                                   | `ImageNativeProps`                    | —               | 底层 img 的非冲突原生属性；`className/style` 合并，Image 的 fit/position 最终生效 |
+| `ref` / `imageRef`                             | React ref                             | —               | 分别指向稳定 root 和当前 native img                                               |
+| 其余 root props                                | `HTMLAttributes<HTMLDivElement>`      | —               | 传给 wrapper；不包含 children/onLoad/onError                                      |
+
+`width/height` 的 `NaN`、Infinity 和负 number 归零，保证 SSR 不输出非法数值。两者均为正 number 时，root 使用宽度加推导比例，不保留会在 `max-width:100%` 下失真的固定高度；原生 width/height 仍默认接收这组数值。`intrinsicWidth/intrinsicHeight` 可覆盖原生尺寸，使布局尺寸与资源比例彻底解耦。CSS 字符串由浏览器校验，`style.width/height/aspectRatio` 仅在对应专有 prop 未提供时生效。
 
 ## Events
 
-`onLoad/onError` 在对应原生 img 事件之后更新视觉状态并透传事件；不可取消，也不自动重试。
+| Event            | 时机                    | 说明                                                          |
+| ---------------- | ----------------------- | ------------------------------------------------------------- |
+| `onLoad(event)`  | React 收到 native load  | 状态先在同一批更新为 loaded；fallback source 的事件同样透传   |
+| `onError(event)` | React 收到 native error | primary 失败切换 `fallbackSrc`；fallback 再失败进入最终 error |
+
+事件不可取消，也不会为 hydration 前已经完成的缓存请求合成 SyntheticEvent。没有 `onStateChange` 或命令式 retry；业务重试应改变 `src/srcSet/fallbackSrc`，使来源 key 进入新周期。
 
 ## Ref 与命令式方法
 
-`ref` 指向 root div；`imageRef` 指向当前 img。空源或 error 后 img 卸载，imageRef 为 null。无命令式重试。
+`ref` 始终指向 root div。`imageRef` 在 loading/loaded 时指向当前 img；无可请求来源或最终 error 时为 null。React 19 callback ref 返回的 cleanup 会原样执行；旧式 callback/object ref 在节点消失或卸载时仍收到 null。primary 切到 fallback 时复用同一个 DOM img，来源属性更新；不保证该节点在未来版本永远复用。无命令式方法。
 
 ## 键盘操作
 
-| 按键   | 行为                                      |
-| ------ | ----------------------------------------- |
-| 不适用 | Image 非交互；链接/按钮语义由外层元素提供 |
+| 按键   | 行为                                                           |
+| ------ | -------------------------------------------------------------- |
+| 不适用 | Image 非交互，不进入 Tab；链接、按钮或查看器语义由外层组件负责 |
 
 ## 触摸与手势
 
-不拦截触摸。44×44 只用于默认状态层的可见性，不代表图片是触控目标。
+不拦截触摸或滚动。状态层的最小可见尺寸不是触控目标。不要直接给 Image 添加 click 后假装按钮；将它放入语义正确的 Button/Link。
 
 ## 无障碍
 
-加载成功由原生 img/alt 提供语义；失败时 root 以相同 alt 暴露 `role=img`。空 alt 的失败状态 `aria-hidden`。loading root 使用 `aria-busy`，不建立 live region，避免列表批量播报。
+- loading/loaded 由原生 img 和必填 `alt` 提供图片语义；root 在 loading 时设置 `aria-busy`，但不创建 live region，避免图片列表批量播报。
+- 最终 error 会卸载损坏 img；非空 alt 由 root 以 `role="img"` 和相同 `aria-label` 保留语义，空 alt 则整层 `aria-hidden`。
+- placeholder/fallback 是视觉槽位，不应放按钮、链接、另一张带 alt 的 img 或 live region；需要重试按钮时在 Image 外部组合。
+- `imageProps` 可传 `aria-describedby`、`title` 和 `data-*` 等 native img 属性；类型与运行时都会阻止它覆盖 alt、aria-hidden、aria-label、aria-labelledby、role、source/request/event 字段。
+- alt 应描述图片承载的信息，不写“图片/照片”；邻近文字已完整表达且图片纯装饰时使用 `alt=""`。
 
 ## 动效
 
-加载完成仅 opacity 淡入；`prefers-reduced-motion` 下缩为 1ms。没有循环动画。
+loading → loaded 仅使用 opacity 淡入；`prefers-reduced-motion` 或 `ConfigProvider motion="reduced"` 下关闭过渡。error 与来源回退无循环动画。
 
 ## 主题与定制
 
-背景、文字与圆角来自 Meu Token；forced-colors 增加系统色边界。稳定定制入口为 radius、fit、className/style、placeholder/fallback 与 data 属性。
+背景、文字、圆角和动效来自 Meu Token；forced-colors 增加系统色边界。稳定定制入口为 `radius`、`fit`、`position`、`className/style`、`imageProps.className/style`、placeholder/fallback 以及公开 data 属性。内部 class 名不是契约。
 
 ## SSR 与 Next.js
 
-首屏不读取浏览器全局；有源时 SSR 输出占位与 img，缓存完成检查在 effect 中执行。它不是 `next/image` 替代品，不提供预加载、loader 或服务端尺寸推导。
+- 首屏 render 不读取 `window`、网络状态或图片缓存；服务端与客户端都由同一 props 计算 primary/fallback、loading/error 和原生属性。
+- 有来源时 SSR 输出 placeholder + img；无来源时直接输出可访问 fallback。`fallbackSrc` 在 primary 缺失时会直接进入 SSR img，在 primary 失败时只由客户端原生 error 事件切换。
+- hydration 后 effect 才检查 `img.complete/naturalWidth`，用于浏览器缓存已完成但 React 未收到 load/error 事件的情况；它只恢复状态，不伪造已经错过的事件，也不会改变服务器首帧结构。
+- Image 不是 `next/image` 替代品，不提供 loader、preload、静态 import 尺寸推导、服务端裁图或 blur data URL。一个页面的 LCP 图片通常使用应用层优化组件，其余内容图片可使用 Image。
 
 ## RTL 与国际化
 
-布局无方向性；alt/fallback 文案由调用方本地化。
+布局与来源状态无方向性；`object-position` 是调用方 CSS 值，如需随 RTL 翻转焦点须由业务选择对应值。alt、placeholder 和 fallback 文案由调用方本地化。
 
 ## 浏览器与 WebView
 
-依赖原生 img、object-fit、CSS Grid 与 requestAnimationFrame。旧 WKWebView 不支持 native lazy 时会退化为 eager；内容和错误状态仍正确。
+完整支持范围继承 V2 支持矩阵：iOS Safari/WKWebView 15+、Android Chrome/WebView 89+；更早版本为观察档。实现依赖标准 img、`object-fit/object-position`、CSS Grid、`aspect-ratio` 和 requestAnimationFrame：
+
+- 不支持 native lazy loading 的 WebView 会按浏览器规则退化为 eager，请求与无障碍语义仍成立。
+- 不支持 CSS `aspect-ratio` 的观察档浏览器仍可从 native `intrinsicWidth/intrinsicHeight` 获得资源比例，但 wrapper 的预留高度可能降级；正式支持档内使用响应式 width + aspectRatio。
+- `fetchPriority` 不被识别时只是提示失效，不影响请求。
+- 静态旧语法检查不是旧 WebView 完整运行时承诺，真机/宿主验收以发布签字表为准。
 
 ## 边界情况与已知限制
 
-- 未知尺寸仍可能产生 CLS，生产环境应提供 width/height 或稳定容器比例。
-- 失败后需改变 src/srcSet 才会重试；组件不做指数退避。
-- CSS 字符串尺寸的合法性由浏览器决定；仅 number 会做有限值与非负归一。
+- 只有 CSS 字符串宽度且没有 height/aspectRatio 时，未知图片尺寸仍可能产生 CLS。
+- `fallbackSrc` 只有一层，不递归、不退避；React 观察到的每个原生失败事件都会触发 `onError`，hydration 前已经结束的缓存请求不会补发事件。
+- fallback source 是单一 src，不复用 primary `srcSet`，避免错误候选再次胜出；若备用也需要响应式候选，请由业务换一组 props 开启新周期。
+- 浏览器决定候选选择、缓存、解码与错误事件时序；组件不探测网络、不取消下载。
+- `imageProps.style.objectFit/objectPosition` 会被顶层 `fit/position` 覆盖，其他样式合并。
+- `<picture>`、art direction、自动格式协商、占位色提取和可点击重试不在当前范围。
 
 ## 性能预算
 
-常数 DOM；图片字节、解码、响应式候选和缓存策略属于调用方。长列表应使用 lazy 和 CDN 裁剪。
+常数 DOM、一个 effect、零 Observer/网络包装器。加载态最多 root + state layer + img，loaded 只剩 root + img。实际图片字节、候选数量、CDN 裁剪、缓存和解码成本由调用方负责；长列表使用 `loading="lazy"`，首屏 LCP 不应滥用 lazy。
 
 ## 测试证据
 
-- Unit: `Image.test.tsx` 覆盖原生属性、加载、失败、空源、异常尺寸。
-- Story interaction: `Fallback.play` 验证失败语义；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2602 B / 32768 B 预算，组合 Brotli 2325 B；共享样式由应用单独导入一次。
-- SSR/hydration: Node SSR 覆盖稳定 markup；隔离 Next 16 hydration 后本地图片进入 loaded 状态且无 hydration/runtime error。
-- RTL: 无方向性逻辑。
-- Reduced motion: CSS 降级已实现，浏览器截图待补。
-- Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎滚动到 lazy 图片，断言可访问名称、可见性与 `data-state=loaded`。
-- Chromatic Light/Dark: Story 已建立，基线待执行。
-- Real device: 未执行。
+- Unit: `Image.test.tsx` 覆盖原生请求属性、loading/loaded、浏览器缓存恢复但不合成事件、primary/fallback 双失败链、无 primary 的 fallbackSrc、A→B→A 来源回环重置、响应式/固有几何、fit/position、imageProps 合并与无障碍冲突防御、装饰语义、异常尺寸、双 ref 与 React 19 callback-ref cleanup。
+- SSR: `Image.ssr.test.tsx` 覆盖确定性 loading markup、原生 width/height/srcSet/sizes、无源 informative/decorative fallback，以及 SSR 直接 fallbackSrc。
+- Hydration: `Image.hydration.test.tsx` 覆盖有源与无源首帧节点复用、原生属性保持和 0 hydration console error。
+- Story interaction: `PlaceholderToLoaded`、`Fallback`、`FallbackSource` 分别覆盖加载完成、最终错误与来源回退；`ResponsiveCrop`、`Lazy`、`LightAndDark` 提供视觉/兼容场景。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3264 B / 32768 B 预算，组合 Brotli 2923 B；共享样式由应用单独导入一次。
+- 隔离 Next H5 production build 与 `renders atomic display components with native actions and fallbacks` 已在 mobile Chromium/WebKit 通过，覆盖 srcSet/sizes/position、primary→fallback source、200 响应但不可解码资源和 0 runtime console/page error；独立 hydration 场景同样在两种引擎通过。
+- 仓库既有 Storybook 390×844 的 Light/Dark、locale、RTL、reduced-motion、200% 字体与 forced-colors 矩阵；新增 API 仍需随下一次发布候选完整视觉矩阵复跑。
+- Chromatic、真实 iOS/Android、VoiceOver/TalkBack、旧 WebView 弱网/离线：未在本次组件级优化中执行，不写成通过。
+
+## 未来变更规则
+
+1. `alt` 必填、native img 语义、root/image 双 ref、`data-state` 三态和现有默认值属于兼容契约；不得在 minor 版本静默改变。
+2. 新增来源阶段必须保持有限、确定且 SSR 首帧可推导；不得引入无限自动重试、隐式 fetch、随机 key 或 hydration 前浏览器分支。
+3. 新增 native img 属性优先通过明确顶层 prop 或 `ImageNativeProps` 开放；任何冲突字段都必须规定覆盖顺序并增加类型、unit、SSR/hydration 测试。
+4. 修改错误/回退语义时必须验证 informative/decorative alt、React 已观察事件次数、缓存恢复、imageRef 清理和 source key 回环重置，并提供迁移说明。
+5. 新增视觉状态必须使用 Token，覆盖 Light/Dark、forced-colors、reduced-motion、200% 字体和 320–430px 移动视口；不得把交互职责塞入 placeholder/fallback。
+6. 扩大浏览器、Next 或 WebView 支持声明前，必须先完成对应独立消费者和真实设备证据；模拟器、Playwright 与静态扫描不得冒充真机签字。
+7. README 与本文件是永久契约，不得在功能合并后降级为临时 TODO；测试证据必须区分“已执行”和“待执行”。
 
 ## V2 优化记录
 
 ### 待优化
 
-补真实 CDN/srcSet、缓存命中、失败、VoiceOver/TalkBack 与移动 WebView lazy 专项；本地 lazy/loaded 双引擎路径已完成。
+- 真实 CDN 多密度候选、缓存命中、慢网/离线和 fallback source 时序专项。
+- VoiceOver/TalkBack 对 informative/decorative 失败语义的真机验收。
+- iOS/Android WebView native lazy、aspect-ratio 降级和图片内存压力记录。
+- 下一发布候选的完整 Storybook 矩阵、Chromatic 和真实设备签字。
 
 ### 已完成
 
-明确状态机、错误语义、SSR/Next 边界；归一异常数值尺寸并补 forced-colors/reduced-motion；增加隔离 Next H5 loaded/hydration 证据。
+- 固化三态与 primary/fallback source 有限状态机，补原生请求语义和响应式尺寸提示。
+- 增加 object-position、aspect-ratio、独立 intrinsic 尺寸、fetch priority、受约束 native props、稳定 refs 与异常数值归一。
+- 补齐 Unit、SSR、hydration、状态/响应式 Story、无障碍和兼容契约。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                           | 迁移说明         |
-| ---------- | ------ | ------------ | ---------------------------------------------- | ---------------- |
-| 2026-08-29 | 未发布 | behavior     | 异常数值尺寸稳定归零并完成 V2 契约             | 合法既有输入不变 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 lazy/loaded/hydration 证据 | 无               |
+| 日期       | 版本   | 类型      | 内容                                                                                 | 迁移说明                   |
+| ---------- | ------ | --------- | ------------------------------------------------------------------------------------ | -------------------------- |
+| 2026-08-29 | 未发布 | feature   | 增加 fallbackSrc、position、aspectRatio、intrinsic 尺寸、fetchPriority 与 imageProps | 全部可选；既有调用无需修改 |
+| 2026-08-29 | 未发布 | hardening | 固化来源回环重置、ref 清理、SSR/hydration 与 informative/decorative error 语义       | 合法既有输入不变           |

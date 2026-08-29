@@ -73,7 +73,14 @@ export type { TagProps, TagRef, TagSize, TagTone, TagVariant } from "./Tag";
 export { Badge } from "./Badge";
 export type { BadgeProps, BadgeTone } from "./Badge";
 export { Image } from "./Image";
-export type { ImageFit, ImageProps, ImageRadius, ImageState } from "./Image";
+export type {
+  ImageFit,
+  ImageNativeProps,
+  ImagePosition,
+  ImageProps,
+  ImageRadius,
+  ImageState
+} from "./Image";
 export { ImageViewer } from "./ImageViewer";
 export type {
   ImageViewerControls,
@@ -157,7 +164,14 @@ export type { TabsActivationMode, TabsItem, TabsProps } from "./Tabs";
 export { TabBar } from "./TabBar";
 export type { TabBarItem, TabBarProps } from "./TabBar";
 export { Steps } from "./Steps";
-export type { StepItem, StepStatus, StepsDirection, StepsProps } from "./Steps";
+export type {
+  StepItem,
+  StepStatus,
+  StepsDirection,
+  StepsIndicator,
+  StepsProps,
+  StepsSize
+} from "./Steps";
 export { Progress } from "./Progress";
 export type { ProgressProps, ProgressSize, ProgressTone } from "./Progress";
 export { PullToRefresh } from "./PullToRefresh";

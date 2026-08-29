@@ -11,4 +11,22 @@ describe("Avatar SSR", () => {
     expect(html).toContain('aria-label="Ada Lovelace"');
     expect(html).toContain("AL");
   });
+
+  it("server-renders responsive image hints and normalized geometry", () => {
+    const html = renderToString(
+      <Avatar
+        src="/avatar.jpg"
+        srcSet="/avatar.jpg 1x, /avatar@2x.jpg 2x"
+        sizes="56px"
+        alt="Grace Hopper"
+        size={Number.NaN}
+        objectPosition="center 25%"
+      />
+    );
+    expect(html).toContain('srcSet="/avatar.jpg 1x, /avatar@2x.jpg 2x"');
+    expect(html).toContain('sizes="56px"');
+    expect(html).toContain("--meu-avatar-size:44px");
+    expect(html).toContain("--meu-avatar-object-position:center 25%");
+    expect(html).not.toContain("NaN");
+  });
 });

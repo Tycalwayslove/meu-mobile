@@ -710,6 +710,16 @@
         },
         {
           "kind": "type",
+          "name": "ImageNativeProps",
+          "sourcePath": "packages/mobile/src/Image"
+        },
+        {
+          "kind": "type",
+          "name": "ImagePosition",
+          "sourcePath": "packages/mobile/src/Image"
+        },
+        {
+          "kind": "type",
           "name": "ImageProps",
           "sourcePath": "packages/mobile/src/Image"
         },
@@ -1625,7 +1635,17 @@
         },
         {
           "kind": "type",
+          "name": "StepsIndicator",
+          "sourcePath": "packages/mobile/src/Steps"
+        },
+        {
+          "kind": "type",
           "name": "StepsProps",
+          "sourcePath": "packages/mobile/src/Steps"
+        },
+        {
+          "kind": "type",
+          "name": "StepsSize",
           "sourcePath": "packages/mobile/src/Steps"
         },
         {
@@ -2087,8 +2107,8 @@
       "externalWildcardExports": [],
       "packageName": "@meu/mobile",
       "stats": {
-        "total": 416,
-        "types": 325,
+        "total": 420,
+        "types": 329,
         "values": 91
       }
     },
@@ -2650,7 +2670,7 @@
     },
     {
       "category": "information",
-      "description": "图片、文字与加载失败回退统一的身份展示。",
+      "description": "响应式图片、备用源与文字回退统一的身份展示。",
       "highlights": [
         "内容优先",
         "深色主题",
@@ -3534,7 +3554,7 @@
     },
     {
       "category": "information",
-      "description": "按容器宽度折叠长文本，并提供展开与收起路径。",
+      "description": "按字素和真实容器测量截断长文本，支持受控展开与收起。",
       "highlights": [
         "内容优先",
         "深色主题",
@@ -4133,7 +4153,7 @@
     },
     {
       "category": "information",
-      "description": "明确 loading、error、fallback 与适配方式的媒体组件。",
+      "description": "具备响应式源、占位、备用源与稳定尺寸的媒体组件。",
       "highlights": [
         "内容优先",
         "深色主题",
@@ -4160,6 +4180,14 @@
         {
           "kind": "type",
           "name": "ImageFit"
+        },
+        {
+          "kind": "type",
+          "name": "ImageNativeProps"
+        },
+        {
+          "kind": "type",
+          "name": "ImagePosition"
         },
         {
           "kind": "type",
@@ -4610,7 +4638,7 @@
     },
     {
       "category": "information",
-      "description": "只读页码进度，不伪造点击目标。",
+      "description": "默认只读的页码进度，也可启用受控原生页码按钮。",
       "highlights": [
         "内容优先",
         "深色主题",
@@ -5565,7 +5593,7 @@
     },
     {
       "category": "information",
-      "description": "只读有序流程状态，支持水平与垂直布局。",
+      "description": "有序流程状态与可选原生步骤导航，支持横竖布局。",
       "highlights": [
         "内容优先",
         "深色主题",
@@ -5599,7 +5627,15 @@
         },
         {
           "kind": "type",
+          "name": "StepsIndicator"
+        },
+        {
+          "kind": "type",
           "name": "StepsProps"
+        },
+        {
+          "kind": "type",
+          "name": "StepsSize"
         },
         {
           "kind": "type",
@@ -6349,8 +6385,8 @@
     "packages": 4,
     "products": 68,
     "productsWithoutPublicExports": 0,
-    "publicExports": 504,
-    "publicTypes": 379,
+    "publicExports": 508,
+    "publicTypes": 383,
     "publicValues": 125,
     "undocumentedPublicExports": 0,
     "unclaimedPublicValues": 0

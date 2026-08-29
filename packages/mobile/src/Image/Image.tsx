@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
 import { defaultGlyph, imageElement, imageRoot, stateLayer } from "./Image.css";
@@ -11,9 +11,32 @@ function toCssLength(value: number | string | undefined) {
   return `${Number.isFinite(value) ? Math.max(0, value) : 0}px`;
 }
 
-function assignRef<T>(ref: ImageProps["imageRef"], value: T | null) {
-  if (typeof ref === "function") ref(value as HTMLImageElement | null);
-  else if (ref) ref.current = value as HTMLImageElement | null;
+function toNativeDimension(value: number | string | undefined) {
+  if (typeof value !== "number") return undefined;
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+function normalizeSource(value: string | undefined) {
+  return value ? value.trim() || undefined : undefined;
+}
+
+function assignRef(ref: ImageProps["imageRef"], value: HTMLImageElement | null) {
+  if (typeof ref === "function") return ref(value);
+  if (ref) ref.current = value;
+  return undefined;
+}
+
+type ImageSourceKind = "primary" | "fallback";
+type SourceState = { key: string; source: ImageSourceKind; state: ImageState };
+
+function initialSourceState(
+  key: string,
+  hasPrimarySource: boolean,
+  hasFallbackSource: boolean
+): SourceState {
+  if (hasPrimarySource) return { key, source: "primary", state: "loading" };
+  if (hasFallbackSource) return { key, source: "fallback", state: "loading" };
+  return { key, source: "primary", state: "error" };
 }
 
 /**
@@ -23,18 +46,25 @@ function assignRef<T>(ref: ImageProps["imageRef"], value: T | null) {
  */
 export function Image({
   alt,
+  aspectRatio,
   className,
   crossOrigin,
   decoding = "async",
   draggable = false,
   fallback,
+  fallbackSrc,
+  fetchPriority,
   fit = "cover",
   height,
   imageRef,
+  imageProps,
+  intrinsicHeight,
+  intrinsicWidth,
   loading = "eager",
   onError,
   onLoad,
   placeholder,
+  position = "50% 50%",
   radius = "none",
   ref,
   referrerPolicy,
@@ -45,31 +75,85 @@ export function Image({
   width,
   ...props
 }: ImageProps) {
-  const normalizedSrc = src ? src.trim() || undefined : undefined;
-  const sourceKey = `${normalizedSrc || ""}\u0000${srcSet || ""}`;
-  const hasSource = Boolean(normalizedSrc || srcSet);
+  const normalizedSrc = normalizeSource(src);
+  const normalizedSrcSet = normalizeSource(srcSet);
+  const normalizedFallbackSrc = normalizeSource(fallbackSrc);
+  const sourceKey = `${normalizedSrc || ""}\u0000${normalizedSrcSet || ""}\u0000${normalizedFallbackSrc || ""}`;
+  const hasPrimarySource = Boolean(normalizedSrc || normalizedSrcSet);
+  const hasFallbackSource = Boolean(normalizedFallbackSrc);
   const internalImageRef = useRef<HTMLImageElement | null>(null);
-  const [sourceState, setSourceState] = useState<{ key: string; state: ImageState }>(() => ({
-    key: sourceKey,
-    state: hasSource ? "loading" : "error"
-  }));
-  const state = sourceState.key === sourceKey ? sourceState.state : hasSource ? "loading" : "error";
+  const [sourceState, setSourceState] = useState<SourceState>(() =>
+    initialSourceState(sourceKey, hasPrimarySource, hasFallbackSource)
+  );
+  if (sourceState.key !== sourceKey) {
+    setSourceState(initialSourceState(sourceKey, hasPrimarySource, hasFallbackSource));
+  }
+  const currentSourceState =
+    sourceState.key === sourceKey
+      ? sourceState
+      : initialSourceState(sourceKey, hasPrimarySource, hasFallbackSource);
+  const { source: sourceKind, state } = currentSourceState;
+  const renderedSrc = sourceKind === "fallback" ? normalizedFallbackSrc : normalizedSrc;
+  const renderedSrcSet = sourceKind === "primary" ? normalizedSrcSet : undefined;
+  const hasRenderedSource = Boolean(renderedSrc || renderedSrcSet);
   const baseStyle = style || {};
+  const hasNumericRatio =
+    typeof width === "number" &&
+    Number.isFinite(width) &&
+    width > 0 &&
+    typeof height === "number" &&
+    Number.isFinite(height) &&
+    height > 0;
+  const inferredAspectRatio = hasNumericRatio ? `${width} / ${height}` : undefined;
   const resolvedStyle: CSSProperties = {
     ...baseStyle,
     width: toCssLength(width) || baseStyle.width,
-    height: toCssLength(height) || baseStyle.height
+    height: hasNumericRatio ? undefined : toCssLength(height) || baseStyle.height,
+    aspectRatio:
+      aspectRatio !== undefined
+        ? aspectRatio
+        : baseStyle.aspectRatio !== undefined
+          ? baseStyle.aspectRatio
+          : inferredAspectRatio
   };
   const classes = imageRoot({ radius });
+  const fixedHeight = Boolean(
+    resolvedStyle.height !== undefined || resolvedStyle.aspectRatio !== undefined
+  );
+  const elementClasses = imageElement({ fixedHeight });
+  const imageClasses =
+    imageProps && imageProps.className
+      ? `${elementClasses} ${imageProps.className}`
+      : elementClasses;
+  const nativeImageStyle = imageProps && imageProps.style ? imageProps.style : {};
+  const setImageRef = useCallback(
+    (node: HTMLImageElement | null) => {
+      internalImageRef.current = node;
+      const cleanup = assignRef(imageRef, node);
+      if (!node) return undefined;
+      return () => {
+        internalImageRef.current = null;
+        if (typeof cleanup === "function") cleanup();
+        else assignRef(imageRef, null);
+      };
+    },
+    [imageRef]
+  );
 
   useEffect(() => {
     const image = internalImageRef.current;
     if (!image || !image.complete) return;
     const frame = window.requestAnimationFrame(() => {
-      setSourceState({ key: sourceKey, state: image.naturalWidth > 0 ? "loaded" : "error" });
+      if (image.naturalWidth > 0) {
+        setSourceState({ key: sourceKey, source: sourceKind, state: "loaded" });
+      } else if (sourceKind === "primary" && hasFallbackSource) {
+        setSourceState({ key: sourceKey, source: "fallback", state: "loading" });
+      } else {
+        setSourceState({ key: sourceKey, source: sourceKind, state: "error" });
+      }
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [sourceKey]);
+  }, [hasFallbackSource, sourceKey, sourceKind]);
 
   const defaultState = <span className={defaultGlyph} aria-hidden="true" />;
   const stateContent =
@@ -92,12 +176,13 @@ export function Image({
       aria-hidden={state === "error" && !alt ? true : undefined}
       aria-busy={state === "loading" || undefined}
       data-meu-component="image"
+      data-source={sourceKind}
       data-state={state}
     >
       {state === "error" ? (
         <span className={stateLayer({ overlay: false })}>{stateContent}</span>
       ) : null}
-      {hasSource && state !== "error" ? (
+      {hasRenderedSource && state !== "error" ? (
         <>
           {state === "loading" ? (
             <span className={stateLayer({ overlay: true })} aria-hidden="true">
@@ -105,28 +190,37 @@ export function Image({
             </span>
           ) : null}
           <img
-            ref={(node) => {
-              internalImageRef.current = node;
-              assignRef(imageRef, node);
-            }}
-            className={imageElement({ fixedHeight: height !== undefined })}
-            src={normalizedSrc}
-            srcSet={srcSet}
-            sizes={sizes}
+            {...imageProps}
+            ref={setImageRef}
+            className={imageClasses}
+            src={renderedSrc}
+            srcSet={renderedSrcSet}
+            sizes={sourceKind === "primary" ? sizes : undefined}
             alt={alt}
+            aria-hidden={alt ? undefined : true}
+            aria-label={undefined}
+            aria-labelledby={undefined}
+            role={undefined}
             crossOrigin={crossOrigin}
             decoding={decoding}
             draggable={draggable}
+            fetchPriority={fetchPriority}
+            width={toNativeDimension(intrinsicWidth !== undefined ? intrinsicWidth : width)}
+            height={toNativeDimension(intrinsicHeight !== undefined ? intrinsicHeight : height)}
             loading={loading}
             referrerPolicy={referrerPolicy}
             data-pending={state === "loading" ? "true" : undefined}
-            style={{ objectFit: fit }}
+            style={{ ...nativeImageStyle, objectFit: fit, objectPosition: position }}
             onLoad={(event) => {
-              setSourceState({ key: sourceKey, state: "loaded" });
+              setSourceState({ key: sourceKey, source: sourceKind, state: "loaded" });
               if (onLoad) onLoad(event);
             }}
             onError={(event) => {
-              setSourceState({ key: sourceKey, state: "error" });
+              if (sourceKind === "primary" && hasFallbackSource) {
+                setSourceState({ key: sourceKey, source: "fallback", state: "loading" });
+              } else {
+                setSourceState({ key: sourceKey, source: sourceKind, state: "error" });
+              }
               if (onError) onError(event);
             }}
           />

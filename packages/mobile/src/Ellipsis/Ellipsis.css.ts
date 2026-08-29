@@ -33,15 +33,6 @@ export const measure = style({
   wordBreak: "break-word"
 });
 
-export const measureAction = style({
-  display: "inline-flex",
-  marginInlineStart: 4,
-  color: "var(--meu-color-accent)",
-  font: "inherit",
-  fontWeight: 600,
-  lineHeight: "inherit"
-});
-
 export const action = style({
   display: "inline-flex",
   alignItems: "center",
@@ -75,3 +66,8 @@ export const action = style({
     }
   }
 });
+
+// Keep the hidden action's inline footprint identical to the real button. This
+// is intentionally composed from `action` so future spacing changes cannot
+// silently invalidate truncation measurements.
+export const measureAction = style([action, { pointerEvents: "none" }]);

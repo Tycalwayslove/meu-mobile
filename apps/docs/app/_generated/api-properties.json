@@ -1761,6 +1761,13 @@
           "description": "Text alternative for the image and, on failure, the fallback graphic; use an empty string for decorative images."
         },
         {
+          "name": "aspectRatio",
+          "type": "Property.AspectRatio",
+          "required": false,
+          "event": false,
+          "description": "CSS aspect-ratio reserved by the root before image bytes arrive."
+        },
+        {
           "name": "crossOrigin",
           "type": "CrossOrigin",
           "required": false,
@@ -1791,6 +1798,20 @@
           "description": "Content shown when the source is absent or fails to load; defaults to a decorative image glyph."
         },
         {
+          "name": "fallbackSrc",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "One alternate URL requested after the primary source fails, or immediately when the primary source is absent."
+        },
+        {
+          "name": "fetchPriority",
+          "type": "\"auto\" | \"high\" | \"low\"",
+          "required": false,
+          "event": false,
+          "description": "Native request-priority hint for the underlying `img`."
+        },
+        {
           "name": "fit",
           "type": "ImageFit",
           "required": false,
@@ -1806,11 +1827,32 @@
           "description": "Root height; numbers become non-negative pixel lengths."
         },
         {
+          "name": "imageProps",
+          "type": "ImageNativeProps",
+          "required": false,
+          "event": false,
+          "description": "Additional non-conflicting native attributes for the underlying `img`; className and style are merged."
+        },
+        {
           "name": "imageRef",
           "type": "Ref<HTMLImageElement>",
           "required": false,
           "event": false,
           "description": "Ref to the underlying `img`; it is `null` while no valid source is rendered."
+        },
+        {
+          "name": "intrinsicHeight",
+          "type": "number",
+          "required": false,
+          "event": false,
+          "description": "Native intrinsic image height. Use with `intrinsicWidth` to reserve the source ratio."
+        },
+        {
+          "name": "intrinsicWidth",
+          "type": "number",
+          "required": false,
+          "event": false,
+          "description": "Native intrinsic image width. Use with `intrinsicHeight` to reserve the source ratio."
         },
         {
           "name": "loading",
@@ -1826,6 +1868,14 @@
           "required": false,
           "event": false,
           "description": "Content overlaid while the source loads; defaults to a decorative image glyph."
+        },
+        {
+          "name": "position",
+          "type": "ImagePosition",
+          "required": false,
+          "event": false,
+          "description": "CSS `object-position` applied to the underlying image.",
+          "defaultValue": "\"50% 50%\""
         },
         {
           "name": "radius",
@@ -1882,14 +1932,14 @@
           "type": "ReactEventHandler<HTMLImageElement>",
           "required": false,
           "event": true,
-          "description": "Called after the underlying image enters the error state."
+          "description": "Called when React observes a native error event, including primary and fallback requests."
         },
         {
           "name": "onLoad",
           "type": "ReactEventHandler<HTMLImageElement>",
           "required": false,
           "event": true,
-          "description": "Called after the underlying image loads successfully."
+          "description": "Called when React observes a native load event for the current primary or fallback image."
         }
       ],
       "ImageViewerIndexChangeDetails": [
@@ -2672,11 +2722,48 @@
           "description": "Accessible alternative for the person's identity. Use an empty string only for decorative avatars."
         },
         {
+          "name": "crossOrigin",
+          "type": "CrossOrigin",
+          "required": false,
+          "event": false,
+          "description": "Native image CORS mode, applied to the underlying `img`."
+        },
+        {
+          "name": "decoding",
+          "type": "\"auto\" | \"async\" | \"sync\"",
+          "required": false,
+          "event": false,
+          "description": "Browser decoding hint for the underlying `img`.",
+          "defaultValue": "\"async\""
+        },
+        {
+          "name": "draggable",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Whether the underlying image participates in native drag-and-drop.",
+          "defaultValue": "false"
+        },
+        {
           "name": "fallback",
           "type": "ReactNode",
           "required": false,
           "event": false,
           "description": "Replaces the generated initials when the image is loading, missing, or fails."
+        },
+        {
+          "name": "fallbackSrc",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Alternate image URL requested after the primary source fails, before showing the content fallback."
+        },
+        {
+          "name": "fetchPriority",
+          "type": "\"auto\" | \"high\" | \"low\"",
+          "required": false,
+          "event": false,
+          "description": "Native request-priority hint for the underlying `img`."
         },
         {
           "name": "fit",
@@ -2709,11 +2796,26 @@
           "defaultValue": "\"eager\""
         },
         {
+          "name": "objectPosition",
+          "type": "Property.ObjectPosition<string | number>",
+          "required": false,
+          "event": false,
+          "description": "CSS `object-position` used to choose the visible focal point.",
+          "defaultValue": "\"50% 50%\""
+        },
+        {
           "name": "ref",
           "type": "Ref<HTMLSpanElement>",
           "required": false,
           "event": false,
           "description": "Ref to the stable avatar root."
+        },
+        {
+          "name": "referrerPolicy",
+          "type": "HTMLAttributeReferrerPolicy",
+          "required": false,
+          "event": false,
+          "description": "Native referrer policy for the underlying image request."
         },
         {
           "name": "shape",
@@ -2732,6 +2834,13 @@
           "defaultValue": "\"medium\""
         },
         {
+          "name": "sizes",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Native responsive-size hint used with `srcSet`."
+        },
+        {
           "name": "src",
           "type": "string",
           "required": false,
@@ -2739,21 +2848,42 @@
           "description": "Image source. Empty and whitespace-only sources render the fallback without a request."
         },
         {
+          "name": "srcSet",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Native responsive image candidate list; it can provide the source without `src`."
+        },
+        {
           "name": "onError",
           "type": "ReactEventHandler<HTMLImageElement>",
           "required": false,
           "event": true,
-          "description": "Runs after the underlying image fails. The initials fallback remains visible."
+          "description": "Runs when React observes a native image error, including `fallbackSrc` when provided."
         },
         {
           "name": "onLoad",
           "type": "ReactEventHandler<HTMLImageElement>",
           "required": false,
           "event": true,
-          "description": "Runs after the underlying image loads successfully."
+          "description": "Runs when React observes the underlying image's native load event."
         }
       ],
       "EllipsisProps": [
+        {
+          "name": "actionRef",
+          "type": "Ref<HTMLButtonElement>",
+          "required": false,
+          "event": false,
+          "description": "Ref to the currently rendered expand/collapse button, or null when no action is needed."
+        },
+        {
+          "name": "collapseAriaLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible name used by the collapse button when its visible content is not descriptive."
+        },
         {
           "name": "collapseText",
           "type": "ReactNode",
@@ -2783,6 +2913,13 @@
           "description": "Which portion of the text remains visible when truncated."
         },
         {
+          "name": "expandAriaLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible name used by the expand button when its visible content is not descriptive."
+        },
+        {
           "name": "expanded",
           "type": "boolean",
           "required": false,
@@ -2802,6 +2939,13 @@
           "required": false,
           "event": false,
           "description": "Ref to the root element that contains both visual and assistive text."
+        },
+        {
+          "name": "remeasureKey",
+          "type": "string | number",
+          "required": false,
+          "event": false,
+          "description": "Changes to this value force a new measurement after ancestor typography changes."
         },
         {
           "name": "rows",
@@ -4008,6 +4152,13 @@
       ],
       "StepItem": [
         {
+          "name": "ariaLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Replaces the title portion of the optional button name; the localized status prefix remains."
+        },
+        {
           "name": "description",
           "type": "ReactNode",
           "required": false,
@@ -4015,11 +4166,25 @@
           "description": "Supporting detail rendered below the title."
         },
         {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Prevents activation when the Steps component is interactive."
+        },
+        {
           "name": "icon",
           "type": "ReactNode",
           "required": false,
           "event": false,
-          "description": "Replaces the derived number/check/error indicator."
+          "description": "Replaces the derived indicator. Must not contain focusable or interactive descendants."
+        },
+        {
+          "name": "key",
+          "type": "string | number",
+          "required": false,
+          "event": false,
+          "description": "Stable React identity. Provide this when items can be reordered."
         },
         {
           "name": "status",
@@ -4054,11 +4219,19 @@
           "defaultValue": "\"horizontal\""
         },
         {
+          "name": "indicator",
+          "type": "StepsIndicator",
+          "required": false,
+          "event": false,
+          "description": "Indicator treatment. Custom item icons take precedence.",
+          "defaultValue": "\"number\""
+        },
+        {
           "name": "items",
           "type": "readonly StepItem[]",
           "required": true,
           "event": false,
-          "description": "Ordered, read-only progress steps."
+          "description": "Ordered progress steps."
         },
         {
           "name": "ref",
@@ -4066,6 +4239,21 @@
           "required": false,
           "event": false,
           "description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref)."
+        },
+        {
+          "name": "size",
+          "type": "StepsSize",
+          "required": false,
+          "event": false,
+          "description": "Visual density.",
+          "defaultValue": "\"medium\""
+        },
+        {
+          "name": "onChange",
+          "type": "(index: number, event: MouseEvent<HTMLButtonElement>) => void",
+          "required": false,
+          "event": true,
+          "description": "Enables native step buttons and runs after an enabled, non-current step is activated.\nKeyboard activation is reported as a React mouse event with `detail === 0`."
         }
       ],
       "ProgressProps": [
@@ -17405,11 +17593,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2324,
-    "eventFields": 239,
-    "exportedTypes": 379,
+    "documentedFields": 2350,
+    "eventFields": 240,
+    "exportedTypes": 383,
     "exportedTypesWithFields": 225,
-    "fields": 2324,
+    "fields": 2350,
     "packages": 4
   }
 }

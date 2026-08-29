@@ -17,7 +17,11 @@ storyIds:
     information-avatar--initial,
     information-avatar--explicit-initials,
     information-avatar--rounded,
+    information-avatar--sizes-and-shapes,
+    information-avatar--focal-point-and-responsive-source,
+    information-avatar--custom-fallback,
     information-avatar--image-failure,
+    information-avatar--rtl-and-decorative,
     information-avatar--light-and-dark
   ]
 source: packages/mobile/src/Avatar
@@ -27,10 +31,11 @@ source: packages/mobile/src/Avatar
 
 ## 当前能力
 
-- 基于 Image 的固定尺寸头像，支持 circle/rounded/square、三档预设和正有限数值尺寸。
-- 图片 loading/loaded/error、空源、失败回退、显式 initials、自定义 fallback、alt、loading 和 image/root ref 已验证。
-- loading 与 error 都保留相同 fallback，源变化由 Image 状态机重新开始；不自行重试或缓存失败。
-- RTL 无方向性布局；forced-colors 保留轮廓。图片淡入的 reduced-motion 降级由 Image 实现。
+- 基于 Image 的固定尺寸头像，支持 circle/rounded/square、三档预设和安全归一化的数值像素尺寸。
+- 图片 loading/loaded/error、空源、失败回退、显式 initials、自定义 fallback、alt、root/image ref 已验证。
+- 原生响应式图片与请求控制已透传：srcSet、sizes、loading、decoding、fetchPriority、crossOrigin、referrerPolicy、draggable；objectPosition 可调整圆形裁切焦点。
+- 可选 fallbackSrc 在主源失败后尝试一次备用图片，再落到内容 fallback；源变化由 Image 状态机重新开始，不自行循环重试或缓存失败。
+- 32px small 不再继承通用 Image 状态层的 44px 最小尺寸与 padding；RTL 无方向性布局；forced-colors 只保留 Avatar 外轮廓，避免双边框。图片淡入的 reduced-motion 降级由 Image 实现。
 
 状态为 `verification`；Next H5 移动 Chromium/WebKit 已覆盖图片与 initials fallback，最终 Chromatic 视觉审批和真机读屏尚未完成。
 
@@ -49,7 +54,15 @@ source: packages/mobile/src/Avatar
 ## 基础用法
 
 ```tsx
-<Avatar src={user.avatarUrl} alt={user.displayName} initials="LX" loading="lazy" />
+<Avatar
+  src={user.avatarUrl}
+  srcSet={`${user.avatarUrl} 1x, ${user.avatar2xUrl} 2x`}
+  sizes="44px"
+  alt={user.displayName}
+  initials="LX"
+  loading="lazy"
+  objectPosition="50% 25%"
+/>
 ```
 
 ## 受控与非受控
@@ -62,15 +75,43 @@ source: packages/mobile/src/Avatar
 
 ## Props
 
-API 由 `AvatarProps` 生成。fallback 优先级为 `fallback`、显式 `initials`、alt 首字符；空 alt 表示装饰图像。数值 size 非有限时回退 44px，有限值最小 1px。
+API 由 `AvatarProps` 生成。fallback 优先级固定为 `fallback`、显式 `initials`、alt 首字符；空 alt 表示装饰图像。数值 size 非有限时回退 44px，有限值最小 1px。
+
+| Prop              | 类型                                   | 默认值    | 契约                                                         |
+| ----------------- | -------------------------------------- | --------- | ------------------------------------------------------------ |
+| alt               | string                                 | 必填      | 身份图像名称；仅纯装饰时传空字符串                           |
+| src / srcSet      | string                                 | undefined | 图片候选；空白 src 视为缺失，srcSet 可独立提供候选           |
+| sizes             | string                                 | undefined | srcSet 使用宽度描述符时的原生尺寸提示                        |
+| fallback          | ReactNode                              | undefined | 最高优先级 loading/error/空源内容                            |
+| fallbackSrc       | string                                 | undefined | 主图片失败后尝试一次的备用 URL                               |
+| initials          | string                                 | undefined | 次级 fallback；渲染前 trim，视觉层统一 uppercase             |
+| size              | small / medium / large / number        | medium    | 32 / 44 / 56px 或归一化后的像素值                            |
+| shape             | circle / rounded / square              | circle    | 裁切形状                                                     |
+| fit               | CSS object-fit                         | cover     | 图片缩放方式                                                 |
+| objectPosition    | CSS object-position                    | 50% 50%   | 裁切焦点，写入 Avatar 私有 CSS 变量                          |
+| loading           | eager / lazy                           | eager     | 原生加载策略                                                 |
+| decoding          | auto / async / sync                    | async     | 原生解码提示                                                 |
+| fetchPriority     | high / low / auto                      | undefined | 原生请求优先级提示                                           |
+| crossOrigin       | anonymous / use-credentials / 空字符串 | undefined | 原生 CORS 模式                                               |
+| referrerPolicy    | 原生 referrer policy                   | undefined | 图片请求来源策略                                             |
+| draggable         | boolean                                | false     | 原生拖拽行为                                                 |
+| ref / imageRef    | Ref<span> / Ref<img>                   | undefined | 稳定根节点 / 当前存在的原生图片节点                          |
+| className / style | 原生 span 属性                         | undefined | 只作用于 Avatar 根；数值 size 与 objectPosition 保留内部变量 |
+
+其余允许的 `HTMLAttributes<HTMLSpanElement>` 透传根节点；`children`、`dangerouslySetInnerHTML`、根级 `onLoad/onError` 不在公开接口中，避免破坏内部状态结构。
 
 ## Events
 
-`onLoad`、`onError` 透传底层 img 事件，每个原生事件触发一次；事件不可由 Avatar 取消，且不会自动改写 src。
+| Event          | 触发时机                             | 状态结果                                          |
+| -------------- | ------------------------------------ | ------------------------------------------------- |
+| onLoad(event)  | React 观察到当前 img 的 native load  | Image 进入 loaded，然后调用回调                   |
+| onError(event) | React 观察到当前 img 的 native error | 有 fallbackSrc 时切到备用 loading，否则进入 error |
+
+每个 React 已观察到的原生事件透传一次；正常的 primary 与 fallbackSrc 双失败可能收到两次 onError。hydration 前已经完成的缓存请求会恢复状态，但不会合成已错过的 SyntheticEvent。Avatar 不合成重试事件，不自动改写调用方 src。调用方变更 src/srcSet/fallbackSrc 时，状态机会以新 source key 回到 loading。
 
 ## Ref 与命令式方法
 
-`ref` 指向稳定根 span；`imageRef` 在实际 img 存在时指向它。error/空源时 img 被卸载，imageRef 可能为 null。
+`ref` 指向稳定根 span；`imageRef` 在实际 img 存在时指向它。primary 切换到 fallbackSrc 时复用 img；最终 error/空源时 img 被卸载，imageRef 为 null。
 
 ## 键盘操作
 
@@ -84,19 +125,19 @@ API 由 `AvatarProps` 生成。fallback 优先级为 `fallback`、显式 `initia
 
 ## 无障碍
 
-非空 alt 为图像名称，失败回退仍以同一名称暴露；空 alt 时图像和文字 fallback 均装饰性隐藏。initials 不能替代准确 alt。
+非空 alt 为图像名称，失败回退仍以同一名称暴露；空 alt 时图片与文字/custom fallback 整体装饰性隐藏。loading fallback 在原生 img 仍存在时 aria-hidden，避免同一身份被朗读两次。initials 只是视觉回退，不能替代准确 alt。自定义 fallback 不得包含按钮、链接、输入框或 live region。
 
 ## 动效
 
-Avatar 自身无动画；Image 的 opacity 淡入使用全局 motion，并在 reduced-motion 下缩短到 1ms。
+Avatar 自身无动画；Image 的 opacity 淡入使用全局 motion，并在 reduced-motion 下将过渡关闭为 0ms。
 
 ## 主题与定制
 
-背景、文字、圆角和字体来自 Meu Token；forced-colors 使用 Canvas/CanvasText。稳定入口为 shape、size、className/style 与 data 属性。
+背景、文字、圆角和字体来自 Meu Token；forced-colors 使用 Canvas/CanvasText 且只绘制外层轮廓。稳定入口为 shape、size、fit、objectPosition、className/style 与 data 属性；`data-meu-avatar-fallback` 只标识内部 fallback，不是插槽 API。
 
 ## SSR 与 Next.js
 
-render 不读取浏览器全局。空源服务端直接输出可访问 fallback；有源时输出 loading 占位与 img，客户端 effect 只处理缓存图片完成状态。
+render 不读取浏览器全局、随机值或布局信息。空源服务端直接输出可访问 fallback；有源时服务端和客户端首帧都输出 loading 占位与 img。hydrate 后 Image effect 才检查缓存图片的 complete/naturalWidth，不改变首帧结构。`Avatar.hydration.test.tsx` 断言无 recoverable error、ref 恢复和 hydrate 后 error 回退。
 
 ## RTL 与国际化
 
@@ -104,13 +145,14 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 
 ## 浏览器与 WebView
 
-依赖 React 19、原生 img loading/alt 与 CSS Grid。语法目标为 Chrome/WebView 70 和 iOS 13；原生 lazy loading 在较旧 WKWebView 可能退化为 eager，不影响内容正确性。
+正式支持 React 19、iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；Chrome 70 / iOS 13 仅是构建语法扫描和观察档，不构成完整运行时承诺。组件依赖原生 img/alt/srcSet/sizes/object-fit、CSS Grid 与自定义属性；旧 WKWebView 的 lazy loading 可能退化为 eager，decoding/loading 也只是浏览器提示。跨域是否成功仍由图片服务器 CORS/Referrer 配置决定。
 
 ## 边界情况与已知限制
 
-- 不内建跨域、srcSet、sizes、重试和上传；需要时直接使用 Image。
+- 不内建 picture/source、循环重试、缓存、上传或 Next/Image 优化；需要这些能力时使用 Image 或业务图片层。
 - 自定义 fallback 应是短静态内容，不放按钮或链接。
 - 1–31px 数值头像可显示，但不满足触控或可读性建议。
+- 派生 fallback 只取 trim 后 alt 的首个 Unicode code point；组合 emoji、复姓或多词姓名应显式传业务本地化 initials。
 
 ## 性能预算
 
@@ -118,15 +160,17 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 
 ## 测试证据
 
-- Unit: `Avatar.test.tsx` 覆盖派生/显式 initials、失败、loading、装饰 alt 和数值尺寸。
-- Story interaction: `ImageFailure` 触发 error 并验证 fallback；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3175 B / 32768 B 预算，组合 Brotli 2814 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Avatar.ssr.test.tsx` 验证稳定 fallback；隔离 Next 16 hydration 后图片与 initials fallback 均保持可访问名称，0 hydration/runtime error。
+- Unit: `Avatar.test.tsx` 共 9 项，覆盖派生/显式 initials、error/onError、loading、装饰 alt、root/image ref、响应式与请求属性、fallbackSrc 成功链、srcSet-only、失败后换源恢复、数值尺寸归一化和 objectPosition。
+- SSR: `Avatar.ssr.test.tsx` 共 2 项，覆盖空源可访问 fallback、响应式属性、objectPosition 和 NaN 尺寸归一化。
+- Hydration: `Avatar.hydration.test.tsx` 共 1 项，覆盖真实 renderToString → hydrateRoot、0 recoverable/console error、root/image ref 恢复与 hydrate 后 error fallback。
+- Story interaction: `ImageFailure` 等待并验证 error 名称/fallback，`FocalPointAndResponsiveSource` 验证 sizes/srcSet 透传；两项均通过 TypeScript 与 ESLint，新增 Story 的浏览器 play 待下次 Storybook 矩阵执行。
+- Storybook 浏览器矩阵（上次发布基线）：本地扫描器曾在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合，结果为 0 违规、0 `pageerror`；本轮新增 Story 仍需重跑。
+- 官网 Next 运行时（上次发布基线）：本地 production build 曾在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）。本轮隔离 Next H5 production build 已加入 Avatar `fallbackSrc/objectPosition` 与 Image `srcSet/sizes/position/fallbackSrc` 场景，并在 mobile Chromium/WebKit 定向通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3929 B / 32768 B 预算，组合 Brotli 3517 B；共享样式由应用单独导入一次。
+- SSR/hydration: 组件目录 3 个测试文件共 12 项通过；隔离 Next 16 hydration 后图片与 initials fallback 均保持可访问名称，0 hydration/runtime error。
 - RTL: 逻辑无关；专属自动化不适用。
 - Reduced motion: 继承 Image CSS，截图待补。
-- Mobile Chromium/WebKit E2E: `renders atomic display components with native actions and fallbacks` 在两种引擎断言正常图片与空源 initials fallback 的 `img` 名称。
+- Mobile Chromium/WebKit E2E: `renders atomic display components with native actions and fallbacks` 已在两种引擎通过，覆盖正常图片、空源 initials、备用头像来源与 objectPosition，运行时 0 `pageerror` / `console.error`。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 待补。
 
@@ -134,17 +178,29 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 
 ### 待优化
 
-- 补 Chromatic、真实失败/lazy loading 与 VoiceOver/TalkBack 真机验证；基础图片/fallback 双引擎路径已完成。
+- 补 Chromatic、慢网 lazy loading 与 VoiceOver/TalkBack 真机验证；基础图片/fallback 双引擎路径已完成。
 
 ### 已完成
 
 - 明确 fallback 优先级，增加 initials，补齐 alt/loading/error/ref 契约。
+- 增加 fallbackSrc、srcSet/sizes、请求/解码属性和 objectPosition，修复 small 状态层挤压与 forced-colors 双边框。
+- 增加换源恢复、严格 SSR 和真实 hydrateRoot 的组件内回归测试，并扩展 shape/size/RTL/custom fallback Story。
 - 增加 forced-colors、Unit、SSR、交互与 Light/Dark Story。
 - 在隔离 Next H5 中补图片、fallback 与 hydration 双引擎证据。
+
+## 未来变更规则
+
+1. fallback 优先级、alt 语义、非交互 span 根、ref 指向和 `data-meu-component/data-shape/data-size` 属于兼容契约；改变它们必须按破坏性变更处理。
+2. 新图片能力优先以可选 prop 透传且保持服务端首帧确定；不得因浏览器能力检测造成 hydration 分叉。
+3. 不在 Avatar 内加入点击、在线状态、角标或上传逻辑；组合行为由 Button/Link、Badge、ImageUploader 承担。
+4. 新状态必须同时补 Unit、SSR/hydration、Story 和无障碍说明；涉及视觉时补 Light/Dark、RTL、forced-colors、200% 字体和 reduced-motion 证据。
+5. 文档中的“已通过”只能记录实际执行证据；Chromatic、真机或外部网络未运行时必须保留为待验证。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型         | 内容                                            | 迁移说明                               |
 | ---------- | ------ | ------------ | ----------------------------------------------- | -------------------------------------- |
 | 2026-08-29 | 未发布 | behavior     | 增加显式 initials 与完整图片状态证据            | 现有 fallback 和派生首字符行为保持兼容 |
+| 2026-08-29 | 未发布 | additive API | 增加备用源、响应式/请求属性与 objectPosition    | 全部可选，默认视觉和请求策略保持兼容   |
+| 2026-08-29 | 未发布 | fix          | small fallback 去除通用 44px 状态层约束         | 无                                     |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎图片/fallback/hydration 证据 | 无                                     |

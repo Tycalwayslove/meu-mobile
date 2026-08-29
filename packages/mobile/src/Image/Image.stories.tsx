@@ -4,6 +4,9 @@ import { ThemeProvider } from "../ConfigProvider";
 import { waitForStory } from "../storyTestUtils";
 import { Image } from "./Image";
 
+const landscape =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Crect width='800' height='450' fill='%23dce8d5'/%3E%3Cpath d='M0 350 190 170l130 120 130-150 350 310H0Z' fill='%2367845d'/%3E%3Ccircle cx='650' cy='105' r='46' fill='%23f3c96b'/%3E%3C/svg%3E";
+
 const meta = {
   title: "Information/Image",
   component: Image,
@@ -12,7 +15,7 @@ const meta = {
     width: 280,
     height: 160,
     radius: "surface",
-    src: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800"
+    src: landscape
   }
 } satisfies Meta<typeof Image>;
 
@@ -20,6 +23,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Loaded: Story = {};
+export const PlaceholderToLoaded: Story = {
+  args: { placeholder: "图片加载中…" },
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+    const image = canvasElement.querySelector("img");
+    if (!root || !image) throw new window.Error("Expected Image loading markup");
+    if (root.getAttribute("data-state") === "loading") {
+      image.dispatchEvent(new window.Event("load", { bubbles: true }));
+    }
+    await waitForStory(
+      () => root.getAttribute("data-state") === "loaded",
+      "Image did not enter loaded state"
+    );
+  }
+};
 export const Fallback: Story = {
   args: { src: "/missing-image.jpg", alt: "图片加载失败", fallback: "暂时无法显示图片" },
   play: async ({ canvasElement }) => {
@@ -39,6 +57,51 @@ export const Fallback: Story = {
   }
 };
 export const Lazy: Story = { args: { loading: "lazy" } };
+export const FallbackSource: Story = {
+  args: {
+    src: "/missing-primary-image.jpg",
+    fallbackSrc: landscape,
+    alt: "使用备用来源的山谷插画",
+    placeholder: "正在切换备用来源…"
+  },
+  play: async ({ canvasElement }) => {
+    const primary = canvasElement.querySelector("img");
+    if (!primary) throw new window.Error("Expected primary Image element");
+    const initialRoot = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+    if (initialRoot && initialRoot.getAttribute("data-source") === "primary") {
+      primary.dispatchEvent(new window.Event("error", { bubbles: true }));
+    }
+    await waitForStory(() => {
+      const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+      return Boolean(root && root.getAttribute("data-source") === "fallback");
+    }, "Image did not switch to fallbackSrc");
+    const fallback = canvasElement.querySelector("img");
+    if (!fallback) throw new window.Error("Expected fallback Image element");
+    fallback.dispatchEvent(new window.Event("load", { bubbles: true }));
+    await waitForStory(() => {
+      const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+      return Boolean(root && root.getAttribute("data-state") === "loaded");
+    }, "Fallback source did not load");
+  }
+};
+export const ResponsiveCrop: Story = {
+  render: () => (
+    <div style={{ width: "min(100%, 420px)" }}>
+      <Image
+        src={landscape}
+        srcSet={`${landscape} 480w, ${landscape} 960w`}
+        sizes="(max-width: 480px) 100vw, 420px"
+        alt="响应式裁切的山谷插画"
+        width="100%"
+        aspectRatio="4 / 3"
+        fit="cover"
+        position="70% center"
+        loading="lazy"
+        radius="surface"
+      />
+    </div>
+  )
+};
 export const LightAndDark: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12 }}>

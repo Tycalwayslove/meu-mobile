@@ -12,6 +12,7 @@ type DisplayDemoProps = {
 
 export function DisplayDemo({ focus }: DisplayDemoProps = {}) {
   const [action, setAction] = useState("尚未筛选");
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
   const tags = (
     <Space wrap gap={2}>
@@ -31,6 +32,12 @@ export function DisplayDemo({ focus }: DisplayDemoProps = {}) {
     <Space align="center" gap={4}>
       <Avatar src="/demo-avatar.svg" alt="Meu 示例店铺" size="large" />
       <Avatar src="" alt="林夏" />
+      <Avatar
+        src="/missing-avatar.svg"
+        fallbackSrc="/demo-avatar.svg"
+        alt="使用备用图片的头像"
+        objectPosition="center 25%"
+      />
     </Space>
   );
   const badges = (
@@ -46,14 +53,24 @@ export function DisplayDemo({ focus }: DisplayDemoProps = {}) {
   const image = (
     <Image
       src="/demo-media.svg"
+      srcSet="/demo-media.svg 1x, /demo-media.svg 2x"
+      sizes="(max-width: 480px) 100vw, 480px"
       alt="绿色植物与商品包装插画"
       width="100%"
-      height={180}
+      aspectRatio="16 / 9"
+      position="center 35%"
       radius="surface"
       loading="lazy"
     />
   );
-  const ellipsis = <Ellipsis content={description} rows={2} />;
+  const ellipsis = (
+    <Ellipsis
+      content={description}
+      rows={2}
+      expanded={descriptionExpanded}
+      onExpandedChange={setDescriptionExpanded}
+    />
+  );
 
   if (focus === "avatar") return avatars;
   if (focus === "badge") return badges;

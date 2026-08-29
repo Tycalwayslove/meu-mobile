@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useState } from "react";
 
 import { Steps } from "./Steps";
 
@@ -44,6 +45,43 @@ export const Vertical: Story = { args: { direction: "vertical" } };
 export const Error: Story = {
   args: {
     items: items.map((item, index) => (index === 1 ? { ...item, status: "error" as const } : item))
+  }
+};
+export const CompactDots: Story = { args: { indicator: "dot", size: "small" } };
+
+function InteractiveStepsDemo() {
+  const [current, setCurrent] = useState(1);
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <Steps
+        aria-label="结算步骤"
+        current={current}
+        items={[
+          { key: "cart", title: "购物车", description: "2 件商品" },
+          { key: "address", title: "地址", description: "当前步骤" },
+          { key: "payment", title: "支付", description: "可返回修改" },
+          { key: "done", title: "完成", disabled: true }
+        ]}
+        onChange={setCurrent}
+      />
+      <output aria-live="polite">当前第 {current + 1} 步</output>
+    </div>
+  );
+}
+
+export const Interactive: Story = {
+  render: () => <InteractiveStepsDemo />,
+  play: async ({ canvasElement }) => {
+    const target = Array.from(canvasElement.querySelectorAll<HTMLButtonElement>("button")).find(
+      (button) => button.textContent && button.textContent.includes("支付")
+    );
+    if (!target) throw new window.Error("Expected an interactive payment step");
+    target.click();
+    await Promise.resolve();
+    const output = canvasElement.querySelector("output");
+    if (!output || output.textContent !== "当前第 3 步") {
+      throw new window.Error("Interactive Steps did not publish the requested index");
+    }
   }
 };
 export const LongResponsiveTitles: Story = {

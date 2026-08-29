@@ -188,7 +188,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 - Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 110824 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 36048 B / 65536 B 预算，组合 Brotli 86648 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 111536 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 36700 B / 65536 B 预算，组合 Brotli 87213 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，验证无 hydration 错误；客户端 `reset(nextDefaults)` 更新后，原生 reset 会恢复新的客户端默认值而不是旧服务端值
 - RTL: 隔离 Next H5 的 Form hydration 场景在 `dir="rtl"` 下验证输入方向继承、默认值与 reset 行为；adapter 继续依赖底层组件的逻辑属性
 - Reduced motion: Form 无自有动效；同一专项场景在 `motion="reduced"` Provider 下完成 hydration 与交互，Form 不新增 transition/animation

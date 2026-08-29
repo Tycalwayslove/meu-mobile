@@ -762,7 +762,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ alt, className, fallback, fit, imageRef, initials, loading, onError, onLoad, ref, shape, size, src, style, ...props }",
+              "parameterName": "{ alt, className, crossOrigin, decoding, draggable, fallback, fallbackSrc, fetchPriority, fit, imageRef, initials, loading, objectPosition, onError, onLoad, ref, referrerPolicy, shape, sizes, size, src, srcSet, style, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -854,7 +854,43 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"onError\" | \"onLoad\"> & {\n    alt: string;\n    fallback?: "
+              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"onError\" | \"onLoad\"> & {\n    alt: string;\n    crossOrigin?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImgHTMLAttributes",
+              "canonicalReference": "@types/react!React.ImgHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLImageElement",
+              "canonicalReference": "!HTMLImageElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"crossOrigin\"];\n    decoding?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImgHTMLAttributes",
+              "canonicalReference": "@types/react!React.ImgHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLImageElement",
+              "canonicalReference": "!HTMLImageElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"decoding\"];\n    draggable?: boolean;\n    fallback?: "
             },
             {
               "kind": "Reference",
@@ -863,7 +899,25 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    fit?: "
+              "text": ";\n    fallbackSrc?: string;\n    fetchPriority?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImgHTMLAttributes",
+              "canonicalReference": "@types/react!React.ImgHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLImageElement",
+              "canonicalReference": "!HTMLImageElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"fetchPriority\"];\n    fit?: "
             },
             {
               "kind": "Reference",
@@ -908,7 +962,16 @@
             },
             {
               "kind": "Content",
-              "text": ">[\"loading\"];\n    onError?: "
+              "text": ">[\"loading\"];\n    objectPosition?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CSSProperties",
+              "canonicalReference": "@types/react!React.CSSProperties:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"objectPosition\"];\n    onError?: "
             },
             {
               "kind": "Reference",
@@ -962,7 +1025,25 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    shape?: "
+              "text": ">;\n    referrerPolicy?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImgHTMLAttributes",
+              "canonicalReference": "@types/react!React.ImgHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLImageElement",
+              "canonicalReference": "!HTMLImageElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"referrerPolicy\"];\n    shape?: "
             },
             {
               "kind": "Reference",
@@ -971,7 +1052,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    size?: "
+              "text": ";\n    sizes?: string;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -980,7 +1061,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    src?: string;\n}"
+              "text": ";\n    src?: string;\n    srcSet?: string;\n}"
             },
             {
               "kind": "Content",
@@ -992,7 +1073,7 @@
           "name": "AvatarProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 35
+            "endIndex": 53
           }
         },
         {
@@ -6802,7 +6883,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ className, collapseText, content, defaultExpanded, direction, expanded: expandedProp, expandText, onEllipsisChange, onExpandedChange, ref, rows, style, ...props }",
+              "parameterName": "{ actionRef, className, collapseAriaLabel, collapseText, content, defaultExpanded, direction, expanded: expandedProp, expandAriaLabel, expandText, onEllipsisChange, onExpandedChange, ref, remeasureKey, rows, style, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -6880,7 +6961,25 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"dangerouslySetInnerHTML\"> & {\n    collapseText?: "
+              "text": ">, \"children\" | \"dangerouslySetInnerHTML\"> & {\n    actionRef?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Ref",
+              "canonicalReference": "@types/react!React.Ref:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    collapseAriaLabel?: string;\n    collapseText?: "
             },
             {
               "kind": "Reference",
@@ -6898,7 +6997,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    expanded?: boolean;\n    expandText?: "
+              "text": ";\n    expanded?: boolean;\n    expandAriaLabel?: string;\n    expandText?: "
             },
             {
               "kind": "Reference",
@@ -6943,7 +7042,7 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    rows?: number;\n}"
+              "text": ">;\n    remeasureKey?: string | number;\n    rows?: number;\n}"
             },
             {
               "kind": "Content",
@@ -6955,7 +7054,7 @@
           "name": "EllipsisProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 21
+            "endIndex": 25
           }
         },
         {
@@ -8078,7 +8177,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ alt, className, crossOrigin, decoding, draggable, fallback, fit, height, imageRef, loading, onError, onLoad, placeholder, radius, ref, referrerPolicy, sizes, src, srcSet, style, width, ...props }",
+              "parameterName": "{ alt, aspectRatio, className, crossOrigin, decoding, draggable, fallback, fallbackSrc, fetchPriority, fit, height, imageRef, imageProps, intrinsicHeight, intrinsicWidth, loading, onError, onLoad, placeholder, position, radius, ref, referrerPolicy, sizes, src, srcSet, style, width, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -8138,6 +8237,95 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!ImageNativeProps:type",
+          "docComment": "/**\n * Native image attributes that are not already controlled by {@link ImageProps}.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type ImageNativeProps = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "ImgHTMLAttributes",
+              "canonicalReference": "@types/react!React.ImgHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLImageElement",
+              "canonicalReference": "!HTMLImageElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">, \"alt\" | \"aria-hidden\" | \"aria-label\" | \"aria-labelledby\" | \"children\" | \"crossOrigin\" | \"dangerouslySetInnerHTML\" | \"decoding\" | \"draggable\" | \"fetchPriority\" | \"height\" | \"loading\" | \"onError\" | \"onLoad\" | \"ref\" | \"referrerPolicy\" | \"role\" | \"sizes\" | \"src\" | \"srcSet\" | \"width\">"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Image/types.ts",
+          "releaseTag": "Public",
+          "name": "ImageNativeProps",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 7
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!ImagePosition:type",
+          "docComment": "/**\n * CSS object-position value applied to an image.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type ImagePosition = "
+            },
+            {
+              "kind": "Reference",
+              "text": "NonNullable",
+              "canonicalReference": "!NonNullable:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "CSSProperties",
+              "canonicalReference": "@types/react!React.CSSProperties:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"objectPosition\"]>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Image/types.ts",
+          "releaseTag": "Public",
+          "name": "ImagePosition",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 5
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!ImageProps:type",
           "docComment": "/**\n * Props for a stateful image with loading and failure content.\n *\n * @public\n */\n",
           "excerptTokens": [
@@ -8170,7 +8358,16 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"onError\" | \"onLoad\"> & {\n    alt: string;\n    crossOrigin?: "
+              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"onError\" | \"onLoad\"> & {\n    alt: string;\n    aspectRatio?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CSSProperties",
+              "canonicalReference": "@types/react!React.CSSProperties:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "[\"aspectRatio\"];\n    crossOrigin?: "
             },
             {
               "kind": "Reference",
@@ -8215,7 +8412,25 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    fit?: "
+              "text": ";\n    fallbackSrc?: string;\n    fetchPriority?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImgHTMLAttributes",
+              "canonicalReference": "@types/react!React.ImgHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLImageElement",
+              "canonicalReference": "!HTMLImageElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"fetchPriority\"];\n    fit?: "
             },
             {
               "kind": "Reference",
@@ -8242,7 +8457,16 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    loading?: "
+              "text": ">;\n    imageProps?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImageNativeProps",
+              "canonicalReference": "@meu/mobile!ImageNativeProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    intrinsicHeight?: number;\n    intrinsicWidth?: number;\n    loading?: "
             },
             {
               "kind": "Reference",
@@ -8305,6 +8529,15 @@
             },
             {
               "kind": "Content",
+              "text": ";\n    position?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ImagePosition",
+              "canonicalReference": "@meu/mobile!ImagePosition:type"
+            },
+            {
+              "kind": "Content",
               "text": ";\n    radius?: "
             },
             {
@@ -8362,7 +8595,7 @@
           "name": "ImageProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 47
+            "endIndex": 57
           }
         },
         {
@@ -18471,7 +18704,7 @@
             },
             {
               "kind": "Content",
-              "text": "{\n    description?: "
+              "text": "{\n    ariaLabel?: string;\n    description?: "
             },
             {
               "kind": "Reference",
@@ -18480,7 +18713,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    icon?: "
+              "text": ";\n    disabled?: boolean;\n    icon?: "
             },
             {
               "kind": "Reference",
@@ -18489,7 +18722,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    status?: "
+              "text": ";\n    key?: string | number;\n    status?: "
             },
             {
               "kind": "Reference",
@@ -18775,7 +19008,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!Steps:function(1)",
-          "docComment": "/**\n * Renders an ordered, read-only sequence of process steps.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Renders an ordered process indicator with optional native step buttons.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -18813,7 +19046,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, className, current, direction, items, ref, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, className, current, direction, indicator: indicatorType, items, onChange, onKeyDown, ref, size, tabIndex, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -18859,6 +19092,32 @@
         },
         {
           "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!StepsIndicator:type",
+          "docComment": "/**\n * Visual treatment for the step indicator.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type StepsIndicator = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"number\" | \"dot\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Steps/types.ts",
+          "releaseTag": "Public",
+          "name": "StepsIndicator",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
+          "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!StepsProps:type",
           "docComment": "/**\n * Props for an ordered process indicator.\n *\n * @public\n */\n",
           "excerptTokens": [
@@ -18882,12 +19141,21 @@
             },
             {
               "kind": "Content",
-              "text": "<\"ol\">, \"children\"> & {\n    current?: number;\n    direction?: "
+              "text": "<\"ol\">, \"children\" | \"onChange\" | \"role\"> & {\n    current?: number;\n    direction?: "
             },
             {
               "kind": "Reference",
               "text": "StepsDirection",
               "canonicalReference": "@meu/mobile!StepsDirection:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    indicator?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "StepsIndicator",
+              "canonicalReference": "@meu/mobile!StepsIndicator:type"
             },
             {
               "kind": "Content",
@@ -18900,7 +19168,25 @@
             },
             {
               "kind": "Content",
-              "text": "[];\n    ref?: "
+              "text": "[];\n    onChange?: (index: number, event: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MouseEvent",
+              "canonicalReference": "@types/react!React.MouseEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLButtonElement",
+              "canonicalReference": "!HTMLButtonElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">) => void;\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -18918,7 +19204,16 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n}"
+              "text": ">;\n    size?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "StepsSize",
+              "canonicalReference": "@meu/mobile!StepsSize:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n}"
             },
             {
               "kind": "Content",
@@ -18930,7 +19225,33 @@
           "name": "StepsProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 13
+            "endIndex": 21
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!StepsSize:type",
+          "docComment": "/**\n * Density of the step indicator and labels.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type StepsSize = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"medium\" | \"small\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/Steps/types.ts",
+          "releaseTag": "Public",
+          "name": "StepsSize",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
           }
         },
         {

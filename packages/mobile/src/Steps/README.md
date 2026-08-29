@@ -1,3 +1,5 @@
 # Steps
 
-只读任务进度有序列表。`current` 自动派生状态，组件不提供点击跳步行为。永久事实源见 [Steps.docs.mdx](./Steps.docs.mdx)。
+商用移动端有序流程组件。默认提供只读状态展示；传入 `onChange` 后使用原生按钮提供受控步骤导航，并支持 disabled、稳定 key、数字/圆点指示器、两种密度、横向根键盘滚动、横竖布局、SSR、RTL、高对比与减弱动画。
+
+永久事实源、完整 Props/Events、无障碍契约、兼容边界、测试证据和后续变更规则见 [Steps.docs.mdx](./Steps.docs.mdx)。任何功能或行为变更都必须同步更新该文档。

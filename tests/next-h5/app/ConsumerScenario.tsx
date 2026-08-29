@@ -332,6 +332,7 @@ export function ConsumerScenario() {
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const [cellLoading, setCellLoading] = useState(true);
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [watermarkMessage, setWatermarkMessage] = useState("水印未发生 DOM 变更");
   const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
   const [navigationMessage, setNavigationMessage] = useState("等待导航操作");
@@ -342,6 +343,7 @@ export function ConsumerScenario() {
   const [previewMode, setPreviewMode] = useState<"summary" | "detail">("summary");
   const [previewPanel, setPreviewPanel] = useState<"overview" | "metrics">("overview");
   const [previewPage, setPreviewPage] = useState(1);
+  const [checkoutStep, setCheckoutStep] = useState(1);
   const [contentTab, setContentTab] = useState("overview");
   const [primarySection, setPrimarySection] = useState("home");
   const [feedbackProgress, setFeedbackProgress] = useState(64);
@@ -843,6 +845,7 @@ export function ConsumerScenario() {
           <Tabs
             aria-label="订单内容"
             stretch={false}
+            style={{ maxWidth: 260 }}
             value={contentTab}
             onChange={setContentTab}
             items={[
@@ -864,6 +867,36 @@ export function ConsumerScenario() {
               { title: "确认收货" }
             ]}
           />
+          <Steps
+            aria-label="可交互结算进度"
+            current={checkoutStep}
+            indicator="dot"
+            size="small"
+            style={{ maxWidth: 280 }}
+            items={[
+              { key: "cart", title: "购物车" },
+              { key: "address", title: "地址" },
+              { key: "payment", title: "支付", ariaLabel: "前往支付步骤" },
+              { key: "complete", title: "完成", disabled: true }
+            ]}
+            onChange={setCheckoutStep}
+          />
+          <Steps
+            aria-label="RTL 可交互结算进度"
+            current={1}
+            dir="rtl"
+            indicator="dot"
+            size="small"
+            style={{ maxWidth: 280 }}
+            items={[
+              { key: "cart", title: "السلة" },
+              { key: "address", title: "العنوان" },
+              { key: "payment", title: "الدفع" },
+              { key: "complete", title: "مكتمل", disabled: true }
+            ]}
+            onChange={() => undefined}
+          />
+          <output aria-live="polite">当前结算步骤：{checkoutStep + 1}</output>
           <div className="integration-pagination">
             <Button
               size="small"
@@ -1014,16 +1047,40 @@ export function ConsumerScenario() {
             <Badge dot tone="success" label="店铺在线">
               <Avatar src="" alt="林夏" />
             </Badge>
+            <Avatar
+              src="/invalid-image.bin"
+              fallbackSrc="/demo-avatar.svg"
+              alt="备用图片头像"
+              objectPosition="center 25%"
+            />
           </div>
           <Image
             src="/demo-media.svg"
+            srcSet="/demo-media.svg 1x, /demo-media.svg 2x"
+            sizes="(max-width: 480px) 100vw, 480px"
             alt="绿色植物与商品包装插画"
             width="100%"
-            height={160}
+            aspectRatio="16 / 9"
+            position="center 35%"
             radius="surface"
             loading="lazy"
           />
-          <Ellipsis content={displayDescription} rows={2} />
+          <Image
+            src="/invalid-image.bin"
+            fallbackSrc="/demo-media.svg"
+            alt="备用商品插画"
+            width="100%"
+            height={96}
+            radius="control"
+          />
+          <Ellipsis
+            content={displayDescription}
+            rows={2}
+            expanded={descriptionExpanded}
+            expandAriaLabel="展开完整商品说明"
+            collapseAriaLabel="收起完整商品说明"
+            onExpandedChange={setDescriptionExpanded}
+          />
           <output aria-live="polite">{displayAction}</output>
         </section>
 

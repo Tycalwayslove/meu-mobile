@@ -16,6 +16,8 @@ storyIds:
     information-steps--horizontal,
     information-steps--vertical,
     information-steps--error,
+    information-steps--compact-dots,
+    information-steps--interactive,
     information-steps--long-responsive-titles,
     information-steps--local-ltr-inside-rtl
   ]
@@ -26,115 +28,197 @@ source: packages/mobile/src/Steps
 
 ## 当前能力
 
-只读有序进度列表，支持 wait/process/finish/error、横竖布局、显式状态覆盖、长标题换行和窄屏横向滚动。
+- 原生 `ol > li` 有序流程语义，支持 `wait / process / finish / error`，`current` 自动派生状态，单项 `status` 可覆盖视觉状态。
+- 水平与垂直布局、`medium / small` 密度、`number / dot` 指示器、自定义图标、长标题换行与水平窄屏滚动。
+- 默认只读；提供 `onChange` 后，每项变为原生 `button`。当前项与业务 disabled 项使用原生 disabled，不进入顺序焦点且不会发出变更事件。
+- 中文和英文状态文本、`aria-current="step"`、forced-colors、RTL 逻辑方向和 reduced-motion 降级均已内置。
+- `key` 支持动态重排的稳定 React 身份；ref、原生 `ol` 属性和显式 `tabIndex` 可透传。
+
+当前处于 `verification`：API、单元、SSR 和 Story 交互已完成；全库视觉基线与真机验收在全部组件完成后统一执行。
 
 ## 何时使用
 
-用于订单、审批和任务的顺序进度。
+用于订单履约、身份认证、审批、开户或任务流程等有限且有明确先后关系的阶段。仅展示状态时省略 `onChange`；允许用户返回已完成步骤或跳转到可访问步骤时传入 `onChange`。
 
 ## 何时不要使用
 
-可点击的分步表单应由业务使用链接/按钮导航；Steps 不提供跳步交互。
+- 不要用 Steps 表示连续百分比，使用 Progress。
+- 不要用它替代带面板关系的页签，使用 Tabs。
+- 不要把 disabled 或颜色作为唯一的业务限制说明；在相邻文案中解释原因。
+- 步骤超过约 7 个且名称很长时，优先拆分流程或使用纵向布局。
 
 ## 结构与状态
 
-`ol → li → indicator + content`；当前索引使用 `aria-current="step"`。单项 status 可覆盖视觉与读屏状态。
+只读结构为 `ol[role=list] > li > div > indicator + content`；交互结构为 `ol[role=list] > li > button > indicator + content`。显式 list role 保住 Safari/VoiceOver 在清除列表 marker 后的列表语义。当前索引对应的 `li` 使用 `aria-current="step"`。指示器整体为装饰，状态由标题前的 visually-hidden 文本公布，因此自定义图标不会成为重复名称。
+
+默认状态派生规则：`index < current` 为 `finish`，`index === current` 为 `process`，其余为 `wait`。非有限 `current` 归零并截断小数；超出 items 范围时不会伪造当前项。显式 `item.status` 只覆盖状态，不改变 `aria-current`。
 
 ## 基础用法
 
 ```tsx
-<Steps current={1} items={[{ title: "提交" }, { title: "支付" }, { title: "完成" }]} />
+<Steps
+  current={1}
+  items={[
+    { key: "submit", title: "提交订单" },
+    { key: "ship", title: "商家发货", description: "处理中" },
+    { key: "receive", title: "确认收货" }
+  ]}
+/>
+```
+
+交互式受控用法：
+
+```tsx
+const [current, setCurrent] = useState(1);
+
+<Steps
+  current={current}
+  onChange={(nextIndex) => setCurrent(nextIndex)}
+  items={[
+    { key: "account", title: "账户" },
+    { key: "profile", title: "资料" },
+    { key: "confirm", title: "确认", disabled: !canConfirm }
+  ]}
+/>;
 ```
 
 ## 受控与非受控
 
-不适用：组件无内部进度状态，`current` 始终由调用方提供。
+Steps 不保存当前步骤，`current` 始终由调用方控制。`onChange(index, event)` 只表达用户请求，不会在组件内部修改 `current`；当前项和 disabled 项使用原生 disabled 且不会触发。需要初始值时由业务状态初始化，而不是使用 `defaultCurrent`。
 
 ## 表单集成
 
-不适用：只展示进度，不提交值。
+Steps 不是表单字段，不提交值、不参与校验。分步表单应把 `current`、脏状态和校验结果保存在表单/流程状态中；只有当前页校验通过后才更新 `current`。步骤按钮固定 `type="button"`，不会意外提交外层 form。
 
 ## Props
 
-`current` 默认 0；显式 item.status 优先。非法 current 只参与派生，不伪造当前项。API 细节以 TSDoc 为准。
+### StepsProps
+
+| 属性        | 类型                                             | 默认值         | 说明                                                     |
+| ----------- | ------------------------------------------------ | -------------- | -------------------------------------------------------- |
+| `items`     | `readonly StepItem[]`                            | 必填           | 有序步骤                                                 |
+| `current`   | `number`                                         | `0`            | 当前步骤的零基索引                                       |
+| `direction` | `"horizontal" \| "vertical"`                     | `"horizontal"` | 布局方向                                                 |
+| `indicator` | `"number" \| "dot"`                              | `"number"`     | 指示器样式；`item.icon` 优先                             |
+| `size`      | `"medium" \| "small"`                            | `"medium"`     | 视觉密度                                                 |
+| `onChange`  | `(index, MouseEvent<HTMLButtonElement>) => void` | —              | 存在时启用原生步骤按钮                                   |
+| `ref`       | `Ref<HTMLOListElement>`                          | —              | 根有序列表                                               |
+| 其他        | `ComponentProps<"ol">`                           | —              | `onChange/children/role` 除外；className/style/ARIA 透传 |
+
+### StepItem
+
+| 字段          | 类型               | 说明                                 |
+| ------------- | ------------------ | ------------------------------------ |
+| `title`       | `ReactNode`        | 必填的可见标题                       |
+| `description` | `ReactNode`        | 可选补充信息                         |
+| `status`      | `StepStatus`       | 覆盖派生状态                         |
+| `icon`        | `ReactNode`        | 覆盖默认指示器；只允许非交互图形     |
+| `key`         | `string \| number` | 动态增删/排序时应提供的稳定身份      |
+| `disabled`    | `boolean`          | 交互模式下禁用原生按钮               |
+| `ariaLabel`   | `string`           | 替换按钮名称的标题部分；状态前缀保留 |
 
 ## Events
 
-不适用：只读组件不发交互事件。
+`onChange(index, event)` 在用户点击、Enter 或 Space 激活非当前且未禁用的步骤时触发。键盘激活仍由浏览器产生 React mouse event，通常 `event.detail === 0`。只读模式不会注册步骤点击处理；根元素自己的其他原生事件仍可透传。
 
 ## Ref 与命令式方法
 
-ref 指向 `HTMLOListElement`；无命令式跳步。
+ref 指向 `HTMLOListElement`。没有命令式跳步 API；滚动、聚焦或状态变更由调用方显式完成。
 
 ## 键盘操作
 
-| 按键   | 行为                  |
-| ------ | --------------------- |
-| 不适用 | Steps 不进入 Tab 顺序 |
+| 模式               | 按键              | 行为                                             |
+| ------------------ | ----------------- | ------------------------------------------------ |
+| 水平（只读或交互） | `Tab`             | 聚焦可横向滚动的 `ol`                            |
+| 水平根             | `← / →`           | 按物理方向滚动约 80% 容器宽度，最少 48px         |
+| 垂直只读           | —                 | 默认不进入 Tab 顺序                              |
+| 交互               | `Tab / Shift+Tab` | 从水平滚动容器按 DOM 顺序移动到 enabled 原生按钮 |
+| 交互               | `Enter / Space`   | 请求切换到该步骤                                 |
+| 交互 disabled/当前 | —                 | 原生 disabled，不进入顺序焦点且不发出 `onChange` |
+
+调用方可通过根 `tabIndex` 覆盖默认聚焦策略，也可通过根 `onKeyDown` 先行处理并 `preventDefault()` 取消内置滚动。方向键只在事件目标就是水平根且没有 Alt/Ctrl/Meta/Shift 修饰键时按物理方向滚动，不拦截步骤按钮、后代控件或浏览器快捷键。Steps 不使用 tablist 或 roving-focus 模型，因为它不承诺控制对应 tabpanel。
 
 ## 触摸与手势
 
-不适用：没有点击或手势目标。
+交互步骤的按钮最小高度为 44px，整块标题/描述区域均可点击；当前项和业务 disabled 项使用原生按钮禁用语义。组件不实现滑动、长按或拖拽。
 
 ## 无障碍
 
-原生 ol/li 公布顺序；当前项使用 aria-current=step；每项隐藏文本公布本地化状态，图标为装饰。
+- 原生 `ol/li` 公布顺序；根默认名称为“进度”或 `Progress`，建议业务传更具体的 `aria-label`。
+- 当前项使用 `aria-current="step"`；每项都在标题前公布本地化状态，不能仅靠颜色识别。
+- 自定义 icon 位于 `aria-hidden` 指示器内，但 `aria-hidden` 不会自动让后代控件退出 Tab 顺序，因此 icon 严禁包含按钮、链接、输入框或任何可聚焦节点。
+- 交互模式使用原生 button 与 disabled；`ariaLabel` 只在可见标题不足以描述目的时使用，组件仍自动保留本地化状态前缀。
+- `error` 的语义只是步骤状态，不会自动 live announce；异步失败需要业务在独立 `aria-live` 区域通知。
 
 ## 动效
 
-无运行时动画；状态色变化随 React render 即时更新。reduced-motion 不适用。
+状态切换只按 motion token 过渡指示器的前景色、背景色和边框色；步骤按钮按下提供轻微缩放，不移动周围布局。系统 `prefers-reduced-motion: reduce` 或 `ConfigProvider motion="reduced"` 下关闭过渡。连接线即时更新，避免长流程产生连续追逐动画。
 
 ## 主题与定制
 
-使用 ink/muted/accent/danger/border token；forced-colors 下 indicator 使用系统色。
+颜色、字体、间距和圆角全部来自 Meu Token。forced-colors 下当前、错误和聚焦态使用系统色。稳定定制入口为 `direction / indicator / size / item.icon / className / style`；不要依赖内部类名或 DOM 层级。
 
 ## SSR 与 Next.js
 
-确定性有序列表，可直接 SSR；服务端与客户端 items/current 必须一致。
+组件只基于 props 和 ConfigProvider 渲染，无随机 ID、时间或浏览器测量，SSR 输出确定。服务端与首个客户端 render 必须提供相同的 `items/current/direction/indicator/size`，并且必须同时存在或同时省略 `onChange`：它决定 `div` 与 `button` 两种真实结构，前后不一致会造成 hydration mismatch。组件目录的 hydrateRoot 测试分别覆盖只读与交互结构。
 
 ## RTL 与国际化
 
-连接线使用 CSS 逻辑边界，按最近的 `dir` 祖先镜像；局部 LTR 可正确覆盖外层 RTL。状态文本支持 zh-CN/en-US。
+连接线和间距使用 CSS 逻辑属性，跟随最近的 `dir` 祖先；局部 LTR 可覆盖外层 RTL。内置状态文案支持 `zh-CN / en-US`。标题、描述和 `ariaLabel` 由业务本地化，组件不改写内容顺序。
 
 ## 浏览器与 WebView
 
-基于 flex/grid 与原生滚动，兼容目标 Chrome/WebView 70+、iOS 13+。
+正式支持矩阵为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。构建产物另保持 Chrome 70 / iOS 13 静态语法扫描，但 iOS 13–14 与 Chromium 79–88 只是观察档，不承诺逻辑属性、`overflow-wrap:anywhere` 或 RTL 连接线完全一致。焦点环使用支持档可靠的 `:focus`，因此部分宿主在触摸后保留焦点时也可能显示轮廓；这是旧 WebView 外接键盘可见性优先的明确取舍。
 
 ## 边界情况与已知限制
 
-水平长步骤会滚动而非压缩到不可读；自定义 icon 必须保持装饰性，状态仍由隐藏文本表达。
+- 水平长步骤保持每项最小宽度并允许横向滚动，不会把文字压缩到不可读。
+- 未传 `key` 时回退到 index；动态排序会沿用 React 的索引身份，业务必须传稳定 key。
+- `item.status="process"` 不会改变 `current` 或 `aria-current`；两者职责不同。
+- 交互模式不是路由组件。需要链接语义时，在外部导航回调中调用路由器；新窗口等真实 anchor 场景不应伪装成步骤按钮。
+- Steps 不自动滚动当前项到可视区，也不在动态删除后抢回焦点；调用方变更 items 时应避免删除当前正在操作的按钮。
 
 ## 性能预算
 
-O(items)，无监听、测量或第三方运行时。
+渲染和状态派生均为 O(items)，无 effect、全局监听器、ResizeObserver 或布局测量；水平根只有一个 React keydown 处理器。建议单个流程保持有限步骤；超长历史记录使用 Timeline/List。
 
 ## 测试证据
 
-- Unit: 派生状态、current、error、横竖、本地化
-- Story interaction: `Horizontal` 验证有序列表、派生状态、当前步骤与可聚焦语义；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3649 B / 32768 B 预算，组合 Brotli 3211 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Steps.ssr.test.tsx`
-- RTL: 逻辑边界 + 嵌套 RTL/LTR Story，真实截图待补
-- Reduced motion: 不适用
-- Mobile Chromium/WebKit E2E: `connects tab panels, primary navigation and read-only progress semantics` 在两种引擎断言有序列表、三项状态、`aria-current=step` 与 visually-hidden 状态前缀
-- Chromatic Light/Dark: 发布后建立
-- Real device: 待补
+- Unit：`Steps.test.tsx` 11 项覆盖派生状态、error、横竖、本地化、只读/交互结构、Enter/Space 与键盘事件 detail、LTR/RTL 根滚动、修饰键/调用方取消/后代冒泡保护、current/disabled 原生禁用、ariaLabel 状态前缀、aria-labelledby、dot/small、ref/tabIndex 和自定义 icon 装饰语义。
+- SSR：`Steps.ssr.test.tsx` 2 项覆盖有序列表/current 语义，以及交互 button、disabled 与 dot 的确定性输出。
+- Hydration：`Steps.hydration.test.tsx` 分别覆盖只读 div 与交互 button，要求 0 recoverable error / console.error。
+- Story：`Horizontal` 检查只读滚动焦点和状态；`Interactive` 检查受控切换；另有 Vertical、Error、CompactDots、长文案和嵌套 RTL 场景。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4421 B / 32768 B 预算，组合 Brotli 3872 B；共享样式由应用单独导入一次。
+- 本批本地命令：Steps 3 files / 15 tests、定向 ESLint/格式化、`@meu/mobile` typecheck/build、API strict 均通过。隔离 Next H5 production build 后，mobile Chromium/WebKit 均验证 Enter 激活、LTR/RTL 水平根 `←/→` 溢出滚动、current/disabled 状态与 0 runtime console/page error。
+- Chromatic/Vercel：遵循开发阶段降频策略，本批不运行；全部组件完成后统一建立最终 Light/Dark/RTL/字号/高对比视觉证据并部署。
+- Real device：待最终发布前在 iOS WebView 与 Android WebView 补触摸、横向滚动、VoiceOver/TalkBack 验收。
 
 ## V2 优化记录
 
-### 待优化
+### 优化方案
 
-补 200% 字号与 RTL 专属截图；基础双引擎语义路径已完成。
+1. 固化只读有序流程与交互步骤导航两个明确模式，避免把可点击 div 当控件。
+2. 增加商业场景所需的 disabled、稳定 key、ariaLabel、small 与 dot，同时保持原有默认视觉/API。
+3. 补全触摸面积、状态读屏、RTL、forced-colors、reduced-motion 与 SSR 边界。
+4. 用 Unit、SSR、Story 和最终 Next H5 双引擎/视觉矩阵逐层验收。
 
 ### 已完成
 
-确认 ol/li、aria-current、状态公告、长标题滚动响应与 forced-colors；补隔离 Next H5 状态与 hydration 证据。
+- 原生 button 交互、受控 onChange、current/disabled 事件防重。
+- `number/dot`、`medium/small`、自定义图标与 token 化状态过渡。
+- 稳定 key、button ariaLabel、ref/tabIndex 和根原生属性契约。
+- 中文/英文状态、aria-current、44px 触摸高度、RTL/forced-colors/reduced-motion。
+- 组件内永久 API、边界、兼容与测试文档。
+
+### 待最终验收
+
+- 全库 Chromatic Light/Dark/RTL/200%/forced-colors 基线和两类真机读屏验收。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                       | 迁移说明    |
-| ---------- | ------ | ------------ | ------------------------------------------ | ----------- |
-| 2026-08-29 | 未发布 | behavior     | 响应式长标题和高对比模式                   | 无 API 破坏 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎步骤语义/hydration 证据 | 无          |
+| 日期       | 版本   | 类型          | 内容                                                               | 迁移说明                                        |
+| ---------- | ------ | ------------- | ------------------------------------------------------------------ | ----------------------------------------------- |
+| 2026-08-29 | 未发布 | feature       | 增加交互 onChange、disabled/key/ariaLabel、dot 与 small            | 默认仍为只读 number/medium，无需迁移            |
+| 2026-08-29 | 未发布 | accessibility | 原生步骤按钮、44px 高度、状态读屏、forced-colors 与 reduced-motion | 水平根默认可聚焦以保证溢出内容可键盘滚动        |
+| 2026-08-29 | 未发布 | accessibility | 水平根增加跨 Chromium/WebKit 的 `←/→` 滚动                         | 根 onKeyDown 可 preventDefault 取消内置行为     |
+| 2026-08-29 | 未发布 | documentation | 固化 Props/Events/SSR/RTL/兼容/限制/验证与未来变更规则             | 后续行为或 API 变化必须同步更新本文档和测试证据 |

@@ -876,19 +876,30 @@ test("renders atomic display components with native actions and fallbacks", asyn
   await expect(section.getByText("99+")).toBeVisible();
   await expect(section.getByLabel("店铺在线")).toBeVisible();
   await expect(section.getByRole("img", { name: "林夏" })).toBeVisible();
+  const fallbackAvatar = section.getByRole("img", { name: "备用图片头像" });
+  await expect(fallbackAvatar).toBeVisible();
+  await expect(fallbackAvatar.locator("xpath=..")).toHaveAttribute("data-source", "fallback");
+  await expect(fallbackAvatar.locator("xpath=..")).toHaveAttribute("data-state", "loaded");
 
   const media = section.getByRole("img", { name: "绿色植物与商品包装插画" });
   await media.scrollIntoViewIfNeeded();
   await expect(media).toBeVisible();
   await expect(media.locator("xpath=..")).toHaveAttribute("data-state", "loaded");
+  await expect(media).toHaveAttribute("srcset", /demo-media\.svg 2x/);
+  await expect(media).toHaveCSS("object-position", "50% 35%");
+
+  const fallbackMedia = section.getByRole("img", { name: "备用商品插画" });
+  await expect(fallbackMedia).toBeVisible();
+  await expect(fallbackMedia.locator("xpath=..")).toHaveAttribute("data-source", "fallback");
+  await expect(fallbackMedia.locator("xpath=..")).toHaveAttribute("data-state", "loaded");
 
   await section.getByRole("button", { name: "仅看待处理" }).click();
   await expect(section.getByText("已筛选待处理商品")).toBeVisible();
 
-  const expand = section.getByRole("button", { name: "展开" });
+  const expand = section.getByRole("button", { name: "展开完整商品说明" });
   await expect(expand).toBeVisible();
   await expand.click();
-  await expect(section.getByRole("button", { name: "收起" })).toHaveAttribute(
+  await expect(section.getByRole("button", { name: "收起完整商品说明" })).toHaveAttribute(
     "aria-expanded",
     "true"
   );
@@ -977,12 +988,45 @@ test("connects tab panels, primary navigation and read-only progress semantics",
   await expect(afterSales).toHaveAttribute("tabindex", "0");
   await expect(section.getByRole("tabpanel", { name: "售后服务" })).toContainText("订单售后服务");
 
-  const progress = section.getByRole("list", { name: "进度" });
+  const progress = section.getByRole("list", { name: "进度", exact: true });
   await expect(progress.locator("li")).toHaveCount(3);
   await expect(progress.locator('li[aria-current="step"]')).toContainText("商家发货");
   const statusPrefix = progress.getByText("进行中：", { exact: true });
   await expect(statusPrefix).toHaveCSS("position", "absolute");
   await expect(statusPrefix).toHaveCSS("width", "1px");
+
+  const interactiveProgress = section.getByRole("list", {
+    name: "可交互结算进度",
+    exact: true
+  });
+  await expect(interactiveProgress).toHaveAttribute("data-indicator", "dot");
+  await expect(interactiveProgress).toHaveAttribute("data-size", "small");
+  await expect(interactiveProgress).toHaveAttribute("tabindex", "0");
+  await expect(interactiveProgress.getByRole("button")).toHaveCount(4);
+  await expect(interactiveProgress.getByRole("button", { name: /完成$/ })).toBeDisabled();
+  expect(await interactiveProgress.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(
+    true
+  );
+  await interactiveProgress.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect
+    .poll(() => interactiveProgress.evaluate((node) => node.scrollLeft))
+    .toBeGreaterThan(0);
+  const paymentStep = interactiveProgress.getByRole("button", {
+    name: "未开始：前往支付步骤"
+  });
+  await paymentStep.focus();
+  await page.keyboard.press("Enter");
+  await expect(section.getByText("当前结算步骤：3")).toBeVisible();
+  await expect(interactiveProgress.locator('li[aria-current="step"]')).toContainText("支付");
+
+  const rtlProgress = section.getByRole("list", { name: "RTL 可交互结算进度" });
+  expect(await rtlProgress.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+  await rtlProgress.focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect.poll(() => rtlProgress.evaluate((node) => node.scrollLeft)).toBeLessThan(0);
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(() => rtlProgress.evaluate((node) => node.scrollLeft)).toBe(0);
 
   const primary = section.getByRole("navigation", { name: "底部主导航" });
   await expect(primary.getByRole("link", { name: "首页" })).toHaveAttribute("href", "#home");

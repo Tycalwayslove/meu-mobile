@@ -17,6 +17,7 @@ export function NavigationDemo({ focus }: NavigationDemoProps = {}) {
   const [message, setMessage] = useState("等待操作");
   const [viewMode, setViewMode] = useState<"list" | "card">("list");
   const [page, setPage] = useState(1);
+  const [progressStep, setProgressStep] = useState(1);
   const [contentTab, setContentTab] = useState("overview");
   const [primarySection, setPrimarySection] = useState("home");
 
@@ -55,14 +56,19 @@ export function NavigationDemo({ focus }: NavigationDemoProps = {}) {
     />
   );
   const steps = (
-    <Steps
-      current={1}
-      items={[
-        { title: "提交订单", description: "08:30" },
-        { title: "商家发货", description: "处理中" },
-        { title: "确认收货" }
-      ]}
-    />
+    <div style={{ display: "grid", gap: 8 }}>
+      <Steps
+        aria-label="订单履约进度"
+        current={progressStep}
+        items={[
+          { key: "submit", title: "提交订单", description: "08:30" },
+          { key: "ship", title: "商家发货", description: "处理中" },
+          { key: "receive", title: "确认收货" }
+        ]}
+        onChange={setProgressStep}
+      />
+      <output aria-live="polite">当前第 {progressStep + 1} 步</output>
+    </div>
   );
   const pagination = (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

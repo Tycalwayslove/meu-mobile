@@ -116,17 +116,26 @@ export type AvatarFit = NonNullable<CSSProperties["objectFit"]>;
 // @public
 export type AvatarProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "dangerouslySetInnerHTML" | "onError" | "onLoad"> & {
     alt: string;
+    crossOrigin?: ImgHTMLAttributes<HTMLImageElement>["crossOrigin"];
+    decoding?: ImgHTMLAttributes<HTMLImageElement>["decoding"];
+    draggable?: boolean;
     fallback?: ReactNode;
+    fallbackSrc?: string;
+    fetchPriority?: ImgHTMLAttributes<HTMLImageElement>["fetchPriority"];
     fit?: AvatarFit;
     initials?: string;
     imageRef?: Ref<HTMLImageElement>;
     loading?: ImgHTMLAttributes<HTMLImageElement>["loading"];
+    objectPosition?: CSSProperties["objectPosition"];
     onError?: ReactEventHandler<HTMLImageElement>;
     onLoad?: ReactEventHandler<HTMLImageElement>;
     ref?: Ref<HTMLSpanElement>;
+    referrerPolicy?: ImgHTMLAttributes<HTMLImageElement>["referrerPolicy"];
     shape?: AvatarShape;
+    sizes?: string;
     size?: AvatarSize;
     src?: string;
+    srcSet?: string;
 };
 
 // @public
@@ -743,15 +752,19 @@ export type EllipsisDirection = "start" | "end" | "middle";
 
 // @public
 export type EllipsisProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML"> & {
+    actionRef?: Ref<HTMLButtonElement>;
+    collapseAriaLabel?: string;
     collapseText?: ReactNode;
     content: string;
     defaultExpanded?: boolean;
     direction?: EllipsisDirection;
     expanded?: boolean;
+    expandAriaLabel?: string;
     expandText?: ReactNode;
     onEllipsisChange?: (ellipsed: boolean) => void;
     onExpandedChange?: (expanded: boolean, event: MouseEvent_2<HTMLButtonElement>) => void;
     ref?: Ref<HTMLDivElement>;
+    remeasureKey?: string | number;
     rows?: number;
 };
 
@@ -885,19 +898,32 @@ export { Image_2 as Image }
 export type ImageFit = NonNullable<CSSProperties["objectFit"]>;
 
 // @public
+export type ImageNativeProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "alt" | "aria-hidden" | "aria-label" | "aria-labelledby" | "children" | "crossOrigin" | "dangerouslySetInnerHTML" | "decoding" | "draggable" | "fetchPriority" | "height" | "loading" | "onError" | "onLoad" | "ref" | "referrerPolicy" | "role" | "sizes" | "src" | "srcSet" | "width">;
+
+// @public
+export type ImagePosition = NonNullable<CSSProperties["objectPosition"]>;
+
+// @public
 export type ImageProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "dangerouslySetInnerHTML" | "onError" | "onLoad"> & {
     alt: string;
+    aspectRatio?: CSSProperties["aspectRatio"];
     crossOrigin?: ImgHTMLAttributes<HTMLImageElement>["crossOrigin"];
     decoding?: ImgHTMLAttributes<HTMLImageElement>["decoding"];
     draggable?: boolean;
     fallback?: ReactNode;
+    fallbackSrc?: string;
+    fetchPriority?: ImgHTMLAttributes<HTMLImageElement>["fetchPriority"];
     fit?: ImageFit;
     height?: number | string;
     imageRef?: Ref<HTMLImageElement>;
+    imageProps?: ImageNativeProps;
+    intrinsicHeight?: number;
+    intrinsicWidth?: number;
     loading?: ImgHTMLAttributes<HTMLImageElement>["loading"];
     onError?: ReactEventHandler<HTMLImageElement>;
     onLoad?: ReactEventHandler<HTMLImageElement>;
     placeholder?: ReactNode;
+    position?: ImagePosition;
     radius?: ImageRadius;
     ref?: Ref<HTMLDivElement>;
     referrerPolicy?: ImgHTMLAttributes<HTMLImageElement>["referrerPolicy"];
@@ -2019,8 +2045,11 @@ export type SpaceProps = HTMLAttributes<HTMLDivElement> & {
 
 // @public
 export type StepItem = {
+    ariaLabel?: string;
     description?: ReactNode;
+    disabled?: boolean;
     icon?: ReactNode;
+    key?: string | number;
     status?: StepStatus;
     title: ReactNode;
 };
@@ -2078,12 +2107,21 @@ export function Steps(input: StepsProps): JSX.Element;
 export type StepsDirection = "horizontal" | "vertical";
 
 // @public
-export type StepsProps = Omit<ComponentProps<"ol">, "children"> & {
+export type StepsIndicator = "number" | "dot";
+
+// @public
+export type StepsProps = Omit<ComponentProps<"ol">, "children" | "onChange" | "role"> & {
     current?: number;
     direction?: StepsDirection;
+    indicator?: StepsIndicator;
     items: readonly StepItem[];
+    onChange?: (index: number, event: MouseEvent_2<HTMLButtonElement>) => void;
     ref?: Ref<HTMLOListElement>;
+    size?: StepsSize;
 };
+
+// @public
+export type StepsSize = "medium" | "small";
 
 // @public
 export type StepStatus = "wait" | "process" | "finish" | "error";

@@ -34,9 +34,12 @@ export const imageElement = recipe({
     width: "100%",
     maxWidth: "100%",
     transition: "opacity var(--meu-motion-enter) var(--meu-motion-ease-standard)",
-    selectors: { "&[data-pending='true']": { opacity: 0 } },
+    selectors: {
+      "&[data-pending='true']": { opacity: 0 },
+      '[data-meu-motion="reduced"] &': { transitionDuration: "0ms" }
+    },
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
       "(forced-colors: active)": { forcedColorAdjust: "auto" }
     }
   },

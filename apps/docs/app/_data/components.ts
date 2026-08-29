@@ -376,24 +376,36 @@ export const componentDocs: readonly ComponentDoc[] = [
   mobile("Badge", "badge", "information", "在内容旁表达数量或提醒状态。", {
     storyTitle: "Information/Badge"
   }),
-  mobile("Avatar", "avatar", "information", "图片、文字与加载失败回退统一的身份展示。", {
+  mobile("Avatar", "avatar", "information", "响应式图片、备用源与文字回退统一的身份展示。", {
     storyTitle: "Information/Avatar"
   }),
-  mobile("Image", "image", "information", "明确 loading、error、fallback 与适配方式的媒体组件。", {
+  mobile("Image", "image", "information", "具备响应式源、占位、备用源与稳定尺寸的媒体组件。", {
     storyTitle: "Information/Image"
   }),
   mobile("Collapse", "collapse", "information", "原生按钮控制的可折叠内容组。", {
     storyTitle: "Information/Collapse"
   }),
-  mobile("Ellipsis", "ellipsis", "information", "按容器宽度折叠长文本，并提供展开与收起路径。", {
-    storyTitle: "Information/Ellipsis"
-  }),
-  mobile("Steps", "steps", "information", "只读有序流程状态，支持水平与垂直布局。", {
+  mobile(
+    "Ellipsis",
+    "ellipsis",
+    "information",
+    "按字素和真实容器测量截断长文本，支持受控展开与收起。",
+    {
+      storyTitle: "Information/Ellipsis"
+    }
+  ),
+  mobile("Steps", "steps", "information", "有序流程状态与可选原生步骤导航，支持横竖布局。", {
     storyTitle: "Information/Steps"
   }),
-  mobile("PaginationDots", "pagination-dots", "information", "只读页码进度，不伪造点击目标。", {
-    storyTitle: "Navigation/PaginationDots"
-  }),
+  mobile(
+    "PaginationDots",
+    "pagination-dots",
+    "information",
+    "默认只读的页码进度，也可启用受控原生页码按钮。",
+    {
+      storyTitle: "Navigation/PaginationDots"
+    }
+  ),
 
   mobile("PullToRefresh", "pull-to-refresh", "collections", "不接管滚动容器的下拉刷新状态机。", {
     priority: "P1",

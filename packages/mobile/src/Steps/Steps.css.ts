@@ -42,7 +42,8 @@ export const step = recipe({
         background: "var(--meu-color-border)",
         content: ""
       },
-      '&[data-last="true"]::after': { display: "none" }
+      '&[data-last="true"]::after': { display: "none" },
+      '&[data-disabled="true"]': { opacity: 0.55 }
     }
   },
   variants: {
@@ -64,12 +65,17 @@ export const step = recipe({
         }
       },
       vertical: {
-        display: "grid",
-        gridTemplateColumns: "32px minmax(0, 1fr)",
-        columnGap: "var(--meu-space-3)",
         minHeight: 56,
         selectors: {
           "&::after": { top: 36, bottom: -12, insetInlineStart: 15, width: 2 }
+        }
+      }
+    },
+    size: {
+      medium: {},
+      small: {
+        selectors: {
+          "&::after": { top: 11, insetInlineStart: 11 }
         }
       }
     },
@@ -80,7 +86,77 @@ export const step = recipe({
       error: {}
     }
   },
-  defaultVariants: { direction: "horizontal", status: "wait" }
+  compoundVariants: [
+    {
+      variants: { direction: "horizontal", size: "small" },
+      style: {
+        selectors: {
+          "&::after": {
+            insetInlineStart: "calc(50% + 16px)",
+            insetInlineEnd: "calc(-50% + 16px)"
+          }
+        }
+      }
+    },
+    {
+      variants: { direction: "vertical", size: "small" },
+      style: { minHeight: 48, selectors: { "&::after": { top: 28, bottom: -12 } } }
+    }
+  ],
+  defaultVariants: { direction: "horizontal", size: "medium", status: "wait" }
+});
+
+export const action = recipe({
+  base: {
+    width: "100%",
+    minWidth: 0,
+    minHeight: 44,
+    padding: 0,
+    border: 0,
+    color: "inherit",
+    background: "transparent",
+    font: "inherit",
+    transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+    selectors: {
+      "button&": { cursor: "pointer" },
+      "button&:disabled": { cursor: "not-allowed" },
+      "button&:active:not(:disabled)": { transform: "scale(0.98)" },
+      "button&:focus": {
+        borderRadius: "var(--meu-radius-control)",
+        outline: "2px solid var(--meu-color-accent)",
+        outlineOffset: 2
+      },
+      '[data-meu-motion="reduced"] &': { transitionDuration: "0ms" }
+    },
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
+      "(forced-colors: active)": {
+        selectors: { "button&:focus": { outlineColor: "Highlight" } }
+      }
+    }
+  },
+  variants: {
+    direction: {
+      horizontal: { display: "grid", justifyItems: "center", textAlign: "center" },
+      vertical: {
+        display: "grid",
+        gridTemplateColumns: "32px minmax(0, 1fr)",
+        columnGap: "var(--meu-space-3)",
+        textAlign: "start"
+      }
+    },
+    size: {
+      medium: {},
+      small: {}
+    }
+  },
+  compoundVariants: [
+    {
+      variants: { direction: "vertical", size: "small" },
+      style: { gridTemplateColumns: "24px minmax(0, 1fr)" }
+    }
+  ],
+  defaultVariants: { direction: "horizontal", size: "medium" }
 });
 
 export const indicator = recipe({
@@ -98,15 +174,25 @@ export const indicator = recipe({
     fontSize: 13,
     fontWeight: 600,
     lineHeight: 1,
+    transition:
+      "color var(--meu-motion-exit) var(--meu-motion-ease-standard), background-color var(--meu-motion-exit) var(--meu-motion-ease-standard), border-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
     "@media": {
+      "(prefers-reduced-motion: reduce)": { transition: "none" },
       "(forced-colors: active)": {
         color: "CanvasText",
         background: "Canvas",
         borderColor: "CanvasText"
       }
+    },
+    selectors: {
+      '[data-meu-motion="reduced"] &': { transitionDuration: "0ms" }
     }
   },
   variants: {
+    size: {
+      medium: {},
+      small: { width: 24, height: 24, borderWidth: 1, fontSize: 11 }
+    },
     status: {
       wait: {
         color: "var(--meu-color-muted)",
@@ -132,7 +218,14 @@ export const indicator = recipe({
       }
     }
   },
-  defaultVariants: { status: "wait" }
+  defaultVariants: { size: "medium", status: "wait" }
+});
+
+export const dotGlyph = style({
+  width: 6,
+  height: 6,
+  borderRadius: "var(--meu-radius-round)",
+  background: "currentColor"
 });
 
 export const content = recipe({
@@ -141,23 +234,48 @@ export const content = recipe({
     direction: {
       horizontal: { marginTop: "var(--meu-space-2)", maxWidth: 160 },
       vertical: { paddingTop: 4, paddingBottom: "var(--meu-space-3)" }
+    },
+    size: {
+      medium: {},
+      small: {}
     }
   },
-  defaultVariants: { direction: "horizontal" }
+  compoundVariants: [
+    {
+      variants: { direction: "vertical", size: "small" },
+      style: { paddingTop: 1 }
+    }
+  ],
+  defaultVariants: { direction: "horizontal", size: "medium" }
 });
 
-export const title = style({
-  color: "var(--meu-color-ink)",
-  fontSize: 14,
-  fontWeight: 500,
-  lineHeight: "20px",
-  overflowWrap: "anywhere"
+export const title = recipe({
+  base: {
+    color: "var(--meu-color-ink)",
+    fontWeight: 500,
+    overflowWrap: "anywhere"
+  },
+  variants: {
+    size: {
+      medium: { fontSize: 14, lineHeight: "20px" },
+      small: { fontSize: 13, lineHeight: "18px" }
+    }
+  },
+  defaultVariants: { size: "medium" }
 });
 
-export const description = style({
-  marginTop: 2,
-  color: "var(--meu-color-muted)",
-  fontSize: 12,
-  lineHeight: "18px",
-  overflowWrap: "anywhere"
+export const description = recipe({
+  base: {
+    marginTop: 2,
+    color: "var(--meu-color-muted)",
+    fontSize: 12,
+    overflowWrap: "anywhere"
+  },
+  variants: {
+    size: {
+      medium: { lineHeight: "18px" },
+      small: { lineHeight: "16px" }
+    }
+  },
+  defaultVariants: { size: "medium" }
 });

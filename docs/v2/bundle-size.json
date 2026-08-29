@@ -6,9 +6,9 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 19891,
-    "gzipBytes": 23972,
-    "rawBytes": 187186,
+    "brotliBytes": 20152,
+    "gzipBytes": 24337,
+    "rawBytes": 189924,
     "files": [
       {
         "filePath": "packages/tokens/dist/theme.css",
@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 114688,
-      "brotliBytes": 86648,
-      "gzipBytes": 110824,
-      "rawBytes": 583276,
+      "brotliBytes": 87213,
+      "gzipBytes": 111536,
+      "rawBytes": 586985,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -71,9 +71,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 31379,
-          "gzipBytes": 36048,
-          "rawBytes": 159205,
+          "brotliBytes": 31936,
+          "gzipBytes": 36700,
+          "rawBytes": 162914,
           "name": "MeuFormImageUploader",
           "passesBudget": true
         },
@@ -331,9 +331,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2814,
-      "gzipBytes": 3175,
-      "rawBytes": 10551,
+      "brotliBytes": 3517,
+      "gzipBytes": 3929,
+      "rawBytes": 14914,
       "docsPath": "packages/mobile/src/Avatar/Avatar.docs.mdx",
       "name": "Avatar",
       "packageName": "@meu/mobile",
@@ -342,9 +342,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2814,
-          "gzipBytes": 3175,
-          "rawBytes": 10551,
+          "brotliBytes": 3517,
+          "gzipBytes": 3929,
+          "rawBytes": 14914,
           "name": "Avatar",
           "passesBudget": true
         }
@@ -795,9 +795,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2296,
-      "gzipBytes": 2619,
-      "rawBytes": 9171,
+      "brotliBytes": 2779,
+      "gzipBytes": 3166,
+      "rawBytes": 12228,
       "docsPath": "packages/mobile/src/Ellipsis/Ellipsis.docs.mdx",
       "name": "Ellipsis",
       "packageName": "@meu/mobile",
@@ -806,9 +806,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2296,
-          "gzipBytes": 2619,
-          "rawBytes": 9171,
+          "brotliBytes": 2779,
+          "gzipBytes": 3166,
+          "rawBytes": 12228,
           "name": "Ellipsis",
           "passesBudget": true
         }
@@ -900,9 +900,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2325,
-      "gzipBytes": 2602,
-      "rawBytes": 8296,
+      "brotliBytes": 2923,
+      "gzipBytes": 3264,
+      "rawBytes": 12016,
       "docsPath": "packages/mobile/src/Image/Image.docs.mdx",
       "name": "Image",
       "packageName": "@meu/mobile",
@@ -911,9 +911,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2325,
-          "gzipBytes": 2602,
-          "rawBytes": 8296,
+          "brotliBytes": 2923,
+          "gzipBytes": 3264,
+          "rawBytes": 12016,
           "name": "Image",
           "passesBudget": true
         }
@@ -921,9 +921,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 29428,
-      "gzipBytes": 33858,
-      "rawBytes": 150309,
+      "brotliBytes": 29992,
+      "gzipBytes": 34507,
+      "rawBytes": 154018,
       "docsPath": "packages/mobile/src/ImageUploader/ImageUploader.docs.mdx",
       "name": "ImageUploader",
       "packageName": "@meu/mobile",
@@ -932,9 +932,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 29428,
-          "gzipBytes": 33858,
-          "rawBytes": 150309,
+          "brotliBytes": 29992,
+          "gzipBytes": 34507,
+          "rawBytes": 154018,
           "name": "ImageUploader",
           "passesBudget": true
         }
@@ -942,9 +942,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 25920,
-      "gzipBytes": 29826,
-      "rawBytes": 131007,
+      "brotliBytes": 26517,
+      "gzipBytes": 30501,
+      "rawBytes": 134716,
       "docsPath": "packages/mobile/src/ImageViewer/ImageViewer.docs.mdx",
       "name": "ImageViewer",
       "packageName": "@meu/mobile",
@@ -953,9 +953,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 25920,
-          "gzipBytes": 29826,
-          "rawBytes": 131007,
+          "brotliBytes": 26517,
+          "gzipBytes": 30501,
+          "rawBytes": 134716,
           "name": "ImageViewer",
           "passesBudget": true
         }
@@ -1512,9 +1512,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3211,
-      "gzipBytes": 3649,
-      "rawBytes": 11504,
+      "brotliBytes": 3872,
+      "gzipBytes": 4421,
+      "rawBytes": 15096,
       "docsPath": "packages/mobile/src/Steps/Steps.docs.mdx",
       "name": "Steps",
       "packageName": "@meu/mobile",
@@ -1523,9 +1523,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3211,
-          "gzipBytes": 3649,
-          "rawBytes": 11504,
+          "brotliBytes": 3872,
+          "gzipBytes": 4421,
+          "rawBytes": 15096,
           "name": "Steps",
           "passesBudget": true
         }

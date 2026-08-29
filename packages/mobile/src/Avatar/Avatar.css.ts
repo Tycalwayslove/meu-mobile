@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 export const avatarRoot = recipe({
@@ -15,6 +15,7 @@ export const avatarRoot = recipe({
     fontFamily: "var(--meu-font-ui)",
     fontWeight: 600,
     lineHeight: 1,
+    userSelect: "none",
     verticalAlign: "middle",
     "@media": {
       "(forced-colors: active)": {
@@ -47,11 +48,30 @@ export const avatarImage = style({
   borderRadius: "inherit"
 });
 
+globalStyle(`${avatarImage}[data-meu-component="image"]`, {
+  maxWidth: "none"
+});
+
+globalStyle(`${avatarImage} > span`, {
+  minWidth: 0,
+  minHeight: 0,
+  padding: 0
+});
+
+globalStyle(`${avatarImage}[data-meu-component="image"]`, {
+  "@media": {
+    "(forced-colors: active)": { border: 0 }
+  }
+});
+
 export const avatarFallback = style({
   display: "grid",
   placeItems: "center",
   width: "100%",
   height: "100%",
   lineHeight: 1,
-  textTransform: "uppercase"
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  textTransform: "uppercase",
+  whiteSpace: "nowrap"
 });

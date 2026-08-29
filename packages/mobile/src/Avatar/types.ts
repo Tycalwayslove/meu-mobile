@@ -37,8 +37,18 @@ export type AvatarProps = Omit<
 > & {
   /** Accessible alternative for the person's identity. Use an empty string only for decorative avatars. */
   alt: string;
+  /** Native image CORS mode, applied to the underlying `img`. */
+  crossOrigin?: ImgHTMLAttributes<HTMLImageElement>["crossOrigin"];
+  /** Browser decoding hint for the underlying `img`. @defaultValue "async" */
+  decoding?: ImgHTMLAttributes<HTMLImageElement>["decoding"];
+  /** Whether the underlying image participates in native drag-and-drop. @defaultValue false */
+  draggable?: boolean;
   /** Replaces the generated initials when the image is loading, missing, or fails. */
   fallback?: ReactNode;
+  /** Alternate image URL requested after the primary source fails, before showing the content fallback. */
+  fallbackSrc?: string;
+  /** Native request-priority hint for the underlying `img`. */
+  fetchPriority?: ImgHTMLAttributes<HTMLImageElement>["fetchPriority"];
   /** CSS object-fit behavior for the underlying image. @defaultValue "cover" */
   fit?: AvatarFit;
   /** Explicit short initials used before the fallback derived from `alt`. */
@@ -47,16 +57,24 @@ export type AvatarProps = Omit<
   imageRef?: Ref<HTMLImageElement>;
   /** Native image loading strategy. @defaultValue "eager" */
   loading?: ImgHTMLAttributes<HTMLImageElement>["loading"];
-  /** Runs after the underlying image fails. The initials fallback remains visible. */
+  /** CSS `object-position` used to choose the visible focal point. @defaultValue "50% 50%" */
+  objectPosition?: CSSProperties["objectPosition"];
+  /** Runs when React observes a native image error, including `fallbackSrc` when provided. */
   onError?: ReactEventHandler<HTMLImageElement>;
-  /** Runs after the underlying image loads successfully. */
+  /** Runs when React observes the underlying image's native load event. */
   onLoad?: ReactEventHandler<HTMLImageElement>;
   /** Ref to the stable avatar root. */
   ref?: Ref<HTMLSpanElement>;
+  /** Native referrer policy for the underlying image request. */
+  referrerPolicy?: ImgHTMLAttributes<HTMLImageElement>["referrerPolicy"];
   /** Avatar clipping shape. @defaultValue "circle" */
   shape?: AvatarShape;
+  /** Native responsive-size hint used with `srcSet`. */
+  sizes?: string;
   /** Preset CSS size or a positive finite pixel size. @defaultValue "medium" */
   size?: AvatarSize;
   /** Image source. Empty and whitespace-only sources render the fallback without a request. */
   src?: string;
+  /** Native responsive image candidate list; it can provide the source without `src`. */
+  srcSet?: string;
 };

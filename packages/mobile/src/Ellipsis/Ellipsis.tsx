@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties, Ref } from "react";
 
 import { VisuallyHidden } from "../internal/VisuallyHidden";
 
@@ -93,22 +93,46 @@ function buildCandidate(chars: string[], count: number, direction: EllipsisDirec
   return `${chars.slice(0, count).join("")}…`;
 }
 
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
+  if (typeof ref === "function") return ref(value);
+  if (ref) ref.current = value;
+  return undefined;
+}
+
+function parsePixelValue(value: string) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function getStyleMeasurementKey(style: CSSProperties | undefined) {
+  if (!style) return "";
+  const values = style as Record<string, unknown>;
+  return Object.keys(style)
+    .sort()
+    .map((key) => `${key}:${String(values[key])}`)
+    .join(";");
+}
+
 /**
  * Renders measured multi-line truncation with accessible expand and collapse controls.
  *
  * @public
  */
 export function Ellipsis({
+  actionRef,
   className,
+  collapseAriaLabel,
   collapseText = "收起",
   content,
   defaultExpanded = false,
   direction = "end",
   expanded: expandedProp,
+  expandAriaLabel,
   expandText = "展开",
   onEllipsisChange,
   onExpandedChange,
   ref,
+  remeasureKey,
   rows = 1,
   style,
   ...props
@@ -132,6 +156,31 @@ export function Ellipsis({
   const measureActionRef = useRef<HTMLSpanElement | null>(null);
   const lastEllipsedRef = useRef<boolean | undefined>(undefined);
   const resolvedStyle: EllipsisStyle = { ...style, "--meu-ellipsis-rows": safeRows };
+  const styleMeasurementKey = getStyleMeasurementKey(style);
+  const setRootRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      rootRef.current = node;
+      const cleanup = assignRef(ref, node);
+      if (!node) return undefined;
+      return () => {
+        rootRef.current = null;
+        if (typeof cleanup === "function") cleanup();
+        else assignRef(ref, null);
+      };
+    },
+    [ref]
+  );
+  const setActionRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      const cleanup = assignRef(actionRef, node);
+      if (!node) return undefined;
+      return () => {
+        if (typeof cleanup === "function") cleanup();
+        else assignRef(actionRef, null);
+      };
+    },
+    [actionRef]
+  );
 
   useEffect(() => {
     const root = rootRef.current;
@@ -140,21 +189,25 @@ export function Ellipsis({
     const mirrorAction = measureActionRef.current;
     if (!root || !mirror || !mirrorText) return;
 
-    let frame = 0;
+    let frame: number | null = null;
+    let timer: number | null = null;
     let disposed = false;
     function runMeasure() {
       if (!root || !mirror || !mirrorText) return;
-      const width = root.clientWidth;
+      const computed = window.getComputedStyle(root);
+      const width =
+        root.clientWidth -
+        parsePixelValue(computed.paddingLeft) -
+        parsePixelValue(computed.paddingRight);
       if (width <= 0) return;
       mirror.style.width = `${width}px`;
-      const computed = window.getComputedStyle(root);
-      const parsedLineHeight = Number.parseFloat(computed.lineHeight);
-      const fontSize = Number.parseFloat(computed.fontSize) || 16;
-      const lineHeight = Number.isFinite(parsedLineHeight) ? parsedLineHeight : fontSize * 1.5;
-      const maxHeight = lineHeight * safeRows + 0.5;
       if (mirrorAction) mirrorAction.style.display = "none";
+      mirrorText.textContent = "\u00a0";
+      const singleLineHeight = mirror.offsetHeight;
       mirrorText.textContent = content || "\u00a0";
-      const needsEllipsis = mirror.offsetHeight > maxHeight;
+      const fullHeight = mirror.offsetHeight;
+      const textOnlyMaxHeight = singleLineHeight * safeRows + 0.5;
+      const needsEllipsis = singleLineHeight > 0 && fullHeight > textOnlyMaxHeight;
 
       if (!needsEllipsis) {
         setMeasurement({
@@ -167,14 +220,23 @@ export function Ellipsis({
         return;
       }
 
-      if (mirrorAction) mirrorAction.style.display = "inline-flex";
+      let actionMaxHeight = textOnlyMaxHeight;
+      if (mirrorAction) {
+        mirrorAction.style.display = "inline-flex";
+        mirrorText.textContent = "";
+        const actionLineHeight = mirror.offsetHeight;
+        actionMaxHeight =
+          singleLineHeight * Math.max(0, safeRows - 1) +
+          Math.max(singleLineHeight, actionLineHeight) +
+          0.5;
+      }
       const chars = splitGraphemes(content);
       let low = 0;
       let high = chars.length;
       while (low < high) {
         const middle = Math.ceil((low + high) / 2);
         mirrorText.textContent = buildCandidate(chars, middle, direction);
-        if (mirror.offsetHeight <= maxHeight) low = middle;
+        if (mirror.offsetHeight <= actionMaxHeight) low = middle;
         else high = middle - 1;
       }
       setMeasurement({
@@ -188,8 +250,21 @@ export function Ellipsis({
 
     function scheduleMeasure() {
       if (disposed) return;
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(runMeasure);
+      if (frame !== null && typeof window.cancelAnimationFrame === "function") {
+        window.cancelAnimationFrame(frame);
+      }
+      if (timer !== null) window.clearTimeout(timer);
+      if (typeof window.requestAnimationFrame === "function") {
+        frame = window.requestAnimationFrame(() => {
+          frame = null;
+          runMeasure();
+        });
+      } else {
+        timer = window.setTimeout(() => {
+          timer = null;
+          runMeasure();
+        }, 0);
+      }
     }
 
     scheduleMeasure();
@@ -197,15 +272,29 @@ export function Ellipsis({
       typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleMeasure);
     if (observer) observer.observe(root);
     if (!observer) window.addEventListener("resize", scheduleMeasure);
-    if (document.fonts) void document.fonts.ready.then(scheduleMeasure);
+    window.addEventListener("orientationchange", scheduleMeasure);
+    const fonts = document.fonts;
+    if (fonts) {
+      void fonts.ready.then(scheduleMeasure);
+      if (typeof fonts.addEventListener === "function") {
+        fonts.addEventListener("loadingdone", scheduleMeasure);
+      }
+    }
 
     return () => {
       disposed = true;
-      window.cancelAnimationFrame(frame);
+      if (frame !== null && typeof window.cancelAnimationFrame === "function") {
+        window.cancelAnimationFrame(frame);
+      }
+      if (timer !== null) window.clearTimeout(timer);
       if (observer) observer.disconnect();
       if (!observer) window.removeEventListener("resize", scheduleMeasure);
+      window.removeEventListener("orientationchange", scheduleMeasure);
+      if (fonts && typeof fonts.removeEventListener === "function") {
+        fonts.removeEventListener("loadingdone", scheduleMeasure);
+      }
     };
-  }, [content, direction, expandText, safeRows]);
+  }, [className, content, direction, expandText, remeasureKey, safeRows, styleMeasurementKey]);
 
   useEffect(() => {
     if (!measured || lastEllipsedRef.current === ellipsed) return;
@@ -221,11 +310,7 @@ export function Ellipsis({
   return (
     <div
       {...props}
-      ref={(node) => {
-        rootRef.current = node;
-        if (typeof ref === "function") ref(node);
-        else if (ref) ref.current = node;
-      }}
+      ref={setRootRef}
       className={classes}
       style={resolvedStyle}
       data-meu-component="ellipsis"
@@ -245,7 +330,10 @@ export function Ellipsis({
         <button
           type="button"
           className={action}
+          data-meu-ellipsis-action=""
           aria-expanded={expanded}
+          aria-label={expanded ? collapseAriaLabel : expandAriaLabel}
+          ref={setActionRef}
           onClick={(event) => {
             const nextExpanded = !expanded;
             if (!controlled) setUncontrolledExpanded(nextExpanded);

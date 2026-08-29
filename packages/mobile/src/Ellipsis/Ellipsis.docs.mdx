@@ -14,10 +14,15 @@ figma:
 storyIds:
   [
     information-ellipsis--end,
+    information-ellipsis--single-line,
+    information-ellipsis--multi-line,
     information-ellipsis--middle,
     information-ellipsis--start,
     information-ellipsis--controlled-expanded,
+    information-ellipsis--controlled-toggle,
     information-ellipsis--interactive-expansion,
+    information-ellipsis--icon-action,
+    information-ellipsis--truncation-only,
     information-ellipsis--narrow-rtl
   ]
 source: packages/mobile/src/Ellipsis
@@ -27,7 +32,7 @@ source: packages/mobile/src/Ellipsis
 
 ## 当前能力
 
-按真实容器宽度对纯文本进行 start/end/middle、多行截断；受控/非受控展开；ResizeObserver 与 window resize fallback；SSR 原生 clamp 首帧；完整文本始终供读屏获取。
+按真实容器内容宽度对纯文本进行 start/end/middle、单行或多行截断；支持受控/非受控展开、可隐藏或自定义操作内容、React 19 cleanup ref、操作按钮 ref 与独立无障碍名称。测量响应自身 class/style、显式 `remeasureKey`、ResizeObserver、viewport/orientation resize、字体 ready 和后续字体加载；SSR 首帧使用原生 clamp，完整文本始终供读屏获取。
 
 ## 何时使用
 
@@ -57,15 +62,35 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 
 ## Props
 
-rows 归一为至少 1 的有限整数；非有限值回退 1。expandText/collapseText 为 falsy 时对应操作隐藏。direction 只控制保留文本片段，不改变文档方向。
+| Prop                | 类型                                                                    | 默认值   | 说明                                                         |
+| ------------------- | ----------------------------------------------------------------------- | -------- | ------------------------------------------------------------ |
+| `content`           | `string`                                                                | 必填     | 完整纯文本；视觉截断不修改该来源                             |
+| `rows`              | `number`                                                                | `1`      | 收起时最大行数；有限值向下取整并限制为至少 1，非有限值回退 1 |
+| `direction`         | `"start" \| "middle" \| "end"`                                          | `"end"`  | 保留字符数组的起点、两端或终点；不改变 DOM `dir`             |
+| `expanded`          | `boolean`                                                               | -        | 受控展开状态                                                 |
+| `defaultExpanded`   | `boolean`                                                               | `false`  | 非受控初始展开状态，只在首次挂载读取                         |
+| `expandText`        | `ReactNode`                                                             | `"展开"` | 展开操作可见内容；falsy 时隐藏收起态操作                     |
+| `collapseText`      | `ReactNode`                                                             | `"收起"` | 收起操作可见内容；falsy 时隐藏展开态操作                     |
+| `expandAriaLabel`   | `string`                                                                | -        | 展开按钮无障碍名称覆盖，适用于图标或含糊文案                 |
+| `collapseAriaLabel` | `string`                                                                | -        | 收起按钮无障碍名称覆盖                                       |
+| `onExpandedChange`  | `(next, event: MouseEvent<HTMLButtonElement>) => void`                  | -        | 原生 button 激活计算下一状态后调用                           |
+| `onEllipsisChange`  | `(ellipsed: boolean) => void`                                           | -        | 完成测量且“是否需要截断”的布尔值改变时调用                   |
+| `ref`               | `Ref<HTMLDivElement>`                                                   | -        | 根 div ref                                                   |
+| `actionRef`         | `Ref<HTMLButtonElement>`                                                | -        | 当前操作按钮 ref；无需操作或对应文案为 falsy 时为 null       |
+| `remeasureKey`      | `string \| number`                                                      | -        | 祖先排版改变但容器未 resize 时，改变该值强制重新测量         |
+| 原生 `div` 属性     | `HTMLAttributes<HTMLDivElement>`（除 children/dangerouslySetInnerHTML） | -        | `id`、`dir`、ARIA、data、className、style 和根事件透传       |
+
+`direction` 只控制保留文本片段，不改变文档方向。生成的 class 名、测量镜像和候选文本不是公共 API；稳定观测入口为 `data-meu-component`、`data-direction`、`data-state` 与 `data-meu-ellipsis-action`。
+
+`expandText` / `collapseText` 仅接受简短文本或装饰图标；不得放 button、link、input、带全局唯一 id 的节点或有副作用的组件。`expandText` 会同时出现在隐藏测量镜像与真实 action 中，复杂内容既可能产生重复 DOM identity，也会让宽度测量失真。
 
 ## Events
 
-onExpandedChange(next,event) 由按钮触发；受控状态不乐观改变。内容/行数/方向变化进入 pending 时保留上一轮操作按钮，避免仍需截断的重测过程卸载焦点。onEllipsisChange 仅在完成测量且布尔结果变化时触发。
+`onExpandedChange(next,event)` 由点击、Enter 或 Space 产生的原生 button 激活触发；受控状态不乐观改变，事件不可由 Ellipsis 取消。内容/行数/方向变化进入 pending 时保留上一轮操作按钮，避免仍需截断的重测过程卸载焦点。`onEllipsisChange` 仅在完成测量且布尔结果变化时触发；同一结果的重复 resize/font 通知不会重复回调。
 
 ## Ref 与命令式方法
 
-ref 指向根 div，可用于测量/选择；无公开 remeasure 方法，容器 resize 与字体 ready 自动触发。
+`ref` 指向根 div；`actionRef` 指向当前可见的原生 button。React 19 callback ref 返回的 cleanup 会原样执行；旧式 callback ref 在节点消失或卸载时仍收到 null。容器 resize、组件自身 `className`/`style`、viewport/orientation change、字体 ready 与后续 `loadingdone` 会自动触发；祖先 class、CSS 变量或媒体查询只改变排版但没有造成尺寸通知时，调用方应改变 `remeasureKey`。业务不应读写隐藏测量节点。
 
 ## 键盘操作
 
@@ -80,7 +105,7 @@ ref 指向根 div，可用于测量/选择；无公开 remeasure 方法，容器
 
 ## 无障碍
 
-完整文本通过 VisuallyHidden 暴露一次，视觉候选 aria-hidden，避免读出省略号或重复。按钮使用 aria-expanded；本地化按钮文案由调用方覆盖。
+完整文本通过 VisuallyHidden 暴露一次，视觉候选 `aria-hidden`，避免读出省略号或重复。按钮使用 `aria-expanded`；可见文案通常形成 accessible name，图标或含糊文案必须同时提供 `expandAriaLabel` / `collapseAriaLabel`。本地化内容与按钮名称由调用方负责。
 
 ## 动效
 
@@ -100,11 +125,17 @@ ref 指向根 div，可用于测量/选择；无公开 remeasure 方法，容器
 
 ## 浏览器与 WebView
 
-ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测量。完整支持档使用 `Intl.Segmenter` 按 Unicode grapheme 切分，旧内核 fallback 仍保持 ZWJ emoji、旗帜、肤色、variation selector 与常见组合附加符完整。
+正式支持矩阵为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。优先使用 ResizeObserver；缺失时监听 window resize，同时始终监听 orientationchange。FontFaceSet 可用时在 ready 和后续 loadingdone 重测；缺失不影响初始与 resize 测量。requestAnimationFrame 缺失时退化到零延迟 timer。完整支持档使用 `Intl.Segmenter` 按 Unicode grapheme 切分。
+
+旧内核无 `Intl.Segmenter` 时的轻量 fallback 只保证常见 ZWJ emoji、旗帜、肤色、variation selector 与部分组合附加符；它不是完整 UAX #29 实现，不承诺 Indic spacing mark/virama、Hangul Jamo 或 CRLF 的完整 grapheme 聚合。iOS 13–14 与 Chromium 70–88 属于观察档或静态语法扫描档，不构成完整运行时承诺；业务若必须支持这些内核，应避免依赖视觉候选的精确字符边界并完成专项真机验收。
 
 ## 边界情况与已知限制
 
-宽度为 0 时保持 pending，直到 resize；CSS/JS 测量受调用方字体与 line-height 影响。全选复制可能包含辅助隐藏文本与视觉文本，单独复制建议从业务原始 content 提供复制按钮。
+宽度为 0 或镜像无法得到有效单行高度时保持 pending，直到后续 resize/font 通知。可用宽度会扣除根元素左右 padding；单行高度从同字体的镜像直接测得，不猜测 `line-height: normal`。全选复制可能包含辅助隐藏文本与视觉文本，单独复制建议从业务原始 content 提供复制按钮。
+
+容器窄于 44px 操作按钮最小触控宽度，或“省略号 + action”本身无法放入允许行数时，操作可能额外占一行；此时应增加容器宽度、隐藏 `expandText` 使用纯截断，或在组件外提供查看全文操作。组件不会为了满足行数而把触控目标缩小到不可用。
+
+若祖先 class、主题变量或媒体查询改变 font/letter-spacing，但根元素边框盒尺寸不变且浏览器不触发字体事件，ResizeObserver 不会产生通知。调用方应把对应排版版本传给 `remeasureKey`；组件自身 `className`/`style` 变化则会自动重测。
 
 ## 性能预算
 
@@ -112,13 +143,16 @@ ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测�
 
 ## 测试证据
 
-- Unit: 测量、三向候选基础、受控展开、内容更新陈旧帧、非有限 rows
-- Story interaction: `InteractiveExpansion` 验证测量后展开状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Unit：目标测试覆盖单/多行、纯截断、三向候选、受控/非受控、键盘激活、短文本、回调去重、内容更新 pending/focus、padding 宽度、ResizeObserver、resize/orientation/RAF fallback、零宽 pending、字体 ready/loadingdone、React 19 callback-ref cleanup、`remeasureKey`、原生属性/自定义 accessible name、rows 归一、Intl.Segmenter 与 grapheme fallback。
+- SSR/Hydration：服务端完整辅助文本与稳定 clamp fallback；真实 `renderToString → hydrateRoot` 复用根 DOM，0 recoverable/console error，测量后才增加操作按钮并可展开。
+- 本次直接执行：`pnpm --filter @meu/mobile exec vitest run src/Ellipsis --maxWorkers=1`，3 files / 27 tests 通过；包 typecheck、build 与目标 ESLint 均通过。
+- Story：SingleLine、MultiLine、三方向、ControlledExpanded、ControlledToggle play、InteractiveExpansion play、IconAction、TruncationOnly、NarrowRTL。按任务约束，本次未运行 Storybook 静态构建、Chromatic 或 Vercel。
+- 历史 Story interaction：`InteractiveExpansion` 验证测量后展开状态；`check-storybook-links` 已验证全库 title 具备关键 play，本 title 的 play 在历史本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2619 B / 32768 B 预算，组合 Brotli 2296 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Ellipsis.ssr.test.tsx` 验证稳定 fallback；隔离 Next 16 hydration 后完成真实宽度测量并保留可操作展开按钮，0 hydration/runtime error
-- RTL: NarrowRTL Story
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3166 B / 32768 B 预算，组合 Brotli 2779 B；共享样式由应用单独导入一次。
+- SSR/hydration: `Ellipsis.ssr.test.tsx` 与 `Ellipsis.hydration.test.tsx` 提供组件内直接证据；隔离 Next 16 的历史证据保留
+- RTL: NarrowRTL Story 在 190px 混合 Arabic/Latin 内容下真实进入 collapsed，使用 middle 截断并保留可操作按钮
 - Reduced motion: 无动画，不适用
 - Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎以 390px 视口完成真实排版测量，激活展开并断言按钮变为“收起”且 `aria-expanded=true`
 - Chromatic Light/Dark: 待建立
@@ -128,16 +162,29 @@ ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测�
 
 ### 待优化
 
-补复制体验与字体加载专项 E2E；基础双引擎真实测量/展开路径已完成。
+补全选/复制产品方案与字体替换专项 E2E；发布批次统一补 Storybook 扩展矩阵、Chromatic 和 VoiceOver/TalkBack 真机记录。基础双引擎真实测量/展开路径已有历史证据。
 
 ### 已完成
 
-修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调和 grapheme 安全截断；补 RTL/forced-colors/SSR 与隔离 Next H5 测量边界。
+修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调和 grapheme 安全截断；测量改为真实单行高度并扣除 padding，镜像操作与真实按钮同 footprint，并把 44px 操作按钮的行盒增量纳入行数预算，避免单行截断退化为纯省略号；增加 orientation/font loadingdone/RAF fallback、React 19 cleanup ref、`remeasureKey`、actionRef 与独立 accessible name；补真实 collapsed RTL/forced-colors/SSR/hydration 与隔离 Next H5 测量边界。
+
+## 未来变更规则
+
+- 保持 `content: string`、默认 `rows=1`、默认 `direction=end`、中文默认操作文案和现有受控判定不变；任何默认值或事件时序变化都必须作为显式破坏性提案。
+- 新增方向、标记样式或富文本能力前，必须先定义 grapheme、bidi、辅助文本、复制和测量契约；不得让视觉候选成为唯一可访问内容。
+- 调整按钮 spacing、font 或最小触控面积时，隐藏镜像必须复用同一 action 样式，并新增窄宽度回归测试。
+- 调整测量调度时，必须保留 ResizeObserver 缺失、RAF 缺失、字体后加载、宽度为 0、卸载清理和 hydration 无错误证据。
+- 公共稳定入口仅限导出类型/Props/Events/ref 和文档声明的 data 属性；不得承诺生成 class、内部 DOM 顺序或二分候选文本的精确字符数。
+- 发布前新增 API 必须同步 types、Unit、SSR/hydration（适用时）、Story、README 与本文件，并记录兼容/迁移说明；不得用未执行的矩阵更新“已通过”证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                        | 迁移说明                         |
-| ---------- | ------ | ------------ | ------------------------------------------- | -------------------------------- |
-| 2026-08-29 | 未发布 | fix          | V2 测量身份、异常 rows 与兼容降级           | API 兼容；非有限 rows 现统一为 1 |
-| 2026-08-29 | 未发布 | fix          | 截断改为 grapheme 安全分段                  | API 兼容；emoji/组合字符不再破碎 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎测量/展开/hydration 证据 | 无                               |
+| 日期       | 版本   | 类型         | 内容                                         | 迁移说明                         |
+| ---------- | ------ | ------------ | -------------------------------------------- | -------------------------------- |
+| 2026-08-29 | 未发布 | fix          | V2 测量身份、异常 rows 与兼容降级            | API 兼容；非有限 rows 现统一为 1 |
+| 2026-08-29 | 未发布 | fix          | 截断改为 grapheme 安全分段                   | API 兼容；emoji/组合字符不再破碎 |
+| 2026-08-29 | 未发布 | feature      | 增加 actionRef 与展开/收起独立无障碍名称     | 全部可选，现有调用无需迁移       |
+| 2026-08-29 | 未发布 | fix          | 真实行高/padding/action footprint 与重测回退 | API 兼容；边界截断结果可能更准确 |
+| 2026-08-29 | 未发布 | feature      | 增加 `remeasureKey` 与 React 19 ref cleanup  | 新属性可选，现有调用无需迁移     |
+| 2026-08-29 | 未发布 | verification | 扩充 Unit/SSR/hydration 与真实截断 RTL Story | 无                               |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎测量/展开/hydration 证据  | 无                               |
