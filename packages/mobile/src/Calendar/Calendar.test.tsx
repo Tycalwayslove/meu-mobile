@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { createDateParts, nativeDateAdapter } from "@meu/date-adapter";
 import type { DateAdapter } from "@meu/date-adapter";
+import { createRef } from "react";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
 import { Calendar } from "./Calendar";
 import { compareCalendarDays, normalizeCalendarValue } from "./resolveCalendar";
+import type { CalendarRef } from "./types";
 
 function date(day: number, month = 8, year = 2026) {
   return nativeDateAdapter.fromParts(createDateParts({ day, month, year }))!;
@@ -175,6 +177,74 @@ describe("Calendar", () => {
 
     rerender(<Calendar month={date(1, 9)} onMonthChange={onMonthChange} aria-label="Calendar" />);
     expect(screen.getByText("2026年9月")).toBeTruthy();
+  });
+
+  it("focuses today imperatively in the current or a newly accepted month", () => {
+    const ref = createRef<CalendarRef<Date>>();
+    const onMonthChange = vi.fn();
+    const adapter = { ...nativeDateAdapter, now: () => date(10, 9) };
+    const { rerender } = render(
+      <Calendar
+        ref={ref}
+        adapter={adapter}
+        month={date(1)}
+        defaultValue={date(5)}
+        disabledDate={(_value, details) => details.outside}
+        onMonthChange={onMonthChange}
+        aria-label="Calendar"
+      />
+    );
+
+    act(() => dayButton(5).focus());
+    act(() => {
+      if (ref.current) ref.current.goToToday();
+    });
+    expect(screen.getByText("2026年8月")).toBeTruthy();
+    expect(document.activeElement).toBe(dayButton(5));
+    expect(nativeDateAdapter.getParts(onMonthChange.mock.calls[0]![0] as Date)).toMatchObject({
+      month: 9,
+      year: 2026
+    });
+    expect(onMonthChange.mock.calls[0]![1]).toEqual({ reason: "today" });
+
+    rerender(
+      <Calendar
+        ref={ref}
+        adapter={adapter}
+        month={date(1, 9)}
+        defaultValue={date(5)}
+        disabledDate={(_value, details) => details.outside}
+        onMonthChange={onMonthChange}
+        aria-label="Calendar"
+      />
+    );
+    expect(document.activeElement).toBe(dayButton(10, 9));
+
+    act(() => dayButton(8, 9).focus());
+    act(() => {
+      if (ref.current) ref.current.goToToday();
+    });
+    expect(document.activeElement).toBe(dayButton(10, 9));
+  });
+
+  it("clamps goToToday to the nearest enabled in-bounds day", () => {
+    const ref = createRef<CalendarRef<Date>>();
+    const adapter = { ...nativeDateAdapter, now: () => date(10) };
+    render(
+      <Calendar
+        ref={ref}
+        adapter={adapter}
+        defaultMonth={date(1)}
+        min={date(12)}
+        disabledDate={(value) => nativeDateAdapter.getParts(value).day === 12}
+        aria-label="Calendar"
+      />
+    );
+
+    act(() => {
+      if (ref.current) ref.current.goToToday();
+    });
+    expect(document.activeElement).toBe(dayButton(13));
   });
 
   it("provides roving keyboard focus across days and months", () => {

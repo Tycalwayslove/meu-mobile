@@ -54,6 +54,12 @@ function normalizedStep(value: number | undefined) {
   return Math.max(1, Math.min(59, Math.floor(value)));
 }
 
+function stepForPrecision(precision: DatePrecision, minuteStep: number, secondStep: number) {
+  if (precision === "minute") return minuteStep;
+  if (precision === "second") return secondStep;
+  return 1;
+}
+
 function valuesBetween(start: number, end: number, step = 1) {
   const values: number[] = [];
   for (let value = start; value <= end; value += step) values.push(value);
@@ -110,6 +116,25 @@ function normalizeLowerParts(parts: DateParts, precision: DatePrecision) {
   return next;
 }
 
+function alignDateBound<TDate>(
+  adapter: DateAdapter<TDate>,
+  bound: TDate,
+  precision: DatePrecision,
+  step: number,
+  direction: "ceil" | "floor"
+) {
+  const parts = normalizeLowerParts(adapter.getParts(bound), precision);
+  if (precision === "minute" || precision === "second") {
+    parts[precision] = Math.floor(parts[precision] / step) * step;
+  }
+  let candidate = adapter.fromParts(parts);
+  if (candidate === null) return bound;
+  if (direction === "ceil" && adapter.compare(candidate, bound) < 0) {
+    candidate = adapter.add(candidate, step, precision);
+  }
+  return candidate;
+}
+
 function comparePartsAtPrecision(left: DateParts, right: DateParts, precision: DatePrecision) {
   const end = precisionIndex(precision);
   for (let index = 0; index <= end; index += 1) {
@@ -119,15 +144,26 @@ function comparePartsAtPrecision(left: DateParts, right: DateParts, precision: D
   return 0;
 }
 
-function isWithinBounds(
+function isWithinBounds<TDate>(
   parts: DateParts,
-  precision: DatePrecision,
+  currentPrecision: DatePrecision,
+  terminalPrecision: DatePrecision,
   minParts: DateParts,
-  maxParts: DateParts
+  maxParts: DateParts,
+  candidate: TDate | null,
+  adapter: DateAdapter<TDate>,
+  bounds: DatePickerBounds<TDate>
 ) {
+  if (currentPrecision === terminalPrecision) {
+    return (
+      candidate !== null &&
+      adapter.compare(candidate, bounds.min) >= 0 &&
+      adapter.compare(candidate, bounds.max) <= 0
+    );
+  }
   return (
-    comparePartsAtPrecision(parts, minParts, precision) >= 0 &&
-    comparePartsAtPrecision(parts, maxParts, precision) <= 0
+    comparePartsAtPrecision(parts, minParts, currentPrecision) >= 0 &&
+    comparePartsAtPrecision(parts, maxParts, currentPrecision) <= 0
   );
 }
 
@@ -187,13 +223,20 @@ export function resolveDatePicker<TDate>({
   secondStep,
   source
 }: ResolveDatePickerOptions<TDate>): ResolvedDatePicker<TDate> {
-  const minParts = adapter.getParts(bounds.min);
-  const maxParts = adapter.getParts(bounds.max);
+  const resolvedMinuteStep = normalizedStep(minuteStep);
+  const resolvedSecondStep = normalizedStep(secondStep);
+  const boundStep = stepForPrecision(precision, resolvedMinuteStep, resolvedSecondStep);
+  const effectiveBounds = {
+    max: alignDateBound(adapter, bounds.max, precision, boundStep, "floor"),
+    min: alignDateBound(adapter, bounds.min, precision, boundStep, "ceil")
+  };
+  const minParts = adapter.getParts(effectiveBounds.min);
+  const maxParts = adapter.getParts(effectiveBounds.max);
   const precisions = datePickerPrecisions.slice(0, precisionIndex(precision) + 1);
   const columns: Array<PickerColumn<number>> = [];
   const values: Array<number | null> = [];
   let parts = normalizeLowerParts(
-    adapter.getParts(initialDate(adapter, source, bounds)),
+    adapter.getParts(initialDate(adapter, source, effectiveBounds)),
     precision
   );
   const genericAdapter = adapter as DateAdapter<unknown>;
@@ -205,8 +248,8 @@ export function resolveDatePicker<TDate>({
       minParts,
       maxParts,
       genericAdapter,
-      normalizedStep(minuteStep),
-      normalizedStep(secondStep)
+      resolvedMinuteStep,
+      resolvedSecondStep
     );
     const options = rawValues.map((value) => {
       const candidateParts = setPrecisionPart(parts, currentPrecision, value, genericAdapter);
@@ -221,7 +264,16 @@ export function resolveDatePicker<TDate>({
       return {
         disabled:
           !candidate ||
-          !isWithinBounds(candidateParts, currentPrecision, minParts, maxParts) ||
+          !isWithinBounds(
+            candidateParts,
+            currentPrecision,
+            precision,
+            minParts,
+            maxParts,
+            candidate,
+            adapter,
+            effectiveBounds
+          ) ||
           !allowedByFilter,
         label: renderedLabel,
         textValue:

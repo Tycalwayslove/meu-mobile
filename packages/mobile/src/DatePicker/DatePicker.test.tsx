@@ -134,6 +134,120 @@ describe("DatePicker", () => {
     ).toBe("true");
   });
 
+  it("rounds a fine-grained minimum up to the next representable hour", () => {
+    const onConfirm = vi.fn();
+    render(
+      <DatePicker
+        open
+        aria-label="整点预约"
+        precision="hour"
+        min={date({ day: 15, hour: 9, minute: 30, month: 7, year: 2026 })}
+        max={date({ day: 15, hour: 11, minute: 45, month: 7, year: 2026 })}
+        defaultValue={date({ day: 15, hour: 9, minute: 30, month: 7, year: 2026 })}
+        onConfirm={onConfirm}
+      />
+    );
+
+    const hourWheel = screen.getByRole("listbox", { name: "时" });
+    expect(
+      within(hourWheel).getByRole("option", { name: "09时" }).getAttribute("aria-disabled")
+    ).toBe("true");
+    expect(
+      within(hourWheel).getByRole("option", { name: "10时" }).getAttribute("aria-selected")
+    ).toBe("true");
+
+    fireEvent.click(screen.getByRole("button", { name: "确定" }));
+    expectParts(onConfirm.mock.calls[0]![0] as Date, {
+      day: 15,
+      hour: 10,
+      minute: 0,
+      month: 7,
+      second: 0,
+      year: 2026
+    });
+  });
+
+  it("rounds minute bounds to the step grid and disables an empty grid", () => {
+    const min = date({
+      day: 15,
+      hour: 9,
+      minute: 20,
+      month: 7,
+      second: 30,
+      year: 2026
+    });
+    const { rerender } = render(
+      <DatePicker
+        open
+        aria-label="步长预约"
+        precision="minute"
+        minuteStep={15}
+        min={min}
+        max={date({
+          day: 15,
+          hour: 9,
+          minute: 44,
+          month: 7,
+          second: 59,
+          year: 2026
+        })}
+        defaultValue={min}
+      />
+    );
+
+    const minuteWheel = screen.getByRole("listbox", { name: "分" });
+    expect(
+      within(minuteWheel).getByRole("option", { name: "15分" }).getAttribute("aria-disabled")
+    ).toBe("true");
+    expect(
+      within(minuteWheel).getByRole("option", { name: "30分" }).getAttribute("aria-selected")
+    ).toBe("true");
+    expect(
+      within(minuteWheel).getByRole("option", { name: "45分" }).getAttribute("aria-disabled")
+    ).toBe("true");
+
+    rerender(
+      <DatePicker
+        open
+        aria-label="步长预约"
+        precision="minute"
+        minuteStep={15}
+        min={date({
+          day: 15,
+          hour: 9,
+          minute: 59,
+          month: 7,
+          second: 30,
+          year: 2026
+        })}
+        max={date({ day: 15, hour: 10, minute: 10, month: 7, year: 2026 })}
+        defaultValue={min}
+      />
+    );
+    expect(screen.getByRole("option", { name: "10时" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("option", { name: "00分" }).getAttribute("aria-selected")).toBe("true");
+
+    rerender(
+      <DatePicker
+        open
+        aria-label="步长预约"
+        precision="minute"
+        minuteStep={15}
+        min={date({ day: 15, hour: 9, minute: 31, month: 7, year: 2026 })}
+        max={date({
+          day: 15,
+          hour: 9,
+          minute: 44,
+          month: 7,
+          second: 59,
+          year: 2026
+        })}
+        defaultValue={min}
+      />
+    );
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(true);
+  });
+
   it("supports localized column names and custom labels", () => {
     render(
       <ConfigProvider locale="en-US">

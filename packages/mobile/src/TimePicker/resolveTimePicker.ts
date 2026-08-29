@@ -124,10 +124,22 @@ function compareTimeAtPrecision(left: TimeValue, right: TimeValue, precision: Ti
   return 0;
 }
 
-function isWithinBounds(time: TimeValue, precision: TimePickerPrecision, bounds: TimePickerBounds) {
+function compareTime(left: TimeValue, right: TimeValue) {
+  return compareTimeAtPrecision(left, right, "second");
+}
+
+function isWithinBounds(
+  time: TimeValue,
+  currentPrecision: TimePickerPrecision,
+  terminalPrecision: TimePickerPrecision,
+  bounds: TimePickerBounds
+) {
+  if (currentPrecision === terminalPrecision) {
+    return compareTime(time, bounds.min) >= 0 && compareTime(time, bounds.max) <= 0;
+  }
   return (
-    compareTimeAtPrecision(time, bounds.min, precision) >= 0 &&
-    compareTimeAtPrecision(time, bounds.max, precision) <= 0
+    compareTimeAtPrecision(time, bounds.min, currentPrecision) >= 0 &&
+    compareTimeAtPrecision(time, bounds.max, currentPrecision) <= 0
   );
 }
 
@@ -161,18 +173,62 @@ function hourValues(period: TimePickerPeriod, hourCycle: TimePickerHourCycle, ho
   return valuesBetween(start, start + 11, hourStep);
 }
 
+function alignTimeBound(
+  bound: TimeValue,
+  precision: TimePickerPrecision,
+  hourCycle: TimePickerHourCycle,
+  hourStep: number,
+  minuteStep: number,
+  secondStep: number,
+  direction: "ceil" | "floor"
+) {
+  const hours =
+    hourCycle === "h23"
+      ? hourValues("am", hourCycle, hourStep)
+      : [...hourValues("am", hourCycle, hourStep), ...hourValues("pm", hourCycle, hourStep)];
+  const minutes = precision === "hour" ? [0] : valuesBetween(0, 59, minuteStep);
+  const orderedHours = direction === "ceil" ? hours : [...hours].reverse();
+  const orderedMinutes = direction === "ceil" ? minutes : [...minutes].reverse();
+
+  for (const hour of orderedHours) {
+    for (const minute of orderedMinutes) {
+      let second = 0;
+      if (precision === "second") {
+        if (hour === bound.hour && minute === bound.minute) {
+          second =
+            direction === "ceil"
+              ? Math.ceil(bound.second / secondStep) * secondStep
+              : Math.floor(bound.second / secondStep) * secondStep;
+        } else {
+          second = direction === "ceil" ? 0 : Math.floor(59 / secondStep) * secondStep;
+        }
+        if (second > 59) continue;
+      }
+      const candidate = { hour, minute, second };
+      const comparison = compareTime(candidate, bound);
+      if (direction === "ceil" ? comparison >= 0 : comparison <= 0) return candidate;
+    }
+  }
+  return null;
+}
+
 function candidateAllowed(
   time: TimeValue,
-  precision: TimePickerPrecision,
+  currentPrecision: TimePickerPrecision,
+  terminalPrecision: TimePickerPrecision,
   hourCycle: TimePickerHourCycle,
   bounds: TimePickerBounds,
   filter: TimePickerFilter | undefined
 ) {
-  const currentFilter = filter && filter[precision];
+  const currentFilter = filter && filter[currentPrecision];
   return (
-    isWithinBounds(time, precision, bounds) &&
+    isWithinBounds(time, currentPrecision, terminalPrecision, bounds) &&
     (currentFilter
-      ? currentFilter(time[precision], { hourCycle, precision, time: cloneTime(time) })
+      ? currentFilter(time[currentPrecision], {
+          hourCycle,
+          precision: currentPrecision,
+          time: cloneTime(time)
+        })
       : true)
   );
 }
@@ -181,12 +237,13 @@ function periodAvailable(
   period: TimePickerPeriod,
   time: TimeValue,
   hourCycle: TimePickerHourCycle,
+  precision: TimePickerPrecision,
   hourStep: number,
   bounds: TimePickerBounds,
   filter: TimePickerFilter | undefined
 ) {
   return hourValues(period, hourCycle, hourStep).some((hour) =>
-    candidateAllowed({ ...time, hour }, "hour", hourCycle, bounds, filter)
+    candidateAllowed({ ...time, hour }, "hour", precision, hourCycle, bounds, filter)
   );
 }
 
@@ -214,8 +271,30 @@ export function resolveTimePicker({
   const resolvedHourStep = normalizedStep(hourStep, 23);
   const resolvedMinuteStep = normalizedStep(minuteStep, 59);
   const resolvedSecondStep = normalizedStep(secondStep, 59);
+  const effectiveBounds = {
+    max:
+      alignTimeBound(
+        bounds.max,
+        precision,
+        hourCycle,
+        resolvedHourStep,
+        resolvedMinuteStep,
+        resolvedSecondStep,
+        "floor"
+      ) || bounds.max,
+    min:
+      alignTimeBound(
+        bounds.min,
+        precision,
+        hourCycle,
+        resolvedHourStep,
+        resolvedMinuteStep,
+        resolvedSecondStep,
+        "ceil"
+      ) || bounds.min
+  };
   const columnTypes = timePickerColumns(precision, hourCycle);
-  let time = initialTime(source, bounds, precision);
+  let time = initialTime(source, effectiveBounds, precision);
   let period = periodForHour(time.hour);
   let periodOptions: PickerColumn<TimePickerColumnValue> = [];
 
@@ -228,8 +307,9 @@ export function resolveTimePicker({
           value,
           candidateTime,
           hourCycle,
+          precision,
           resolvedHourStep,
-          bounds,
+          effectiveBounds,
           filter
         ),
         label: rendered.label,
@@ -262,7 +342,14 @@ export function resolveTimePicker({
       const candidateTime = { ...time, [column]: value };
       const rendered = label(column, value, { time: candidateTime });
       return {
-        disabled: !candidateAllowed(candidateTime, column, hourCycle, bounds, filter),
+        disabled: !candidateAllowed(
+          candidateTime,
+          column,
+          precision,
+          hourCycle,
+          effectiveBounds,
+          filter
+        ),
         label: rendered.label,
         textValue: rendered.textValue,
         value

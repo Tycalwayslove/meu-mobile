@@ -88,7 +88,11 @@ export type CalendarRef<TDate> = {
   focus: () => void;
   /** Requests the month containing `month`; controlled consumers must update `month`. */
   goToMonth: (month: TDate) => void;
-  /** Requests and focuses the adapter's current month and day. */
+  /**
+   * Requests the adapter's current month and focuses today, or the nearest enabled in-bounds day
+   * found within 366 days. Focus falls back to the calendar root when none is found. Controlled
+   * consumers must accept the month request before cross-month focus can complete.
+   */
   goToToday: () => void;
 };
 

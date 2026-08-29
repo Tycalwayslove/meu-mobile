@@ -119,19 +119,19 @@ type TimePickerBaseProps = Omit<
   filter?: TimePickerFilter;
   /** Uses canonical 24-hour wheels or 12-hour wheels with an AM/PM column. @defaultValue "h23" */
   hourCycle?: TimePickerHourCycle;
-  /** Hour increment, floored and clamped to 1–23. @defaultValue 1 */
+  /** Hour-grid increment anchored at 0 in h23 and at 0/12 in h12, floored and clamped to 1–23. @defaultValue 1 */
   hourStep?: number;
-  /** Inclusive latest selectable time; invalid values fall back to 23:59:59. */
+  /** Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Invalid values fall back to 23:59:59. */
   max?: TimeValue;
-  /** Inclusive earliest selectable time; invalid values fall back to 00:00:00. */
+  /** Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Invalid values fall back to 00:00:00. */
   min?: TimeValue;
-  /** Minute increment, floored and clamped to 1–59. @defaultValue 1 */
+  /** Minute-grid increment anchored at 0, floored and clamped to 1–59. @defaultValue 1 */
   minuteStep?: number;
   /** Called with the normalized canonical time before confirmation requests closure. */
   onConfirm?: (value: TimeValue) => void;
   /** Reports each valid in-panel draft change without committing it. */
   onSelect?: (value: TimeValue, details: TimePickerSelectDetails) => void;
-  /** Last time unit rendered and compared against bounds. @defaultValue "minute" */
+  /** Last rendered unit; lower units are zeroed and bounds are enforced against the resulting complete time. @defaultValue "minute" */
   precision?: TimePickerPrecision;
   /** Customizes visible option labels; plain text also becomes wheel type-ahead text. */
   renderLabel?: (
@@ -139,7 +139,7 @@ type TimePickerBaseProps = Omit<
     value: TimePickerColumnValue,
     details: TimePickerLabelDetails
   ) => ReactNode;
-  /** Second increment, floored and clamped to 1–59. @defaultValue 1 */
+  /** Second-grid increment anchored at 0, floored and clamped to 1–59. @defaultValue 1 */
   secondStep?: number;
   /** Controlled committed time; the open wheel keeps an isolated draft until confirm. */
   value?: TimeValue | null;

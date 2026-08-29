@@ -72,6 +72,83 @@ describe("TimePicker", () => {
     ).toBe("true");
   });
 
+  it("rounds a fine-grained minimum up to the next representable hour", () => {
+    const onConfirm = vi.fn();
+    render(
+      <TimePicker
+        open
+        aria-label="整点预约"
+        precision="hour"
+        min={{ hour: 9, minute: 30, second: 0 }}
+        max={{ hour: 11, minute: 45, second: 0 }}
+        defaultValue={{ hour: 9, minute: 30, second: 0 }}
+        onConfirm={onConfirm}
+      />
+    );
+
+    const hourWheel = screen.getByRole("listbox", { name: "时" });
+    expect(
+      within(hourWheel).getByRole("option", { name: "09时" }).getAttribute("aria-disabled")
+    ).toBe("true");
+    expect(
+      within(hourWheel).getByRole("option", { name: "10时" }).getAttribute("aria-selected")
+    ).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "确定" }));
+    expect(onConfirm).toHaveBeenCalledWith({ hour: 10, minute: 0, second: 0 });
+  });
+
+  it("rounds minute bounds to the step grid and disables an empty grid", () => {
+    const { rerender } = render(
+      <TimePicker
+        open
+        aria-label="步长预约"
+        precision="minute"
+        minuteStep={15}
+        min={{ hour: 9, minute: 20, second: 30 }}
+        max={{ hour: 9, minute: 44, second: 59 }}
+        defaultValue={{ hour: 9, minute: 20, second: 30 }}
+      />
+    );
+
+    const minuteWheel = screen.getByRole("listbox", { name: "分" });
+    expect(
+      within(minuteWheel).getByRole("option", { name: "15分" }).getAttribute("aria-disabled")
+    ).toBe("true");
+    expect(
+      within(minuteWheel).getByRole("option", { name: "30分" }).getAttribute("aria-selected")
+    ).toBe("true");
+    expect(
+      within(minuteWheel).getByRole("option", { name: "45分" }).getAttribute("aria-disabled")
+    ).toBe("true");
+
+    rerender(
+      <TimePicker
+        open
+        aria-label="步长预约"
+        precision="minute"
+        minuteStep={15}
+        min={{ hour: 9, minute: 59, second: 30 }}
+        max={{ hour: 10, minute: 10, second: 0 }}
+        defaultValue={{ hour: 9, minute: 59, second: 30 }}
+      />
+    );
+    expect(screen.getByRole("option", { name: "10时" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("option", { name: "00分" }).getAttribute("aria-selected")).toBe("true");
+
+    rerender(
+      <TimePicker
+        open
+        aria-label="步长预约"
+        precision="minute"
+        minuteStep={15}
+        min={{ hour: 9, minute: 31, second: 0 }}
+        max={{ hour: 9, minute: 44, second: 59 }}
+        defaultValue={{ hour: 9, minute: 31, second: 0 }}
+      />
+    );
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(true);
+  });
+
   it("maps a twelve-hour period column back to canonical hours", () => {
     const onConfirm = vi.fn();
     render(

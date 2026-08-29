@@ -59,17 +59,17 @@ type DatePickerBaseProps<TDate> = Omit<
   defaultValue?: TDate | null;
   /** Per-column predicates; return `false` to disable a candidate option. */
   filter?: DatePickerFilter<TDate>;
-  /** Inclusive latest selectable date; defaults to the end of the year ten years after today. */
+  /** Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Defaults to the end of the year ten years after today. */
   max?: TDate;
-  /** Inclusive earliest selectable date; defaults to the start of the year ten years before today. */
+  /** Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Defaults to the start of the year ten years before today. */
   min?: TDate;
-  /** Minute increment, floored and clamped from 1 through 59. @defaultValue 1 */
+  /** Minute-grid increment anchored at 0, floored and clamped from 1 through 59. @defaultValue 1 */
   minuteStep?: number;
   /** Called with the valid draft date when the user confirms; controlled consumers must update `value`. */
   onConfirm?: (value: TDate) => void;
   /** Called as a wheel changes with the complete draft date and changed column metadata. */
   onSelect?: (value: TDate, details: DatePickerSelectDetails) => void;
-  /** Finest displayed unit; columns run from year through this precision. @defaultValue "day" */
+  /** Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value. @defaultValue "day" */
   precision?: DatePrecision;
   /** Renders an option label from its precision, numeric value, candidate date parts, and locale. */
   renderLabel?: (
@@ -77,7 +77,7 @@ type DatePickerBaseProps<TDate> = Omit<
     value: number,
     details: DatePickerLabelDetails<TDate>
   ) => ReactNode;
-  /** Second increment, floored and clamped from 1 through 59. @defaultValue 1 */
+  /** Second-grid increment anchored at 0, floored and clamped from 1 through 59. @defaultValue 1 */
   secondStep?: number;
   /** Controlled committed date; `null` displays the lower-bound draft until confirmation. */
   value?: TDate | null;

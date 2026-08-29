@@ -311,11 +311,22 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
     });
   }
 
-  function focusDate(target: TDate, reason: "keyboard" | "outside-day") {
+  function focusDate(target: TDate, reason: "keyboard" | "outside-day" | "today") {
     const normalized = normalizeCalendarDay(resolvedAdapter, target);
     if (normalized === null) return;
-    let candidate: TDate = normalized;
-    let attempts = 0;
+    let clamped = normalized;
+    if (
+      normalizedMin !== null &&
+      compareCalendarDays(resolvedAdapter, clamped, normalizedMin) < 0
+    ) {
+      clamped = normalizedMin;
+    }
+    if (
+      normalizedMax !== null &&
+      compareCalendarDays(resolvedAdapter, clamped, normalizedMax) > 0
+    ) {
+      clamped = normalizedMax;
+    }
     const direction =
       compareCalendarDays(
         resolvedAdapter,
@@ -324,17 +335,50 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
       ) < 0
         ? -1
         : 1;
-    while (attempts < 366) {
-      const outside = !sameCalendarMonth(resolvedAdapter, candidate, currentMonth);
-      if (!isDisabledDate(candidate, outside)) break;
-      candidate = resolvedAdapter.add(candidate, direction, "day");
-      attempts += 1;
+
+    let candidate: TDate | null = null;
+    for (let distance = 0; distance <= 366 && candidate === null; distance += 1) {
+      const offsets = distance === 0 ? [0] : [distance * direction, distance * -direction];
+      for (const offset of offsets) {
+        const next = offset === 0 ? clamped : resolvedAdapter.add(clamped, offset, "day");
+        if (
+          normalizedMin !== null &&
+          compareCalendarDays(resolvedAdapter, next, normalizedMin) < 0
+        ) {
+          continue;
+        }
+        if (
+          normalizedMax !== null &&
+          compareCalendarDays(resolvedAdapter, next, normalizedMax) > 0
+        ) {
+          continue;
+        }
+        // A navigation target is evaluated as a day in its destination month. Treating it as an
+        // outside cell here would make predicates such as `details.outside` block every
+        // cross-month keyboard or imperative focus request.
+        if (!isDisabledDate(next, false)) {
+          candidate = next;
+          break;
+        }
+      }
     }
+
+    if (candidate === null) {
+      setFocusedDay(null);
+      focusAfterNavigation.current = false;
+      if (rootRef.current) rootRef.current.focus();
+      return;
+    }
+
     setFocusedDay(candidate);
-    focusAfterNavigation.current = true;
-    if (!sameCalendarMonth(resolvedAdapter, candidate, currentMonth)) {
-      requestMonth(candidate, reason);
+    const visibleTarget = dayRefs.current.get(calendarDayKey(resolvedAdapter, candidate));
+    if (visibleTarget && sameCalendarMonth(resolvedAdapter, candidate, currentMonth)) {
+      focusAfterNavigation.current = false;
+      visibleTarget.focus();
+      return;
     }
+    focusAfterNavigation.current = true;
+    requestMonth(candidate, reason);
   }
 
   function handleDayKeyDown(event: KeyboardEvent<HTMLButtonElement>, date: TDate) {
@@ -382,8 +426,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
       requestMonth(nextMonth, "keyboard");
     },
     goToToday() {
-      requestMonth(today, "today");
-      setFocusedDay(today);
+      focusDate(today, "today");
     }
   }));
 

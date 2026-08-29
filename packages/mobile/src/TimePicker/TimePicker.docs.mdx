@@ -63,7 +63,7 @@ MeuFormTimePicker 精确绑定 TimeValue | null。打开弹层和焦点转入 Po
 
 ## Props
 
-precision 默认为 minute；hourCycle 默认为 h23，h12 只改变列与展示，回调仍为 0–23。hourStep 夹紧 1–23，minute/secondStep 夹紧 1–59；filter 按规范化 24h 值禁用；columnLabels/renderLabel 只改呈现。
+precision 默认为 minute；hourCycle 默认为 h23，h12 只改变列与展示，回调仍为 0–23。低于 precision 的单位归零；min 向上取整到第一个可表示的 precision/step 网格点，max 向下取整到最后一个可表示网格点。hourStep 夹紧 1–23，minute/secondStep 夹紧 1–59；filter 按规范化 24h 值禁用；columnLabels/renderLabel 只改呈现。
 
 ## Events
 
@@ -107,7 +107,7 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 
 ## 边界情况与已知限制
 
-非法字段、矛盾 bounds、filter 禁用所有路径都会禁用确定。步长从 0 对齐，不保证包含边界末值；h12 的 hourStep 同样基于规范化 0/12 起点。formatTimeValue 只格式化有效 TimeValue，不做时区换算。
+非法字段、矛盾 bounds、边界之间没有可表示网格点或 filter 禁用所有路径都会禁用确定；组件不会用越界值填补空网格。步长从 0 对齐，不保证包含边界末值；h12 的 hourStep 同样基于规范化 0/12 起点。formatTimeValue 只格式化有效 TimeValue，不做时区换算。
 
 ## 性能预算
 
@@ -115,12 +115,12 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 
 ## 测试证据
 
-- Unit：隐藏位归零、bounds/steps/filter、12h/period、seconds、自定义 label、取消/确认、受控、动态受控模式、矛盾边界、格式化。
+- Unit：隐藏位归零、bounds 上下取整、step 网格与空网格、filter、12h/period、seconds、自定义 label、取消/确认、受控、动态受控模式、矛盾边界、格式化。
 - SSR：TimePicker.ssr.test.tsx 覆盖稳定 dialog/listbox 与 AM/PM。
 - Story interaction: `Default` 验证 Portal 打开、draft 选择、确认回调与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 15157 B / 49152 B 预算；最大单值 `TimePicker` 为 14907 B / 49152 B 预算，组合 Brotli 13449 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 15592 B / 49152 B 预算；最大单值 `TimePicker` 为 15350 B / 49152 B 预算，组合 Brotli 13846 B；共享样式由应用单独导入一次。
 - Figma：Meu/TimePicker 245:2；8 variants、48px options、12/24h Light/Dark QA。
 - 双引擎、Chromatic 视觉回归、真机滚轮/读屏：待发布门禁。
 
