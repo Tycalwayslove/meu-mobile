@@ -5242,6 +5242,77 @@
           "name": "createCalendarGrid"
         },
         {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!DateAdapter:type",
+          "docComment": "/**\n * Platform-neutral date operations consumed by Meu date components.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type DateAdapter<TDate> = "
+            },
+            {
+              "kind": "Reference",
+              "text": "BaseDateAdapter",
+              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/DatePicker/types.ts",
+          "releaseTag": "Public",
+          "name": "DateAdapter",
+          "typeParameters": [
+            {
+              "typeParameterName": "TDate",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              }
+            }
+          ],
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 3
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!DateParts:type",
+          "docComment": "/**\n * Complete civil date and time fields; months are one-based.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type DateParts = "
+            },
+            {
+              "kind": "Reference",
+              "text": "BaseDateParts",
+              "canonicalReference": "@meu/date-adapter!DateParts:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/DatePicker/types.ts",
+          "releaseTag": "Public",
+          "name": "DateParts",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
+        },
+        {
           "kind": "Function",
           "canonicalReference": "@meu/mobile!DatePicker:function(1)",
           "docComment": "/**\n * Renders a confirmation-based date wheel backed by a pluggable DateAdapter.\n *\n * @public\n */\n",
@@ -5356,7 +5427,7 @@
             {
               "kind": "Reference",
               "text": "DatePrecision",
-              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+              "canonicalReference": "@meu/mobile!DatePrecision:type"
             },
             {
               "kind": "Content",
@@ -5413,7 +5484,7 @@
             {
               "kind": "Reference",
               "text": "DateParts",
-              "canonicalReference": "@meu/date-adapter!DateParts:type"
+              "canonicalReference": "@meu/mobile!DateParts:type"
             },
             {
               "kind": "Content",
@@ -5422,7 +5493,7 @@
             {
               "kind": "Reference",
               "text": "DatePrecision",
-              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+              "canonicalReference": "@meu/mobile!DatePrecision:type"
             },
             {
               "kind": "Content",
@@ -5627,7 +5698,7 @@
             {
               "kind": "Reference",
               "text": "DatePrecision",
-              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+              "canonicalReference": "@meu/mobile!DatePrecision:type"
             },
             {
               "kind": "Content",
@@ -5644,6 +5715,33 @@
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 5
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!DatePrecision:type",
+          "docComment": "/**\n * Finest editable unit displayed by a date or time picker.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type DatePrecision = "
+            },
+            {
+              "kind": "Reference",
+              "text": "BaseDatePrecision",
+              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/DatePicker/types.ts",
+          "releaseTag": "Public",
+          "name": "DatePrecision",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
           }
         },
         {

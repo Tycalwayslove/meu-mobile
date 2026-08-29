@@ -24,6 +24,7 @@ export type ComponentDoc = {
   name: string;
   packageName: "@meu/form-react" | "@meu/icons-react" | "@meu/mobile" | "@meu/primitives-react";
   priority: "P0" | "P1" | "P2";
+  publicExportNames?: readonly string[];
   slug: string;
   sourcePath: string;
   sourcePathPrefixes?: readonly string[];
@@ -100,6 +101,7 @@ function mobile(
   description: string,
   options: {
     priority?: "P0" | "P1" | "P2";
+    publicExportNames?: readonly string[];
     sourceName?: string;
     sourcePathPrefixes?: readonly string[];
     /** Human-readable Storybook grouping; the link itself comes from the explicit ID map. */
@@ -116,6 +118,7 @@ function mobile(
     name,
     packageName: "@meu/mobile",
     priority: options.priority || "P0",
+    ...(options.publicExportNames ? { publicExportNames: options.publicExportNames } : {}),
     slug,
     sourcePath: `packages/mobile/src/${options.sourceName || name}`,
     ...(options.sourcePathPrefixes ? { sourcePathPrefixes: options.sourcePathPrefixes } : {}),
@@ -126,6 +129,14 @@ function mobile(
 
 export const componentDocs: readonly ComponentDoc[] = [
   mobile("ConfigProvider", "config-provider", "foundation", "统一主题、语言与 Portal 容器配置。", {
+    publicExportNames: [
+      "ConfigProvider",
+      "ConfigProviderProps",
+      "MeuConfig",
+      "MeuLocale",
+      "MeuTheme",
+      "useMeuConfig"
+    ],
     sourceName: "ConfigProvider",
     storyTitle: "Foundation/ConfigProvider"
   }),
@@ -135,6 +146,7 @@ export const componentDocs: readonly ComponentDoc[] = [
     "foundation",
     "ConfigProvider 的主题语义别名，支持 light、dark 与 system。",
     {
+      publicExportNames: ["ThemeProvider"],
       sourceName: "ConfigProvider",
       storyTitle: "Foundation/ThemeProvider"
     }
@@ -361,10 +373,12 @@ export const componentDocs: readonly ComponentDoc[] = [
   }),
 
   mobile("Cell", "cell", "information", "列表中的原生按钮、链接或只读信息行。", {
+    publicExportNames: ["Cell", "CellProps", "CellRef"],
     sourceName: "List",
     storyTitle: "Information/Cell & List"
   }),
   mobile("List", "list", "information", "为 Cell 提供分组、卡片、分隔线与列表语义。", {
+    publicExportNames: ["List", "ListDivider", "ListMode", "ListProps"],
     storyTitle: "Information/Cell & List"
   }),
   mobile("Card", "card", "information", "通过 header、content、footer 插槽组织相关内容。", {

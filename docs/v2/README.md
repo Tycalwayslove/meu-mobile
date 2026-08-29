@@ -23,7 +23,7 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 - 官网生产构建由独立本地门禁验证 68 个组件页面和 8 个公共页面的 Light/Dark、主题恢复、页面结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA；当前 152 个页面/主题场景全部通过。
 - Bundle 门禁对 68 个产品族和 125 个公开运行时值分别执行 Rollup tree-shaking；当前全部在分级 gzip 预算内，共享 CSS 为 25,021 B / 32 KiB 预算。
 - `@meu/test-utils` 已提供 a11y、SSR/hydration、表单、手势、locale/RTL 与 reduced-motion 辅助能力；单元、隔离 Next H5 Chromium/WebKit 与旧语法扫描已有本地门禁。
-- 隔离 Next H5 已在移动 Chromium/WebKit 完成 112/112 条全量 E2E，并为初始 open Portal、测量与手势边界建立专项 hydration；性能/恢复专页 14/14、三轮重复 42/42，覆盖 10,000 行 VirtualList、1,500 节点 TreeSelect、高频/取消手势，以及 Image、InfiniteList、ImageUploader 的确定性失败、重试与取消。
+- 隔离 Next H5 已在移动 Chromium/WebKit 完成 114/114 条全量 E2E，并为初始 open Portal、测量与手势边界建立专项 hydration；性能/恢复专页 14/14、三轮重复 42/42，覆盖 10,000 行 VirtualList、1,500 节点 TreeSelect、高频/取消手势，以及 Image、InfiniteList、ImageUploader 的确定性失败、重试与取消；`/verification` 的 5 秒工具自检 2/2 通过，可供最终候选执行 60 秒真机采样与导出结构化证据。
 - 真实 iOS Safari/VoiceOver、Android Chrome/TalkBack、旧 WebView 运行时、持续手势帧率/内存/弱网专项，以及最终 Chromatic 视觉审批仍是发布阻断项。
 
 这些数字是当前仓库可重复生成的证据，不等同于组件已经达到 `commercial`。每个组件仍需按模板补齐剩余适用项并完成最终发布验收。

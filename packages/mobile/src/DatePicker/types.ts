@@ -1,4 +1,8 @@
-import type { DateAdapter, DateParts, DatePrecision } from "@meu/date-adapter";
+import type {
+  DateAdapter as BaseDateAdapter,
+  DateParts as BaseDateParts,
+  DatePrecision as BaseDatePrecision
+} from "@meu/date-adapter";
 import type { ReactNode } from "react";
 
 import type {
@@ -7,6 +11,15 @@ import type {
   PickerOpenChangeDetails,
   PickerSelectDetails
 } from "../Picker";
+
+/** Platform-neutral date operations consumed by Meu date components. @public */
+export type DateAdapter<TDate> = BaseDateAdapter<TDate>;
+
+/** Complete civil date and time fields; months are one-based. @public */
+export type DateParts = BaseDateParts;
+
+/** Finest editable unit displayed by a date or time picker. @public */
+export type DatePrecision = BaseDatePrecision;
 
 /**
  * Candidate date state supplied to a date-picker filter.
@@ -92,5 +105,3 @@ export type DatePickerProps<TDate = Date> = DatePickerBaseProps<TDate> & PickerA
  * @public
  */
 export type DatePickerOpenChangeDetails = PickerOpenChangeDetails;
-
-export type { DateAdapter, DateParts, DatePrecision } from "@meu/date-adapter";

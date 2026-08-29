@@ -133,7 +133,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 
 - Unit: `Carousel.test.tsx` 覆盖默认静止、位置公告、原生按钮键盘路径、受控回滚、动态 items、autoplay focus/hover/visibility/reduced-motion、drag reason、RTL、资源清理，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
 - SSR: `Carousel.ssr.test.tsx` 在无 window/document 环境验证静态按钮、默认关闭 autoplay、活动索引、inactive/inert 和页名/页数 status。
-- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status。最新本地 Storybook 链接检查通过 444 stories、415 个共置 storyIds 和 80 个带 play 的 title。
+- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status。对应 Story 已纳入中央生成的链接、关键 play 和浏览器矩阵门禁，组件文档不复制易漂移的全局计数。
 - Carousel 定向浏览器扫描：6 个 Story × Light/Dark 两个场景全部通过；play 返回 success，axe WCAG A/AA 为 0 违规，且无 `pageerror`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。

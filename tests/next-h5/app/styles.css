@@ -218,6 +218,131 @@ textarea {
   font-size: 12px;
 }
 
+.verification-shell {
+  max-width: 680px;
+}
+
+.verification-links,
+.verification-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+
+.verification-links {
+  margin-top: 16px;
+}
+
+.verification-links a {
+  color: var(--meu-color-accent);
+}
+
+.verification-workbench,
+.verification-fields,
+.verification-checklist {
+  display: grid;
+  gap: 16px;
+}
+
+.verification-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.verification-card h2,
+.verification-card p {
+  margin: 0;
+}
+
+.verification-card > p,
+.verification-card > output,
+.verification-card > div > output {
+  color: var(--meu-color-muted);
+  line-height: 1.5;
+}
+
+.verification-fields label,
+.verification-actions label,
+.verification-checklist label {
+  display: grid;
+  gap: 6px;
+  color: var(--meu-color-muted);
+  font-size: 13px;
+}
+
+.verification-fields input,
+.verification-actions select,
+.verification-checklist select,
+.verification-checklist textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--meu-color-ink);
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-control);
+}
+
+.verification-checklist textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.verification-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.verification-metrics div {
+  padding: 12px;
+  background: var(--meu-color-canvas);
+  border-radius: var(--meu-radius-control);
+}
+
+.verification-metrics dt {
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
+.verification-metrics dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.verification-panel-stage {
+  position: relative;
+  height: 480px;
+  overflow: hidden;
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.verification-panel-content {
+  min-height: 420px;
+  padding: 16px;
+}
+
+.verification-checklist fieldset {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-control);
+}
+
+.verification-checklist legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
 .integration-refresh [data-meu-component="pull-to-refresh"] > div:last-child {
   min-height: 112px;
   padding: 20px;

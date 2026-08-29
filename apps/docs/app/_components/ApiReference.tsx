@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 import type { ComponentApiProperty, ComponentApiReference } from "../_data/api-reference";
 import { CodeBlock } from "./CodeBlock";
 import { ScrollableTableRegion } from "./ScrollableTableRegion";
@@ -48,6 +52,25 @@ export function ApiReference({
   entries: ComponentApiReference[];
   packageName: string;
 }) {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const visibleEntries = useMemo(
+    () =>
+      normalizedQuery
+        ? entries.filter((entry) =>
+            [
+              entry.name,
+              entry.description || "",
+              ...(entry.properties || []).flatMap((property) => [
+                property.name,
+                property.description || "",
+                property.type
+              ])
+            ].some((value) => value.toLocaleLowerCase().includes(normalizedQuery))
+          )
+        : entries,
+    [entries, normalizedQuery]
+  );
   if (entries.length === 0) return null;
 
   return (
@@ -67,8 +90,20 @@ export function ApiReference({
         </div>
         <span>{entries.length} exports</span>
       </div>
+      <label className="api-reference__search">
+        <span>筛选 API</span>
+        <input
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.currentTarget.value)}
+          placeholder="输入 export、Prop、Event 或类型"
+        />
+        <small aria-live="polite">
+          显示 {visibleEntries.length} / {entries.length} 项
+        </small>
+      </label>
       <div className="api-reference__list">
-        {entries.map((entry, index) =>
+        {visibleEntries.map((entry, index) =>
           (() => {
             const properties = entry.properties || [];
             const events = properties.filter((property) => property.event);
@@ -78,7 +113,7 @@ export function ApiReference({
               <details
                 className="api-reference__entry"
                 key={`${entry.kind}-${entry.name}`}
-                open={index < 3 || entry.name.endsWith("Props")}
+                open={normalizedQuery !== "" || index < 3}
               >
                 <summary>
                   <code>{entry.name}</code>
@@ -94,6 +129,9 @@ export function ApiReference({
             );
           })()
         )}
+        {visibleEntries.length === 0 ? (
+          <p className="api-reference__empty">没有匹配的 API。请尝试组件名、Prop 或 Event。</p>
+        ) : null}
       </div>
     </section>
   );

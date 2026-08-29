@@ -761,7 +761,7 @@
             {
               "kind": "Reference",
               "text": "DateAdapter",
-              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+              "canonicalReference": "@meu/mobile!DateAdapter:type"
             },
             {
               "kind": "Content",
@@ -2674,7 +2674,7 @@
             {
               "kind": "Reference",
               "text": "DateAdapter",
-              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+              "canonicalReference": "@meu/mobile!DateAdapter:type"
             },
             {
               "kind": "Content",
@@ -2683,7 +2683,7 @@
             {
               "kind": "Reference",
               "text": "DatePrecision",
-              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+              "canonicalReference": "@meu/mobile!DatePrecision:type"
             },
             {
               "kind": "Content",
@@ -2773,7 +2773,7 @@
             {
               "kind": "Reference",
               "text": "DateAdapter",
-              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+              "canonicalReference": "@meu/mobile!DateAdapter:type"
             },
             {
               "kind": "Content",
@@ -2782,7 +2782,7 @@
             {
               "kind": "Reference",
               "text": "DatePrecision",
-              "canonicalReference": "@meu/date-adapter!DatePrecision:type"
+              "canonicalReference": "@meu/mobile!DatePrecision:type"
             },
             {
               "kind": "Content",
@@ -3067,7 +3067,7 @@
             {
               "kind": "Reference",
               "text": "DateAdapter",
-              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+              "canonicalReference": "@meu/mobile!DateAdapter:type"
             },
             {
               "kind": "Content",
@@ -3166,7 +3166,7 @@
             {
               "kind": "Reference",
               "text": "DateAdapter",
-              "canonicalReference": "@meu/date-adapter!DateAdapter:interface"
+              "canonicalReference": "@meu/mobile!DateAdapter:type"
             },
             {
               "kind": "Content",
@@ -4423,7 +4423,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuFormProps:type",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * Native form attributes and React Hook Form lifecycle callbacks accepted by {@link MeuForm}.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -7869,7 +7869,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/form-react!MeuUseFormProps:type",
-          "docComment": "/**\n * @public\n */\n",
+          "docComment": "/**\n * React Hook Form options accepted by {@link useMeuForm}, with a mutually exclusive Zod schema or custom resolver and Meu defaults for unregistering conditional fields and DOM-order focus.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

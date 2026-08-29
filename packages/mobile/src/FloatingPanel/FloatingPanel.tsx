@@ -113,7 +113,7 @@ function isInteractiveContent(target: EventTarget | null, boundary: HTMLElement 
       "[data-meu-floating-panel-drag-ignore]"
     ].join(", ")
   );
-  return interactive ? boundary.contains(interactive) : false;
+  return interactive ? interactive !== boundary && boundary.contains(interactive) : false;
 }
 
 function releaseDragPointerCapture(session: DragSession) {
@@ -525,6 +525,9 @@ export function FloatingPanel({
         ref={bodyRef}
         id={bodyId}
         className={body}
+        role="region"
+        aria-label={config.locale === "en-US" ? "Floating panel content" : "浮动面板内容"}
+        tabIndex={0}
         data-content-drag={canDragFromContent ? "true" : undefined}
         data-content-dragging={effectiveDragging ? "true" : undefined}
         onLostPointerCapture={(event) => finishDrag(event, true)}

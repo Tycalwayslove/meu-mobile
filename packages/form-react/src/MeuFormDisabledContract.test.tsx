@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { Checkbox, Radio } from "@meu/mobile";
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { MeuForm } from "./MeuForm";
@@ -56,7 +56,10 @@ type DisabledValues = {
 
 const firstDate = new Date(2026, 7, 10);
 const secondDate = new Date(2026, 7, 15);
+const resetStartDate = new Date(2026, 8, 2);
+const resetEndDate = new Date(2026, 8, 8);
 const image = { alt: "商品图", url: "/product.jpg" };
+const resetImage = { alt: "新商品图", url: "/reset-product.jpg" };
 const defaultValues: DisabledValues = {
   accepted: true,
   appointment: ["today"],
@@ -80,6 +83,31 @@ const defaultValues: DisabledValues = {
   title: "喵呜店",
   treeValues: ["phone"],
   view: "list"
+};
+
+const resetValues: DisabledValues = {
+  accepted: false,
+  appointment: ["tomorrow"],
+  calendarDate: resetStartDate,
+  code: "9876",
+  deliveryDate: resetStartDate,
+  deliveryTime: { hour: 18, minute: 45, second: 0 },
+  deliveryWindow: [resetStartDate, resetEndDate],
+  description: "重置后的介绍",
+  images: [resetImage],
+  notifications: false,
+  paymentAmount: "88.6",
+  quantity: 5,
+  query: "重置订单",
+  rating: 2,
+  region: ["jiangsu", "nanjing"],
+  score: 30,
+  services: ["pickup"],
+  shipping: "express",
+  tags: ["sale"],
+  title: "重置店铺",
+  treeValues: ["tablet"],
+  view: "grid"
 };
 
 function DisabledAdapterMatrix({
@@ -106,6 +134,7 @@ function DisabledAdapterMatrix({
           disabled={disabled}
         >
           <Checkbox value="delivery">配送</Checkbox>
+          <Checkbox value="pickup">自提</Checkbox>
         </MeuFormCheckboxGroup>
         <MeuFormRadioGroup<DisabledValues, string>
           name="shipping"
@@ -113,6 +142,7 @@ function DisabledAdapterMatrix({
           disabled={disabled}
         >
           <Radio value="standard">标准配送</Radio>
+          <Radio value="express">加急配送</Radio>
         </MeuFormRadioGroup>
         <MeuFormSwitch<DisabledValues> name="notifications" label="通知" disabled={disabled} />
         <MeuFormStepper<DisabledValues> name="quantity" label="数量" disabled={disabled} />
@@ -122,18 +152,29 @@ function DisabledAdapterMatrix({
           name="tags"
           label="标签"
           disabled={disabled}
-          options={[{ label: "新品", value: "new" }]}
+          options={[
+            { label: "新品", value: "new" },
+            { label: "促销", value: "sale" }
+          ]}
         />
         <MeuFormSegmentedControl<DisabledValues, string>
           name="view"
           label="视图"
           disabled={disabled}
-          options={[{ label: "列表", value: "list" }]}
+          options={[
+            { label: "列表", value: "list" },
+            { label: "网格", value: "grid" }
+          ]}
         />
         <MeuFormPicker<DisabledValues, string>
           name="appointment"
           label="预约"
-          columns={[[{ label: "今天", value: "today" }]]}
+          columns={[
+            [
+              { label: "今天", value: "today" },
+              { label: "明天", value: "tomorrow" }
+            ]
+          ]}
           triggerProps={{ disabled }}
         />
         <MeuFormCascadePicker<DisabledValues, string>
@@ -144,6 +185,11 @@ function DisabledAdapterMatrix({
               label: "浙江",
               value: "zhejiang",
               children: [{ label: "杭州", value: "hangzhou" }]
+            },
+            {
+              label: "江苏",
+              value: "jiangsu",
+              children: [{ label: "南京", value: "nanjing" }]
             }
           ]}
           triggerProps={{ disabled }}
@@ -168,7 +214,10 @@ function DisabledAdapterMatrix({
           name="treeValues"
           label="类目"
           disabled={disabled}
-          options={[{ label: "手机", value: "phone" }]}
+          options={[
+            { label: "手机", value: "phone" },
+            { label: "平板", value: "tablet" }
+          ]}
         />
         <MeuFormNumberKeyboard<DisabledValues>
           name="paymentAmount"
@@ -183,6 +232,9 @@ function DisabledAdapterMatrix({
           upload={() => Promise.resolve(image)}
         />
       </div>
+      <button type="button" onClick={() => form.reset(resetValues)}>
+        重置全部适配器
+      </button>
     </MeuForm>
   );
 }
@@ -225,5 +277,28 @@ describe("MeuForm local disabled contract", () => {
     await waitFor(() =>
       expect(onSubmit).toHaveBeenLastCalledWith(defaultValues, expect.anything())
     );
+  });
+
+  it("resets all 22 adapters to one coherent RHF and native-form snapshot", async () => {
+    const onSubmit = vi.fn();
+    const { container } = render(<DisabledAdapterMatrix disabled={false} onSubmit={onSubmit} />);
+    const view = within(container);
+
+    fireEvent.click(view.getByRole("button", { name: "重置全部适配器" }));
+
+    expect(view.getByRole<HTMLInputElement>("textbox", { name: "标题" }).value).toBe("重置店铺");
+    expect(view.getByRole<HTMLInputElement>("checkbox", { name: "同意" }).checked).toBe(false);
+    expect(view.getByRole<HTMLInputElement>("radio", { name: "加急配送" }).checked).toBe(true);
+
+    const form = container.querySelector("form")!;
+    const formData = new FormData(form);
+    expect(formData.get("title")).toBe("重置店铺");
+    expect(formData.get("paymentAmount")).toBe("88.6");
+    expect(formData.get("code")).toBe("9876");
+    expect(formData.getAll("deliveryWindow")).toEqual(["2026-09-02", "2026-09-08"]);
+    expect(formData.get("images")).toBe("/reset-product.jpg");
+
+    fireEvent.submit(form);
+    await waitFor(() => expect(onSubmit).toHaveBeenLastCalledWith(resetValues, expect.anything()));
   });
 });

@@ -858,9 +858,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4960,
-      "gzipBytes": 5591,
-      "rawBytes": 23348,
+      "brotliBytes": 5001,
+      "gzipBytes": 5643,
+      "rawBytes": 23496,
       "docsPath": "packages/mobile/src/FloatingPanel/FloatingPanel.docs.mdx",
       "name": "FloatingPanel",
       "packageName": "@meu/mobile",
@@ -869,9 +869,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4960,
-          "gzipBytes": 5591,
-          "rawBytes": 23348,
+          "brotliBytes": 5001,
+          "gzipBytes": 5643,
+          "rawBytes": 23496,
           "name": "FloatingPanel",
           "passesBudget": true
         }

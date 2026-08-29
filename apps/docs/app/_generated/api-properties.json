@@ -9109,7 +9109,7 @@
         },
         {
           "name": "fromParts",
-          "type": "(parts: DateParts) => TDate | null",
+          "type": "(parts: DateParts) => TDate",
           "required": true,
           "event": false,
           "description": "Creates a value from validated civil fields, or `null` when the fields cannot form a date."
@@ -9151,7 +9151,7 @@
         },
         {
           "name": "parse",
-          "type": "(value: string, pattern: string, locale?: string) => TDate | null",
+          "type": "(value: string, pattern: string, locale?: string) => TDate",
           "required": true,
           "event": false,
           "description": "Parses a string with the documented token pattern, returning `null` for invalid input."
@@ -9225,14 +9225,14 @@
         },
         {
           "name": "parts",
-          "type": "DateParts",
+          "type": "BaseDateParts",
           "required": true,
           "event": false,
           "description": "Complete candidate parts after applying this column value."
         },
         {
           "name": "precision",
-          "type": "DatePrecision",
+          "type": "BaseDatePrecision",
           "required": true,
           "event": false,
           "description": "Column whose candidate is being filtered."
@@ -9255,14 +9255,14 @@
         },
         {
           "name": "parts",
-          "type": "DateParts",
+          "type": "BaseDateParts",
           "required": true,
           "event": false,
           "description": "Complete candidate parts after applying this column value."
         },
         {
           "name": "precision",
-          "type": "DatePrecision",
+          "type": "BaseDatePrecision",
           "required": true,
           "event": false,
           "description": "Column whose candidate is being filtered."
@@ -9324,7 +9324,7 @@
         },
         {
           "name": "columnLabels",
-          "type": "Partial<Record<DatePrecision, string>>",
+          "type": "Partial<Record<BaseDatePrecision, string>>",
           "required": false,
           "event": false,
           "description": "Accessible labels by wheel precision; omitted entries use localized labels."
@@ -9368,7 +9368,7 @@
         },
         {
           "name": "filter",
-          "type": "Partial<Record<DatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>",
+          "type": "Partial<Record<BaseDatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>",
           "required": false,
           "event": false,
           "description": "Per-column predicates; return `false` to disable a candidate option."
@@ -9428,7 +9428,7 @@
         },
         {
           "name": "precision",
-          "type": "DatePrecision",
+          "type": "BaseDatePrecision",
           "required": false,
           "event": false,
           "description": "Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value.",
@@ -9532,7 +9532,7 @@
         },
         {
           "name": "precision",
-          "type": "DatePrecision",
+          "type": "BaseDatePrecision",
           "required": true,
           "event": false,
           "description": "Date precision represented by the changed wheel column."
@@ -15036,7 +15036,7 @@
         },
         {
           "name": "columnLabels",
-          "type": "Partial<Record<DatePrecision, string>>",
+          "type": "Partial<Record<BaseDatePrecision, string>>",
           "required": false,
           "event": false,
           "description": "Accessible labels by wheel precision; omitted entries use localized labels."
@@ -15065,7 +15065,7 @@
         },
         {
           "name": "filter",
-          "type": "Partial<Record<DatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>",
+          "type": "Partial<Record<BaseDatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>",
           "required": false,
           "event": false,
           "description": "Per-column predicates; return `false` to disable a candidate option."
@@ -15118,7 +15118,7 @@
         },
         {
           "name": "precision",
-          "type": "DatePrecision",
+          "type": "BaseDatePrecision",
           "required": false,
           "event": false,
           "description": "Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value.",
@@ -15196,7 +15196,7 @@
         },
         {
           "name": "columnLabels",
-          "type": "Partial<Record<DatePrecision, string>>",
+          "type": "Partial<Record<BaseDatePrecision, string>>",
           "required": false,
           "event": false,
           "description": "Accessible labels by wheel precision; omitted entries use localized labels."
@@ -15239,7 +15239,7 @@
         },
         {
           "name": "filter",
-          "type": "Partial<Record<DatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>",
+          "type": "Partial<Record<BaseDatePrecision, (value: number, details: DatePickerFilterDetails<TDate>) => boolean>>",
           "required": false,
           "event": false,
           "description": "Per-column predicates; return `false` to disable a candidate option."
@@ -15334,7 +15334,7 @@
         },
         {
           "name": "precision",
-          "type": "DatePrecision",
+          "type": "BaseDatePrecision",
           "required": false,
           "event": false,
           "description": "Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value.",

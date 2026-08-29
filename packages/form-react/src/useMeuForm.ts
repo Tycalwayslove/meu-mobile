@@ -5,7 +5,12 @@ import { useForm } from "react-hook-form";
 import type { FieldValues, Resolver, UseFormProps, UseFormReturn } from "react-hook-form";
 import type { ZodType } from "zod";
 
-/** @public */
+/**
+ * React Hook Form options accepted by {@link useMeuForm}, with a mutually exclusive Zod schema or
+ * custom resolver and Meu defaults for unregistering conditional fields and DOM-order focus.
+ *
+ * @public
+ */
 export type MeuUseFormProps<
   TFieldValues extends FieldValues,
   TContext = unknown,

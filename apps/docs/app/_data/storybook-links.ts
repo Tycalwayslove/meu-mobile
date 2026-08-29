@@ -83,3 +83,17 @@ export function getComponentStoryId(slug: string): string | undefined {
   if (!(slug in componentStoryIds)) return undefined;
   return componentStoryIds[slug as ComponentStorySlug] || undefined;
 }
+
+export function getStoryLabel(storyId: string) {
+  const storyName = storyId.split("--").at(-1) || storyId;
+  return storyName
+    .split("-")
+    .filter(Boolean)
+    .map((word, index) => {
+      const normalized = word.toLowerCase();
+      if (normalized === "rtl") return "RTL";
+      if (normalized === "ltr") return "LTR";
+      return index === 0 ? `${word.charAt(0).toUpperCase()}${word.slice(1)}` : word;
+    })
+    .join(" ");
+}

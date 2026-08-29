@@ -48,7 +48,11 @@ function resolveSubmitter(
   return element.form === form && !element.disabled ? element : null;
 }
 
-/** @public */
+/**
+ * Native form attributes and React Hook Form lifecycle callbacks accepted by {@link MeuForm}.
+ *
+ * @public
+ */
 export type MeuFormProps<
   TFieldValues extends FieldValues,
   TContext = unknown,

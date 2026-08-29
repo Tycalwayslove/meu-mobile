@@ -17,13 +17,24 @@
 
 ## 当前可复查状态
 
-- 移动 Chromium/WebKit 隔离 Next H5：112/112 通过，逐用例断言 0 `pageerror`、0 `console.error`；其中性能/恢复专页 14/14，并完成 3 轮重复共 42/42。
+- 移动 Chromium/WebKit 隔离 Next H5：114/114 通过，逐用例断言 0 `pageerror`、0 `console.error`；其中性能/恢复专页 14/14，并完成 3 轮重复共 42/42；真机验收工作台自检 2/2。
 - Storybook：444 个 Story × 7 场景，共 3,108 个组合通过。
 - 官网：68 个组件页和 8 个公共页面 × Light/Dark，共 152 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
 - 客户端静态兼容扫描：199 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。
 - 当前开发机安装了 iOS 18.3 与 18.6 Simulator；尚未把模拟器目视结果登记为真机证据。
 - Android SDK/ADB 可用，但尚无已配置 AVD；Android 真机与 Emulator 均未登记。
 - VoiceOver、TalkBack、WKWebView 宿主、旧 WebView 和真实慢 3G/离线/丢包与内存记录：待补；本地确定性失败/重试/取消模型不计作真机或真实网络通过。
+
+## 本地真机验收工作台
+
+隔离 H5 应用的 `/verification` 路由提供候选版本的统一留证入口。它可以记录执行人、设备/系统、40 位候选 commit SHA、网络请求成功/失败/取消事件，以及 D-01 至 D-06 的 pass/fail/pending 与备注；完成采样后会导出 `schemaVersion: 1.0.0` 的 JSON 文件。
+
+- `5 秒（工具自检）` 仅确认采样、网络探针和导出链路可运行，`requiredDurationMet` 固定为 `false`，不能计作 PERF-01。
+- `60 秒（正式验收）` 记录估算 FPS、frame count、P95/最大帧耗时、`>32ms` 慢帧、支持时的 Long Tasks，以及 Chromium 可用时的 JS heap；执行期间必须持续操作 Carousel、SwipeActions、FloatingPanel、BottomSheet 与 ImageViewer。
+- 网络探针必须在目标慢网、离线或切网条件下由执行人主动运行、取消和恢复；本地成功请求不等于真实弱网通过。
+- 导出的 JSON 必须与截图、录屏、trace 或 issue 一起人工复核并登记到本页。工作台不会自动把 pending 提升为 pass，也不会改变任何组件状态。
+
+开发时运行本地 Next H5 production build 后访问该路由；正式候选必须使用冻结后的同一 SHA，代码或样式变化后重新采样。
 
 ## 每次验收必须记录
 

@@ -3108,6 +3108,11 @@
       "name": "Cell",
       "packageName": "@meu/mobile",
       "priority": "P0",
+      "publicExportNames": [
+        "Cell",
+        "CellProps",
+        "CellRef"
+      ],
       "slug": "cell",
       "sourcePath": "packages/mobile/src/List",
       "storyId": "information-cell-list--card",
@@ -3130,22 +3135,6 @@
         {
           "kind": "type",
           "name": "CellRef"
-        },
-        {
-          "kind": "value",
-          "name": "List"
-        },
-        {
-          "kind": "type",
-          "name": "ListDivider"
-        },
-        {
-          "kind": "type",
-          "name": "ListMode"
-        },
-        {
-          "kind": "type",
-          "name": "ListProps"
         }
       ]
     },
@@ -3261,6 +3250,14 @@
       "name": "ConfigProvider",
       "packageName": "@meu/mobile",
       "priority": "P0",
+      "publicExportNames": [
+        "ConfigProvider",
+        "ConfigProviderProps",
+        "MeuConfig",
+        "MeuLocale",
+        "MeuTheme",
+        "useMeuConfig"
+      ],
       "slug": "config-provider",
       "sourcePath": "packages/mobile/src/ConfigProvider",
       "storyId": "foundation-configprovider--nested-configuration",
@@ -3292,10 +3289,6 @@
         {
           "kind": "type",
           "name": "MeuTheme"
-        },
-        {
-          "kind": "value",
-          "name": "ThemeProvider"
         },
         {
           "kind": "value",
@@ -4459,6 +4452,12 @@
       "name": "List",
       "packageName": "@meu/mobile",
       "priority": "P0",
+      "publicExportNames": [
+        "List",
+        "ListDivider",
+        "ListMode",
+        "ListProps"
+      ],
       "slug": "list",
       "sourcePath": "packages/mobile/src/List",
       "storyId": "information-cell-list--card",
@@ -4470,18 +4469,6 @@
       "docsPath": "packages/mobile/src/List/List.docs.mdx",
       "hasDocs": true,
       "publicExports": [
-        {
-          "kind": "value",
-          "name": "Cell"
-        },
-        {
-          "kind": "type",
-          "name": "CellProps"
-        },
-        {
-          "kind": "type",
-          "name": "CellRef"
-        },
         {
           "kind": "value",
           "name": "List"
@@ -5959,6 +5946,9 @@
       "name": "ThemeProvider",
       "packageName": "@meu/mobile",
       "priority": "P0",
+      "publicExportNames": [
+        "ThemeProvider"
+      ],
       "slug": "theme-provider",
       "sourcePath": "packages/mobile/src/ConfigProvider",
       "storyId": "foundation-themeprovider--light-and-dark",
@@ -5972,31 +5962,7 @@
       "publicExports": [
         {
           "kind": "value",
-          "name": "ConfigProvider"
-        },
-        {
-          "kind": "type",
-          "name": "ConfigProviderProps"
-        },
-        {
-          "kind": "type",
-          "name": "MeuConfig"
-        },
-        {
-          "kind": "type",
-          "name": "MeuLocale"
-        },
-        {
-          "kind": "type",
-          "name": "MeuTheme"
-        },
-        {
-          "kind": "value",
           "name": "ThemeProvider"
-        },
-        {
-          "kind": "value",
-          "name": "useMeuConfig"
         }
       ]
     },

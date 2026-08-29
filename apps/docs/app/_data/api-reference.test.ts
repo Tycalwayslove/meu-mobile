@@ -59,6 +59,23 @@ describe("generated API reference integration", () => {
     expect(new Set(entries.map((entry) => `${entry.kind}:${entry.name}`))).toEqual(
       new Set(product.publicExports.map((entry) => `${entry.kind}:${entry.name}`))
     );
+    expect(
+      entries.filter(
+        (entry) =>
+          entry.signature ===
+          `${entry.kind === "type" ? "export type" : "export"} { ${entry.name} };`
+      )
+    ).toEqual([]);
+  });
+
+  it("documents every top-level public API entry", () => {
+    const missing = products.flatMap((product) =>
+      getComponentApiReference(product)
+        .filter((entry) => !entry.description)
+        .map((entry) => `${product.slug}:${entry.name}`)
+    );
+
+    expect(missing).toEqual([]);
   });
 
   it("adds generated field, default and event metadata to public Props", () => {

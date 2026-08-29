@@ -53,7 +53,15 @@ test("parseModuleExports distinguishes values, types and wildcard exports", () =
 });
 
 test("parseComponentDocs validates metadata, public values and required sections", () => {
-  const validHeadings = requiredDocsSections.map((section) => `## ${section}`).join("\n\n");
+  const validHeadings = requiredDocsSections
+    .map((section) => {
+      if (section === "基础用法") return `## ${section}\n\n\`\`\`tsx\n<MeuButton />\n\`\`\``;
+      if (section === "Props" || section === "Events") {
+        return `## ${section}\n\n| 名称 | 说明 |\n| --- | --- |\n| \`value\` | 已说明 |`;
+      }
+      return `## ${section}\n\n已记录。`;
+    })
+    .join("\n\n");
   const valid = parseComponentDocs(
     `---
 name: Button
@@ -125,11 +133,11 @@ test("buildComponentManifest maps shared modules to product-specific documents",
     mkdirSync(path.join(fixtureRoot, "packages/example/src/Button"), { recursive: true });
     writeFileSync(
       path.join(fixtureRoot, "packages/example/src/index.ts"),
-      'export { MeuButton } from "./Button";\nexport type { MeuButtonProps } from "./Button";\n'
+      'export { MeuButton, ThemeButton } from "./Button";\nexport type { MeuButtonProps, ThemeButtonProps } from "./Button";\n'
     );
     writeFileSync(
       path.join(fixtureRoot, "packages/example/src/Button/index.ts"),
-      "export const MeuButton = 1; export type MeuButtonProps = {};\n"
+      "export const MeuButton = 1; export const ThemeButton = 2; export type MeuButtonProps = {}; export type ThemeButtonProps = {};\n"
     );
     writeFileSync(
       path.join(fixtureRoot, "packages/example/src/Button/Button.docs.mdx"),
@@ -147,6 +155,7 @@ test("buildComponentManifest maps shared modules to product-specific documents",
         name: "Button",
         packageName: "@meu/example",
         priority: "P0",
+        publicExportNames: ["MeuButton", "MeuButtonProps"],
         slug: "button",
         sourcePath: "packages/example/src/Button"
       },
@@ -157,6 +166,7 @@ test("buildComponentManifest maps shared modules to product-specific documents",
         name: "ThemeButton",
         packageName: "@meu/example",
         priority: "P0",
+        publicExportNames: ["ThemeButton", "ThemeButtonProps"],
         slug: "theme-button",
         sourcePath: "packages/example/src/Button"
       }
@@ -175,6 +185,10 @@ test("buildComponentManifest maps shared modules to product-specific documents",
     assert.equal(product.docsPath, "packages/example/src/Button/Button.docs.mdx");
     const themeProduct = manifest.products[1];
     assert.ok(themeProduct);
+    assert.deepEqual(themeProduct.publicExports, [
+      { kind: "value", name: "ThemeButton" },
+      { kind: "type", name: "ThemeButtonProps" }
+    ]);
     assert.equal(themeProduct.docsPath, "packages/example/src/Button/ThemeButton.docs.mdx");
   } finally {
     rmSync(fixtureRoot, { force: true, recursive: true });
@@ -188,9 +202,17 @@ test("workspace manifest covers the four packages and all declared product entri
   assert.equal(manifest.packages.length, 4);
   assert.equal(manifest.products.length, 68);
   const button = manifest.products.find((item) => item.slug === "button");
+  const cell = manifest.products.find((item) => item.slug === "cell");
+  const configProvider = manifest.products.find((item) => item.slug === "config-provider");
   const form = manifest.products.find((item) => item.slug === "form");
+  const list = manifest.products.find((item) => item.slug === "list");
+  const themeProvider = manifest.products.find((item) => item.slug === "theme-provider");
   assert.ok(button);
+  assert.ok(cell);
+  assert.ok(configProvider);
   assert.ok(form);
+  assert.ok(list);
+  assert.ok(themeProvider);
   assert.equal(
     button.publicExports.some((item) => item.name === "Button" && item.kind === "value"),
     true
@@ -206,6 +228,22 @@ test("workspace manifest covers the four packages and all declared product entri
   assert.equal(
     form.publicExports.some((item) => item.name === "useMeuForm" && item.kind === "value"),
     true
+  );
+  assert.deepEqual(
+    cell.publicExports.map((item) => item.name),
+    ["Cell", "CellProps", "CellRef"]
+  );
+  assert.deepEqual(
+    list.publicExports.map((item) => item.name),
+    ["List", "ListDivider", "ListMode", "ListProps"]
+  );
+  assert.deepEqual(
+    configProvider.publicExports.map((item) => item.name),
+    ["ConfigProvider", "ConfigProviderProps", "MeuConfig", "MeuLocale", "MeuTheme", "useMeuConfig"]
+  );
+  assert.deepEqual(
+    themeProvider.publicExports.map((item) => item.name),
+    ["ThemeProvider"]
   );
   assert.equal(
     serializeManifest(manifest),

@@ -152,7 +152,6 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 ### 待优化
 
 - 补真实 iOS/Android pointer cancel、长按菜单、系统软键盘共存与读屏路径。
-- 补齐 form adapter 的 touched/error/reset 组合证明；dirty、输入、删除、长度和确认已有 Unit。
 - 明确触摸设备与系统软键盘共存限制，并提供降级示例。
 
 ### 已完成
@@ -161,6 +160,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 - Trigger 无损合并 Field 命名/说明，并移除 button 上无效的 `aria-required` API；form adapter 的值可进入原生 FormData。
 - Escape 按开放栈只交给顶层实例，关闭或卸载后自动移交下一层。
 - Portal 继承 theme/locale/dir/motion；补 initial-open hydration、RTL/reduced-motion、关闭期事件隔离和连删取消状态机。
+- form adapter 已纳入 22 个适配器的统一 reset 快照，重置后同时校验真实控件、原生 FormData 与 RHF 提交值。
 
 ## 变更记录
 

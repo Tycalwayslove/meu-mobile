@@ -342,7 +342,7 @@ export type MeuFormPickerProps<TFieldValues extends FieldValues, TValue extends 
     triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
-// @public (undocumented)
+// @public
 export type MeuFormProps<TFieldValues extends FieldValues, TContext = unknown, TTransformedValues = TFieldValues> = Omit<FormHTMLAttributes<HTMLFormElement>, "action" | "onSubmit"> & {
     action?: FormHTMLAttributes<HTMLFormElement>["action"];
     form: UseFormReturn<TFieldValues, TContext, TTransformedValues>;
@@ -561,7 +561,7 @@ export type MeuStringFieldPath<TFieldValues extends FieldValues> = FieldPathByVa
 // @public
 export type MeuTimePickerFieldPath<TFieldValues extends FieldValues> = FieldPathByValue<TFieldValues, TimeValue> | FieldPathByValue<TFieldValues, TimeValue | null> | FieldPathByValue<TFieldValues, TimeValue | undefined> | FieldPathByValue<TFieldValues, TimeValue | null | undefined>;
 
-// @public (undocumented)
+// @public
 export type MeuUseFormProps<TFieldValues extends FieldValues, TContext = unknown, TTransformedValues = TFieldValues> = Omit<UseFormProps<TFieldValues, TContext, TTransformedValues>, "resolver"> & ({
     resolver?: never;
     schema: ZodType<TTransformedValues, TFieldValues>;

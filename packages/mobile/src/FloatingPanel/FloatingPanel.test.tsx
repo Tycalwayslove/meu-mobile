@@ -62,6 +62,18 @@ afterEach(() => {
 });
 
 describe("FloatingPanel", () => {
+  it("keeps its scrollable body keyboard reachable", () => {
+    render(<FloatingPanel anchors={[200, 400]}>可滚动详情</FloatingPanel>);
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+    const bodyId = handle.getAttribute("aria-controls");
+
+    expect(bodyId).toBeTruthy();
+    const body = document.getElementById(bodyId!);
+    expect(body && body.getAttribute("tabindex")).toBe("0");
+    expect(body && body.getAttribute("role")).toBe("region");
+    expect(body && body.getAttribute("aria-label")).toBe("浮动面板内容");
+  });
+
   it("normalizes pixel anchors and starts from the lowest available height", () => {
     const { container } = render(
       <FloatingPanel anchors={[0, 20, 20.4, 300, 2000, Number.POSITIVE_INFINITY]}>

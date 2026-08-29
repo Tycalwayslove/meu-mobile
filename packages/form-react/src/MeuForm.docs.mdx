@@ -199,7 +199,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx`、`MeuFormValueControls.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序、server error 替换、adapter 显式 error 保留与 readOnly Slider hidden FormData；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx`、`MeuFormValueControls.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序、server error 替换、adapter 显式 error 保留与 readOnly Slider hidden FormData；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交；统一 reset 矩阵还验证重置后的真实控件、原生 FormData 与 RHF 提交快照保持一致。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
 - Story interaction: `check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
@@ -242,6 +242,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 | 2026-08-29 | 未发布 | behavior     | Calendar 只在焦点离开整个复合控件时进入 touched 并运行 onBlur 校验                  | 组内日期/月份控件移焦不再提前触发 blur；消费方回调在 RHF 更新后执行         |
 | 2026-08-29 | 未发布 | verification | 增加移动 Chromium/WebKit 的原生 reset 与服务端错误滚动路径                          | reset 会清理值、dirty、touched 与错误；服务端错误聚焦首个 DOM 字段          |
 | 2026-08-29 | 未发布 | verification | 增加服务端默认值 hydration 与客户端默认值切换专项                                   | `reset(nextDefaults)` 后的原生 reset 恢复最新客户端默认值                   |
+| 2026-08-29 | 未发布 | verification | 22 个 adapter 统一 reset 后复核控件、FormData 与 RHF 快照                           | adapter reset 由同一事实源驱动，不保留旧 UI 草稿                            |
 | 2026-08-29 | 未发布 | verification | 在双移动引擎验证复杂日期范围的单条 JSON `FormData` 契约                             | 后端按 JSON 数组解析 `deliveryWindow`，不再依赖同名重复条目                 |
 | 2026-08-29 | 未发布 | hardening    | 核心注册、卸载、并发提交、异步错误与首错聚焦契约加固                                | 默认卸载注销；`action` 改为显式边界；新增可选错误/并发 props                |
 | 2026-08-29 | 未发布 | hardening    | 22 个 adapter 增加稳定的内部字段顺序标记，字符串 action 保留原始 submitter          | 复合/空值字段也按 DOM 顺序聚焦；业务不得依赖内部诊断属性                    |

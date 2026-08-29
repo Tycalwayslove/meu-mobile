@@ -18,6 +18,8 @@ export type ProductComponent = {
   name: string;
   packageName: string;
   priority: string;
+  /** Exact public export names owned by this product when a source module hosts multiple products. */
+  publicExportNames?: readonly string[];
   slug: string;
   sourcePath: string;
   /** Additional source prefixes whose public exports belong to this product document. */
@@ -318,6 +320,13 @@ function productOwnsSource(component: ProductComponent, sourcePath: string) {
   );
 }
 
+function productOwnsExport(component: ProductComponent, publicExport: PublicExport) {
+  if (!productOwnsSource(component, publicExport.sourcePath)) return false;
+  return component.publicExportNames
+    ? component.publicExportNames.includes(publicExport.name)
+    : true;
+}
+
 type ParsedDocs = {
   declaredExports: string[];
   issues: string[];
@@ -331,6 +340,18 @@ function parseInlineList(value: string) {
     .split(",")
     .map((item) => item.trim().replace(/^['"]|['"]$/g, ""))
     .filter(Boolean);
+}
+
+function collectH2Sections(sourceText: string) {
+  const matches = [...sourceText.matchAll(/^##\s+(.+?)\s*$/gm)];
+  return new Map(
+    matches.map((match, index) => {
+      const start = (match.index || 0) + match[0].length;
+      const nextMatch = matches[index + 1];
+      const end = nextMatch && nextMatch.index !== undefined ? nextMatch.index : sourceText.length;
+      return [match[1]!.trim(), sourceText.slice(start, end).trim()] as const;
+    })
+  );
 }
 
 export function parseComponentDocs(
@@ -406,11 +427,30 @@ export function parseComponentDocs(
       issues.push(`frontmatter exports contains non-public value: ${item}`);
   }
 
-  const headings = new Set(
-    [...sourceText.matchAll(/^##\s+(.+?)\s*$/gm)].map((match) => match[1]!.trim())
-  );
+  const sections = collectH2Sections(sourceText);
   for (const section of requiredDocsSections) {
-    if (!headings.has(section)) issues.push(`missing required section: ${section}`);
+    const body = sections.get(section);
+    if (body === undefined) issues.push(`missing required section: ${section}`);
+    else if (body.replace(/<!--[^]*?-->/g, "").trim() === "") {
+      issues.push(`required section is empty: ${section}`);
+    }
+  }
+
+  const usageBody = sections.get("基础用法");
+  if (usageBody && !/```(?:tsx?|jsx?)\b/.test(usageBody)) {
+    issues.push("基础用法 must include a typed TSX/JSX code example");
+  }
+  for (const section of ["Props", "Events"] as const) {
+    const body = sections.get(section);
+    if (
+      body &&
+      !/(?:`[^`]+`|\b[A-Za-z][A-Za-z0-9]*\b)/.test(body) &&
+      !/(?:不适用|没有独立|无独立|不暴露|无公开|不提供)/.test(body)
+    ) {
+      issues.push(
+        `${section} must name a documented API or include an explicit not-applicable reason`
+      );
+    }
   }
 
   return { declaredExports, issues };
@@ -429,7 +469,7 @@ export function buildComponentManifest(
       const packageManifest = packageByName.get(component.packageName);
       const publicExports = packageManifest
         ? packageManifest.exports
-            .filter((item) => productOwnsSource(component, item.sourcePath))
+            .filter((item) => productOwnsExport(component, item))
             .map(({ kind, name }) => ({ kind, name }))
         : [];
       const docsPath = expectedDocsPath(workspaceRoot, component.sourcePath, component.name);
@@ -455,7 +495,7 @@ export function buildComponentManifest(
           !components.some(
             (component) =>
               component.packageName === packageManifest.packageName &&
-              productOwnsSource(component, item.sourcePath)
+              productOwnsExport(component, item)
           )
       )
       .map((item) => ({ ...item, packageName: packageManifest.packageName }))
@@ -473,7 +513,7 @@ export function buildComponentManifest(
           components.some(
             (component) =>
               component.packageName === packageManifest.packageName &&
-              productOwnsSource(component, item.sourcePath)
+              productOwnsExport(component, item)
           ) &&
           !claimedPublicValues.has(`${packageManifest.packageName}:${item.name}`)
       )
@@ -524,6 +564,27 @@ export function manifestIssues(manifest: ComponentManifest) {
       issues.push(
         `product has no public export from declared source: ${product.packageName}/${product.name} (${product.sourcePath})`
       );
+    }
+    for (const name of product.publicExportNames || []) {
+      if (!product.publicExports.some((item) => item.name === name)) {
+        issues.push(
+          `configured public export is not available from declared source: ${product.packageName}/${product.name} -> ${name}`
+        );
+      }
+    }
+  }
+  const productOwners = new Map<string, string[]>();
+  for (const product of manifest.products) {
+    for (const item of product.publicExports) {
+      const key = `${product.packageName}:${item.kind}:${item.name}`;
+      const owners = productOwners.get(key) || [];
+      owners.push(product.name);
+      productOwners.set(key, owners);
+    }
+  }
+  for (const [key, owners] of productOwners) {
+    if (owners.length > 1) {
+      issues.push(`public export is assigned to multiple products: ${key} -> ${owners.join(", ")}`);
     }
   }
   for (const item of manifest.undocumentedPublicExports) {

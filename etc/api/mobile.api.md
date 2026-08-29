@@ -10,9 +10,9 @@ import type { ChangeEvent } from 'react';
 import type { ComponentProps } from 'react';
 import type { ComponentPropsWithoutRef } from 'react';
 import type { CSSProperties } from 'react';
-import { DateAdapter } from '@meu/date-adapter';
-import { DateParts } from '@meu/date-adapter';
-import { DatePrecision } from '@meu/date-adapter';
+import type { DateAdapter as DateAdapter_2 } from '@meu/date-adapter';
+import type { DateParts as DateParts_2 } from '@meu/date-adapter';
+import type { DatePrecision as DatePrecision_2 } from '@meu/date-adapter';
 import type { FocusEvent as FocusEvent_2 } from 'react';
 import type { FocusEventHandler } from 'react';
 import { ForwardRefExoticComponent } from 'react';
@@ -234,7 +234,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>): JSX.Element
 //
 // @public
 export type CalendarBaseProps<TDate> = CalendarNativeProps & {
-    adapter?: DateAdapter<TDate>;
+    adapter?: DateAdapter_2<TDate>;
     allowClear?: boolean;
     defaultMonth?: TDate;
     disabled?: boolean;
@@ -276,11 +276,11 @@ export type CalendarDayDetails<TDate> = {
 };
 
 // @public
-export function calendarDayKey<TDate>(adapter: DateAdapter<TDate>, value: TDate): string;
+export function calendarDayKey<TDate>(adapter: DateAdapter_2<TDate>, value: TDate): string;
 
 // @public
 export type CalendarDisabledDateDetails<TDate> = {
-    adapter: DateAdapter<TDate>;
+    adapter: DateAdapter_2<TDate>;
     outside: boolean;
 };
 
@@ -307,7 +307,7 @@ export type CalendarProps<TDate = Date> = CalendarSingleProps<TDate> | CalendarM
 export type CalendarRange<TDate> = readonly [TDate, TDate];
 
 // @public
-export function calendarRange<TDate>(adapter: DateAdapter<TDate>, value: CalendarValue<TDate>): CalendarRange<TDate> | null;
+export function calendarRange<TDate>(adapter: DateAdapter_2<TDate>, value: CalendarValue<TDate>): CalendarRange<TDate> | null;
 
 // @public
 export type CalendarRangeProps<TDate> = CalendarBaseProps<TDate> & {
@@ -540,7 +540,7 @@ export type CollapseProps = Omit<ComponentProps<"div">, "children" | "defaultVal
 export type CollapseVariant = "plain" | "card";
 
 // @public
-export function compareCalendarDays<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate): number;
+export function compareCalendarDays<TDate>(adapter: DateAdapter_2<TDate>, left: TDate, right: TDate): number;
 
 // @public
 export function ConfigProvider(input: ConfigProviderProps): JSX.Element;
@@ -561,11 +561,13 @@ export type ConfigProviderProps = {
 // Warning: (ae-forgotten-export) The symbol "CalendarGridDay" needs to be exported by the entry point index.d.ts
 //
 // @public
-export function createCalendarGrid<TDate>(adapter: DateAdapter<TDate>, month: TDate, weekStartsOn: CalendarWeekStartsOn, fixedWeeks: boolean): CalendarGridDay<TDate>[];
+export function createCalendarGrid<TDate>(adapter: DateAdapter_2<TDate>, month: TDate, weekStartsOn: CalendarWeekStartsOn, fixedWeeks: boolean): CalendarGridDay<TDate>[];
 
-export { DateAdapter }
+// @public
+export type DateAdapter<TDate> = DateAdapter_2<TDate>;
 
-export { DateParts }
+// @public
+export type DateParts = DateParts_2;
 
 // @public
 export function DatePicker<TDate = Date>(input: DatePickerProps<TDate>): JSX.Element;
@@ -601,10 +603,11 @@ export type DatePickerSelectDetails = PickerSelectDetails & {
     precision: DatePrecision;
 };
 
-export { DatePrecision }
+// @public
+export type DatePrecision = DatePrecision_2;
 
 // @public
-export function dateRangeIsSelectable<TDate>(adapter: DateAdapter<TDate>, value: CalendarRange<TDate> | null, options: {
+export function dateRangeIsSelectable<TDate>(adapter: DateAdapter_2<TDate>, value: CalendarRange<TDate> | null, options: {
     disabled?: boolean;
     disabledDate?: (date: TDate, details: CalendarDisabledDateDetails<TDate>) => boolean;
     max?: TDate;
@@ -1287,13 +1290,13 @@ export type NavBarProps = Omit<ComponentProps<"header">, "children" | "dir" | "t
 };
 
 // @public
-export function normalizeCalendarDay<TDate>(adapter: DateAdapter<TDate>, value: TDate): TDate | null;
+export function normalizeCalendarDay<TDate>(adapter: DateAdapter_2<TDate>, value: TDate): TDate | null;
 
 // @public
-export function normalizeCalendarMonth<TDate>(adapter: DateAdapter<TDate>, value: TDate): TDate | null;
+export function normalizeCalendarMonth<TDate>(adapter: DateAdapter_2<TDate>, value: TDate): TDate | null;
 
 // @public
-export function normalizeDateRange<TDate>(adapter: DateAdapter<TDate>, value: CalendarRange<TDate> | null | undefined): CalendarRange<TDate> | null;
+export function normalizeDateRange<TDate>(adapter: DateAdapter_2<TDate>, value: CalendarRange<TDate> | null | undefined): CalendarRange<TDate> | null;
 
 // @public
 export function NumberKeyboard(input: NumberKeyboardProps): JSX.Element | null;
@@ -1745,13 +1748,13 @@ export type SafeAreaProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
 };
 
 // @public
-export function sameCalendarDay<TDate>(adapter: DateAdapter<TDate>, left: TDate | null | undefined, right: TDate | null | undefined): boolean;
+export function sameCalendarDay<TDate>(adapter: DateAdapter_2<TDate>, left: TDate | null | undefined, right: TDate | null | undefined): boolean;
 
 // @public
-export function sameCalendarMonth<TDate>(adapter: DateAdapter<TDate>, left: TDate, right: TDate): boolean;
+export function sameCalendarMonth<TDate>(adapter: DateAdapter_2<TDate>, left: TDate, right: TDate): boolean;
 
 // @public
-export function sameDateRange<TDate>(adapter: DateAdapter<TDate>, left: CalendarRange<TDate> | null | undefined, right: CalendarRange<TDate> | null | undefined): boolean;
+export function sameDateRange<TDate>(adapter: DateAdapter_2<TDate>, left: CalendarRange<TDate> | null | undefined, right: CalendarRange<TDate> | null | undefined): boolean;
 
 // @public
 export const SearchField: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange"> & {
@@ -2410,10 +2413,10 @@ export type TimePickerSelectDetails = PickerSelectDetails & {
 };
 
 // @public
-export type TimeValue = Pick<DateParts, "hour" | "minute" | "second"> & {
-    hour: DateParts["hour"];
-    minute: DateParts["minute"];
-    second: DateParts["second"];
+export type TimeValue = Pick<DateParts_2, "hour" | "minute" | "second"> & {
+    hour: DateParts_2["hour"];
+    minute: DateParts_2["minute"];
+    second: DateParts_2["second"];
 };
 
 // @public

@@ -57,11 +57,13 @@ pnpm bundle:size:check
 
 同一路由还包含确定性网络恢复模型：Image 的不可解码响应→换源恢复、InfiniteList 的首次业务失败→显式重试→恰好两次请求，以及 ImageUploader 的失败任务重试与 pending task 主动取消。模型使用可控本地响应，不冒充慢 3G、离线或丢包实测。
 
-`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 14/14 通过，并完成 3 轮重复共 42/42。完整隔离 Next H5 套件共 112/112 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
+`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 14/14 通过，并完成 3 轮重复共 42/42。完整隔离 Next H5 套件共 114/114 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
+
+`/verification` 提供正式候选的 60 秒真机采样与 JSON 导出，记录估算 FPS、P95/最大帧耗时、慢帧、Long Tasks、可用时的 JS heap 及网络成功/失败/取消事件。两种移动引擎的 5 秒工具自检 2/2 通过，只证明采集与导出链路可运行；未在真实设备执行的结果不得填写 PERF-01。
 
 ## 仍需独立证明
 
-- VirtualList 动态高度滚动、滚动锚定、真实 60 秒采样、峰值内存与长任务；
+- VirtualList 动态高度滚动、滚动锚定，以及使用工作台完成真实 60 秒采样、峰值内存与长任务记录；
 - Carousel、BottomSheet、ImageViewer 的持续手势帧率；SwipeActions/FloatingPanel 的真实触摸与滚动竞争；
 - 图片上传的并发大图、object URL 回收与弱网内存；确定性失败、retry 和 Abort 已覆盖；
 - 慢 3G、离线与丢包条件下 Image/InfiniteList/ImageUploader 的真实请求时序；

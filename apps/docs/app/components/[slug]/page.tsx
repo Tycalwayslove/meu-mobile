@@ -19,6 +19,7 @@ import {
   getCategory,
   getComponentDoc
 } from "../../_data/components";
+import { getStoryLabel } from "../../_data/storybook-links";
 
 export function generateStaticParams() {
   return componentDocs.map((component) => ({ slug: component.slug }));
@@ -73,7 +74,14 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
         figmaNodeId ? `?node-id=${figmaNodeId.replace(":", "-")}` : ""
       }`
     : undefined;
-  const importExample = `import { ${component.name} } from "${component.packageName}";\n\nexport function Example() {\n  return <${component.name} />;\n}`;
+  const declaredExports = manifestProduct ? manifestProduct.declaredExports : [];
+  const importNames =
+    declaredExports.length > 0
+      ? declaredExports.length <= 3
+        ? declaredExports
+        : [declaredExports[0]!]
+      : [component.name];
+  const importExample = `import { ${importNames.join(", ")} } from "${component.packageName}";`;
 
   return (
     <main className="component-layout">
@@ -103,6 +111,12 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
           </div>
         </section>
 
+        <section className="component-section" aria-labelledby="import-title">
+          <h2 id="import-title">工作区导入</h2>
+          <p>当前版本保持私有，通过 pnpm workspace 消费对应包。</p>
+          <CodeBlock>{importExample}</CodeBlock>
+        </section>
+
         {v2Document ? (
           <ComponentDocument document={v2Document} />
         ) : (
@@ -122,7 +136,6 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
                 当前版本保持私有，不发布 npm。应用通过 pnpm workspace
                 直接消费对应包，并在入口引入全局样式。
               </p>
-              <CodeBlock>{importExample}</CodeBlock>
             </section>
           </>
         )}
@@ -143,9 +156,9 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
               <span>Figma 未绑定</span>
             )}
             {storybookUrls.length > 0 ? (
-              storybookUrls.map(({ href, storyId }, index) => (
+              storybookUrls.map(({ href, storyId }) => (
                 <a href={href} target="_blank" rel="noreferrer" key={storyId}>
-                  {storybookUrls.length > 1 ? `Story ${index + 1}` : "在 Storybook 打开"} ↗
+                  Story: {getStoryLabel(storyId)} ↗
                 </a>
               ))
             ) : (
