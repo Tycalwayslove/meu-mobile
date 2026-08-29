@@ -17,6 +17,7 @@ export function SiteFooter() {
         >
           Figma
         </a>
+        <Link href="/licenses">第三方许可</Link>
         <Link href="/privacy">隐私</Link>
         <Link href="/terms">使用说明</Link>
       </nav>

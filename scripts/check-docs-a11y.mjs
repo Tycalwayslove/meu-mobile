@@ -67,7 +67,7 @@ try {
   const browser = await chromium.launch({ headless: true });
   const discovery = await browser.newPage({ viewport: { width: 390, height: 844 } });
   await discovery.goto(`${origin}/components`, { waitUntil: "networkidle" });
-  let paths = await discovery
+  const componentPaths = await discovery
     .locator('a[href^="/components/"]')
     .evaluateAll((links) => [
       ...new Set(
@@ -77,6 +77,17 @@ try {
       )
     ]);
   await discovery.close();
+  const staticPaths = [
+    "/",
+    "/getting-started",
+    "/foundations",
+    "/components",
+    "/lab",
+    "/licenses",
+    "/privacy",
+    "/terms"
+  ];
+  let paths = [...componentPaths, ...staticPaths];
 
   const match = globalThis.process.env.MEU_DOCS_MATCH;
   const limit = Number.parseInt(globalThis.process.env.MEU_DOCS_LIMIT || "0", 10);
@@ -120,24 +131,33 @@ try {
             waitUntil: "networkidle"
           });
           if (!response?.ok()) throw new Error(`HTTP ${response?.status()}`);
-          const [headingCount, previewCount, apiCount, documentStatus] = await Promise.all([
+          const isComponentPage = path.startsWith("/components/");
+          const [headingCount, mainCount, previewCount, apiCount] = await Promise.all([
             page.locator("h1").count(),
+            page.locator("main").count(),
             page.locator(".preview-frame").count(),
-            page.locator("#api-reference").count(),
-            page.locator(".component-document__meta dd[data-status]").getAttribute("data-status")
+            page.locator("#api-reference").count()
           ]);
-          if (headingCount !== 1 || previewCount !== 1 || apiCount !== 1) {
+          if (headingCount !== 1 || mainCount !== 1) {
+            throw new Error(`Expected h1/main once, received ${headingCount}/${mainCount}`);
+          }
+          if (isComponentPage && (previewCount !== 1 || apiCount !== 1)) {
             throw new Error(
-              `Expected h1/preview/API once, received ${headingCount}/${previewCount}/${apiCount}`
+              `Expected component preview/API once, received ${previewCount}/${apiCount}`
             );
           }
-          if (
-            !documentStatus ||
-            !["audit", "design", "implementation", "verification", "commercial"].includes(
-              documentStatus
-            )
-          ) {
-            throw new Error(`Missing or invalid component document status: ${documentStatus}`);
+          if (isComponentPage) {
+            const documentStatus = await page
+              .locator(".component-document__meta dd[data-status]")
+              .getAttribute("data-status");
+            if (
+              !documentStatus ||
+              !["audit", "design", "implementation", "verification", "commercial"].includes(
+                documentStatus
+              )
+            ) {
+              throw new Error(`Missing or invalid component document status: ${documentStatus}`);
+            }
           }
           const selectedTheme = await page.locator(".theme-select select").inputValue();
           if (selectedTheme !== theme) {
@@ -190,7 +210,7 @@ try {
     globalThis.process.exitCode = 1;
   } else {
     globalThis.process.stdout.write(
-      `Docs accessibility passed: ${paths.length} component pages × ${themes.length} theme(s).\n`
+      `Docs accessibility passed: ${paths.length} pages × ${themes.length} theme(s).\n`
     );
   }
 } catch (error) {

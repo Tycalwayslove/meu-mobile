@@ -24,6 +24,14 @@ export default function TermsPage() {
           稳定等级。正式版本发布前，接口可能依据集成验证结果调整。
         </p>
       </section>
+      <section className="content-section">
+        <h2>第三方内容</h2>
+        <p>
+          Lucide、Feather 与 TanStack Virtual
+          等第三方内容继续适用各自许可证。来源、版本与完整许可文本见
+          <a href="/licenses">第三方许可</a>；Meu 命名不改变上游权利归属。
+        </p>
+      </section>
     </main>
   );
 }

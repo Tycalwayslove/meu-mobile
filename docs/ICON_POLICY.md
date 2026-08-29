@@ -13,3 +13,13 @@
 
 图标统一使用 24 × 24 viewBox、`currentColor`、2 px stroke 和圆角端点。品牌 Logo 与业务专属图标
 必须作为 MeuMall 自有资产单独登记。禁止新增 emoji 和 iconfont。
+
+分发与披露门禁：
+
+- `pnpm legal:check` 校验仓库、`@meu/icons-core` 与官网公开下载文件中的许可文本完全一致。
+- 门禁通过 `npm pack --dry-run --json` 验证实际图标包包含 `LICENSE`、第三方 notices、完整许可文本、
+  lock、manifest 与所有上游 SVG 快照。
+- 官网 `/licenses` 页面披露 Lucide、Feather 与 TanStack Virtual 的版本、来源、Meu 命名边界和
+  完整许可文本入口。
+- `modified=true` 的上游几何会被生成器和许可门禁拒绝，必须建立独立来源与授权记录后才能准入。
+- 工程门禁只保证来源与通知材料随制品保留；正式外部分发仍需项目负责人或法务按交付方式签字。

@@ -7,7 +7,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     /\/$/,
     ""
   );
-  const routes = ["", "/components", "/getting-started", "/foundations", "/lab"];
+  const routes = [
+    "",
+    "/components",
+    "/getting-started",
+    "/foundations",
+    "/lab",
+    "/licenses",
+    "/privacy",
+    "/terms"
+  ];
   return [
     ...routes.map((route) => ({ url: `${base}${route}`, changeFrequency: "weekly" as const })),
     ...componentDocs.map((component) => ({

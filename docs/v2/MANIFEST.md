@@ -61,4 +61,4 @@ packages/primitives-react/src/Portal.docs.mdx
 - 公开导出没有任何产品文档归属；
 - 外部 `export *` 无法被本地静态枚举。
 
-`@meu/form-react` 当前透传 `react-hook-form` 的 `export *`。manifest 会保留这个事实，但不会假装已经枚举其上游 API；V2 发布前应决定改为显式导出，或将其作为经过审计的例外策略记录下来。
+`@meu/form-react` 已移除对 `react-hook-form` 的外部 `export *`，仅公开 Meu 自有入口；消费方需要的上游 hooks 与类型应直接从 `react-hook-form` 导入。manifest 会继续把任何新出现、无法静态枚举的外部 wildcard export 作为阻断项报告。

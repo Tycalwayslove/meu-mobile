@@ -441,6 +441,7 @@ export function ConsumerScenario() {
   const [refreshRequestCount, setRefreshRequestCount] = useState(0);
   const [refreshPending, setRefreshPending] = useState(false);
   const [infinitePage, setInfinitePage] = useState(1);
+  const [infinitePending, setInfinitePending] = useState(false);
   const [infiniteRequestStatus, setInfiniteRequestStatus] = useState("分页请求：空闲");
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
@@ -480,6 +481,7 @@ export function ConsumerScenario() {
   const virtualListRef = useRef<VirtualListRef>(null);
   const portalTargetRef = useRef<HTMLDivElement>(null);
   const refreshResolveRef = useRef<(() => void) | null>(null);
+  const infiniteCompleteRef = useRef<(() => void) | null>(null);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -672,21 +674,38 @@ export function ConsumerScenario() {
             loadMore={({ signal, trigger }) =>
               new Promise<void>((resolve, reject) => {
                 setInfiniteRequestStatus(`分页请求：${trigger}`);
+                setInfinitePending(true);
                 const handleAbort = () => {
-                  window.clearTimeout(timer);
+                  infiniteCompleteRef.current = null;
+                  setInfinitePending(false);
                   setInfiniteRequestStatus(`分页请求已取消：${trigger}`);
                   reject(new DOMException("Aborted", "AbortError"));
                 };
-                const timer = window.setTimeout(() => {
+                infiniteCompleteRef.current = () => {
                   signal.removeEventListener("abort", handleAbort);
+                  infiniteCompleteRef.current = null;
+                  setInfinitePending(false);
                   setInfinitePage((current) => current + 1);
                   setInfiniteRequestStatus(`分页请求已完成：${trigger}`);
                   resolve();
-                }, 100);
+                };
                 signal.addEventListener("abort", handleAbort, { once: true });
               })
             }
           />
+          <Button
+            size="small"
+            type="button"
+            variant="outline"
+            tone="neutral"
+            disabled={!infinitePending}
+            onClick={() => {
+              const complete = infiniteCompleteRef.current;
+              if (complete) complete();
+            }}
+          >
+            完成分页请求
+          </Button>
           <Button
             size="small"
             type="button"

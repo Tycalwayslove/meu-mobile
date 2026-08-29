@@ -540,6 +540,11 @@ textarea:focus,
   line-height: 1.75;
 }
 
+.content-section code {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .preview-frame {
   min-height: 360px;
   display: grid;

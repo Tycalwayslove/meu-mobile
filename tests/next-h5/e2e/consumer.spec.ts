@@ -544,6 +544,8 @@ test("loads infinite pages manually, locks each request and reaches completion",
     (button as HTMLButtonElement).click();
   });
   await expect(root).toHaveAttribute("aria-busy", "true");
+  await expect(section.getByText("分页请求：manual")).toBeVisible();
+  await section.getByRole("button", { name: "完成分页请求" }).click();
   await expect(list.getByRole("listitem")).toHaveCount(4);
   const secondLoad = section.getByRole("button", { name: "加载更多" });
   await expect(secondLoad).toBeFocused();
@@ -551,6 +553,8 @@ test("loads infinite pages manually, locks each request and reaches completion",
   await expect(section.getByText("分页请求已完成：manual")).toBeVisible();
 
   await secondLoad.click();
+  await expect(root).toHaveAttribute("aria-busy", "true");
+  await section.getByRole("button", { name: "完成分页请求" }).click();
   await expect(list.getByRole("listitem")).toHaveCount(6);
   await expect(root).toHaveAttribute("data-status", "complete");
   await expect(section.getByText("没有更多内容了").last()).toBeVisible();
@@ -565,6 +569,7 @@ test("cooperatively aborts an in-flight infinite-list request on external comple
 
   await section.getByRole("button", { name: "加载更多" }).click();
   await expect(root).toHaveAttribute("aria-busy", "true");
+  await expect(section.getByRole("button", { name: "完成分页请求" })).toBeEnabled();
   await section.getByRole("button", { name: "结束分页并取消请求" }).click();
 
   await expect(root).toHaveAttribute("data-status", "complete");
