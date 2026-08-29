@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 114688,
-      "brotliBytes": 80930,
-      "gzipBytes": 102350,
-      "rawBytes": 529566,
+      "brotliBytes": 81811,
+      "gzipBytes": 103739,
+      "rawBytes": 538986,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -47,17 +47,17 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4763,
-          "gzipBytes": 5344,
-          "rawBytes": 18071,
+          "brotliBytes": 4772,
+          "gzipBytes": 5354,
+          "rawBytes": 18152,
           "name": "MeuFormTextInput",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 7287,
-          "gzipBytes": 8215,
-          "rawBytes": 31953,
+          "brotliBytes": 7303,
+          "gzipBytes": 8229,
+          "rawBytes": 32036,
           "name": "MeuFormNumberKeyboard",
           "passesBudget": true
         },
@@ -72,152 +72,152 @@
         {
           "budgetBytes": 65536,
           "brotliBytes": 29763,
-          "gzipBytes": 34200,
-          "rawBytes": 148741,
+          "gzipBytes": 34212,
+          "rawBytes": 148798,
           "name": "MeuFormImageUploader",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5229,
-          "gzipBytes": 5884,
-          "rawBytes": 22378,
+          "brotliBytes": 5252,
+          "gzipBytes": 5897,
+          "rawBytes": 22465,
           "name": "MeuFormTextArea",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5521,
-          "gzipBytes": 6231,
-          "rawBytes": 21866,
+          "brotliBytes": 5552,
+          "gzipBytes": 6244,
+          "rawBytes": 21959,
           "name": "MeuFormSearchField",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4464,
-          "gzipBytes": 4991,
-          "rawBytes": 19180,
+          "brotliBytes": 4579,
+          "gzipBytes": 5124,
+          "rawBytes": 19903,
           "name": "MeuFormCheckbox",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4142,
-          "gzipBytes": 4666,
-          "rawBytes": 17106,
+          "brotliBytes": 4242,
+          "gzipBytes": 4769,
+          "rawBytes": 17642,
           "name": "MeuFormCheckboxGroup",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4134,
-          "gzipBytes": 4653,
-          "rawBytes": 17016,
+          "brotliBytes": 4237,
+          "gzipBytes": 4750,
+          "rawBytes": 17514,
           "name": "MeuFormRadioGroup",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4258,
-          "gzipBytes": 4795,
-          "rawBytes": 17864,
+          "brotliBytes": 4362,
+          "gzipBytes": 4884,
+          "rawBytes": 18364,
           "name": "MeuFormSwitch",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5704,
-          "gzipBytes": 6389,
-          "rawBytes": 24733,
+          "brotliBytes": 5688,
+          "gzipBytes": 6400,
+          "rawBytes": 24818,
           "name": "MeuFormStepper",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5465,
-          "gzipBytes": 6075,
-          "rawBytes": 22897,
+          "brotliBytes": 5460,
+          "gzipBytes": 6084,
+          "rawBytes": 22980,
           "name": "MeuFormSlider",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5556,
-          "gzipBytes": 6218,
-          "rawBytes": 22532,
+          "brotliBytes": 5586,
+          "gzipBytes": 6231,
+          "rawBytes": 22611,
           "name": "MeuFormRate",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5541,
-          "gzipBytes": 6226,
-          "rawBytes": 24287,
+          "brotliBytes": 5627,
+          "gzipBytes": 6322,
+          "rawBytes": 24791,
           "name": "MeuFormSelector",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 27386,
-          "gzipBytes": 32183,
-          "rawBytes": 139046,
+          "brotliBytes": 27444,
+          "gzipBytes": 32200,
+          "rawBytes": 139129,
           "name": "MeuFormTreeSelect",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 13454,
-          "gzipBytes": 15243,
-          "rawBytes": 64111,
+          "brotliBytes": 13474,
+          "gzipBytes": 15258,
+          "rawBytes": 64194,
           "name": "MeuFormPicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 14058,
-          "gzipBytes": 15999,
-          "rawBytes": 69095,
+          "brotliBytes": 14091,
+          "gzipBytes": 16015,
+          "rawBytes": 69178,
           "name": "MeuFormCascadePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 17820,
-          "gzipBytes": 20257,
-          "rawBytes": 88878,
+          "brotliBytes": 18076,
+          "gzipBytes": 20549,
+          "rawBytes": 90444,
           "name": "MeuFormDatePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 19574,
-          "gzipBytes": 22566,
-          "rawBytes": 100212,
+          "brotliBytes": 19834,
+          "gzipBytes": 22925,
+          "rawBytes": 101829,
           "name": "MeuFormDateRangePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 11584,
-          "gzipBytes": 13159,
-          "rawBytes": 56491,
+          "brotliBytes": 11844,
+          "gzipBytes": 13469,
+          "rawBytes": 58108,
           "name": "MeuFormCalendar",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 16032,
-          "gzipBytes": 18208,
-          "rawBytes": 79442,
+          "brotliBytes": 16428,
+          "gzipBytes": 18668,
+          "rawBytes": 81828,
           "name": "MeuFormTimePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5161,
-          "gzipBytes": 5779,
-          "rawBytes": 22591,
+          "brotliBytes": 5175,
+          "gzipBytes": 5800,
+          "rawBytes": 22718,
           "name": "MeuFormSegmentedControl",
           "passesBudget": true
         },
@@ -415,9 +415,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 9389,
-      "gzipBytes": 10636,
-      "rawBytes": 45172,
+      "brotliBytes": 9632,
+      "gzipBytes": 10927,
+      "rawBytes": 46706,
       "docsPath": "packages/mobile/src/Calendar/Calendar.docs.mdx",
       "name": "Calendar",
       "packageName": "@meu/mobile",
@@ -426,9 +426,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 9361,
-          "gzipBytes": 10606,
-          "rawBytes": 45018,
+          "brotliBytes": 9604,
+          "gzipBytes": 10897,
+          "rawBytes": 46552,
           "name": "Calendar",
           "passesBudget": true
         },
@@ -584,9 +584,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3408,
-      "gzipBytes": 3824,
-      "rawBytes": 16090,
+      "brotliBytes": 3528,
+      "gzipBytes": 3963,
+      "rawBytes": 17181,
       "docsPath": "packages/mobile/src/Checkbox/Checkbox.docs.mdx",
       "name": "Checkbox",
       "packageName": "@meu/mobile",
@@ -595,17 +595,17 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2889,
-          "gzipBytes": 3233,
-          "rawBytes": 11955,
+          "brotliBytes": 2999,
+          "gzipBytes": 3353,
+          "rawBytes": 12591,
           "name": "Checkbox",
           "passesBudget": true
         },
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2514,
-          "gzipBytes": 2843,
-          "rawBytes": 9650,
+          "brotliBytes": 2592,
+          "gzipBytes": 2929,
+          "rawBytes": 10105,
           "name": "CheckboxGroup",
           "passesBudget": true
         }
@@ -663,9 +663,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 14899,
-      "gzipBytes": 16769,
-      "rawBytes": 74336,
+      "brotliBytes": 15139,
+      "gzipBytes": 17040,
+      "rawBytes": 75819,
       "docsPath": "packages/mobile/src/DatePicker/DatePicker.docs.mdx",
       "name": "DatePicker",
       "packageName": "@meu/mobile",
@@ -674,9 +674,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 14895,
-          "gzipBytes": 16766,
-          "rawBytes": 74314,
+          "brotliBytes": 15136,
+          "gzipBytes": 17037,
+          "rawBytes": 75797,
           "name": "DatePicker",
           "passesBudget": true
         },
@@ -692,9 +692,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 16794,
-      "gzipBytes": 19272,
-      "rawBytes": 85902,
+      "brotliBytes": 17062,
+      "gzipBytes": 19615,
+      "rawBytes": 87436,
       "docsPath": "packages/mobile/src/DateRangePicker/DateRangePicker.docs.mdx",
       "name": "DateRangePicker",
       "packageName": "@meu/mobile",
@@ -703,9 +703,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 16827,
-          "gzipBytes": 19262,
-          "rawBytes": 85844,
+          "brotliBytes": 17054,
+          "gzipBytes": 19604,
+          "rawBytes": 87378,
           "name": "DateRangePicker",
           "passesBudget": true
         },
@@ -1252,9 +1252,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3327,
-      "gzipBytes": 3743,
-      "rawBytes": 15435,
+      "brotliBytes": 3440,
+      "gzipBytes": 3867,
+      "rawBytes": 16406,
       "docsPath": "packages/mobile/src/Radio/Radio.docs.mdx",
       "name": "RadioGroup",
       "packageName": "@meu/mobile",
@@ -1263,17 +1263,17 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2796,
-          "gzipBytes": 3137,
-          "rawBytes": 11233,
+          "brotliBytes": 2899,
+          "gzipBytes": 3239,
+          "rawBytes": 11787,
           "name": "Radio",
           "passesBudget": true
         },
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2516,
-          "gzipBytes": 2830,
-          "rawBytes": 9428,
+          "brotliBytes": 2571,
+          "gzipBytes": 2912,
+          "rawBytes": 9845,
           "name": "RadioGroup",
           "passesBudget": true
         }
@@ -1386,9 +1386,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3919,
-      "gzipBytes": 4395,
-      "rawBytes": 16920,
+      "brotliBytes": 3993,
+      "gzipBytes": 4479,
+      "rawBytes": 17337,
       "docsPath": "packages/mobile/src/Selector/Selector.docs.mdx",
       "name": "Selector",
       "packageName": "@meu/mobile",
@@ -1397,9 +1397,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3919,
-          "gzipBytes": 4395,
-          "rawBytes": 16920,
+          "brotliBytes": 3993,
+          "gzipBytes": 4479,
+          "rawBytes": 17337,
           "name": "Selector",
           "passesBudget": true
         }
@@ -1554,9 +1554,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2697,
-      "gzipBytes": 3042,
-      "rawBytes": 10651,
+      "brotliBytes": 2767,
+      "gzipBytes": 3126,
+      "rawBytes": 11068,
       "docsPath": "packages/mobile/src/Switch/Switch.docs.mdx",
       "name": "Switch",
       "packageName": "@meu/mobile",
@@ -1565,9 +1565,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2697,
-          "gzipBytes": 3042,
-          "rawBytes": 10651,
+          "brotliBytes": 2767,
+          "gzipBytes": 3126,
+          "rawBytes": 11068,
           "name": "Switch",
           "passesBudget": true
         }
@@ -1701,9 +1701,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 13449,
-      "gzipBytes": 15157,
-      "rawBytes": 66456,
+      "brotliBytes": 13846,
+      "gzipBytes": 15592,
+      "rawBytes": 68759,
       "docsPath": "packages/mobile/src/TimePicker/TimePicker.docs.mdx",
       "name": "TimePicker",
       "packageName": "@meu/mobile",
@@ -1712,9 +1712,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 13228,
-          "gzipBytes": 14907,
-          "rawBytes": 65377,
+          "brotliBytes": 13622,
+          "gzipBytes": 15350,
+          "rawBytes": 67680,
           "name": "TimePicker",
           "passesBudget": true
         },

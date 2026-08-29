@@ -634,7 +634,7 @@
           "type": "CheckboxStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state for the group and descendants."
+          "description": "Marks the group invalid and applies error visuals to descendants without adding ARIA invalid tokens to each checkbox."
         },
         {
           "name": "value",
@@ -678,7 +678,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Displays and exposes the native mixed state without changing the submitted value."
+          "description": "Keeps the native mixed property and `aria-checked=\"mixed\"` active until this prop becomes false, without changing the submitted value."
         },
         {
           "name": "readOnly",
@@ -699,7 +699,7 @@
           "type": "CheckboxStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; use `aria-invalid` or Field for accessible validation."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
         },
         {
           "name": "value",
@@ -778,7 +778,7 @@
           "type": "RadioStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state for the group and descendants."
+          "description": "Marks the radiogroup invalid and applies error visuals to descendants without adding ARIA invalid tokens to each radio."
         },
         {
           "name": "value",
@@ -836,7 +836,7 @@
           "type": "RadioStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; use `aria-invalid` or Field for accessible validation."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
         },
         {
           "name": "value",
@@ -894,7 +894,7 @@
           "type": "SwitchStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; use `aria-invalid` or Field for accessible validation."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
         },
         {
           "name": "onChange",
@@ -1341,7 +1341,7 @@
           "type": "SelectorStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid`.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact.",
           "defaultValue": "\"default\""
         },
         {
@@ -8793,21 +8793,21 @@
           "type": "TDate",
           "required": false,
           "event": false,
-          "description": "Inclusive latest selectable date; defaults to the end of the year ten years after today."
+          "description": "Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Defaults to the end of the year ten years after today."
         },
         {
           "name": "min",
           "type": "TDate",
           "required": false,
           "event": false,
-          "description": "Inclusive earliest selectable date; defaults to the start of the year ten years before today."
+          "description": "Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Defaults to the start of the year ten years before today."
         },
         {
           "name": "minuteStep",
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Minute increment, floored and clamped from 1 through 59.",
+          "description": "Minute-grid increment anchored at 0, floored and clamped from 1 through 59.",
           "defaultValue": "1"
         },
         {
@@ -8822,7 +8822,7 @@
           "type": "DatePrecision",
           "required": false,
           "event": false,
-          "description": "Finest displayed unit; columns run from year through this precision.",
+          "description": "Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value.",
           "defaultValue": "\"day\""
         },
         {
@@ -8867,7 +8867,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Second increment, floored and clamped from 1 through 59.",
+          "description": "Second-grid increment anchored at 0, floored and clamped from 1 through 59.",
           "defaultValue": "1"
         },
         {
@@ -9696,7 +9696,7 @@
           "type": "() => void",
           "required": true,
           "event": false,
-          "description": "Requests and focuses the adapter's current month and day."
+          "description": "Requests the adapter's current month and focuses today, or the nearest enabled in-bounds day\nfound within 366 days. Focus falls back to the calendar root when none is found. Controlled\nconsumers must accept the month request before cross-month focus can complete."
         }
       ],
       "CalendarSingleProps": [
@@ -10465,7 +10465,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Hour increment, floored and clamped to 1–23.",
+          "description": "Hour-grid increment anchored at 0 in h23 and at 0/12 in h12, floored and clamped to 1–23.",
           "defaultValue": "1"
         },
         {
@@ -10489,21 +10489,21 @@
           "type": "TimeValue",
           "required": false,
           "event": false,
-          "description": "Inclusive latest selectable time; invalid values fall back to 23:59:59."
+          "description": "Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Invalid values fall back to 23:59:59."
         },
         {
           "name": "min",
           "type": "TimeValue",
           "required": false,
           "event": false,
-          "description": "Inclusive earliest selectable time; invalid values fall back to 00:00:00."
+          "description": "Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Invalid values fall back to 00:00:00."
         },
         {
           "name": "minuteStep",
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Minute increment, floored and clamped to 1–59.",
+          "description": "Minute-grid increment anchored at 0, floored and clamped to 1–59.",
           "defaultValue": "1"
         },
         {
@@ -10518,7 +10518,7 @@
           "type": "TimePickerPrecision",
           "required": false,
           "event": false,
-          "description": "Last time unit rendered and compared against bounds.",
+          "description": "Last rendered unit; lower units are zeroed and bounds are enforced against the resulting complete time.",
           "defaultValue": "\"minute\""
         },
         {
@@ -10563,7 +10563,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Second increment, floored and clamped to 1–59.",
+          "description": "Second-grid increment anchored at 0, floored and clamped to 1–59.",
           "defaultValue": "1"
         },
         {
@@ -11556,7 +11556,7 @@
           "type": "Omit<NumberKeyboardTriggerProps, \"value\" | \"aria-controls\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, ref, and ARIA wiring managed here."
+          "description": "Props forwarded to the trigger except managed state and ARIA wiring. Disabling either the\nkeyboard or trigger also omits the field from React Hook Form and native submissions."
         },
         {
           "name": "onConfirm",
@@ -12145,7 +12145,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Displays and exposes the native mixed state without changing the submitted value."
+          "description": "Keeps the native mixed property and `aria-checked=\"mixed\"` active until this prop becomes false, without changing the submitted value."
         },
         {
           "name": "label",
@@ -12194,7 +12194,7 @@
           "type": "CheckboxStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; use `aria-invalid` or Field for accessible validation."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
         },
         {
           "name": "value",
@@ -12294,7 +12294,7 @@
           "type": "CheckboxStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state for the group and descendants."
+          "description": "Marks the group invalid and applies error visuals to descendants without adding ARIA invalid tokens to each checkbox."
         },
         {
           "name": "onChange",
@@ -12380,7 +12380,7 @@
           "type": "RadioStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state for the group and descendants."
+          "description": "Marks the radiogroup invalid and applies error visuals to descendants without adding ARIA invalid tokens to each radio."
         },
         {
           "name": "onChange",
@@ -12452,7 +12452,7 @@
           "type": "SwitchStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; use `aria-invalid` or Field for accessible validation."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
         },
         {
           "name": "onBlur",
@@ -12927,7 +12927,7 @@
           "type": "SelectorStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid`.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact.",
           "defaultValue": "\"default\""
         },
         {
@@ -13559,7 +13559,7 @@
           "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, and ref managed by this adapter."
+          "description": "Props forwarded to the trigger except managed state. Disabling either the tree or trigger\nalso omits the field from React Hook Form and native submissions."
         },
         {
           "name": "virtual",
@@ -13916,7 +13916,7 @@
           "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, and ref managed by this adapter."
+          "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
         },
         {
           "name": "onCancel",
@@ -14244,7 +14244,7 @@
           "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, and ref managed by this adapter."
+          "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
         },
         {
           "name": "onCancel",
@@ -14371,21 +14371,21 @@
           "type": "TDate",
           "required": false,
           "event": false,
-          "description": "Inclusive latest selectable date; defaults to the end of the year ten years after today."
+          "description": "Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Defaults to the end of the year ten years after today."
         },
         {
           "name": "min",
           "type": "TDate",
           "required": false,
           "event": false,
-          "description": "Inclusive earliest selectable date; defaults to the start of the year ten years before today."
+          "description": "Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Defaults to the start of the year ten years before today."
         },
         {
           "name": "minuteStep",
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Minute increment, floored and clamped from 1 through 59.",
+          "description": "Minute-grid increment anchored at 0, floored and clamped from 1 through 59.",
           "defaultValue": "1"
         },
         {
@@ -14393,7 +14393,7 @@
           "type": "DatePrecision",
           "required": false,
           "event": false,
-          "description": "Finest displayed unit; columns run from year through this precision.",
+          "description": "Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value.",
           "defaultValue": "\"day\""
         },
         {
@@ -14424,7 +14424,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Second increment, floored and clamped from 1 through 59.",
+          "description": "Second-grid increment anchored at 0, floored and clamped from 1 through 59.",
           "defaultValue": "1"
         },
         {
@@ -14559,21 +14559,21 @@
           "type": "TDate",
           "required": false,
           "event": false,
-          "description": "Inclusive latest selectable date; defaults to the end of the year ten years after today."
+          "description": "Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Defaults to the end of the year ten years after today."
         },
         {
           "name": "min",
           "type": "TDate",
           "required": false,
           "event": false,
-          "description": "Inclusive earliest selectable date; defaults to the start of the year ten years before today."
+          "description": "Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Defaults to the start of the year ten years before today."
         },
         {
           "name": "minuteStep",
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Minute increment, floored and clamped from 1 through 59.",
+          "description": "Minute-grid increment anchored at 0, floored and clamped from 1 through 59.",
           "defaultValue": "1"
         },
         {
@@ -14609,7 +14609,7 @@
           "type": "DatePrecision",
           "required": false,
           "event": false,
-          "description": "Finest displayed unit; columns run from year through this precision.",
+          "description": "Finest displayed unit; columns run from year through this precision, lower units are zeroed, and bounds are enforced against the resulting complete value.",
           "defaultValue": "\"day\""
         },
         {
@@ -14654,7 +14654,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Second increment, floored and clamped from 1 through 59.",
+          "description": "Second-grid increment anchored at 0, floored and clamped from 1 through 59.",
           "defaultValue": "1"
         },
         {
@@ -14669,7 +14669,7 @@
           "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, and ref managed by this adapter."
+          "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
         },
         {
           "name": "onCancel",
@@ -15186,7 +15186,7 @@
           "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, and ref managed by this adapter."
+          "description": "Props forwarded to the trigger except managed state. Disabling either the picker or trigger\nalso omits the field from React Hook Form and native submissions."
         },
         {
           "name": "weekdayLabels",
@@ -16328,7 +16328,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Hour increment, floored and clamped to 1–23.",
+          "description": "Hour-grid increment anchored at 0 in h23 and at 0/12 in h12, floored and clamped to 1–23.",
           "defaultValue": "1"
         },
         {
@@ -16352,21 +16352,21 @@
           "type": "TimeValue",
           "required": false,
           "event": false,
-          "description": "Inclusive latest selectable time; invalid values fall back to 23:59:59."
+          "description": "Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Invalid values fall back to 23:59:59."
         },
         {
           "name": "min",
           "type": "TimeValue",
           "required": false,
           "event": false,
-          "description": "Inclusive earliest selectable time; invalid values fall back to 00:00:00."
+          "description": "Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Invalid values fall back to 00:00:00."
         },
         {
           "name": "minuteStep",
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Minute increment, floored and clamped to 1–59.",
+          "description": "Minute-grid increment anchored at 0, floored and clamped to 1–59.",
           "defaultValue": "1"
         },
         {
@@ -16374,7 +16374,7 @@
           "type": "TimePickerPrecision",
           "required": false,
           "event": false,
-          "description": "Last time unit rendered and compared against bounds.",
+          "description": "Last rendered unit; lower units are zeroed and bounds are enforced against the resulting complete time.",
           "defaultValue": "\"minute\""
         },
         {
@@ -16405,7 +16405,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Second increment, floored and clamped to 1–59.",
+          "description": "Second-grid increment anchored at 0, floored and clamped to 1–59.",
           "defaultValue": "1"
         },
         {
@@ -16518,7 +16518,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Hour increment, floored and clamped to 1–23.",
+          "description": "Hour-grid increment anchored at 0 in h23 and at 0/12 in h12, floored and clamped to 1–23.",
           "defaultValue": "1"
         },
         {
@@ -16549,21 +16549,21 @@
           "type": "TimeValue",
           "required": false,
           "event": false,
-          "description": "Inclusive latest selectable time; invalid values fall back to 23:59:59."
+          "description": "Inclusive raw upper bound; the effective maximum is the last precision/step grid point at or before it. Invalid values fall back to 23:59:59."
         },
         {
           "name": "min",
           "type": "TimeValue",
           "required": false,
           "event": false,
-          "description": "Inclusive earliest selectable time; invalid values fall back to 00:00:00."
+          "description": "Inclusive raw lower bound; the effective minimum is the first precision/step grid point at or after it. Invalid values fall back to 00:00:00."
         },
         {
           "name": "minuteStep",
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Minute increment, floored and clamped to 1–59.",
+          "description": "Minute-grid increment anchored at 0, floored and clamped to 1–59.",
           "defaultValue": "1"
         },
         {
@@ -16599,7 +16599,7 @@
           "type": "TimePickerPrecision",
           "required": false,
           "event": false,
-          "description": "Last time unit rendered and compared against bounds.",
+          "description": "Last rendered unit; lower units are zeroed and bounds are enforced against the resulting complete time.",
           "defaultValue": "\"minute\""
         },
         {
@@ -16644,7 +16644,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Second increment, floored and clamped to 1–59.",
+          "description": "Second-grid increment anchored at 0, floored and clamped to 1–59.",
           "defaultValue": "1"
         },
         {
@@ -16652,7 +16652,7 @@
           "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
           "required": false,
           "event": false,
-          "description": "Props forwarded to the trigger except state, value, status, and ref managed by this adapter."
+          "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
         },
         {
           "name": "onCancel",
