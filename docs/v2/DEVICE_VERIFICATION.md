@@ -19,6 +19,8 @@
 
 - 移动 Chromium/WebKit 隔离 Next H5：84/84 通过，逐用例断言 0 `pageerror`、0 `console.error`。
 - Storybook：374 个 Story × 7 场景，共 2,618 个组合通过。
+- 官网：68 个组件页 × Light/Dark，共 136 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
+- 客户端静态兼容扫描：202 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。
 - 当前开发机安装了 iOS 18.3 与 18.6 Simulator；尚未把模拟器目视结果登记为真机证据。
 - Android SDK/ADB 可用，但尚无已配置 AVD；Android 真机与 Emulator 均未登记。
 - VoiceOver、TalkBack、WKWebView 宿主、旧 WebView 和弱网/内存记录：待补。
@@ -91,3 +93,5 @@
 3. 高风险手势/Overlay/输入组件在真实 WebView 宿主中通过对应场景。
 4. 所有失败已有修复并复验，或在支持矩阵与组件留存文档中明确降级。
 5. 最终集中执行 Chromatic 视觉审批和 Vercel 官网发布；开发期不重复部署。
+
+跨设备、性能、法务、视觉与发布的最终签字统一记录在 [`RELEASE_ACCEPTANCE.md`](./RELEASE_ACCEPTANCE.md)。

@@ -12,9 +12,9 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 
 ## 当前基线
 
-- Manifest 登记 68 个组件族、125 个公开值、369 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
+- Manifest 登记 68 个组件族、125 个公开值、371 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
 - 68/68 个组件族已由 `audit/implementation` 进入 `verification`；这表示本地实现与自动化证据齐全到可执行最终验收，不代表已越过真机、Chromatic 和发布门禁。
-- API 属性清单已覆盖 222 个结构化类型、2250 个字段与 232 个事件；2250/2250 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
+- API 属性清单已覆盖 222 个结构化类型、2258 个字段与 232 个事件；2258/2258 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
 - Storybook 当前包含 80 个标题、374 个 Story；68 个官网组件链接、342 个留存文档 Story ID 与对应 Autodocs entry 均通过静态校验。
 - 80 个 Storybook 标题均至少包含一项关键 `play` 交互；本地浏览器门禁会等待交互成功，再在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合，最近一次结果为 0 违规、0 `pageerror`。
 - 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；Props / Events 来自完整的生成 API 模型。
@@ -112,7 +112,7 @@ audit → design → implementation → verification → commercial
 
 每个组件完成时，同一个变更必须包含：实现、类型 JSDoc、单测、Story/交互、视觉基线、留存文档、官网页面和变更记录。不得把文档留到所有代码完成后集中补写。
 
-逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，真机记录使用 [`DEVICE_VERIFICATION.md`](./DEVICE_VERIFICATION.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
+逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，真机记录使用 [`DEVICE_VERIFICATION.md`](./DEVICE_VERIFICATION.md)，最终候选的人工签字与发布顺序见 [`RELEASE_ACCEPTANCE.md`](./RELEASE_ACCEPTANCE.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
 
 ## 发布门禁
 
