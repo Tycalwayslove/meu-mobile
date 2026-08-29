@@ -314,6 +314,15 @@ export function ConsumerScenario() {
   const [passcodeResult, setPasscodeResult] = useState("等待验证码输入");
   const [imageUploadResult, setImageUploadResult] = useState("图片上传尚未操作");
   const [savedImages, setSavedImages] = useState("");
+  const [sliderPointerValue, setSliderPointerValue] = useState(40);
+  const [sliderCompleteCount, setSliderCompleteCount] = useState(0);
+  const [sliderCancelCount, setSliderCancelCount] = useState(0);
+  const [sliderPointerSource, setSliderPointerSource] = useState("none");
+  const [sliderCancelSource, setSliderCancelSource] = useState("none");
+  const [ratePointerValue, setRatePointerValue] = useState(3);
+  const [rateCancelCount, setRateCancelCount] = useState(0);
+  const [ratePointerSource, setRatePointerSource] = useState("none");
+  const [rateCancelSource, setRateCancelSource] = useState("none");
   const [feedbackMessage, setFeedbackMessage] = useState("等待反馈组件操作");
   const [popupOpen, setPopupOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -1213,13 +1222,44 @@ export function ConsumerScenario() {
           <MeuFormSwitch<FormValues> name="notifications" label="消息通知" />
           <MeuFormCheckbox<FormValues> name="agreement">同意服务协议</MeuFormCheckbox>
           <MeuFormStepper<FormValues> name="quantity" label="购买数量" min={1} max={5} />
-          <MeuFormSlider<FormValues>
-            name="volume"
-            label="提示音量"
-            showValue
-            formatValue={(value) => `${value}%`}
-          />
-          <MeuFormRate<FormValues> name="rating" label="服务评分" />
+          <section className="integration-range-gestures" aria-label="滑块与评分手势验证">
+            <MeuFormSlider<FormValues>
+              name="volume"
+              label="提示音量"
+              showValue
+              formatValue={(value) => `${value}%`}
+              onChange={(nextValue) => setSliderPointerValue(nextValue)}
+              onChangeComplete={() => setSliderCompleteCount((count) => count + 1)}
+              onPointerDown={(event) =>
+                setSliderPointerSource(event.nativeEvent.isTrusted ? "trusted" : "synthetic")
+              }
+              onPointerCancel={(event) => {
+                setSliderCancelCount((count) => count + 1);
+                setSliderCancelSource(event.nativeEvent.isTrusted ? "trusted" : "synthetic");
+              }}
+            />
+            <output aria-live="polite">滑块当前值：{sliderPointerValue}</output>
+            <output aria-live="polite">滑块完成次数：{sliderCompleteCount}</output>
+            <output aria-live="polite">滑块取消次数：{sliderCancelCount}</output>
+            <output aria-live="polite">滑块 pointerdown：{sliderPointerSource}</output>
+            <output aria-live="polite">滑块 pointercancel：{sliderCancelSource}</output>
+            <MeuFormRate<FormValues>
+              name="rating"
+              label="服务评分"
+              onChange={(nextValue) => setRatePointerValue(nextValue)}
+              onPointerDown={(event) =>
+                setRatePointerSource(event.nativeEvent.isTrusted ? "trusted" : "synthetic")
+              }
+              onPointerCancel={(event) => {
+                setRateCancelCount((count) => count + 1);
+                setRateCancelSource(event.nativeEvent.isTrusted ? "trusted" : "synthetic");
+              }}
+            />
+            <output aria-live="polite">评分当前值：{ratePointerValue}</output>
+            <output aria-live="polite">评分取消次数：{rateCancelCount}</output>
+            <output aria-live="polite">评分 pointerdown：{ratePointerSource}</output>
+            <output aria-live="polite">评分 pointercancel：{rateCancelSource}</output>
+          </section>
           <section className="integration-number-keyboard" aria-label="数字键盘表单集成">
             <MeuFormNumberKeyboard<FormValues>
               name="paymentAmount"

@@ -37,7 +37,7 @@ source: packages/mobile/src/Slider
 - `onChangeComplete` 只在一次真实改变的 pointer 或值变更键交互结束时触发一次；取消 pointer、无变化抬手和陈旧事件不会误报。
 - track、marks 与原生 range direction 支持 RTL；焦点、forced-colors 和 44px 最小触控高度有明确降级。
 
-当前为 V2 `verification`。单元、SSR、Story、本地 axe 与全库浏览器场景矩阵已建立；Next-H5 集成场景已在移动 Chromium/WebKit 中验证键盘改值和表单提交。真实 pointer drag/cancel、组件专属真机读屏和最终 Chromatic 视觉审批尚未完成，因此不能标记为 commercial。
+当前为 V2 `verification`。单元、SSR、Story、本地 axe 与全库浏览器场景矩阵已建立；Next-H5 集成场景已在移动 Chromium/WebKit 中验证键盘改值、可信鼠标 pointer 拖动、单次完成回调和表单提交。合成 pointercancel 的收敛已验证，但真实触摸取消、组件专属真机读屏和最终 Chromatic 视觉审批尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -165,8 +165,9 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormSlider` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `volume:41`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer。
+- Next-H5 pointer E2E：`drags slider and rate with browser pointer events and resets cancelled sessions` 在两种移动引擎、390×844 视口中通过 `page.mouse` 产生 `isTrusted=true` 的 pointerdown，将原生 range 从 40 拖至至少 75，并验证 `onChangeComplete` 只触发一次；随后在可信 pointerdown 会话中派发 `isTrusted=false` 的 pointercancel，验证取消回调触发且不会补发完成回调。该证据不等同于物理触摸或系统级取消。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4232 B / 32768 B 预算，组合 Brotli 3769 B；共享样式由应用单独导入一次。
-- 待补：移动 Chromium/WebKit 真实 pointer drag、pointer cancel 与 `onChangeComplete` 结束边界；forced-colors 聚焦截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
+- 待补：iOS/Android 物理触摸 drag、系统 pointercancel 与滚动竞争；forced-colors 聚焦截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 
 ## V2 优化记录
 
@@ -177,10 +178,11 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 - 增加非受控 form reset、RTL 渐变/marks、兼容旧 WebView 的 focus fallback 和 forced-colors。
 - 补全 TSDoc、SSR/单元/Story 契约与本事实源。
 - Next-H5 双引擎已验证 ArrowRight 改值、hydration、受控表单提交和无运行时错误。
+- Next-H5 双引擎已验证可信鼠标 pointer 拖动、单次完成和合成 cancel 收敛。
 
 ### 待优化
 
-- 完成真实移动 pointer drag/cancel、forced-colors 聚焦截图、Chromatic、真机读屏和大字号验收。
+- 完成物理触摸 drag/cancel 与滚动竞争、forced-colors 聚焦截图、Chromatic、真机读屏和大字号验收。
 - 有真实双值业务与跨端契约后再设计 RangeSlider，不扩张当前 API。
 
 ## 维护规则
@@ -195,3 +197,4 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 | 2026-08-28 | 未发布 | compatibility | 增加 reset、RTL、forced-colors 与 SSR 证明                 | 无                            |
 | 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                                  | README 改为仅指向本文件       |
 | 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification         |
+| 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、单次完成与合成 cancel 双引擎证据         | 状态仍为 verification         |

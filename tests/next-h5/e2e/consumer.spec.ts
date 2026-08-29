@@ -1327,6 +1327,73 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("drags slider and rate with browser pointer events and resets cancelled sessions", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "滑块与评分手势验证" });
+  const volume = section.getByRole("slider", { name: "提示音量" });
+  await volume.scrollIntoViewIfNeeded();
+  const volumeBox = await volume.boundingBox();
+  if (!volumeBox) throw new Error("Expected Slider pointer bounds");
+
+  await page.mouse.move(volumeBox.x + volumeBox.width * 0.4, volumeBox.y + volumeBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(volumeBox.x + volumeBox.width * 0.8, volumeBox.y + volumeBox.height / 2, {
+    steps: 6
+  });
+  await page.mouse.up();
+
+  const draggedVolume = Number(await volume.inputValue());
+  expect(draggedVolume).toBeGreaterThanOrEqual(75);
+  await expect(section.getByText(`滑块当前值：${draggedVolume}`)).toBeVisible();
+  await expect(section.getByText("滑块完成次数：1")).toBeVisible();
+  await expect(section.getByText("滑块 pointerdown：trusted")).toBeVisible();
+
+  await page.mouse.move(volumeBox.x + volumeBox.width * 0.6, volumeBox.y + volumeBox.height / 2);
+  await page.mouse.down();
+  await volume.dispatchEvent("pointercancel", {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse"
+  });
+  await page.mouse.up();
+  await expect(section.getByText("滑块取消次数：1")).toBeVisible();
+  await expect(section.getByText("滑块 pointercancel：synthetic")).toBeVisible();
+  await expect(section.getByText("滑块完成次数：1")).toBeVisible();
+
+  const rating = section.getByRole("slider", { name: "服务评分" });
+  await rating.scrollIntoViewIfNeeded();
+  const ratingBox = await rating.boundingBox();
+  if (!ratingBox) throw new Error("Expected Rate pointer bounds");
+
+  await page.mouse.move(ratingBox.x + ratingBox.width * 0.2, ratingBox.y + ratingBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(ratingBox.x + ratingBox.width * 0.8, ratingBox.y + ratingBox.height / 2, {
+    steps: 6
+  });
+  await page.mouse.up();
+  await expect(rating).toHaveValue("4");
+  await expect(section.getByText("评分当前值：4")).toBeVisible();
+  await expect(section.getByText("评分 pointerdown：trusted")).toBeVisible();
+
+  await rating.click({ position: { x: ratingBox.width * 0.8, y: ratingBox.height / 2 } });
+  await expect(rating).toHaveValue("0");
+  await expect(section.getByText("评分当前值：0")).toBeVisible();
+
+  await page.mouse.move(ratingBox.x + ratingBox.width * 0.4, ratingBox.y + ratingBox.height / 2);
+  await page.mouse.down();
+  await rating.dispatchEvent("pointercancel", {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse"
+  });
+  await page.mouse.up();
+  await expect(section.getByText("评分取消次数：1")).toBeVisible();
+  await expect(section.getByText("评分 pointercancel：synthetic")).toBeVisible();
+});
+
 test("switches theme and preserves mobile touch targets", async ({ page }) => {
   const provider = page.locator('[data-meu-component="config-provider"]').first();
   await page.getByRole("button", { name: "切换主题" }).click();
