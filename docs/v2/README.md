@@ -15,7 +15,7 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 
 - Manifest 登记 68 个组件族、125 个公开值、371 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
 - 68/68 个组件族已由 `audit/implementation` 进入 `verification`；这表示本地实现与自动化证据齐全到可执行最终验收，不代表已越过真机、Chromatic 和发布门禁。
-- API 属性清单已覆盖 222 个结构化类型、2258 个字段与 232 个事件；2258/2258 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
+- API 属性清单已覆盖 222 个结构化类型、2263 个字段与 237 个事件；2263/2263 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
 - Storybook 当前包含 80 个标题、374 个 Story；68 个官网组件链接、342 个留存文档 Story ID 与对应 Autodocs entry 均通过静态校验。
 - 80 个 Storybook 标题均至少包含一项关键 `play` 交互；本地浏览器门禁会等待交互成功，再在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合，最近一次结果为 0 违规、0 `pageerror`。
 - 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；Props / Events 来自完整的生成 API 模型。

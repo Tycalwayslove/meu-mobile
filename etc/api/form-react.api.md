@@ -89,12 +89,13 @@ export function MeuForm<TFieldValues extends FieldValues, TContext = unknown, TT
 export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(props: MeuFormCalendarProps<TFieldValues, TDate>): JSX.Element;
 
 // @public
-export type MeuFormCalendarAdapterProps<TDate> = Omit<CalendarBaseProps<TDate>, "defaultValue" | "onChange" | "ref" | "selectionMode" | "value">;
+export type MeuFormCalendarAdapterProps<TDate> = Omit<CalendarBaseProps<TDate>, "defaultValue" | "onBlur" | "onChange" | "ref" | "selectionMode" | "value">;
 
 // @public
 export type MeuFormCalendarCommonProps<TDate, TValue = TDate | ReadonlyArray<TDate>> = MeuFormCalendarAdapterProps<TDate> & {
     description?: ReactNode;
     label?: ReactNode;
+    onBlur?: CalendarBaseProps<TDate>["onBlur"];
     required?: boolean;
     serializeValue?: (value: TValue, details: {
         adapter: DateAdapter<TDate>;

@@ -1869,7 +1869,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!CalendarBaseProps:type",
-          "docComment": "/**\n * Props shared by every calendar selection mode.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Props shared by every calendar selection mode. Native `aria-invalid` tokens are exposed on the calendar group; an invalid Field context overrides a caller token with `true`.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -16094,7 +16094,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!SearchFieldStatus:type",
-          "docComment": "/**\n * Visual and semantic validation state. `error` also sets `aria-invalid`.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Visual and semantic validation state. `error` emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -21906,7 +21906,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, allowClear, cancelText, className, clearSearchOnClose, closeOnEscape, closeOnMaskClick, confirmText, container, defaultExpandedValues, defaultOpen, defaultSearchValue, defaultValue, disabled, emptyContent, expandedValues, filterOption, forceMount, loadChildren, loadingText, loadErrorText, lockScroll, maskOpacity, maxCount, multiple, onCancel, onConfirm, onExpandedValuesChange, onLoadError, onOpenChange, onSearchValueChange, onSelect, open, options, overscan, readOnly, ref, renderOption, restoreFocus, returnFocusRef, safeArea, searchPlaceholder, searchable, searchValue, selectionMode, status, title, treeAriaLabel, treeHeight, value, virtual, ...props }",
+              "parameterName": "{ \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledby, allowClear, cancelText, className, clearSearchOnClose, closeOnEscape, closeOnMaskClick, confirmText, container, defaultExpandedValues, defaultOpen, defaultSearchValue, defaultValue, disabled, emptyContent, expandedValues, filterOption, forceMount, loadChildren, loadingText, loadErrorText, lockScroll, maskOpacity, maxCount, multiple, onCancel, onConfirm, onExpandedValuesChange, onLoadError, onOpenChange, onSearchValueChange, onSelect, open, options, overscan, readOnly, ref, renderOption, restoreFocus, returnFocusRef, safeArea, searchPlaceholder, searchable, searchValue, selectionMode, status, title, treeAriaLabel, treeHeight, value, virtual, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0

@@ -668,7 +668,7 @@
             },
             {
               "kind": "Content",
-              "text": "<TDate>, \"defaultValue\" | \"onChange\" | \"ref\" | \"selectionMode\" | \"value\">"
+              "text": "<TDate>, \"defaultValue\" | \"onBlur\" | \"onChange\" | \"ref\" | \"selectionMode\" | \"value\">"
             },
             {
               "kind": "Content",
@@ -747,7 +747,16 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    required?: boolean;\n    serializeValue?: (value: TValue, details: {\n        adapter: "
+              "text": ";\n    onBlur?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "CalendarBaseProps",
+              "canonicalReference": "@meu/mobile!CalendarBaseProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<TDate>[\"onBlur\"];\n    required?: boolean;\n    serializeValue?: (value: TValue, details: {\n        adapter: "
             },
             {
               "kind": "Reference",
@@ -801,7 +810,7 @@
           ],
           "typeTokenRange": {
             "startIndex": 5,
-            "endIndex": 15
+            "endIndex": 17
           }
         },
         {

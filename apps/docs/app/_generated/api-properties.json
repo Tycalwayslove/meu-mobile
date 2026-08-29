@@ -388,7 +388,7 @@
           "type": "\"default\" | \"error\"",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid`.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved.",
           "defaultValue": "\"default\""
         },
         {
@@ -428,7 +428,7 @@
           "type": "TextAreaStatus",
           "required": false,
           "event": false,
-          "description": "Applies error styling and `aria-invalid`.",
+          "description": "Applies error styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved.",
           "defaultValue": "\"default\""
         }
       ],
@@ -531,7 +531,7 @@
           "type": "SearchFieldStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state.",
+          "description": "Visual validation state. Field or status errors override a caller ARIA invalid token with `true`.",
           "defaultValue": "`\"default\"`"
         },
         {
@@ -699,7 +699,7 @@
           "type": "CheckboxStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
+          "description": "Visual validation state; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact."
         },
         {
           "name": "value",
@@ -836,7 +836,7 @@
           "type": "RadioStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
+          "description": "Visual validation state; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact."
         },
         {
           "name": "value",
@@ -894,7 +894,7 @@
           "type": "SwitchStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
+          "description": "Visual validation state; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact."
         },
         {
           "name": "onChange",
@@ -968,7 +968,7 @@
           "type": "StepperStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state. Field errors and `aria-invalid` also activate error styling."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the spinbutton."
         },
         {
           "name": "step",
@@ -1068,7 +1068,7 @@
           "type": "SliderStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state. Field errors and `aria-invalid` also activate error styling."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the native range."
         },
         {
           "name": "step",
@@ -1166,7 +1166,7 @@
           "type": "RateStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state. Field errors and `aria-invalid` also activate error styling."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the slider or read-only meter."
         },
         {
           "name": "value",
@@ -1341,7 +1341,7 @@
           "type": "SelectorStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact.",
+          "description": "Applies validation styling; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact.",
           "defaultValue": "\"default\""
         },
         {
@@ -2373,7 +2373,7 @@
           "type": "ImageUploaderStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; `error` also sets `aria-invalid` on the native input.",
+          "description": "Visual validation state. `error` exposes `aria-invalid=\"true\"` on the uploader group and\noverrides a caller grammar, spelling, true, or false token.",
           "defaultValue": "\"default\""
         },
         {
@@ -3328,7 +3328,7 @@
           "type": "SegmentedControlStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid`.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the radiogroup.",
           "defaultValue": "\"default\""
         },
         {
@@ -5197,7 +5197,7 @@
           "type": "TreeSelectStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state announced through `aria-invalid`.",
+          "description": "Visual validation state announced as `aria-invalid=\"true\"` on the tree; caller grammar/spelling tokens are otherwise preserved there.",
           "defaultValue": "\"default\""
         },
         {
@@ -5719,7 +5719,7 @@
           "type": "NumberKeyboardTriggerStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; Field context errors also resolve to `error`.",
+          "description": "Visual validation state. `error` and Field errors expose `aria-invalid=\"true\"` on the native\nbutton; otherwise caller grammar, spelling, true, and false tokens are preserved.",
           "defaultValue": "\"default\""
         },
         {
@@ -5971,7 +5971,7 @@
           "type": "PasscodeInputStatus",
           "required": false,
           "event": false,
-          "description": "Validation presentation state. Prefer Field error content for accessible feedback."
+          "description": "Validation presentation state. `error` and Field errors expose `aria-invalid=\"true\"` on the\nnative input; otherwise caller grammar, spelling, true, and false tokens are preserved."
         },
         {
           "name": "value",
@@ -8229,7 +8229,7 @@
           "type": "PickerTriggerStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state; Field context errors also resolve to `error`."
+          "description": "Visual validation state. `error` and Field errors expose `aria-invalid=\"true\"` on the native\nbutton; otherwise caller grammar, spelling, true, and false tokens are preserved."
         },
         {
           "name": "value",
@@ -11191,7 +11191,7 @@
           "type": "\"default\" | \"error\"",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid`.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved.",
           "defaultValue": "\"default\""
         },
         {
@@ -11997,7 +11997,7 @@
           "type": "TextAreaStatus",
           "required": false,
           "event": false,
-          "description": "Applies error styling and `aria-invalid`.",
+          "description": "Applies error styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved.",
           "defaultValue": "\"default\""
         },
         {
@@ -12093,7 +12093,7 @@
           "type": "SearchFieldStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state.",
+          "description": "Visual validation state. Field or status errors override a caller ARIA invalid token with `true`.",
           "defaultValue": "`\"default\"`"
         },
         {
@@ -12194,7 +12194,7 @@
           "type": "CheckboxStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
+          "description": "Visual validation state; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact."
         },
         {
           "name": "value",
@@ -12452,7 +12452,7 @@
           "type": "SwitchStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state that emits `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact."
+          "description": "Visual validation state; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact."
         },
         {
           "name": "onBlur",
@@ -12561,7 +12561,7 @@
           "type": "StepperStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state. Field errors and `aria-invalid` also activate error styling."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the spinbutton."
         },
         {
           "name": "step",
@@ -12673,7 +12673,7 @@
           "type": "SliderStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state. Field errors and `aria-invalid` also activate error styling."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the native range."
         },
         {
           "name": "step",
@@ -12799,7 +12799,7 @@
           "type": "RateStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state. Field errors and `aria-invalid` also activate error styling."
+          "description": "Visual validation state that emits `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the slider or read-only meter."
         },
         {
           "name": "onBlur",
@@ -12927,7 +12927,7 @@
           "type": "SelectorStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid=\"true\"`; explicit `grammar` or `spelling` tokens remain intact.",
+          "description": "Applies validation styling; an error emits `aria-invalid=\"true\"` and overrides caller tokens, otherwise native invalid tokens remain intact.",
           "defaultValue": "\"default\""
         },
         {
@@ -13178,7 +13178,7 @@
           "type": "TreeSelectStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state announced through `aria-invalid`.",
+          "description": "Visual validation state announced as `aria-invalid=\"true\"` on the tree; caller grammar/spelling tokens are otherwise preserved there.",
           "defaultValue": "\"default\""
         },
         {
@@ -13529,7 +13529,7 @@
           "type": "TreeSelectStatus",
           "required": false,
           "event": false,
-          "description": "Visual validation state announced through `aria-invalid`.",
+          "description": "Visual validation state announced as `aria-invalid=\"true\"` on the tree; caller grammar/spelling tokens are otherwise preserved there.",
           "defaultValue": "\"default\""
         },
         {
@@ -15512,6 +15512,13 @@
           "defaultValue": "0"
         },
         {
+          "name": "onBlur",
+          "type": "FocusEventHandler<HTMLDivElement>",
+          "required": false,
+          "event": true,
+          "description": "Called after focus leaves the entire calendar and React Hook Form marks the field touched.\nMoving focus between month controls or date buttons does not call this handler."
+        },
+        {
           "name": "onMonthChange",
           "type": "(month: TDate, details: CalendarMonthChangeDetails) => void",
           "required": false,
@@ -15685,6 +15692,13 @@
           "event": false,
           "description": "JavaScript weekday index placed in the first grid column.",
           "defaultValue": "0"
+        },
+        {
+          "name": "onBlur",
+          "type": "FocusEventHandler<HTMLDivElement>",
+          "required": false,
+          "event": true,
+          "description": "Called after focus leaves the entire calendar and React Hook Form marks the field touched.\nMoving focus between month controls or date buttons does not call this handler."
         },
         {
           "name": "onChange",
@@ -15869,6 +15883,13 @@
           "defaultValue": "0"
         },
         {
+          "name": "onBlur",
+          "type": "FocusEventHandler<HTMLDivElement>",
+          "required": false,
+          "event": true,
+          "description": "Called after focus leaves the entire calendar and React Hook Form marks the field touched.\nMoving focus between month controls or date buttons does not call this handler."
+        },
+        {
           "name": "onChange",
           "type": "((value: TDate, details: CalendarChangeDetails<TDate>) => void) | ((value: readonly TDate[], details: CalendarChangeDetails<TDate>) => void) | ((value: CalendarRange<TDate>, details: CalendarChangeDetails<TDate>) => void)",
           "required": false,
@@ -16051,6 +16072,13 @@
           "defaultValue": "0"
         },
         {
+          "name": "onBlur",
+          "type": "FocusEventHandler<HTMLDivElement>",
+          "required": false,
+          "event": true,
+          "description": "Called after focus leaves the entire calendar and React Hook Form marks the field touched.\nMoving focus between month controls or date buttons does not call this handler."
+        },
+        {
           "name": "onChange",
           "type": "(value: CalendarRange<TDate>, details: CalendarChangeDetails<TDate>) => void",
           "required": false,
@@ -16231,6 +16259,13 @@
           "event": false,
           "description": "JavaScript weekday index placed in the first grid column.",
           "defaultValue": "0"
+        },
+        {
+          "name": "onBlur",
+          "type": "FocusEventHandler<HTMLDivElement>",
+          "required": false,
+          "event": true,
+          "description": "Called after focus leaves the entire calendar and React Hook Form marks the field touched.\nMoving focus between month controls or date buttons does not call this handler."
         },
         {
           "name": "onChange",
@@ -16770,7 +16805,7 @@
           "type": "SegmentedControlStatus",
           "required": false,
           "event": false,
-          "description": "Applies validation styling and `aria-invalid`.",
+          "description": "Applies validation styling and `aria-invalid=\"true\"`; caller grammar/spelling tokens are otherwise preserved on the radiogroup.",
           "defaultValue": "\"default\""
         },
         {
@@ -16904,11 +16939,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2258,
-    "eventFields": 232,
+    "documentedFields": 2263,
+    "eventFields": 237,
     "exportedTypes": 371,
     "exportedTypesWithFields": 222,
-    "fields": 2258,
+    "fields": 2263,
     "packages": 4
   }
 }
