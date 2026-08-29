@@ -4,7 +4,8 @@ import type {
   MouseEvent,
   PointerEvent,
   ReactNode,
-  Ref
+  Ref,
+  TouchEvent
 } from "react";
 
 /**
@@ -30,7 +31,7 @@ export type IndexListSection = {
  *
  * @public
  */
-export type IndexListChangeSource = "index" | "scroll";
+export type IndexListChangeSource = "imperative" | "index" | "scroll";
 
 /**
  * Details reported with an active-section change.
@@ -40,8 +41,11 @@ export type IndexListChangeSource = "index" | "scroll";
 export type IndexListChangeDetails = {
   /** Original input event when the change came from the index rail. */
   event?:
-    MouseEvent<HTMLButtonElement> | KeyboardEvent<HTMLButtonElement> | PointerEvent<HTMLElement>;
-  /** Whether the rail or owned scroll viewport caused the change. */
+    | MouseEvent<HTMLButtonElement>
+    | KeyboardEvent<HTMLButtonElement>
+    | PointerEvent<HTMLElement>
+    | TouchEvent<HTMLElement>;
+  /** Whether the rail, owned scroll viewport, or imperative handle caused the change. */
   source: IndexListChangeSource;
 };
 
@@ -73,13 +77,17 @@ export type IndexListRef = {
  * @public
  */
 export type IndexListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange"> & {
+  /** Controlled active section key. `null` or an unknown key falls back to the first section. */
+  activeKey?: string | null;
+  /** Initial active section for uncontrolled usage; unknown keys fall back to the first section. */
+  defaultActiveKey?: string;
   /** Accessible name for the index navigation rail. */
   indexAriaLabel?: string;
-  /** Called when the active section changes through scrolling or index interaction. */
+  /** Called when scrolling, rail interaction, or the imperative handle requests a new active key. */
   onIndexChange?: (key: string, details: IndexListChangeDetails) => void;
   /** Imperative scrolling handle. */
   ref?: Ref<IndexListRef>;
-  /** Stable ordered sections. Keys must be unique. */
+  /** Stable ordered sections. The first occurrence wins when a key is duplicated. */
   sections: readonly IndexListSection[];
   /** Keeps the current section heading at the top of the owned viewport. */
   sticky?: boolean;

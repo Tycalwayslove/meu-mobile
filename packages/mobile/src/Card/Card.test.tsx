@@ -36,6 +36,34 @@ describe("Card", () => {
     expect(body.textContent).toBe("0");
   });
 
+  it("does not create empty regions for React nodes that render nothing", () => {
+    const { rerender } = render(
+      <Card
+        title={false}
+        description={[null, false]}
+        footer={[]}
+        media={
+          <>
+            {null}
+            {false}
+          </>
+        }
+      >
+        <>{false}</>
+      </Card>
+    );
+
+    const card = document.querySelector('[data-meu-component="card"]');
+    if (!card) throw new Error("Expected Card root");
+    expect(card.querySelector("[data-meu-card-media]")).toBeNull();
+    expect(card.querySelector("[data-meu-card-header]")).toBeNull();
+    expect(card.querySelector("[data-meu-card-body]")).toBeNull();
+    expect(card.querySelector("[data-meu-card-footer]")).toBeNull();
+
+    rerender(<Card>{""}</Card>);
+    expect(card.querySelector("[data-meu-card-body]")).not.toBeNull();
+  });
+
   it("keeps media and footer actions in separate non-nested regions", () => {
     render(
       <Card

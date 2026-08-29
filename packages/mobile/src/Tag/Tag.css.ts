@@ -4,6 +4,7 @@ import { recipe } from "@vanilla-extract/recipes";
 export const tagGroup = style({
   display: "inline-flex",
   alignItems: "center",
+  minWidth: 0,
   maxWidth: "100%",
   verticalAlign: "middle"
 });
@@ -14,6 +15,8 @@ export const tagRoot = recipe({
     display: "inline-grid",
     placeItems: "center",
     boxSizing: "border-box",
+    minWidth: 0,
+    maxWidth: "100%",
     padding: 0,
     color: "inherit",
     background: "transparent",
@@ -24,7 +27,13 @@ export const tagRoot = recipe({
   },
   variants: {
     disabled: {
-      true: { cursor: "not-allowed", opacity: 0.55 },
+      true: {
+        cursor: "not-allowed",
+        opacity: 0.55,
+        "@media": {
+          "(forced-colors: active)": { color: "GrayText", opacity: 1 }
+        }
+      },
       false: {}
     },
     interactive: {
@@ -37,7 +46,14 @@ export const tagRoot = recipe({
           "&:active:not(:disabled)": { transform: "scale(0.98)" }
         },
         transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
-        "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+        "@media": {
+          "(prefers-reduced-motion: reduce)": { transition: "none" },
+          "(forced-colors: active)": {
+            selectors: {
+              "&:focus": { outlineColor: "Highlight" }
+            }
+          }
+        }
       },
       false: {}
     }
@@ -66,6 +82,17 @@ export const tagChip = recipe({
     }
   },
   variants: {
+    disabled: {
+      true: {
+        "@media": {
+          "(forced-colors: active)": {
+            color: "GrayText",
+            borderColor: "GrayText"
+          }
+        }
+      },
+      false: {}
+    },
     rounded: {
       true: { borderRadius: "var(--meu-radius-round)" },
       false: { borderRadius: 6 }
@@ -164,6 +191,7 @@ export const tagChip = recipe({
     }
   ],
   defaultVariants: {
+    disabled: false,
     rounded: false,
     selected: false,
     size: "medium",
@@ -177,6 +205,7 @@ export const tagContent = style({
   maxWidth: "24ch",
   overflow: "hidden",
   textOverflow: "ellipsis",
+  wordBreak: "break-word",
   overflowWrap: "anywhere"
 });
 
@@ -205,7 +234,14 @@ export const tagClose = style({
   },
   transition: "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
   "@media": {
-    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
-    "(forced-colors: active)": { color: "ButtonText", border: "1px solid ButtonText" }
+    "(prefers-reduced-motion: reduce)": { transition: "none" },
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      border: "1px solid ButtonText",
+      selectors: {
+        "&:disabled": { color: "GrayText", opacity: 1 },
+        "&:focus": { outlineColor: "Highlight" }
+      }
+    }
   }
 });

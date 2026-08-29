@@ -19,6 +19,7 @@ storyIds:
     information-tag--interactive,
     information-tag--filter,
     information-tag--closable,
+    information-tag--filter-closable,
     information-tag--long-text,
     information-tag--light-and-dark
   ]
@@ -36,7 +37,7 @@ Figma node `77:2` 是 Tag 页面参考；当前 FIGMA_SYNC 未能确定组件集
 - 五种 tone、三种 variant/size、rounded、长文 24ch 视觉省略、RTL 逻辑间距、reduced-motion 和 forced-colors。
 - 交互与关闭目标均至少 44×44，原生 Enter/Space 键盘路径成立。
 
-状态为 `verification`；Next H5 移动 Chromium/WebKit 已覆盖展示与 action Tag，最终 Chromatic 视觉审批和真机读屏待补。
+状态为 `verification`；共置 Unit、SSR/hydration 与 Story 已覆盖原生结构和动作边界，最终 Chromium/WebKit 集成签字、Chromatic 和真机读屏待补。
 
 ## 何时使用
 
@@ -63,7 +64,7 @@ Figma node `77:2` 是 Tag 页面参考；当前 FIGMA_SYNC 未能确定组件集
 
 ## 受控与非受控
 
-selected 完全受控，Tag 不自行切换。省略 selected 时筛选 button 不暴露 pressed 状态；静态/closable 模式没有选择状态。
+selected 完全受控，Tag 不自行切换。省略 selected 时筛选 button 不暴露 pressed 状态；没有 onClick 时 selected 被忽略，不产生视觉或 ARIA 选择态。closable filter 仍由调用方受控。
 
 ## 表单集成
 
@@ -71,7 +72,7 @@ selected 完全受控，Tag 不自行切换。省略 selected 时筛选 button �
 
 ## Props
 
-API 由 `TagProps` 生成。onClick 启用筛选按钮；onClose 增加独立按钮。纯文本 children 会生成包含标签内容的本地化关闭名称；复杂内容应显式提供 closeAriaLabel。
+API 由 `TagProps` 生成。onClick 启用筛选按钮；onClose 增加独立按钮。仅 filter-only 模式接受原生 button attributes（例如 form/name/value），并始终固定 `type=button`；closable 模式的 className/style 和其余 root attributes 属于外层 span group，`aria-label` 专门命名 primary。纯文本 children 会生成包含标签内容的本地化关闭名称；复杂或视觉为空的 children 必须显式提供 aria-label/closeAriaLabel。
 
 ## Events
 
@@ -110,7 +111,7 @@ Delete/Backspace 不自动删除，避免用户编辑文本时误触；删除使
 
 ## SSR 与 Next.js
 
-只依据 props/ConfigProvider locale render，无 effect 或浏览器读取；服务端会确定输出 span/button 结构。服务端与客户端必须使用相同 onClick/onClose 模式避免 hydration 结构变化。
+只依据 props/ConfigProvider locale render，无 effect 或浏览器读取；服务端会确定输出 span/button 结构。共置 hydration 测试覆盖两按钮 closable filter。服务端与客户端必须使用相同 onClick/onClose 模式；动态切换这些 props 会有意替换原生根并改变 Tab stop。
 
 ## RTL 与国际化
 
@@ -118,47 +119,44 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 
 ## 浏览器与 WebView
 
-依赖原生 button、inline-flex 和 CSS 自定义属性，兼容 Chrome/WebView 70、iOS 13 语法基线。焦点增强使用旧内核可执行的 `:focus`；触摸/鼠标也可能显示焦点环，这是保留旧 WebView 键盘可见性的兼容取舍。
+正式运行时支持继承 V2 矩阵：iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。Chrome 70 / iOS 13 只做构建产物语法扫描，不是运行时支持承诺。基础 button/inline-flex 可安全降级，长词提供 `word-break` fallback；焦点增强使用旧内核可执行的 `:focus`，触摸/鼠标也可能显示焦点环，这是键盘可见性的取舍。
 
 ## 边界情况与已知限制
 
-- selected 不会自动更新；传 selected 却无 onClick 只改变视觉 data，不构成筛选控件。
+- selected 不会自动更新；没有 onClick 时 selected 被忽略。
 - 24ch 省略不自动提供 title；DOM 文本仍完整，鼠标 tooltip 需业务显式传 title。
 - onClick+onClose 会创建两个 Tab stop，这是避免嵌套交互的有意设计。
+- Tag 不提供 loading；异步主动作应使用 Button，异步筛选由业务以 disabled 和邻近状态文本表达。
 
 ## 性能预算
 
 每个 Tag 为常数节点，无监听/effect；大量筛选应使用 Selector 并避免数百 Tag 同屏。
 
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2661 B / 32768 B 预算，组合 Brotli 2348 B；共享样式由应用单独导入一次。
+
 ## 测试证据
 
-- Unit: `Tag.test.tsx` 覆盖静态、filter、selected、独立 close 键盘和 disabled 双动作。
-- Story interaction: `Filter` 切换并验证 `aria-pressed`；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2618 B / 32768 B 预算，组合 Brotli 2304 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种 DOM 模式；隔离 Next 16 hydration 后静态与 action Tag 保持原生语义，0 hydration/runtime error。
-- RTL: 逻辑 CSS 已实现，专属截图待补。
-- Reduced motion: CSS 已实现，截图待补。
-- Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎渲染多 tone/variant，并激活“仅看待处理” action Tag 验证业务输出。
-- Chromatic Light/Dark: Story 已建立，基线待执行。
-- Real device: 待补。
+- Unit: `Tag.test.tsx` 覆盖静态/filter/selected、selected 静态降级、button attributes、双按钮键盘、disabled 事件抑制、root props/ref 和动态模式切换。
+- SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种服务端 DOM，并实际 hydrate closable filter，断言 0 recoverable error、两个同级按钮且无嵌套。
+- Story interaction: `Filter` 验证受控 pressed；`FilterClosable` 验证两按钮同级；`LongText` 提供 160px RTL 长翻译场景。
+- Reduced motion / forced-colors: CSS 分别移除 press transition，并使用系统 Highlight/GrayText；视觉签字待补。
+- 尚无本目录可复核的 Chromatic 基线、真机读屏或 iOS 13/Chrome 70 运行时通过记录；不能从仓库级静态扫描推导这些结论。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补 RTL/长翻译/forced-colors 视觉、close 模式移动键盘和真机读屏；基础 action 路径已完成。
+- 补 forced-colors 视觉签字、支持下限移动键盘和真机读屏。
 
 ### 已完成
 
 - 分离静态、筛选、selected 与可关闭模式，避免嵌套按钮并冻结事件顺序。
 - 增加 44px close 目标、长文、reduced-motion、forced-colors、TSDoc、Unit/SSR/Story。
-- 在隔离 Next H5 中补多状态渲染、action 与 hydration 双引擎证据。
+- 增加模式判别原生 attributes、窄宽约束、静态 selected 降级与真实 hydration 测试。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                  | 迁移说明                        |
-| ---------- | ------ | ------------ | ----------------------------------------------------- | ------------------------------- |
-| 2026-08-29 | 未发布 | behavior     | 增加 selected/onClose/closeAriaLabel 并分离双动作语义 | 现有静态和 onClick 模式保持兼容 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 action/hydration 证据             | 无                              |
+| 日期       | 版本   | 类型      | 内容                                                         | 迁移说明                        |
+| ---------- | ------ | --------- | ------------------------------------------------------------ | ------------------------------- |
+| 2026-08-29 | 未发布 | behavior  | 增加 selected/onClose/closeAriaLabel 并分离双动作语义        | 现有静态和 onClick 模式保持兼容 |
+| 2026-08-29 | 未发布 | hardening | 原生 props 判别、静态 selected 降级、窄宽/高对比与 hydration | selected 无 onClick 时被忽略    |

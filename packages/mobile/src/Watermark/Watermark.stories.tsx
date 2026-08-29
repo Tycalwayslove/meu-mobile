@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { Card } from "../Card";
 import { ThemeProvider } from "../ConfigProvider";
+import { waitForStory } from "../storyTestUtils";
 import { Watermark } from "./Watermark";
 
 const meuMark =
@@ -44,7 +45,30 @@ export const ImageWithFallback: Story = {
     opacity: 0.12,
     width: 56,
     height: 56
+  },
+  play: async ({ canvasElement }) => {
+    const image = canvasElement.querySelector("svg image");
+    if (!image) throw new window.Error("Expected Watermark SVG image");
+    image.dispatchEvent(new window.Event("error", { bubbles: true }));
+    await waitForStory(() => {
+      const content = canvasElement.textContent;
+      return Boolean(
+        !canvasElement.querySelector("svg image") && content && content.includes("Meu fallback")
+      );
+    }, "Watermark did not expose its text fallback after an image error");
   }
+};
+
+export const HostBoundary: Story = {
+  render: () => (
+    <div style={{ padding: 24 }}>
+      <Watermark content="Host only" style={{ width: 240 }}>
+        <Card style={{ minHeight: 160, boxShadow: "0 0 0 12px rgba(23, 107, 91, 0.12)" }}>
+          wrapper 与 SVG viewport 双重裁界，业务内容和水印都保持在 host 内。
+        </Card>
+      </Watermark>
+    </div>
+  )
 };
 
 function DynamicContentPreview() {

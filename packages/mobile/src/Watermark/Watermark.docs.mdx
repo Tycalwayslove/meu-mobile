@@ -27,7 +27,7 @@ source: packages/mobile/src/Watermark
 
 ## 当前能力
 
-同构 SVG 交错平铺，支持文本/多行/图片优先与失败回退、字体/尺寸/间距/偏移/旋转/透明度/zIndex，以及可关闭的弱篡改恢复。overlay 不阻止真实内容交互，也不进入无障碍树。
+同构 SVG 交错平铺，支持文本/多行/图片优先与失败回退、单次图片 load/error 事件、字体/尺寸/间距/偏移/旋转/透明度/zIndex，以及可关闭的弱篡改恢复。overlay 不阻止真实内容交互，也不进入无障碍树。
 
 ## 何时使用
 
@@ -63,11 +63,11 @@ API 由 `WatermarkProps` 生成。正尺寸限制 1..2048；gap 为 0..2048；�
 
 ## Events
 
-`onImageError` 透传 SVG image error，随后回退文本；`onRemove` 只在 overlay 删除或自身属性/文本/子树被篡改并恢复时触发。业务 children 的正常增删不会触发。
+平铺内有三枚同源 `<image>`；`onImageLoad` / `onImageError` 对当前 URL 的一次尝试合计最多触发一次，以首先收到的终态事件为准，error 后回退文本，URL 变化后重置尝试。若需要重试完全相同的 URL，应更换 cache-buster 或重新挂载。`onRemove` 只在 overlay 删除或自身属性/文本/子树被篡改并恢复时触发。业务 children 的正常增删不会触发。
 
 ## Ref 与命令式方法
 
-`ref` 指向 root div；无命令式方法。
+`ref` 指向 root div；支持 React 19 callback ref cleanup；无命令式方法。
 
 ## 键盘操作
 
@@ -89,11 +89,11 @@ SVG 为 `aria-hidden=true`、`focusable=false`；水印文字不会被读屏重�
 
 ## 主题与定制
 
-默认字体、颜色来自 Meu Token；font/color、opacity 和 geometry 可显式覆盖。forced-colors 下 overlay 仍是装饰信息，不作为状态唯一表达。稳定入口为 props、root className/style 与 data 属性。
+默认字体、颜色来自 Meu Token；font/color、opacity 和 geometry 可显式覆盖。forced-colors 下 overlay 仍是装饰信息，不作为状态唯一表达。无动画，因此 reduced-motion 不改变输出。稳定入口为 props、root className/style 与 data 属性。
 
 ## SSR 与 Next.js
 
-useId 生成稳定 pattern id；render 不读取 window/document。MutationObserver 仅在客户端 layout effect 启动，服务端和客户端首屏 SVG 一致。
+useId 生成稳定 pattern id；render 不读取 window/document。MutationObserver 仅在客户端 layout effect 启动，服务端和客户端首屏 SVG 一致。图片状态只在 effect/event 中变化，不会改变 SSR 首屏结构。
 
 ## RTL 与国际化
 
@@ -101,29 +101,34 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 
 ## 浏览器与 WebView
 
-依赖 SVG pattern/image、CSS custom properties 和可选 MutationObserver。无 MutationObserver 时仅失去弱篡改恢复，水印仍显示。外链 SVG image 的 CORS/打印由宿主和浏览器策略决定。
+正式支持矩阵为 Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chrome 70 / iOS 13 只是 production 构建语法与选择器静态基线，不是完整运行时承诺；iOS 13–14 与 Chromium/WebView 79–88 属观察档。实现依赖 SVG pattern/image、CSS custom properties 和可选 MutationObserver；定位使用 `top/right/bottom/left` 而非旧内核不支持的 `inset`。无 MutationObserver 时仅失去弱篡改恢复，水印仍显示。`href` 与兼容 `xlink:href` 同时输出。
+
+容器尺寸变化由百分比 SVG viewport 原生跟随，不做 JS 几何测量，因此没有 ResizeObserver 依赖或 fallback，也没有 observer resize 竞态。SVG 文字和矢量图片不需要 DPR canvas 重绘；位图应提供至少 2x 源。旧内核运行时、CORS 图片、打印分页仍需目标宿主复验。
 
 ## 边界情况与已知限制
 
 - DOM 篡改者可关闭 JS、隐藏祖先、覆盖 CSS 或截图后编辑，tamperProtection 不构成安全承诺。
 - 极长文本不自动省略，可能超出 mark box；调用方应提供短标识。
-- 打印/导出 PDF、canvas 截图和跨域图片需要业务链路单独验证。
+- wrapper 的 `overflow:hidden` 与 Figma `clipsContent=true` 一致，100% SVG viewport 自身也 `overflow:hidden`，业务 children 与水印图案均裁在 host 边界；需要阴影、sticky 或越界提示的内容应调整 DOM 层级，不应依赖越过 Watermark root。
+- SVG 前景元素带 print color adjustment 提示，但打印/导出 PDF 的跨页重复、系统省墨、canvas/html2canvas 截图和跨域图片需要业务链路单独验证。
+- 组件不创建/revoke object URL；调用方创建的 blob URL 仍由调用方在不再使用后释放。任意外链 URL 可能产生网络请求，敏感查询参数和第三方追踪源不得作为水印资源。
 
 ## 性能预算
 
-固定三枚 mark 定义并由 SVG pattern 平铺，DOM 不随容器面积增长。MutationObserver 只保护 overlay 和其直接移除；高频业务 children 更新不触发修复。
+固定三枚 mark 定义并由 SVG pattern 平铺，DOM 不随容器面积、DPR 或 resize 次数增长。图片事件用 ref 去重，不为三枚 mark 重复提交状态。MutationObserver 只保护 overlay 和其直接移除；同批记录逆序恢复并在卸载时断开，高频业务 children 更新不触发修复。
 
 ## 测试证据
 
-- Unit: `Watermark.test.tsx` 覆盖文本/图片回退、几何归一、ref、篡改恢复、动态 children 与 SSR。
+- Unit（本轮定向通过）: `Watermark.test.tsx` 14 项覆盖文本/多行、图片 load/error 去重与 URL 变化、几何归一、对象/callback ref、篡改逆序恢复、外部节点边界、observer 缺失/关闭、动态 children、SSR markup 与 hydration；另有 1 项 node-environment SSR 覆盖无 window/document 输出。
 - Story interaction: `DynamicContent` 验证业务内容更新且水印 overlay 保持稳定；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- `ImageWithFallback` Story 主动派发 error 并等待文本 fallback；`HostBoundary` 固化 wrapper + overlay 双重裁界与 Figma `clipsContent=true` 一致。
+- Storybook 浏览器矩阵：374 Story × 7 场景、2,618 个组合和 0 axe/pageerror 是本轮代码之前的仓库历史基线，不能证明本次变更；冻结候选必须重跑后才能升级为当前证据。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2719 B / 32768 B 预算，组合 Brotli 2391 B；共享样式由应用单独导入一次。
-- SSR/hydration: Node SSR 已覆盖 stable pattern markup；隔离 Next 16 hydration 后 overlay 与业务 children 保持稳定，0 hydration/runtime error。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3225 B / 32768 B 预算，组合 Brotli 2829 B；共享样式由应用单独导入一次。
+- SSR/hydration: 本轮 jsdom 定向测试覆盖 stable pattern markup 和 hydrateRoot 节点复用；隔离 Next 16 浏览器路径需在冻结候选重跑。
 - RTL: 无方向性布局；bidi 内容待真机。
 - Reduced motion: 不适用，无动画。
-- Mobile Chromium/WebKit E2E: `renders a non-interactive watermark and restores its removed overlay` 在两种引擎断言 `aria-hidden`、`pointer-events:none`、内部按钮可用、手动移除后恢复与 `onRemove` 输出。
+- Mobile Chromium/WebKit E2E: 仓库已有 `renders a non-interactive watermark and restores its removed overlay` 双引擎场景；本轮变更后的执行结果由最终冻结流程记录，不把场景存在等同于当前通过。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 未执行。
 
@@ -131,15 +136,16 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 
 ### 待优化
 
-补打印/PDF、跨域 SVG image、无 MutationObserver、bidi 与移动端截图；基础篡改恢复双引擎路径已完成。
+补打印/PDF、跨域 SVG image、bidi、移动端截图和完整支持档真机；无 MutationObserver 单元降级已完成，基础篡改恢复双引擎场景已存在但需随冻结候选重跑。
 
 ### 已完成
 
-修复篡改保护误回滚业务 children 的商用阻断；固化弱安全、SSR、性能和无障碍边界；补隔离 Next H5 篡改恢复证据。
+修复图片重复事件、同批篡改恢复顺序、observer 越界节点处理与卸载竞态；支持 React 19 callback-ref cleanup；固化 ResizeObserver/DPR、URL 生命周期、打印/截图、浏览器支持和 Figma clipping 一致性。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                              | 迁移说明 |
-| ---------- | ------ | ------------ | ------------------------------------------------- | -------- |
-| 2026-08-29 | 未发布 | fix          | 篡改监听只保护水印 overlay，不再干预业务 children | 无需迁移 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎篡改恢复/hydration 证据        | 无       |
+| 日期       | 版本   | 类型         | 内容                                                           | 迁移说明                                   |
+| ---------- | ------ | ------------ | -------------------------------------------------------------- | ------------------------------------------ |
+| 2026-08-29 | 未发布 | fix          | 篡改监听只保护水印 overlay，不再干预业务 children              | 无需迁移                                   |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎篡改恢复/hydration 证据                     | 无                                         |
+| 2026-08-29 | 未发布 | fix          | 图片事件去重、逆序篡改恢复、observer/ref 清理与旧 CSS 定位兼容 | 新增可选 `onImageLoad`；保留 root 裁切契约 |

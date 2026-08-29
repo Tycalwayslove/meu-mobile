@@ -1,9 +1,13 @@
 "use client";
 
+import { Children, Fragment, isValidElement } from "react";
+import type { ReactNode } from "react";
+
 import {
   body,
   description as descriptionStyle,
   extra as extraStyle,
+  footerActions,
   footer as footerStyle,
   header,
   heading,
@@ -14,6 +18,15 @@ import {
   title as titleStyle
 } from "./Card.css";
 import type { CardProps } from "./types";
+
+function hasRenderableContent(node: ReactNode): boolean {
+  return Children.toArray(node).some(
+    (child) =>
+      !isValidElement<{ children?: ReactNode }>(child) ||
+      child.type !== Fragment ||
+      hasRenderableContent(child.props.children)
+  );
+}
 
 /**
  * Renders a structured surface with optional header, body, and footer regions.
@@ -36,13 +49,13 @@ export function Card({
   variant = "outlined",
   ...props
 }: CardProps) {
-  const hasLeading = leading !== undefined && leading !== null;
-  const hasTitle = title !== undefined && title !== null;
-  const hasDescription = description !== undefined && description !== null;
-  const hasExtra = extra !== undefined && extra !== null;
-  const hasFooter = footer !== undefined && footer !== null;
+  const hasLeading = hasRenderableContent(leading);
+  const hasTitle = hasRenderableContent(title);
+  const hasDescription = hasRenderableContent(description);
+  const hasExtra = hasRenderableContent(extra);
+  const hasFooter = hasRenderableContent(footer);
   const hasHeader = hasLeading || hasTitle || hasDescription || hasExtra;
-  const hasBody = children !== undefined && children !== null;
+  const hasBody = hasRenderableContent(children);
   const classes = root({ variant });
 
   return (
@@ -54,7 +67,7 @@ export function Card({
       data-padding={padding}
       data-variant={variant}
     >
-      {media !== undefined && media !== null ? (
+      {hasRenderableContent(media) ? (
         <div
           className={mediaStyle}
           style={mediaAspectRatio === undefined ? undefined : { aspectRatio: mediaAspectRatio }}
@@ -83,7 +96,7 @@ export function Card({
       ) : null}
       {hasFooter ? (
         <div
-          className={`${footerStyle({ actions: footerLayout === "actions", divided: hasHeader || hasBody })} ${sectionPadding({ padding })}`}
+          className={`${footerStyle({ divided: hasHeader || hasBody })} ${sectionPadding({ padding })}${footerLayout === "actions" ? ` ${footerActions}` : ""}`}
           data-meu-card-footer
           data-layout={footerLayout}
         >

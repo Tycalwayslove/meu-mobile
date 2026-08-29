@@ -34,6 +34,7 @@ import { RefAttributes } from 'react';
 import type { RefObject } from 'react';
 import type { SVGProps } from 'react';
 import { TextareaHTMLAttributes } from 'react';
+import type { TouchEvent as TouchEvent_2 } from 'react';
 
 // @public
 export function ActionMenu(input: ActionMenuProps): JSX.Element;
@@ -1129,15 +1130,17 @@ export function IndexList(input: IndexListProps): JSX.Element;
 
 // @public
 export type IndexListChangeDetails = {
-    event?: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement> | PointerEvent_2<HTMLElement>;
+    event?: MouseEvent_2<HTMLButtonElement> | KeyboardEvent_2<HTMLButtonElement> | PointerEvent_2<HTMLElement> | TouchEvent_2<HTMLElement>;
     source: IndexListChangeSource;
 };
 
 // @public
-export type IndexListChangeSource = "index" | "scroll";
+export type IndexListChangeSource = "imperative" | "index" | "scroll";
 
 // @public
 export type IndexListProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onChange"> & {
+    activeKey?: string | null;
+    defaultActiveKey?: string;
     indexAriaLabel?: string;
     onIndexChange?: (key: string, details: IndexListChangeDetails) => void;
     ref?: Ref<IndexListRef>;
@@ -2276,20 +2279,12 @@ export type TabsProps = Omit<ComponentProps<"div">, "children" | "defaultValue" 
 // @public
 export function Tag(input: TagProps): JSX.Element;
 
+// Warning: (ae-forgotten-export) The symbol "TagStaticProps" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "TagFilterProps" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "TagClosableProps" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type TagProps = Omit<HTMLAttributes<HTMLSpanElement>, "children" | "dangerouslySetInnerHTML" | "onClick"> & {
-    children: ReactNode;
-    closeAriaLabel?: string;
-    disabled?: boolean;
-    onClick?: MouseEventHandler<HTMLButtonElement>;
-    onClose?: MouseEventHandler<HTMLButtonElement>;
-    ref?: Ref<TagRef>;
-    rounded?: boolean;
-    selected?: boolean;
-    size?: TagSize;
-    tone?: TagTone;
-    variant?: TagVariant;
-};
+export type TagProps = TagStaticProps | TagFilterProps | TagClosableProps;
 
 // @public
 export type TagRef = HTMLSpanElement | HTMLButtonElement;
@@ -2648,6 +2643,7 @@ export type WatermarkProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "
     image?: string;
     offset?: readonly [number, number];
     onImageError?: ReactEventHandler<SVGImageElement>;
+    onImageLoad?: ReactEventHandler<SVGImageElement>;
     onRemove?: () => void;
     opacity?: number;
     ref?: Ref<HTMLDivElement>;

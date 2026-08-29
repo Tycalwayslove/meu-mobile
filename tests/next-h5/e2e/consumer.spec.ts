@@ -168,6 +168,11 @@ test("renders a non-interactive watermark and restores its removed overlay", asy
   await overlay.evaluate((node) => node.remove());
   await expect(watermark.locator("[data-meu-watermark-overlay]")).toBeAttached();
   await expect(section.getByText("水印已恢复")).toBeVisible();
+
+  const restoredOverlay = watermark.locator("[data-meu-watermark-overlay]");
+  const canonicalStyle = await restoredOverlay.getAttribute("style");
+  await restoredOverlay.evaluate((node) => node.setAttribute("style", "display: none"));
+  await expect(restoredOverlay).toHaveAttribute("style", canonicalStyle || "");
 });
 
 test("navigates indexed sections and vertical category panels", async ({ page }) => {
@@ -179,13 +184,54 @@ test("navigates indexed sections and vertical category panels", async ({ page })
   await expect(indexB).toHaveAttribute("aria-current", "location");
   await expect(section.getByText("索引 B / 分类 featured")).toBeVisible();
 
+  await indexB.focus();
+  await indexB.press("ArrowDown");
+  const indexC = indexList.getByRole("button", { name: "C" });
+  await expect(indexC).toBeFocused();
+  await expect(indexC).toHaveAttribute("aria-current", "location");
+  await expect(section.getByText("索引 C / 分类 featured")).toBeVisible();
+
+  const indexA = indexList.getByRole("button", { name: "A" });
+  const rail = indexList.getByRole("navigation", { name: "分组索引" });
+  const aBox = await indexA.boundingBox();
+  const cBox = await indexC.boundingBox();
+  if (!aBox || !cBox) throw new Error("Expected IndexList rail button bounds");
+  await rail.evaluate(
+    (node, positions) => {
+      const dispatch = (type: string, clientY: number) => {
+        node.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            button: 0,
+            cancelable: true,
+            clientX: positions.clientX,
+            clientY,
+            isPrimary: true,
+            pointerId: 17,
+            pointerType: "touch"
+          })
+        );
+      };
+      dispatch("pointerdown", positions.fromY);
+      dispatch("pointermove", positions.toY);
+      dispatch("pointerup", positions.toY);
+    },
+    {
+      clientX: aBox.x + aBox.width / 2,
+      fromY: cBox.y + cBox.height / 2,
+      toY: aBox.y + aBox.height / 2
+    }
+  );
+  await expect(indexA).toHaveAttribute("aria-current", "location");
+  await expect(section.getByText("索引 A / 分类 featured")).toBeVisible();
+
   const featured = section.getByRole("tab", { name: "精选" });
   await featured.focus();
   await featured.press("ArrowDown");
   const food = section.getByRole("tab", { name: /食品/ });
   await expect(food).toHaveAttribute("aria-selected", "true");
   await expect(section.getByRole("tabpanel", { name: /食品/ })).toContainText("食品与饮品分类");
-  await expect(section.getByText("索引 B / 分类 food")).toBeVisible();
+  await expect(section.getByText("索引 A / 分类 food")).toBeVisible();
 });
 
 test("binds validation, clear action and successful submission", async ({ page }) => {
@@ -906,6 +952,15 @@ test("renders atomic display components with native actions and fallbacks", asyn
 
   await section.getByRole("button", { name: "仅看待处理" }).click();
   await expect(section.getByText("已筛选待处理商品")).toBeVisible();
+
+  const promotionFilter = section.getByRole("button", { name: "促销中", exact: true });
+  const removePromotion = section.getByRole("button", { name: "移除标签：促销中" });
+  await expect(promotionFilter).toHaveAttribute("aria-pressed", "true");
+  await promotionFilter.click();
+  await expect(section.getByText("已启用促销筛选")).toBeVisible();
+  await removePromotion.click();
+  await expect(section.getByText("已移除促销标签")).toBeVisible();
+  await expect(section.getByRole("button", { name: "促销中" })).toHaveCount(0);
 
   const expand = section.getByRole("button", { name: "展开完整商品说明" });
   await expect(expand).toBeVisible();

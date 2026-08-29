@@ -39,14 +39,16 @@ const routeGroups = [
 ] as const;
 
 function IndexListPreview({
+  controlled = false,
   sections = routeGroups,
   sticky = true
-}: Pick<IndexListProps, "sections" | "sticky">) {
+}: Pick<IndexListProps, "sections" | "sticky"> & { controlled?: boolean }) {
   const firstSection = sections[0];
   const [activeKey, setActiveKey] = useState(firstSection ? firstSection.key : "");
   return (
     <>
       <IndexList
+        {...(controlled ? { activeKey } : {})}
         aria-label="路线索引列表"
         sections={sections}
         sticky={sticky}
@@ -97,6 +99,16 @@ export const Default: Story = {
   }
 };
 
+export const Controlled: Story = {
+  render: (args) => (
+    <IndexListPreview
+      controlled
+      sections={args.sections}
+      {...(args.sticky === undefined ? {} : { sticky: args.sticky })}
+    />
+  )
+};
+
 export const CustomBrief: Story = {
   args: {
     sections: routeGroups.map((group, index) => ({
@@ -106,5 +118,7 @@ export const CustomBrief: Story = {
     }))
   }
 };
+
+export const Empty: Story = { args: { sections: [] } };
 
 export const NonSticky: Story = { args: { sticky: false } };

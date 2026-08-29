@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { ReactEventHandler } from "react";
 
 import { overlay, root } from "./Watermark.css";
 import { clampWatermarkOpacity, createWatermarkPattern } from "./pattern";
@@ -28,6 +29,7 @@ export function Watermark({
   image,
   offset,
   onImageError,
+  onImageLoad,
   onRemove,
   opacity,
   ref,
@@ -43,6 +45,10 @@ export function Watermark({
   const rootRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<SVGSVGElement | null>(null);
   const [imageFailedFor, setImageFailedFor] = useState<string | null>(null);
+  const imageAttemptRef = useRef<{
+    source: string | undefined;
+    status: "idle" | "loaded" | "failed";
+  }>({ source: image, status: "idle" });
   const pattern = useMemo(
     () => createWatermarkPattern({ content, font, gap, height, offset, rotate, width }),
     [content, font, gap, height, offset, rotate, width]
@@ -56,11 +62,32 @@ export function Watermark({
   const firstX = pattern.tileWidth / 2;
   const secondX = firstX + pattern.tileWidth / 2;
 
-  const setRootRef = (node: HTMLDivElement | null) => {
-    rootRef.current = node;
-    if (typeof ref === "function") ref(node);
-    else if (ref) ref.current = node;
-  };
+  const setRootRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      rootRef.current = node;
+      if (typeof ref === "function") {
+        const cleanup = ref(node);
+        if (!node) return;
+        return () => {
+          if (rootRef.current === node) rootRef.current = null;
+          if (typeof cleanup === "function") cleanup();
+          else ref(null);
+        };
+      }
+      if (ref) ref.current = node;
+      if (!node) return;
+      return () => {
+        if (rootRef.current === node) rootRef.current = null;
+        if (ref && ref.current === node) ref.current = null;
+      };
+    },
+    [ref]
+  );
+
+  useEffect(() => {
+    imageAttemptRef.current = { source: image, status: "idle" };
+    setImageFailedFor(null);
+  }, [image]);
 
   useSafeLayoutEffect(() => {
     const container = rootRef.current;
@@ -68,7 +95,9 @@ export function Watermark({
     if (!tamperProtection || !container || !watermark || typeof MutationObserver === "undefined") {
       return;
     }
+    let active = true;
     const observe = (observer: MutationObserver) => {
+      if (!active) return;
       observer.observe(container, { childList: true });
       observer.observe(watermark, {
         attributeOldValue: true,
@@ -82,41 +111,71 @@ export function Watermark({
     const observer = new MutationObserver((records) => {
       observer.disconnect();
       let tampered = false;
+      const addedOverlayNodes = new Set<Node>();
       for (const record of records) {
-        if (record.target === container) {
-          if (Array.from(record.removedNodes).includes(watermark)) {
-            container.appendChild(watermark);
+        if (record.target !== container && record.type === "childList") {
+          for (const added of Array.from(record.addedNodes)) addedOverlayNodes.add(added);
+        }
+      }
+      const transientNodes = Array.from(addedOverlayNodes).filter(
+        (node) => node !== watermark && !watermark.contains(node)
+      );
+      const isTransient = (node: Node) =>
+        transientNodes.some((transient) => transient === node || transient.contains(node));
+      try {
+        for (const record of Array.from(records).reverse()) {
+          if (record.target === container) {
+            if (Array.from(record.removedNodes).includes(watermark)) {
+              container.appendChild(watermark);
+              tampered = true;
+            }
+            continue;
+          }
+          if (record.type === "attributes" && record.attributeName) {
+            const target = record.target as Element;
+            if (isTransient(target)) continue;
+            if (record.oldValue === null) target.removeAttribute(record.attributeName);
+            else target.setAttribute(record.attributeName, record.oldValue);
             tampered = true;
           }
-          continue;
-        }
-        if (record.type === "attributes" && record.attributeName) {
-          const target = record.target as Element;
-          if (record.oldValue === null) target.removeAttribute(record.attributeName);
-          else target.setAttribute(record.attributeName, record.oldValue);
-          tampered = true;
-        }
-        if (record.type === "characterData" && record.oldValue !== null) {
-          record.target.nodeValue = record.oldValue;
-          tampered = true;
-        }
-        if (record.type === "childList") {
-          for (const added of Array.from(record.addedNodes)) {
-            if (added.parentNode) added.parentNode.removeChild(added);
+          if (record.type === "characterData" && record.oldValue !== null) {
+            if (isTransient(record.target)) continue;
+            record.target.nodeValue = record.oldValue;
+            tampered = true;
           }
-          for (const removed of Array.from(record.removedNodes)) {
-            if (record.target instanceof Node) {
-              record.target.insertBefore(removed, record.nextSibling);
+          if (record.type === "childList") {
+            if (isTransient(record.target)) continue;
+            for (const added of Array.from(record.addedNodes)) {
+              if (added.parentNode === record.target) record.target.removeChild(added);
             }
+            const reference =
+              record.nextSibling && record.nextSibling.parentNode === record.target
+                ? record.nextSibling
+                : null;
+            for (const removed of Array.from(record.removedNodes)) {
+              if (isTransient(removed)) continue;
+              record.target.insertBefore(removed, reference);
+            }
+            tampered = true;
           }
-          tampered = true;
+        }
+      } finally {
+        if (
+          active &&
+          rootRef.current === container &&
+          overlayRef.current === watermark &&
+          watermark.parentNode === container
+        ) {
+          observe(observer);
         }
       }
       if (tampered && onRemove) onRemove();
-      observe(observer);
     });
     observe(observer);
-    return () => observer.disconnect();
+    return () => {
+      active = false;
+      observer.disconnect();
+    };
   }, [
     content,
     crossOrigin,
@@ -134,21 +193,45 @@ export function Watermark({
     zIndex
   ]);
 
+  const handleImageLoad: ReactEventHandler<SVGImageElement> = (event) => {
+    if (!image) return;
+    const attempt = imageAttemptRef.current;
+    if (attempt.source !== image) {
+      imageAttemptRef.current = { source: image, status: "idle" };
+    } else if (attempt.status !== "idle") {
+      return;
+    }
+    imageAttemptRef.current.status = "loaded";
+    if (onImageLoad) onImageLoad(event);
+  };
+
+  const handleImageError: ReactEventHandler<SVGImageElement> = (event) => {
+    if (!image) return;
+    const attempt = imageAttemptRef.current;
+    if (attempt.source !== image) {
+      imageAttemptRef.current = { source: image, status: "idle" };
+    } else if (attempt.status !== "idle") {
+      return;
+    }
+    imageAttemptRef.current.status = "failed";
+    setImageFailedFor(image);
+    if (onImageError) onImageError(event);
+  };
+
   const renderMark = (x: number, y: number, key: string) => (
     <g key={key} transform={`translate(${x} ${y}) rotate(${pattern.rotate})`}>
       {showImage ? (
         <image
           href={image}
+          xlinkHref={image}
           x={-pattern.markWidth / 2}
           y={-pattern.markHeight / 2}
           width={pattern.markWidth}
           height={pattern.markHeight}
           preserveAspectRatio="xMidYMid meet"
           {...(crossOrigin ? { crossOrigin } : {})}
-          onError={(event) => {
-            if (image) setImageFailedFor(image);
-            if (onImageError) onImageError(event);
-          }}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
       ) : showText ? (
         pattern.lines.map((line, index) => {

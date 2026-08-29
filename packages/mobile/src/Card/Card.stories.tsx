@@ -78,3 +78,26 @@ export const LightAndDark: Story = {
     </div>
   )
 };
+
+export const NarrowRtlContent: Story = {
+  render: () => (
+    <div dir="rtl" style={{ width: 260, maxWidth: "100%" }}>
+      <Card
+        title="عنوان طويل للغاية لاختبار التفاف النص داخل بطاقة ضيقة"
+        description="وصف يوضح أن النص غير المنفصل لا يوسّع سطح البطاقة"
+        extra={<Tag tone="warning">قيد المراجعة الطويلة</Tag>}
+        footer={
+          <>
+            <Button size="small" variant="outline">
+              لاحقًا
+            </Button>
+            <Button size="small">عرض</Button>
+          </>
+        }
+        footerLayout="actions"
+      >
+        VeryLongUnbrokenBusinessIdentifier012345678901234567890
+      </Card>
+    </div>
+  )
+};

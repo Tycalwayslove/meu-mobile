@@ -10008,7 +10008,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ className, indexAriaLabel, onIndexChange, ref, sections, sticky, ...props }",
+              "parameterName": "{ activeKey: activeKeyProp, className, defaultActiveKey, indexAriaLabel, onIndexChange, ref, sections, sticky, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -10091,6 +10091,24 @@
             },
             {
               "kind": "Content",
+              "text": "> | "
+            },
+            {
+              "kind": "Reference",
+              "text": "TouchEvent",
+              "canonicalReference": "@types/react!React.TouchEvent:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLElement",
+              "canonicalReference": "!HTMLElement:interface"
+            },
+            {
+              "kind": "Content",
               "text": ">;\n    source: "
             },
             {
@@ -10112,7 +10130,7 @@
           "name": "IndexListChangeDetails",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 16
+            "endIndex": 20
           }
         },
         {
@@ -10126,7 +10144,7 @@
             },
             {
               "kind": "Content",
-              "text": "\"index\" | \"scroll\""
+              "text": "\"imperative\" | \"index\" | \"scroll\""
             },
             {
               "kind": "Content",
@@ -10175,7 +10193,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\" | \"onChange\"> & {\n    indexAriaLabel?: string;\n    onIndexChange?: (key: string, details: "
+              "text": ">, \"children\" | \"onChange\"> & {\n    activeKey?: string | null;\n    defaultActiveKey?: string;\n    indexAriaLabel?: string;\n    onIndexChange?: (key: string, details: "
             },
             {
               "kind": "Reference",
@@ -20681,7 +20699,7 @@
         {
           "kind": "TypeAlias",
           "canonicalReference": "@meu/mobile!TagProps:type",
-          "docComment": "/**\n * Props for a label, filter, or closable chip.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Props for a label, filter, or closable chip. Native button attributes are available only in filter-only mode; closable mode applies root attributes to its span group.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -20689,120 +20707,26 @@
             },
             {
               "kind": "Reference",
-              "text": "Omit",
-              "canonicalReference": "!Omit:type"
+              "text": "TagStaticProps",
+              "canonicalReference": "@meu/mobile!~TagStaticProps:type"
             },
             {
               "kind": "Content",
-              "text": "<"
+              "text": " | "
             },
             {
               "kind": "Reference",
-              "text": "HTMLAttributes",
-              "canonicalReference": "@types/react!React.HTMLAttributes:interface"
+              "text": "TagFilterProps",
+              "canonicalReference": "@meu/mobile!~TagFilterProps:type"
             },
             {
               "kind": "Content",
-              "text": "<"
+              "text": " | "
             },
             {
               "kind": "Reference",
-              "text": "HTMLSpanElement",
-              "canonicalReference": "!HTMLSpanElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">, \"children\" | \"dangerouslySetInnerHTML\" | \"onClick\"> & {\n    children: "
-            },
-            {
-              "kind": "Reference",
-              "text": "ReactNode",
-              "canonicalReference": "@types/react!React.ReactNode:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    closeAriaLabel?: string;\n    disabled?: boolean;\n    onClick?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "MouseEventHandler",
-              "canonicalReference": "@types/react!React.MouseEventHandler:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLButtonElement",
-              "canonicalReference": "!HTMLButtonElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">;\n    onClose?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "MouseEventHandler",
-              "canonicalReference": "@types/react!React.MouseEventHandler:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "HTMLButtonElement",
-              "canonicalReference": "!HTMLButtonElement:interface"
-            },
-            {
-              "kind": "Content",
-              "text": ">;\n    ref?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "Ref",
-              "canonicalReference": "@types/react!React.Ref:type"
-            },
-            {
-              "kind": "Content",
-              "text": "<"
-            },
-            {
-              "kind": "Reference",
-              "text": "TagRef",
-              "canonicalReference": "@meu/mobile!TagRef:type"
-            },
-            {
-              "kind": "Content",
-              "text": ">;\n    rounded?: boolean;\n    selected?: boolean;\n    size?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "TagSize",
-              "canonicalReference": "@meu/mobile!TagSize:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    tone?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "TagTone",
-              "canonicalReference": "@meu/mobile!TagTone:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n    variant?: "
-            },
-            {
-              "kind": "Reference",
-              "text": "TagVariant",
-              "canonicalReference": "@meu/mobile!TagVariant:type"
-            },
-            {
-              "kind": "Content",
-              "text": ";\n}"
+              "text": "TagClosableProps",
+              "canonicalReference": "@meu/mobile!~TagClosableProps:type"
             },
             {
               "kind": "Content",
@@ -20814,7 +20738,7 @@
           "name": "TagProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 27
+            "endIndex": 6
           }
         },
         {
@@ -23930,7 +23854,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, className, content, crossOrigin, font, gap, height, image, offset, onImageError, onRemove, opacity, ref, rotate, style, tamperProtection, width, zIndex, ...props }",
+              "parameterName": "{ children, className, content, crossOrigin, font, gap, height, image, offset, onImageError, onImageLoad, onRemove, opacity, ref, rotate, style, tamperProtection, width, zIndex, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -24071,6 +23995,24 @@
             },
             {
               "kind": "Content",
+              "text": ">;\n    onImageLoad?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactEventHandler",
+              "canonicalReference": "@types/react!React.ReactEventHandler:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "SVGImageElement",
+              "canonicalReference": "!SVGImageElement:interface"
+            },
+            {
+              "kind": "Content",
               "text": ">;\n    onRemove?: () => void;\n    opacity?: number;\n    ref?: "
             },
             {
@@ -24101,7 +24043,7 @@
           "name": "WatermarkProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 25
+            "endIndex": 29
           }
         }
       ]

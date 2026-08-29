@@ -29,9 +29,10 @@ export function Tag({
 }: TagProps) {
   const { locale } = useMeuConfig();
   const interactive = Boolean(onClick);
+  const isSelected = interactive && selected === true;
   const classes = tagRoot({ disabled, interactive });
   const content = (
-    <span className={tagChip({ rounded, selected: Boolean(selected), size, tone, variant })}>
+    <span className={tagChip({ disabled, rounded, selected: isSelected, size, tone, variant })}>
       <span className={tagContent}>{children}</span>
     </span>
   );
@@ -43,7 +44,7 @@ export function Tag({
         ? "filter-closable"
         : "closable"
       : interactive
-        ? selected
+        ? isSelected
           ? "selected"
           : "filter"
         : "static";
@@ -54,12 +55,12 @@ export function Tag({
       className={classes}
       disabled={disabled}
       aria-label={ariaLabel}
-      aria-pressed={selected}
+      aria-pressed={interactive ? selected : undefined}
       onClick={onClick}
       data-meu-tag-primary
       data-size={size}
       data-state={state}
-      data-selected={selected || undefined}
+      data-selected={isSelected || undefined}
       data-tone={tone}
       data-variant={variant}
     >
@@ -68,11 +69,12 @@ export function Tag({
   ) : (
     <span
       className={classes}
+      aria-label={ariaLabel}
       aria-disabled={disabled || undefined}
       data-meu-tag-primary
       data-size={size}
       data-state={state}
-      data-selected={selected || undefined}
+      data-selected={undefined}
       data-tone={tone}
       data-variant={variant}
     >
@@ -101,7 +103,7 @@ export function Tag({
         data-meu-tag-group
         data-size={size}
         data-state={state}
-        data-selected={selected || undefined}
+        data-selected={isSelected || undefined}
         data-tone={tone}
         data-variant={variant}
       >
@@ -134,7 +136,7 @@ export function Tag({
         data-meu-component="tag"
         data-size={size}
         data-state={state}
-        data-selected={selected || undefined}
+        data-selected={isSelected || undefined}
         data-tone={tone}
         data-variant={variant}
       >
@@ -153,7 +155,7 @@ export function Tag({
       data-meu-component="tag"
       data-size={size}
       data-state={state}
-      data-selected={selected || undefined}
+      data-selected={undefined}
       data-tone={tone}
       data-variant={variant}
     >

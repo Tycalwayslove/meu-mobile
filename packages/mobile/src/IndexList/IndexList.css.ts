@@ -11,17 +11,27 @@ export const root = style({
   background: "var(--meu-color-surface)",
   border: "1px solid var(--meu-color-border)",
   borderRadius: "var(--meu-radius-surface)",
-  fontFamily: "var(--meu-font-ui)"
+  fontFamily: "var(--meu-font-ui)",
+  selectors: {
+    "&[data-empty='true']": { gridTemplateColumns: "minmax(0, 1fr)" }
+  }
 });
 
 export const body = style({
+  position: "relative",
   minWidth: 0,
   minHeight: 0,
   overflowX: "hidden",
   overflowY: "auto",
   overscrollBehavior: "contain",
   WebkitOverflowScrolling: "touch",
-  scrollPaddingTop: 36
+  scrollPaddingTop: 36,
+  selectors: {
+    "&:focus": {
+      outline: "2px solid var(--meu-color-accent)",
+      outlineOffset: -2
+    }
+  }
 });
 
 export const section = style({ minWidth: 0, scrollMarginTop: 36 });
@@ -53,6 +63,7 @@ export const heading = recipe({
 export const content = style({ minWidth: 0 });
 
 export const rail = style({
+  position: "relative",
   display: "flex",
   flexDirection: "column",
   alignItems: "stretch",
@@ -107,10 +118,29 @@ export const indexButton = recipe({
     active: {
       true: {
         color: "var(--meu-color-accent-contrast)",
-        background: "var(--meu-color-accent)"
+        background: "var(--meu-color-accent)",
+        "@media": {
+          "(forced-colors: active)": {
+            color: "HighlightText",
+            background: "Highlight",
+            forcedColorAdjust: "none"
+          }
+        }
       },
       false: {}
     }
   },
   defaultVariants: { active: false }
+});
+
+export const status = style({
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0
 });

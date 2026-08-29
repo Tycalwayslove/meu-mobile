@@ -332,6 +332,7 @@ export function ConsumerScenario() {
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const [cellLoading, setCellLoading] = useState(true);
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
+  const [promotionTagVisible, setPromotionTagVisible] = useState(true);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [watermarkMessage, setWatermarkMessage] = useState("水印未发生 DOM 变更");
   const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
@@ -1039,6 +1040,19 @@ export function ConsumerScenario() {
             <Tag tone="danger" rounded onClick={() => setDisplayAction("已筛选待处理商品")}>
               仅看待处理
             </Tag>
+            {promotionTagVisible ? (
+              <Tag
+                selected
+                tone="accent"
+                onClick={() => setDisplayAction("已启用促销筛选")}
+                onClose={() => {
+                  setPromotionTagVisible(false);
+                  setDisplayAction("已移除促销标签");
+                }}
+              >
+                促销中
+              </Tag>
+            ) : null}
           </div>
           <div className="integration-avatars">
             <Badge content={128} max={99} bordered>

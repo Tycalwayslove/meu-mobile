@@ -45,8 +45,10 @@ export type WatermarkProps = Omit<
   image?: string;
   /** Horizontal and vertical pattern origin; each axis defaults to half its gap. */
   offset?: readonly [number, number];
-  /** Called when the SVG image fails; the component then falls back to `content`. */
+  /** Called once for the current image attempt when the SVG image fails; the component then falls back to `content`. */
   onImageError?: ReactEventHandler<SVGImageElement>;
+  /** Called once for the current image attempt when any repeated SVG image finishes loading. */
+  onImageLoad?: ReactEventHandler<SVGImageElement>;
   /** Called after tamper protection restores a removed or mutated overlay. */
   onRemove?: () => void;
   /** Overlay opacity, clamped to 0–1. @defaultValue 0.16 */

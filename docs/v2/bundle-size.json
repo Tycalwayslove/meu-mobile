@@ -6,9 +6,9 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 20244,
-    "gzipBytes": 24433,
-    "rawBytes": 190616,
+    "brotliBytes": 20355,
+    "gzipBytes": 24652,
+    "rawBytes": 192191,
     "files": [
       {
         "filePath": "packages/tokens/dist/theme.css",
@@ -500,9 +500,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 1916,
-      "gzipBytes": 2144,
-      "rawBytes": 7317,
+      "brotliBytes": 1964,
+      "gzipBytes": 2225,
+      "rawBytes": 7448,
       "docsPath": "packages/mobile/src/Card/Card.docs.mdx",
       "name": "Card",
       "packageName": "@meu/mobile",
@@ -511,9 +511,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 1916,
-          "gzipBytes": 2144,
-          "rawBytes": 7317,
+          "brotliBytes": 1964,
+          "gzipBytes": 2225,
+          "rawBytes": 7448,
           "name": "Card",
           "passesBudget": true
         }
@@ -963,9 +963,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3151,
-      "gzipBytes": 3568,
-      "rawBytes": 13011,
+      "brotliBytes": 5323,
+      "gzipBytes": 6041,
+      "rawBytes": 27019,
       "docsPath": "packages/mobile/src/IndexList/IndexList.docs.mdx",
       "name": "IndexList",
       "packageName": "@meu/mobile",
@@ -974,9 +974,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3151,
-          "gzipBytes": 3568,
-          "rawBytes": 13011,
+          "brotliBytes": 5323,
+          "gzipBytes": 6041,
+          "rawBytes": 27019,
           "name": "IndexList",
           "passesBudget": true
         }
@@ -1617,9 +1617,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2304,
-      "gzipBytes": 2618,
-      "rawBytes": 9687,
+      "brotliBytes": 2348,
+      "gzipBytes": 2661,
+      "rawBytes": 9896,
       "docsPath": "packages/mobile/src/Tag/Tag.docs.mdx",
       "name": "Tag",
       "packageName": "@meu/mobile",
@@ -1628,9 +1628,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2304,
-          "gzipBytes": 2618,
-          "rawBytes": 9687,
+          "brotliBytes": 2348,
+          "gzipBytes": 2661,
+          "rawBytes": 9896,
           "name": "Tag",
           "passesBudget": true
         }
@@ -1833,9 +1833,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2391,
-      "gzipBytes": 2719,
-      "rawBytes": 9011,
+      "brotliBytes": 2829,
+      "gzipBytes": 3225,
+      "rawBytes": 12290,
       "docsPath": "packages/mobile/src/Watermark/Watermark.docs.mdx",
       "name": "Watermark",
       "packageName": "@meu/mobile",
@@ -1844,9 +1844,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2391,
-          "gzipBytes": 2719,
-          "rawBytes": 9011,
+          "brotliBytes": 2829,
+          "gzipBytes": 3225,
+          "rawBytes": 12290,
           "name": "Watermark",
           "passesBudget": true
         }

@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 const paddingValues = {
@@ -43,6 +43,11 @@ export const media = style({
   background: "var(--meu-color-subtle)"
 });
 
+globalStyle(`${media} > img, ${media} > video`, {
+  display: "block",
+  maxWidth: "100%"
+});
+
 export const sectionPadding = recipe({
   base: { boxSizing: "border-box" },
   variants: {
@@ -60,7 +65,6 @@ export const header = recipe({
   base: {
     display: "flex",
     alignItems: "flex-start",
-    gap: "var(--meu-space-3)",
     minWidth: 0
   },
   variants: {
@@ -79,6 +83,7 @@ export const leading = style({
   justifyContent: "center",
   minWidth: 24,
   minHeight: 24,
+  marginInlineEnd: "var(--meu-space-3)",
   color: "var(--meu-color-accent)"
 });
 
@@ -89,6 +94,7 @@ export const title = style({
   fontSize: 16,
   fontWeight: 600,
   lineHeight: "24px",
+  wordBreak: "break-word",
   overflowWrap: "anywhere"
 });
 
@@ -98,36 +104,45 @@ export const description = style({
   color: "var(--meu-color-muted)",
   fontSize: 14,
   lineHeight: "20px",
+  wordBreak: "break-word",
   overflowWrap: "anywhere"
 });
 
 export const extra = style({
   display: "flex",
-  flex: "0 0 auto",
+  flex: "0 1 auto",
   alignItems: "center",
+  minWidth: 0,
+  maxWidth: "50%",
   minHeight: 24,
-  marginInlineStart: "auto"
+  marginInlineStart: "var(--meu-space-3)",
+  wordBreak: "break-word",
+  overflowWrap: "anywhere"
 });
 
-export const body = style({ minWidth: 0, overflowWrap: "anywhere" });
+export const body = style({
+  minWidth: 0,
+  wordBreak: "break-word",
+  overflowWrap: "anywhere"
+});
 
 export const footer = recipe({
   base: { minWidth: 0 },
   variants: {
-    actions: {
-      true: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        flexWrap: "wrap",
-        gap: "var(--meu-space-2)"
-      },
-      false: {}
-    },
     divided: {
       true: { borderTop: "1px solid var(--meu-color-border)" },
       false: {}
     }
   },
-  defaultVariants: { actions: false, divided: false }
+  defaultVariants: { divided: false }
 });
+
+export const footerActions = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
+  flexWrap: "wrap"
+});
+
+globalStyle(`${footerActions} > *`, { marginBlock: "var(--meu-space-1)" });
+globalStyle(`${footerActions} > * + *`, { marginInlineStart: "var(--meu-space-2)" });

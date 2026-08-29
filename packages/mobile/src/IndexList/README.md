@@ -7,12 +7,14 @@
 
 ## 契约
 
-- `sections` 的 `key` 同时作为分组身份、索引按钮可访问名称和 `scrollTo` 目标，必须稳定且唯一。
+- `sections` 的 `key` 同时作为分组身份、稳定 DOM 关联和 `scrollTo` 目标；重复时只保留首项。
 - `title` 是主内容区标题，`brief` 是右侧短索引；未提供时分别回退为完整 key 与首字符。
 - `sticky` 默认开启，只固定组件自身滚动视口中的分组标题。
-- `onIndexChange` 区分 `index` 与 `scroll` 来源；重复激活同一分组不会重复通知。
-- `ref.scrollTo(key, options)` 返回是否找到目标，可选择平滑滚动和把焦点移到索引按钮。
+- `activeKey` / `defaultActiveKey` 提供受控与非受控 active；无效值回退到首个现存分组。
+- `onIndexChange` 区分 `index`、`scroll` 与 `imperative` 来源；受控调用方可接受或拒绝请求。
+- `ref.scrollTo(key, options)` 返回是否找到目标，可选择平滑滚动和把焦点移到索引按钮；低动态偏好会将平滑滚动降级为即时滚动。
 - 索引按钮使用 44×44px 原生 button、roving tab stop、上下方向键及 Home / End。
+- Pointer capture 不可用时临时监听 window；iOS 13.0–13.3 使用 Touch Events 滑动后备，cancel/unmount 均清理。
 
 ## 边界
 

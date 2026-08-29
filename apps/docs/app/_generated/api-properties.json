@@ -1612,15 +1612,15 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Disables filter activation and close actions.",
+          "description": "Disables filter activation and close actions. Static labels only receive an unavailable visual state.",
           "defaultValue": "false"
         },
         {
           "name": "ref",
-          "type": "Ref<TagRef>",
+          "type": "Ref<HTMLSpanElement> | Ref<HTMLButtonElement>",
           "required": false,
           "event": false,
-          "description": "Ref to the rendered root: the group span when closable, otherwise the primary span or filter button."
+          "description": "Ref to the actual Tag root element."
         },
         {
           "name": "rounded",
@@ -1635,7 +1635,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Controlled selected state for filter mode, exposed through `aria-pressed`."
+          "description": "Controlled selected state for filter mode, exposed through `aria-pressed`. Ignored without `onClick`."
         },
         {
           "name": "size",
@@ -1666,7 +1666,7 @@
           "type": "MouseEventHandler<HTMLButtonElement>",
           "required": false,
           "event": true,
-          "description": "Activates filter mode using a native button."
+          "description": "Activates filter mode using a native `type=\"button\"` button.\nOptionally activates the primary filter button."
         },
         {
           "name": "onClose",
@@ -2975,14 +2975,14 @@
           "type": "ReactNode",
           "required": false,
           "event": false,
-          "description": "Main non-interactive card content."
+          "description": "Main non-interactive card content. Nullish, boolean, empty-array, and empty-fragment content does not create a body region."
         },
         {
           "name": "description",
           "type": "ReactNode",
           "required": false,
           "event": false,
-          "description": "Supporting title text."
+          "description": "Supporting title text. Nullish, boolean, empty-array, and empty-fragment content does not create a header region."
         },
         {
           "name": "extra",
@@ -3315,7 +3315,7 @@
       "IndexListChangeDetails": [
         {
           "name": "event",
-          "type": "MouseEvent<HTMLButtonElement, globalThis.MouseEvent> | KeyboardEvent<HTMLButtonElement> | PointerEvent<HTMLElement>",
+          "type": "MouseEvent<HTMLButtonElement, globalThis.MouseEvent> | KeyboardEvent<HTMLButtonElement> | PointerEvent<HTMLElement> | TouchEvent<HTMLElement>",
           "required": false,
           "event": false,
           "description": "Original input event when the change came from the index rail."
@@ -3325,10 +3325,24 @@
           "type": "IndexListChangeSource",
           "required": true,
           "event": false,
-          "description": "Whether the rail or owned scroll viewport caused the change."
+          "description": "Whether the rail, owned scroll viewport, or imperative handle caused the change."
         }
       ],
       "IndexListProps": [
+        {
+          "name": "activeKey",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Controlled active section key. `null` or an unknown key falls back to the first section."
+        },
+        {
+          "name": "defaultActiveKey",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Initial active section for uncontrolled usage; unknown keys fall back to the first section."
+        },
         {
           "name": "indexAriaLabel",
           "type": "string",
@@ -3348,7 +3362,7 @@
           "type": "readonly IndexListSection[]",
           "required": true,
           "event": false,
-          "description": "Stable ordered sections. Keys must be unique."
+          "description": "Stable ordered sections. The first occurrence wins when a key is duplicated."
         },
         {
           "name": "sticky",
@@ -3362,7 +3376,7 @@
           "type": "(key: string, details: IndexListChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when the active section changes through scrolling or index interaction."
+          "description": "Called when scrolling, rail interaction, or the imperative handle requests a new active key."
         }
       ],
       "IndexListRef": [
@@ -6020,7 +6034,14 @@
           "type": "ReactEventHandler<SVGImageElement>",
           "required": false,
           "event": true,
-          "description": "Called when the SVG image fails; the component then falls back to `content`."
+          "description": "Called once for the current image attempt when the SVG image fails; the component then falls back to `content`."
+        },
+        {
+          "name": "onImageLoad",
+          "type": "ReactEventHandler<SVGImageElement>",
+          "required": false,
+          "event": true,
+          "description": "Called once for the current image attempt when any repeated SVG image finishes loading."
         },
         {
           "name": "onRemove",
@@ -7882,7 +7903,7 @@
         },
         {
           "name": "role",
-          "type": "\"dialog\" | \"alertdialog\"",
+          "type": "\"alertdialog\" | \"dialog\"",
           "required": false,
           "event": false,
           "description": "Uses interruptive alert-dialog semantics.\nUses standard dialog semantics for interactive or non-urgent content.",
@@ -8020,7 +8041,7 @@
         },
         {
           "name": "role",
-          "type": "\"dialog\" | \"alertdialog\"",
+          "type": "\"alertdialog\" | \"dialog\"",
           "required": false,
           "event": false,
           "description": "Uses interruptive alert-dialog semantics.\nUses standard dialog semantics for interactive or non-urgent content.",
@@ -12160,7 +12181,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<NumberKeyboardTriggerProps, \"value\" | \"aria-controls\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<NumberKeyboardTriggerProps, \"value\" | \"aria-controls\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state and ARIA wiring. Disabling either the\nkeyboard or trigger also omits the field from React Hook Form and native submissions."
@@ -14210,7 +14231,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<PickerTriggerProps, \"value\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state. Disabling either the tree or trigger\nalso omits the field from React Hook Form and native submissions."
@@ -14567,7 +14588,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<PickerTriggerProps, \"value\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
@@ -14895,7 +14916,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<PickerTriggerProps, \"value\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
@@ -15320,7 +15341,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<PickerTriggerProps, \"value\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
@@ -15837,7 +15858,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<PickerTriggerProps, \"value\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state. Disabling either the picker or trigger\nalso omits the field from React Hook Form and native submissions."
@@ -17338,7 +17359,7 @@
         },
         {
           "name": "triggerProps",
-          "type": "Omit<PickerTriggerProps, \"value\" | \"ref\" | \"open\" | \"status\">",
+          "type": "Omit<PickerTriggerProps, \"value\" | \"status\" | \"ref\" | \"open\">",
           "required": false,
           "event": false,
           "description": "Props forwarded to the trigger except managed state. Disabling the trigger also omits the\nfield from React Hook Form and native submissions."
@@ -17593,11 +17614,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2350,
-    "eventFields": 240,
+    "documentedFields": 2353,
+    "eventFields": 241,
     "exportedTypes": 383,
     "exportedTypesWithFields": 225,
-    "fields": 2350,
+    "fields": 2353,
     "packages": 4
   }
 }

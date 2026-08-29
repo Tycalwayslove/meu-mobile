@@ -20,9 +20,9 @@ export type CardFooterLayout = "content" | "actions";
  * @public
  */
 export type CardProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "onClick" | "title"> & {
-  /** Main non-interactive card content. */
+  /** Main non-interactive card content. Nullish, boolean, empty-array, and empty-fragment content does not create a body region. */
   children?: ReactNode;
-  /** Supporting title text. */
+  /** Supporting title text. Nullish, boolean, empty-array, and empty-fragment content does not create a header region. */
   description?: ReactNode;
   /** Compact metadata or a separate action aligned with the heading. */
   extra?: ReactNode;

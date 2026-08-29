@@ -18,7 +18,8 @@ storyIds:
     information-card--elevated,
     information-card--with-footer,
     information-card--with-media-and-actions,
-    information-card--light-and-dark
+    information-card--light-and-dark,
+    information-card--narrow-rtl-content
   ]
 source: packages/mobile/src/Card
 ---
@@ -29,10 +30,10 @@ source: packages/mobile/src/Card
 
 - 非交互 div 容器，提供 media、leading、title、description、extra、body、footer 槽位和四档 padding。
 - outlined/filled/elevated 三种表面；media 可选 aspect ratio；footer 默认保持任意内容布局，并可显式切换为可换行操作区。
-- 保留 0/空字符串等有意内容，不把 Card 自动变成 button/link，避免嵌套交互冲突。
+- 保留 0/空字符串等有意内容；null/undefined/boolean/空数组/空 Fragment 不创建空 section。不把 Card 自动变成 button/link，避免嵌套交互冲突。
 - RTL 使用逻辑 margin；forced-colors 保留边框。无动画。
 
-状态为 `verification`；Next H5 移动 Chromium/WebKit 已覆盖 slots、独立操作与 hydration，最终 Chromatic 视觉审批和更广的真实业务内容矩阵待补。
+状态为 `verification`；共置 Unit、SSR/hydration 与 Story 已覆盖核心结构，Chromium/WebKit 业务集成、Chromatic 和真机仍需以实际执行记录签字。
 
 ## 何时使用
 
@@ -106,47 +107,44 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 
 ## 浏览器与 WebView
 
-基础布局兼容 Chrome/WebView 70、iOS 13。CSS aspect-ratio 在旧版本可能忽略，因此不能把它作为唯一 CLS 保证；关键媒体需提供固定 width/height 或容器 fallback。
+正式运行时支持继承 V2 矩阵：iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。Chrome 70 / iOS 13 只做构建产物语法扫描，不是运行时支持承诺；`aspect-ratio` 和 flex `gap` 均不能据此视为已验证。Card 的 header 间距和 action footer 使用逻辑 margin 降级，长词同时提供 `word-break` fallback；关键媒体仍需自身 `width`/`height`，不能只依赖 `mediaAspectRatio` 保证 CLS。
 
 ## 边界情况与已知限制
 
 - 不提供交互根、加载态、选择态或 collapsible 行为。
 - mediaAspectRatio 不裁剪子内容；媒体需自行 `object-fit` 和 100% 尺寸。
 - actions footer 仅布局，不自动命名为 action group；复杂动作组由业务提供 fieldset/group 语义。
+- loading/disabled 属于卡内真实控件的状态；Card 根不会代理、阻断或宣布这些状态。
 
 ## 性能预算
 
 节点数与传入 slot 内容线性相关；Card 本身无监听、测量或 effect。超长列表应配合虚拟化容器。
 
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2225 B / 32768 B 预算，组合 Brotli 1964 B；共享样式由应用单独导入一次。
+
 ## 测试证据
 
-- Unit: `Card.test.tsx` 覆盖非交互语义、空内容、媒体比例和独立 footer action。
-- Story interaction: `Outlined` 验证非交互根及 header/body 边界；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2144 B / 32768 B 预算，组合 Brotli 1916 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Card.ssr.test.tsx` 覆盖 slots、heading/link 和非 button 根；隔离 Next 16 hydration 后 header/body/footer 与独立 action 保持一致，0 hydration/runtime error。
-- RTL: 逻辑 CSS 已实现，专属截图待补。
-- Reduced motion: 无动画，不适用。
-- Mobile Chromium/WebKit E2E: `composes Card slots and controls accessible Collapse panels` 在两种引擎断言 Card 根、body 内容、header slots 与 footer action 业务输出。
-- Chromatic Light/Dark: Story 已建立，基线待执行。
-- Real device: 待补。
+- Unit: `Card.test.tsx` 覆盖静态根、0/空字符串与空 ReactNode、media、任意 footer 和独立 action。
+- SSR/hydration: `Card.ssr.test.tsx` 直接断言服务端 slots，并在 jsdom hydrate 后检查 0 recoverable error、div 根和独立 button。
+- Story: `Outlined` 有结构 play；`NarrowRtlContent` 提供 RTL、长词、窄宽、长 extra 和换行 actions 的人工/视觉检查场景。
+- Reduced motion: Card 本身无动画。
+- 尚无本目录可复核的 Chromatic 基线、真机读屏或 iOS 13/Chrome 70 运行时通过记录；不能从仓库级静态扫描推导这些结论。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补长内容/RTL/forced-colors/Light-Dark 专属视觉；基础移动端 slots/action 已完成。
+- 补 forced-colors/Light-Dark 的签字截图和支持下限真机记录。
 
 ### 已完成
 
 - 冻结非交互根与嵌套交互边界，补 media ratio、显式 footer action layout、RTL 和 forced-colors。
 - 补齐 TSDoc、Unit、SSR 与组合 Story。
-- 在隔离 Next H5 中补 slots、footer action 与 hydration 双引擎证据。
+- 增加空 ReactNode 归一化、旧 flex-gap 降级、长词 fallback 与真实 hydration 测试。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                              | 迁移说明                     |
-| ---------- | ------ | ------------ | ------------------------------------------------- | ---------------------------- |
-| 2026-08-29 | 未发布 | behavior     | 增加 mediaAspectRatio，强化 footer/RTL/高对比边界 | 现有 slots 与 DOM 根保持兼容 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 slots/action/hydration 证据   | 无                           |
+| 日期       | 版本   | 类型      | 内容                                               | 迁移说明                       |
+| ---------- | ------ | --------- | -------------------------------------------------- | ------------------------------ |
+| 2026-08-29 | 未发布 | behavior  | 增加 mediaAspectRatio，强化 footer/RTL/高对比边界  | 现有 slots 与 DOM 根保持兼容   |
+| 2026-08-29 | 未发布 | hardening | 空节点归一化、旧内核间距/断词降级与 hydration 测试 | false/空数组不再产生空 section |

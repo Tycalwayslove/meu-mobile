@@ -41,8 +41,37 @@ export const Filter: Story = {
 export const Closable: Story = {
   args: { children: "可移除", closeAriaLabel: "移除可移除标签", onClose: () => undefined }
 };
+export const FilterClosable: Story = {
+  args: {
+    children: "仅看待处理",
+    closeAriaLabel: "移除待处理筛选",
+    onClick: () => undefined,
+    onClose: () => undefined,
+    selected: true
+  },
+  play: async ({ canvasElement }) => {
+    const group = canvasElement.querySelector<HTMLElement>("[data-meu-tag-group]");
+    await Promise.resolve();
+    if (!group || group.querySelectorAll(":scope > button").length !== 2) {
+      throw new window.Error("Expected independent filter and close buttons");
+    }
+    if (group.querySelector("button button")) {
+      throw new window.Error("Tag actions must not be nested");
+    }
+  }
+};
 export const LongText: Story = {
-  args: { children: "这是一个用于验证窄屏和长翻译文本截断行为的标签", onClick: () => undefined }
+  decorators: [
+    (Story) => (
+      <div dir="rtl" style={{ width: 160, maxWidth: "100%" }}>
+        <Story />
+      </div>
+    )
+  ],
+  args: {
+    children: "هذه تسمية طويلة جدًا للتحقق من العرض الضيق واتجاه النص",
+    onClick: () => undefined
+  }
 };
 export const LightAndDark: Story = {
   render: () => (

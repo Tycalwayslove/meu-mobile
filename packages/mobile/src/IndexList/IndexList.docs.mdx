@@ -14,7 +14,9 @@ figma:
 storyIds:
   [
     navigation-indexlist--default,
+    navigation-indexlist--controlled,
     navigation-indexlist--custom-brief,
+    navigation-indexlist--empty,
     navigation-indexlist--non-sticky
   ]
 source: packages/mobile/src/IndexList
@@ -25,9 +27,11 @@ source: packages/mobile/src/IndexList
 ## 当前能力
 
 - 在组件自己的有界纵向视口内渲染稳定分组、sticky 标题和 44×44 索引按钮。
-- 原生按钮支持 roving tab stop、ArrowUp/ArrowDown、Home/End、点击和沿索引栏连续触摸定位。
-- `onIndexChange` 区分 `index`/`scroll`，`ref.scrollTo` 支持自动/平滑定位和可选焦点移动。
-- 动态删除当前分组时视觉与 Tab stop 回退首个现存分组；RTL、forced-colors 与 i18n 内置文案已处理。
+- 原生按钮支持 roving tab stop、ArrowUp/ArrowDown、Home/End、点击、Pointer Events 与早期 iOS 13 Touch Events 连续定位。
+- `activeKey` / `defaultActiveKey` 支持受控和非受控 active；`onIndexChange` 区分 `index`/`scroll`/`imperative`。
+- 动态删除当前分组时 active、Tab stop 与索引焦点回退首个现存分组；重复 key 仅采用首项，DOM 关联不随排序改变。
+- `ref.scrollTo` 支持定位和可选焦点移动；平滑滚动跟踪可被用户输入取消，并尊重 ConfigProvider/系统低动态偏好。
+- RTL、forced-colors、空列表、SSR 与中英文内置文案已处理。
 
 状态为 `verification`；浏览器交互、视觉和真机证据仍需在发布批次统一执行。
 
@@ -41,7 +45,7 @@ source: packages/mobile/src/IndexList
 
 ## 结构与状态
 
-根网格包含 owned scroll body 与 `nav` rail；每个 section 由可见 heading 标记。状态只有当前 active key 与 programmatic-scroll 抑制窗口，业务数据仍由调用方持有。
+根网格包含 owned scroll body 与 `nav` rail；每个 section 由稳定 `aria-labelledby` 标记，索引按钮通过 `aria-controls` 指向它。空列表不输出空 navigation，也不留下无意义 Tab stop。组件管理 active、滚动跟踪、手势与简短定位公告，业务数据仍由调用方持有。
 
 ## 基础用法
 
@@ -56,7 +60,7 @@ source: packages/mobile/src/IndexList
 
 ## 受控与非受控
 
-不提供受控 active key。active 由索引操作和组件自身滚动派生；业务需要定位时调用 `ref.scrollTo`。`sections` 是外部事实源。
+省略 `activeKey` 时，`defaultActiveKey` 只决定初始分组，之后 active 由索引操作和组件自身滚动派生。传入 `activeKey` 后 active 由调用方控制；交互先调用 `onIndexChange`，若调用方未接受新 key，下一任务会把 owned viewport 回滚到权威分组。`null`、未知 key、删除中的 key 都回退首个现存分组；空列表为 `null` 状态且不触发变更事件。
 
 ## 表单集成
 
@@ -64,15 +68,15 @@ source: packages/mobile/src/IndexList
 
 ## Props
 
-API 由 `IndexListProps`/`IndexListSection` 生成。`key` 必须稳定唯一；非展示型 key 用 `ariaLabel` 提供按钮名称；`brief` 只改变短视觉，`title` 只改变可见 heading。
+API 由 `IndexListProps`/`IndexListSection` 生成。`key` 应稳定唯一；防御性归一化会忽略同 key 的后续项。非展示型或空 key 用 `ariaLabel` 提供按钮名称；空 key 未提供名称时回退本地化位置名称。`brief` 只改变短视觉，`title` 只改变可见 heading。
 
 ## Events
 
-`onIndexChange(key, details)` 仅在 active key 真正变化时通知。rail 的点击、键盘和 pointer 滑动为 `source=index`；body 滚动为 `source=scroll`。
+`onIndexChange(key, details)` 仅在相对当前权威 active 请求不同 key 时通知。rail 的点击、键盘、pointer/Touch Events 滑动为 `source=index`；body 滚动为 `source=scroll`；ref 命令为 `source=imperative`。原生输入事件仅在 React rail 路径可用，window capture 后备仍提供 source。
 
 ## Ref 与命令式方法
 
-`scrollTo(key, { behavior, focusIndex })` 找到目标返回 true，否则返回 false；平滑滚动使用浏览器原生行为。
+`scrollTo(key, { behavior, focusIndex })` 找到目标返回 true，否则返回 false。平滑滚动使用浏览器原生行为，并以到达目标、滚动空闲或 1.5 秒上限结束内部抑制；wheel、pointer、touch 或键盘输入会立即释放抑制。ConfigProvider `motion=reduced` 或系统 `prefers-reduced-motion` 会把 `smooth` 降级为 `auto`。
 
 ## 键盘操作
 
@@ -85,15 +89,15 @@ API 由 `IndexListProps`/`IndexListSection` 生成。`key` 必须稳定唯一；
 
 ## 触摸与手势
 
-在 44px rail 上按下并上下滑动会连续定位最近按钮，主 pointer 结束或取消后释放 capture。rail 使用 `touch-action:none`，只在窄索引区域认领手势；主内容保持原生纵向滚动。
+在 44px rail 上按下并上下滑动会连续定位最近按钮。Pointer capture 失败时只在该手势生命周期内监听 window move/up/cancel；iOS 13.0–13.3 没有 Pointer Events 时使用 Touch Events。结束、取消、lost capture 和卸载都会清理。rail 使用 `touch-action:none`，只在窄索引区域认领手势；主内容保持原生纵向滚动。
 
 ## 无障碍
 
-rail 是具名 navigation，内部滚动 region 与 rail 默认名称均随 ConfigProvider locale 使用中英文，section 由可见 heading 标记，active button 使用 `aria-current=location`。`brief` 为图形或数字时必须提供可理解的 `ariaLabel`。
+rail 是具名 navigation，内部滚动 region 与 rail 默认名称均随 ConfigProvider locale 使用中英文，section 由可见 heading 标记，active button 使用 `aria-current=location`。键盘切换移动焦点；动态删除被聚焦项时焦点回退当前 roving button；rail/ref 定位还通过隐藏 polite status 公告。`brief` 为图形或数字时必须提供可理解的 `ariaLabel`。
 
 ## 动效
 
-组件不创建自定义动画；仅 `behavior=smooth` 使用平台滚动。reduced-motion 场景由调用方改用 `auto`，组件不会偷偷覆盖明确请求。
+组件不创建自定义动画；仅 `behavior=smooth` 使用平台滚动，低动态偏好会覆盖为 `auto`。
 
 ## 主题与定制
 
@@ -113,9 +117,10 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 
 ## 边界情况与已知限制
 
-- 不验证重复 key；重复 identity 属于调用方错误。
+- 重复 key 只保留首项；调用方仍应提供稳定唯一 identity，避免静默丢弃业务内容。
 - 只拥有内部滚动，不监听 window 或任意外部 scroller。
-- programmatic smooth 完成使用保守时间窗抑制滚动回报，不提供 scrollend 事件。
+- window pointer 监听只在 pointer capture 失败的活动手势中存在；组件不接管页面滚动。
+- programmatic smooth 不依赖较新的 `scrollend`；使用目标检测、150ms 空闲和 1.5 秒硬上限。
 - 分组非常多时 rail 自身可滚动；不提供拼音、搜索或分组生成。
 
 ## 性能预算
@@ -124,13 +129,13 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 
 ## 测试证据
 
-- Unit: `IndexList.test.tsx` 覆盖语义、中英文 region/rail 名称、ref、键盘、滚动、动态删除、pointer 滑动和 ariaLabel。
+- Unit: `IndexList.test.tsx` 覆盖语义、中英文名称、ref source、键盘、滚动、动态删除/焦点恢复、重复 identity、受控拒绝回滚、空列表、capture 后备/cancel、早期 iOS Touch Events、低动态和公告。
 - Story interaction: `Default.play` 验证键盘索引切换、焦点和活动分组输出；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3568 B / 32768 B 预算，组合 Brotli 3151 B；共享样式由应用单独导入一次。
-- SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构；隔离 Next 16 hydration 后索引按钮、活动分组与业务输出保持一致，0 hydration/runtime error。
-- RTL / Reduced motion / forced-colors: CSS 与契约完成，视觉矩阵待补。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 6041 B / 32768 B 预算，组合 Brotli 5323 B；共享样式由应用单独导入一次。
+- SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构、重复 identity、受控归一化与空列表；隔离 Next 16 hydration 后索引按钮、活动分组与业务输出保持一致，0 hydration/runtime error。
+- RTL / Reduced motion / forced-colors: 逻辑边界、运行时 motion 降级与系统色 active/focus 契约完成，视觉矩阵待补。
 - Mobile Chromium/WebKit E2E: `navigates indexed sections and vertical category panels` 在两种引擎点击 B 索引并断言 `aria-current=location`、活动内容和业务输出。Chromatic Light/Dark 与 real device 待最终批次。
 
 ## V2 优化记录
@@ -141,13 +146,14 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 
 ### 已完成
 
-- 增加连续 pointer 索引、中英文稳定可访问名称、RTL 逻辑边界、forced-colors、TSDoc、SSR 与动态数据测试。
+- 增加受控 active、稳定 identity/DOM 关联、连续 pointer/touch 后备、焦点/公告、低动态、空列表、RTL 逻辑边界、forced-colors、TSDoc、SSR 与动态数据测试。
 - 在隔离 Next H5 中补索引跳转、活动分组、业务输出与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                   | 迁移说明                                    |
-| ---------- | ------ | ------------ | -------------------------------------- | ------------------------------------------- |
-| 2026-08-29 | 未发布 | hardening    | 完成索引触摸、动态分组与跨平台语义加固 | 新增可选 `section.ariaLabel`，其余 API 兼容 |
-| 2026-08-29 | 未发布 | fix          | 英文 locale 的内容 region 使用英文名称 | API 兼容；读屏不再混入中文默认标签          |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎索引/hydration 证据 | 无                                          |
+| 日期       | 版本   | 类型         | 内容                                    | 迁移说明                                                 |
+| ---------- | ------ | ------------ | --------------------------------------- | -------------------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening    | 补受控 active、identity、手势与滚动竞态 | `scrollTo` 事件 source 改为 `imperative`；新增可选 props |
+| 2026-08-29 | 未发布 | hardening    | 完成索引触摸、动态分组与跨平台语义加固  | 新增可选 `section.ariaLabel`，其余 API 兼容              |
+| 2026-08-29 | 未发布 | fix          | 英文 locale 的内容 region 使用英文名称  | API 兼容；读屏不再混入中文默认标签                       |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎索引/hydration 证据  | 无                                                       |
