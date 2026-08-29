@@ -137,7 +137,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 - Carousel 定向浏览器扫描：6 个 Story × Light/Dark 两个场景全部通过；play 返回 success，axe WCAG A/AA 为 0 违规，且无 `pageerror`。
 - Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代本轮 RTL/200%/forced-colors 最终视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 19950 B / 49152 B 预算，组合 Brotli 17554 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 20055 B / 49152 B 预算，组合 Brotli 17684 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next 16 App Router hydration 后受控索引、活动/非活动 slide 及原生替代操作保持一致，0 hydration/runtime error
 - RTL: Unit 与 Story 已覆盖配置、逻辑方向和长文本；手势与双向文本真机待补
 - Reduced motion: Unit 覆盖自动播放门控和即时切换；真实浏览器动画待补

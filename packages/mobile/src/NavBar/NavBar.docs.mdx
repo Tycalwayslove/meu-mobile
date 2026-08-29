@@ -176,7 +176,7 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 - Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play 源码；本轮未构建/执行全量 Storybook runner。
 - Storybook 浏览器矩阵：仓库记录有 374×7 历史基线，但早于本轮 4 个新增 Story，不能作为本轮视觉或 axe 证据。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`uses native navigation actions, radio segments and read-only page dots` 在 Chromium/WebKit 均通过，批次整页 Light/Dark axe WCAG A/AA 也通过。新增 loading/sticky 视觉仍留待最终 Storybook 矩阵。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3900 B / 32768 B 预算，组合 Brotli 3434 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4009 B / 32768 B 预算，组合 Brotli 3537 B；共享样式由应用单独导入一次。
 - SSR/hydration：共置 SSR 与 direct hydration 测试本轮通过。
 - RTL：unit 覆盖 config RTL 与 nested LTR override；LongTitleRTL Story 待视觉审批。
 - Reduced motion：系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 覆盖显式策略，真实浏览器视觉留到最终矩阵。

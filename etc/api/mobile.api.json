@@ -5008,7 +5008,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, className, dir, locale, motion, portalContainer, style, theme }",
+              "parameterName": "{ children, className, dir, locale, motion, portalContainer, ref, style, theme }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -5073,7 +5073,25 @@
             },
             {
               "kind": "Content",
-              "text": ") | null;\n    style?: "
+              "text": ") | null;\n    ref?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Ref",
+              "canonicalReference": "@types/react!React.Ref:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLDivElement",
+              "canonicalReference": "!HTMLDivElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">;\n    style?: "
             },
             {
               "kind": "Reference",
@@ -5103,7 +5121,7 @@
           "name": "ConfigProviderProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 14
+            "endIndex": 18
           }
         },
         {
@@ -6745,7 +6763,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"children\"> & {\n    align?: \"start\" | \"center\" | \"end\";\n    children?: import(\"react\")."
+              "text": ">, \"children\"> & {\n    align?: \"start\" | \"center\" | \"end\";\n    children?: "
             },
             {
               "kind": "Reference",

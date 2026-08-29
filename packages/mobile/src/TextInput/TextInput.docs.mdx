@@ -182,7 +182,7 @@ SSR 输出真实 input、value/type/autoComplete/disabled/error 与 loading stat
 - Hydration：真实 `hydrateRoot` 无 mismatch，hydration 后 clear/change/focus。
 - Story interaction：Clearable 覆盖值/回调/focus；NativeFormReset 覆盖 default/FormData；LoadingFocusTransfer 覆盖 loading 焦点移交；ReducedMotionLoading 覆盖 provider motion 与 loading/error 语义。Password/autofill 与 RTL Story 提供人工入口。
 - 官网 Next 运行时：既有本地 production 双引擎证据覆盖 Field invalid、受控 fill、clear/focus、修正与提交；本轮未重新执行或扩大共享 E2E，loading、外部 form/reset 与受控拒绝仍待后续定向浏览器验证。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4512 B / 32768 B 预算，组合 Brotli 3976 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4617 B / 32768 B 预算，组合 Brotli 4086 B；共享样式由应用单独导入一次。
 
 ## V2 优化记录
 

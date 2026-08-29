@@ -1,4 +1,4 @@
-import { MeuIconSearch, MeuIconX } from "@meu/icons-react";
+import { MeuIconChevronLeft, MeuIconSearch, MeuIconX } from "@meu/icons-react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
@@ -58,6 +58,26 @@ export const OutlineDanger: Story = {
 export const Loading: Story = { args: { loading: true } };
 export const Pressed: Story = {
   args: { "aria-label": "取消收藏", "aria-pressed": true, variant: "outline", tone: "accent" }
+};
+export const Disabled: Story = { args: { disabled: true } };
+export const ExternalLabel: Story = {
+  render: () => (
+    <div style={{ alignItems: "center", display: "flex", gap: 12 }}>
+      <span id="icon-button-search-label">搜索商品</span>
+      <IconButton aria-labelledby="icon-button-search-label">
+        <MeuIconSearch />
+      </IconButton>
+    </div>
+  )
+};
+export const DirectionalRtl: Story = {
+  render: () => (
+    <div dir="rtl">
+      <IconButton aria-label="返回上一页">
+        <MeuIconChevronLeft style={{ transform: "scaleX(-1)" }} />
+      </IconButton>
+    </div>
+  )
 };
 export const Sizes: Story = {
   render: () => (

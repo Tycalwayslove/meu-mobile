@@ -12,7 +12,7 @@ export type DividerProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
    * @defaultValue "center"
    */
   align?: "start" | "center" | "end";
-  /** Optional horizontal label. Vertical dividers do not render label content. */
+  /** Optional horizontal label. Empty React nodes are ignored; vertical dividers do not render label content. */
   children?: ReactNode;
   /**
    * Separator orientation.

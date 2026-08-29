@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "429:3"
 storyIds:
   [
     actions-iconbutton--default,
@@ -18,6 +18,9 @@ storyIds:
     actions-iconbutton--outline-danger,
     actions-iconbutton--loading,
     actions-iconbutton--pressed,
+    actions-iconbutton--disabled,
+    actions-iconbutton--external-label,
+    actions-iconbutton--directional-rtl,
     actions-iconbutton--sizes
   ]
 source: packages/mobile/src/IconButton
@@ -30,7 +33,9 @@ source: packages/mobile/src/IconButton
 - 原生 `button`，默认 `type="button"`，支持 ref、原生 button 属性和 `aria-pressed`。
 - `solid | outline | ghost`、三种 tone、三档 size 与 loading；全部尺寸保持至少 44×44 CSS px。
 - 类型要求 `aria-label` 或 `aria-labelledby` 二选一；图标子树统一作为装饰内容隐藏，避免重复名称。
-- loading 保留按钮尺寸、设置 `aria-busy`、阻止重复触发，并在 reduced-motion 下显示静态 ring。
+- 运行时同样拒绝空白名称或同时提供两种名称，避免 JavaScript、CMS 或不完整类型边界绕过可访问契约。
+- loading/disabled 使用原生 disabled 阻止重复触发与表单提交；loading 保留按钮尺寸、设置 `aria-busy`，并在 reduced-motion 下显示静态 ring。
+- CSS 明确重置 appearance、文本选择和触控操作；forced-colors 下保留边界、焦点、pressed 与 disabled 差异。
 
 当前状态为 `verification`；本地 axe 已通过，真机读屏、高对比与完整视觉矩阵尚未完成，不等于商用验收完成。
 
@@ -68,11 +73,11 @@ source: packages/mobile/src/IconButton
 
 ## Props
 
-API 由 `IconButtonProps`、`IconButtonSize`、`IconButtonTone` 与 `IconButtonVariant` 生成。必须提供非空且具体的 `aria-label`，或提供指向真实文本的 `aria-labelledby`；两者不能同时提供。children 只用于图标，不作为 accessible name。
+API 由 `IconButtonProps`、`IconButtonSize`、`IconButtonTone` 与 `IconButtonVariant` 生成。必须提供非空且具体的 `aria-label`，或提供指向真实文本的 `aria-labelledby`；两者不能同时提供。类型和运行时都校验二选一，但运行时无法证明 labelledby 指向的 ID 存在。children 只用于图标，不作为 accessible name。
 
 ## Events
 
-没有自定义事件。`onClick/onPointer*/onKey*` 等原生事件透传；loading 或 disabled 使用原生 disabled 阻止事件。组件不吞掉错误，也不负责异步请求或回滚。
+没有自定义事件。`onClick/onPointer*/onKey*` 等原生事件透传；loading 或 disabled 使用原生 disabled 阻止事件和 form submit。仅设置 `aria-disabled` 不会获得原生行为锁，业务必须改用 `disabled`。组件不吞掉错误，也不负责异步请求或回滚。
 
 ## Ref 与命令式方法
 
@@ -88,11 +93,11 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ## 触摸与手势
 
-无自定义手势。所有尺寸至少 44×44 CSS px；快速连点由调用方及时进入 loading/disabled 锁定。长按沿用浏览器行为，组件不注册全局 pointer listener。
+无自定义手势。所有尺寸至少 44×44 CSS px，`touch-action: manipulation` 避免控件双击缩放/旧式点击延迟；快速连点仍由调用方及时进入 loading/disabled 锁定。组件不会猜测异步 Promise 并自动上锁，也不注册全局 pointer listener。
 
 ## 无障碍
 
-使用原生 button。可访问名称必须描述动作而非图标外观，例如“关闭对话框”而不是“叉号”。toggle 动作使用 `aria-pressed`；图标子树被 `aria-hidden`，避免 SVG title 与按钮名称重复。焦点环兼容旧 WebView 的 `:focus`。
+使用原生 button。可访问名称必须描述动作而非图标外观，例如“关闭对话框”而不是“叉号”；空白或竞争名称会直接抛出错误。toggle 动作使用 `aria-pressed=true|false|mixed`；图标子树被 `aria-hidden`，避免 SVG title 与按钮名称重复。焦点环兼容旧 WebView 的 `:focus`；forced-colors 使用系统 ButtonText、Highlight 与 GrayText 保持状态区分。
 
 ## 动效
 
@@ -108,7 +113,7 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ## RTL 与国际化
 
-控件本身对称，不改变图标方向。返回/前进等方向性图标是否镜像由具体图标或调用方决定。accessible name 由业务 locale 提供，组件不猜测或翻译动作名称。
+控件本身对称，不改变图标方向。返回/前进等方向性图标由调用方按业务方向显式镜像，不能对所有图标做 RTL 全局翻转；`DirectionalRtl` Story 演示了返回图标的上下文镜像。accessible name 由业务 locale 提供，组件不猜测或翻译动作名称，长名称只进入 accessibility tree，不改变 44×44 布局。
 
 ## 浏览器与 WebView
 
@@ -116,9 +121,10 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ## 边界情况与已知限制
 
-- TypeScript 只能要求存在 label 字符串，不能证明字符串非空或 `aria-labelledby` ID 有效。
+- 运行时能拒绝空白或竞争名称，但不能证明 `aria-labelledby` ID 存在、可见文案准确或 locale 正确。
 - children 被整体视为装饰内容；需要可访问复合内容时应使用 `Button`。
 - loading 不提供进度百分比或完成公告；业务结果由页面 live region 或反馈组件负责。
+- loading 只锁定当前 render；异步 handler 必须在首次激活后立即提交 loading/disabled，组件不会缓存 Promise 或永久吞掉后续激活。
 
 ## 性能预算
 
@@ -126,11 +132,11 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ## 测试证据
 
-- Unit: `IconButton.test.tsx`，覆盖默认 type、点击、label/labelledby、装饰图标、pressed、loading 与禁用
+- Unit: `IconButton.test.tsx`，覆盖默认 type、点击、label/labelledby、空白/竞争名称拒绝、装饰图标、pressed/mixed、loading/disabled、ref、原生 form 属性/提交与 SSR
 - Story interaction: `Default.play` 验证按压状态、业务输出与焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1918 B / 32768 B 预算，组合 Brotli 1693 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2047 B / 32768 B 预算，组合 Brotli 1799 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next 16 App Router 首屏输出可访问名称，hydration 后 Enter 操作成功且 0 hydration/runtime error
 - RTL: 对称控件，方向性图标待矩阵验证
 - Reduced motion: CSS 静态降级已实现，待浏览器证明
@@ -150,13 +156,15 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 - 支持 label/labelledby 二选一并隐藏装饰图标子树。
 - 冻结 44px 触控、pressed 状态、loading 锁与 reduced-motion 静态降级。
+- 增加运行时非空名称校验、native form/ref/SSR 回归、touch-action 与 forced-colors 状态表达，并补 labelledby、disabled 与 RTL Story。
 - 完成 title 级 Story play 门禁与本地 Light/Dark axe 扫描。
 - 补齐公开 API TSDoc、单测、Story 与永久留存文档。
 - 在隔离 Next H5 中补 Enter 激活、44px 目标与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型           | 内容                                                     | 迁移说明                     |
-| ---------- | ------ | -------------- | -------------------------------------------------------- | ---------------------------- |
-| 2026-08-28 | 0.1.0  | implementation | 增加 labelledby、pressed、装饰图标与 reduced-motion 契约 | 现有 aria-label 用法无需迁移 |
-| 2026-08-29 | 未发布 | verification   | 增加 Next H5 双引擎键盘、目标尺寸与 hydration 证据       | 无                           |
+| 日期       | 版本   | 类型           | 内容                                                        | 迁移说明                                       |
+| ---------- | ------ | -------------- | ----------------------------------------------------------- | ---------------------------------------------- |
+| 2026-08-28 | 0.1.0  | implementation | 增加 labelledby、pressed、装饰图标与 reduced-motion 契约    | 现有 aria-label 用法无需迁移                   |
+| 2026-08-29 | 未发布 | verification   | 增加 Next H5 双引擎键盘、目标尺寸与 hydration 证据          | 无                                             |
+| 2026-08-29 | 未发布 | accessibility  | 强制运行时名称、原生表单/ref/SSR、forced-colors 与 RTL 契约 | 空白或同时提供两种名称会抛错；有效用法无需迁移 |

@@ -7,7 +7,7 @@ import {
   meuIconSearch,
   meuIconX
 } from "@meu/icons-core";
-import { createElement, forwardRef } from "react";
+import { createElement, forwardRef, useId } from "react";
 import type { SVGProps } from "react";
 
 import type { MeuIconNode } from "@meu/icons-core";
@@ -61,14 +61,31 @@ export const MeuIcon = forwardRef<SVGSVGElement, MeuIconProps>(function MeuIcon(
   },
   ref
 ) {
+  const generatedTitleId = useId();
   const hasTitle = typeof title === "string" && title.trim().length > 0;
+  const hasAriaLabel = typeof ariaLabel === "string" && ariaLabel.trim().length > 0;
+  const hasAriaLabelledBy = typeof ariaLabelledBy === "string" && ariaLabelledBy.trim().length > 0;
   const explicitlyHidden = ariaHidden === true || ariaHidden === "true";
-  const labelled = !explicitlyHidden && Boolean(hasTitle || ariaLabel || ariaLabelledBy);
+  const labelled = !explicitlyHidden && (hasTitle || hasAriaLabel || hasAriaLabelledBy);
   const resolvedAriaHidden = ariaHidden !== undefined ? ariaHidden : labelled ? undefined : true;
-  const resolvedAriaLabel =
-    ariaLabel !== undefined ? ariaLabel : hasTitle && !ariaLabelledBy ? title : undefined;
+  const resolvedAriaLabel = explicitlyHidden || !hasAriaLabel ? undefined : ariaLabel;
+  const resolvedAriaLabelledBy = explicitlyHidden
+    ? undefined
+    : hasAriaLabel
+      ? undefined
+      : hasAriaLabelledBy
+        ? ariaLabelledBy
+        : hasTitle
+          ? generatedTitleId
+          : undefined;
   const resolvedFocusable = focusable !== undefined ? focusable : "false";
-  const resolvedRole = role !== undefined ? role : labelled ? "img" : undefined;
+  const resolvedRole = explicitlyHidden
+    ? undefined
+    : role !== undefined
+      ? role
+      : labelled
+        ? "img"
+        : undefined;
 
   return (
     <svg
@@ -84,12 +101,12 @@ export const MeuIcon = forwardRef<SVGSVGElement, MeuIconProps>(function MeuIcon(
       strokeLinejoin="round"
       aria-hidden={resolvedAriaHidden}
       aria-label={resolvedAriaLabel}
-      aria-labelledby={ariaLabelledBy}
+      aria-labelledby={resolvedAriaLabelledBy}
       focusable={resolvedFocusable}
       role={resolvedRole}
       data-meu-icon={name}
     >
-      {hasTitle ? <title>{title}</title> : null}
+      {hasTitle && !explicitlyHidden ? <title id={generatedTitleId}>{title}</title> : null}
       {icon.map(([tag, attributes], index) =>
         createElement(tag, Object.assign({ key: `${name}-${index}` }, attributes))
       )}

@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "436:2"
 storyIds:
   [
     layout-space--horizontal,
@@ -30,7 +30,7 @@ source: packages/mobile/src/Space
 - 支持 horizontal/vertical、5 种 cross-axis 对齐、wrap，以及 9 档 Meu spacing token gap。
 - horizontal 的开始方向跟随容器 `dir`，没有物理 left/right 布局 API。
 
-当前状态为 `verification`，尚未完成旧 WebView 与真机商用验收。
+当前状态为 `verification`；共置 SSR/hydration 已覆盖稳定容器与子控件复用，尚未完成观察档旧 WebView 与真机商用验收。
 
 ## 何时使用
 
@@ -123,12 +123,12 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 
 ## 测试证据
 
-- Unit: `Space.test.tsx` 覆盖顺序、方向、QA 属性、原生属性与 ref
+- Unit/SSR（本轮 5/5）: `Space.test.tsx` 覆盖顺序、方向、QA 属性、原生属性与 ref；`Space.ssr.test.tsx` 覆盖服务端顺序、真实 hydrateRoot 容器/按钮复用和 0 recoverable error
 - Story interaction: `Wrapped` 验证方向、gap、wrap 与子项顺序；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Storybook 浏览器矩阵：374 Story × 7 场景、2,618 个组合和 0 axe/pageerror 是本轮之前的仓库历史基线；新增变更必须随最终冻结候选重跑，不能把旧基线当作当前证明。
+- 官网 Next 运行时：68 个组件页 × Light/Dark 的 136 场景为本轮之前的生产构建历史基线；本轮只记录共置 hydration 与后续定向 H5 结果。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1724 B / 32768 B 预算，组合 Brotli 1538 B；共享样式由应用单独导入一次。
-- SSR/hydration: 隔离 Next 16 App Router 首屏与 hydration 后保持 `gap=3`、wrap 和子项原生交互，0 hydration/runtime error
+- SSR/hydration: 共置测试直接验证 `gap=3`、wrap、子项顺序以及容器/按钮节点复用；既有隔离 Next 16 场景存在，本轮未重复执行该全局场景
 - RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
 - Reduced motion: 不适用；没有内建动效
 - Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 token gap、wrap 与内部按钮键盘操作
@@ -149,6 +149,7 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 - 增加 wrap、RTL 与 token scale Story，并记录 vertical wrap 和旧 WebView 边界。
 - 保留现有 Props 与 DOM 结构，未新增无场景证据的布局 API。
 - 在隔离 Next H5 中补 token gap、wrap、键盘交互与 hydration 证据。
+- 增加共置 SSR/hydration 回归，确保布局根和原生子控件不因水合被替换。
 
 ## 变更记录
 
@@ -156,3 +157,4 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 | ---------- | ------ | ------------ | ------------------------------------------- | -------- |
 | 2026-08-28 | 0.1.0  | hardening    | 完善 TSDoc、RTL/wrap/兼容边界和测试证据     | 无       |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 wrap/gap/hydration 证据 | 无       |
+| 2026-08-29 | 未发布 | verification | 增加共置 SSR/hydration 节点复用证据         | 无       |

@@ -1,9 +1,14 @@
 import { style } from "@vanilla-extract/css";
 
-export const visuallyHidden = style({
+const hiddenProperties = {
   position: "absolute",
+  boxSizing: "border-box",
   width: 1,
   height: 1,
+  minWidth: 0,
+  minHeight: 0,
+  maxWidth: 1,
+  maxHeight: 1,
   padding: 0,
   margin: -1,
   overflow: "hidden",
@@ -12,12 +17,35 @@ export const visuallyHidden = style({
   WebkitClipPath: "inset(50%)",
   whiteSpace: "nowrap",
   wordWrap: "normal",
-  border: 0,
+  borderWidth: 0
+} as const;
+
+export const visuallyHidden = style({
+  ...hiddenProperties,
   "@media": {
     "(forced-colors: active)": {
-      border: 0,
+      borderWidth: 0,
       clipPath: "inset(50%)",
+      WebkitClipPath: "inset(50%)",
       forcedColorAdjust: "none"
+    }
+  }
+});
+
+export const visuallyHiddenFocusable = style({
+  selectors: {
+    "&:not(:focus):not(:focus-within)": hiddenProperties
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      selectors: {
+        "&:not(:focus):not(:focus-within)": {
+          borderWidth: 0,
+          clipPath: "inset(50%)",
+          WebkitClipPath: "inset(50%)",
+          forcedColorAdjust: "none"
+        }
+      }
     }
   }
 });

@@ -9,13 +9,14 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "428:3"
 storyIds:
   [
     foundation-themeprovider--light-and-dark,
     foundation-themeprovider--system-theme,
-    foundation-themeprovider--theme-only-nested-override
+    foundation-themeprovider--theme-only-nested-override,
+    foundation-themeprovider--native-controls
   ]
 source: packages/mobile/src/ConfigProvider
 ---
@@ -28,6 +29,7 @@ source: packages/mobile/src/ConfigProvider
 - 支持 `light`、`dark` 与 `system`，通过 `data-meu-theme` 切换语义色彩 Token。
 - 嵌套时只覆盖显式传入的 theme；locale、dir、motion 与 portal 配置继续继承父级。
 - `system` 由 CSS `prefers-color-scheme` 解析，不在 hydration 阶段读取浏览器环境。
+- 边界同步声明 `color-scheme: light|dark|light dark`，原生 select、input、滚动条和系统 UI 可跟随固定或系统主题。
 
 当前为 V2 `verification` 状态。主题持久化、首屏恢复、forced-colors 与高对比浏览器矩阵已形成库级门禁；真机验证和最终视觉审批尚未完成，不能标记为 commercial。
 
@@ -84,7 +86,7 @@ ThemeProvider 不持有内部主题状态。`theme` 完全受控；省略时继�
 - `theme="system"`: 根级默认，通过 `prefers-color-scheme: dark` 选择暗色 Token。
 - 省略 `theme`: 继承父级，而不是重新回到 system。
 
-其余 locale、dir、motion、portalContainer、className 和 style 行为见 ConfigProvider 文档。
+其余 locale、dir、motion、portalContainer、className 和 style 行为见 ConfigProvider 文档。React 19 `ref` 同样指向真实 Provider `HTMLDivElement`。
 
 ## Events
 
@@ -92,7 +94,7 @@ ThemeProvider 不持有内部主题状态。`theme` 完全受控；省略时继�
 
 ## Ref 与命令式方法
 
-当前不公开 ref 或主题命令式方法。不要通过查询内部 class 切换主题；更新受控 `theme` 属性即可。
+`ref` 指向真实 `HTMLDivElement`，支持 React 19 callback cleanup；不提供主题命令式方法。不要通过 ref 或查询内部 class 切换主题，更新受控 `theme` 属性即可。
 
 ## 键盘操作
 
@@ -110,6 +112,7 @@ ThemeProvider 不持有内部主题状态。`theme` 完全受控；省略时继�
 - ThemeProvider 本身没有 role，不增加读屏层级。
 - 固定 light/dark 与 system 都必须在组件级验证文本、边框、焦点环和禁用态对比度。
 - forced-colors/high contrast 当前依赖浏览器默认与各组件 CSS，尚无 Provider 开关或完整证明。
+- `color-scheme` 只影响用户代理绘制，不用颜色替代组件的文字、图标或 ARIA 状态。
 
 ## 动效
 
@@ -122,6 +125,7 @@ ThemeProvider 自身不执行主题过渡，避免大面积颜色动画、首屏
 ## SSR 与 Next.js
 
 - `system` 的服务端与客户端都输出 `data-meu-theme="system"`，由 CSS 解析实际方案，不产生 JavaScript hydration 分支。
+- `color-scheme: light dark` 与 Token 媒体查询在首次绘制前由 CSS 解析，并在系统偏好变化时自动重算，不需要 `matchMedia` 监听器。
 - 若产品保存用户显式的 light/dark，推荐把选择写入 cookie，并让服务端首屏与客户端使用同一 `theme` Prop。
 - 仅在客户端读取 localStorage 再切换会产生可见的主题跳变；ThemeProvider 当前不内置阻塞脚本或持久化机制。
 - CSP nonce、内联防闪脚本和服务端主题协商属于应用壳层，不由组件库隐式注入。
@@ -149,10 +153,11 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 ## 测试证据
 
 - Unit: `ConfigProvider.test.tsx` 验证 ThemeProvider 与 ConfigProvider 同一身份、theme-only 嵌套不重置 locale/dir。
-- Story interaction: `LightAndDark` 验证独立主题边界及最近 Provider 读取；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Story interaction: `LightAndDark` 验证独立主题边界及最近 Provider 读取；`NativeControls` 提供固定 light/dark 与 system 原生 select 的 `color-scheme` 浏览器验证入口。
+- 本次定向 Storybook 扫描：ThemeProvider 4 个 Story × Light/Dark，共 8 个场景，play 与 axe WCAG A/AA 均通过。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 776 B / 32768 B 预算，组合 Brotli 671 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 820 B / 32768 B 预算，组合 Brotli 714 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 hydration 单测覆盖 system 标记一致和零 recoverable error。
 - RTL: 单元与 Theme-only Story 验证主题覆盖不改变方向。
 - Reduced motion: Provider 不做主题动画；应用自定义过渡仍需独立验证。
@@ -175,6 +180,8 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 - 修复 theme-only 嵌套导致 locale/dir/portal 等配置被重置的问题。
 - 保持 system 纯 CSS 解析，SSR/hydration 不访问浏览器环境。
 - 增加 light/dark、system 与嵌套继承 Story。
+- 为固定和 system 主题增加 `color-scheme`，并补原生控件 Story。
+- 通过共享 Props 增加 React 19 Provider DOM ref。
 - Next H5 production consumer 已在 Chromium/WebKit 验证 alias 的 system 主题/动效媒体查询与实际 Token 计算值，并验证外层固定 light/dark 受控路径、全页无障碍与无运行时错误。
 
 ## 变更记录
@@ -184,3 +191,4 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 | 2026-08-28 | 未发布 | behavior     | ThemeProvider 嵌套改为只覆盖显式字段                                               | 若依赖旧重置行为，请显式传入所有配置 |
 | 2026-08-28 | 未发布 | docs         | 明确 alias、system SSR 与持久化边界                                                | 无                                   |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定/system 主题、motion、computed Token、axe 与 hydration 证据 | 无                                   |
+| 2026-08-29 | 未发布 | hardening    | 原生控件跟随 `color-scheme`，共享 React 19 DOM ref                                 | API 仅新增可选 ref，无迁移           |

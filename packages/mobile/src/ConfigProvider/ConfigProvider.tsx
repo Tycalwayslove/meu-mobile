@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, useContext, useMemo } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode, Ref } from "react";
 
-import { motionReduced, motionSystem } from "./ConfigProvider.css";
+import { motionReduced, motionSystem, themeBoundary } from "./ConfigProvider.css";
 
 /**
  * Locales whose built-in Meu Mobile strings are currently maintained.
@@ -61,6 +61,8 @@ export type ConfigProviderProps = {
    * `null` renders in place and `undefined` inherits the parent/default behavior.
    */
   portalContainer?: HTMLElement | (() => HTMLElement) | null;
+  /** React 19 ref for the provider's real DOM boundary. */
+  ref?: Ref<HTMLDivElement>;
   /** Inline styles for the provider DOM boundary. */
   style?: CSSProperties;
   /** Theme strategy. `system` is resolved by CSS without a hydration-time script. */
@@ -89,6 +91,7 @@ export function ConfigProvider({
   locale,
   motion,
   portalContainer,
+  ref,
   style,
   theme
 }: ConfigProviderProps) {
@@ -110,11 +113,13 @@ export function ConfigProvider({
     [resolvedDir, resolvedLocale, resolvedMotion, resolvedPortalContainer, resolvedTheme]
   );
   const motionClassName = resolvedMotion === "reduced" ? motionReduced : motionSystem;
-  const resolvedClassName = className ? `${motionClassName} ${className}` : motionClassName;
+  const internalClassName = `${themeBoundary} ${motionClassName}`;
+  const resolvedClassName = className ? `${internalClassName} ${className}` : internalClassName;
 
   return (
     <MeuConfigContext.Provider value={config}>
       <div
+        ref={ref}
         className={resolvedClassName}
         dir={resolvedDir}
         style={style}

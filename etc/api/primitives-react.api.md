@@ -4,9 +4,11 @@
 
 ```ts
 
+import { ForwardRefExoticComponent } from 'react';
 import type { HTMLAttributes } from 'react';
 import { JSX } from 'react';
 import type { ReactNode } from 'react';
+import { RefAttributes } from 'react';
 import type { RefObject } from 'react';
 
 // @public
@@ -38,9 +40,13 @@ export function useBodyScrollLock(locked: boolean): void;
 export function useFocusTrap(input: FocusTrapOptions): void;
 
 // @public
-export function VisuallyHidden(input: VisuallyHiddenProps): JSX.Element;
+export const VisuallyHidden: ForwardRefExoticComponent<HTMLAttributes<HTMLSpanElement> & {
+focusable?: boolean;
+} & RefAttributes<HTMLSpanElement>>;
 
 // @public
-export type VisuallyHiddenProps = HTMLAttributes<HTMLSpanElement>;
+export type VisuallyHiddenProps = HTMLAttributes<HTMLSpanElement> & {
+    focusable?: boolean;
+};
 
 ```

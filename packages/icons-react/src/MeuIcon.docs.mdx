@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "4:5"
 storyIds: [foundation-icon--catalog, foundation-icon--semantic-icon]
 source: packages/icons-react/src/MeuIcon
 ---
@@ -21,7 +21,7 @@ source: packages/icons-react/src/MeuIcon
 
 - `@meu/icons-core` 提供 5 个平台无关 SVG node，`@meu/icons-react` 提供通用 `MeuIcon` 与 Meu 命名组件；Meu 名称是稳定 API，不表示 Meu 创作了几何。
 - 所有图标使用 24 × 24 viewBox、`currentColor`、圆角端点，默认 `size=24`、`strokeWidth=2`。
-- 无 accessible name 时默认为装饰图并设置 `aria-hidden`；可用 `title`、`aria-label` 或 `aria-labelledby` 创建语义图。
+- 无 accessible name 时默认为装饰图并设置 `aria-hidden`；可用 `title`、`aria-label` 或 `aria-labelledby` 创建语义图。title-only 模式用 React `useId` 建立真实 `title` 关联，SSR 与 hydration 保持一致。
 - 几何逐字生成自 `lucide-static@1.34.0` 的 5 个已锁定 SVG；lock 固定 npm SHA-512、Lucide commit、逐文件/逐几何 SHA-256、上游名称和 React 导出。
 - 仓库随包保留 Lucide 完整 LICENSE、Feather MIT 文本、上游 SVG snapshot 与逐图标 manifest；生成和漂移检查不访问网络。
 
@@ -62,7 +62,7 @@ source: packages/icons-react/src/MeuIcon
 
 ## Props
 
-通用 `MeuIcon` 需要 `icon` 和稳定 kebab-case `name`；命名图标已经固化这两项。`size` 同时控制宽高，`strokeWidth` 使用 24 × 24 坐标系单位；其余属性来自原生 `SVGProps`。
+通用 `MeuIcon` 需要 `icon` 和稳定 kebab-case `name`；命名图标已经固化这两项。`size` 同时控制宽高，`strokeWidth` 使用 24 × 24 坐标系单位；其余属性来自原生 `SVGProps`。名称优先级为非空 `aria-label` → 非空 `aria-labelledby` → 非空 `title`；空白名称不会把装饰图误升格为语义图。
 
 ## 来源与再生成
 
@@ -94,7 +94,7 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 ## 无障碍
 
-默认图标设置 `aria-hidden=true` 和 `focusable=false`。图标单独传达信息时提供 `title`、`aria-label` 或 `aria-labelledby`；已有相邻可见文案时保持装饰模式，避免重复公告。显式 `aria-hidden=true` 优先于名称输入。
+默认图标设置 `aria-hidden=true` 和 `focusable=false`。图标单独传达信息时提供 `title`、`aria-label` 或 `aria-labelledby`；title-only 模式输出有稳定 ID 的 `<title>` 并由 `aria-labelledby` 引用。已有相邻可见文案时保持装饰模式，避免重复公告。显式 `aria-hidden=true` 优先于名称输入，并移除竞争的 label、labelledby 与 title 元数据。
 
 ## 动效
 
@@ -106,11 +106,11 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 ## SSR 与 Next.js
 
-输出是确定性的 SVG，不读取浏览器全局、不发起运行时请求，可在服务端渲染。交互事件仍要求位于 Client Component 边界。
+输出是确定性的 SVG，不读取浏览器全局、不发起运行时请求，可在服务端渲染。title ID 由 React `useId` 生成，不依赖随机数或 DOM 查询；首次树结构一致时可安全 hydration。交互事件仍要求位于 Client Component 边界。
 
 ## RTL 与国际化
 
-图标库不自动镜像。`MeuIconChevronLeft` 只表示几何方向；“返回、上一项、展开”等语义及 RTL 旋转由 NavBar、Carousel 等拥有上下文的组件处理。图标不内置可见文案，accessible name 由调用方本地化。
+图标库不自动镜像。`MeuIconChevronLeft` 只表示物理“向左”几何；“返回、上一项、展开”等语义及 RTL 镜像由 NavBar、Carousel、IconButton 等拥有上下文的组件处理。调用方可在明确的 RTL 业务语义中使用 `transform: scaleX(-1)`，但不能对 check、plus、search、x 等非方向图标做全局镜像。图标不内置可见文案，accessible name 由调用方本地化。
 
 ## 浏览器与 WebView
 
@@ -122,6 +122,7 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 - 当前 5 个 Meu 命名导出分别映射同名 Lucide/Feather 图标，`modified=false`；完整映射和 checksum 以生成 manifest 为准。
 - 工程校验只能证明当前 snapshot、生成物和上游归档一致，不能代替律师对 ISC/MIT 通知、发布载体和商业使用场景的最终意见。
 - `title` 适合简短名称，不承担长说明或动态状态公告。
+- 同时提供 `aria-label` 与 `aria-labelledby` 时 `aria-label` 优先；IconButton 等上层控件会进一步限制为二选一。
 - named component 不提供自动 RTL 镜像，调用方不得仅凭图形名称猜测业务方向。
 
 ## 性能预算
@@ -130,14 +131,14 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 ## 测试证据
 
-- Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`，覆盖不可变来源、逐图标 checksum/许可映射与全部 Meu React 导出 ID
+- Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`，覆盖不可变来源、逐图标 checksum/许可映射、全部 Meu React 导出 ID、装饰/三种命名优先级、空名称、title ID、ref、尺寸/描边/currentColor 与 SSR
 - Generation drift: `icons:check` 验证 snapshot/license checksum，并离线比较 `icons.ts` 与 manifest；core package `test` 必须先通过该检查
 - Upstream archive: `icons:upstream:verify` 已用固定 npm SHA-512 验证 5 个 SVG 和完整 LICENSE；该显式审计命令不进入普通 `pnpm check`
 - Story interaction: `Catalog` 验证装饰图标不可聚焦且对辅助技术隐藏；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 1421 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 1397 B / 32768 B 预算，组合 Brotli 1217 B；共享样式由应用单独导入一次。
-- SSR/hydration: 实现无浏览器分支，尚无独立 hydration 测试
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 1531 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 1507 B / 32768 B 预算，组合 Brotli 1335 B；共享样式由应用单独导入一次。
+- SSR/hydration: Unit 已验证 SSR title/labelledby 关联、角色、Meu ID、currentColor 与尺寸；独立真实 hydration 仍由 Next H5 证据覆盖
 - RTL: 规则已文档化，拥有方向语义的上层组件仍需逐项验证
 - Reduced motion: 不适用；没有内建动效
 - Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 `MeuIconSearch` 输出 `data-meu-icon="search"`、装饰态 `aria-hidden=true` / `focusable=false`、20×20 尺寸，并由 44×44 以上 IconButton 经焦点 + Enter 激活；页面 hydration 后保持 0 `pageerror` / `console.error`。语义图标的真实 VoiceOver/TalkBack 公告仍未执行。
@@ -155,14 +156,17 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 - 补齐公开 TSDoc、Meu DevTools displayName、尺寸/描边契约及装饰/语义名称模式。
 - 允许 `title`、`aria-label`、`aria-labelledby`，并保留显式 `aria-hidden` 优先级。
+- 让 title-only 模式通过稳定 ID 与 `aria-labelledby` 建立可验证关系；显式装饰模式移除竞争命名元数据，空白名称保持装饰语义。
+- 补 ref、currentColor、尺寸/描边与直接 SSR 回归，明确仅方向图标由上下文按 RTL 镜像。
 - 固定 Lucide npm 归档、Git commit 与逐文件 checksum；加入上游 snapshot、离线生成/漂移检查和显式联网归档验证。
 - 逐项记录 Meu ID、上游名称、React 导出、几何 checksum 与 ISC/MIT 文件，不再用 Meu 命名遮蔽来源。
 - 增加 Next H5 双引擎装饰 SVG 属性、尺寸、宿主键盘激活与 hydration 证据；该技术证据不替代来源许可法务意见或真机读屏。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                         | 迁移说明 |
-| ---------- | ------ | ------------ | ------------------------------------------------------------ | -------- |
-| 2026-08-28 | 0.1.0  | hardening    | 完善语义模式、命名、TSDoc 与来源审计记录                     | 无       |
-| 2026-08-29 | 未发布 | provenance   | 固定上游并加入可复现生成、漂移与许可证据                     | 无       |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎装饰属性、尺寸、键盘宿主与 hydration 证据 | 无       |
+| 日期       | 版本   | 类型          | 内容                                                         | 迁移说明                                 |
+| ---------- | ------ | ------------- | ------------------------------------------------------------ | ---------------------------------------- |
+| 2026-08-28 | 0.1.0  | hardening     | 完善语义模式、命名、TSDoc 与来源审计记录                     | 无                                       |
+| 2026-08-29 | 未发布 | provenance    | 固定上游并加入可复现生成、漂移与许可证据                     | 无                                       |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎装饰属性、尺寸、键盘宿主与 hydration 证据 | 无                                       |
+| 2026-08-29 | 未发布 | accessibility | 强化 SVG title 关联、命名优先级、装饰覆盖、ref 与 RTL 契约   | 空白名称不再创建语义图；有效用法无需迁移 |

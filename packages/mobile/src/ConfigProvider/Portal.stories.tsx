@@ -1,6 +1,6 @@
 import { Portal } from "@meu/primitives-react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 function CustomContainerDemo() {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -40,6 +40,43 @@ function CustomContainerDemo() {
   );
 }
 
+function LazyRefContainerDemo() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const getContainer = useCallback(() => containerRef.current, []);
+
+  return (
+    <section>
+      <p style={{ color: "var(--meu-color-muted)", margin: "0 0 12px" }}>
+        惰性 resolver 可以读取同次提交才挂载的目标 ref。
+      </p>
+      <div
+        ref={containerRef}
+        aria-label="惰性 Portal 目标容器"
+        role="region"
+        style={{
+          border: "1px dashed var(--meu-color-border)",
+          borderRadius: "var(--meu-radius-surface)",
+          minHeight: 112,
+          padding: 16
+        }}
+      />
+      <Portal container={getContainer}>
+        <div
+          style={{
+            background: "var(--meu-color-subtle)",
+            borderRadius: "var(--meu-radius-control)",
+            color: "var(--meu-color-accent)",
+            fontWeight: 700,
+            padding: 16
+          }}
+        >
+          同次提交后已移动到 ref 容器
+        </div>
+      </Portal>
+    </section>
+  );
+}
+
 const meta = {
   title: "Foundation/Portal",
   component: Portal,
@@ -61,6 +98,19 @@ export const CustomContainer: Story = {
       content.textContent !== "Portal 内容已挂载到自定义容器"
     ) {
       throw new window.Error("Expected Portal content inside the custom target");
+    }
+  }
+};
+
+export const LazyRefContainer: Story = {
+  render: () => <LazyRefContainerDemo />,
+  play: async ({ canvasElement }) => {
+    const target = canvasElement.querySelector<HTMLElement>('[role="region"]');
+    await Promise.resolve();
+    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    const content = target ? target.firstElementChild : null;
+    if (!target || !content || content.parentElement !== target) {
+      throw new window.Error("Expected lazy Portal content inside the ref-backed target");
     }
   }
 };

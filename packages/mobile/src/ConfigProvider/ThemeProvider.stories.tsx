@@ -91,3 +91,51 @@ export const ThemeOnlyNestedOverride: Story = {
     </ConfigProvider>
   )
 };
+
+export const NativeControls: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {(["light", "dark", "system"] as const).map((theme) => (
+        <ThemeProvider
+          key={theme}
+          theme={theme}
+          style={{
+            background: "var(--meu-color-surface)",
+            border: "1px solid var(--meu-color-border)",
+            borderRadius: "var(--meu-radius-surface)",
+            color: "var(--meu-color-ink)",
+            padding: 16
+          }}
+        >
+          <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
+            <legend style={{ fontWeight: 700, marginBlockEnd: 12 }}>{theme} theme</legend>
+            <label style={{ display: "grid", gap: 8 }}>
+              Delivery window
+              <select defaultValue="afternoon" style={{ minBlockSize: 44, paddingInline: 12 }}>
+                <option value="morning">08:00–12:00</option>
+                <option value="afternoon">14:00–18:00</option>
+              </select>
+            </label>
+          </fieldset>
+        </ThemeProvider>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const light = canvasElement.querySelector<HTMLElement>('[data-meu-theme="light"]');
+    const dark = canvasElement.querySelector<HTMLElement>('[data-meu-theme="dark"]');
+    const system = canvasElement.querySelector<HTMLElement>('[data-meu-theme="system"]');
+    await Promise.resolve();
+    if (!light || !dark || !system) {
+      throw new window.Error("Expected all native-control theme boundaries");
+    }
+    if (
+      window.getComputedStyle(light).colorScheme !== "light" ||
+      window.getComputedStyle(dark).colorScheme !== "dark" ||
+      !window.getComputedStyle(system).colorScheme.includes("light") ||
+      !window.getComputedStyle(system).colorScheme.includes("dark")
+    ) {
+      throw new window.Error("Expected ThemeProvider to expose matching color-scheme values");
+    }
+  }
+};

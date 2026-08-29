@@ -6,7 +6,10 @@ export const divider = recipe({
     boxSizing: "border-box",
     minWidth: 0,
     color: "var(--meu-color-muted)",
-    fontSize: 12,
+    fontFamily: "var(--meu-font-meta-font-family)",
+    fontSize: "var(--meu-font-meta-font-size)",
+    fontWeight: "var(--meu-font-meta-font-weight)",
+    letterSpacing: "var(--meu-font-meta-letter-spacing)",
     forcedColorAdjust: "auto",
     "@media": { "(forced-colors: active)": { color: "CanvasText" } }
   },

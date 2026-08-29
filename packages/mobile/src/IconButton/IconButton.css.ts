@@ -9,13 +9,19 @@ export const iconButton = recipe({
     placeItems: "center",
     flexShrink: 0,
     boxSizing: "border-box",
+    appearance: "none",
+    WebkitAppearance: "none",
     minWidth: 44,
     minHeight: 44,
     padding: 0,
     border: 0,
     borderRadius: "var(--meu-radius-control)",
     fontFamily: "var(--meu-font-ui)",
+    lineHeight: 1,
     cursor: "pointer",
+    touchAction: "manipulation",
+    userSelect: "none",
+    WebkitUserSelect: "none",
     WebkitTapHighlightColor: "transparent",
     transition: [
       "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
@@ -35,7 +41,24 @@ export const iconButton = recipe({
         cursor: "not-allowed"
       }
     },
-    "@media": { "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" } }
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": {
+        color: "ButtonText",
+        background: "Canvas",
+        border: "1px solid ButtonText",
+        forcedColorAdjust: "auto",
+        selectors: {
+          "&:focus": { outlineColor: "Highlight" },
+          '&[aria-pressed="true"], &[aria-pressed="mixed"]': {
+            boxShadow: "none",
+            borderColor: "Highlight",
+            borderWidth: 2
+          },
+          "&:disabled": { color: "GrayText", borderColor: "GrayText" }
+        }
+      }
+    }
   },
   variants: {
     size: {

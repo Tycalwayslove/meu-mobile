@@ -1,7 +1,17 @@
-import { forwardRef } from "react";
+import { Children, Fragment, forwardRef, isValidElement } from "react";
+import type { ReactNode } from "react";
 
 import { content, divider, line, shortLine } from "./Divider.css";
 import type { DividerProps } from "./types";
+
+function hasRenderableContent(node: ReactNode): boolean {
+  return Children.toArray(node).some(
+    (child) =>
+      !isValidElement<{ children?: ReactNode }>(child) ||
+      child.type !== Fragment ||
+      hasRenderableContent(child.props.children)
+  );
+}
 
 /**
  * Separates related content groups with native `separator` semantics.
@@ -20,8 +30,7 @@ export const Divider = forwardRef<HTMLDivElement, DividerProps>(function Divider
   ref
 ) {
   const classes = divider({ direction });
-  const hasContent =
-    direction === "horizontal" && children !== undefined && children !== null && children !== false;
+  const hasContent = direction === "horizontal" && hasRenderableContent(children);
   const contentLabel =
     hasContent && (typeof children === "string" || typeof children === "number")
       ? String(children)

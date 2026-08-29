@@ -126,7 +126,7 @@ Chrome 70 与 iOS 13 可解析实现；不依赖 dvh、CSS logical inset 或 tra
 - Story interaction: `Bottom.play` 验证打开、可访问对话框、关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 8641 B / 32768 B 预算，组合 Brotli 7648 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 9053 B / 32768 B 预算，组合 Brotli 7993 B；共享样式由应用单独导入一次。
 - SSR/hydration: Popup Node SSR 与 JSDOM hydrateRoot 已独立覆盖；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成组合 hydration，0 `pageerror`、0 `console.error`。
 - RTL: RightToLeft Story 覆盖 close button 布局与物理 left position；浏览器矩阵截图仍待重跑。
 - Reduced motion: CSS 1ms 降级已实现；新增 Stories 尚未进入扩展浏览器矩阵。

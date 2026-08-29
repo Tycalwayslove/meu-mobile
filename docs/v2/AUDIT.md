@@ -123,17 +123,17 @@ V2 采用以下事实源：
 
 已由当前仓库命令重新生成或执行的证据：
 
-- `docs:manifest:report`：68 个产品条目、125 个公开值、379 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
+- `docs:manifest:report`：68 个产品条目、125 个公开值、383 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
 - 68/68 个产品条目状态为 `verification`；尚无条目提前标记为 `commercial`。
-- `api:properties:strict`：225 个结构化类型、2324 个字段、2324 个已描述字段、239 个事件，公开字段文档覆盖率 100%。
+- `api:properties:strict`：226 个结构化类型、2355 个字段、2355 个已描述字段、241 个事件，公开字段文档覆盖率 100%。
 - `api:extract:strict`：mobile、form-react、icons-react、primitives-react 四包均为 0 warning；公开声明全部具有明确 release tag。
-- `storybook:validate-links`：最近一次已构建索引含 394 个 Story；当前源码静态计数为 412 个 Story exports，组件文档含 384 项 Story ID 引用（379 个唯一 ID）。开发阶段未重建 Storybook 静态站，当前验证器如实报告 19 项引用待索引刷新（其中 Loading Story 被 List 与 Cell 分别引用）；不把陈旧索引冒充当前全绿证据。
+- `storybook:validate-links`：当前本地 Storybook 构建含 436 个 Story，组件文档引用 407 个 Story ID 且无缺失；80/80 个标题至少包含一项关键交互或语义断言。开发阶段只保留本地构建证据，不上传 Chromatic。
 - `check-storybook-a11y.mjs`：最近一次完整矩阵在 390×844 视口运行 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），2,618 个组合通过且无 `pageerror`。该基线早于本轮新增 Story；按开发期本地优先策略，全部组件冻结后统一刷新。
 - 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
 - 官网生产构建通过 68 个组件页 × Light/Dark 的历史本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景；本轮改动后尚未重跑官网全量矩阵。
-- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 23,972 B / 32 KiB，逐组件结果已同步到留存文档。
-- 隔离 Next H5：最近一次完整套件在移动 Chromium/WebKit 中 92/92 通过；本批重新构建 Next 16 production 站后，SideNav、Collapse、SegmentedControl radiogroup/tabs 与 PaginationDots 共 6/6 条双引擎定向场景通过。完整套件将在候选冻结后统一复验。
-- 本批共置 Unit/SSR/hydration：Collapse、PaginationDots、SegmentedControl、SideNav 合计 12 files / 81 tests 通过；form adapter 定向 3 files / 6 tests 通过。新增 Story 源码已完成但尚未进入已构建索引，其余 API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle 与支持矩阵检查均已本地验证。
+- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 24,879 B / 32 KiB，逐组件结果已同步到留存文档。
+- 隔离 Next H5：最近一次完整套件在移动 Chromium/WebKit 中 92/92 通过；本批重新构建 Next 16 production 站后，Provider/Portal、Icon/VisuallyHidden/IconButton 与 SafeArea/Space/Divider 的 4/4 条双引擎定向场景及 2/2 条 hydration 场景通过。完整套件将在候选冻结后统一复验。
+- 本批全量 `pnpm test` 为 19/19 个任务通过，其中 mobile 为 141 files / 927 tests；API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle、类型与兼容性检查均已本地验证。线上视觉矩阵继续留待 68 个组件冻结后统一执行。
 - 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 240 次 pointermove 均在仓库预算内，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 199 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 

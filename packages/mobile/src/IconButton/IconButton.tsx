@@ -24,6 +24,17 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
   },
   ref
 ) {
+  const ariaLabel = props["aria-label"];
+  const ariaLabelledBy = props["aria-labelledby"];
+  const hasAriaLabel = typeof ariaLabel === "string" && ariaLabel.trim().length > 0;
+  const hasAriaLabelledBy = typeof ariaLabelledBy === "string" && ariaLabelledBy.trim().length > 0;
+
+  if (hasAriaLabel === hasAriaLabelledBy) {
+    throw new Error(
+      "IconButton requires exactly one non-empty aria-label or aria-labelledby accessible name."
+    );
+  }
+
   const classes = iconButton({ size, tone, variant });
   const pressed = props["aria-pressed"];
   const state = loading

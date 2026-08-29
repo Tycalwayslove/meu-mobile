@@ -139,7 +139,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 - Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 6045 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 5272 B / 32768 B 预算，组合 Brotli 5334 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 6348 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 5577 B / 32768 B 预算，组合 Brotli 5565 B；共享样式由应用单独导入一次。
 - SSR/hydration: `NumberKeyboard.hydration.test.tsx` 使用真实 `hydrateRoot` 覆盖 initial-open Portal 移动、Provider 边界、输入事件与 0 hydration error
 - RTL: `RtlReducedMotion` Story 与 Unit 覆盖 Portal `dir`、逻辑关闭按钮和稳定数字顺序；最终视觉审批留到冻结候选
 - Reduced motion: ConfigProvider 显式策略会进入 Portal boundary；Story play 断言 panel computed transition 为 0s

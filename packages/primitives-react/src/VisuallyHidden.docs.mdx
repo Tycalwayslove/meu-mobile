@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "429:2"
 storyIds: [foundation-visuallyhidden--accessible-icon-button]
 source: packages/primitives-react/src/VisuallyHidden
 ---
@@ -23,23 +23,24 @@ source: packages/primitives-react/src/VisuallyHidden
 - 使用 1×1、overflow、legacy clip 和现代 clip-path 组合隐藏视觉内容。
 - 不设置 `hidden`、`display: none`、`visibility: hidden` 或 `aria-hidden`，内容保留在 accessibility tree。
 - 保留 caller class，并在 forced-colors 模式维持裁剪规则。
-- SSR 输出完整文本与语义属性。
+- `focusable=true` 时仅在自身或后代未聚焦时裁剪，可用于键盘聚焦后显现的 skip link；组件不会擅自创建 Tab stop。
+- 支持 React ref；SSR 输出完整文本与语义属性，`focusable` 不会泄漏为无效 DOM 属性。
 
 当前状态为 `verification`；尚未完成 Windows High Contrast、VoiceOver/TalkBack 真机验收，不能标记为 commercial。
 
 ## 何时使用
 
-用于给纯图标按钮补 accessible name、为视觉图表补说明，或提供 `role="status"` 的读屏状态文本。文字应简短、与当前 locale 一致并随状态同步。
+用于给纯图标按钮补 accessible name、为视觉图表补说明，或提供 `role="status"` 的读屏状态文本。`focusable` 模式只用于跳至主要内容等在键盘聚焦后必须可见的入口。文字应简短、与当前 locale 一致并随状态同步。
 
 ## 何时不要使用
 
 - 不用来隐藏敏感信息、SEO 堆词或应对所有用户可见的错误。
-- 不把可操作的 Button、Link、Input 放入其中；视觉不可见的可聚焦控件会形成键盘陷阱。
+- 默认模式不包裹 Button、Link、Input；视觉不可见的可聚焦控件会形成键盘陷阱。需要 skip link 时必须显式使用 `focusable`，并验证聚焦后入口完整可见。
 - 可见 label 更清晰时，不应只提供读屏 label。
 
 ## 结构与状态
 
-结构只有一个 `span` 和 children。没有视觉状态；内容可以承载静态名称、描述或 live region，但 live region 的更新策略由调用方负责。
+结构只有一个 `span` 和 children。默认状态永久裁剪；`focusable` 状态在自身或后代获得焦点时解除裁剪。内容可以承载静态名称、描述、live region 或 skip link，但 live region 的更新策略由调用方负责。
 
 ## 基础用法
 
@@ -56,6 +57,12 @@ source: packages/primitives-react/src/VisuallyHidden
 </VisuallyHidden>
 ```
 
+```tsx
+<VisuallyHidden focusable>
+  <a href="#main-content">跳至主要内容</a>
+</VisuallyHidden>
+```
+
 ## 受控与非受控
 
 不适用。组件不持有状态；children 和 ARIA 属性由调用方控制。
@@ -66,7 +73,7 @@ source: packages/primitives-react/src/VisuallyHidden
 
 ## Props
 
-接受 `HTMLAttributes<HTMLSpanElement>`，包括 children、id、role、aria-live 和 className。组件无专有行为 Props；API 表以 TSDoc/API Extractor 为准。
+接受 `HTMLAttributes<HTMLSpanElement>`，包括 children、id、role、aria-live、tabIndex 和 className。`focusable=false` 默认永久裁剪；设为 true 时仅在自身与后代均未聚焦时裁剪。该属性不自动添加 tabIndex，API 表以 TSDoc/API Extractor 为准。
 
 ## Events
 
@@ -74,13 +81,14 @@ source: packages/primitives-react/src/VisuallyHidden
 
 ## Ref 与命令式方法
 
-当前函数组件不转发 ref。需要命令式读写 DOM 的场景尚无证据；如后续增加必须走兼容性评审。
+ref 指向真实 `HTMLSpanElement`，可用于测试、关联或明确的焦点恢复。不要通过 ref 把默认模式下的隐藏说明变成临时交互入口。
 
 ## 键盘操作
 
-| 按键 | 行为                                |
-| ---- | ----------------------------------- |
-| 任意 | 不定义；VisuallyHidden 本身不可聚焦 |
+| 按键          | 行为                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| Tab           | 默认模式不创建 Tab stop；`focusable` 模式由 caller 提供的交互后代或 tabIndex 接收焦点并解除裁剪 |
+| Enter / Space | 沿用获得焦点的原生交互元素行为；wrapper 不合成 click                                            |
 
 ## 触摸与手势
 
@@ -96,11 +104,11 @@ source: packages/primitives-react/src/VisuallyHidden
 
 ## 主题与定制
 
-没有 Token。`className` 会合并，但 caller 不应覆盖 position、尺寸、clip、overflow 或 white-space；覆盖这些属性可能泄漏隐藏文本或形成布局占位。
+没有 Token。默认裁剪同时限制 width/height、min/max 尺寸、box-sizing、overflow、legacy clip、clip-path 与 white-space，降低全局 span/reset 样式导致文字泄漏或布局占位的风险。`className` 会合并，但 caller 不应覆盖这些属性；带 `!important` 的全局 CSS 仍可能破坏契约。
 
 ## SSR 与 Next.js
 
-无浏览器全局和 effect，服务端直接输出 span 与文本，hydration 结构一致。可在 Server Component 输出中使用其生成的静态标记，但包入口的具体 Client/Server 边界仍以构建产物为准。
+无浏览器全局和 effect，服务端直接输出 span 与文本，hydration 结构一致。`focusable` 只选择 CSS class，不输出无效 DOM 属性。可在 Server Component 输出中使用其生成的静态标记，但包入口的具体 Client/Server 边界仍以构建产物为准。
 
 ## RTL 与国际化
 
@@ -115,7 +123,7 @@ legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；fo
 - className 可覆盖隐藏样式，属于调用方责任，不是稳定主题接口。
 - 极端全局 CSS 使用 `!important` 仍可能破坏裁剪。
 - 组件不会自动去重 accessible name，也不会验证 live region 文案频率。
-- 不提供“获得焦点时显示”的 skip-link 模式；该场景应使用独立 SkipLink 组件。
+- `focusable` 只负责聚焦显现，不提供目标存在性、滚动、焦点转移或路由管理；完整 skip link 仍由应用保证目标可聚焦且不被固定栏遮挡。
 
 ## 性能预算
 
@@ -123,11 +131,11 @@ legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；fo
 
 ## 测试证据
 
-- Unit: `VisuallyHidden.test.tsx` 覆盖 SSR 文本/语义、class 合并和不设置 aria-hidden
+- Unit: `VisuallyHidden.test.tsx` 覆盖 SSR 文本/语义、class 合并、不设置 aria-hidden、focusable 属性隔离、focus-reveal class 与 React ref
 - Story interaction: `AccessibleIconButton` 验证纯图标按钮由隐藏文本获得可访问名称；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 331 B / 32768 B 预算，组合 Brotli 258 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 412 B / 32768 B 预算，组合 Brotli 323 B；共享样式由应用单独导入一次。
 - SSR/hydration: SSR 单测已覆盖；隔离 Next 16 App Router hydration 后文本保留在可访问树并维持 1×1px absolute clip，0 hydration/runtime error
 - RTL: 样式无方向依赖；文案 locale 待集成层验证
 - Reduced motion: 不适用，无动画
@@ -140,18 +148,20 @@ legacy `clip` 与 `clip-path` 并存，覆盖旧 WebView 和现代浏览器；fo
 ### 待优化
 
 - 增加 Windows High Contrast 和 VoiceOver/TalkBack 真机矩阵。
-- 评估独立 SkipLink，避免把可聚焦显示行为塞进当前基础组件。
+- 基于 focusable 原语建立独立 SkipLink，补目标焦点、固定栏避让与双浏览器证据。
 
 ### 已完成
 
 - 增加 clip-path/WebKit clip-path，与 legacy clip 形成兼容裁剪。
 - 增加 forced-colors 规则并保持无颜色依赖。
 - 补公开 Props/组件 TSDoc、SSR 和 class 合并单测。
+- 增加可选 focus-reveal 模式与 React ref；默认模式保持永久裁剪，并补 min/max 尺寸、box-sizing 与 WebKit forced-colors 裁剪韧性。
 - 在隔离 Next H5 中补可访问命名、裁剪几何与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                            | 迁移说明 |
-| ---------- | ------ | ------------- | ----------------------------------------------- | -------- |
-| 2026-08-28 | 0.1.0  | compatibility | 强化现代裁剪与 forced-colors 行为并建立留存文档 | 无       |
-| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎命名/裁剪/hydration 证据     | 无       |
+| 日期       | 版本   | 类型          | 内容                                            | 迁移说明                                 |
+| ---------- | ------ | ------------- | ----------------------------------------------- | ---------------------------------------- |
+| 2026-08-28 | 0.1.0  | compatibility | 强化现代裁剪与 forced-colors 行为并建立留存文档 | 无                                       |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎命名/裁剪/hydration 证据     | 无                                       |
+| 2026-08-29 | 未发布 | accessibility | 增加 focus-reveal、ref 与全局 reset 裁剪韧性    | 默认行为不变；skip link 可改用 focusable |

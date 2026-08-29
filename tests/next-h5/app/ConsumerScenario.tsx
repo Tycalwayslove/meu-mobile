@@ -440,8 +440,12 @@ export function ConsumerScenario() {
 
         <section className="integration-foundations" aria-label="基础布局与原语">
           <VisuallyHidden id="foundation-status-label">基础布局状态</VisuallyHidden>
+          <VisuallyHidden focusable>
+            <a href="#foundation-actions">跳到基础操作</a>
+          </VisuallyHidden>
           <Divider align="start">基础布局</Divider>
-          <Space block gap={3} wrap>
+          <Divider data-testid="foundation-empty-divider">{[]}</Divider>
+          <Space id="foundation-actions" block gap={3} wrap>
             <Button
               size="small"
               variant="outline"
@@ -458,6 +462,11 @@ export function ConsumerScenario() {
             >
               <MeuIconSearch size={20} />
             </IconButton>
+            <MeuIconCheck
+              data-testid="foundation-semantic-icon"
+              size={20}
+              title="基础组件状态：正常"
+            />
           </Space>
           <output aria-labelledby="foundation-status-label">{foundationMessage}</output>
           <div ref={portalTargetRef} data-testid="foundation-portal-target" />

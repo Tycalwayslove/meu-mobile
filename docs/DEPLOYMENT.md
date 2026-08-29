@@ -28,7 +28,7 @@ pnpm storybook
 pnpm verify:release
 ```
 
-该命令只在本机运行，不会触发 Vercel、Chromatic 或 npm 发布。它包含严格 API/TSDoc、逐产品 bundle、单元/类型/兼容/双引擎 Next H5、Storybook 374 Story × 7 场景和官网 68 页 × Light/Dark 门禁。
+该命令只在本机运行，不会触发 Vercel、Chromatic 或 npm 发布。它包含严格 API/TSDoc、逐产品 bundle、单元/类型/兼容/双引擎 Next H5、冻结 commit 的全部 Story × 7 场景和官网 68 页 × Light/Dark 门禁。
 
 ## Vercel
 
@@ -51,7 +51,7 @@ pnpm verify:release
 ## 统一发布顺序
 
 1. 确认待发布代码已经合并到 `main`，工作树无未提交变更。
-2. 本地运行 `pnpm verify:release`；其中 `pnpm check` 包含严格 API/TSDoc、逐产品 bundle 预算和兼容门禁。链接门禁要求每个 Storybook 标题至少有一项关键 `play`，Storybook 门禁会在 390×844 视口验证全部 374 个 Story × 7 场景，存在 `play` 时必须先收到成功结果；官网门禁会扫描 68 个组件页面的 Light/Dark、主题恢复、文档状态、页面结构及 React 页面/控制台异常。两项 Axe 门禁均使用 WCAG A/AA 且不会上传 Chromatic。
+2. 本地运行 `pnpm verify:release`；其中 `pnpm check` 包含严格 API/TSDoc、逐产品 bundle 预算和兼容门禁。链接门禁要求每个 Storybook 标题至少有一项关键 `play`，Storybook 门禁会在 390×844 视口验证冻结 commit 的全部 Story × 7 场景（当前本地索引为 436 个 Story），存在 `play` 时必须先收到成功结果；官网门禁会扫描 68 个组件页面的 Light/Dark、主题恢复、文档状态、页面结构及 React 页面/控制台异常。两项 Axe 门禁均使用 WCAG A/AA 且不会上传 Chromatic。
 3. 确认 GitHub 的 `Quality` workflow 全部通过。
 4. 手动运行 `Publish Storybook`，检查 Chromatic 构建并处理需要人工确认的视觉差异。
 5. Chromatic 地址稳定后，触发 Vercel 的 `Release Meu Mobile Docs` Deploy Hook。

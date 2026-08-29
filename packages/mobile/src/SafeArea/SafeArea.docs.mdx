@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "434:3071"
 storyIds: [layout-safearea--bottom, layout-safearea--top, layout-safearea--landscape-edges]
 source: packages/mobile/src/SafeArea
 ---
@@ -25,7 +25,7 @@ source: packages/mobile/src/SafeArea
 - 横竖屏变化由浏览器重新计算 env，left/right 可覆盖横屏刘海边缘。
 - SSR 不读取浏览器全局，默认 `aria-hidden="true"`，并透传 className、style、ref 和 div 原生属性。
 
-当前状态为 `verification`；尚未完成真实刘海设备、键盘场景和组合布局的验收，不能标记为 commercial。
+当前状态为 `verification`；共置 SSR/hydration 已覆盖稳定根节点，但尚未完成真实刘海设备、键盘场景和组合布局的验收，不能标记为 commercial。
 
 ## 何时使用
 
@@ -125,12 +125,12 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 
 ## 测试证据
 
-- Unit: `SafeArea.test.tsx` 覆盖四边、fallback 归一化/覆盖和 SSR
+- Unit/SSR（本轮 9/9）: `SafeArea.test.tsx` 覆盖四边与 fallback 归一化/覆盖；`SafeArea.ssr.test.tsx` 覆盖确定性服务端标记、真实 `hydrateRoot` 节点复用和 0 recoverable error
 - Story interaction: `Bottom.play` 验证 spacer 的隐藏语义、物理边和 fallback；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Storybook 浏览器矩阵：374 Story × 7 场景、2,618 个组合和 0 axe/pageerror 是本轮之前的仓库历史基线；新增变更必须随最终冻结候选重跑，不能把旧基线当作当前证明。
+- 官网 Next 运行时：68 个组件页 × Light/Dark 的 136 场景为本轮之前的生产构建历史基线；本轮只记录共置 hydration 与后续定向 H5 结果。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1723 B / 32768 B 预算，组合 Brotli 1521 B；共享样式由应用单独导入一次。
-- SSR/hydration: SSR 单测覆盖稳定标记；隔离 Next 16 App Router hydration 后保持 bottom、aria-hidden 与 fallback 输入，0 hydration/runtime error
+- SSR/hydration: 共置测试直接验证 right/left 物理边、inline fallback 与 hydrateRoot；既有隔离 Next 16 场景覆盖 bottom，但本轮未重复执行该全局场景
 - RTL: 文档明确物理边语义，浏览器视觉证明待补
 - Reduced motion: 不适用，无动画
 - Mobile Chromium/WebKit E2E: 基础消费场景在两种引擎断言 bottom 物理边与隐藏 spacer；真实 `env()`、viewport-fit、旋转和软键盘仍待设备级验证
@@ -152,6 +152,7 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 - 明确组件不自动去重安全区，避免对合法的多边组合施加隐式布局规则。
 - 补 Props/release tag、SSR 与 targeted unit evidence。
 - 在隔离 Next H5 中补 bottom spacer、隐藏语义与 hydration 双引擎证据。
+- 增加共置 hydrateRoot 节点复用与 recoverable error 回归测试，不再只依赖外部集成页证明 SSR 稳定性。
 
 ## 变更记录
 
@@ -159,3 +160,4 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 | ---------- | ------ | ------------ | ------------------------------------------- | -------------------------------------------------- |
 | 2026-08-28 | 0.1.0  | feature      | 新增左右安全区与 fallback，建立 V2 留存文档 | 原有 top/bottom 用法保持兼容；重复消费由调用方排查 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 bottom/hydration 证据   | 无                                                 |
+| 2026-08-29 | 未发布 | verification | 增加共置 SSR/hydration 节点复用证据         | 无                                                 |

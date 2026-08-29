@@ -22,3 +22,15 @@ export const motionSystem = style({
 export const motionReduced = style({
   vars: reducedMotionDurations
 });
+
+/**
+ * Keeps user-agent rendered controls aligned with the explicit or system
+ * theme without adding a JavaScript media-query subscription.
+ */
+export const themeBoundary = style({
+  selectors: {
+    '&[data-meu-theme="light"]': { colorScheme: "light" },
+    '&[data-meu-theme="dark"]': { colorScheme: "dark" },
+    '&[data-meu-theme="system"]': { colorScheme: "light dark" }
+  }
+});

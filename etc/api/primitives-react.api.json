@@ -271,7 +271,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/primitives-react!Portal:function(1)",
-          "docComment": "/**\n * Renders children into `document.body` or a caller-owned DOM container. During SSR and the first hydration pass, children stay in place so server markup remains useful and hydration-safe. React owns portal cleanup when the destination changes or the component unmounts.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Renders children into `document.body` or a caller-owned DOM container. During SSR and the first hydration pass, children stay in place so server markup remains useful and hydration-safe. React owns portal cleanup when the destination changes or the component unmounts. React context and synthetic events continue through the logical tree, including for cross-document targets.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -516,22 +516,13 @@
           "name": "useFocusTrap"
         },
         {
-          "kind": "Function",
-          "canonicalReference": "@meu/primitives-react!VisuallyHidden:function(1)",
+          "kind": "Variable",
+          "canonicalReference": "@meu/primitives-react!VisuallyHidden:var",
           "docComment": "/**\n * Keeps content in the accessibility tree while clipping it visually. The component deliberately renders a `span` and never applies `aria-hidden`, `hidden`, or `display: none`.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
-              "text": "export declare function VisuallyHidden(input: "
-            },
-            {
-              "kind": "Reference",
-              "text": "VisuallyHiddenProps",
-              "canonicalReference": "@meu/primitives-react!VisuallyHiddenProps:type"
-            },
-            {
-              "kind": "Content",
-              "text": "): "
+              "text": "VisuallyHidden: "
             },
             {
               "kind": "Content",
@@ -539,40 +530,58 @@
             },
             {
               "kind": "Reference",
-              "text": "JSX.Element",
-              "canonicalReference": "@types/react!React.JSX.Element:interface"
+              "text": "ForwardRefExoticComponent",
+              "canonicalReference": "@types/react!React.ForwardRefExoticComponent:interface"
             },
             {
               "kind": "Content",
-              "text": ";"
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLAttributes",
+              "canonicalReference": "@types/react!React.HTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLSpanElement",
+              "canonicalReference": "!HTMLSpanElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "> & {\n    focusable?: boolean;\n} & import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "RefAttributes",
+              "canonicalReference": "@types/react!React.RefAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLSpanElement",
+              "canonicalReference": "!HTMLSpanElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">>"
             }
           ],
           "fileUrlPath": "src/VisuallyHidden.tsx",
-          "returnTypeTokenRange": {
-            "startIndex": 3,
-            "endIndex": 5
-          },
+          "isReadonly": true,
           "releaseTag": "Public",
-          "overloadIndex": 1,
-          "parameters": [
-            {
-              "parameterName": "{ className, ...props }",
-              "parameterTypeTokenRange": {
-                "startIndex": 0,
-                "endIndex": 0
-              },
-              "isOptional": false
-            },
-            {
-              "parameterName": "input",
-              "parameterTypeTokenRange": {
-                "startIndex": 1,
-                "endIndex": 2
-              },
-              "isOptional": false
-            }
-          ],
-          "name": "VisuallyHidden"
+          "name": "VisuallyHidden",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 12
+          }
         },
         {
           "kind": "TypeAlias",
@@ -599,7 +608,7 @@
             },
             {
               "kind": "Content",
-              "text": ">"
+              "text": "> & {\n    focusable?: boolean;\n}"
             },
             {
               "kind": "Content",

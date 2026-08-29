@@ -60,15 +60,21 @@ test("resolves system theme and motion from media queries without React state", 
 
 test("composes layout, icon action, custom portal and hidden accessible text", async ({ page }) => {
   const section = page.getByRole("region", { name: "基础布局与原语" });
-  const divider = section.locator('[data-meu-component="divider"]');
+  const divider = section.getByRole("separator", { name: "基础布局" });
   await expect(divider).toHaveAttribute("role", "separator");
   await expect(divider).toHaveAttribute("aria-label", "基础布局");
   await expect(divider).toHaveAttribute("aria-orientation", "horizontal");
   await expect(divider).toHaveAttribute("data-align", "start");
 
+  const emptyDivider = section.getByTestId("foundation-empty-divider");
+  await expect(emptyDivider).toHaveAttribute("data-content", "false");
+  await expect(emptyDivider.locator(":scope > *")).toHaveCount(1);
+
   const space = section.locator('[data-meu-component="space"]');
   await expect(space).toHaveAttribute("data-gap", "3");
   await expect(space).toHaveAttribute("data-wrap", "true");
+  await expect(space).toHaveCSS("display", "flex");
+  await expect(space).toHaveCSS("column-gap", "12px");
 
   const normalAction = section.getByRole("button", { name: "普通操作" });
   await expect(normalAction).toHaveAttribute("type", "button");
@@ -103,9 +109,28 @@ test("composes layout, icon action, custom portal and hidden accessible text", a
   await expect(hiddenLabel).toHaveCSS("position", "absolute");
   await expect(hiddenLabel).toHaveCSS("width", "1px");
 
+  const skipLink = section.getByRole("link", { name: "跳到基础操作" });
+  await expect(skipLink.locator("..")).toHaveCSS("position", "absolute");
+  await skipLink.focus();
+  await expect(skipLink.locator("..")).toHaveCSS("position", "static");
+
+  const semanticIcon = section.getByRole("img", { name: "基础组件状态：正常" });
+  const semanticTitle = semanticIcon.locator("title");
+  await expect(semanticTitle).toHaveText("基础组件状态：正常");
+  await expect(semanticTitle).toHaveAttribute("id", /.+/);
+  expect(await semanticIcon.getAttribute("aria-labelledby")).toBe(
+    await semanticTitle.getAttribute("id")
+  );
+
   const safeArea = section.getByTestId("foundation-safe-area");
   await expect(safeArea).toHaveAttribute("data-position", "bottom");
   await expect(safeArea).toHaveAttribute("aria-hidden", "true");
+  await expect(safeArea).toHaveCSS("pointer-events", "none");
+  expect(
+    await safeArea.evaluate((node) =>
+      node.style.getPropertyValue("--meu-safe-area-fallback").trim()
+    )
+  ).toBe("12px");
 });
 
 test("has no WCAG A/AA violations in light and dark themes", async ({ page }) => {

@@ -29,6 +29,22 @@ describe("Divider", () => {
     expect(divider.getAttribute("data-content")).toBe("true");
   });
 
+  it("does not create a labeled layout for empty React nodes", () => {
+    const { rerender } = render(<Divider>{[]}</Divider>);
+    let divider = screen.getByRole("separator");
+    expect(divider.getAttribute("data-content")).toBe("false");
+    expect(divider.children).toHaveLength(1);
+
+    rerender(
+      <Divider>
+        <></>
+      </Divider>
+    );
+    divider = screen.getByRole("separator");
+    expect(divider.getAttribute("data-content")).toBe("false");
+    expect(divider.children).toHaveLength(1);
+  });
+
   it("forwards labels, native attributes and refs", () => {
     const ref = createRef<HTMLDivElement>();
     render(<Divider ref={ref} aria-label="商品与配送信息分界" data-testid="divider" />);

@@ -115,6 +115,27 @@ describe("ConfigProvider", () => {
     expect(screen.getByTestId("lazy-portal").getAttribute("data-portal")).toBe("custom");
   });
 
+  it("forwards its React 19 ref and runs callback-ref cleanup", () => {
+    const cleanup = vi.fn();
+    const ref = vi.fn((node: HTMLDivElement | null): (() => void) | undefined => {
+      if (node) return cleanup;
+      return undefined;
+    });
+    const view = render(
+      <ConfigProvider ref={ref} theme="dark">
+        <span>Ref boundary</span>
+      </ConfigProvider>
+    );
+
+    expect(ref).toHaveBeenCalledTimes(1);
+    const firstRefCall = ref.mock.calls[0];
+    if (!firstRefCall) throw new Error("Expected the provider ref callback");
+    expect(firstRefCall[0]).toBeInstanceOf(HTMLDivElement);
+    view.unmount();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(ref).toHaveBeenCalledTimes(1);
+  });
+
   it("hydrates deterministic system-theme markup without recoverable errors", async () => {
     const ui = (
       <ConfigProvider theme="system" motion="system" dir="rtl" locale="en-US">

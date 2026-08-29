@@ -553,6 +553,7 @@ export type ConfigProviderProps = {
     locale?: MeuLocale;
     motion?: "system" | "reduced";
     portalContainer?: HTMLElement | (() => HTMLElement) | null;
+    ref?: Ref<HTMLDivElement>;
     style?: CSSProperties;
     theme?: MeuTheme;
 };
