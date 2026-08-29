@@ -50,6 +50,7 @@ source: packages/form-react/src/MeuForm
 - Zod transform 的输入值与提交值可通过三个泛型分别表达，不再把 transform 后的类型伪装成输入类型。
 - 表单级 `disabled` 会传播到本批次覆盖的文本、选择、数值与分段控件 adapter。
 - adapter 的局部 `disabled` 会同步登记到 React Hook Form：禁用期间既不进入 RHF `onSubmit`，也不进入原生 `FormData`；重新启用后保留值并恢复提交。
+- Calendar 将整个月历视为一个复合字段：日期按钮和月份控件之间移动焦点不会提前 touched，只有焦点离开整个月历时才触发 RHF blur 与 `mode="onBlur"` 校验。
 - adapter 将 `required` 同步给 Field 和适用的原生控件；`MeuForm` 默认 `noValidate=true`，由 React Hook Form 负责验证与错误展示。
 - NumberKeyboard、PasscodeInput、Picker、CascadePicker、DatePicker、DateRangePicker、Calendar、TimePicker、TreeSelect 与 ImageUploader 都提供明确的原生 FormData 契约；集合值按同名重复条目保持顺序。
 - 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按所属 `MeuForm` 内的 DOM 顺序聚焦首个已注册错误字段；同页多表单的同名字段不会互相干扰。
@@ -106,6 +107,7 @@ export function StoreForm() {
 
 - 文本、textarea、search、checkbox、switch、stepper、slider 和 rate 保留原生 `name/ref/onBlur/required/disabled`。
 - CheckboxGroup、RadioGroup、Selector 与 SegmentedControl 只有在焦点离开整个复合控件后才调用 RHF `onBlur`，组内移动焦点不会提前变成 touched。
+- Calendar 同样只在焦点离开整个复合根时调用 RHF 与消费方 `onBlur`；RHF 先更新 touched，再调用消费方回调。选择日期只更新 value/dirty，不把 change 伪装成 blur。
 - 非原生字符串/标量集合通过 hidden successful controls 参与 FormData；`getAll(name)` 按选择顺序返回 Picker、CascadePicker、TreeSelect、日期范围、Calendar 集合与已完成上传 URL。
 - 无论 `disabled` 来自 adapter 自身、Picker trigger 还是 NumberKeyboard 键盘/trigger，禁用字段都会同时从 RHF 提交值和原生 successful controls 中省略；不要把 `disabled` 当作仅视觉状态。`readOnly` 字段仍保留提交值。
 - `rules.required` 决定 RHF 校验；视觉 `required` 同时表达字段必填并下传原生语义。二者需要由调用方保持一致。
@@ -181,11 +183,11 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组和 dirty/touched；22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦。
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组和 dirty/touched；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦。
 - Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 103739 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 34212 B / 65536 B 预算，组合 Brotli 81811 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 104658 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 34307 B / 65536 B 预算，组合 Brotli 81986 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next H5 消费端会等待含 MeuForm 的页面完成 hydration，并要求每条用例都没有 `pageerror` 或 `console.error`；服务端/客户端默认值切换的 Form 专项矩阵待补
 - RTL: 待补
 - Reduced motion: Form 无自有动效，组合矩阵待补
@@ -221,3 +223,4 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 | 2026-08-28 | 未发布 | build        | 排除 Story declaration，增加 sideEffects 声明                                       | 无                                                                          |
 | 2026-08-29 | 未发布 | verification | 记录 mobile Chromium/WebKit 已覆盖的提交、清除、确认/取消、图片序列化与错误聚焦证据 | 状态保持 `verification`；原生 reset、服务端错误滚动、IME 与真机读屏仍待验证 |
 | 2026-08-29 | 未发布 | behavior     | 统一 22 个 adapter 的局部 disabled 与 RHF/native 提交省略语义                       | 禁用字段不再出现在 RHF `onSubmit`；重新启用后恢复原值提交                   |
+| 2026-08-29 | 未发布 | behavior     | Calendar 只在焦点离开整个复合控件时进入 touched 并运行 onBlur 校验                  | 组内日期/月份控件移焦不再提前触发 blur；消费方回调在 RHF 更新后执行         |

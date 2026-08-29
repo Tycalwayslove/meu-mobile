@@ -90,7 +90,109 @@ function CalendarForm({ onSubmit }: { onSubmit: (values: Values) => void }) {
   );
 }
 
+type BlurValues = { deliveryDate: Date | null };
+
+function CalendarBlurForm({ events }: { events: string[] }) {
+  const form = useMeuForm<BlurValues>({
+    defaultValues: { deliveryDate: date(10) },
+    mode: "onBlur"
+  });
+
+  return (
+    <MeuForm form={form} onSubmit={vi.fn()}>
+      <MeuFormCalendar<BlurValues>
+        name="deliveryDate"
+        label="模糊日期"
+        defaultMonth={date(1)}
+        onBlur={() =>
+          events.push(form.getFieldState("deliveryDate").isTouched ? "touched" : "untouched")
+        }
+      />
+      <output data-testid="calendar-lifecycle">
+        {form.formState.isDirty ? "dirty" : "pristine"}/
+        {form.formState.touchedFields.deliveryDate ? "touched" : "untouched"}
+      </output>
+      <Button type="button" onClick={() => form.reset()}>
+        重置日历
+      </Button>
+    </MeuForm>
+  );
+}
+
+function CalendarOnBlurValidationForm() {
+  const form = useMeuForm<BlurValues>({
+    defaultValues: { deliveryDate: null },
+    mode: "onBlur"
+  });
+
+  return (
+    <MeuForm form={form} onSubmit={vi.fn()}>
+      <MeuFormCalendar<BlurValues>
+        name="deliveryDate"
+        label="待验证日期"
+        defaultMonth={date(1)}
+        rules={{ validate: (value) => value instanceof Date || "请选择日期" }}
+      />
+      <output data-testid="validation-touched">
+        {form.formState.touchedFields.deliveryDate ? "touched" : "untouched"}
+      </output>
+      <Button type="button" onClick={() => form.reset()}>
+        重置验证
+      </Button>
+    </MeuForm>
+  );
+}
+
 describe("MeuFormCalendar", () => {
+  it("touches only after focus leaves the composite and preserves consumer blur order", async () => {
+    const events: string[] = [];
+    render(<CalendarBlurForm events={events} />);
+    const calendar = screen.getByRole("group", { name: "模糊日期" });
+    const day10 = calendar.querySelector<HTMLButtonElement>('[data-date="2026-08-10"]')!;
+    const day11 = calendar.querySelector<HTMLButtonElement>('[data-date="2026-08-11"]')!;
+    const reset = screen.getByRole("button", { name: "重置日历" });
+
+    fireEvent.click(day11);
+    expect(screen.getByTestId("calendar-lifecycle").textContent).toBe("dirty/untouched");
+
+    fireEvent.blur(day10, { relatedTarget: day11 });
+    expect(screen.getByTestId("calendar-lifecycle").textContent).toBe("dirty/untouched");
+    expect(events).toEqual([]);
+
+    fireEvent.blur(day11, { relatedTarget: reset });
+    await waitFor(() =>
+      expect(screen.getByTestId("calendar-lifecycle").textContent).toBe("dirty/touched")
+    );
+    expect(events).toEqual(["touched"]);
+
+    fireEvent.click(reset);
+    await waitFor(() =>
+      expect(screen.getByTestId("calendar-lifecycle").textContent).toBe("pristine/untouched")
+    );
+    const restoredDay = calendar.querySelector('[data-date="2026-08-10"]');
+    expect(restoredDay ? restoredDay.getAttribute("aria-pressed") : null).toBe("true");
+  });
+
+  it("runs onBlur validation only when focus leaves the calendar and reset clears it", async () => {
+    render(<CalendarOnBlurValidationForm />);
+    const calendar = screen.getByRole("group", { name: "待验证日期" });
+    const day10 = calendar.querySelector<HTMLButtonElement>('[data-date="2026-08-10"]')!;
+    const day11 = calendar.querySelector<HTMLButtonElement>('[data-date="2026-08-11"]')!;
+    const reset = screen.getByRole("button", { name: "重置验证" });
+
+    fireEvent.blur(day10, { relatedTarget: day11 });
+    expect(screen.getByTestId("validation-touched").textContent).toBe("untouched");
+    expect(screen.queryByRole("alert")).toBeNull();
+
+    fireEvent.blur(day11, { relatedTarget: reset });
+    expect((await screen.findByRole("alert")).textContent).toBe("请选择日期");
+    expect(screen.getByTestId("validation-touched").textContent).toBe("touched");
+
+    fireEvent.click(reset);
+    await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    expect(screen.getByTestId("validation-touched").textContent).toBe("untouched");
+  });
+
   it("keeps a numeric adapter value of zero selected", () => {
     type NumericValues = { epochDate: number | null };
     function NumericCalendarForm() {

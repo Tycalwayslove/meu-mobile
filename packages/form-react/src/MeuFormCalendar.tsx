@@ -13,7 +13,7 @@ import type {
   DateAdapter
 } from "@meu/mobile";
 import { useRef } from "react";
-import type { ReactNode } from "react";
+import type { FocusEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
 
@@ -27,7 +27,7 @@ import { HiddenFormValues, serializeHiddenFormValues } from "./HiddenFormValues"
  */
 export type MeuFormCalendarAdapterProps<TDate> = Omit<
   CalendarBaseProps<TDate>,
-  "defaultValue" | "onChange" | "ref" | "selectionMode" | "value"
+  "defaultValue" | "onBlur" | "onChange" | "ref" | "selectionMode" | "value"
 >;
 
 /**
@@ -75,6 +75,11 @@ export type MeuFormCalendarCommonProps<
   description?: ReactNode;
   /** Visible field label rendered by the surrounding `Field`. */
   label?: ReactNode;
+  /**
+   * Called after focus leaves the entire calendar and React Hook Form marks the field touched.
+   * Moving focus between month controls or date buttons does not call this handler.
+   */
+  onBlur?: CalendarBaseProps<TDate>["onBlur"];
   /** Shows the required affordance; enforce required validation through mode-specific `rules`. */
   required?: boolean;
   /**
@@ -178,6 +183,7 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
     description,
     label,
     name,
+    onBlur,
     onChange,
     required = false,
     rules,
@@ -261,6 +267,12 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
     }
   }
 
+  function handleBlur(event: FocusEvent<HTMLDivElement>) {
+    if (event.currentTarget.contains(event.relatedTarget)) return;
+    field.onBlur();
+    if (onBlur) onBlur(event);
+  }
+
   return (
     <Field
       label={label}
@@ -277,6 +289,7 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
           selectionMode="multiple"
           disabled={resolvedDisabled}
           value={Array.isArray(field.value) ? (field.value as ReadonlyArray<TDate>) : []}
+          onBlur={handleBlur}
           onChange={(nextValue, details) => publish(nextValue, details)}
         />
       ) : selectionMode === "range" ? (
@@ -287,6 +300,7 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
           selectionMode="range"
           disabled={resolvedDisabled}
           value={Array.isArray(field.value) && field.value.length === 2 ? field.value : null}
+          onBlur={handleBlur}
           onChange={(nextValue, details) => publish(nextValue, details)}
         />
       ) : (
@@ -297,6 +311,7 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
           selectionMode="single"
           disabled={resolvedDisabled}
           value={field.value === null || field.value === undefined ? null : field.value}
+          onBlur={handleBlur}
           onChange={(nextValue, details) => publish(nextValue, details)}
         />
       )}
