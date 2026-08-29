@@ -9,6 +9,20 @@ export const metadata: Metadata = {
 };
 
 const installCode = `pnpm add '@meu/mobile@workspace:*' '@meu/form-react@workspace:*' '@meu/primitives-react@workspace:*'`;
+const nextConfigCode = `import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  transpilePackages: [
+    "@meu/form-react",
+    "@meu/icons-react",
+    "@meu/mobile",
+    "@meu/primitives-react",
+    "@tanstack/react-virtual",
+    "@tanstack/virtual-core"
+  ]
+};
+
+export default nextConfig;`;
 const layoutCode = `import "@meu/tokens/css";
 import "@meu/primitives-react/styles.css";
 import "@meu/mobile/styles.css";
@@ -100,25 +114,39 @@ export default function GettingStartedPage() {
       </header>
 
       <section className="content-section">
-        <h2>1. 加入工作区依赖</h2>
+        <h2>1. 确认支持版本</h2>
+        <p>
+          V2 Web 首发支持 React 19 与 Next.js 16 App Router；当前验证版本为 React 19.2.8 和 Next.js
+          16.3.3。React 18、Next.js 14–15 与 Pages Router 尚未进入支持矩阵。
+        </p>
+      </section>
+
+      <section className="content-section">
+        <h2>2. 加入工作区依赖</h2>
         <p>使用 pnpm 的 workspace 协议锁定本地包，避免误装同名公开包。</p>
         <CodeBlock label="shell">{installCode}</CodeBlock>
       </section>
 
       <section className="content-section">
-        <h2>2. 引入样式与主题</h2>
+        <h2>3. 配置 Next.js 转译</h2>
+        <p>在应用的 next.config.ts 中转译 Meu 包及虚拟列表运行时依赖。</p>
+        <CodeBlock>{nextConfigCode}</CodeBlock>
+      </section>
+
+      <section className="content-section">
+        <h2>4. 引入样式与主题</h2>
         <p>在 App Router 根布局引入 Token 和组件样式，并只放置一个顶层 ConfigProvider。</p>
         <CodeBlock>{layoutCode}</CodeBlock>
       </section>
 
       <section className="content-section">
-        <h2>3. 使用内置表单集成</h2>
+        <h2>5. 使用内置表单集成</h2>
         <p>表单适配以 React Hook Form 为状态事实源，并通过 Zod 统一校验与错误消息。</p>
         <CodeBlock>{formCode}</CodeBlock>
       </section>
 
       <section className="content-section">
-        <h2>4. 映射服务端字段错误</h2>
+        <h2>6. 映射服务端字段错误</h2>
         <p>
           `applyMeuFormErrors` 会把后端字段错误写入对应 RHF 实例，并将焦点限制在所属
           `MeuForm`；同一页面存在多个同名字段表单时也不会串焦点。
@@ -127,7 +155,7 @@ export default function GettingStartedPage() {
       </section>
 
       <section className="content-section">
-        <h2>5. 明确复杂值的提交格式</h2>
+        <h2>7. 明确复杂值的提交格式</h2>
         <p>
           Picker、日期、树和上传 adapter 都生成原生 successful controls。数组默认使用同名重复条目；
           后端需要 JSON 或其他单值协议时，通过同步 `serializeValue` 显式声明。

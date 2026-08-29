@@ -269,3 +269,13 @@ SideNav 继续使用 `value / defaultValue / onChange`。items 带 content 时�
 非活动面板状态；不带 content 时降为 navigation button，当前项使用 `aria-current="page"`，从而允许 Next 路由
 或业务状态持有内容。两者均不进入 form-react。未来 uni-app 复用 sections/items、值和事件状态机，替换 DOM
 滚动、焦点与 ARIA 实现。
+
+## ADR-028：V2 Web 首发冻结 React 19 与 Next.js 16 App Router
+
+V2 Web 首发只承诺 React 19 与 Next.js 16 App Router，当前隔离消费者、官网和 MeuMall H5 开发版本分别使用
+React 19.2.8 与 Next.js 16.3.3。组件运行时不依赖 Next.js，但 Portal、refs、表单、SSR 与 hydration 的支持结论
+必须来自同一代 React DOM 与真实 Next 消费者，不能只根据类型可以安装来推断兼容。
+
+React 18、Next.js 14–15 与 Pages Router 在首发范围外。未来扩展版本时必须建立独立依赖树，并通过类型、构建、
+SSR、hydration、refs、Portal、focus、表单和双浏览器引擎验证后，才能放宽 peerDependencies。uni-app 继续遵循
+ADR-004：只复用平台中立 Token、SVG 与状态契约，DOM 实现不直接复用。

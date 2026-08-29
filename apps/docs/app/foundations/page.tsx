@@ -59,6 +59,28 @@ export default function FoundationsPage() {
       </section>
 
       <section className="content-section">
+        <h2>运行时支持</h2>
+        <div className="content-grid">
+          <article className="content-card">
+            <h3>React 19</h3>
+            <p>当前使用 React 19.2.8 验证组件、表单、Portal、SSR 与 hydration。</p>
+          </article>
+          <article className="content-card">
+            <h3>Next.js 16</h3>
+            <p>当前使用 Next.js 16.3.3 App Router 验证官网与隔离 H5 消费者。</p>
+          </article>
+          <article className="content-card">
+            <h3>旧版本</h3>
+            <p>React 18、Next.js 14–15 与 Pages Router 需建立独立消费者后再扩展支持。</p>
+          </article>
+          <article className="content-card">
+            <h3>uni-app</h3>
+            <p>未来复用 Token 与平台中立契约，DOM、Portal、焦点和手势实现需要重新适配。</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="content-section">
         <h2>Meu 图标体系与许可</h2>
         <p>
           对外导出统一采用 <code>MeuIcon*</code> 语义命名。底层图形优先取自 Lucide（ISC）与

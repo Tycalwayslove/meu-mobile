@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 114688,
-      "brotliBytes": 85360,
-      "gzipBytes": 113403,
-      "rawBytes": 584206,
+      "brotliBytes": 80827,
+      "gzipBytes": 102314,
+      "rawBytes": 529345,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -39,9 +39,9 @@
       "valueBundles": [
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5061,
-          "gzipBytes": 6017,
-          "rawBytes": 29533,
+          "brotliBytes": 687,
+          "gzipBytes": 830,
+          "rawBytes": 2211,
           "name": "MeuForm",
           "passesBudget": true
         },
@@ -55,25 +55,25 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 11688,
-          "gzipBytes": 13586,
-          "rawBytes": 59314,
+          "brotliBytes": 7287,
+          "gzipBytes": 8215,
+          "rawBytes": 31953,
           "name": "MeuFormNumberKeyboard",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 13109,
-          "gzipBytes": 15143,
-          "rawBytes": 66710,
+          "brotliBytes": 8674,
+          "gzipBytes": 9783,
+          "rawBytes": 39349,
           "name": "MeuFormPasscodeInput",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 34240,
-          "gzipBytes": 39531,
-          "rawBytes": 176102,
+          "brotliBytes": 29763,
+          "gzipBytes": 34200,
+          "rawBytes": 148741,
           "name": "MeuFormImageUploader",
           "passesBudget": true
         },
@@ -159,41 +159,41 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 31815,
-          "gzipBytes": 37666,
-          "rawBytes": 166431,
+          "brotliBytes": 27386,
+          "gzipBytes": 32183,
+          "rawBytes": 139046,
           "name": "MeuFormTreeSelect",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 17861,
-          "gzipBytes": 20621,
-          "rawBytes": 91472,
+          "brotliBytes": 13454,
+          "gzipBytes": 15243,
+          "rawBytes": 64111,
           "name": "MeuFormPicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 18488,
-          "gzipBytes": 21381,
-          "rawBytes": 96456,
+          "brotliBytes": 14058,
+          "gzipBytes": 15999,
+          "rawBytes": 69095,
           "name": "MeuFormCascadePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 22244,
-          "gzipBytes": 25647,
-          "rawBytes": 116239,
+          "brotliBytes": 17820,
+          "gzipBytes": 20257,
+          "rawBytes": 88878,
           "name": "MeuFormDatePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 23962,
-          "gzipBytes": 27966,
-          "rawBytes": 127573,
+          "brotliBytes": 19574,
+          "gzipBytes": 22566,
+          "rawBytes": 100212,
           "name": "MeuFormDateRangePicker",
           "passesBudget": true
         },
@@ -207,9 +207,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 20448,
-          "gzipBytes": 23593,
-          "rawBytes": 106803,
+          "brotliBytes": 16032,
+          "gzipBytes": 18208,
+          "rawBytes": 79442,
           "name": "MeuFormTimePicker",
           "passesBudget": true
         },

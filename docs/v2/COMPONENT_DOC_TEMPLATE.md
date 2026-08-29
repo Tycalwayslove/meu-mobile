@@ -76,6 +76,8 @@ source: packages/mobile/src/ComponentName
 
 ## 浏览器与 WebView
 
+默认继承 [`SUPPORT_MATRIX.md`](./SUPPORT_MATRIX.md)；这里只记录该组件额外的运行时要求、降级与限制。
+
 ## 边界情况与已知限制
 
 ## 性能预算
@@ -111,6 +113,7 @@ source: packages/mobile/src/ComponentName
 - Props/Events/Ref 的公开变化必须修改类型 JSDoc、测试、文档和变更记录。
 - 视觉或动效变化必须更新 Figma、Story 和 Chromatic 基线。
 - 兼容性、限制或降级变化即使不改变类型，也必须更新文档。
+- 所有组件默认继承 `SUPPORT_MATRIX.md`；新增 React、Next、浏览器或 WebView 支持前必须先完成独立消费者验证。
 - 破坏性变更需先进入弃用周期，记录替代 API 与迁移示例。
 - 测试链接只能指向已运行的证据，不能用计划项冒充完成项。
 - Story interaction 必须说明覆盖的是“每个标题的关键路径”还是“每个 Story”；Axe 必须记录视口、主题、规则级别，以及是否在 `play` 完成后执行，禁止用静态 Story 数量冒充交互证明。

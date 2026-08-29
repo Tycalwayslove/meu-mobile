@@ -22,16 +22,17 @@
 
 以下数字来自 2026-08-29 本地生产构建和浏览器门禁，候选冻结后仍需运行 `pnpm verify:release` 复验：
 
-| 门禁         | 当前证据                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------ |
-| 文档映射     | 68 个产品、125 个公开值、371 个公开类型、68 份共置文档；0 未认领、0 覆盖问题               |
-| API          | 222 个结构化类型、2258/2258 个字段有说明、232 个事件；API Extractor 0 warning              |
-| Storybook    | 374 个 Story × 7 场景，共 2,618 个组合；关键 `play`、axe WCAG A/AA 与 `pageerror` 全部通过 |
-| 官网         | 68 个组件页 × Light/Dark，共 136 个主题、结构、axe 与 React 运行时场景通过                 |
-| 单元与集成   | Mobile 544、Form 53、Docs 145；隔离 Next H5 Chromium/WebKit 84/84 通过                     |
-| 兼容静态扫描 | 202 个 production 构建文件通过 Chrome 70 / iOS 13 基线                                     |
-| 体积         | 68/68 产品与 125/125 公开值在预算内；共享 CSS 22,670 B gzip / 32 KiB                       |
-| 运行时基准   | VirtualList 10,000 行、TreeSelect 1,500 节点、SwipeActions 高频 pointer 场景在双引擎预算内 |
+| 门禁         | 当前证据                                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------- |
+| 文档映射     | 68 个产品、125 个公开值、371 个公开类型、68 份共置文档；0 未认领、0 覆盖问题                            |
+| API          | 222 个结构化类型、2258/2258 个字段有说明、232 个事件；API Extractor 0 warning                           |
+| Storybook    | 374 个 Story × 7 场景，共 2,618 个组合；关键 `play`、axe WCAG A/AA 与 `pageerror` 全部通过              |
+| 官网         | 68 个组件页 × Light/Dark，共 136 个主题、结构、axe 与 React 运行时场景通过                              |
+| 单元与集成   | Mobile 544、Form 53、Docs 145；隔离 Next H5 Chromium/WebKit 84/84 通过                                  |
+| 兼容静态扫描 | 202 个 production 构建文件通过 Chrome 70 / iOS 13 基线                                                  |
+| 体积         | 68/68 产品与 125/125 公开值在预算内；共享 CSS 22,670 B gzip / 32 KiB                                    |
+| 运行时基准   | VirtualList 10,000 行、TreeSelect 1,500 节点、SwipeActions 高频 pointer 场景在双引擎预算内              |
+| 支持矩阵     | React 19 / Next.js 16 App Router、运行时 peer、私有发布边界与隔离消费者版本由 `pnpm support:check` 固定 |
 
 这些结果不自动把组件标记为 `commercial`。真机、旧 WebView、持续性能、法务和人工视觉仍为阻断项。
 

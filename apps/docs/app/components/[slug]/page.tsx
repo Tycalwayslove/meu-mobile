@@ -89,7 +89,8 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
             <span className="meta-pill">
               {manifestProduct ? manifestProduct.priority : component.priority}
             </span>
-            <span className="meta-pill">React</span>
+            <span className="meta-pill">React 19</span>
+            <span className="meta-pill">Next 16</span>
             {v2Document ? <span className="meta-pill">V2 文档</span> : null}
           </div>
         </header>

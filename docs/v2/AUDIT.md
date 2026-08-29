@@ -73,7 +73,7 @@ V2 采用以下事实源：
 
 ### 包与消费边界
 
-- React peer 当前限定为 React 19。正式商用前必须决定是否扩展到 React 18/Next 14–15，或清楚声明仅支持 React 19/Next 16。
+- V2 Web 首发已冻结为 React 19 与 Next.js 16 App Router；React 18、Next 14–15 和 Pages Router 未经独立消费者验证，不作支持承诺。精确版本、peer 与扩展准入条件见 [`SUPPORT_MATRIX.md`](./SUPPORT_MATRIX.md)。
 - uni-app 仍是后续适配边界；V2 Web 组件不应伪装为可直接运行的 uni-app 原生组件，但 Token、行为契约和平台无关逻辑需要可复用。
 
 ## 最高风险组件族

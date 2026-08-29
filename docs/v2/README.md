@@ -9,6 +9,7 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 - 每个组件都有一份永久留存文档，代码变更必须同步更新；
 - 官网从留存文档与类型清单生成完整用法、Props、Events、Ref、Token、兼容性与示例；
 - 当前不发布 npm，先通过 workspace、官网、Storybook 与隔离 Next H5 测试站完成商用验收。
+- V2 Web 首发冻结 React 19 与 Next.js 16 App Router；精确 peer、验证版本、浏览器档位和扩展旧版本的准入条件见 [`SUPPORT_MATRIX.md`](./SUPPORT_MATRIX.md)。
 
 ## 当前基线
 
@@ -112,7 +113,7 @@ audit → design → implementation → verification → commercial
 
 每个组件完成时，同一个变更必须包含：实现、类型 JSDoc、单测、Story/交互、视觉基线、留存文档、官网页面和变更记录。不得把文档留到所有代码完成后集中补写。
 
-逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，真机记录使用 [`DEVICE_VERIFICATION.md`](./DEVICE_VERIFICATION.md)，最终候选的人工签字与发布顺序见 [`RELEASE_ACCEPTANCE.md`](./RELEASE_ACCEPTANCE.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
+逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，运行时与消费版本见 [`SUPPORT_MATRIX.md`](./SUPPORT_MATRIX.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，真机记录使用 [`DEVICE_VERIFICATION.md`](./DEVICE_VERIFICATION.md)，最终候选的人工签字与发布顺序见 [`RELEASE_ACCEPTANCE.md`](./RELEASE_ACCEPTANCE.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
 
 ## 发布门禁
 
