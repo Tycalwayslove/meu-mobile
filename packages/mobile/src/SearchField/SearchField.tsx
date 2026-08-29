@@ -2,7 +2,7 @@
 
 import { MeuIconSearch, MeuIconX } from "@meu/icons-react";
 import { VisuallyHidden } from "@meu/primitives-react";
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import type {
   ChangeEvent,
   CompositionEvent,
@@ -39,8 +39,10 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
     clearLabel: clearLabelProp,
     clearable = true,
     defaultValue = "",
+    dir,
     disabled = false,
     enterKeyHint = "search",
+    form,
     id,
     loading = false,
     loadingLabel: loadingLabelProp,
@@ -64,6 +66,8 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
   const fieldContext = useFieldContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const composingRef = useRef(false);
+  const clearFocusedRef = useRef(false);
+  const resetTimerRef = useRef<number | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const controlled = value !== undefined;
   const currentValue = controlled ? value : uncontrolledValue;
@@ -103,6 +107,46 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
       : config.locale === "en-US"
         ? "Searching"
         : "正在搜索";
+
+  useEffect(() => {
+    const element = inputRef.current;
+    const ownerForm = element ? element.form : null;
+    if (!element || !ownerForm) return undefined;
+
+    const handleReset = (event: Event) => {
+      const currentElement = inputRef.current;
+      if (currentElement) {
+        currentElement.defaultValue = controlled
+          ? value === undefined
+            ? ""
+            : value
+          : defaultValue;
+      }
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = window.setTimeout(() => {
+        resetTimerRef.current = null;
+        const resetElement = inputRef.current;
+        if (!resetElement || event.defaultPrevented) return;
+        if (controlled) resetElement.value = value === undefined ? "" : value;
+        else setUncontrolledValue(defaultValue);
+        composingRef.current = false;
+      }, 0);
+    };
+
+    ownerForm.addEventListener("reset", handleReset);
+    return () => {
+      ownerForm.removeEventListener("reset", handleReset);
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    };
+  }, [controlled, defaultValue, form, value]);
+
+  useEffect(() => {
+    if (!loading || !clearFocusedRef.current) return;
+    clearFocusedRef.current = false;
+    const element = inputRef.current;
+    if (element && !element.disabled) element.focus();
+  }, [loading]);
 
   function updateValue(nextValue: string, details: SearchFieldChangeDetails) {
     if (!controlled) setUncontrolledValue(nextValue);
@@ -161,6 +205,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
   return (
     <span
       className={className ? `${rootClasses} ${className}` : rootClasses}
+      dir={dir}
       style={style}
       data-meu-component="search-field"
       data-readonly={readOnly || undefined}
@@ -189,6 +234,8 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
         id={resolvedId}
         className={input}
         type="search"
+        dir={dir}
+        form={form}
         disabled={disabled}
         readOnly={readOnly}
         enterKeyHint={enterKeyHint}
@@ -219,6 +266,12 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
           className={clearButton}
           aria-label={clearLabel}
           onClick={clear}
+          onBlur={() => {
+            clearFocusedRef.current = false;
+          }}
+          onFocus={() => {
+            clearFocusedRef.current = true;
+          }}
           onMouseDown={(event) => event.preventDefault()}
         >
           <MeuIconX size={18} />

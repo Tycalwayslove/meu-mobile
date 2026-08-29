@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
@@ -69,6 +69,8 @@ describe("SearchField", () => {
     );
     expect(input.value).toBe("");
     expect(document.activeElement).toBe(input);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(0);
   });
 
   it("lets a native form own Enter when onSearch is absent", async () => {
@@ -101,6 +103,83 @@ describe("SearchField", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("restores an uncontrolled value on native form reset without publishing a change", async () => {
+    const onChange = vi.fn();
+    const onSearch = vi.fn();
+    const { container } = render(
+      <form>
+        <SearchField
+          aria-label="可重置搜索"
+          defaultValue="初始订单"
+          name="query"
+          onChange={onChange}
+          onSearch={onSearch}
+        />
+      </form>
+    );
+    const form = container.querySelector("form")!;
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "可重置搜索" });
+
+    fireEvent.change(input, { target: { value: "修改后的订单" } });
+    input.focus();
+    fireEvent.compositionStart(input);
+    expect(new FormData(form).get("query")).toBe("修改后的订单");
+    act(() => form.reset());
+
+    expect(input.value).toBe("初始订单");
+    await waitFor(() => expect(input.value).toBe("初始订单"));
+    expect(document.activeElement).toBe(input);
+    expect(new FormData(form).get("query")).toBe("初始订单");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onSearch).toHaveBeenCalledOnce();
+  });
+
+  it("honors cancelled reset and an external form owner", async () => {
+    const onReset = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
+    render(
+      <>
+        <form id="search-owner" onReset={onReset} />
+        <SearchField
+          aria-label="外部表单搜索"
+          defaultValue="初始"
+          form="search-owner"
+          name="query"
+        />
+      </>
+    );
+    const form = document.getElementById("search-owner") as HTMLFormElement;
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "外部表单搜索" });
+
+    fireEvent.change(input, { target: { value: "保留修改" } });
+    act(() => form.reset());
+    expect(input.value).toBe("保留修改");
+    await act(() => new Promise<void>((resolve) => window.setTimeout(resolve, 0)));
+
+    expect(onReset).toHaveBeenCalledOnce();
+    expect(input.value).toBe("保留修改");
+    expect(new FormData(form).get("query")).toBe("保留修改");
+  });
+
+  it("keeps the latest controlled value after native form reset", async () => {
+    const { container, rerender } = render(
+      <form>
+        <SearchField aria-label="受控重置" name="query" value="第一版" />
+      </form>
+    );
+    rerender(
+      <form>
+        <SearchField aria-label="受控重置" name="query" value="第二版" />
+      </form>
+    );
+    const form = container.querySelector("form")!;
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "受控重置" });
+
+    act(() => form.reset());
+    await waitFor(() => expect(input.value).toBe("第二版"));
+    expect(new FormData(form).get("query")).toBe("第二版");
+  });
+
   it("respects a consumer keydown cancellation before running onSearch", () => {
     const onSearch = vi.fn();
     const onKeyDown = vi.fn((event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -124,6 +203,19 @@ describe("SearchField", () => {
     expect(onSearch).not.toHaveBeenCalled();
   });
 
+  it("keeps the non-standard native search event separate from the Enter callback", () => {
+    const onSearch = vi.fn();
+    const nativeSearch = vi.fn();
+    render(<SearchField aria-label="原生事件" defaultValue="订单" onSearch={onSearch} />);
+    const input = screen.getByRole("searchbox", { name: "原生事件" });
+    input.addEventListener("search", nativeSearch);
+
+    fireEvent(input, new Event("search", { bubbles: true }));
+
+    expect(nativeSearch).toHaveBeenCalledOnce();
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
   it("does not search while an IME composition is active or for repeated Enter", () => {
     const onBlur = vi.fn();
     const onSearch = vi.fn();
@@ -137,6 +229,8 @@ describe("SearchField", () => {
     expect(onSearch).not.toHaveBeenCalled();
 
     fireEvent.compositionEnd(input);
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 229 });
+    expect(onSearch).not.toHaveBeenCalled();
     const keepsRepeatDefault = fireEvent.keyDown(input, { key: "Enter", repeat: true });
     expect(keepsRepeatDefault).toBe(false);
     expect(onSearch).not.toHaveBeenCalled();
@@ -166,27 +260,65 @@ describe("SearchField", () => {
     expect(onSearch).toHaveBeenCalledWith("固定条件", expect.objectContaining({ source: "enter" }));
   });
 
-  it("announces loading, hides clear and blocks repeated search and form submission", () => {
-    const onSearch = vi.fn();
+  it("treats controlled clear as a rejectable value request", () => {
+    const onChange = vi.fn();
+    const onClear = vi.fn();
     render(
-      <SearchField
-        aria-label="远程搜索"
-        defaultValue="订单"
-        loading
-        loadingLabel="订单搜索中"
-        onSearch={onSearch}
-      />
+      <SearchField aria-label="受控清除" value="固定查询" onChange={onChange} onClear={onClear} />
+    );
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "受控清除" });
+
+    fireEvent.click(screen.getByRole("button", { name: "清除搜索" }));
+
+    expect(onChange).toHaveBeenCalledWith("", expect.objectContaining({ source: "clear" }));
+    expect(onClear).toHaveBeenCalledOnce();
+    expect(input.value).toBe("固定查询");
+    expect(document.activeElement).toBe(input);
+  });
+
+  it("announces loading, hides clear and blocks repeated search and form submission", async () => {
+    const onSearch = vi.fn();
+    const onSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
+    const user = userEvent.setup();
+    render(
+      <form onSubmit={onSubmit}>
+        <SearchField
+          aria-label="远程搜索"
+          defaultValue="订单"
+          loading
+          loadingLabel="订单搜索中"
+          onSearch={onSearch}
+        />
+      </form>
     );
     const input = screen.getByRole("searchbox", { name: "远程搜索" });
     const root = input.parentElement;
 
+    await user.click(input);
+    await user.keyboard("{Enter}");
     const keepsNativeDefault = fireEvent.keyDown(input, { key: "Enter" });
     expect(keepsNativeDefault).toBe(false);
     expect(onSearch).not.toHaveBeenCalled();
+    expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByRole("status", { name: "订单搜索中" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "清除搜索" })).toBeNull();
     expect(input.getAttribute("aria-busy")).toBe("true");
     expect(root && root.getAttribute("data-state")).toBe("loading");
+  });
+
+  it("returns keyboard focus to the input when loading replaces a focused clear action", async () => {
+    const { rerender } = render(
+      <SearchField aria-label="焦点搜索" defaultValue="订单" loading={false} />
+    );
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "焦点搜索" });
+    const clearAction = screen.getByRole("button", { name: "清除搜索" });
+    clearAction.focus();
+    expect(document.activeElement).toBe(clearAction);
+
+    rerender(<SearchField aria-label="焦点搜索" defaultValue="订单" loading />);
+
+    await waitFor(() => expect(document.activeElement).toBe(input));
+    expect(screen.queryByRole("button", { name: "清除搜索" })).toBeNull();
   });
 
   it("lets Field errors override caller grammar and hides actions while disabled", () => {
@@ -200,6 +332,28 @@ describe("SearchField", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.disabled).toBe(true);
     expect(screen.queryByRole("button", { name: "清除搜索" })).toBeNull();
+  });
+
+  it("uses native disabled and read-only FormData semantics", () => {
+    const { container } = render(
+      <form>
+        <SearchField aria-label="禁用条件" defaultValue="disabled" disabled name="disabledQuery" />
+        <SearchField aria-label="只读条件" defaultValue="readonly" name="readOnlyQuery" readOnly />
+      </form>
+    );
+    const form = container.querySelector("form")!;
+    const data = new FormData(form);
+
+    expect(data.has("disabledQuery")).toBe(false);
+    expect(data.get("readOnlyQuery")).toBe("readonly");
+  });
+
+  it("applies an explicit writing direction to both the visual root and native input", () => {
+    render(<SearchField aria-label="RTL 搜索" defaultValue="طلب" dir="rtl" />);
+    const input = screen.getByRole("searchbox", { name: "RTL 搜索" });
+
+    expect(input.getAttribute("dir")).toBe("rtl");
+    expect(input.parentElement && input.parentElement.getAttribute("dir")).toBe("rtl");
   });
 
   it.each([

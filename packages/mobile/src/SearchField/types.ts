@@ -86,7 +86,8 @@ export type SearchFieldProps = Omit<
    */
   clearable?: boolean;
   /**
-   * Initial value when the component is uncontrolled.
+   * Initial and native form-reset value when the component is uncontrolled. Reset does not emit
+   * `onChange`.
    *
    * @defaultValue `""`
    */
@@ -116,6 +117,6 @@ export type SearchFieldProps = Omit<
    * @defaultValue `"default"`
    */
   status?: SearchFieldStatus;
-  /** Controlled search value. */
+  /** Controlled search value; native form reset cannot change it. */
   value?: string;
 };

@@ -66,7 +66,17 @@ const controlBase = {
     "&:disabled": { cursor: "not-allowed", opacity: 0.42 }
   },
   "@media": {
-    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+    "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      background: "Canvas",
+      borderColor: "ButtonText",
+      boxShadow: "none",
+      selectors: {
+        "&:focus": { outlineColor: "Highlight" },
+        "&:disabled": { color: "GrayText", borderColor: "GrayText", opacity: 1 }
+      }
+    }
   }
 };
 

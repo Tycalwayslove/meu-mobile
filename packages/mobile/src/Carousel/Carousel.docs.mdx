@@ -15,8 +15,10 @@ storyIds:
   [
     gesture-carousel--default,
     gesture-carousel--looping-autoplay,
+    gesture-carousel--accessible-autoplay-pause,
     gesture-carousel--controlled,
-    gesture-carousel--disabled
+    gesture-carousel--disabled,
+    gesture-carousel--rtl-and-long-content
   ]
 source: packages/mobile/src/Carousel
 ---
@@ -26,7 +28,8 @@ source: packages/mobile/src/Carousel
 ## 当前能力
 
 - Embla 驱动的单页轮播，支持受控/非受控 index、drag、loop、gap、indicator 和可选 autoplay。
-- 固定提供前后原生按钮；autoplay 时提供暂停/播放按钮，并在 hover、focus、页面隐藏和 drag 时暂停。
+- 固定提供前后原生按钮；autoplay 时提供暂停/播放按钮。hover 和页面隐藏只暂时挂起计时，focus、drag 和前后按钮会持续暂停，直到用户显式播放。
+- 独立 live status 始终组合自定义页名、可见页和总页数；自动轮播时关闭公告，静止后的换页使用 polite 公告。
 - `onIndexChange` 区分 `autoplay | drag | next | previous`；非活动页从焦点顺序移除。
 
 ## 何时使用
@@ -56,7 +59,9 @@ root → controls → viewport/track/slides → indicator。状态包括 active 
 
 ## 受控与非受控
 
-受控使用 `index/onIndexChange`，非受控使用 `defaultIndex`。输入会归一化到现有 item 范围；受控调用方未更新 index 时，视图会回滚到受控值。
+受控使用 `index/onIndexChange`，非受控使用 `defaultIndex`。输入会归一化到现有 item 范围；受控调用方未更新 index 时，视图会回滚到受控值。不要在同一实例运行时切换是否传入 `index`，如需切换请使用新的 `key`。
+
+items 初始为空时，非受控 Carousel 会在首批内容到达后应用首次 `defaultIndex`。现有 items 缩短时，索引立即收敛；随后扩容不会复活已裁掉的旧索引。items 归一化和受控 prop 更新都不触发 `onIndexChange`。
 
 ## 表单集成
 
@@ -68,7 +73,7 @@ API 表由 `CarouselProps` 生成。核心为 items、index/defaultIndex、onInd
 
 ## Events
 
-`onIndexChange(index, { reason })` 只在实际选择变化时触发。drag 开始会永久暂停本轮 autoplay，前后按钮也会暂停；hover 只是暂时暂停。
+`onIndexChange(index, { reason })` 只在用户操作或 timer 选中不同页时触发。drag 开始会持续暂停本轮 autoplay，前后按钮和焦点进入也会暂停；hover 与页面隐藏只挂起当前 timer。Embla `reInit` 和 props/items 归一化不伪装成 drag 事件。
 
 ## Ref 与命令式方法
 
@@ -85,15 +90,17 @@ ref 指向根 `HTMLDivElement`。不公开 Embla instance；程序化切换通�
 
 ## 触摸与手势
 
-drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向页面滚动、pointer cancel、多指、嵌套可点击内容和 RTL。
+drag 默认开启，阈值由 Embla 控制。track 使用 `touch-action: pan-y pinch-zoom`，浏览器保留纵向滚动和缩放；Embla 8.6.0 负责横向识别、多指退出和 `touchcancel`。组件监听 Embla `pointerUp` 清除未完成 drag 的原因，不自行持有 pointer capture。
+
+Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。横向拖动、斜向起手、纵向滚动、多指缩放、系统取消、嵌套链接和 RTL 方向仍需目标浏览器与真机验证。
 
 ## 无障碍
 
-提供 carousel/slide roledescription、每页名称、live region、暂停控制和前后按钮。非活动页同时使用 `aria-hidden` 与 `inert`；旧内核 fallback 保存/恢复调用方 tabindex，并观察动态插入与 tabindex/disabled/href/contenteditable 变化，避免新控件进入隐藏页的 Tab 路径。
+提供 carousel/slide roledescription、每页名称、独立位置 status、暂停控制和前后按钮。自定义 `ariaLabel` 不再遮蔽页码：status 会公告“页名，第 2 张，共 5 张”。自动轮播时 status 为 `aria-live=off`；静止时为 polite。非活动页同时使用 `aria-hidden` 与 `inert`；旧内核 fallback 保存/恢复调用方 tabindex，并观察动态插入与 tabindex/disabled/href/contenteditable 变化，避免新控件进入隐藏页的 Tab 路径。
 
 ## 动效
 
-默认不自动播放。reduced-motion 时自动播放不启动，用户显式播放后使用即时切换。V2 需验证动画中断、controlled rollback 和 loop clone 的可见性。
+默认不自动播放。系统 `prefers-reduced-motion` 或 `ConfigProvider motion="reduced"` 时自动播放不启动；用户显式播放后使用即时切换。暂停按钮获焦时会先停止轮播，但仍保留“暂停”动作，后续 click/Enter 不会反向重启。V2 仍需验证真实动画中断、controlled rollback 和 loop clone 的视觉边界。
 
 ## 主题与定制
 
@@ -101,11 +108,11 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 ## SSR 与 Next.js
 
-服务端输出静态 slides，交互在客户端初始化。items 的 key、数量和初始 index 在 hydration 前必须稳定。
+服务端输出静态 slides、原生按钮、活动/非活动语义和位置 status，不访问 window/document。交互在客户端初始化。items 的 key、数量和初始 index 在 hydration 前必须稳定；SSR Unit 不等于 Next 浏览器 hydration 证据。
 
 ## RTL 与国际化
 
-内置中英文按钮与 roledescription。V2 需验证 RTL 下视觉顺序、手势方向、前后按钮图标和 Embla direction 配置。
+内置中英文按钮与 roledescription。`dir=rtl` 会传给 Embla，按钮位置和图标使用逻辑方向；Unit 与 `RtlAndLongContent` Story 覆盖配置和长文本。真实手势方向与双向文本仍需目标浏览器验证。
 
 ## 浏览器与 WebView
 
@@ -116,6 +123,7 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 - items 为空或只有一项时控制按钮禁用。
 - autoplay 最短间隔归一为 1000ms，但内容可读时间仍由调用方负责。
 - MutationObserver 仅扫描 slide 内潜在焦点节点及相关属性；复杂动态内容仍需性能验证。
+- 前后按钮和 indicator 覆盖在内容上方。文本型 slide 应像 Story 一样预留两侧至少 64px，并在 200% 字体下检查换行；组件无法替业务内容自动腾出安全区。
 
 ## 性能预算
 
@@ -123,14 +131,16 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 ## 测试证据
 
-- Unit: `Carousel.test.tsx` 覆盖语义、受控回滚、自动播放/reduced-motion、可见性、drag reason，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
-- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide 的可访问状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `Carousel.test.tsx` 覆盖默认静止、位置公告、原生按钮键盘路径、受控回滚、动态 items、autoplay focus/hover/visibility/reduced-motion、drag reason、RTL、资源清理，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
+- SSR: `Carousel.ssr.test.tsx` 在无 window/document 环境验证静态按钮、默认关闭 autoplay、活动索引、inactive/inert 和页名/页数 status。
+- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status。最新 Storybook build/link 检查通过 386 stories、354 个共置 storyIds 和 80 个带 play 的 title。
+- Carousel 定向浏览器扫描：6 个 Story × Light/Dark 两个场景全部通过；play 返回 success，axe WCAG A/AA 为 0 违规，且无 `pageerror`。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代本轮 RTL/200%/forced-colors 最终视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 18395 B / 49152 B 预算，组合 Brotli 16225 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 18910 B / 49152 B 预算，组合 Brotli 16658 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next 16 App Router hydration 后受控索引、活动/非活动 slide 及原生替代操作保持一致，0 hydration/runtime error
-- RTL: 待补
-- Reduced motion: 有单测覆盖，待真实浏览器证明
+- RTL: Unit 与 Story 已覆盖配置、逻辑方向和长文本；手势与双向文本真机待补
+- Reduced motion: Unit 覆盖自动播放门控和即时切换；真实浏览器动画待补
 - Mobile Chromium/WebKit E2E: `runs the controlled carousel with native alternatives and focus isolation` 在两种引擎断言前后按钮、受控索引、slide 名称、非活动控件 `tabindex=-1` 与活动 link 可聚焦；drag/滚动竞争仍待专项
 - Chromatic Light/Dark: Figma 与 stories 已有基线，待矩阵化
 - Real device: 待补
@@ -139,18 +149,21 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 ### 待优化
 
-- 完成 RTL、pointer cancel、滚动仲裁和读屏真机测试。
+- 完成 RTL、touch/pointer cancel、斜向滚动仲裁、200% 字体和读屏真机测试。
 - 补 drag 性能、滚动竞争与真机证据；SSR/hydration 和按钮导航双引擎路径已完成。
-- 审核 autoplay 默认、间隔下限与 WCAG 暂停要求的文档表达。
+- 在复杂 slide 上记录 50 项 MutationObserver/Embla 主线程基准和增量 bundle 结果。
 
 ### 已完成
 
-- 已默认关闭 autoplay，提供暂停/播放与前后按钮、reduced-motion 降级和 reason 事件；动态非活动页使用 inert 与旧内核 tabindex fallback 隔离；补隔离 Next H5 焦点隔离证据。
+- 已默认关闭 autoplay，提供暂停/播放与前后按钮、reduced-motion 降级和 reason 事件。
+- 修复暂停按钮 focus→click 反向重启，增加页名/可见页/总页数 status，并冻结动态 items 与 `reInit` 事件边界。
+- 动态非活动页使用 inert 与旧内核 tabindex fallback 隔离；补隔离 Next H5 焦点隔离证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                   | 迁移说明                                             |
-| ---------- | ------ | ------------ | ------------------------------------------------------ | ---------------------------------------------------- |
-| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                   | 无                                                   |
-| 2026-08-29 | 未发布 | fix          | 动态非活动页焦点隔离                                   | API 兼容；隐藏 slide 的后续属性变化不再重入 Tab 路径 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/focus-isolation/hydration 证据 | 无                                                   |
+| 日期       | 版本   | 类型         | 内容                                                      | 迁移说明                                             |
+| ---------- | ------ | ------------ | --------------------------------------------------------- | ---------------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                      | 无                                                   |
+| 2026-08-29 | 未发布 | fix          | 动态非活动页焦点隔离                                      | API 兼容；隐藏 slide 的后续属性变化不再重入 Tab 路径 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/focus-isolation/hydration 证据    | 无                                                   |
+| 2026-08-29 | 未发布 | fix          | 修复 autoplay focus 动作、位置公告、动态 items 和资源清理 | API 兼容；新增 status DOM，不改变受控事件签名        |

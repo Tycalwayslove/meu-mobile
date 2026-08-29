@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { NumberKeyboard } from "./NumberKeyboard";
 import { NumberKeyboardTrigger } from "./NumberKeyboardTrigger";
 import { waitForStory } from "../storyTestUtils";
@@ -135,4 +136,31 @@ export const IdentityCard: Story = {
 
 export const RandomOrder: Story = {
   render: () => <KeyboardPreview randomOrder />
+};
+
+export const RtlReducedMotion: Story = {
+  render: () => (
+    <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+      <NumberKeyboard open title="Amount keyboard" />
+    </ConfigProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const body = canvasElement.ownerDocument.body;
+    await waitForStory(
+      () => body.querySelector('[data-meu-component="number-keyboard"]') !== null,
+      "Expected the RTL NumberKeyboard portal"
+    );
+    const layer = body.querySelector<HTMLElement>('[data-meu-overlay-layer="number-keyboard"]');
+    const keyboard = body.querySelector<HTMLElement>('[data-meu-component="number-keyboard"]');
+    if (!layer || !keyboard) throw new window.Error("Expected the RTL NumberKeyboard portal");
+    if (
+      layer.getAttribute("dir") !== "rtl" ||
+      layer.getAttribute("lang") !== "en-US" ||
+      layer.getAttribute("data-meu-theme") !== "dark" ||
+      layer.getAttribute("data-meu-motion") !== "reduced" ||
+      window.getComputedStyle(keyboard).transitionDuration !== "0s"
+    ) {
+      throw new window.Error("NumberKeyboard did not preserve the portal config boundary");
+    }
+  }
 };

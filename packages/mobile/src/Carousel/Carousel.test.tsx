@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
@@ -9,7 +10,7 @@ const embla = vi.hoisted(() => {
   type Listener = () => void;
   const listeners = new Map<string, Set<Listener>>();
   let initialized = false;
-  let options: { loop?: boolean; startIndex?: number } = {};
+  let options: { direction?: "ltr" | "rtl"; loop?: boolean; startIndex?: number } = {};
   let selected = 0;
   let slideCount = 0;
 
@@ -53,6 +54,9 @@ const embla = vi.hoisted(() => {
   return {
     api,
     emit,
+    getOptions() {
+      return options;
+    },
     initialize(nextOptions: typeof options) {
       options = nextOptions;
       if (initialized) return;
@@ -87,18 +91,20 @@ const items = [
 ] as const;
 
 function stubMotionPreference(matches: boolean) {
+  const query = {
+    addEventListener: vi.fn(),
+    addListener: vi.fn(),
+    matches,
+    media: "(prefers-reduced-motion: reduce)",
+    onchange: null,
+    removeEventListener: vi.fn(),
+    removeListener: vi.fn()
+  };
   vi.stubGlobal(
     "matchMedia",
-    vi.fn(() => ({
-      addEventListener: vi.fn(),
-      addListener: vi.fn(),
-      matches,
-      media: "(prefers-reduced-motion: reduce)",
-      onchange: null,
-      removeEventListener: vi.fn(),
-      removeListener: vi.fn()
-    }))
+    vi.fn(() => query)
   );
+  return query;
 }
 
 beforeEach(() => {
@@ -110,6 +116,7 @@ beforeEach(() => {
     callback(0);
     return 1;
   });
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
 });
 
 afterEach(() => {
@@ -136,7 +143,10 @@ describe("Carousel", () => {
       false
     );
     const track = container.querySelector("[data-meu-carousel-track]");
-    expect(track && track.getAttribute("aria-live")).toBe("polite");
+    expect(track && track.getAttribute("aria-live")).toBe("off");
+    const status = screen.getByRole("status");
+    expect(status.textContent).toBe("春季新品，第 1 张，共 3 张");
+    expect(status.getAttribute("aria-live")).toBe("polite");
   });
 
   it("changes an uncontrolled index through native previous and next buttons", async () => {
@@ -150,6 +160,7 @@ describe("Carousel", () => {
     expect(onIndexChange).toHaveBeenLastCalledWith(1, { reason: "next" });
     expect(screen.getByRole("button", { name: "查看春季新品", hidden: true }).tabIndex).toBe(-1);
     expect(screen.getByRole("link", { name: "查看会员礼遇" }).hasAttribute("tabindex")).toBe(false);
+    expect(screen.getByRole("status").textContent).toBe("会员礼遇，第 2 张，共 3 张");
 
     fireEvent.click(screen.getByRole("button", { name: "上一张" }));
     await waitFor(() => expect(onIndexChange).toHaveBeenLastCalledWith(0, { reason: "previous" }));
@@ -198,6 +209,22 @@ describe("Carousel", () => {
     expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("0");
   });
 
+  it("keeps native control buttons as the keyboard alternative to dragging", async () => {
+    const user = userEvent.setup();
+    const onIndexChange = vi.fn();
+    render(<Carousel items={items} onIndexChange={onIndexChange} />);
+
+    const next = screen.getByRole("button", { name: "下一张" });
+    next.focus();
+    await user.keyboard("{Enter}");
+    expect(onIndexChange).toHaveBeenLastCalledWith(1, { reason: "next" });
+
+    const previous = screen.getByRole("button", { name: "上一张" });
+    previous.focus();
+    await user.keyboard(" ");
+    expect(onIndexChange).toHaveBeenLastCalledWith(0, { reason: "previous" });
+  });
+
   it("autoplays, permanently pauses on focus and can be explicitly restarted", () => {
     vi.useFakeTimers();
     const onIndexChange = vi.fn();
@@ -228,6 +255,40 @@ describe("Carousel", () => {
     expect(onIndexChange).toHaveBeenLastCalledWith(2, { reason: "autoplay" });
   });
 
+  it("does not restart rotation when the running pause button receives focus before click", () => {
+    vi.useFakeTimers();
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel autoplay autoplayInterval={1000} items={items} loop onIndexChange={onIndexChange} />
+    );
+
+    const pause = screen.getByRole("button", { name: "暂停轮播" });
+    fireEvent.focus(pause);
+    expect(screen.getByRole("button", { name: "暂停轮播" })).toBe(pause);
+    fireEvent.click(pause);
+    expect(screen.getByRole("button", { name: "播放轮播" })).toBe(pause);
+    void act(() => vi.advanceTimersByTime(2000));
+    expect(onIndexChange).not.toHaveBeenCalled();
+  });
+
+  it("temporarily suspends autoplay while hovered and restarts with a full interval", () => {
+    vi.useFakeTimers();
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel autoplay autoplayInterval={1000} items={items} loop onIndexChange={onIndexChange} />
+    );
+    const carousel = screen.getByRole("group", { name: "推荐内容" });
+
+    fireEvent.mouseEnter(carousel);
+    void act(() => vi.advanceTimersByTime(2000));
+    expect(onIndexChange).not.toHaveBeenCalled();
+    fireEvent.mouseLeave(carousel);
+    void act(() => vi.advanceTimersByTime(999));
+    expect(onIndexChange).not.toHaveBeenCalled();
+    void act(() => vi.advanceTimersByTime(1));
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "autoplay" });
+  });
+
   it("respects reduced motion until the user explicitly starts rotation", () => {
     vi.useFakeTimers();
     stubMotionPreference(true);
@@ -250,6 +311,32 @@ describe("Carousel", () => {
     expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "autoplay" });
   });
 
+  it("honors an explicit reduced-motion provider even when the OS preference is off", () => {
+    vi.useFakeTimers();
+    stubMotionPreference(false);
+    const onIndexChange = vi.fn();
+    render(
+      <ConfigProvider motion="reduced">
+        <Carousel
+          autoplay
+          autoplayInterval={1000}
+          items={items}
+          loop
+          onIndexChange={onIndexChange}
+        />
+      </ConfigProvider>
+    );
+
+    expect(screen.getByRole("button", { name: "播放轮播" })).toBeTruthy();
+    void act(() => vi.advanceTimersByTime(2000));
+    expect(onIndexChange).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "播放轮播" }));
+    void act(() => vi.advanceTimersByTime(1000));
+    expect(embla.api.scrollNext).toHaveBeenLastCalledWith(true);
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "autoplay" });
+  });
+
   it("reports drag selection and keeps rotation paused after pointer interaction", () => {
     vi.useFakeTimers();
     const onIndexChange = vi.fn();
@@ -267,6 +354,36 @@ describe("Carousel", () => {
       vi.advanceTimersByTime(3000);
     });
     expect(onIndexChange).toHaveBeenCalledTimes(1);
+    void act(() => embla.emit("pointerUp"));
+  });
+
+  it("does not classify Embla reinitialization as a user drag", () => {
+    const onIndexChange = vi.fn();
+    render(<Carousel items={items} onIndexChange={onIndexChange} />);
+
+    act(() => {
+      embla.api.scrollTo(1, true);
+      embla.emit("reInit");
+    });
+    expect(onIndexChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("converges an uncontrolled index across empty, shrinking, and growing item sets", () => {
+    embla.setSlideCount(0);
+    const { rerender } = render(<Carousel defaultIndex={2} items={[]} />);
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("0");
+
+    embla.setSlideCount(3);
+    rerender(<Carousel defaultIndex={2} items={items} />);
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("2");
+
+    embla.setSlideCount(1);
+    rerender(<Carousel defaultIndex={2} items={items.slice(0, 1)} />);
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("0");
+
+    embla.setSlideCount(3);
+    rerender(<Carousel defaultIndex={2} items={items} />);
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("0");
   });
 
   it("pauses in a hidden page and resumes only after the page becomes visible", () => {
@@ -308,5 +425,48 @@ describe("Carousel", () => {
       true
     );
     expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("passes RTL direction to Embla while preserving localized native controls", () => {
+    const onIndexChange = vi.fn();
+    render(
+      <ConfigProvider dir="rtl">
+        <Carousel items={items} onIndexChange={onIndexChange} />
+      </ConfigProvider>
+    );
+
+    expect(embla.getOptions().direction).toBe("rtl");
+    fireEvent.click(screen.getByRole("button", { name: "下一张" }));
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "next" });
+  });
+
+  it("removes media, visibility, Embla, observer, timer, and rollback work on unmount", () => {
+    vi.useFakeTimers();
+    const query = stubMotionPreference(false);
+    const removeDocumentListener = vi.spyOn(document, "removeEventListener");
+    const observe = vi.spyOn(MutationObserver.prototype, "observe");
+    const disconnect = vi.spyOn(MutationObserver.prototype, "disconnect");
+    let frameCallback: FrameRequestCallback | undefined;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frameCallback = callback;
+      return 42;
+    });
+    const cancelFrame = vi.fn();
+    vi.stubGlobal("cancelAnimationFrame", cancelFrame);
+    const { unmount } = render(<Carousel autoplay index={0} items={items} loop />);
+    act(() => embla.api.scrollNext(false));
+    expect(frameCallback).toBeTypeOf("function");
+    expect(observe).toHaveBeenCalled();
+
+    unmount();
+    expect(query.removeEventListener).toHaveBeenCalledWith("change", expect.any(Function));
+    expect(removeDocumentListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+    expect(embla.api.off).toHaveBeenCalledWith("select", expect.any(Function));
+    expect(embla.api.off).toHaveBeenCalledWith("pointerDown", expect.any(Function));
+    expect(embla.api.off).toHaveBeenCalledWith("pointerUp", expect.any(Function));
+    expect(disconnect).toHaveBeenCalled();
+    expect(cancelFrame).toHaveBeenCalledWith(42);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

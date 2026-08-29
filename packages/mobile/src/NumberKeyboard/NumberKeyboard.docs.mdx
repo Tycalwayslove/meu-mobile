@@ -16,7 +16,8 @@ storyIds:
     data-entry-numberkeyboard--numeric,
     data-entry-numberkeyboard--decimal,
     data-entry-numberkeyboard--confirm,
-    data-entry-numberkeyboard--random-order
+    data-entry-numberkeyboard--random-order,
+    data-entry-numberkeyboard--rtl-reduced-motion
   ]
 source: packages/mobile/src/NumberKeyboard
 ---
@@ -29,6 +30,8 @@ source: packages/mobile/src/NumberKeyboard
 - number/decimal、extra key、全宽 confirm、受控/非受控 open、safe area、关闭按钮和随机数字顺序。
 - 输入、删除、确认和关闭分离；删除键可在按住 600ms 后每 120ms 连续触发。
 - 多实例同时开放时，Escape 只由最后开放的顶层实例响应；顶层关闭 Escape 时不会穿透关闭下层。
+- Portal 边界复制 ConfigProvider 的 theme、locale、dir 和 motion；RTL 与显式 reduced-motion 不依赖 Portal 的 DOM 祖先。
+- 一旦 `open` 变为 false，退出动画中的全部输入键立即 disabled，不会在视觉退场阶段继续发布业务事件。
 - NumberKeyboardTrigger 提供不会唤起系统软键盘的原生 button 触发器，并合并 Field 的 label/description/error 关联。
 
 ## 何时使用
@@ -66,7 +69,7 @@ Portal layer → panel → optional header → 3×4 key grid → optional confir
 
 ## Props
 
-API 由 `NumberKeyboardProps` 与 `NumberKeyboardTriggerProps` 生成。重要选项包括 mode、extraKey、confirmLabel、deleteRepeat、randomOrder、showCloseButton、safeArea、container 和显示状态 Props。
+API 由 `NumberKeyboardProps` 与 `NumberKeyboardTriggerProps` 生成。重要选项包括 mode、extraKey、confirmLabel、deleteRepeat、randomOrder、showCloseButton、safeArea、container 和显示状态 Props。`confirmLabel` 为 null、空字符串或仅空白时都不渲染确认键，避免产生无名称按钮。
 
 ## Events
 
@@ -93,7 +96,7 @@ NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命
 
 ## 触摸与手势
 
-数字键至少 56px 高；删除支持长按。鼠标按下使用 preventDefault 保留真实 input 焦点，但键盘 Tab 仍可进入按键。V2 需验证 pointer cancel、触摸长按菜单、快速切换 open 和卸载清理。
+数字键至少 56px 高；删除支持长按。鼠标按下使用 preventDefault 保留真实 input 焦点，但键盘 Tab 仍可进入按键。连删只接受主指针和主按钮；pointer cancel/leave、disabled/deleteRepeat 切换、关闭及卸载都会清理定时器。取消不会吞掉下一次独立删除，长按完成后的同一尾随 click 才会被抑制。合成 PointerEvent 已覆盖这些状态机，真实触摸长按菜单与系统 pointercancel 仍需真机验证。
 
 ## 无障碍
 
@@ -101,7 +104,7 @@ NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命
 
 ## 动效
 
-底部进入/退出由 overlay presence 管理。V2 需冻结时长、缓动、中断和 reduced-motion，并证明退出期间不会继续发布输入。
+底部进入/退出由 overlay presence 管理，使用公共 enter/exit duration 与标准 easing；显式 `motion="reduced"` 将 Portal 内过渡降为 0ms，系统 reduced-motion 使用 1ms 静态收敛。`open=false` 后按键立即不可用，退出期间不会继续发布输入、删除或确认。
 
 ## 主题与定制
 
@@ -109,11 +112,11 @@ NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命
 
 ## SSR 与 Next.js
 
-closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder 只在打开时于客户端计算，避免服务端随机 DOM mismatch。
+closed 状态服务端不输出 Portal 内容；客户端打开。initial-open 状态会先输出可用的原地 SSR 标记，hydration 后由 Portal 移入目标容器；真实 `hydrateRoot` 测试要求 0 hydration error，并复验按钮事件。randomOrder 只在打开时于客户端计算，避免服务端随机 DOM mismatch。
 
 ## RTL 与国际化
 
-内置 zh-CN/en-US labels，可逐项覆盖。数字布局保持标准数字顺序，不因 RTL 自动反转；业务值方向由真实 input 决定。
+内置 zh-CN/en-US labels，可逐项覆盖。Portal layer 显式携带 `dir/lang`；关闭按钮使用逻辑末端定位，Trigger 文本使用逻辑 start。数字矩阵保持代码中的数字顺序，不因 RTL 自动反转；业务值方向由真实 input 决定。
 
 ## 浏览器与 WebView
 
@@ -132,14 +135,14 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 ## 测试证据
 
-- Unit: `NumberKeyboard.test.tsx`，覆盖 SSR、输入来源、关闭原因、焦点保持、连续删除、禁用/本地化/随机顺序，以及多实例 Escape 层级
+- Unit: `NumberKeyboard.test.tsx`，覆盖 SSR、输入来源、关闭原因、焦点保持、连续删除、pointer cancel/非主指针、运行时 disabled、关闭期事件隔离、空确认键、Portal config 边界、本地化/随机顺序，以及多实例 Escape 层级
 - Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 5697 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 4926 B / 32768 B 预算，组合 Brotli 5019 B；共享样式由应用单独导入一次。
-- SSR/hydration: Unit 已覆盖服务端渲染；开放 Portal hydration 仍待专门证明
-- RTL: 待补
-- Reduced motion: 待补
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 6049 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 5277 B / 32768 B 预算，组合 Brotli 5336 B；共享样式由应用单独导入一次。
+- SSR/hydration: `NumberKeyboard.hydration.test.tsx` 使用真实 `hydrateRoot` 覆盖 initial-open Portal 移动、Provider 边界、输入事件与 0 hydration error
+- RTL: `RtlReducedMotion` Story 与 Unit 覆盖 Portal `dir`、逻辑关闭按钮和稳定数字顺序；最终视觉审批留到冻结候选
+- Reduced motion: ConfigProvider 显式策略会进入 Portal boundary；Story play 断言 panel computed transition 为 0s
 - Mobile Chromium/WebKit E2E: 已覆盖输入、删除、完成、非模态滚动与焦点基本路径；长按路径由 Unit 覆盖
 - Chromatic Light/Dark: Storybook 已建立显式主题矩阵；线上发布按里程碑延后
 - Real device: 待补
@@ -148,7 +151,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 ### 待优化
 
-- 补 pointer cancel、开放 Portal hydration、RTL 与真机测试。
+- 补真实 iOS/Android pointer cancel、长按菜单、系统软键盘共存与读屏路径。
 - 补齐 form adapter 的 touched/error/reset 组合证明；dirty、输入、删除、长度和确认已有 Unit。
 - 明确触摸设备与系统软键盘共存限制，并提供降级示例。
 
@@ -157,6 +160,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 - V1 已采用值与显示分离、非模态 Portal、原生按键、关闭原因、连删节奏和安全边界声明。
 - Trigger 无损合并 Field 命名/说明，并移除 button 上无效的 `aria-required` API；form adapter 的值可进入原生 FormData。
 - Escape 按开放栈只交给顶层实例，关闭或卸载后自动移交下一层。
+- Portal 继承 theme/locale/dir/motion；补 initial-open hydration、RTL/reduced-motion、关闭期事件隔离和连删取消状态机。
 
 ## 变更记录
 
@@ -166,3 +170,4 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 | 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                                    | 无                                                          |
 | 2026-08-29 | 未发布 | behavior | Escape 仅由最后开放的顶层实例响应                       | 无                                                          |
 | 2026-08-29 | 未发布 | a11y     | Trigger 保留原生 invalid token，错误上下文优先输出 true | 无                                                          |
+| 2026-08-29 | 未发布 | behavior | Portal 配置边界、关闭期隔离、连删取消与 hydration 加固  | 空白 confirmLabel 现在与 null 一样不渲染；其他用法无需迁移  |

@@ -44,6 +44,9 @@ export const panel = recipe({
     WebkitTapHighlightColor: "transparent",
     "@media": {
       "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+    },
+    selectors: {
+      '[data-meu-motion="reduced"] &': { transitionDuration: "0ms" }
     }
   },
   variants: {
@@ -86,7 +89,7 @@ export const title = style({
 export const closeButton = style({
   position: "absolute",
   top: 4,
-  right: 8,
+  insetInlineEnd: 8,
   minWidth: 56,
   minHeight: 44,
   padding: "0 var(--meu-space-2)",
@@ -143,6 +146,9 @@ export const key = recipe({
       "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
       "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)"
     ].join(", "),
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+    },
     selectors: {
       "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -2 },
       "&:active:not(:disabled)": {
@@ -154,10 +160,8 @@ export const key = recipe({
         background: "var(--meu-color-subtle)",
         boxShadow: "none",
         cursor: "not-allowed"
-      }
-    },
-    "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      },
+      '[data-meu-motion="reduced"] &': { transitionDuration: "0ms" }
     }
   },
   variants: {
@@ -212,7 +216,7 @@ export const trigger = recipe({
     fontFamily: "var(--meu-font-ui)",
     fontSize: 16,
     lineHeight: 1.4,
-    textAlign: "left",
+    textAlign: "start",
     cursor: "pointer",
     WebkitTapHighlightColor: "transparent",
     selectors: {

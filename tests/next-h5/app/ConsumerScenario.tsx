@@ -283,6 +283,7 @@ export function ConsumerScenario() {
   const [savedAdvanced, setSavedAdvanced] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedFor, setSearchedFor] = useState("");
+  const [nativeSearchSubmit, setNativeSearchSubmit] = useState("原生搜索尚未提交");
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
   const [watermarkMessage, setWatermarkMessage] = useState("水印未发生 DOM 变更");
@@ -425,6 +426,7 @@ export function ConsumerScenario() {
         <div className="integration-search">
           <SearchField
             aria-label="搜索组件"
+            dir="rtl"
             placeholder="搜索 Meu 组件"
             value={searchQuery}
             onChange={setSearchQuery}
@@ -433,6 +435,21 @@ export function ConsumerScenario() {
           <output aria-live="polite">
             {searchedFor ? `正在搜索：${searchedFor}` : "等待搜索"}
           </output>
+          <form
+            aria-label="原生搜索表单"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              const query = data.get("nativeQuery");
+              setNativeSearchSubmit(`原生搜索提交：${typeof query === "string" ? query : ""}`);
+            }}
+          >
+            <SearchField aria-label="可重置原生搜索" defaultValue="订单" name="nativeQuery" />
+            <Button size="small" type="reset" tone="neutral" variant="outline">
+              恢复默认搜索
+            </Button>
+            <output aria-live="polite">{nativeSearchSubmit}</output>
+          </form>
         </div>
 
         <section className="integration-refresh" aria-label="下拉刷新">
@@ -563,45 +580,49 @@ export function ConsumerScenario() {
         </section>
 
         <section className="integration-carousel" aria-label="内容轮播">
-          <Carousel
-            aria-label="推荐活动"
-            index={carouselIndex}
-            items={[
-              {
-                key: "new",
-                ariaLabel: "本周新品",
-                content: (
-                  <Button variant="outline" tone="neutral">
-                    查看本周新品
-                  </Button>
-                )
-              },
-              {
-                key: "member",
-                ariaLabel: "会员礼遇",
-                content: (
-                  <a
-                    href="#member-offer"
-                    style={{ display: "inline-flex", minHeight: 44, alignItems: "center" }}
-                  >
-                    查看会员礼遇
-                  </a>
-                )
-              },
-              {
-                key: "weekend",
-                ariaLabel: "周末活动",
-                content: (
-                  <Button variant="outline" tone="neutral">
-                    查看周末活动
-                  </Button>
-                )
-              }
-            ]}
-            loop
-            onIndexChange={setCarouselIndex}
-          />
-          <output aria-live="polite">当前轮播：{carouselIndex + 1}</output>
+          <ConfigProvider dir="rtl" motion="reduced">
+            <Carousel
+              aria-label="推荐活动"
+              autoplay
+              autoplayInterval={1000}
+              index={carouselIndex}
+              items={[
+                {
+                  key: "new",
+                  ariaLabel: "本周新品",
+                  content: (
+                    <Button variant="outline" tone="neutral">
+                      查看本周新品
+                    </Button>
+                  )
+                },
+                {
+                  key: "member",
+                  ariaLabel: "会员礼遇",
+                  content: (
+                    <a
+                      href="#member-offer"
+                      style={{ display: "inline-flex", minHeight: 44, alignItems: "center" }}
+                    >
+                      查看会员礼遇
+                    </a>
+                  )
+                },
+                {
+                  key: "weekend",
+                  ariaLabel: "周末活动",
+                  content: (
+                    <Button variant="outline" tone="neutral">
+                      查看周末活动
+                    </Button>
+                  )
+                }
+              ]}
+              loop
+              onIndexChange={setCarouselIndex}
+            />
+            <output aria-live="polite">当前轮播：{carouselIndex + 1}</output>
+          </ConfigProvider>
         </section>
 
         <section className="integration-image-viewer" aria-label="图片预览">
@@ -1092,30 +1113,32 @@ export function ConsumerScenario() {
               <DialogCommandDemo onResult={setOverlayMessage} />
               <ToastCommandDemo onResult={setOverlayMessage} />
               <output aria-live="polite">{overlayMessage}</output>
-              <Popup
-                aria-label="配送方式"
-                open={popupOpen}
-                closeOnMaskClick
-                showCloseButton
-                returnFocusRef={popupTriggerRef}
-                onOpenChange={(nextOpen, details) => {
-                  setPopupOpen(nextOpen);
-                  if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
-                }}
-              >
-                <div className="integration-popup-content">
-                  <h2>配送方式</h2>
-                  <p>选择适合当前订单的配送方式。</p>
-                  <Button
-                    onClick={() => {
-                      setPopupOpen(false);
-                      setOverlayMessage("已确认标准配送");
-                    }}
-                  >
-                    确认标准配送
-                  </Button>
-                </div>
-              </Popup>
+              <ConfigProvider dir="rtl" motion="reduced">
+                <Popup
+                  aria-label="配送方式"
+                  open={popupOpen}
+                  closeOnMaskClick
+                  showCloseButton
+                  returnFocusRef={popupTriggerRef}
+                  onOpenChange={(nextOpen, details) => {
+                    setPopupOpen(nextOpen);
+                    if (!nextOpen) setOverlayMessage(`浮层已关闭：${details.reason}`);
+                  }}
+                >
+                  <div className="integration-popup-content">
+                    <h2>配送方式</h2>
+                    <p>选择适合当前订单的配送方式。</p>
+                    <Button
+                      onClick={() => {
+                        setPopupOpen(false);
+                        setOverlayMessage("已确认标准配送");
+                      }}
+                    >
+                      确认标准配送
+                    </Button>
+                  </div>
+                </Popup>
+              </ConfigProvider>
               <BottomSheet
                 open={sheetOpen}
                 title="订单筛选"
@@ -1296,22 +1319,24 @@ export function ConsumerScenario() {
             <output aria-live="polite">评分 pointercancel：{rateCancelSource}</output>
           </section>
           <section className="integration-number-keyboard" aria-label="数字键盘表单集成">
-            <MeuFormNumberKeyboard<FormValues>
-              name="paymentAmount"
-              label="交易金额"
-              description="值、dirty、校验和提交由表单层持有；键盘不锁滚动或转移鼠标焦点。"
-              mode="decimal"
-              maxLength={8}
-              confirmLabel="完成金额输入"
-              transformInput={appendPaymentAmount}
-              formatValue={(value) => (value ? `¥ ${value}` : undefined)}
-              onConfirm={(value) => setNumberKeyboardResult(`金额确认：${value}`)}
-              onOpenChange={(nextOpen, details) => {
-                if (!nextOpen) setNumberKeyboardClose(`键盘关闭：${details.reason}`);
-              }}
-            />
-            <output aria-live="polite">{numberKeyboardResult}</output>
-            <output aria-live="polite">{numberKeyboardClose}</output>
+            <ConfigProvider dir="rtl" motion="reduced">
+              <MeuFormNumberKeyboard<FormValues>
+                name="paymentAmount"
+                label="交易金额"
+                description="值、dirty、校验和提交由表单层持有；键盘不锁滚动或转移鼠标焦点。"
+                mode="decimal"
+                maxLength={8}
+                confirmLabel="完成金额输入"
+                transformInput={appendPaymentAmount}
+                formatValue={(value) => (value ? `¥ ${value}` : undefined)}
+                onConfirm={(value) => setNumberKeyboardResult(`金额确认：${value}`)}
+                onOpenChange={(nextOpen, details) => {
+                  if (!nextOpen) setNumberKeyboardClose(`键盘关闭：${details.reason}`);
+                }}
+              />
+              <output aria-live="polite">{numberKeyboardResult}</output>
+              <output aria-live="polite">{numberKeyboardClose}</output>
+            </ConfigProvider>
           </section>
           <section className="integration-passcode-input" aria-label="密码输入表单集成">
             <MeuFormPasscodeInput<FormValues>

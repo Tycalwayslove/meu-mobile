@@ -1,5 +1,8 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { createRef } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { NumberKeyboard } from "../NumberKeyboard";
@@ -29,6 +32,9 @@ describe("Popup", () => {
     if (!(mask instanceof HTMLElement) || !(mask.firstElementChild instanceof HTMLElement)) {
       throw new Error("Expected Popup mask");
     }
+    fireEvent.pointerDown(mask.firstElementChild, { pointerId: 1 });
+    fireEvent.pointerCancel(mask.firstElementChild, { pointerId: 1 });
+    expect(onOpenChange).not.toHaveBeenCalled();
     fireEvent.click(mask.firstElementChild);
     fireEvent.keyDown(document, { key: "Escape" });
     fireEvent.click(closeButton);
@@ -36,6 +42,24 @@ describe("Popup", () => {
     expect(onOpenChange).toHaveBeenNthCalledWith(1, false, { reason: "mask" });
     expect(onOpenChange).toHaveBeenNthCalledWith(2, false, { reason: "escape" });
     expect(onOpenChange).toHaveBeenNthCalledWith(3, false, { reason: "close-button" });
+    expect(screen.getByRole("dialog", { name: "订单筛选" })).toBeTruthy();
+    expect(document.body.getAttribute("data-meu-scroll-locked")).toBe("true");
+  });
+
+  it("keeps modal isolation without rendering a mask", async () => {
+    const background = document.createElement("button");
+    background.textContent = "页面操作";
+    document.body.append(background);
+    render(
+      <Popup aria-label="无蒙层面板" open mask={false}>
+        <button type="button">面板操作</button>
+      </Popup>
+    );
+
+    await waitFor(() => expect(background.hasAttribute("inert")).toBe(true));
+    expect(document.body.querySelector('[data-meu-component="mask"]')).toBeNull();
+    expect(screen.getByRole("dialog", { name: "无蒙层面板" })).toBeTruthy();
+    background.remove();
   });
 
   it("contains tab focus and restores the invoker", async () => {
@@ -66,6 +90,21 @@ describe("Popup", () => {
     trigger.remove();
   });
 
+  it("honors a valid initial focus target", async () => {
+    const initialFocusRef = createRef<HTMLButtonElement>();
+    render(
+      <Popup aria-label="配送方式" open initialFocusRef={initialFocusRef} showCloseButton>
+        <button ref={initialFocusRef} type="button">
+          确认配送
+        </button>
+      </Popup>
+    );
+
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "确认配送" }))
+    );
+  });
+
   it("keeps a force-mounted closed popup out of layout and the accessibility tree", () => {
     render(
       <Popup aria-label="筛选面板" open={false} forceMount>
@@ -76,6 +115,99 @@ describe("Popup", () => {
     if (!(layer instanceof HTMLElement)) throw new Error("Expected Popup layer");
     expect(layer.hidden).toBe(true);
     expect(screen.queryByRole("dialog", { name: "筛选面板" })).toBeNull();
+  });
+
+  it("keeps force-mounted content hidden after its exit completes", async () => {
+    const { rerender } = render(
+      <Popup aria-label="保活面板" open forceMount>
+        内容
+      </Popup>
+    );
+    const layer = document.body.querySelector('[data-meu-overlay-layer="popup"]');
+    if (!(layer instanceof HTMLElement)) throw new Error("Expected Popup layer");
+
+    rerender(
+      <Popup aria-label="保活面板" open={false} forceMount>
+        内容
+      </Popup>
+    );
+    expect(layer.getAttribute("aria-hidden")).toBe("true");
+    expect(layer.hasAttribute("inert")).toBe(true);
+    await waitFor(() => expect(layer.hidden).toBe(true));
+    expect(screen.queryByRole("dialog", { name: "保活面板" })).toBeNull();
+  });
+
+  it("cancels an exit unmount when a controlled popup reopens", async () => {
+    const onOpenChange = vi.fn();
+    const { rerender } = render(
+      <Popup aria-label="筛选面板" open onOpenChange={onOpenChange}>
+        <button type="button">应用筛选</button>
+      </Popup>
+    );
+    await waitFor(() => expect(screen.getByRole("dialog", { name: "筛选面板" })).toBeTruthy());
+
+    rerender(
+      <Popup aria-label="筛选面板" open={false} onOpenChange={onOpenChange}>
+        <button type="button">应用筛选</button>
+      </Popup>
+    );
+    const layer = document.body.querySelector<HTMLElement>('[data-meu-overlay-layer="popup"]');
+    if (!layer) throw new Error("Expected exiting Popup layer");
+    await waitFor(() => expect(layer.getAttribute("data-state")).toBe("closed"));
+
+    rerender(
+      <Popup aria-label="筛选面板" open onOpenChange={onOpenChange}>
+        <button type="button">应用筛选</button>
+      </Popup>
+    );
+    await waitFor(() => expect(layer.getAttribute("data-state")).toBe("open"));
+    await new Promise((resolve) => setTimeout(resolve, 180));
+    expect(document.body.contains(layer)).toBe(true);
+    expect(document.body.getAttribute("data-meu-scroll-locked")).toBe("true");
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it("rebinds focus trapping when an open popup moves between portal containers", async () => {
+    const firstContainer = document.createElement("div");
+    const secondContainer = document.createElement("div");
+    const outside = document.createElement("button");
+    outside.textContent = "页面操作";
+    document.body.append(firstContainer, secondContainer, outside);
+
+    const { rerender } = render(
+      <Popup aria-label="移动面板" container={firstContainer} open>
+        <button type="button">面板操作</button>
+      </Popup>
+    );
+    await waitFor(() =>
+      expect(firstContainer.querySelector('[data-meu-component="popup"]')).toBeTruthy()
+    );
+
+    rerender(
+      <Popup aria-label="移动面板" container={secondContainer} open>
+        <button type="button">面板操作</button>
+      </Popup>
+    );
+    await waitFor(() => {
+      expect(firstContainer.querySelector('[data-meu-component="popup"]')).toBeNull();
+      expect(secondContainer.querySelector('[data-meu-component="popup"]')).toBeTruthy();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "面板操作" }));
+    });
+
+    outside.focus();
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "面板操作" }))
+    );
+
+    rerender(
+      <Popup aria-label="移动面板" container={secondContainer} open={false}>
+        <button type="button">面板操作</button>
+      </Popup>
+    );
+    await waitFor(() => expect(outside.hasAttribute("inert")).toBe(false));
+    firstContainer.remove();
+    secondContainer.remove();
+    outside.remove();
   });
 
   it("routes Escape to the top layer and reference-counts scroll locks", async () => {
@@ -199,5 +331,34 @@ describe("Popup", () => {
     expect(keyboardLayer ? keyboardLayer.hasAttribute("aria-hidden") : null).toBe(false);
     expect(screen.getByRole("button", { name: "1" }).hasAttribute("disabled")).toBe(false);
     background.remove();
+  });
+
+  it("hydrates an open body portal without recoverable errors", async () => {
+    const ui = (
+      <Popup aria-label="服务端面板" open>
+        <button type="button">确认</button>
+      </Popup>
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(ui);
+    document.body.append(container);
+    const recoverableErrors: unknown[] = [];
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+
+    await act(async () => {
+      root = hydrateRoot(container, ui, {
+        onRecoverableError: (error) => recoverableErrors.push(error)
+      });
+      await Promise.resolve();
+    });
+    await waitFor(() =>
+      expect(document.body.querySelector('[role="dialog"][aria-label="服务端面板"]')).toBeTruthy()
+    );
+    expect(recoverableErrors).toEqual([]);
+
+    act(() => {
+      if (root !== undefined) root.unmount();
+    });
+    container.remove();
   });
 });

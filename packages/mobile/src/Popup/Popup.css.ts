@@ -39,7 +39,12 @@ export const panel = recipe({
     transitionDuration: "var(--meu-motion-enter)",
     transitionTimingFunction: "var(--meu-motion-ease-standard)",
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": {
+        border: "1px solid CanvasText",
+        boxShadow: "none",
+        forcedColorAdjust: "auto"
+      }
     }
   },
   variants: {
@@ -138,11 +143,17 @@ export const closeButton = style({
   cursor: "pointer",
   selectors: {
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: 2 },
-    "&:disabled": { cursor: "not-allowed", opacity: 0.5 }
+    "&:disabled": { cursor: "not-allowed", opacity: 0.5 },
+    "[dir='rtl'] &": { right: "auto", left: "var(--meu-space-2)" }
   },
   "@media": {
     "(hover: hover)": {
       selectors: { "&:hover:not(:disabled)": { background: "var(--meu-color-subtle)" } }
+    },
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      border: "1px solid ButtonText",
+      forcedColorAdjust: "auto"
     }
   }
 });
@@ -153,5 +164,6 @@ export const body = style({
   maxHeight: "100%",
   overflowX: "hidden",
   overflowY: "auto",
+  overscrollBehavior: "contain",
   WebkitOverflowScrolling: "touch"
 });

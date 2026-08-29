@@ -134,12 +134,12 @@ describe("NumberKeyboard", () => {
     );
     const backspace = screen.getByRole("button", { name: "删除上一位" });
 
-    fireEvent.pointerDown(backspace, { button: 0 });
+    fireEvent.pointerDown(backspace, { button: 0, isPrimary: true, pointerId: 2 });
     vi.advanceTimersByTime(840);
     expect(onDelete).toHaveBeenCalledTimes(3);
     expect(onDelete).toHaveBeenLastCalledWith({ repeated: true });
 
-    fireEvent.pointerUp(backspace, { button: 0 });
+    fireEvent.pointerUp(backspace, { button: 0, isPrimary: true, pointerId: 2 });
     fireEvent.click(backspace);
     expect(onDelete).toHaveBeenCalledTimes(3);
     unmount();
@@ -195,6 +195,117 @@ describe("NumberKeyboard", () => {
     const layer = document.querySelector('[data-meu-overlay-layer="number-keyboard"]');
     expect(layer ? layer.getAttribute("aria-hidden") : null).toBe("true");
     expect(screen.queryByRole("group", { name: "Number keyboard" })).toBeNull();
+  });
+
+  it("propagates provider direction, locale, theme and explicit reduced motion into its portal", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <NumberKeyboard open />
+      </ConfigProvider>
+    );
+
+    const layer = document.querySelector('[data-meu-overlay-layer="number-keyboard"]');
+    expect(layer).toBeTruthy();
+    expect(layer ? layer.getAttribute("dir") : null).toBe("rtl");
+    expect(layer ? layer.getAttribute("lang") : null).toBe("en-US");
+    expect(layer ? layer.getAttribute("data-meu-theme") : null).toBe("dark");
+    expect(layer ? layer.getAttribute("data-meu-motion") : null).toBe("reduced");
+    expect(layer ? layer.className : "").not.toBe("");
+  });
+
+  it("blocks programmatic key activation as soon as a controlled keyboard starts closing", () => {
+    const onInput = vi.fn();
+    const onDelete = vi.fn();
+    const onConfirm = vi.fn();
+    const { rerender } = render(
+      <NumberKeyboard
+        open
+        forceMount
+        aria-label="关闭中的键盘"
+        confirmLabel="确定"
+        onConfirm={onConfirm}
+        onDelete={onDelete}
+        onInput={onInput}
+      />
+    );
+
+    rerender(
+      <NumberKeyboard
+        open={false}
+        forceMount
+        aria-label="关闭中的键盘"
+        confirmLabel="确定"
+        onConfirm={onConfirm}
+        onDelete={onDelete}
+        onInput={onInput}
+      />
+    );
+    const group = document.querySelector('[data-meu-component="number-keyboard"]');
+    const digit = group ? group.querySelector<HTMLButtonElement>('[data-key="1"]') : null;
+    const backspace = group
+      ? group.querySelector<HTMLButtonElement>('[data-key="backspace"]')
+      : null;
+    const confirm = group
+      ? Array.from(group.querySelectorAll<HTMLButtonElement>("button")).find(
+          (button) => button.textContent === "确定"
+        )
+      : null;
+    expect(digit && digit.disabled).toBe(true);
+    expect(backspace && backspace.disabled).toBe(true);
+    expect(confirm && confirm.disabled).toBe(true);
+    if (digit) fireEvent.click(digit);
+    if (backspace) fireEvent.click(backspace);
+    if (confirm) fireEvent.click(confirm);
+    expect(onInput).not.toHaveBeenCalled();
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it("clears a cancelled repeat without swallowing the next deliberate delete", () => {
+    vi.useFakeTimers();
+    const onDelete = vi.fn();
+    render(<NumberKeyboard open aria-label="取消连删键盘" onDelete={onDelete} />);
+    const backspace = screen.getByRole("button", { name: "删除上一位" });
+
+    fireEvent.pointerDown(backspace, { button: 0, isPrimary: true, pointerId: 3 });
+    vi.advanceTimersByTime(600);
+    expect(onDelete).toHaveBeenCalledOnce();
+    expect(onDelete).toHaveBeenLastCalledWith({ repeated: true });
+    fireEvent.pointerCancel(backspace, { pointerId: 3 });
+    fireEvent.click(backspace);
+
+    expect(onDelete).toHaveBeenCalledTimes(2);
+    expect(onDelete).toHaveBeenLastCalledWith({ repeated: false });
+  });
+
+  it("stops an active repeat when disabled and ignores non-primary pointers", () => {
+    vi.useFakeTimers();
+    const onDelete = vi.fn();
+    const { rerender } = render(
+      <NumberKeyboard open aria-label="状态切换键盘" onDelete={onDelete} />
+    );
+    const backspace = screen.getByRole("button", { name: "删除上一位" });
+
+    fireEvent.pointerDown(backspace, { button: 0, isPrimary: false, pointerId: 4 });
+    vi.advanceTimersByTime(1000);
+    expect(onDelete).not.toHaveBeenCalled();
+
+    fireEvent.pointerDown(backspace, { button: 0, isPrimary: true, pointerId: 5 });
+    vi.advanceTimersByTime(600);
+    expect(onDelete).toHaveBeenCalledOnce();
+    rerender(<NumberKeyboard open aria-label="状态切换键盘" disabled onDelete={onDelete} />);
+    vi.advanceTimersByTime(1000);
+    expect(onDelete).toHaveBeenCalledOnce();
+  });
+
+  it("omits a confirm key whose label is empty or whitespace", () => {
+    const { rerender } = render(<NumberKeyboard open aria-label="空确认键盘" confirmLabel="   " />);
+    expect(document.querySelector('[data-layout="standard"]')).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^\s*$/ })).toBeNull();
+
+    rerender(<NumberKeyboard open aria-label="空确认键盘" confirmLabel="确定" />);
+    expect(screen.getByRole("button", { name: "确定" })).toBeTruthy();
+    expect(document.querySelector('[data-layout="confirm"]')).toBeTruthy();
   });
 });
 

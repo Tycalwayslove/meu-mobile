@@ -1,10 +1,11 @@
 "use client";
 
 import { Portal } from "@meu/primitives-react";
-import { useEffect, useId, useMemo, useRef } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useControllableOpen } from "../internal/useControllableOpen";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import {
@@ -36,7 +37,7 @@ function removeOpenKeyboard(token: symbol) {
 }
 
 function isTopOpenKeyboard(token: symbol) {
-  return openKeyboardStack.at(-1) === token;
+  return openKeyboardStack[openKeyboardStack.length - 1] === token;
 }
 
 function shuffleDigits() {
@@ -108,6 +109,7 @@ export function NumberKeyboard({
   const titleId = `meu-number-keyboard-title-${useId()}`;
   const repeatDelayRef = useRef(0);
   const repeatIntervalRef = useRef(0);
+  const suppressDeleteClickTimerRef = useRef(0);
   const repeatStartedRef = useRef(false);
   const suppressDeleteClickRef = useRef(false);
   const escapeTokenRef = useRef<symbol | null>(null);
@@ -145,21 +147,40 @@ export function NumberKeyboard({
   const resolvedLabelledby = ariaLabelledby || (!ariaLabel && title ? titleId : undefined);
   const resolvedAriaLabel = ariaLabel || (resolvedLabelledby ? undefined : localized.label);
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const configBoundary = getConfigBoundaryProps(config);
+  const resolvedConfirmLabel = confirmLabel && confirmLabel.trim().length > 0 ? confirmLabel : null;
 
-  const stopDeleteRepeat = () => {
+  const stopDeleteRepeat = useCallback(() => {
     window.clearTimeout(repeatDelayRef.current);
     window.clearInterval(repeatIntervalRef.current);
     repeatDelayRef.current = 0;
     repeatIntervalRef.current = 0;
-  };
+  }, []);
+
+  const cancelDeleteRepeat = useCallback(() => {
+    stopDeleteRepeat();
+    window.clearTimeout(suppressDeleteClickTimerRef.current);
+    suppressDeleteClickTimerRef.current = 0;
+    repeatStartedRef.current = false;
+    suppressDeleteClickRef.current = false;
+  }, [stopDeleteRepeat]);
 
   const emitDelete = (repeated: boolean) => {
     if (!disabled && onDelete) onDelete({ repeated });
   };
 
   const startDeleteRepeat = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (disabled || !deleteRepeat || event.button !== 0) return;
+    if (
+      disabled ||
+      !resolvedOpen ||
+      !deleteRepeat ||
+      event.button !== 0 ||
+      event.isPrimary === false
+    )
+      return;
     stopDeleteRepeat();
+    window.clearTimeout(suppressDeleteClickTimerRef.current);
+    suppressDeleteClickTimerRef.current = 0;
     repeatStartedRef.current = false;
     suppressDeleteClickRef.current = false;
     repeatDelayRef.current = window.setTimeout(() => {
@@ -172,15 +193,24 @@ export function NumberKeyboard({
     }, DELETE_REPEAT_DELAY);
   };
 
-  const finishDeleteRepeat = () => {
-    if (repeatStartedRef.current) suppressDeleteClickRef.current = true;
+  const finishDeleteRepeat = (suppressTrailingClick: boolean) => {
+    if (repeatStartedRef.current && suppressTrailingClick) {
+      suppressDeleteClickRef.current = true;
+      window.clearTimeout(suppressDeleteClickTimerRef.current);
+      suppressDeleteClickTimerRef.current = window.setTimeout(() => {
+        suppressDeleteClickRef.current = false;
+        suppressDeleteClickTimerRef.current = 0;
+      }, 0);
+    } else {
+      suppressDeleteClickRef.current = false;
+    }
     repeatStartedRef.current = false;
     stopDeleteRepeat();
   };
 
   useEffect(() => {
-    if (!resolvedOpen) stopDeleteRepeat();
-  }, [resolvedOpen]);
+    if (!resolvedOpen || disabled || !deleteRepeat) cancelDeleteRepeat();
+  }, [cancelDeleteRepeat, deleteRepeat, disabled, resolvedOpen]);
 
   useEffect(() => {
     if (!resolvedOpen) return undefined;
@@ -208,7 +238,7 @@ export function NumberKeyboard({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [closeOnEscape, requestOpenChange, resolvedOpen]);
 
-  useEffect(() => () => stopDeleteRepeat(), []);
+  useEffect(() => () => cancelDeleteRepeat(), [cancelDeleteRepeat]);
 
   if (!shouldRender) return null;
 
@@ -228,7 +258,7 @@ export function NumberKeyboard({
       aria-label={value}
       className={key({ kind: "digit" })}
       data-key={value}
-      disabled={disabled}
+      disabled={disabled || !resolvedOpen}
       onMouseDown={preserveCurrentFocus}
       onClick={() => emitInput(value)}
     >
@@ -243,7 +273,7 @@ export function NumberKeyboard({
         aria-label={resolvedExtraKey.ariaLabel}
         className={key({ kind: "extra" })}
         data-key={resolvedExtraKey.value}
-        disabled={disabled || resolvedExtraKey.disabled}
+        disabled={disabled || !resolvedOpen || resolvedExtraKey.disabled}
         onMouseDown={preserveCurrentFocus}
         onClick={() => emitInput(resolvedExtraKey.value)}
       >
@@ -259,20 +289,22 @@ export function NumberKeyboard({
       aria-label={resolvedBackspaceLabel}
       className={key({ kind: "delete" })}
       data-key="backspace"
-      disabled={disabled}
+      disabled={disabled || !resolvedOpen}
       onMouseDown={preserveCurrentFocus}
       onClick={() => {
         if (suppressDeleteClickRef.current) {
           suppressDeleteClickRef.current = false;
+          window.clearTimeout(suppressDeleteClickTimerRef.current);
+          suppressDeleteClickTimerRef.current = 0;
           return;
         }
         emitDelete(false);
       }}
       onContextMenu={(event) => event.preventDefault()}
-      onPointerCancel={finishDeleteRepeat}
+      onPointerCancel={() => finishDeleteRepeat(false)}
       onPointerDown={startDeleteRepeat}
-      onPointerLeave={finishDeleteRepeat}
-      onPointerUp={finishDeleteRepeat}
+      onPointerLeave={() => finishDeleteRepeat(false)}
+      onPointerUp={() => finishDeleteRepeat(true)}
     >
       <span className={backspaceGlyph} aria-hidden="true">
         ⌫
@@ -283,13 +315,12 @@ export function NumberKeyboard({
   return (
     <Portal container={portalContainer}>
       <div
-        className={layer({ state: visualState })}
+        {...configBoundary}
+        className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
         inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
-        lang={config.locale}
         data-meu-overlay-layer="number-keyboard"
-        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <div
@@ -304,7 +335,7 @@ export function NumberKeyboard({
               ? `${panel({ safeArea, state: visualState })} ${className}`
               : panel({ safeArea, state: visualState })
           }
-          data-layout={confirmLabel ? "confirm" : "standard"}
+          data-layout={resolvedConfirmLabel ? "confirm" : "standard"}
           data-meu-component="number-keyboard"
           data-state={visualState}
           style={style}
@@ -320,6 +351,7 @@ export function NumberKeyboard({
                 <button
                   type="button"
                   className={closeButton}
+                  disabled={!resolvedOpen}
                   onMouseDown={preserveCurrentFocus}
                   onClick={() => requestOpenChange(false, { reason: "close-button" })}
                 >
@@ -335,18 +367,18 @@ export function NumberKeyboard({
               {renderDigit(digits[9])}
               {renderDelete()}
             </div>
-            {confirmLabel ? (
+            {resolvedConfirmLabel ? (
               <button
                 type="button"
                 className={key({ kind: "confirm" })}
-                disabled={disabled || confirmDisabled}
+                disabled={disabled || !resolvedOpen || confirmDisabled}
                 onMouseDown={preserveCurrentFocus}
                 onClick={() => {
                   if (onConfirm) onConfirm();
                   if (closeOnConfirm) requestOpenChange(false, { reason: "confirm" });
                 }}
               >
-                {confirmLabel}
+                {resolvedConfirmLabel}
               </button>
             ) : null}
           </div>

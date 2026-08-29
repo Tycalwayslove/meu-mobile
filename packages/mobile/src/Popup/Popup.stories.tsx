@@ -86,3 +86,5 @@ export const Bottom: Story = {
 export const Top: Story = { args: { position: "top" } };
 export const Left: Story = { args: { position: "left" } };
 export const Right: Story = { args: { position: "right" } };
+export const RightToLeft: Story = { args: { dir: "rtl", position: "left" } };
+export const WithoutMask: Story = { args: { mask: false, position: "right" } };

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { waitForStory } from "../storyTestUtils";
 import { Carousel } from "./Carousel";
 import type { CarouselItem } from "./types";
@@ -119,10 +120,61 @@ export const LoopingAutoplay: Story = {
   args: { autoplay: true, autoplayInterval: 3000, loop: true }
 };
 
+export const AccessibleAutoplayPause: Story = {
+  args: { autoplay: true, autoplayInterval: 3000, loop: true },
+  play: async ({ canvasElement }) => {
+    const pause = canvasElement.querySelector<HTMLButtonElement>(
+      '[data-meu-carousel-rotation][aria-label="暂停轮播"]'
+    );
+    const status = canvasElement.querySelector<HTMLElement>("[data-meu-carousel-status]");
+    if (!pause || !status) throw new window.Error("Expected Carousel pause control and status");
+
+    pause.focus();
+    await waitForStory(
+      () => pause.getAttribute("aria-label") === "暂停轮播",
+      "Focus changed the pending pause action"
+    );
+    pause.click();
+    await waitForStory(
+      () => pause.getAttribute("aria-label") === "播放轮播",
+      "Expected Carousel to remain paused after activation"
+    );
+    if (status.getAttribute("aria-live") !== "polite") {
+      throw new window.Error("Paused Carousel status was not announced politely");
+    }
+  }
+};
+
 export const Controlled: Story = {
   render: () => <ControlledPreview />
 };
 
 export const Disabled: Story = {
   args: { defaultIndex: 1, disabled: true }
+};
+
+export const RtlAndLongContent: Story = {
+  render: () => (
+    <ConfigProvider dir="rtl">
+      <div style={{ maxWidth: 640 }}>
+        <Carousel
+          aria-label="المحتوى المميز"
+          items={[
+            {
+              key: "long",
+              ariaLabel: "مجموعة ذات عنوان طويل",
+              content: (
+                <PreviewSlide
+                  eyebrow="01 / RTL"
+                  title="عنوان طويل يلتف عند تكبير النص"
+                  detail="نص وصفي طويل للتحقق من اتجاه الكتابة والتفاف المحتوى دون فقد أزرار التنقل."
+                />
+              )
+            },
+            { key: "member", ariaLabel: "مزايا الأعضاء", content: previewItems[2]!.content }
+          ]}
+        />
+      </div>
+    </ConfigProvider>
+  )
 };

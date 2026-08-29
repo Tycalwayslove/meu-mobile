@@ -11,7 +11,15 @@ lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "151:724"
-storyIds: [feedback-popup--bottom, feedback-popup--top, feedback-popup--left, feedback-popup--right]
+storyIds:
+  [
+    feedback-popup--bottom,
+    feedback-popup--top,
+    feedback-popup--left,
+    feedback-popup--right,
+    feedback-popup--right-to-left,
+    feedback-popup--without-mask
+  ]
 source: packages/mobile/src/Popup
 ---
 
@@ -20,8 +28,8 @@ source: packages/mobile/src/Popup
 ## 当前能力
 
 - 四方向 Portal 浮层，支持受控/非受控 open、Mask、滚动锁、焦点圈定/恢复、Escape 和关闭按钮。
-- 支持自定义 portal container、forceMount、safe area、initial/return focus ref。
-- 关闭事件提供 `mask | escape | close-button` reason，退出动画结束后卸载。
+- 支持自定义 portal container、forceMount、safe area、initial/return focus ref；打开时切换容器会重新绑定焦点圈定。
+- 用户关闭意图提供 `mask | escape | close-button` reason；程序化 prop 变化不发事件。退出动画结束后卸载，退出中重开会取消卸载。
 
 ## 何时使用
 
@@ -33,7 +41,7 @@ source: packages/mobile/src/Popup
 
 ## 结构与状态
 
-Portal layer → optional Mask → dialog panel → optional close button → body。状态为 closed、entering、open、exiting；视觉方向由 position 决定。
+Portal layer → optional Mask → dialog panel → optional close button → body。DOM 的 `data-state` 为 open/closed；打开时通过两帧从 closed 过渡到 open，关闭时立即进入 inert/aria-hidden 的 closed 视觉态，并在 presence 窗口结束后卸载。
 
 ## 基础用法
 
@@ -45,7 +53,7 @@ Portal layer → optional Mask → dialog panel → optional close button → bo
 
 ## 受控与非受控
 
-受控使用 `open/onOpenChange`，非受控使用 `defaultOpen`。受控模式下关闭意图只回调，不自行改变 open；调用方必须提交新值。
+受控使用 `open/onOpenChange`，非受控使用 `defaultOpen`。受控模式下关闭意图只回调，不自行改变 open；调用方拒绝请求时 Popup 保持打开、锁滚动并圈定焦点。外部程序化开关不反向调用 `onOpenChange`。退出中重开会取消待执行卸载，重新进入并继续焦点与滚动锁。
 
 ## 表单集成
 
@@ -53,17 +61,17 @@ Popup 不持有表单值。关闭前是否丢弃草稿由组合组件决定；�
 
 ## Props
 
-API 由 `PopupProps` 生成。调用方必须二选一提供 `aria-label` 或 `aria-labelledby`；重要行为 Props 包括 container、mask、lockScroll、closeOnEscape、closeOnMaskClick、restoreFocus、initialFocusRef、returnFocusRef、forceMount 和 safeArea。
+API 由 `PopupProps` 生成。调用方必须二选一提供 `aria-label` 或 `aria-labelledby`；重要行为 Props 包括 container、mask、lockScroll、closeOnEscape、closeOnMaskClick、restoreFocus、initialFocusRef、returnFocusRef、forceMount 和 safeArea。role、aria-modal、aria-hidden、hidden、inert 和 tabIndex 由组件固定管理，不是覆盖入口。
 
 共享 `OverlayContainer`、`OverlayDismissReason` 与 `OverlayOpenChangeDetails` 类型由本页归档；具体组件可以扩展 reason，但不得改写基础 `mask | escape | close-button` 含义。
 
 ## Events
 
-`onOpenChange(open, details)` 仅在组件请求变化时调用。当前关闭 reason 为 `mask`、`escape`、`close-button`；程序化 open 变化不反向发事件。
+`onOpenChange(open, details)` 仅在组件请求变化时调用。当前关闭 reason 为 `mask`、`escape`、`close-button`。Mask 必须完成原生 click 才产生 mask reason；pointercancel 不关闭。程序化 open 变化不反向发事件，也没有 programmatic reason。
 
 ## Ref 与命令式方法
 
-ref 指向 dialog panel。焦点控制优先使用 `initialFocusRef` 和 `returnFocusRef`，不要依赖内部 DOM。
+ref 指向 dialog panel。`initialFocusRef` 只有在指向面板内可见元素时生效，否则回退到首个 tabbable 元素，再回退到 panel。`returnFocusRef` 优先于打开前捕获的焦点；`restoreFocus=false` 关闭自动恢复。不要依赖内部 DOM。
 
 ## 键盘操作
 
@@ -74,37 +82,38 @@ ref 指向 dialog panel。焦点控制优先使用 `initialFocusRef` 和 `return
 
 ## 触摸与手势
 
-Mask 点击可选关闭；面板本身不定义拖拽。关闭按钮目标至少 44×44。V2 需验证 pointer cancel 与滚动边界。
+Mask 点击可选关闭；pointercancel 不合成 click，因此不会关闭。面板本身不定义拖拽。关闭按钮目标为 44×44，内部滚动区使用原生触摸滚动和 overscroll contain；旧 iOS 忽略该增强时，body lock 仍阻止页面主滚动，橡皮筋边界需真机验证。
 
 ## 无障碍
 
-面板使用 `role="dialog"`、`aria-modal="true"` 并强制可访问名称。打开时圈定焦点并通过共享引用计数管理器把背景 siblings 设为 inert/aria-hidden；嵌套模态只暴露栈顶，自定义 Portal 容器会沿祖先路径隔离背景，关闭后精确恢复原属性。Popover focus branch、由 `aria-controls` 关联的 NumberKeyboard 与 Toast live region 保持可达；真实读屏浏览模式仍需真机验证。
+面板使用 `role="dialog"`、`aria-modal="true"` 并强制可访问名称。打开时圈定焦点并通过共享引用计数管理器把背景 siblings 设为 inert/aria-hidden；嵌套模态只暴露栈顶，自定义 Portal 容器会沿祖先路径隔离背景，关闭后精确恢复原属性。打开时更换 HTMLElement 容器会重建 panel ref 和焦点圈定；resolver 返回目标变化时必须传入新的 resolver identity。Popover focus branch、由 `aria-controls` 关联的 NumberKeyboard 与 Toast live region保持可达；真实读屏浏览模式仍需真机验证。
 
 ## 动效
 
-位置决定进入/退出方向，presence 层保留退出 DOM。V2 需冻结时长/缓动/中断规则，并在 reduced-motion 下即时或淡化切换。
+bottom/top/right/left 分别从对应物理边缘沿 transform 进入。标准进入/退出 Token 为 180/140ms，缓动为 standard；presence 保留 160ms，覆盖退出动画。退出中重开会取消卸载。prefers-reduced-motion 将 panel 与 Mask 过渡缩至 1ms；presence 仍保留惰性 DOM 到 160ms，但关闭后立即 inert/aria-hidden，不再交互。
 
 ## 主题与定制
 
-公开定制为 position、maskOpacity、safeArea、close button、container、className/style 与全局 Token。z-index 由 overlay 层级统一治理。
+公开定制为 position、maskOpacity、safeArea、close button、container、className/style 与全局 Token。z-index 由 overlay 层级统一治理。forced-colors 去除浮层阴影并恢复 CanvasText panel 边界、ButtonText 关闭按钮边界与原生 focus outline。
 
 ## SSR 与 Next.js
 
-Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 closed/open/forceMount 的 hydration DOM 稳定。
+Portal 在 SSR 和首次 hydration 内联输出，客户端挂载后移到 body 或目标容器。Node SSR 已证明 closed 非 forceMount 不输出、closed forceMount 输出 hidden/inert、open 不解析 lazy target；JSDOM hydrateRoot 已证明 open body Portal 移动无 recoverable error。服务端与首次客户端必须提供一致的 open、forceMount、position 和可访问名称。
 
 ## RTL 与国际化
 
-关闭 label 从 ConfigProvider locale 获取，也可显式覆盖。left/right position 在 RTL 下仍表示物理方向；若产品需要 start/end，需在 V2 API 评审后增加，不能静默翻转。
+关闭 label 从 ConfigProvider locale 获取，也可显式覆盖。关闭按钮在 RTL 下移到左上角。left/right position 始终表示物理方向；产品需要 start/end 时必须在 API 评审后增加，不能静默翻转。
 
 ## 浏览器与 WebView
 
-重点验证 iOS body lock、软键盘/visual viewport、返回焦点、嵌套 Portal 和浏览器后退键组合。
+Chrome 70 与 iOS 13 可解析实现；不依赖 dvh、CSS logical inset 或 transitionend。旧浏览器不支持 overscroll-behavior 时只失去滚动链增强。仍需真机验证 iOS body lock、软键盘/visual viewport、返回焦点、嵌套 Portal 和浏览器后退键组合。
 
 ## 边界情况与已知限制
 
 - 当前 `aria-modal` 固定为 true，不适合非模态用法。
 - 背景隔离只管理同一 Document；跨 iframe/ShadowRoot 仍需宿主显式分区。
-- container 指向自定义文档或 Shadow DOM 的边界尚未声明支持。
+- container 支持当前 Document 中的 HTMLElement；跨 Document/ShadowRoot 尚未声明支持。lazy resolver 的目标变化必须伴随新函数 identity。
+- Popup 不监听 visualViewport；含输入框的 bottom panel 可能被旧 WebView 软键盘遮挡，复杂键盘避让使用 BottomSheet 或业务布局。
 
 ## 性能预算
 
@@ -112,14 +121,15 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 
 ## 测试证据
 
-- Unit: `Popup.test.tsx` 覆盖关闭原因、焦点、栈顶 Escape、嵌套背景隔离、自定义容器属性恢复与关联 NumberKeyboard；`overlayHooks.test.tsx` 覆盖 tabbable 顺序与 isolation 引用计数。
+- Unit: `Popup.test.tsx` 覆盖关闭原因与 mask pointercancel、无 Mask 模态隔离、initial focus/圈定/恢复、forceMount 退出、退出中重开、动态 Portal 容器、栈顶 Escape、滚动锁、嵌套背景隔离、自定义容器属性恢复、关联 NumberKeyboard 与 body Portal hydration；`overlayHooks.test.tsx` 覆盖 tabbable 顺序与 isolation 引用计数。
+- SSR: `Popup.ssr.test.tsx` 覆盖 closed/open/forceMount、固定 dialog 语义和 lazy container 不在服务端求值。
 - Story interaction: `Bottom.play` 验证打开、可访问对话框、关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 8278 B / 32768 B 预算，组合 Brotli 7329 B；共享样式由应用单独导入一次。
-- SSR/hydration: 单元覆盖 Portal 基础；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成组合 hydration，0 `pageerror`、0 `console.error`。
-- RTL: 待补
-- Reduced motion: 待补
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 8321 B / 32768 B 预算，组合 Brotli 7367 B；共享样式由应用单独导入一次。
+- SSR/hydration: Popup Node SSR 与 JSDOM hydrateRoot 已独立覆盖；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成组合 hydration，0 `pageerror`、0 `console.error`。
+- RTL: RightToLeft Story 覆盖 close button 布局与物理 left position；浏览器矩阵截图仍待重跑。
+- Reduced motion: CSS 1ms 降级已实现；新增 Stories 尚未进入扩展浏览器矩阵。
 - Mobile Chromium/WebKit E2E: 打开、focus trap、Escape/关闭、焦点恢复、scroll lock 与 action 链路通过；嵌套 isolation 已有 Unit，读屏浏览模式留待真机。
 - Chromatic Light/Dark: Figma 与 stories 已有基线，待显式矩阵
 - Real device: 待补
@@ -128,17 +138,20 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 
 ### 待优化
 
-- 补软键盘、安全区、退出中断、RTL 和真机证明。
-- 为尚未逐项覆盖的关闭 reason 添加更细的 Story play 与 E2E。
+- 补软键盘/visualViewport、安全区旋转、iOS 滚动链、跨 Document/ShadowRoot 与真机读屏证明。
+- 为 mask pointercancel、动态容器和退出中断补移动浏览器 E2E；Unit 已覆盖状态机。
 
 ### 已完成
 
-- 已统一 Portal、Mask、受控模型、焦点、滚动锁、关闭原因与四方向样式；补齐栈顶 modal background isolation、自定义容器、非模态关联分支及隔离 Next H5 双引擎焦点/关闭证据。
+- 已统一 Portal、Mask、受控模型、焦点、滚动锁、关闭原因与四方向样式；补齐栈顶 modal background isolation、自定义/动态容器、非模态关联分支、退出重开、独立 SSR/hydration 及隔离 Next H5 双引擎焦点/关闭证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                                    | 迁移说明                                     |
-| ---------- | ------ | ------------ | ----------------------------------------------------------------------- | -------------------------------------------- |
-| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                                    | 无                                           |
-| 2026-08-29 | 未发布 | fix          | 背景 inert 与嵌套模态隔离                                               | API 兼容；打开模态后页面背景不再进入可访问树 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎焦点圈定、Escape/Mask、scroll-lock 与 hydration 证据 | 无                                           |
+| 日期       | 版本   | 类型          | 内容                                                                    | 迁移说明                                     |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------- | -------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs          | 建立 V2 留存文档基线                                                    | 无                                           |
+| 2026-08-29 | 未发布 | fix           | 背景 inert 与嵌套模态隔离                                               | API 兼容；打开模态后页面背景不再进入可访问树 |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎焦点圈定、Escape/Mask、scroll-lock 与 hydration 证据 | 无                                           |
+| 2026-08-29 | 未发布 | fix           | 动态 Portal 容器重新绑定焦点圈定；退出重开取消卸载                      | API 兼容                                     |
+| 2026-08-29 | 未发布 | accessibility | 收紧固定 dialog 类型入口，补 RTL 与 forced-colors 边界                  | 移除无效 role/hidden/inert/tabIndex 覆盖类型 |
+| 2026-08-29 | 未发布 | verification  | 增加 SSR/hydration、forceMount、mask cancel 与重开竞态自动化            | 无                                           |

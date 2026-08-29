@@ -21,6 +21,8 @@ storyIds:
     forms-searchfield--read-only,
     forms-searchfield--loading,
     forms-searchfield--native-form-submission,
+    forms-searchfield--native-form-reset,
+    forms-searchfield--right-to-left,
     forms-searchfield--large
   ]
 source: packages/mobile/src/SearchField
@@ -35,6 +37,8 @@ source: packages/mobile/src/SearchField
 - `onChange/onClear/onSearch` 保留原有首参，并提供含稳定 `source` 与原始 React event 的 details 第二参。
 - 有 `onSearch` 时组件独占 Enter 并阻止原生 form submit；没有 `onSearch` 时 Enter 完全交还原生 form。
 - loading 时输入仍可编辑，但会隐藏 clear、公告搜索中状态，并阻止 Enter 产生重复回调或原生提交。
+- 非受控值遵循原生 `form.reset()`，包括外部 `form=` 关联和可取消 reset；受控值始终由 `value` 决定。
+- clear 获得键盘焦点后若被 loading 状态替换，焦点会回到输入，避免落到 document。
 
 当前状态为 `verification`。单元、SSR、Story play、本地 axe，以及 mobile Chromium/WebKit 的 Enter 搜索与清除路径已有证据；完整 Light/Dark 视觉审批、移动浏览器原生 form/details 专项、真机 IME 与读屏尚未完成，因此不能标记为 commercial。
 
@@ -54,6 +58,7 @@ source: packages/mobile/src/SearchField
 - readOnly 保留焦点、复制与 Enter 搜索，但不允许改值或清空。
 - disabled 使用原生 disabled，不能获得焦点或提交值。
 - loading 不锁住输入编辑，方便用户修正查询；它只锁住提交动作。
+- reset 不触发 `onChange/onClear/onSearch`；它恢复表单默认状态，而不是一次用户编辑。
 
 ## 基础用法
 
@@ -74,11 +79,11 @@ const [query, setQuery] = useState("");
 />;
 ```
 
-SearchField 不内置 debounce、请求取消、缓存、历史或路由同步。调用方应在值变化后取消旧请求，并在请求期间传入 `loading`。
+SearchField 不内置 debounce、请求取消、缓存、历史或路由同步。`onSearch` 是同步意图通知，不表示组件接管返回的 Promise。调用方应持有 AbortController，在新查询、清除或卸载时取消旧请求，并只让当前请求更新结果；请求期间传入 `loading`。
 
 ## 受控与非受控
 
-传 `value` 时由调用方控制，组件只通过 `onChange(nextValue, details)` 请求更新；清除后如果调用方不更新 `value`，旧值仍会显示。只传 `defaultValue` 时组件拥有后续值。不要在生命周期内切换受控模式。
+传 `value` 时由调用方控制，组件只通过 `onChange(nextValue, details)` 请求更新；清除后如果调用方不更新 `value`，旧值仍会显示，原生 form reset 也不能改变它。只传 `defaultValue` 时组件拥有后续值，成功的原生 reset 会恢复当前 `defaultValue`，且不发布 change；被 `preventDefault()` 取消的 reset 保留当前值。不要在生命周期内切换受控模式。
 
 ## 表单集成
 
@@ -97,6 +102,7 @@ SearchField 不内置 debounce、请求取消、缓存、历史或路由同步�
 - 传入 `onSearch`：Enter 先 `preventDefault()`，只调用 `onSearch`，不会再触发外围 form submit，避免一次按键发起两次请求。
 - consumer `onKeyDown` 先执行；它调用 `preventDefault()` 后，SearchField 不再调用 `onSearch`。
 - loading 或重复 Enter 会被阻止。disabled input 不参与 FormData；readOnly input 仍参与。
+- 非受控 SearchField 支持祖先 form 和 `form="id"` 外部关联的 reset。reset 保持输入焦点，清除 IME 组合会话，不触发搜索或值事件。
 
 如果旧代码故意同时依赖 `onSearch` 和 `onSubmit`，应迁移为单一入口。确需在回调中走 form 流程时，可显式调用目标 form 的 `requestSubmit()`，并确保只有一处发请求。
 
@@ -105,8 +111,9 @@ SearchField 不内置 debounce、请求取消、缓存、历史或路由同步�
 API 表由 `SearchFieldProps`、`SearchFieldSize`、`SearchFieldStatus` 与事件 details 类型生成。关键跨字段规则如下：
 
 - `clearable` 默认 true；readOnly、disabled、loading 始终优先隐藏 clear。
+- `defaultValue` 是非受控初值及原生 reset 的恢复值；`value` 是受控事实源。
 - `enterKeyHint` 默认 `search`，只提示软键盘外观，不改变 Enter 所有权。
-- `className/style` 作用在视觉 wrapper；其余原生 input 属性传给真实 input。内部 class 与 DOM 层级不是稳定 API。
+- `className/style` 作用在视觉 wrapper；`dir` 同时作用于 wrapper 与真实 input，使组件级 RTL 能翻转视觉顺序；其余原生 input 属性传给真实 input。内部 class 与 DOM 层级不是稳定 API。
 - `clearLabel/loadingLabel` 可覆盖内置中英文 accessible name；未覆盖时跟随 `ConfigProvider.locale`。
 - `status="error"`、Field error 或有效 `aria-invalid` 都进入 error 状态；无 contextual error 时 `false/grammar/spelling` 原样保留，Field/status error 优先输出 `true`。
 
@@ -122,9 +129,11 @@ API 表由 `SearchFieldProps`、`SearchFieldSize`、`SearchFieldStatus` 与事�
 
 details 中的 `event` 是 React SyntheticEvent。单元测试直接断言 input、Enter 和 clear 的 `source` 与 event：clear 产生的 `onChange` 与 `onClear` 共享同一个 details 对象；这些 payload 尚未在移动 E2E 中采集。不要把 DOM event 序列化进日志；异步任务只保存需要的 value/source。
 
+`onSearch` 是 Meu 的 Enter 意图回调，不等同于 WebKit 的非标准 DOM `search` event。组件不合成 Escape/cancel 的 native `search` 事件；未传 `onSearch` 时也不会拦截浏览器原生 search/form 行为。需要观察宿主特有 native `search` 事件时只能通过 ref 注册 DOM listener，并应把它视为平台适配而非跨浏览器契约。
+
 ## Ref 与命令式方法
 
-ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()` 并读取 `form`。内置 clear 在通知 `onClear` 前恢复 input 焦点。除测试和明确焦点恢复外，不要通过 ref 修改受控 value。
+ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()`，读取 selection 和 `form`。内置 clear 在通知 `onClear` 前恢复 input 焦点，清空后的光标位于空值起点；loading 替换一个已聚焦的 clear 时同样恢复输入焦点。除测试和明确焦点恢复外，不要通过 ref 修改受控 value。
 
 ## 键盘操作
 
@@ -160,17 +169,17 @@ ARIA invalid token 只位于原生 searchbox，不复制到图标、clear 或 lo
 
 ## SSR 与 Next.js
 
-渲染不读取 window/document，SSR 单测证明会输出真实 search input、name、value 与 readOnly 状态。隔离 Next H5 消费端还会等待包含 SearchField 的页面完成 hydration，并要求没有 `pageerror` 或 `console.error`；它没有覆盖服务端与首次客户端使用不同 `value/defaultValue/loading/readOnly` 的状态切换。组件包含 `"use client"`，应从 Next Client Component 使用。
+渲染不读取 window/document，SSR 单测证明会输出真实 search input、name、value、readOnly、loading 与 disabled 状态。独立 `hydrateRoot` 测试以相同 props 完成 hydration，断言没有 mismatch，且 hydration 后 clear、值更新和焦点恢复仍可用。服务端与首次客户端故意使用不同 `value/defaultValue/loading/readOnly` 仍属于调用方 mismatch，不由组件掩盖。组件包含 `"use client"`，应从 Next Client Component 使用。
 
 ## RTL 与国际化
 
-布局使用 `padding-inline`，会跟随上层 `dir`。搜索和 clear 图标本身对称，不需要镜像。业务 placeholder、label 和请求结果文案由调用方本地化；内置 clear/loading 名称可覆盖。
+布局使用 `padding-inline`，会跟随上层 `dir`；显式传给组件的 `dir` 同时设置在 wrapper 和 input，保证图标/操作顺序与文本方向一致。搜索和 clear 图标本身对称，不需要镜像。业务 placeholder、label 和请求结果文案由调用方本地化；内置 clear/loading 名称可覆盖。
 
-RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立浏览器证据。
+RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉伯语 IME、混合双向长文本和系统字体放大仍缺真机证据。
 
 ## 浏览器与 WebView
 
-实现使用原生 input/button、Flex、CSS logical properties、`:focus-within`、native click 和基础 key/composition events。仓库静态语法门禁不等于运行时证明；产品完整支持口径仍为 iOS Safari/WKWebView 15+、Android Chrome/WebView 89+，iOS 13–14 与 Chromium 79–88 为观察档。
+实现使用原生 input/button、Flex、CSS logical properties、`:focus-within`、native click、基础 key/composition events 和 `setTimeout`，没有依赖超出 Chrome/WebView 70 与 iOS 13 的强制运行时 API。`enterKeyHint` 在不识别它的旧宿主中仅作为无害属性，不影响硬键盘 Enter 或 form submit。静态兼容和 jsdom 证据不等于真机运行时证明，Chrome 70 与 iOS 13 仍需目标宿主回归。
 
 待补 iOS 中文输入法、Android Gboard、WKWebView 软键盘 `enterKeyHint`、VoiceOver/TalkBack 和 tap-clear 键盘保持的真机记录。
 
@@ -178,6 +187,7 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 - 组件不 trim、规范化或限制关键词；空字符串是否可搜索由业务决定。
 - loading 允许继续编辑，但阻止 Enter；业务需要在 query 改变时取消或忽略旧请求。
+- disabled/readOnly/loading 的切换不会取消业务请求；SearchField 没有请求句柄，取消必须由调用方持有。
 - clear 是值变更请求，不保证受控调用方接受空值。
 - `onSearch` 现在阻止外围 form submit；依赖旧“双触发”行为的代码必须迁移到单一请求入口。
 - IME 通过 composition state、blur reset、native `isComposing` 与兼容性 `keyCode=229` 防护，但仍需真机输入法矩阵。
@@ -190,14 +200,14 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 ## 测试证据
 
-- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 ARIA invalid token/Field 优先级、clear 请求空值后恢复焦点、readOnly/disabled/loading、模拟 composition、repeat Enter、consumer cancellation 与受控 live native value。它还证明未传 `onSearch` 时原生 form 收到一次 submit，传入 `onSearch` 时只有搜索回调收到一次 Enter，不会双重提交。
-- Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 ARIA invalid token/Field 优先级、clear 请求空值后恢复焦点、loading 替换 clear 的焦点移交、readOnly/disabled 原生 FormData、模拟 composition、repeat Enter、consumer cancellation 与受控 live native value。它还证明 Enter 单一所有权，以及祖先/外部 form reset、取消 reset、受控 reset、reset 后 IME 状态和不发布 change。
+- Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`NativeFormReset.play` 验证 clear 后恢复默认值及 FormData。RTL Story 提供方向与阿拉伯语检查入口。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4603 B / 32768 B 预算，组合 Brotli 4075 B；共享样式由应用单独导入一次。
-- SSR/hydration: `SearchField.ssr.test.tsx` 覆盖 native searchbox 与 ARIA invalid token；隔离 Next H5 会断言 hydration 完成且无运行时错误，服务端/客户端状态不一致矩阵待补
-- RTL: 使用 logical CSS；浏览器矩阵待补
-- Reduced motion: CSS 静态 ring 已实现；浏览器 computed-style 证明待补
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4991 B / 32768 B 预算，组合 Brotli 4376 B；共享样式由应用单独导入一次。
+- SSR/hydration: `SearchField.ssr.test.tsx` 覆盖 native searchbox、ARIA invalid、loading 与 disabled；`SearchField.hydration.test.tsx` 直接覆盖无 mismatch 及 hydration 后 clear/focus。
+- RTL: 使用 logical CSS，单元测试覆盖显式 `dir` 的 wrapper/input 同步，并有 RTL Story；混合双向和真机软键盘待补。
+- Reduced motion/forced colors: CSS 分别关闭 spinner animation、压缩 transition，并使用系统按钮/边框色；旧版与真机 computed-style 证明待补。
 - Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接输入字符串 `TextArea` 并按 Enter，断言 `onSearch` 结果只显示该实时值；随后点击内置 clear，断言值为空且焦点回到 searchbox。details payload、无 `onSearch` 时的原生 form submit、loading/repeat/cancellation 与 IME 尚无这两个移动项目的专项断言。
 - Chromatic Light/Dark: Story 集已覆盖状态入口，显式双主题审批待补
 - Real device: 待补
@@ -206,7 +216,7 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 ### 待优化
 
-- 增加服务端/客户端状态切换、RTL、强制色、200% 字号、Light/Dark Chromatic，以及移动双浏览器的原生 form/details/loading/repeat/cancellation 专项证据。
+- 增加强制色、200% 字号、Light/Dark Chromatic，以及移动双浏览器的外部 form/reset、details、loading/repeat/cancellation 专项证据。
 - 在真实 iOS 中文输入法、Android Gboard、VoiceOver 与 TalkBack 验证 Enter、loading 公告和 tap-clear 键盘保持。
 - 与 Field V2 契约合并 required、显式 id、description/error 和 composite label 修复后的集成证据。
 - Figma 暂缺可追溯 file key/node ID，设计资产补齐后更新 frontmatter。
@@ -218,6 +228,7 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 - 修复 readOnly clear、IME composition、repeat Enter、loading 重复提交和焦点恢复边界。
 - loading 改为可公告状态，reduced motion 改为静态 ring；补齐强制色与 44px clear 目标。
 - 补齐公开 TSDoc、SSR/单元测试、Story play、完整留存文档和 README 指针。
+- 补齐原生 form reset/取消/外部关联、受控 reset、hydration、loading 焦点移交和 RTL Story 证据。
 
 ## 变更记录
 
@@ -226,3 +237,4 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 | 2026-08-28 | 0.1.0  | implementation | 增加 details、单一 Enter 所有权、IME/readOnly/loading/focus 与动效契约                          | 旧单参回调继续可用；依赖 onSearch+form 双触发的代码迁移到单一请求入口            |
 | 2026-08-29 | 未发布 | verification   | 记录 mobile Chromium/WebKit 已覆盖 Enter 搜索、清除与焦点恢复；区分 details/form 单测和移动证据 | 状态保持 `verification`；IME、真机读屏及未设 `onSearch` 的移动 form 路径仍待验证 |
 | 2026-08-29 | 未发布 | accessibility  | 保留 ARIA invalid token 并统一 Field/status error 优先级                                        | 无                                                                               |
+| 2026-08-29 | 未发布 | hardening      | 修复 form reset 同步、loading 焦点移交，并补 hydration/RTL/取消边界证据                         | 非受控 reset 现恢复 `defaultValue` 且不触发 change                               |

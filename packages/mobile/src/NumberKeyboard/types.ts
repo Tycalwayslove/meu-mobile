@@ -119,7 +119,7 @@ export type NumberKeyboardProps = Omit<
   closeOnEscape?: boolean;
   /** Disables only the optional confirm key. @defaultValue false */
   confirmDisabled?: boolean;
-  /** Confirm-key label; `null` omits the confirm column. @defaultValue null */
+  /** Confirm-key label; `null`, an empty string, or whitespace omits the key. @defaultValue null */
   confirmLabel?: string | null;
   /** Portal target; `null` renders next to the caller. Defaults to ConfigProvider's target. */
   container?: OverlayContainer;

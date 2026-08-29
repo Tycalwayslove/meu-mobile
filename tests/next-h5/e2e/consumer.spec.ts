@@ -255,13 +255,36 @@ test("focuses and reveals the first server error in form DOM order", async ({ pa
 
 test("searches and clears with the SearchField contract", async ({ page }) => {
   const search = page.getByRole("searchbox", { name: "搜索组件" });
+  await expect(search).toHaveAttribute("dir", "rtl");
+  await expect(search.locator("xpath=parent::*")).toHaveAttribute("dir", "rtl");
   await search.fill("TextArea");
   await search.press("Enter");
   await expect(page.getByText("正在搜索：TextArea")).toBeVisible();
 
-  await page.getByRole("button", { name: "清除搜索" }).click();
+  await search.locator("xpath=parent::*").getByRole("button", { name: "清除搜索" }).click();
   await expect(search).toHaveValue("");
   await expect(search).toBeFocused();
+});
+
+test("lets a native search form submit once and restore its uncontrolled default", async ({
+  page
+}) => {
+  const form = page.getByRole("form", { name: "原生搜索表单" });
+  const search = form.getByRole("searchbox", { name: "可重置原生搜索" });
+
+  await expect(search).toHaveValue("订单");
+  await search.fill("退款订单");
+  await search.press("Enter");
+  await expect(form.getByText("原生搜索提交：退款订单")).toBeVisible();
+
+  await search.fill("临时条件");
+  await form.getByRole("button", { name: "恢复默认搜索" }).click();
+  await expect(search).toHaveValue("订单");
+  const formValue = await form.evaluate((element) => {
+    const value = new FormData(element as HTMLFormElement).get("nativeQuery");
+    return typeof value === "string" ? value : "";
+  });
+  expect(formValue).toBe("订单");
 });
 
 test("arbitrates a real scroll container and keyboard-equivalent refresh paths", async ({
@@ -458,6 +481,22 @@ test("binds a non-modal number keyboard without owning the form value", async ({
 
   const keyboard = page.getByRole("group", { name: "交易金额" });
   await expect(keyboard).toBeVisible();
+  const keyboardLayer = page.locator('[data-meu-overlay-layer="number-keyboard"]');
+  await expect(keyboardLayer).toHaveAttribute("dir", "rtl");
+  await expect(keyboardLayer).toHaveAttribute("data-meu-motion", "reduced");
+  await expect(keyboard).toHaveCSS("transition-duration", "0s");
+  const closeButton = keyboard.getByRole("button", { name: "收起" });
+  const [keyboardBox, closeBox] = await Promise.all([
+    keyboard.boundingBox(),
+    closeButton.boundingBox()
+  ]);
+  expect(keyboardBox).not.toBeNull();
+  expect(closeBox).not.toBeNull();
+  expect(
+    keyboardBox && closeBox
+      ? closeBox.x + closeBox.width / 2 < keyboardBox.x + keyboardBox.width / 2
+      : false
+  ).toBe(true);
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked");
   await expect(page.getByRole("dialog", { name: "交易金额" })).toHaveCount(0);
@@ -633,8 +672,19 @@ test("runs the controlled carousel with native alternatives and focus isolation"
   const section = page.getByRole("region", { name: "内容轮播" });
   const carousel = section.getByRole("group", { name: "推荐活动" });
   await expect(carousel).toHaveAttribute("data-index", "0");
+  await expect(carousel).toHaveAttribute("data-autoplay", "true");
+  await expect(carousel).toHaveAttribute("data-rotating", "false");
+  await expect(section.getByRole("button", { name: "播放轮播" })).toBeVisible();
+  const carouselProvider = carousel.locator(
+    'xpath=ancestor::*[@data-meu-component="config-provider"][1]'
+  );
+  await expect(carouselProvider).toHaveAttribute("dir", "rtl");
+  await expect(carouselProvider).toHaveAttribute("data-meu-motion", "reduced");
   await expect(section.getByText("当前轮播：1")).toBeVisible();
   await expect(section.getByRole("img", { name: "第 1 页，共 3 页" })).toBeVisible();
+  await expect(section.locator("[data-meu-carousel-status]")).toHaveText(
+    "本周新品，第 1 张，共 3 张"
+  );
 
   await section.getByRole("button", { name: "下一张" }).click();
   await expect(carousel).toHaveAttribute("data-index", "1");
@@ -959,10 +1009,20 @@ test("locks scroll, contains focus and restores the Popup trigger", async ({ pag
   const popup = page.getByRole("dialog", { name: "配送方式" });
   await expect(popup).toBeVisible();
   await expect(popup).toHaveAttribute("aria-modal", "true");
+  const popupLayer = page.locator('[data-meu-overlay-layer="popup"]');
+  await expect(popupLayer).toHaveAttribute("dir", "rtl");
+  await expect(popupLayer).toHaveAttribute("data-meu-motion", "reduced");
+  await expect(popup).toHaveCSS("transition-duration", "0s");
   await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
 
   const close = popup.getByRole("button", { name: "关闭" });
   const confirm = popup.getByRole("button", { name: "确认标准配送" });
+  const [popupBox, closeBox] = await Promise.all([popup.boundingBox(), close.boundingBox()]);
+  expect(popupBox).not.toBeNull();
+  expect(closeBox).not.toBeNull();
+  expect(
+    popupBox && closeBox ? closeBox.x + closeBox.width / 2 < popupBox.x + popupBox.width / 2 : false
+  ).toBe(true);
   await expect(close).toBeFocused();
   await confirm.focus();
   await page.keyboard.press("Tab");

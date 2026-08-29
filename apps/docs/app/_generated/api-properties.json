@@ -501,7 +501,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Initial value when the component is uncontrolled.",
+          "description": "Initial and native form-reset value when the component is uncontrolled. Reset does not emit\n`onChange`.",
           "defaultValue": "`\"\"`"
         },
         {
@@ -539,7 +539,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Controlled search value."
+          "description": "Controlled search value; native form reset cannot change it."
         },
         {
           "name": "onChange",
@@ -4090,7 +4090,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Accessible name for the slide; defaults to a localized position such as “2 of 5”."
+          "description": "Accessible slide name. The live position status combines it with the localized current and total page count."
         },
         {
           "name": "content",
@@ -4113,7 +4113,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Enables pointer dragging between slides.",
+          "description": "Enables Embla touch and mouse dragging. Vertical pan, pinch zoom, cancellation, and multi-touch arbitration remain native/engine behavior.",
           "defaultValue": "true"
         },
         {
@@ -4121,7 +4121,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Advances slides on a timer; rotation pauses for interaction, hidden pages, and reduced-motion preference.",
+          "description": "Advances slides on a timer. Rotation pauses after focus, drag, or button navigation; hover and hidden pages suspend it; reduced motion requires explicit start.",
           "defaultValue": "false"
         },
         {
@@ -4183,7 +4183,7 @@
           "type": "readonly CarouselItem[]",
           "required": true,
           "event": false,
-          "description": "Ordered slides displayed by the carousel."
+          "description": "Ordered slides displayed by the carousel. Stable keys preserve content identity; a changed length clamps uncontrolled and controlled indices."
         },
         {
           "name": "loop",
@@ -4240,7 +4240,7 @@
           "type": "(index: number, details: CarouselIndexChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when drag, controls, or autoplay requests a different active index."
+          "description": "Called only when drag, controls, or autoplay requests a different active index; prop and item normalization do not emit."
         },
         {
           "name": "onMouseEnter",
@@ -5613,7 +5613,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Confirm-key label; `null` omits the confirm column.",
+          "description": "Confirm-key label; `null`, an empty string, or whitespace omits the key.",
           "defaultValue": "null"
         },
         {
@@ -5858,7 +5858,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Confirm-key label; `null` omits the confirm column.",
+          "description": "Confirm-key label; `null`, an empty string, or whitespace omits the key.",
           "defaultValue": "null"
         },
         {
@@ -6585,7 +6585,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Lets a mask press request closure.",
+          "description": "Lets a completed native mask click request closure when `mask` is rendered.",
           "defaultValue": "false"
         },
         {
@@ -6593,7 +6593,7 @@
           "type": "OverlayContainer",
           "required": false,
           "event": false,
-          "description": "Portal target; `null` renders next to the caller. Defaults to ConfigProvider's target."
+          "description": "Portal target; `null` renders next to the caller. Defaults to ConfigProvider's target. When a\nresolver's destination changes, pass a new resolver identity so focus trapping rebinds."
         },
         {
           "name": "defaultOpen",
@@ -6608,7 +6608,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Keeps the closed dialog mounted and hidden after hydration.",
+          "description": "Keeps the closed dialog mounted, inert and hidden, including during SSR.",
           "defaultValue": "false"
         },
         {
@@ -6616,14 +6616,14 @@
           "type": "RefObject<HTMLElement>",
           "required": false,
           "event": false,
-          "description": "Preferred element to receive focus when the dialog opens."
+          "description": "Preferred visible descendant to receive focus; invalid targets fall back to the first tabbable descendant or panel."
         },
         {
           "name": "lockScroll",
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Prevents document-body scrolling while open.",
+          "description": "Prevents the current document body from scrolling while open.",
           "defaultValue": "true"
         },
         {
@@ -6631,7 +6631,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Renders the modal backdrop.",
+          "description": "Renders the modal backdrop; focus trapping and modal isolation remain active when omitted.",
           "defaultValue": "true"
         },
         {
@@ -6647,14 +6647,14 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Controlled open state."
+          "description": "Controlled open state; consumers must accept or reject each dismissal request."
         },
         {
           "name": "position",
           "type": "PopupPosition",
           "required": false,
           "event": false,
-          "description": "Screen edge from which the panel enters.",
+          "description": "Physical screen edge from which the panel enters; RTL does not swap left and right.",
           "defaultValue": "\"bottom\""
         },
         {
@@ -6669,7 +6669,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Restores focus after the dialog closes when focus remains inside it.",
+          "description": "Restores the focus captured when the dialog opened after it closes.",
           "defaultValue": "true"
         },
         {
@@ -6700,7 +6700,7 @@
           "type": "(open: boolean, details: OverlayOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Reports requested controlled or uncontrolled visibility changes and their cause."
+          "description": "Reports user dismissal requests and their cause; prop-driven visibility changes emit nothing."
         }
       ],
       "PopoverOpenChangeDetails": [
@@ -11314,7 +11314,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Confirm-key label; `null` omits the confirm column.",
+          "description": "Confirm-key label; `null`, an empty string, or whitespace omits the key.",
           "defaultValue": "null"
         },
         {
@@ -11441,7 +11441,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Confirm-key label; `null` omits the confirm column.",
+          "description": "Confirm-key label; `null`, an empty string, or whitespace omits the key.",
           "defaultValue": "null"
         },
         {

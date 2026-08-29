@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, Ref } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
+import { VisuallyHidden } from "../internal/VisuallyHidden";
 import { PaginationDots } from "../PaginationDots";
 import {
   controls,
@@ -104,27 +105,42 @@ export function Carousel({
   style,
   ...props
 }: CarouselProps) {
-  const { dir, locale } = useMeuConfig();
+  const { dir, locale, motion } = useMeuConfig();
   const count = items.length;
   const controlled = index !== undefined;
+  const [initialDefaultIndex] = useState(defaultIndex);
   const safeDefaultIndex = normalizeIndex(defaultIndex, count);
-  const [uncontrolledIndex, setUncontrolledIndex] = useState(safeDefaultIndex);
+  const [uncontrolledState, setUncontrolledState] = useState({
+    count,
+    index: safeDefaultIndex
+  });
+  let uncontrolledIndex = uncontrolledState.index;
+  if (!controlled && uncontrolledState.count !== count) {
+    uncontrolledIndex = normalizeIndex(
+      uncontrolledState.count === 0 ? initialDefaultIndex : uncontrolledIndex,
+      count
+    );
+    setUncontrolledState({ count, index: uncontrolledIndex });
+  }
   const requestedIndex = controlled ? index : uncontrolledIndex;
   const currentIndex = normalizeIndex(requestedIndex, count);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const motionReduced = motion === "reduced" || reducedMotion;
   const [pageVisible, setPageVisible] = useState(true);
   const [hovered, setHovered] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const [reducedMotionOverride, setReducedMotionOverride] = useState(false);
+  const [rotationFocusAction, setRotationFocusAction] = useState<"pause" | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const changeReasonRef = useRef<CarouselIndexChangeReason | null>(null);
+  const rollbackFrameRef = useRef<number | null>(null);
   const suppressSelectionRef = useRef(false);
   const controlledIndexRef = useRef(currentIndex);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
     dragThreshold: 10,
-    duration: reducedMotion ? 0 : 25,
+    duration: motionReduced ? 0 : 25,
     direction: dir,
     loop: loop && count > 1,
     skipSnaps: false,
@@ -141,7 +157,9 @@ export function Carousel({
           play: "Start slide rotation",
           previous: "Previous slide",
           slide: (position: number) => `${position} of ${count}`,
-          slideRole: "slide"
+          slideRole: "slide",
+          status: (position: number, name?: string) =>
+            name ? `${name}, slide ${position} of ${count}` : `Slide ${position} of ${count}`
         }
       : {
           carousel: "推荐内容",
@@ -150,15 +168,20 @@ export function Carousel({
           play: "播放轮播",
           previous: "上一张",
           slide: (position: number) => `第 ${position} 张，共 ${count} 张`,
-          slideRole: "幻灯片"
+          slideRole: "幻灯片",
+          status: (position: number, name?: string) =>
+            name
+              ? `${name}，第 ${position} 张，共 ${count} 张`
+              : `第 ${position} 张，共 ${count} 张`
         };
   const resolvedInterval = normalizeInterval(autoplayInterval);
   const resolvedStyle = {
     ...style,
     "--meu-carousel-gap": `${normalizeGap(gap)}px`
   } as CarouselStyle;
-  const rotationRequested = autoplay && !userPaused && (!reducedMotion || reducedMotionOverride);
+  const rotationRequested = autoplay && !userPaused && (!motionReduced || reducedMotionOverride);
   const rotating = rotationRequested && !disabled && !hovered && pageVisible && count > 1;
+  const rotationControlShowsPause = rotationFocusAction === "pause" || rotationRequested;
 
   useEffect(() => {
     controlledIndexRef.current = currentIndex;
@@ -193,10 +216,14 @@ export function Carousel({
     }
     const reason = changeReasonRef.current || "drag";
     changeReasonRef.current = null;
-    if (!controlled) setUncontrolledIndex(nextIndex);
+    if (!controlled) setUncontrolledState({ count, index: nextIndex });
     if (nextIndex !== currentIndex && onIndexChange) onIndexChange(nextIndex, { reason });
     if (controlled && nextIndex !== controlledIndexRef.current) {
-      window.requestAnimationFrame(() => {
+      if (rollbackFrameRef.current !== null) {
+        window.cancelAnimationFrame(rollbackFrameRef.current);
+      }
+      rollbackFrameRef.current = window.requestAnimationFrame(() => {
+        rollbackFrameRef.current = null;
         if (!emblaApi || emblaApi.selectedScrollSnap() === controlledIndexRef.current) return;
         suppressSelectionRef.current = true;
         emblaApi.scrollTo(controlledIndexRef.current, true);
@@ -204,27 +231,39 @@ export function Carousel({
     }
   }, [controlled, count, currentIndex, emblaApi, onIndexChange]);
 
+  useEffect(
+    () => () => {
+      if (rollbackFrameRef.current !== null) {
+        window.cancelAnimationFrame(rollbackFrameRef.current);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     if (!emblaApi) return undefined;
     const pointerDown = () => {
       changeReasonRef.current = "drag";
       if (autoplay) setUserPaused(true);
     };
+    const pointerUp = () => {
+      if (changeReasonRef.current === "drag") changeReasonRef.current = null;
+    };
     emblaApi.on("select", handleSelection);
     emblaApi.on("pointerDown", pointerDown);
-    emblaApi.on("reInit", handleSelection);
+    emblaApi.on("pointerUp", pointerUp);
     return () => {
       emblaApi.off("select", handleSelection);
       emblaApi.off("pointerDown", pointerDown);
-      emblaApi.off("reInit", handleSelection);
+      emblaApi.off("pointerUp", pointerUp);
     };
   }, [autoplay, emblaApi, handleSelection]);
 
   useEffect(() => {
     if (!emblaApi || count <= 0 || emblaApi.selectedScrollSnap() === currentIndex) return;
     suppressSelectionRef.current = true;
-    emblaApi.scrollTo(currentIndex, reducedMotion);
-  }, [count, currentIndex, emblaApi, reducedMotion]);
+    emblaApi.scrollTo(currentIndex, motionReduced);
+  }, [count, currentIndex, emblaApi, motionReduced]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -244,7 +283,7 @@ export function Carousel({
       subtree: true
     });
     return () => observer.disconnect();
-  }, [currentIndex, items]);
+  }, [currentIndex]);
 
   useEffect(() => {
     if (!rotating || !emblaApi) return undefined;
@@ -254,21 +293,26 @@ export function Carousel({
         return;
       }
       changeReasonRef.current = "autoplay";
-      emblaApi.scrollNext(reducedMotion);
+      emblaApi.scrollNext(motionReduced);
     }, resolvedInterval);
     return () => window.clearTimeout(timer);
-  }, [count, currentIndex, emblaApi, loop, reducedMotion, resolvedInterval, rotating]);
+  }, [count, currentIndex, emblaApi, loop, motionReduced, resolvedInterval, rotating]);
 
   const move = (reason: "next" | "previous") => {
     if (!emblaApi || disabled || count <= 1) return;
     if (autoplay) setUserPaused(true);
     changeReasonRef.current = reason;
-    if (reason === "next") emblaApi.scrollNext(reducedMotion);
-    else emblaApi.scrollPrev(reducedMotion);
+    if (reason === "next") emblaApi.scrollNext(motionReduced);
+    else emblaApi.scrollPrev(motionReduced);
   };
 
   const toggleRotation = () => {
     if (disabled || !autoplay) return;
+    if (rotationFocusAction === "pause") {
+      setRotationFocusAction(null);
+      setUserPaused(true);
+      return;
+    }
     if (rotationRequested) {
       setUserPaused(true);
       return;
@@ -307,6 +351,13 @@ export function Carousel({
       data-meu-component="carousel"
       data-rotating={rotating ? "true" : "false"}
       onFocusCapture={(event) => {
+        if (
+          rotationRequested &&
+          event.target instanceof HTMLElement &&
+          event.target.hasAttribute("data-meu-carousel-rotation")
+        ) {
+          setRotationFocusAction("pause");
+        }
         if (autoplay) setUserPaused(true);
         if (onFocusCapture) onFocusCapture(event);
       }}
@@ -324,11 +375,15 @@ export function Carousel({
           <button
             className={rotationButton}
             type="button"
-            aria-label={rotationRequested ? pauseLabel || labels.pause : playLabel || labels.play}
+            aria-label={
+              rotationControlShowsPause ? pauseLabel || labels.pause : playLabel || labels.play
+            }
+            data-meu-carousel-rotation
             disabled={disabled || count <= 1}
+            onBlur={() => setRotationFocusAction(null)}
             onClick={toggleRotation}
           >
-            <span aria-hidden="true">{rotationRequested ? "Ⅱ" : "▶"}</span>
+            <span aria-hidden="true">{rotationControlShowsPause ? "Ⅱ" : "▶"}</span>
           </button>
         ) : null}
         <button
@@ -355,12 +410,7 @@ export function Carousel({
         </button>
       </div>
       <div className={viewport} ref={emblaRef} data-meu-carousel-viewport>
-        <div
-          className={track}
-          aria-atomic="false"
-          aria-live={rotating ? "off" : "polite"}
-          data-meu-carousel-track
-        >
+        <div className={track} aria-atomic="false" aria-live="off" data-meu-carousel-track>
           {items.map((item, itemIndex) => {
             const active = itemIndex === currentIndex;
             return (
@@ -381,6 +431,19 @@ export function Carousel({
           })}
         </div>
       </div>
+      {count > 0 ? (
+        <VisuallyHidden
+          role="status"
+          aria-atomic="true"
+          aria-live={rotating ? "off" : "polite"}
+          data-meu-carousel-status
+        >
+          {labels.status(
+            currentIndex + 1,
+            items[currentIndex] ? items[currentIndex].ariaLabel : undefined
+          )}
+        </VisuallyHidden>
+      ) : null}
       {indicatorContent ? <div className={indicatorClass}>{indicatorContent}</div> : null}
     </div>
   );

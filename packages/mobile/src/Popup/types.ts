@@ -26,7 +26,15 @@ type PopupAccessibleName =
 
 type PopupBaseProps = Omit<
   HTMLAttributes<HTMLDivElement>,
-  "aria-label" | "aria-labelledby" | "children"
+  | "aria-hidden"
+  | "aria-label"
+  | "aria-labelledby"
+  | "aria-modal"
+  | "children"
+  | "hidden"
+  | "inert"
+  | "role"
+  | "tabIndex"
 > & {
   /** Dialog body. */
   children: ReactNode;
@@ -34,31 +42,34 @@ type PopupBaseProps = Omit<
   closeLabel?: string;
   /** Lets Escape request closure while the popup is open. @defaultValue true */
   closeOnEscape?: boolean;
-  /** Lets a mask press request closure. @defaultValue false */
+  /** Lets a completed native mask click request closure when `mask` is rendered. @defaultValue false */
   closeOnMaskClick?: boolean;
-  /** Portal target; `null` renders next to the caller. Defaults to ConfigProvider's target. */
+  /**
+   * Portal target; `null` renders next to the caller. Defaults to ConfigProvider's target. When a
+   * resolver's destination changes, pass a new resolver identity so focus trapping rebinds.
+   */
   container?: OverlayContainer;
   /** Initial open state for uncontrolled usage. @defaultValue false */
   defaultOpen?: boolean;
-  /** Keeps the closed dialog mounted and hidden after hydration. @defaultValue false */
+  /** Keeps the closed dialog mounted, inert and hidden, including during SSR. @defaultValue false */
   forceMount?: boolean;
-  /** Preferred element to receive focus when the dialog opens. */
+  /** Preferred visible descendant to receive focus; invalid targets fall back to the first tabbable descendant or panel. */
   initialFocusRef?: RefObject<HTMLElement | null>;
-  /** Prevents document-body scrolling while open. @defaultValue true */
+  /** Prevents the current document body from scrolling while open. @defaultValue true */
   lockScroll?: boolean;
-  /** Renders the modal backdrop. @defaultValue true */
+  /** Renders the modal backdrop; focus trapping and modal isolation remain active when omitted. @defaultValue true */
   mask?: boolean;
   /** Backdrop opacity token. @defaultValue "default" */
   maskOpacity?: MaskOpacity;
-  /** Reports requested controlled or uncontrolled visibility changes and their cause. */
+  /** Reports user dismissal requests and their cause; prop-driven visibility changes emit nothing. */
   onOpenChange?: (open: boolean, details: OverlayOpenChangeDetails) => void;
-  /** Controlled open state. */
+  /** Controlled open state; consumers must accept or reject each dismissal request. */
   open?: boolean;
-  /** Screen edge from which the panel enters. @defaultValue "bottom" */
+  /** Physical screen edge from which the panel enters; RTL does not swap left and right. @defaultValue "bottom" */
   position?: PopupPosition;
   /** Ref to the dialog panel rather than the portal layer. */
   ref?: Ref<HTMLDivElement>;
-  /** Restores focus after the dialog closes when focus remains inside it. @defaultValue true */
+  /** Restores the focus captured when the dialog opened after it closes. @defaultValue true */
   restoreFocus?: boolean;
   /** Explicit focus-restoration target; otherwise the previously focused element is used. */
   returnFocusRef?: RefObject<HTMLElement | null>;

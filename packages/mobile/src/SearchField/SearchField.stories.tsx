@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import { Field } from "../Field";
+import { waitForStory } from "../storyTestUtils";
 import { SearchField } from "./SearchField";
 
 function ControlledSearch() {
@@ -55,6 +56,20 @@ function NativeFormSearch() {
   );
 }
 
+function NativeResetSearch() {
+  return (
+    <form style={{ display: "grid", gap: 12, maxWidth: 390 }}>
+      <SearchField
+        aria-label="可重置搜索"
+        defaultValue="订单"
+        name="query"
+        placeholder="修改后恢复初始搜索词"
+      />
+      <button type="reset">恢复搜索条件</button>
+    </form>
+  );
+}
+
 const meta = {
   title: "Forms/SearchField",
   component: SearchField,
@@ -100,4 +115,30 @@ export const Loading: Story = {
   args: { defaultValue: "正在查询订单", loading: true, loadingLabel: "订单搜索中" }
 };
 export const NativeFormSubmission: Story = { render: () => <NativeFormSearch /> };
+export const NativeFormReset: Story = {
+  render: () => <NativeResetSearch />,
+  play: async ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>('input[type="search"]');
+    const clear = canvasElement.querySelector<HTMLButtonElement>('button[type="button"]');
+    const reset = canvasElement.querySelector<HTMLButtonElement>('button[type="reset"]');
+    if (!input || !clear || !reset) {
+      throw new globalThis.Error("SearchField reset controls were not rendered");
+    }
+
+    clear.click();
+    await waitForStory(() => input.value === "", "SearchField did not clear before reset");
+    reset.click();
+    await waitForStory(
+      () => input.value === "订单",
+      "SearchField did not restore defaultValue on native reset"
+    );
+    const data = new FormData(reset.form!);
+    if (data.get("query") !== "订单") {
+      throw new globalThis.Error("SearchField reset value was missing from FormData");
+    }
+  }
+};
+export const RightToLeft: Story = {
+  args: { defaultValue: "طلب", dir: "rtl", placeholder: "ابحث عن الطلبات" }
+};
 export const Large: Story = { args: { size: "large" } };

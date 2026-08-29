@@ -2,8 +2,8 @@
 
 import { MeuIconX } from "@meu/icons-react";
 import { Portal, useBodyScrollLock, useFocusTrap } from "@meu/primitives-react";
-import { useRef } from "react";
-import type { Ref } from "react";
+import { useMemo, useRef } from "react";
+import type { Ref, RefObject } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useControllableOpen } from "../internal/useControllableOpen";
@@ -52,7 +52,17 @@ export function Popup({
   ...props
 }: PopupProps) {
   const config = useMeuConfig();
+  const portalContainer = container === undefined ? config.portalContainer : container;
   const panelRef = useRef<HTMLDivElement>(null);
+  const focusTrapRef = useMemo<RefObject<HTMLElement | null>>(() => {
+    // The dependency intentionally gives the focus trap a new ref identity when the Portal moves.
+    void portalContainer;
+    return {
+      get current() {
+        return panelRef.current;
+      }
+    };
+  }, [portalContainer]);
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
     defaultOpen,
     onOpenChange,
@@ -60,13 +70,12 @@ export function Popup({
   });
   const { hidden, shouldRender, visualState } = useOverlayPresence(resolvedOpen, forceMount);
   const localizedCloseLabel = closeLabel || (config.locale === "en-US" ? "Close" : "关闭");
-  const portalContainer = container === undefined ? config.portalContainer : container;
   const configBoundary = getConfigBoundaryProps(config);
 
   useBodyScrollLock(resolvedOpen && lockScroll);
   useFocusTrap({
     active: resolvedOpen,
-    containerRef: panelRef,
+    containerRef: focusTrapRef,
     initialFocusRef,
     onEscape: closeOnEscape ? () => requestOpenChange(false, { reason: "escape" }) : undefined,
     restoreFocus,

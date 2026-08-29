@@ -18,6 +18,8 @@
 - `loop` 由引擎实现无缝循环；`allowDrag=false` 只关闭拖拽，前后按钮与受控索引仍可用。
 - 自动播放默认关闭；启用后提供原生暂停/播放按钮，焦点进入或手动拖拽时停止，悬停期间暂停。
 - `prefers-reduced-motion` 下不会自动播放；用户显式点击播放后才允许继续，并使用即时切换。
-- 轮播容器与每张内容采用 carousel / slide roledescription；自动播放时 live region 为 off，静止时为 polite。
+- 轮播容器与每张内容采用 carousel / slide roledescription；独立 status 组合页名、可见页和总页数，自动播放时为 off，静止时为 polite。
 - 非活动页设置 `aria-hidden`，并保存/移除其可聚焦后代的 tabindex，避免读屏或键盘进入屏外内容。
+- items 缩短时，受控与非受控索引都会收敛；非受控 items 再扩容不会复活旧索引，初始空列表仍会在首批内容到达时应用 `defaultIndex`。
+- track 保留纵向滚动和 pinch zoom；Embla 负责横向 drag、多指退出和 touch cancel，目标 WebView 与真机仍须验证。
 - 组件不读取路由、请求或业务埋点；未来 uni-app 复用索引、循环、自动播放与暂停契约，Embla 仅属于 React Web 适配层。
