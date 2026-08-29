@@ -40,3 +40,23 @@ export const Solid: Story = {
 export const Outline: Story = { args: { variant: "outline" } };
 export const Loading: Story = { args: { loading: true } };
 export const Danger: Story = { args: { tone: "danger", children: "删除这条记录" } };
+export const MobileStateMatrix: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12, width: "min(100%, 390px)" }}>
+      <Button block>主要操作</Button>
+      <Button block variant="outline" tone="neutral">
+        次要操作
+      </Button>
+      <Button block variant="ghost" tone="danger">
+        危险操作
+      </Button>
+      <Button block loading>
+        正在保存这项设置
+      </Button>
+      <Button block disabled>
+        暂不可用
+      </Button>
+      <Button block>允许换行的较长移动端操作文案</Button>
+    </div>
+  )
+};

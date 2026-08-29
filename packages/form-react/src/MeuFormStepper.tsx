@@ -82,7 +82,7 @@ export function MeuFormStepper<TFieldValues extends FieldValues>({
                 field.onChange(nextValue);
                 if (onChange) onChange(nextValue);
               }}
-              status={fieldState.invalid ? "error" : "default"}
+              status={fieldState.invalid || stepperProps.status === "error" ? "error" : "default"}
             />
           </Field>
         );

@@ -19,7 +19,12 @@ export const button = recipe({
     fontWeight: 600,
     lineHeight: 1,
     cursor: "pointer",
+    touchAction: "manipulation",
+    userSelect: "none",
+    WebkitUserSelect: "none",
     WebkitTapHighlightColor: "transparent",
+    textAlign: "center",
+    overflowWrap: "anywhere",
     transition: [
       "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
       "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
@@ -39,7 +44,13 @@ export const button = recipe({
       }
     },
     "@media": {
-      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": {
+        borderColor: "ButtonText",
+        borderStyle: "solid",
+        borderWidth: 1,
+        forcedColorAdjust: "auto"
+      }
     }
   },
   variants: {
@@ -131,7 +142,8 @@ export const button = recipe({
 });
 
 export const buttonItem = style({
-  display: "inline-flex"
+  display: "inline-flex",
+  minWidth: 0
 });
 
 export const spinner = style({

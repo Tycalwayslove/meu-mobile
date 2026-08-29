@@ -134,8 +134,8 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 - Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`，覆盖不可变来源、逐图标 checksum/许可映射、全部 Meu React 导出 ID、装饰/三种命名优先级、空名称、title ID、ref、尺寸/描边/currentColor 与 SSR
 - Generation drift: `icons:check` 验证 snapshot/license checksum，并离线比较 `icons.ts` 与 manifest；core package `test` 必须先通过该检查
 - Upstream archive: `icons:upstream:verify` 已用固定 npm SHA-512 验证 5 个 SVG 和完整 LICENSE；该显式审计命令不进入普通 `pnpm check`
-- Story interaction: `Catalog` 验证装饰图标不可聚焦且对辅助技术隐藏；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `Catalog` 验证装饰图标不可聚焦且对辅助技术隐藏；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 1531 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 1507 B / 32768 B 预算，组合 Brotli 1335 B；共享样式由应用单独导入一次。
 - SSR/hydration: Unit 已验证 SSR title/labelledby 关联、角色、Meu ID、currentColor 与尺寸；独立真实 hydration 仍由 Next H5 证据覆盖

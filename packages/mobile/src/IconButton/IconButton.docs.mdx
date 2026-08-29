@@ -133,8 +133,8 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 ## 测试证据
 
 - Unit: `IconButton.test.tsx`，覆盖默认 type、点击、label/labelledby、空白/竞争名称拒绝、装饰图标、pressed/mixed、loading/disabled、ref、原生 form 属性/提交与 SSR
-- Story interaction: `Default.play` 验证按压状态、业务输出与焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `Default.play` 验证按压状态、业务输出与焦点；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2047 B / 32768 B 预算，组合 Brotli 1799 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next 16 App Router 首屏输出可访问名称，hydration 后 Enter 操作成功且 0 hydration/runtime error

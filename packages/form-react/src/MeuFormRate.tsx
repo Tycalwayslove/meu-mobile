@@ -79,7 +79,7 @@ export function MeuFormRate<TFieldValues extends FieldValues>({
               field.onChange(nextValue);
               if (onChange) onChange(nextValue);
             }}
-            status={fieldState.invalid ? "error" : "default"}
+            status={fieldState.invalid || rateProps.status === "error" ? "error" : "default"}
           />
         </Field>
       )}

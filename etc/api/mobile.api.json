@@ -18267,7 +18267,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"onChange\" | \"step\" | \"max\" | \"min\"> & {\n    defaultValue?: number;\n    formatValue?: (value: number) => import(\"react\")."
+              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"onChange\" | \"step\" | \"max\" | \"min\" | \"readOnly\"> & {\n    defaultValue?: number;\n    formatValue?: (value: number) => import(\"react\")."
             },
             {
               "kind": "Reference",
@@ -18321,7 +18321,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    showValue?: boolean;\n    size?: import(\"./types\")."
+              "text": ">) => void;\n    readOnly?: boolean;\n    showValue?: boolean;\n    size?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -18438,7 +18438,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"max\" | \"min\" | \"onChange\" | \"size\" | \"step\" | \"type\" | \"value\"> & {\n    defaultValue?: number;\n    formatValue?: (value: number) => "
+              "text": ">, \"defaultValue\" | \"max\" | \"min\" | \"onChange\" | \"readOnly\" | \"size\" | \"step\" | \"type\" | \"value\"> & {\n    defaultValue?: number;\n    formatValue?: (value: number) => "
             },
             {
               "kind": "Reference",
@@ -18492,7 +18492,7 @@
             },
             {
               "kind": "Content",
-              "text": ">) => void;\n    showValue?: boolean;\n    size?: "
+              "text": ">) => void;\n    readOnly?: boolean;\n    showValue?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",

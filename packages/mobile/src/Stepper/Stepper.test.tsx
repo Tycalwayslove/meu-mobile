@@ -116,6 +116,26 @@ describe("Stepper", () => {
     expect(input.getAttribute("aria-describedby")).toContain("error");
   });
 
+  it("merges nested Field and caller accessibility relationships", () => {
+    render(
+      <>
+        <span id="quantity-name">订单数量</span>
+        <span id="quantity-hint">按箱购买</span>
+        <Field label="购买数量" description="每箱六件">
+          <div>
+            <Stepper aria-labelledby="quantity-name" aria-describedby="quantity-hint" />
+          </div>
+        </Field>
+      </>
+    );
+
+    const input = screen.getByRole("spinbutton", { name: "订单数量 购买数量" });
+    expect(input.getAttribute("aria-labelledby")).toContain("quantity-name");
+    expect(input.getAttribute("aria-labelledby")).toContain("label");
+    expect(input.getAttribute("aria-describedby")).toContain("quantity-hint");
+    expect(input.getAttribute("aria-describedby")).toContain("description");
+  });
+
   it.each([
     [false, "false", "default"],
     ["false", "false", "default"],

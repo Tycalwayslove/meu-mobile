@@ -52,6 +52,7 @@ source: packages/form-react/src/MeuForm
 - adapter 的局部 `disabled` 会同步登记到 React Hook Form：禁用期间既不进入 RHF `onSubmit`，也不进入原生 `FormData`；重新启用后保留值并恢复提交。
 - Calendar 将整个月历视为一个复合字段：日期按钮和月份控件之间移动焦点不会提前 touched，只有焦点离开整个月历时才触发 RHF blur 与 `mode="onBlur"` 校验。
 - adapter 将 `required` 同步给 Field 和适用的原生控件；`MeuForm` 默认 `noValidate=true`，由 React Hook Form 负责验证与错误展示。
+- adapter 的错误视觉取 RHF `fieldState.invalid` 与调用方显式 `status="error"` 的并集；字段当前通过 RHF 校验时，不会把业务仍需展示的错误态重置为 default。
 - NumberKeyboard、PasscodeInput、Picker、CascadePicker、DatePicker、DateRangePicker、Calendar、TimePicker、TreeSelect 与 ImageUploader 都提供明确的原生 FormData 契约；集合值按同名重复条目保持顺序。
 - 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按所属 `MeuForm` 内的 DOM 顺序聚焦首个已注册错误字段；同页多表单的同名字段不会互相干扰。
 - `MeuForm` 透传原生 form 属性，`ref` 指向真实 `HTMLFormElement`。
@@ -109,6 +110,7 @@ export function StoreForm() {
 ## 表单集成
 
 - 文本、textarea、search、checkbox、switch、stepper、slider 和 rate 保留原生 `name/ref/onBlur/required/disabled`。
+- `MeuFormSlider readOnly` 使用底层 Slider 的 meter + hidden input 契约：不可调值、仍进入 FormData，ref 指向 hidden input；disabled readOnly 仍会从 RHF 与原生提交中省略。
 - CheckboxGroup、RadioGroup、Selector 与 SegmentedControl 只有在焦点离开整个复合控件后才调用 RHF `onBlur`，组内移动焦点不会提前变成 touched。
 - `MeuFormSegmentedControl` 固定使用原生 `radiogroup` 模式，以保留 `name`、`required`、FormData 和 RHF 字段契约；导航型 `mode="tabs"` 不属于表单字段，请直接使用 `SegmentedControl` 并由页面拥有对应 tabpanel。
 - Calendar 同样只在焦点离开整个复合根时调用 RHF 与消费方 `onBlur`；RHF 先更新 touched，再调用消费方回调。选择日期只更新 value/dirty，不把 change 伪装成 blur。
@@ -131,6 +133,7 @@ export function StoreForm() {
 - `onInvalid(errors, event)`：RHF 校验未通过时触发。
 - `onSubmitError(error)`：接收 `onSubmit` 或异步 `onInvalid` 的 rejection；省略时错误会在异步任务中重新抛出，避免静默失败。
 - adapter 的 `onChange/onBlur`：先更新 RHF value/touched，再调用消费方同名回调；业务回调读取 `getValues()` 时已得到新值。
+- adapter 的显式 `status="error"` 只控制呈现和 `aria-invalid`，不会凭空创建 RHF error；需要阻止提交时仍应配置 `rules`、schema 或服务端错误。
 - 原生 `onReset` 先交给消费方；未调用 `preventDefault()` 时，`MeuForm` 会同步执行 `form.reset()`。`onInput/onChange` 等其余 form 事件继续透传。
 - `applyMeuFormErrors(form, errors, options)`：默认先清除该 form 上一批由本 helper 写入的 server error，再写入新响应；按所属表单的 DOM 顺序跳过 disabled/inert/aria-hidden 字段并聚焦首个可用具名控件。`clearPrevious=false` 可合并响应，`shouldFocusFirst=false` 可禁止聚焦。未由 `MeuForm` 承载的裸 RHF 实例保持 document fallback。
 
@@ -196,11 +199,11 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序和 server error 替换；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
-- Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx`、`MeuFormValueControls.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序、server error 替换、adapter 显式 error 保留与 readOnly Slider hidden FormData；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
+- Story interaction: `check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 114853 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38288 B / 65536 B 预算，组合 Brotli 89814 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 115288 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38288 B / 65536 B 预算，组合 Brotli 90363 B；共享样式由应用单独导入一次。
 - SSR/hydration: `MeuForm.ssr.test.tsx` 验证确定性原生 form shell 与 React 19 hydration 0 mismatch；隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，客户端 `reset(nextDefaults)` 后原生 reset 恢复新的客户端默认值而不是旧服务端值
 - RTL: 隔离 Next H5 的 Form hydration 场景在 `dir="rtl"` 下验证输入方向继承、默认值与 reset 行为；adapter 继续依赖底层组件的逻辑属性
 - Reduced motion: Form 无自有动效；同一专项场景在 `motion="reduced"` Provider 下完成 hydration 与交互，Form 不新增 transition/animation
@@ -242,3 +245,4 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 | 2026-08-29 | 未发布 | verification | 在双移动引擎验证复杂日期范围的单条 JSON `FormData` 契约                             | 后端按 JSON 数组解析 `deliveryWindow`，不再依赖同名重复条目                 |
 | 2026-08-29 | 未发布 | hardening    | 核心注册、卸载、并发提交、异步错误与首错聚焦契约加固                                | 默认卸载注销；`action` 改为显式边界；新增可选错误/并发 props                |
 | 2026-08-29 | 未发布 | hardening    | 22 个 adapter 增加稳定的内部字段顺序标记，字符串 action 保留原始 submitter          | 复合/空值字段也按 DOM 顺序聚焦；业务不得依赖内部诊断属性                    |
+| 2026-08-29 | 未发布 | hardening    | 数值与选择类 adapter 保留调用方显式 `status="error"`，并加固 Slider readOnly 契约   | `status` 仍只控制呈现；校验状态继续由 `rules`、schema 或服务端错误管理      |

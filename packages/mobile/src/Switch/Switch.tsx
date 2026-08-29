@@ -83,6 +83,11 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     if (interactionBlocked) {
       event.preventDefault();
+      const element = event.currentTarget;
+      element.checked = currentChecked;
+      void Promise.resolve().then(() => {
+        if (inputRef.current === element) element.checked = currentChecked;
+      });
       return;
     }
     const nextChecked = event.target.checked;
@@ -99,7 +104,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
         if (inputRef.current === element) element.checked = currentChecked;
       });
     }
-    if (onClick) onClick(event);
+    if (!loading && onClick) onClick(event);
   }
 
   useEffect(() => {
@@ -107,10 +112,12 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
     const form = element ? element.form : null;
     if (!element || !form || controlled) return;
 
+    const view = form.ownerDocument.defaultView;
+    if (!view) return;
     let resetTimer: number | null = null;
     const handleReset = (event: Event) => {
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
-      resetTimer = window.setTimeout(() => {
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
+      resetTimer = view.setTimeout(() => {
         resetTimer = null;
         if (!event.defaultPrevented) setUncontrolledChecked(defaultChecked);
       }, 0);
@@ -118,7 +125,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
     form.addEventListener("reset", handleReset);
     return () => {
       form.removeEventListener("reset", handleReset);
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
     };
   }, [controlled, defaultChecked, form]);
 

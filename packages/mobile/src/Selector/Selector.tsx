@@ -243,11 +243,13 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
 
   useEffect(() => {
     if (controlled) return undefined;
+    const ownerDocument = rootRef.current ? rootRef.current.ownerDocument : null;
+    if (!ownerDocument) return undefined;
     const handleReset = (event: Event) => {
       const firstInput = inputRefsRef.current.values().next().value;
       const element = rootRef.current;
       const ownerForm = firstInput ? firstInput.form : element ? element.closest("form") : null;
-      if (!(ownerForm instanceof HTMLFormElement) || event.target !== ownerForm) return;
+      if (!ownerForm || event.target !== ownerForm) return;
       if (event.defaultPrevented) return;
       const resetConfig = resetConfigRef.current;
       inputRefsRef.current.forEach((inputElement, identity) => {
@@ -262,9 +264,9 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
         value: resetConfig.value
       });
     };
-    document.addEventListener("reset", handleReset);
+    ownerDocument.addEventListener("reset", handleReset);
     return () => {
-      document.removeEventListener("reset", handleReset);
+      ownerDocument.removeEventListener("reset", handleReset);
     };
   }, [controlled]);
 

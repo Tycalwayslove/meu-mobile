@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "50:414"
 storyIds:
   [
     forms-switch--default,
@@ -30,10 +30,10 @@ source: packages/mobile/src/Switch
 
 - 基于原生 checkbox，暴露 `role="switch"`、checked/required/disabled/name/value/ref 和 constraint validation。
 - 支持受控/非受控、loading、readOnly、error 与三档尺寸，所有尺寸触控目标至少 44×44 CSS px。
-- 非受控值随原生 form reset 恢复；loading/readOnly 冻结交互但保留 checked 值进入 FormData。
+- 非受控值随原生 form reset 恢复；loading/readOnly 冻结交互但保留 checked 值进入 FormData，reset 使用所属 document 的计时器。
 - 调用方与 Field IDREF 合并，Field invalid/required 进入原生控件。
 - 没有 Field/status 错误时，显式 `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`，后两种 token 本身也进入错误视觉态。
-- thumb 使用逻辑 margin 移动，RTL 自动镜像；reduced-motion、forced-colors 和兼容旧 WebView 的焦点环有明确降级。
+- thumb 使用逻辑 margin 移动，RTL 自动镜像；移动 tap、reduced-motion、forced-colors（含 disabled GrayText）和兼容旧 WebView 的焦点环有明确降级。
 
 状态为 `verification`。Unit、SSR、Story contract、本地 axe 与 Next H5 移动 Chromium/WebKit 的基础切换路径已补齐；发布前仍需异步/冻结态的目标 WebView 场景、Chromatic 最终审批及 VoiceOver/TalkBack 真机证据。
 
@@ -76,6 +76,7 @@ V2 对照了 [Ant Design Mobile Switch](https://mobile.ant.design/components/swi
 - `required` 可触发原生 constraint validation，并从 Field context 继承。
 - `loading` 不设置 native disabled：它使用 `aria-busy` + `aria-disabled` 阻断变化，因此正在保存的 checked 值仍存在于 FormData，也仍可聚焦获知状态。
 - `readOnly` 同样保留聚焦和 FormData；真正 disabled 才从 tab order 与 FormData 移除。
+- 官方 `MeuFormSwitch` 以 RHF boolean 为受控事实源，并合并 RHF invalid 与调用方显式 `status="error"`，不会在表单尚未报错时覆盖业务错误态。
 
 ## Props
 
@@ -83,7 +84,7 @@ API 表由 TypeScript/TSDoc 和 API Extractor从 `SwitchProps` 生成。专有 P
 
 ## Events
 
-`onChange(checked, event)` 仅在接受变化后触发。disabled 不产生 native click；loading/readOnly 会 preventDefault、恢复当前值且不触发 onChange。调用方 `onClick` 仍收到 loading/readOnly 事件，可通过 `defaultPrevented` 识别冻结状态。
+`onChange(checked, event)` 仅在接受变化后触发。disabled 不产生 native click；loading/readOnly 会 preventDefault、恢复当前值且不触发 onChange。loading 也不会调用传给 Switch 的 `onClick`，避免保存期间重复触发业务请求；readOnly 的 `onClick` 仍可用于观察焦点/说明交互，并会收到已 preventDefault 的事件。
 
 ## Ref 与命令式方法
 
@@ -122,6 +123,8 @@ track 颜色和 thumb 逻辑 margin 使用短状态过渡；RTL 同一属性自�
 
 render 不读取 browser global；reset listener 只在 effect 中安装。SSR 输出完整 checked/name/value/role。调用方不得根据客户端能力改变首屏 checked，否则会产生 hydration 不一致。
 
+`Switch.hydration.test.tsx` 验证服务端 input 节点复用、无 recoverable error，且受控 Switch 在 hydration 后仍可切换。
+
 ## RTL 与国际化
 
 thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向右、RTL checked 向左。组件无内建业务文案；accessible name 和 loading 结果公告由页面 locale 提供。
@@ -143,12 +146,14 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 
 ## 测试证据
 
-- Unit: `Switch.test.tsx` 覆盖受控/非受控、Field、ARIA invalid token、loading/readOnly、FormData、reset、required 与 IDREF
+- Unit: `Switch.test.tsx` 覆盖受控/非受控、Field、ARIA invalid token、loading/readOnly、`onClick` 抑制、FormData、reset、required 与 IDREF
 - SSR: `Switch.ssr.test.tsx` 覆盖 role/checked/name/value 与显式 ARIA invalid token markup
-- Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Hydration: `Switch.hydration.test.tsx` 覆盖节点复用、受控切换与零 recoverable error
+- Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3135 B / 32768 B 预算，组合 Brotli 2781 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3167 B / 32768 B 预算，组合 Brotli 2808 B；共享样式由应用单独导入一次。
+- Figma：canonical Medium set `50:414`，Small `50:359`、Large `50:469`；30 variants，含 loading。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: 三尺寸 root 最小 44×44
 - RTL/reduced-motion/forced-colors：CSS 和 Story 已建；浏览器视觉证据待补
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击“消息通知”后，表单提交值由 `notifications:true` 更新为 `notifications:false`；页面内 Switch 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
@@ -166,10 +171,12 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 - 修复 loading 通过 native disabled 丢失 FormData 的问题，并明确 aria-busy/aria-disabled 契约。
 - 增加 readOnly、原生 form reset、Field required 与 IDREF 合并。
 - thumb 改用逻辑属性支持 RTL；补齐焦点环、forced-colors、reduced-motion、SSR 和 Story contract。
+- loading 现在同时抑制消费方 `onClick`；补移动 tap、disabled 强制色彩、跨 document reset 与 hydration 回归。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                                                         |
-| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的布尔切换、表单值、hydration 与 44px 证据 | 无                                                               |
-| 2026-08-28 | 未发布 | behavior     | loading 表单语义、readOnly、reset、RTL 与兼容性细化                          | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled` |
+| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                                                             |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 2026-08-29 | 未发布 | behavior     | loading 抑制业务 click；补移动 tap、强制色彩、跨 document reset 与 hydration | 如依赖 loading 期间 onClick 观察，请改为邻近状态或 loading prop 变化 |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的布尔切换、表单值、hydration 与 44px 证据 | 无                                                                   |
+| 2026-08-28 | 未发布 | behavior     | loading 表单语义、readOnly、reset、RTL 与兼容性细化                          | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled`     |

@@ -159,6 +159,7 @@ export function BottomSheet({
   const suppressHandleClickRef = useRef(false);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
+  const [bodyScrollable, setBodyScrollable] = useState(false);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
   const [uncontrolledSnapPoint, setUncontrolledSnapPoint] = useState<
     BottomSheetSnapPoint | undefined
@@ -193,6 +194,7 @@ export function BottomSheet({
   const localizedCloseLabel = closeLabel || (config.locale === "en-US" ? "Close" : "关闭");
   const localizedHandleLabel =
     dragHandleLabel || (config.locale === "en-US" ? "Adjust sheet height" : "调整面板高度");
+  const localizedBodyLabel = config.locale === "en-US" ? "Scrollable content" : "可滚动内容";
   const hasTitle = title !== undefined && title !== null;
   const resolvedLabelledby = ariaLabelledby || (!ariaLabel && hasTitle ? titleId : undefined);
   const portalContainer = container === undefined ? config.portalContainer : container;
@@ -271,6 +273,7 @@ export function BottomSheet({
       if (!panelNode || !bodyNode || !contentNode) return;
       const fixedHeight = panelNode.scrollHeight - bodyNode.clientHeight;
       setContentHeight(Math.max(1, fixedHeight + contentNode.scrollHeight));
+      setBodyScrollable(bodyNode.scrollHeight > bodyNode.clientHeight + 1);
     };
     const frame = window.requestAnimationFrame(measure);
     let observer: ResizeObserver | null = null;
@@ -497,7 +500,13 @@ export function BottomSheet({
               ) : null}
             </div>
           ) : null}
-          <div ref={bodyRef} className={body}>
+          <div
+            ref={bodyRef}
+            className={body}
+            role="region"
+            aria-label={localizedBodyLabel}
+            tabIndex={bodyScrollable ? 0 : undefined}
+          >
             <div ref={contentRef} className={contentClass}>
               {children}
             </div>

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { useState } from "react";
 import type { ChangeEvent } from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
@@ -251,6 +251,36 @@ describe("SegmentedControl", () => {
     expect(screen.getByRole("radio", { name: "列表" })).toHaveProperty("checked", true);
     form.remove();
     vi.useRealTimers();
+  });
+
+  it("observes native reset in the component ownerDocument", () => {
+    const frame = document.createElement("iframe");
+    document.body.append(frame);
+    const ownerDocument = frame.contentDocument;
+    if (!ownerDocument) throw new Error("Expected an iframe document");
+    const container = ownerDocument.createElement("div");
+    ownerDocument.body.append(container);
+    const rendered = render(
+      <form aria-label="frame segmented form">
+        <SegmentedControl
+          aria-label="frame segmented"
+          defaultValue="list"
+          name="view"
+          options={options}
+        />
+      </form>,
+      { container, baseElement: ownerDocument.body }
+    );
+    const queries = within(ownerDocument.body);
+    const form = queries.getByRole<HTMLFormElement>("form", { name: "frame segmented form" });
+    fireEvent.click(queries.getByRole("radio", { name: "卡片" }));
+    expect(new FormData(form).get("view")).toBe("card");
+
+    act(() => form.reset());
+    expect(queries.getByRole("radio", { name: "列表" })).toHaveProperty("checked", true);
+    expect(new FormData(form).get("view")).toBe("list");
+    rendered.unmount();
+    frame.remove();
   });
 
   it("falls back to the first enabled option when an uncontrolled identity disappears", () => {

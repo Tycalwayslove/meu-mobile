@@ -98,7 +98,9 @@ export function MeuFormSegmentedControl<
               field.onChange(nextValue);
               if (onChange) onChange(nextValue, event);
             }}
-            status={fieldState.invalid ? "error" : "default"}
+            status={
+              fieldState.invalid || segmentedControlProps.status === "error" ? "error" : "default"
+            }
           />
         </Field>
       )}

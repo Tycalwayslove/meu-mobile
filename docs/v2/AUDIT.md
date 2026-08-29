@@ -123,17 +123,18 @@ V2 采用以下事实源：
 
 已由当前仓库命令重新生成或执行的证据：
 
-- `docs:manifest:report`：68 个产品条目、125 个公开值、383 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
+- `docs:manifest:report`：68 个产品条目、125 个公开值、384 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
 - 68/68 个产品条目状态为 `verification`；尚无条目提前标记为 `commercial`。
-- `api:properties:strict`：226 个结构化类型、2359 个字段、2359 个已描述字段、242 个事件，公开字段文档覆盖率 100%。
+- Figma 覆盖已达到 68/68；最后 9 个基础交互控件完成 component sets、Light/Dark previews、设计契约与 Token/触控目标 QA，Code Connect 仍按席位边界未尝试。
+- `api:properties:strict`：226 个结构化类型、2361 个字段、2361 个已描述字段、242 个事件，公开字段文档覆盖率 100%。
 - `api:extract:strict`：mobile、form-react、icons-react、primitives-react 四包均为 0 warning；公开声明全部具有明确 release tag。
-- `storybook:validate-links`：当前本地 Storybook 构建含 436 个 Story，组件文档引用 407 个 Story ID 且无缺失；80/80 个标题至少包含一项关键交互或语义断言。开发阶段只保留本地构建证据，不上传 Chromatic。
-- `check-storybook-a11y.mjs`：最近一次完整矩阵在 390×844 视口运行 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），2,618 个组合通过且无 `pageerror`。该基线早于本轮新增 Story；按开发期本地优先策略，全部组件冻结后统一刷新。
+- `storybook:validate-links`：当前本地 Storybook 构建含 444 个 Story，组件文档引用 415 个 Story ID 且无缺失；81/81 个标题至少包含一项关键交互或语义断言。开发阶段只保留本地构建证据，不上传 Chromatic。
+- `check-storybook-a11y.mjs`：当前完整矩阵在 390×844 视口运行 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），3,108 个组合通过，0 axe 违规、0 `pageerror`。
 - 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
-- 官网生产构建通过 68 个组件页 × Light/Dark 的历史本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景；本轮改动后尚未重跑官网全量矩阵。
-- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 24,879 B / 32 KiB，逐组件结果已同步到留存文档。
-- 隔离 Next H5：最近一次完整套件在移动 Chromium/WebKit 中 92/92 通过；本批重新构建 Next 16 production 站后，Provider/Portal、Icon/VisuallyHidden/IconButton 与 SafeArea/Space/Divider 的 4/4 条双引擎定向场景及 2/2 条 hydration 场景通过。完整套件将在候选冻结后统一复验。
-- 本批全量 `pnpm test` 为 19/19 个任务通过，其中 mobile 为 141 files / 927 tests；API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle、类型与兼容性检查均已本地验证。线上视觉矩阵继续留待 68 个组件冻结后统一执行。
+- 官网生产构建通过 68 个组件页 × Light/Dark 的当前本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景，0 违规、0 `pageerror`、0 `console.error`。
+- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 25,021 B / 32 KiB，逐组件结果已同步到留存文档。
+- 隔离 Next H5：Next 16 production build 通过；完整套件在移动 Chromium/WebKit 中 104/104 通过，包含 loading 点击阻断、standalone Radio 同步、Slider readOnly meter/FormData，以及既有 Portal、hydration、手势和性能链路。
+- 本批全量 `pnpm test` 为 19/19 个任务通过，其中 mobile 为 149 files / 958 tests，form-react 为 19 files / 70 tests；API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle、类型与兼容性检查均已本地验证。Storybook 与官网浏览器矩阵也已在冻结候选上完成本地全量复验。
 - 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 240 次 pointermove 均在仓库预算内，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 199 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 

@@ -345,6 +345,36 @@ describe("BottomSheet", () => {
     });
   });
 
+  it("makes an overflowing body keyboard focusable", async () => {
+    const scrollHeight = vi
+      .spyOn(HTMLElement.prototype, "scrollHeight", "get")
+      .mockReturnValue(500);
+    const clientHeight = vi
+      .spyOn(HTMLElement.prototype, "clientHeight", "get")
+      .mockReturnValue(200);
+
+    try {
+      render(
+        <BottomSheet open title="长内容">
+          <span>滚动内容</span>
+        </BottomSheet>
+      );
+      const content = screen.getByText("滚动内容");
+      const contentContainer = content.parentElement;
+      const scrollRegion = contentContainer ? contentContainer.parentElement : null;
+      if (!(scrollRegion instanceof HTMLElement)) {
+        throw new Error("Expected BottomSheet scroll region");
+      }
+
+      await waitFor(() => expect(scrollRegion.tabIndex).toBe(0));
+      expect(scrollRegion.getAttribute("role")).toBe("region");
+      expect(scrollRegion.getAttribute("aria-label")).toBe("可滚动内容");
+    } finally {
+      scrollHeight.mockRestore();
+      clientHeight.mockRestore();
+    }
+  });
+
   it("copies direction, theme and reduced motion across the default body portal", () => {
     render(
       <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">

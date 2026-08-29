@@ -114,4 +114,43 @@ describe("MeuForm selection adapters", () => {
       )
     );
   });
+
+  it("preserves explicit adapter error presentation before RHF reports an error", () => {
+    function StatusForm() {
+      const form = useMeuForm<Values>({
+        defaultValues: {
+          agreement: false,
+          notifications: false,
+          services: [],
+          shipping: "",
+          viewMode: ""
+        }
+      });
+      return (
+        <MeuForm<Values> form={form} onSubmit={() => undefined}>
+          <MeuFormCheckbox<Values> name="agreement" status="error">
+            协议
+          </MeuFormCheckbox>
+          <MeuFormCheckboxGroup<Values, string> aria-label="服务" name="services" status="error">
+            <Checkbox value="delivery">配送</Checkbox>
+          </MeuFormCheckboxGroup>
+          <MeuFormRadioGroup<Values, string> aria-label="配送方式" name="shipping" status="error">
+            <Radio value="standard">标准配送</Radio>
+          </MeuFormRadioGroup>
+          <MeuFormSwitch<Values> aria-label="通知" name="notifications" status="error" />
+        </MeuForm>
+      );
+    }
+
+    const { container } = render(<StatusForm />);
+    const agreement = container.querySelector('input[name="agreement"]');
+    const checkboxGroup = container.querySelector('[data-meu-component="checkbox-group"]');
+    const radioGroup = container.querySelector('[data-meu-component="radio-group"]');
+    const notificationSwitch = container.querySelector('[role="switch"]');
+
+    expect(agreement && agreement.getAttribute("aria-invalid")).toBe("true");
+    expect(checkboxGroup && checkboxGroup.getAttribute("aria-invalid")).toBe("true");
+    expect(radioGroup && radioGroup.getAttribute("aria-invalid")).toBe("true");
+    expect(notificationSwitch && notificationSwitch.getAttribute("aria-invalid")).toBe("true");
+  });
 });

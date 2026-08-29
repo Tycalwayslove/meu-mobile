@@ -8,6 +8,8 @@ import { indicator, input, root } from "./Radio.css";
 import { useRadioGroupContext } from "./RadioGroupContext";
 import type { RadioProps } from "./types";
 
+const RADIO_SYNC_EVENT = "meu:radio-sync";
+
 function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
   if (typeof ref === "function") ref(value);
   else if (ref) ref.current = value;
@@ -100,6 +102,18 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
 
   useEffect(() => {
     const element = inputRef.current;
+    if (!element || inGroup || !resolvedName) return;
+
+    const handleNativeGroupSync = () => {
+      if (controlled) element.checked = Boolean(checked);
+      else setUncontrolledChecked(element.checked);
+    };
+    element.addEventListener(RADIO_SYNC_EVENT, handleNativeGroupSync);
+    return () => element.removeEventListener(RADIO_SYNC_EVENT, handleNativeGroupSync);
+  }, [checked, controlled, inGroup, resolvedName]);
+
+  useEffect(() => {
+    const element = inputRef.current;
     if (element) element.defaultChecked = resetChecked;
   }, [resetChecked]);
 
@@ -108,10 +122,12 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     const form = element ? element.form : null;
     if (!element || !form || controlled || inGroup) return;
 
+    const view = form.ownerDocument.defaultView;
+    if (!view) return;
     let resetTimer: number | null = null;
     const handleReset = (event: Event) => {
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
-      resetTimer = window.setTimeout(() => {
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
+      resetTimer = view.setTimeout(() => {
         resetTimer = null;
         if (!event.defaultPrevented) setUncontrolledChecked(defaultChecked);
       }, 0);
@@ -119,13 +135,18 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     form.addEventListener("reset", handleReset);
     return () => {
       form.removeEventListener("reset", handleReset);
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
     };
   }, [controlled, defaultChecked, form, inGroup]);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     if (resolvedDisabled || resolvedReadOnly) {
       event.preventDefault();
+      const element = event.currentTarget;
+      element.checked = currentChecked;
+      void Promise.resolve().then(() => {
+        if (inputRef.current === element) element.checked = currentChecked;
+      });
       return;
     }
     const nextChecked = event.target.checked;
@@ -133,6 +154,25 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
       groupContext.select(value, event);
     } else if (!controlled) {
       setUncontrolledChecked(nextChecked);
+    }
+    if (!inGroup && resolvedName) {
+      const element = event.currentTarget;
+      const candidates = element.form
+        ? Array.from(element.form.elements)
+        : Array.from(element.ownerDocument.querySelectorAll("input[type='radio']"));
+      const view = element.ownerDocument.defaultView;
+      if (view) {
+        for (const candidate of candidates) {
+          if (
+            candidate instanceof view.HTMLInputElement &&
+            candidate.type === "radio" &&
+            candidate.name === element.name &&
+            candidate.form === element.form
+          ) {
+            candidate.dispatchEvent(new view.Event(RADIO_SYNC_EVENT));
+          }
+        }
+      }
     }
     if (onChange) onChange(nextChecked, event);
   }

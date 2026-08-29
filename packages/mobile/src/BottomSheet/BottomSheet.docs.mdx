@@ -27,7 +27,7 @@ source: packages/mobile/src/BottomSheet
 
 ## 当前能力
 
-底部模态任务面板，支持受控/非受控可见性与 snap point、内容高度、手柄拖拽/点击/键盘、速度吸附、拖拽关闭、Mask/Escape/关闭按钮、Portal、焦点圈定恢复、滚动锁、安全区和动态视口/内容测量。关闭和卸载会清理未完成的指针会话；退出动画中的控件立即 disabled，不再发布业务事件。
+底部模态任务面板，支持受控/非受控可见性与 snap point、内容高度、手柄拖拽/点击/键盘、速度吸附、拖拽关闭、Mask/Escape/关闭按钮、Portal、焦点圈定恢复、滚动锁、安全区和动态视口/内容测量。关闭和卸载会清理未完成的指针会话；退出动画中的控件立即 disabled，不再发布业务事件；内容实际溢出时滚动区自动进入键盘 Tab 顺序。
 
 ## 何时使用
 
@@ -71,7 +71,7 @@ ref 指向 panel；无命令式 snap API，使用 snapPoint。测量由 visualVi
 
 ## 键盘操作
 
-Tab 在模态内循环；Escape 可关闭。手柄 Enter/Space 循环位置，ArrowUp/Down 相邻移动，Home/End 最低/最高。
+Tab 在模态内循环；实际溢出的内容滚动区可聚焦，并可用方向键、PageUp/PageDown、Home/End 原生滚动；未溢出时不增加冗余 Tab 停靠点。Escape 可关闭。手柄 Enter/Space 循环位置，ArrowUp/Down 相邻移动，Home/End 最低/最高。
 
 ## 触摸与手势
 
@@ -79,7 +79,7 @@ Tab 在模态内循环；Escape 可关闭。手柄 Enter/Space 循环位置，Ar
 
 ## 无障碍
 
-panel 为有名称的 `role=dialog aria-modal=true`；标题自动关联。handle 为原生 button，并通过隐藏说明公布本地化实际位置；关闭按钮有本地化名称。退出阶段 layer 为 inert/aria-hidden，handle 与关闭按钮同时 disabled，避免程序化点击穿透发布事件。
+panel 为有名称的 `role=dialog aria-modal=true`；标题自动关联。handle 为原生 button，并通过隐藏说明公布本地化实际位置；关闭按钮有本地化名称。scroll body 是本地化命名的 `region`，内容测量仅在纵向溢出时增加 `tabIndex=0`，满足无内部可聚焦元素的长内容键盘滚动路径且不为短内容增加 Tab 停靠点。退出阶段 layer 为 inert/aria-hidden，handle 与关闭按钮同时 disabled，避免程序化点击穿透发布事件。
 
 ## 动效
 
@@ -111,11 +111,11 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 
 ## 测试证据
 
-- Unit: 模态名称/关闭原因、滚动锁、受控/非受控 snap、键盘、拖拽关闭、pointercancel、混合 pointerType 单会话、关闭中断拖拽、退出期事件隔离、forceMount、动态 snap identity、Portal 容器迁移、本地化/数字标题
-- Story interaction: `Default` 验证打开、handle 聚焦、关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，最终冻结候选仍需统一刷新。
+- Unit: 模态名称/关闭原因、滚动锁、溢出滚动区键盘焦点、受控/非受控 snap、键盘、拖拽关闭、pointercancel、混合 pointerType 单会话、关闭中断拖拽、退出期事件隔离、forceMount、动态 snap identity、Portal 容器迁移、本地化/数字标题
+- Story interaction: `Default` 验证打开、handle 聚焦、关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 11606 B / 32768 B 预算，组合 Brotli 10232 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 11694 B / 32768 B 预算，组合 Brotli 10313 B；共享样式由应用单独导入一次。
 - SSR/hydration: `BottomSheet.ssr.test.tsx` 覆盖服务端结构；`BottomSheet.hydration.test.tsx` 使用真实 `hydrateRoot` 验证初始打开的 body Portal 无 recoverable error；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal/测量 hydration，0 `pageerror`、0 `console.error`。
 - Mobile Chromium/WebKit E2E: 重新构建本地 production 站后，双引擎验证 handle 键盘 snap、pointer drag-dismiss、关闭原因、焦点恢复、body scroll lock 清理、动态 Portal 容器、RTL、`motion="reduced"`，以及模态期间可操作 Toast 进入 Tab 循环；同批 Light/Dark 全页 axe WCAG A/AA 通过。Chromatic 与真机软键盘/读屏延后到全部组件完成后的统一门禁。
 
@@ -139,3 +139,4 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 | 2026-08-29 | 未发布 | verification  | 本地 production 双引擎复验 Portal、RTL、reduced-motion 与 axe  | 无          |
 | 2026-08-29 | 未发布 | behavior      | 拒绝第二个 primary pointer 覆盖进行中的拖拽会话                | 无 API 破坏 |
 | 2026-08-29 | 未发布 | accessibility | 可操作 Toast 纳入 BottomSheet 的键盘焦点循环                   | 无 API 破坏 |
+| 2026-08-29 | 未发布 | accessibility | 长内容实际溢出时滚动区自动进入键盘 Tab 顺序                    | 无 API 破坏 |

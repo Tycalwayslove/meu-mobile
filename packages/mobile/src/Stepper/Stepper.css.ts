@@ -62,6 +62,8 @@ export const button = style({
   fontSize: 22,
   lineHeight: 1,
   cursor: "pointer",
+  touchAction: "manipulation",
+  userSelect: "none",
   WebkitTapHighlightColor: "transparent",
   selectors: {
     "&:first-child": { borderInlineEnd: "1px solid var(--meu-color-border)" },

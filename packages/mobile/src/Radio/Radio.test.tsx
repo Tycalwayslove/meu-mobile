@@ -17,6 +17,64 @@ describe("Radio", () => {
     expect(onChange).toHaveBeenCalledWith(true, expect.anything());
   });
 
+  it("keeps standalone radios with the same native name visually synchronized", async () => {
+    const { rerender } = render(
+      <>
+        <Radio defaultChecked name="address" value="home">
+          家庭
+        </Radio>
+        <Radio name="address" value="office">
+          公司
+        </Radio>
+      </>
+    );
+
+    const home = screen.getByRole("radio", { name: "家庭" });
+    const office = screen.getByRole("radio", { name: "公司" });
+    fireEvent.click(office);
+
+    await waitFor(() => {
+      expect(home).toHaveProperty("checked", false);
+      expect(office).toHaveProperty("checked", true);
+      const homeLabel = home.closest("label");
+      const officeLabel = office.closest("label");
+      expect(homeLabel && homeLabel.getAttribute("data-state")).toBe("unchecked");
+      expect(officeLabel && officeLabel.getAttribute("data-state")).toBe("checked");
+    });
+
+    rerender(
+      <>
+        <Radio defaultChecked name="address" value="home">
+          家庭
+        </Radio>
+        <Radio name="address" value="office">
+          公司
+        </Radio>
+      </>
+    );
+    expect(home).toHaveProperty("checked", false);
+    expect(office).toHaveProperty("checked", true);
+  });
+
+  it("keeps a controlled standalone radio authoritative within a native name group", async () => {
+    render(
+      <>
+        <Radio checked name="primary" value="home">
+          家庭
+        </Radio>
+        <Radio name="primary" value="office">
+          公司
+        </Radio>
+      </>
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: "公司" }));
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: "家庭" })).toHaveProperty("checked", true);
+      expect(screen.getByRole("radio", { name: "公司" })).toHaveProperty("checked", false);
+    });
+  });
+
   it("supports a controlled empty group without selecting optimistically", () => {
     const onChange = vi.fn();
     render(

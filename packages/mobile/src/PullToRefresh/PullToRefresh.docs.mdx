@@ -117,8 +117,8 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 ## 测试证据
 
 - Unit: `PullToRefresh.test.tsx` 覆盖阈值、短拉、显式边界 override、root 自滚动边界、4px 落指抖动、键盘与请求锁、失败、多指/cancel/disabled，以及 pending result/complete timer 的卸载清理。
-- Story interaction: `Default.play` 只验证原生替代按钮能够启动刷新；不证明触摸手势或 complete 状态。`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `Default.play` 只验证原生替代按钮能够启动刷新；不证明触摸手势或 complete 状态。`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2819 B / 32768 B 预算，组合 Brotli 2438 B；共享样式由应用单独导入一次。
 - SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 刷新场景中保持 0 `pageerror` / `console.error`，独立最小化 hydration 专测仍待补。

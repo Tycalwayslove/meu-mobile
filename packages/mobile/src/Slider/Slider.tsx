@@ -43,6 +43,12 @@ function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement |
   else if (ref) ref.current = node;
 }
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
+
 /**
  * Renders a native single-value range control with pointer, keyboard, and form semantics.
  *
@@ -52,6 +58,9 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
+    "aria-valuetext": ariaValueText,
     className,
     defaultValue,
     disabled = false,
@@ -69,6 +78,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
     onPointerCancel,
     onPointerDown,
     onPointerUp,
+    readOnly = false,
     showValue = false,
     size = "medium",
     status = "default",
@@ -101,7 +111,14 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   const interactionActiveRef = useRef(false);
   const keyboardInteractionRef = useRef(false);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy = mergeIdReferences(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
+  const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
+  const labelledBy = hasExplicitAriaLabel
+    ? ariaLabelledBy
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -222,42 +239,99 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
 
   return (
     <div
-      className={className ? `${root({ disabled, size })} ${className}` : root({ disabled, size })}
+      className={
+        className
+          ? `${root({ disabled, readOnly, size })} ${className}`
+          : root({ disabled, readOnly, size })
+      }
       style={style}
       dir={dir}
+      {...(readOnly
+        ? {
+            id: resolvedId,
+            role: "meter" as const,
+            "aria-disabled": disabled || undefined,
+            "aria-label": ariaLabel,
+            "aria-labelledby": labelledBy,
+            "aria-describedby": describedBy,
+            "aria-invalid": resolvedAriaInvalid,
+            "aria-valuemin": lower,
+            "aria-valuemax": effectiveUpper,
+            "aria-valuenow": currentValue,
+            "aria-valuetext": ariaValueText
+          }
+        : {})}
       data-meu-component="slider"
       data-size={size}
-      data-state={disabled ? "disabled" : invalid ? "error" : "default"}
+      data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
     >
       <div className={controlRow}>
-        <input
-          {...props}
-          ref={(node) => {
-            inputRef.current = node;
-            assignRef(ref, node);
-          }}
-          id={resolvedId}
-          className={`${input} ${inputSize({ size, status: invalid ? "error" : status })}`}
-          style={sliderStyle}
-          type="range"
-          min={lower}
-          max={effectiveUpper}
-          step={safeStep}
-          value={currentValue}
-          disabled={disabled}
-          dir={dir}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          onKeyUp={handleKeyUp}
-          onPointerCancel={handlePointerCancel}
-          onPointerDown={handlePointerDown}
-          onPointerUp={handlePointerUp}
-          aria-describedby={describedBy}
-          aria-invalid={resolvedAriaInvalid}
-        />
+        {readOnly ? (
+          <>
+            <input
+              className={`${input} ${inputSize({ size, status: invalid ? "error" : status })}`}
+              style={sliderStyle}
+              type="range"
+              min={lower}
+              max={effectiveUpper}
+              step={safeStep}
+              value={currentValue}
+              disabled
+              dir={dir}
+              tabIndex={-1}
+              aria-hidden="true"
+              data-meu-slot="presentation"
+            />
+            <input
+              ref={(node) => {
+                inputRef.current = node;
+                assignRef(ref, node);
+              }}
+              type="hidden"
+              name={props.name}
+              form={props.form}
+              value={currentValue}
+              disabled={disabled}
+              data-meu-slot="form-value"
+            />
+          </>
+        ) : (
+          <input
+            {...props}
+            ref={(node) => {
+              inputRef.current = node;
+              assignRef(ref, node);
+            }}
+            id={resolvedId}
+            className={`${input} ${inputSize({ size, status: invalid ? "error" : status })}`}
+            style={sliderStyle}
+            type="range"
+            min={lower}
+            max={effectiveUpper}
+            step={safeStep}
+            value={currentValue}
+            disabled={disabled}
+            dir={dir}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}
+            onPointerCancel={handlePointerCancel}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            aria-label={ariaLabel}
+            aria-labelledby={labelledBy}
+            aria-valuetext={ariaValueText}
+            aria-describedby={describedBy}
+            aria-invalid={resolvedAriaInvalid}
+          />
+        )}
         {showValue ? (
-          <output className={valueText} htmlFor={resolvedId} aria-hidden="true">
+          <output
+            className={valueText}
+            htmlFor={readOnly ? undefined : resolvedId}
+            aria-hidden="true"
+          >
             {formatValue ? formatValue(currentValue) : currentValue}
           </output>
         ) : null}

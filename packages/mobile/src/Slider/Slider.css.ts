@@ -13,13 +13,17 @@ export const root = recipe({
       true: { color: "var(--meu-color-muted)" },
       false: {}
     },
+    readOnly: {
+      true: {},
+      false: {}
+    },
     size: {
       small: { gap: "var(--meu-space-1)" },
       medium: { gap: "var(--meu-space-2)" },
       large: { gap: "var(--meu-space-2)" }
     }
   },
-  defaultVariants: { disabled: false, size: "medium" }
+  defaultVariants: { disabled: false, readOnly: false, size: "medium" }
 });
 
 export const controlRow = style({
@@ -44,6 +48,7 @@ export const input = style({
   WebkitAppearance: "none",
   background: "transparent",
   cursor: "pointer",
+  touchAction: "pan-y",
   WebkitTapHighlightColor: "transparent",
   selectors: {
     "&:focus": {

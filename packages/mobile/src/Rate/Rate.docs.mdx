@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "57:197"
 storyIds:
   [
     data-entry-rate--default,
@@ -38,6 +38,7 @@ source: packages/mobile/src/Rate
 - 数值按 1 或 0.5 对齐并限制 0..count；非法 count 回退 5，动态 count/allowHalf/value 仍保持 DOM、视觉与读屏一致。
 - RTL 指针位置与原生 range 方向同步；半填充使用逻辑方向；forced-colors 保留系统 Highlight/GrayText。
 - readOnly 输出为有名称和值的 meter 语义，同时保留 hidden input 的 FormData 和 input ref；disabled readOnly 不提交。
+- Field 的 label/description/error 与调用方 `aria-labelledby` / `aria-describedby` 按 token 合并去重；中间有布局 wrapper 时仍通过 Field context 保留完整关系。
 
 当前为 V2 `verification`。本地 axe 与扩展场景矩阵已通过；Next-H5 集成场景已在移动 Chromium/WebKit 中验证键盘改值、可信鼠标 pointer 拖动、重复点击清零和表单提交。合成 pointercancel 的收敛已验证，但真实触摸取消、最终视觉审批与真机读屏仍待验收，因此不能标记为 commercial。
 
@@ -88,7 +89,8 @@ source: packages/mobile/src/Rate
 - 交互态原生 range 透传 name/form/disabled/onInvalid 等；readOnly 使用 hidden input提交相同 value/name/form。
 - disabled 在两种模式都不进入 FormData。readOnly 进入但不可聚焦；其 ref 指向 hidden input，适合读取 value/form，不应用于 focus。
 - HTML required 对 range 的零值没有“未选择”语义，hidden input required 也无效；必评规则必须由 RHF/Zod/服务端检查大于 0。
-- Field 提供 accessible name/description/error/必填说明；error 映射到 interactive slider 或 readOnly meter 的 `aria-invalid` 和视觉 state。
+- Field 提供 accessible name/description/error/必填说明；调用方 idref 与 Field idref 无损合并，error 映射到 interactive slider 或 readOnly meter 的 `aria-invalid` 和视觉 state。
+- `MeuFormRate` 在 RHF 校验错误与调用方显式 `status="error"` 间取并集，不会在字段当前有效时抹掉业务错误视觉。
 
 ## Props
 
@@ -112,7 +114,7 @@ interactive 依赖原生 range：Arrow keys 按 1/0.5 调整，Home 到 0，End 
 
 ## 触摸与手势
 
-透明 range 覆盖完整字符组，根高度至少 44px；可点选、拖动并响应系统 pointer cancel。组件不阻止纵向滚动、不使用 document 监听。相邻星视觉宽度为 30/34/38px，但整体可交互轨道高度满足移动目标。
+透明 range 覆盖完整字符组，根高度至少 44px；可点选、拖动并响应系统 pointer cancel。`touch-action: pan-y` 明确保留页面纵向滚动并把横向评分交互留给控件，组件不使用 document 监听。相邻星视觉宽度为 30/34/38px，但整体可交互轨道高度满足移动目标。
 
 ## 无障碍
 
@@ -133,7 +135,7 @@ interactive 依赖原生 range：Arrow keys 按 1/0.5 调整，Home 到 0，End 
 
 ## SSR 与 Next.js
 
-- render 不读取 window/document/layout；服务端稳定输出 interactive range 或 readOnly meter+hidden input。getComputedStyle 仅在 pointer handler 中读取方向。
+- render 不读取 window/document/layout；服务端稳定输出 interactive range 或 readOnly meter+hidden input。getComputedStyle 仅在 pointer handler 中读取方向；独立 hydration 回归证明 range/hidden 节点 identity、change 与 FormData 保持有效。
 
 ## RTL 与国际化
 
@@ -158,14 +160,16 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 
 ## 测试证据
 
-- Unit：覆盖半值 change、readOnly meter/Field 值语义、ARIA invalid token/优先级、规范化、RTL 重复清除、拖动尾随 click 不清零、readOnly FormData/ref、同步原生 reset 与取消边界。
+- Unit：覆盖半值 change、readOnly meter/Field 值语义、嵌套 Field idref 合并、ARIA invalid token/优先级、规范化、RTL 重复清除、拖动尾随 click 不清零、readOnly FormData/ref、同步原生 reset 与取消边界。
 - SSR：覆盖 interactive range 与 readOnly meter/hidden form markup，以及 token 归属和 contextual error 覆盖。
-- Story interaction: `NativeFormReset.play` 验证原生 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Hydration：`Rate.hydration.test.tsx` 证明 interactive range 与 readOnly hidden input 保持服务端 DOM identity，change/FormData 可用且无 recoverable error。
+- Story interaction: `NativeFormReset.play` 验证原生 reset；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormRate` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `rating:4`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer 清零或拖动。
 - Next-H5 pointer E2E：`drags slider and rate with browser pointer events and resets cancelled sessions` 在两种移动引擎、390×844 视口中通过 `page.mouse` 产生 `isTrusted=true` 的 pointerdown，将评分拖至 4，并在同一坐标再次点击验证 `allowClear` 清零；随后在可信 pointerdown 会话中派发 `isTrusted=false` 的 pointercancel，验证取消回调收敛。该证据不等同于物理触摸或系统级取消。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4584 B / 32768 B 预算，组合 Brotli 4082 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4769 B / 32768 B 预算，组合 Brotli 4259 B；共享样式由应用单独导入一次。
+- Figma：`Meu/Rate` set `57:197`，15 variants；Light `451:104`、Dark `451:154`、QA `451:179`。Stepper/Slider/Rate/Selector 合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：iOS/Android 物理触摸 drag、系统 pointercancel 与滚动竞争；forced-colors 聚焦与半星截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 
 ## V2 优化记录
@@ -176,6 +180,7 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 - 修复 RTL 重复点击清除映射、拖动尾随 click 误清零与 pointer cancel；保留调用方 pointer/click handlers。
 - 增加非受控 reset、readOnly hidden FormData/ref、Field readOnly naming。
 - 半填充改逻辑方向，增加 forced-colors、TSDoc、SSR/单元/Story 与本事实源。
+- 补齐嵌套 Field idref 组合、独立 hydration 证明与 form adapter 显式错误态保留。
 - Next-H5 双引擎已验证 ArrowRight 改值、hydration、受控表单提交和无运行时错误。
 - Next-H5 双引擎已验证可信鼠标 pointer 拖动、重复点击清零和合成 cancel 收敛。
 
@@ -199,3 +204,4 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 | 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification              |
 | 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、重复清零与合成 cancel 双引擎证据         | 状态仍为 verification              |
 | 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级   | 无                                 |
+| 2026-08-29 | 未发布 | accessibility | 嵌套 Field 合并 label/description idref，并补 hydration    | 无                                 |

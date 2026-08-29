@@ -87,7 +87,7 @@ export function MeuFormRadioGroup<
                 field.onChange(nextValue);
                 if (onChange) onChange(nextValue, event);
               }}
-              status={fieldState.invalid ? "error" : "default"}
+              status={fieldState.invalid || groupProps.status === "error" ? "error" : "default"}
             />
           </Field>
         );

@@ -37,10 +37,10 @@ pnpm bundle:size:check
 ## 当前结果
 
 - 68/68 个产品族和 125/125 个公开运行时值均在预算内；
-- 共享 CSS：24,879 B gzip / 32,768 B 预算，20,526 B Brotli；
-- 最大组合是 `@meu/form-react` 全部 adapters：112,984 B gzip / 114,688 B 预算；
+- 共享 CSS：25,021 B gzip / 32,768 B 预算，20,657 B Brotli；
+- 最大组合是 `@meu/form-react` 全部 adapters：115,288 B gzip / 115,712 B 预算；
 - 最大单值是 `Popover`：46,274 B gzip / 49,152 B 预算，主要成本包含定位运行时；
-- 较大的高级单值包括 `MeuFormImageUploader` 38,101 B、`ImageUploader` 35,893 B、`MeuFormTreeSelect` 33,578 B、`ImageViewer` 31,362 B 和 `TreeSelect` 30,282 B（均为 gzip）。
+- 较大的高级单值包括 `MeuFormImageUploader` 38,288 B、`ImageUploader` 35,893 B、`MeuFormTreeSelect` 33,885 B、`ImageViewer` 31,362 B 和 `TreeSelect` 30,373 B（均为 gzip）。
 
 ## 运行时预算
 
@@ -53,7 +53,7 @@ pnpm bundle:size:check
 | TreeSelect 搜索       |      1,500 个平铺节点 | 精确筛选并完成两帧提交 ≤500ms                                                             |
 | SwipeActions 高频移动 |   单行、右侧双 action | 连续分发 240 次 pointermove 加 settle 的同步主线程成本 ≤250ms，并正确进入 right open 状态 |
 
-`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 6/6 通过。完整隔离 Next H5 套件共 92/92 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
+`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 6/6 通过。完整隔离 Next H5 套件共 104/104 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
 
 ## 仍需独立证明
 

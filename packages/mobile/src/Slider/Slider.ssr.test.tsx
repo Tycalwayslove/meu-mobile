@@ -20,4 +20,15 @@ describe("Slider SSR", () => {
     expect(html).toContain('aria-invalid="grammar"');
     expect(html).toContain("<output");
   });
+
+  it("renders a stable read-only meter and hidden form value", () => {
+    const html = renderToString(
+      <Slider aria-label="已核预算" name="budget" value={35} readOnly showValue />
+    );
+    expect(html).toContain('role="meter"');
+    expect(html).toContain('aria-valuenow="35"');
+    expect(html).toContain('type="hidden"');
+    expect(html).toContain('name="budget"');
+    expect(html.match(/aria-label="已核预算"/g)).toHaveLength(1);
+  });
 });

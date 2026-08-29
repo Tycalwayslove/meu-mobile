@@ -81,6 +81,16 @@ export const RightToLeft: Story = {
   }
 };
 
+export const ReadOnlyFormValue: Story = {
+  render: () => (
+    <form style={{ display: "grid", gap: 12, maxWidth: 390 }}>
+      <Field label="审核后预算" description="只读值仍随表单提交">
+        <Slider name="budget" value={65} readOnly showValue formatValue={(value) => `${value}%`} />
+      </Field>
+    </form>
+  )
+};
+
 export const Error: Story = {
   render: () => (
     <Field label="折扣" error="折扣必须符合活动规则">

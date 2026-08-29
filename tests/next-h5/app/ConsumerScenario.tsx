@@ -86,6 +86,8 @@ import type { NumberKeyboardInputDetails, VirtualListRange, VirtualListRef } fro
 import { useRef, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
 
+import { ControlHardeningScenario } from "./ControlHardeningScenario";
+
 const schema = z.object({
   agreement: z.boolean().refine((value) => value, "请同意服务协议"),
   campaignDates: z.array(z.date()).min(1, "请至少选择一个活动日期"),
@@ -1528,6 +1530,8 @@ export function ConsumerScenario() {
             </section>
           </DialogProvider>
         </ToastProvider>
+
+        <ControlHardeningScenario />
 
         <MeuForm
           className="integration-form"

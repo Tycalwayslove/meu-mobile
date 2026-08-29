@@ -82,7 +82,7 @@ export function MeuFormSlider<TFieldValues extends FieldValues>({
                 field.onChange(nextValue);
                 if (onChange) onChange(nextValue, event);
               }}
-              status={fieldState.invalid ? "error" : "default"}
+              status={fieldState.invalid || sliderProps.status === "error" ? "error" : "default"}
             />
           </Field>
         );

@@ -155,7 +155,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 - Unit: `ConfigProvider.test.tsx` 验证 ThemeProvider 与 ConfigProvider 同一身份、theme-only 嵌套不重置 locale/dir。
 - Story interaction: `LightAndDark` 验证独立主题边界及最近 Provider 读取；`NativeControls` 提供固定 light/dark 与 system 原生 select 的 `color-scheme` 浏览器验证入口。
 - 本次定向 Storybook 扫描：ThemeProvider 4 个 Story × Light/Dark，共 8 个场景，play 与 axe WCAG A/AA 均通过。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 820 B / 32768 B 预算，组合 Brotli 714 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 hydration 单测覆盖 system 标记一致和零 recoverable error。

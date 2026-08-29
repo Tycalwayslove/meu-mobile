@@ -102,10 +102,12 @@ export function RadioGroup<TValue extends RadioValue = RadioValue>({
     const form = firstInput ? firstInput.form : null;
     if (!form || controlled) return;
 
+    const view = form.ownerDocument.defaultView;
+    if (!view) return;
     let resetTimer: number | null = null;
     const handleReset = (event: Event) => {
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
-      resetTimer = window.setTimeout(() => {
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
+      resetTimer = view.setTimeout(() => {
         resetTimer = null;
         if (!event.defaultPrevented) setUncontrolledValue(defaultValue);
       }, 0);
@@ -113,7 +115,7 @@ export function RadioGroup<TValue extends RadioValue = RadioValue>({
     form.addEventListener("reset", handleReset);
     return () => {
       form.removeEventListener("reset", handleReset);
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
     };
   });
 

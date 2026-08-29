@@ -22,6 +22,12 @@ function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement |
   else if (ref) ref.current = node;
 }
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
+
 /**
  * Renders a touch-friendly rating control backed by native range semantics.
  *
@@ -31,6 +37,8 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     "aria-valuetext": ariaValueText,
     allowClear = true,
     allowHalf = false,
@@ -69,7 +77,14 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   const defaultValueRef = useRef(normalizedDefaultValue);
   const pointerSessionRef = useRef<PointerSession | null>(null);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy = mergeIdReferences(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
+  const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
+  const labelledBy = hasExplicitAriaLabel
+    ? ariaLabelledBy
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -186,8 +201,8 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
         ? {
             id: resolvedId,
             role: "meter" as const,
-            "aria-label": props["aria-label"] || valueLabel,
-            "aria-labelledby": props["aria-labelledby"],
+            "aria-label": ariaLabel || (labelledBy ? undefined : valueLabel),
+            "aria-labelledby": labelledBy,
             "aria-describedby": describedBy,
             "aria-invalid": resolvedAriaInvalid,
             "aria-valuemin": 0,
@@ -221,6 +236,8 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
           }}
           onClick={handleClick}
           aria-valuetext={ariaValueText || valueLabel}
+          aria-label={ariaLabel}
+          aria-labelledby={labelledBy}
           aria-describedby={describedBy}
           aria-invalid={resolvedAriaInvalid}
         />

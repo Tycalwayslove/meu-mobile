@@ -38,6 +38,26 @@ describe("Rate", () => {
     expect(rating.getAttribute("aria-describedby")).toContain("error");
   });
 
+  it("merges nested Field and caller accessibility relationships", () => {
+    render(
+      <>
+        <span id="rating-name">订单评分</span>
+        <span id="rating-hint">仅评价本次服务</span>
+        <Field label="服务评分" description="一到五分">
+          <div>
+            <Rate aria-labelledby="rating-name" aria-describedby="rating-hint" />
+          </div>
+        </Field>
+      </>
+    );
+
+    const rating = screen.getByRole("slider", { name: "订单评分 服务评分" });
+    expect(rating.getAttribute("aria-labelledby")).toContain("rating-name");
+    expect(rating.getAttribute("aria-labelledby")).toContain("label");
+    expect(rating.getAttribute("aria-describedby")).toContain("rating-hint");
+    expect(rating.getAttribute("aria-describedby")).toContain("description");
+  });
+
   it.each([
     [false, "false", "default"],
     ["false", "false", "default"],

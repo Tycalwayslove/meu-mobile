@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "54:74"
 storyIds:
   [
     data-entry-stepper--default,
@@ -40,6 +40,7 @@ source: packages/mobile/src/Stepper
 - min/max/step/precision 统一规范化；反向 bounds 排序、非法 step 回退 1、浮点按 step base 对齐；过粗 precision 会提升到 step/min 所需位数，避免连续步进停滞。
 - 支持 `allowEmpty` 的 null、可配置 inputMode、小数点/小数逗号、严格十进制粘贴、无效草稿回滚、IME 保护、可取消的调用方 keydown。
 - 原生 form name/required/disabled/readOnly/reset；readOnly 会保留 FormData 并忽略所有内建改值键；Field label、必填、说明和错误关联；增减按钮通过 aria-controls 指向输入。
+- Field 与调用方的 `aria-labelledby` / `aria-describedby` 按 token 合并去重；中间有布局 wrapper 时仍保留可访问名称和说明。
 - 44px 按钮、三档高度、RTL 逻辑边框、reduced-motion 和 forced-colors 降级。
 
 当前为 V2 `verification`；单元、SSR、Story、本地 axe 与全库移动浏览器门禁已建立，尚缺最终视觉与真机验收，不能标记为 commercial。
@@ -94,6 +95,7 @@ DOM 顺序为 decrement button、text input(role spinbutton)、increment button�
 - min/max/step 是组件数值契约，不是 text input 的原生 constraint validation；服务端/schema 必须重复验证。
 - readOnly 仍进入 FormData且可聚焦/选择；ArrowUp/ArrowDown/Home/End 不修改受控或非受控值，调用方 onKeyDown 仍先执行，Home/End 的原生光标行为不被组件阻止。disabled 不进入 FormData且按钮不可操作。
 - ref 指向 text input，可 focus/select、读取 form/validity/value。
+- `MeuFormStepper` 在 RHF 校验错误与调用方显式 `status="error"` 间取并集，不会在字段当前有效时清除业务错误视觉。
 
 ## Props
 
@@ -124,11 +126,11 @@ ref 指向中央真实 input，可使用原生 `focus()`、`blur()`、`select()`
 
 ## 触摸与手势
 
-按钮最小 44×44 CSS px并使用原生 button 激活语义。`repeatOnLongPress=false` 保持单击一次一步；启用后，按住 500ms 触发第一步，此后每 100ms 重复，pointerup/pointercancel/lost capture、readOnly/disabled、关闭开关或卸载都会清理计时器。重复开始后抑制尾随 click；取消发生在首次重复前时，只提交输入框已编辑的草稿。组件不处理滑动，也不安装 document 监听；页面滚动与系统手势保持原生。
+按钮最小 44×44 CSS px并使用原生 button 激活语义；`touch-action: manipulation` 与不可选文字避免长按期间出现文本选区。`repeatOnLongPress=false` 保持单击一次一步；启用后，按住 500ms 触发第一步，此后每 100ms 重复，pointerup/pointercancel/lost capture、readOnly/disabled、关闭开关或卸载都会清理计时器。重复开始后抑制尾随 click；取消发生在首次重复前时，只提交输入框已编辑的草稿。组件不处理滑动，也不安装 document 监听；页面滚动与系统手势保持原生。
 
 ## 无障碍
 
-- input role=spinbutton 暴露 value now/min/max/required/invalid；有效编辑草稿会同步 value now，不完整或非法草稿不沿用旧值；必须有 Field label 或 ARIA name。
+- input role=spinbutton 暴露 value now/min/max/required/invalid；有效编辑草稿会同步 value now，不完整或非法草稿不沿用旧值；必须有 Field label 或 ARIA name。嵌套 Field context 与调用方 idref 会合并去重。
 - 增减按钮有 ConfigProvider 本地化名称（中：增加/减少，英：Increase/Decrease）和 aria-controls。
 - 边界、readOnly/disabled 会禁用相应按钮；错误由 Field describedby + aria-invalid 公布。
 - 无 Field/status error 时保留 spinbutton 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉。Field/status error 优先输出 `true`，token 不复制到增减按钮。
@@ -170,12 +172,13 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 
 ## 测试证据
 
-- Unit：覆盖按钮/键盘/bounds、小数与空值、Field、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、粗 precision 连续步进、草稿单次发布与 ARIA 同步、decimal-comma paste/IME、严格十进制拒绝、取消键盘处理、readOnly/disabled、长按重复及 pointerup/pointercancel/卸载清理、FormData、required/controls、reset/取消和 RTL hydration。
+- Unit：覆盖按钮/键盘/bounds、小数与空值、Field 与嵌套 Field idref、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、粗 precision 连续步进、草稿单次发布与 ARIA 同步、decimal-comma paste/IME、严格十进制拒绝、取消键盘处理、readOnly/disabled、长按重复及 pointerup/pointercancel/卸载清理、FormData、required/controls、reset/取消和 RTL hydration。
 - SSR：覆盖确定 spinbutton、name/value、dir/inputMode、ARIA invalid token 与两个原生按钮。
-- Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5649 B / 32768 B 预算，组合 Brotli 4972 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5823 B / 32768 B 预算，组合 Brotli 5138 B；共享样式由应用单独导入一次。
+- Figma：canonical `Meu/Stepper` set `54:74`，Min `54:147`、Max `54:220`；36 variants。Light `451:79`、Dark `451:129`、QA `451:179`；合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：软键盘/IME/粘贴与物理长按移动 E2E、系统 pointercancel/滚动竞争、forced-colors 聚焦截图、Light/Dark 视觉基线、VoiceOver/TalkBack。
 
 ## V2 优化记录
@@ -187,6 +190,7 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 - 增加 decimal comma、无效草稿回滚、Escape/Home/End、IME 防误触与可取消 keydown。
 - 修复 inputMode 覆盖与粗 precision 停滞；增加严格十进制 paste/IME 状态机和可取消长按重复。
 - RTL 逻辑边框、forced-colors、TSDoc、SSR/单元/Story 与本事实源。
+- 补齐嵌套 Field idref 组合，并让 form adapter 保留调用方显式错误态。
 
 ### 待优化
 
@@ -209,3 +213,4 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 | 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级        | 无                               |
 | 2026-08-29 | 未发布 | behavior      | inputMode 透传、严格十进制输入、precision 防停滞与可选长按重复  | 新能力默认关闭，既有单击兼容     |
 | 2026-08-29 | 未发布 | verification  | 增加 paste/IME、长按取消/卸载、disabled 与 RTL hydration 自动化 | 无                               |
+| 2026-08-29 | 未发布 | accessibility | 嵌套 Field 合并 label/description idref，adapter 保留显式错误态 | 无                               |

@@ -110,8 +110,8 @@ Floating UI 提供滚动跟随和碰撞处理；兼容目标 Chrome/WebView 70+�
 ## 测试证据
 
 - Unit: 触发/关联、outside/Escape、manual、焦点恢复、forceMount、RTL/theme/motion Portal、模态分支、异常几何与 ref
-- Story interaction: `Default.play` 验证 trigger/dialog 关联、打开、Escape 关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `Default.play` 验证 trigger/dialog 关联、打开、Escape 关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 46274 B / 49152 B 预算，组合 Brotli 38983 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Popover.ssr.test.tsx` 验证服务端关联；隔离 Next production 以 `defaultOpen` 在 Chromium/WebKit 完成 FloatingPortal hydration，0 `pageerror`、0 `console.error`。

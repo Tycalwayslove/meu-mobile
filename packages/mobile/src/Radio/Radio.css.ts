@@ -11,6 +11,9 @@ export const root = recipe({
     color: "var(--meu-color-ink)",
     fontFamily: "var(--meu-font-ui)",
     cursor: "pointer",
+    touchAction: "manipulation",
+    userSelect: "none",
+    WebkitUserSelect: "none",
     WebkitTapHighlightColor: "transparent",
     outline: "none",
     selectors: {
@@ -113,6 +116,17 @@ globalStyle(`${input}:checked + span`, {
     "(forced-colors: active)": {
       borderColor: "Highlight",
       color: "Highlight",
+      forcedColorAdjust: "none"
+    }
+  }
+});
+
+globalStyle(`${input}:disabled + span`, {
+  "@media": {
+    "(forced-colors: active)": {
+      background: "Canvas",
+      borderColor: "GrayText",
+      color: "GrayText",
       forcedColorAdjust: "none"
     }
   }

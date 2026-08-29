@@ -48,6 +48,22 @@ function valueIdentity(value: SegmentedControlValue): string {
   return `${typeof value}:${String(value)}`;
 }
 
+function isInputElement(value: unknown): value is HTMLInputElement {
+  return Boolean(
+    value &&
+    typeof value === "object" &&
+    "tagName" in value &&
+    (value as { tagName?: unknown }).tagName === "INPUT"
+  );
+}
+
+function isDocumentNode(value: unknown, ownerDocument: Document): value is Node {
+  const NodeConstructor = ownerDocument.defaultView ? ownerDocument.defaultView.Node : undefined;
+  return NodeConstructor
+    ? value instanceof NodeConstructor
+    : Boolean(value && typeof value === "object" && "nodeType" in value);
+}
+
 function uniqueOptions<TValue extends SegmentedControlValue>(
   options: readonly SegmentedControlOption<TValue>[]
 ): SegmentedControlOption<TValue>[] {
@@ -231,7 +247,7 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
     if (mode !== "radiogroup") return;
     normalizedOptions.forEach((candidate) => {
       const element = controlRefsRef.current.get(valueIdentity(candidate.value));
-      if (!(element instanceof HTMLInputElement)) return;
+      if (!isInputElement(element)) return;
       element.defaultChecked =
         resetValue !== null && valueIdentity(resetValue) === valueIdentity(candidate.value);
     });
@@ -239,16 +255,18 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
 
   useEffect(() => {
     if (controlled || mode !== "radiogroup") return undefined;
+    const ownerDocument = rootRef.current ? rootRef.current.ownerDocument : null;
+    if (!ownerDocument) return undefined;
     const handleReset = (event: Event) => {
       const firstControl = controlRefsRef.current.values().next().value;
-      const firstInput = firstControl instanceof HTMLInputElement ? firstControl : null;
+      const firstInput = isInputElement(firstControl) ? firstControl : null;
       const element = rootRef.current;
       const ownerForm = firstInput ? firstInput.form : element ? element.closest("form") : null;
-      if (!(ownerForm instanceof HTMLFormElement) || event.target !== ownerForm) return;
+      if (!ownerForm || event.target !== ownerForm) return;
       if (event.defaultPrevented) return;
       const resetConfig = resetConfigRef.current;
       controlRefsRef.current.forEach((controlElement, identity) => {
-        if (controlElement instanceof HTMLInputElement) {
+        if (isInputElement(controlElement)) {
           controlElement.defaultChecked =
             resetConfig.value !== null && valueIdentity(resetConfig.value) === identity;
         }
@@ -258,8 +276,8 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
         value: resetConfig.value
       });
     };
-    document.addEventListener("reset", handleReset);
-    return () => document.removeEventListener("reset", handleReset);
+    ownerDocument.addEventListener("reset", handleReset);
+    return () => ownerDocument.removeEventListener("reset", handleReset);
   }, [controlled, mode]);
 
   useLayoutEffect(() => {
@@ -279,9 +297,12 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
       focusedControl && (replacementControl !== focusedControl || !focusedControl.isConnected)
     );
     if (focusedCandidateIsAvailable && !focusedControlWasReplaced) return;
-    const activeElement = document.activeElement;
+    const ownerDocument = rootRef.current ? rootRef.current.ownerDocument : null;
+    const activeElement = ownerDocument ? ownerDocument.activeElement : null;
     const focusCanBeRecovered =
-      activeElement === document.body || activeElement === focusedControl || !activeElement;
+      activeElement === (ownerDocument ? ownerDocument.body : null) ||
+      activeElement === focusedControl ||
+      !activeElement;
     if (!focusCanBeRecovered) return;
     const fallbackIdentity = focusedCandidateIsAvailable
       ? focusState.identity
@@ -326,19 +347,21 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
     };
 
     updateIndicator();
+    const ownerWindow = rootNode.ownerDocument.defaultView;
+    const ResizeObserverConstructor = ownerWindow ? ownerWindow.ResizeObserver : undefined;
     let observer: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== "undefined") {
-      observer = new ResizeObserver(updateIndicator);
+    if (ResizeObserverConstructor) {
+      observer = new ResizeObserverConstructor(updateIndicator);
       observer.observe(rootNode);
       rootNode.querySelectorAll<HTMLElement>("[data-segmented-item]").forEach((element) => {
         if (observer) observer.observe(element);
       });
     } else {
-      window.addEventListener("resize", updateIndicator);
+      if (ownerWindow) ownerWindow.addEventListener("resize", updateIndicator);
     }
     return () => {
       if (observer) observer.disconnect();
-      else window.removeEventListener("resize", updateIndicator);
+      else if (ownerWindow) ownerWindow.removeEventListener("resize", updateIndicator);
     };
   }, [block, currentIdentity, mode, normalizedOptionsSignature, size]);
 
@@ -368,8 +391,10 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
   function handleRootBlur(event: FocusEvent<HTMLDivElement>) {
     if (onBlur) onBlur(event);
     const nextTarget = event.relatedTarget;
-    if (nextTarget instanceof Node && event.currentTarget.contains(nextTarget)) return;
-    if (nextTarget instanceof Node) {
+    const ownerDocument = event.currentTarget.ownerDocument;
+    if (isDocumentNode(nextTarget, ownerDocument) && event.currentTarget.contains(nextTarget))
+      return;
+    if (isDocumentNode(nextTarget, ownerDocument)) {
       focusStateRef.current = { ...focusStateRef.current, within: false };
       focusedControlRef.current = null;
       if (mode === "tabs") {
@@ -379,7 +404,7 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
     }
     void Promise.resolve().then(() => {
       const rootNode = rootRef.current;
-      if (!rootNode || !rootNode.contains(document.activeElement)) {
+      if (!rootNode || !rootNode.contains(rootNode.ownerDocument.activeElement)) {
         focusStateRef.current = { ...focusStateRef.current, within: false };
         focusedControlRef.current = null;
         if (mode === "tabs") {

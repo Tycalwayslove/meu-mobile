@@ -1983,7 +1983,7 @@ export type SkeletonProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
 export type SkeletonVariant = "text" | "rectangle" | "circle";
 
 // @public
-export const Slider: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange" | "step" | "max" | "min"> & {
+export const Slider: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange" | "step" | "max" | "min" | "readOnly"> & {
 defaultValue?: number;
 formatValue?: (value: number) => ReactNode;
 marks?: SliderMark[];
@@ -1991,6 +1991,7 @@ max?: number;
 min?: number;
 onChange?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
 onChangeComplete?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
+readOnly?: boolean;
 showValue?: boolean;
 size?: SliderSize;
 status?: SliderStatus;
@@ -2005,7 +2006,7 @@ export type SliderMark = {
 };
 
 // @public
-export type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"> & {
+export type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "max" | "min" | "onChange" | "readOnly" | "size" | "step" | "type" | "value"> & {
     defaultValue?: number;
     formatValue?: (value: number) => ReactNode;
     marks?: SliderMark[];
@@ -2013,6 +2014,7 @@ export type SliderProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultVa
     min?: number;
     onChange?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
     onChangeComplete?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
+    readOnly?: boolean;
     showValue?: boolean;
     size?: SliderSize;
     status?: SliderStatus;

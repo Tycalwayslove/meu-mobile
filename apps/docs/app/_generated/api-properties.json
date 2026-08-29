@@ -901,7 +901,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Blocks changes and exposes busy state while preserving the current FormData value."
+          "description": "Blocks changes and consumer `onClick`, exposes busy state, and preserves the current FormData value."
         },
         {
           "name": "readOnly",
@@ -1106,6 +1106,14 @@
           "event": false,
           "description": "Lower bound. Reversed finite bounds are normalized into ascending order.",
           "defaultValue": "0"
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Presents a labelled, non-interactive meter while retaining a hidden native form value and input ref.",
+          "defaultValue": "false"
         },
         {
           "name": "showValue",
@@ -13075,7 +13083,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Blocks changes and exposes busy state while preserving the current FormData value."
+          "description": "Blocks changes and consumer `onClick`, exposes busy state, and preserves the current FormData value."
         },
         {
           "name": "name",
@@ -13334,6 +13342,14 @@
           "required": true,
           "event": false,
           "description": "Path of the numeric React Hook Form field controlled by this slider."
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Presents a labelled, non-interactive meter while retaining a hidden native form value and input ref.",
+          "defaultValue": "false"
         },
         {
           "name": "required",
@@ -17661,11 +17677,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2359,
+    "documentedFields": 2361,
     "eventFields": 242,
     "exportedTypes": 384,
     "exportedTypesWithFields": 226,
-    "fields": 2359,
+    "fields": 2361,
     "packages": 4
   }
 }

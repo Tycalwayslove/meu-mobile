@@ -144,7 +144,7 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。只有�
 - Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、ref-backed 提交后重试、目标切换、卸载清理、SSR resolver 隔离、hydration recoverable error，以及跨 Document Context/合成事件；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、原生 tabbable 顺序、可操作 Toast 键盘分支、背景 inert/aria-hidden 隔离与精确恢复。
 - Story interaction: `CustomContainer` 验证内容移动到调用方提供的目标容器；`LazyRefContainer` 验证同次提交 ref-backed resolver。
 - 本次定向 Storybook 扫描：Portal 2 个 Story × Light/Dark，共 4 个场景，play 与 axe WCAG A/AA 均通过。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 4426 B / 32768 B 预算；最大单值 `useFocusTrap` 为 3012 B / 32768 B 预算，组合 Brotli 3840 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记、SSR 不执行 resolver、hydration 后移动和零 recoverable error

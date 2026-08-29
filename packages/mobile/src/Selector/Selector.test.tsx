@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { useState } from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -429,6 +429,36 @@ describe("Selector", () => {
     const inputs = screen.getAllByRole<HTMLInputElement>("checkbox");
     expect(inputs[0]!.form).toBe(form);
     expect(new FormData(form).getAll("service")).toEqual(["delivery", "pickup"]);
+  });
+
+  it("observes native reset in the component ownerDocument", () => {
+    const frame = document.createElement("iframe");
+    document.body.append(frame);
+    const ownerDocument = frame.contentDocument;
+    if (!ownerDocument) throw new Error("Expected an iframe document");
+    const container = ownerDocument.createElement("div");
+    ownerDocument.body.append(container);
+    const rendered = render(
+      <form aria-label="frame selector form">
+        <Selector
+          aria-label="frame selector"
+          defaultValue={["delivery"]}
+          name="shipping"
+          options={options}
+        />
+      </form>,
+      { container, baseElement: ownerDocument.body }
+    );
+    const queries = within(ownerDocument.body);
+    const form = queries.getByRole<HTMLFormElement>("form", { name: "frame selector form" });
+    fireEvent.click(queries.getByRole("radio", { name: "自提" }));
+    expect(new FormData(form).get("shipping")).toBe("pickup");
+
+    act(() => form.reset());
+    expect(queries.getByRole("radio", { name: "配送" })).toHaveProperty("checked", true);
+    expect(new FormData(form).get("shipping")).toBe("delivery");
+    rendered.unmount();
+    frame.remove();
   });
 
   it("restores DOM, FormData and state immediately on native form reset", () => {

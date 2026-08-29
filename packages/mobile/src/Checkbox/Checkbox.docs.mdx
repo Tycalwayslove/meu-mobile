@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "50:125"
 storyIds:
   [
     forms-checkbox--default,
@@ -30,10 +30,11 @@ source: packages/mobile/src/Checkbox
 - `Checkbox` 基于原生 `input[type=checkbox]`，支持受控/非受控、mixed、required、disabled、readOnly、错误态、三档尺寸和原生 ref。
 - `CheckboxGroup` 管理 `string | number` 数组，统一 `name`、disabled/readOnly/status，支持水平换行与垂直布局。
 - 文本与指示器组成同一个 label；无文案时根目标仍至少 44×44 CSS px。
-- 非受控单项和组都监听所在原生 form 的 reset，恢复 `defaultChecked` / `defaultValue`。
+- 非受控单项和组都监听所在原生 form 的 reset，恢复 `defaultChecked` / `defaultValue`；计时器取自 form 的 owner document，支持 iframe/多 document。
 - 调用方和 Field 的 `aria-describedby` 无损合并并去重；Field invalid/required 进入单项原生语义。
 - 没有 Field/status 错误时，`aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`。Group 在语义根输出错误，子项只继承错误视觉。
-- forced-colors 保留选择标记和焦点，reduced-motion 将状态过渡缩短到 1ms。
+- forced-colors 保留选择标记和焦点，disabled 使用系统 GrayText；reduced-motion 将状态过渡缩短到 1ms。
+- 点击目标使用 `touch-action: manipulation` 且禁止误选 label 文本，适配 iOS/Android 快速 tap。
 
 状态为 `verification`：代码、Unit、SSR、Story contract 与全库移动双引擎门禁已建立，但 VoiceOver/TalkBack 真机与最终 Chromatic 主题审批尚未形成发布证据。
 
@@ -78,6 +79,7 @@ Checkbox DOM 顺序固定为原生 input → 视觉 indicator → label。根暴
 - `disabled` 使用原生 disabled，既不可聚焦也不进入 FormData。
 - `readOnly` 是 Meu 的交互契约：仍可聚焦且保留已选 FormData，但点击/Space 不改变值。HTML checkbox 没有原生 readonly，因此组件用 `aria-readonly` 和事件回滚实现。
 - CheckboxGroup 不把 group required 映射到每个选项。至少一项、最少/最多数量由表单 schema 处理。
+- 官方 `MeuFormCheckbox/MeuFormCheckboxGroup` 以 RHF 值为受控事实源，并合并 RHF invalid 与调用方显式 `status="error"`；任一来源判错都不会被另一方的默认态覆盖。
 
 ## Props
 
@@ -126,6 +128,8 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 
 渲染阶段不访问 window/document；form/reset 监听只在 effect 中安装。SSR 首屏直接包含 checked、name、value 和 ARIA。调用方需保证服务端与客户端的 controlled/default 值一致，避免 hydration 差异。
 
+`Checkbox.hydration.test.tsx` 进一步验证受控 Group 的服务端节点不被替换，hydration 无 recoverable error，且 hydration 后仍能更新选中数组。
+
 ## RTL 与国际化
 
 布局使用 flex gap，不依赖左右 margin；水平组自然按 `dir` 排列。复选标记无方向性。业务文案负责本地化并允许换行；组件不截断 200% 字号下的 label。
@@ -149,10 +153,12 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 
 - Unit: `Checkbox.test.tsx` 覆盖 mixed 点击后的 DOM property 恢复、ARIA invalid token、disabled/readOnly、受控单项/Group、Field、FormData 和 reset
 - SSR: `Checkbox.ssr.test.tsx` 覆盖稳定 group/name/value/checked 与 group ARIA invalid token markup
-- Story interaction: `Indeterminate` 覆盖 accepted click 后 checked、DOM mixed property 与 ARIA 一致；`NativeFormContract` 覆盖点击、重复 FormData 与 reset；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Hydration: `Checkbox.hydration.test.tsx` 覆盖节点复用、受控 Group 激活和零 recoverable error
+- Story interaction: `Indeterminate` 覆盖 accepted click 后 checked、DOM mixed property 与 ARIA 一致；`NativeFormContract` 覆盖点击、重复 FormData 与 reset；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3973 B / 32768 B 预算；最大单值 `Checkbox` 为 3359 B / 32768 B 预算，组合 Brotli 3536 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3996 B / 32768 B 预算；最大单值 `Checkbox` 为 3389 B / 32768 B 预算，组合 Brotli 3563 B；共享样式由应用单独导入一次。
+- Figma：canonical Medium set `50:125`，Small `50:65`、Large `50:185`；36 variants。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；Checkbox/Radio/Switch 合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: CSS root `minWidth/minHeight: 44`
 - Reduced motion / forced colors / RTL: CSS 和专属 Story 已建立；真实浏览器视觉证据待补
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击 CheckboxGroup 的“到店自提”后，表单提交值由 `delivery` 更新为 `delivery,pickup`；页面内 Checkbox 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
@@ -171,10 +177,12 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 - 增加保持 FormData 的 readOnly 契约及组级传播。
 - 合并 Field 与调用方 IDREF，传播原生 required/invalid。
 - 补齐 44×44、WebView 兼容焦点环、forced-colors、reduced-motion、SSR、FormData 和 Story contract。
+- disabled forced-colors 改用 GrayText；补充移动 tap、跨 document reset 与 hydration 专项回归。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型         | 内容                                                                            | 迁移说明                                      |
 | ---------- | ------ | ------------ | ------------------------------------------------------------------------------- | --------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening    | 补齐移动 tap、disabled 强制色彩、跨 document reset 与 hydration 证据            | 无                                            |
 | 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的 Group 选择、表单值、hydration 与 44px 证据 | 无                                            |
 | 2026-08-28 | 未发布 | behavior     | reset、readOnly、IDREF、触控/高对比与验证证据完善                               | 无破坏；只读场景可用 `readOnly` 替代 disabled |

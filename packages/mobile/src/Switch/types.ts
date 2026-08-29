@@ -26,7 +26,7 @@ export type SwitchProps = Omit<
   checked?: boolean;
   /** Initial state for an uncontrolled switch. Native form reset restores this value. */
   defaultChecked?: boolean;
-  /** Blocks changes and exposes busy state while preserving the current FormData value. */
+  /** Blocks changes and consumer `onClick`, exposes busy state, and preserves the current FormData value. */
   loading?: boolean;
   /** Called after an accepted native change with the next state and original event. */
   onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;

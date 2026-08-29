@@ -176,7 +176,7 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 
 - Unit: `Field.test.tsx`，覆盖显式 id、说明合并/去重、native/composite 标签、嵌套布局无重复 id、required/invalid context、ARIA 命名合并、空结构内容、根 DOM/ref
 - Story interaction: `Default` 验证原生 label、required 与说明 IDREF；`NestedLayout` 验证嵌套关联与唯一 id。当前本地静态 Storybook 含 442 个 Story、413 个共置 storyId，81/81 title 至少有一项关键 play。
-- Storybook 浏览器矩阵：本批在 390×844 视口验证 Field 6 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 42 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库 374 个 Story × 7 场景是上一轮历史基线，最终冻结时统一重跑当前全量矩阵。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2118 B / 32768 B 预算，组合 Brotli 1854 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Field.ssr.test.tsx` 覆盖稳定原生关联；隔离 Next 16 表单 hydration 后 description/error IDREF、invalid 与首次错误路径无运行时异常

@@ -51,6 +51,56 @@ describe("Slider", () => {
     expect(screen.getByText("近")).toBeTruthy();
   });
 
+  it("merges nested Field and caller accessibility relationships", () => {
+    render(
+      <>
+        <span id="distance-name">配送范围</span>
+        <span id="distance-hint">单位为公里</span>
+        <Field label="配送距离" description="零到一百公里">
+          <div>
+            <Slider aria-labelledby="distance-name" aria-describedby="distance-hint" />
+          </div>
+        </Field>
+      </>
+    );
+
+    const slider = screen.getByRole("slider", { name: "配送范围 配送距离" });
+    expect(slider.getAttribute("aria-labelledby")).toContain("distance-name");
+    expect(slider.getAttribute("aria-labelledby")).toContain("label");
+    expect(slider.getAttribute("aria-describedby")).toContain("distance-hint");
+    expect(slider.getAttribute("aria-describedby")).toContain("description");
+  });
+
+  it("renders read-only values as a meter while preserving native form data and ref", () => {
+    const ref = { current: null as HTMLInputElement | null };
+    render(
+      <form aria-label="预算表单">
+        <Field label="预算上限" description="审核后不可修改">
+          <Slider ref={ref} name="budget" value={35} readOnly showValue />
+        </Field>
+      </form>
+    );
+
+    const meter = screen.getByRole("meter", { name: "预算上限" });
+    const form = screen.getByRole<HTMLFormElement>("form", { name: "预算表单" });
+    expect(meter.getAttribute("aria-valuenow")).toBe("35");
+    expect(meter.getAttribute("aria-describedby")).toContain("description");
+    expect(screen.queryByRole("slider")).toBeNull();
+    expect(new FormData(form).get("budget")).toBe("35");
+    expect(ref.current && ref.current.type).toBe("hidden");
+  });
+
+  it("excludes disabled read-only values from FormData", () => {
+    render(
+      <form aria-label="禁用预算表单">
+        <Slider aria-label="预算" name="budget" value={35} readOnly disabled />
+      </form>
+    );
+    const form = screen.getByRole<HTMLFormElement>("form", { name: "禁用预算表单" });
+    expect(new FormData(form).get("budget")).toBeNull();
+    expect(screen.getByRole("meter", { name: "预算" }).getAttribute("data-state")).toBe("disabled");
+  });
+
   it.each([
     [false, "false", "default"],
     ["false", "false", "default"],

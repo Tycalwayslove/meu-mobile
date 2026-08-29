@@ -121,8 +121,8 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 ## 测试证据
 
 - Unit: `Badge.test.tsx` 覆盖 zero/max、dot label、tone 文本、RTL offset 与空 ReactNode 归一化。
-- Story interaction: `Count` 验证独立计数与 accessibility tree 暴露；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `Count` 验证独立计数与 accessibility tree 暴露；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2127 B / 32768 B 预算，组合 Brotli 1897 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；隔离 Next 16 hydration 后 99+ 与 dot accessible label 保持一致，0 hydration/runtime error。

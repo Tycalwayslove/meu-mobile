@@ -79,7 +79,7 @@ export function MeuFormCheckbox<TFieldValues extends FieldValues>({
               field.onChange(nextChecked);
               if (onChange) onChange(nextChecked, event);
             }}
-            status={fieldState.invalid ? "error" : "default"}
+            status={fieldState.invalid || checkboxProps.status === "error" ? "error" : "default"}
           />
         </Field>
       )}

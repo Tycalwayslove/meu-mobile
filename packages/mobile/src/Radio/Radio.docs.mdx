@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "50:263"
 storyIds:
   [
     forms-radio--default,
@@ -29,9 +29,10 @@ source: packages/mobile/src/Radio
 - 原生 radio input；RadioGroup 统一稳定 name，保持浏览器互斥、Tab 和方向键行为。
 - 支持 `string | number` 值、受控/非受控、controlled empty (`value=null`)、required、disabled、readOnly、错误态和三档尺寸。
 - 非受控 Group 监听原生 form reset 并恢复 defaultValue；checked 值按原生 FormData 提交。
+- standalone 同名 Radio 会同步原生互斥后的 React 视觉状态，受控同伴仍保持调用方值为事实源。
 - Field label/description/error/required 与调用方 IDREF 无损组合。
 - 没有 Field/status 错误时，`aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`。Group 错误只在语义根输出，子 Radio 继承错误视觉。
-- 选择目标至少 44×44；RTL 使用自然文档流；forced-colors 和 reduced-motion 有静态降级。
+- 选择目标至少 44×44，并使用移动 tap 优化；RTL 使用自然文档流；forced-colors（含 disabled GrayText）和 reduced-motion 有静态降级。
 
 状态为 `verification`；Unit/SSR/Story contract、本地 axe 与 Next H5 移动 Chromium/WebKit 的基础选择路径已建立，Chromatic 主题最终审批和真机读屏尚未达到发布证据线。
 
@@ -66,7 +67,7 @@ Radio DOM 为 input → indicator → label。根暴露 `data-meu-component="rad
 
 - Group `value !== undefined` 时受控；`null` 是明确的受控空值。
 - 非受控 Group 由 defaultValue 初始化并在选择时更新；form reset 回到 defaultValue。
-- standalone Radio 以 checked/defaultChecked 选择受控或非受控。多个关联 Radio 应用 RadioGroup，避免各自 React state 与浏览器同名互斥脱节。
+- standalone Radio 以 checked/defaultChecked 选择受控或非受控；同一 form/name 下会在原生 change 后同步所有 Meu Radio 的 checked 视觉与 `data-state`。业务集合仍优先使用 RadioGroup，以集中管理 value、label、required 和 invalid。
 
 ## 表单集成
 
@@ -74,6 +75,7 @@ Radio DOM 为 input → indicator → label。根暴露 `data-meu-component="rad
 - 选中项以 `name=value` 进入 FormData；disabled 原生排除。
 - required 同时位于 radiogroup (`aria-required`) 与原生 radio name group，触发浏览器 constraint validation。
 - readOnly 保持当前值可聚焦、可提交并阻断选择。radiogroup 使用 `aria-readonly`；HTML radio 没有 native readonly，组内子项由组传达，standalone 以 `aria-disabled` 表达不可修改并通过事件回滚保证值不变。
+- 官方 `MeuFormRadioGroup` 以 RHF 标量值为受控事实源，并合并 RHF invalid 与调用方显式 `status="error"`；任一来源判错都保留错误呈现。
 
 ## Props
 
@@ -122,6 +124,8 @@ Radio ref 指向原生 `HTMLInputElement`。Group ref 指向 radiogroup div。�
 
 render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户端树中稳定；调用方不要基于 `window` 改变首屏选项顺序。reset 监听仅在客户端 effect 注册。
 
+`Radio.hydration.test.tsx` 验证 useId name 在同一服务端/客户端树中一致、DOM 节点复用且 hydration 后可选择。
+
 ## RTL 与国际化
 
 使用 flex gap 和 inline flow，RTL 下选项/文字自然镜像；圆形 indicator 无方向性。长文本允许换行，业务负责 label 翻译和排序含义。
@@ -133,22 +137,24 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 ## 边界情况与已知限制
 
 - HTML radio 不提供 readonly；本组件提供的 readOnly 是可聚焦、可提交的交互冻结，不等同 disabled。
-- standalone 同名 Radio 若各自非受控 React state，外部重新渲染可能恢复旧 checked；同组数据必须使用 RadioGroup 或上层受控值。
+- standalone 同名 Radio 已同步 Meu 组件同伴；若同一 name 混入第三方自绘 Radio，其视觉状态仍由第三方自行负责，推荐统一使用 RadioGroup。
 - generated name 仅保证 React 树内稳定，不应被后端当作业务字段名；表单提交必须显式 name。
 - 动态删除当前选项不会自动选择备用项，由业务决定空值与校验。
 
 ## 性能预算
 
-每个 Group 仅在非受控 form 场景注册一个 reset 监听；没有全局监听、布局测量或第三方运行时依赖。
+每个 Group 仅在非受控 form 场景注册一个 reset 监听；每个具名 standalone Radio 使用 element-local 同步监听，不注册 document/window 全局监听，不测量布局或引入第三方运行时依赖。
 
 ## 测试证据
 
-- Unit: `Radio.test.tsx` 覆盖单项、controlled empty、ARIA invalid token、disabled/readOnly、Field、required、FormData 与 reset
+- Unit: `Radio.test.tsx` 覆盖单项、同名 standalone 原生互斥、受控同伴、controlled empty、ARIA invalid token、disabled/readOnly、Field、required、FormData 与 reset
 - SSR: `Radio.ssr.test.tsx` 覆盖 generated name、radiogroup、required、checked 和 group ARIA invalid token markup
-- Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Hydration: `Radio.hydration.test.tsx` 覆盖 useId name 稳定、节点复用、hydration 后选择与零 recoverable error
+- Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3877 B / 32768 B 预算；最大单值 `Radio` 为 3245 B / 32768 B 预算，组合 Brotli 3446 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 4191 B / 32768 B 预算；最大单值 `Radio` 为 3580 B / 32768 B 预算，组合 Brotli 3732 B；共享样式由应用单独导入一次。
+- Figma：canonical Medium set `50:263`，Small `50:224`、Large `50:302`；24 variants。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；Checkbox/Radio/Switch 合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: CSS `minWidth/minHeight: 44`
 - RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证从“标准配送”聚焦后按 ArrowRight，原生 radio 选择“急速配送”，随后表单提交值为 `express`；页面内 Radio 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
@@ -166,10 +172,12 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 - 修复 Field required 未传播、radiogroup invalid 归属与 IDREF 覆盖问题。
 - 增加 controlled empty、readOnly、FormData 和原生 reset 契约。
 - 补齐 44×44、WebView 兼容焦点环、RTL、forced-colors、reduced-motion、SSR 与 Story contract。
+- 修复 standalone 同名原生互斥后的旧视觉状态，并补跨 document reset、移动 tap、disabled 强制色彩与 hydration 回归。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型         | 内容                                                                           | 迁移说明                                      |
 | ---------- | ------ | ------------ | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening    | 同步 standalone 同名互斥状态；补移动 tap、跨 document reset 与 hydration       | 无；关联选项仍推荐使用 RadioGroup             |
 | 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的方向键选择、表单值、hydration 与 44px 证据 | 无                                            |
 | 2026-08-28 | 未发布 | behavior     | required/invalid、reset、readOnly 与兼容性细节完善                             | 无破坏；只读场景可用 `readOnly` 替代 disabled |

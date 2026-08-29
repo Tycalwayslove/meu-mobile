@@ -132,10 +132,10 @@ Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activ
 ## 测试证据
 
 - Unit: draft 回滚/确认、受控意图、动态列、disabled/empty、pointer/scroll/type-ahead/Page 键、Portal 配置与 Field 语义
-- Story interaction: `SingleColumn.play` 验证选择、确认、表单显示和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Story interaction: `SingleColumn.play` 验证选择、确认、表单显示和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 13784 B / 49152 B 预算；最大单值 `Picker` 为 12910 B / 49152 B 预算，组合 Brotli 12143 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 13794 B / 49152 B 预算；最大单值 `Picker` 为 12919 B / 49152 B 预算，组合 Brotli 12138 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Picker.ssr.test.tsx`；真实 Next hydration 由隔离 H5 站覆盖基础路径
 - RTL: LongLabelsRTL Story 与 Portal unit
 - Reduced motion: ConfigProvider Portal unit；视觉时长待浏览器矩阵

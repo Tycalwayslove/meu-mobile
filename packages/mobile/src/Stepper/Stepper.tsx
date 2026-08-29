@@ -18,6 +18,12 @@ function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement |
   else if (ref) ref.current = node;
 }
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
+
 /**
  * Renders a numeric text field with accessible decrement and increment controls.
  *
@@ -27,6 +33,8 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     allowEmpty = false,
     className,
     decrementAriaLabel,
@@ -104,7 +112,14 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   const repeatValueRef = useRef<number | null>(currentValue);
   const repeatPublishedValueRef = useRef<number | null>(currentValue);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy = mergeIdReferences(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
+  const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
+  const labelledBy = hasExplicitAriaLabel
+    ? ariaLabelledBy
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -433,6 +448,8 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         aria-valuemin={effectiveLower}
         aria-valuemax={effectiveUpper}
         aria-required={required || undefined}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         aria-describedby={describedBy}
         aria-invalid={resolvedAriaInvalid}
       />

@@ -1517,7 +1517,7 @@ test("normalizes DatePicker dates and commits only the confirmed draft", async (
 });
 
 test("rolls back DateRangePicker drafts and commits a complete preset", async ({ page }) => {
-  const form = page.locator("form.integration-form");
+  const form = page.locator('form.integration-form[data-meu-component="form"]');
   await expect
     .poll(() =>
       form.evaluate((node) => new FormData(node as HTMLFormElement).getAll("deliveryWindow"))
@@ -1743,6 +1743,45 @@ test("binds checkbox arrays, radio keyboard selection and switch booleans", asyn
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(
     page.getByText("已保存设置：delivery,pickup / express / notifications:false / agreement:true")
+  ).toBeVisible();
+});
+
+test("preserves blocked controls, standalone radio sync and read-only form values", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "基础控件边界验证" });
+  const loadingButton = section.getByRole("button", { name: "正在保存" });
+  const loadingSwitch = section.getByRole("switch", { name: "保存中的通知" });
+
+  await expect(loadingButton).toBeDisabled();
+  await expect(loadingButton).toHaveAttribute("aria-busy", "true");
+  await expect(loadingSwitch).toBeChecked();
+  await expect(loadingSwitch).toHaveAttribute("aria-busy", "true");
+  await expect(loadingSwitch).toHaveAttribute("aria-disabled", "true");
+  await loadingSwitch.evaluate((element) => (element as HTMLInputElement).click());
+  await expect(loadingSwitch).toBeChecked();
+  await expect(section.getByText("被阻止点击次数：0")).toBeVisible();
+
+  const economy = section.getByRole("radio", { name: "经济配送（独立）" });
+  const priority = section.getByRole("radio", { name: "优先配送（独立）" });
+  await expect(economy).toBeChecked();
+  await section.getByText("优先配送（独立）", { exact: true }).click();
+  await expect(priority).toBeChecked();
+  await expect(economy).not.toBeChecked();
+  await expect(section.getByText("独立 Radio 变化次数：1")).toBeVisible();
+
+  const readOnlyVolume = section.getByRole("meter", { name: "只读音量" });
+  await expect(readOnlyVolume).toHaveAttribute("aria-valuenow", "40");
+  const describedByValue = await readOnlyVolume.getAttribute("aria-describedby");
+  const describedBy = describedByValue ? describedByValue.split(/\s+/) : [];
+  expect(describedBy.length).toBeGreaterThanOrEqual(2);
+  await expect(page.locator("#readonly-volume-external")).toHaveText("外部只读音量说明");
+
+  await section.getByRole("button", { name: "检查基础控件提交值" }).click();
+  await expect(
+    section.getByText("busySwitch:on / standaloneRadio:priority / readonlyVolume:40", {
+      exact: true
+    })
   ).toBeVisible();
 });
 

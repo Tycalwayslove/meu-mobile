@@ -81,7 +81,7 @@ export function MeuFormSelector<
               field.onChange(nextValue);
               if (onChange) onChange(nextValue, options);
             }}
-            status={fieldState.invalid ? "error" : "default"}
+            status={fieldState.invalid || selectorProps.status === "error" ? "error" : "default"}
           />
         </Field>
       )}

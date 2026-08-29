@@ -124,9 +124,9 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 ## 测试证据
 
 - Unit/SSR（本轮 5/5）: `Space.test.tsx` 覆盖顺序、方向、QA 属性、原生属性与 ref；`Space.ssr.test.tsx` 覆盖服务端顺序、真实 hydrateRoot 容器/按钮复用和 0 recoverable error
-- Story interaction: `Wrapped` 验证方向、gap、wrap 与子项顺序；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：374 Story × 7 场景、2,618 个组合和 0 axe/pageerror 是本轮之前的仓库历史基线；新增变更必须随最终冻结候选重跑，不能把旧基线当作当前证明。
-- 官网 Next 运行时：68 个组件页 × Light/Dark 的 136 场景为本轮之前的生产构建历史基线；本轮只记录共置 hydration 与后续定向 H5 结果。
+- Story interaction: `Wrapped` 验证方向、gap、wrap 与子项顺序；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：当前 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1724 B / 32768 B 预算，组合 Brotli 1538 B；共享样式由应用单独导入一次。
 - SSR/hydration: 共置测试直接验证 `gap=3`、wrap、子项顺序以及容器/按钮节点复用；既有隔离 Next 16 场景存在，本轮未重复执行该全局场景
 - RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言

@@ -36,7 +36,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type}
       className={className ? `${classes} ${className}` : classes}
       disabled={disabled || loading}
-      aria-busy={loading}
+      aria-busy={loading || undefined}
       data-meu-component="button"
       data-size={size}
       data-tone={tone}
@@ -45,10 +45,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       {loading ? (
         <span className={`${buttonItem} ${spinner}`} aria-hidden="true" />
       ) : leadingIcon ? (
-        <span className={buttonItem}>{leadingIcon}</span>
+        <span className={buttonItem} aria-hidden="true">
+          {leadingIcon}
+        </span>
       ) : null}
       <span className={buttonItem}>{children}</span>
-      {loading || !trailingIcon ? null : <span className={buttonItem}>{trailingIcon}</span>}
+      {loading || !trailingIcon ? null : (
+        <span className={buttonItem} aria-hidden="true">
+          {trailingIcon}
+        </span>
+      )}
     </button>
   );
 });

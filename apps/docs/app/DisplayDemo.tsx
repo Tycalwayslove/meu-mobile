@@ -33,9 +33,9 @@ export function DisplayDemo({ focus }: DisplayDemoProps = {}) {
       <Avatar src="/demo-avatar.svg" alt="Meu 示例店铺" size="large" />
       <Avatar src="" alt="林夏" />
       <Avatar
-        src="/missing-avatar.svg"
-        fallbackSrc="/demo-avatar.svg"
-        alt="使用备用图片的头像"
+        src=""
+        fallback={<span aria-hidden="true">备</span>}
+        alt="使用自定义回退的头像"
         objectPosition="center 25%"
       />
     </Space>

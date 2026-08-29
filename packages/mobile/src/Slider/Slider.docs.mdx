@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "56:134"
 storyIds:
   [
     data-entry-slider--default,
@@ -19,6 +19,7 @@ storyIds:
     data-entry-slider--controlled,
     data-entry-slider--native-form-reset,
     data-entry-slider--right-to-left,
+    data-entry-slider--read-only-form-value,
     data-entry-slider--error,
     data-entry-slider--disabled,
     data-entry-slider--small,
@@ -33,6 +34,7 @@ source: packages/mobile/src/Slider
 
 - 原生 `input[type="range"]` 单值滑块，保留浏览器触摸拖动、键盘、表单、约束与读屏语义。
 - 受控/非受控、原生 form reset、ref、name/form/disabled、三档尺寸、error、可选值输出、格式化输出与装饰性 marks。
+- `readOnly` 输出静态 `meter` 语义和不可操作的轨道，同时用 hidden input 保留 FormData 与 input ref；它不再依赖对 range 无效的原生 readonly 属性。
 - min/max 有限值会排序；max 不在步长网格上时使用最后一个可达值作为有效上限。渲染值、原生 max、进度、marks 和回调按同一有效范围与正 step 对齐，非法 step 回退为 1。
 - `onChangeComplete` 只在一次真实改变的 pointer 或值变更键交互结束时触发一次；取消 pointer、无变化抬手和陈旧事件不会误报。
 - track、marks 与原生 range direction 支持 RTL；焦点、forced-colors 和 44px 最小触控高度有明确降级。
@@ -52,7 +54,7 @@ source: packages/mobile/src/Slider
 
 ## 结构与状态
 
-结构为原生 range、可选 output 和 presentation-only marks。状态为 default、focus、error、disabled，另有 small/medium/large。根节点暴露 `data-meu-component="slider"`、`data-size`、`data-state`；内部 class 不是稳定 API。
+交互态结构为原生 range、可选 output 和 presentation-only marks；只读态由外层 meter、aria-hidden 的静态 range 轨道与 hidden form input 组成。状态为 default、focus、error、readOnly、disabled，另有 small/medium/large。根节点暴露 `data-meu-component="slider"`、`data-size`、`data-state`；内部 class 不是稳定 API。
 
 ## 基础用法
 
@@ -70,10 +72,17 @@ source: packages/mobile/src/Slider
 </Field>
 ```
 
+只读且随表单提交：
+
+```tsx
+<Slider aria-label="审核后预算" name="approvedBudget" value={65} readOnly showValue />
+```
+
 ## 受控与非受控
 
 - 传 `value` 为受控；显示值会按 bounds/step 规范化，父级仍拥有业务事实源。
 - 不传 `value` 时使用内部状态；`defaultValue` 初始化且作为原生 form reset 的恢复目标。
+- `readOnly` 不改变受控规则；它只把交互表面切换为静态 meter。非受控 readOnly 仍可由 `defaultValue` 与 form reset 恢复。
 - reset 返回时原生 DOM/FormData 已同步恢复默认值，随后只同步 React 状态，不调用 `onChange`/`onChangeComplete`；取消 reset 时保持当前值。运行期改变 defaultValue 后，下一次 reset 使用最新默认值。
 - 不支持在同一生命周期内切换受控性；遵循 React 表单控件约定。
 
@@ -86,14 +95,15 @@ source: packages/mobile/src/Slider
 
 ## 表单集成
 
-- 透传 name、form、disabled、required、onInvalid 等原生属性；disabled 不进入 FormData。
+- 交互态透传 name、form、disabled、required、onInvalid 等原生属性；disabled 不进入 FormData。
+- `readOnly` 使用 hidden input 提交当前规范值；`disabled + readOnly` 仍按 successful-control 规则不提交。HTML range 没有有效 readonly 语义，因此不会保留可调 slider 角色来伪装只读。
 - range 总有浏览器值，HTML required 对“是否选择”没有业务校验意义；必须选择某一非默认业务值时由 schema/RHF 校验。
 - Field 注入 label、description/error、invalid 和必填说明；组件不在不支持 `aria-required` 的 slider role 上伪造状态。
 - ref 指向真实 range，可读取 `valueAsNumber`、`validity`、`form` 或调用 `focus()`。
 
 ## Props
 
-完整表由 TypeScript/TSDoc 与 API Extractor生成。专有 Props：`defaultValue`、`value`、`min`、`max`、`step`、`marks`、`showValue`、`formatValue`、`size`、`status`、`onChange`、`onChangeComplete`；其余来自原生 input（冲突字段除外）。
+完整表由 TypeScript/TSDoc 与 API Extractor生成。专有 Props：`defaultValue`、`value`、`min`、`max`、`step`、`marks`、`showValue`、`formatValue`、`readOnly`、`size`、`status`、`onChange`、`onChangeComplete`；其余来自原生 input（冲突字段除外）。
 
 ## Events
 
@@ -101,19 +111,19 @@ source: packages/mobile/src/Slider
 - `onChangeComplete(value, event)`：pointer up 或值变更键 keyup/blur 时，且本轮确有变化才触发；pointer cancel 不触发。
 - 调用方的 pointer/keyboard/blur handlers 会保留。pointerdown 或 keydown 上 `preventDefault()` 可取消相应原生/内部交互启动。
 - 受控父级拒绝新值时，change 仍按用户尝试报告；随后 DOM 由父级 value 回写。
+- readOnly/disabled 不触发 change 或 complete。
 
 ## Ref 与命令式方法
 
-ref 指向真实 `input[type="range"]`，可使用原生 `focus()`、`blur()`、validity 与 form API。track、marks 和 value output
-没有公开命令式句柄；程序化变值应更新受控 `value`，不要直接改 DOM value。
+交互态 ref 指向真实 `input[type="range"]`，可使用原生 `focus()`、`blur()`、validity 与 form API；readOnly 态 ref 指向参与 FormData 的 hidden input，不可聚焦。track、marks 和 value output 没有公开命令式句柄；程序化变值应更新受控 `value`，不要直接改 DOM value。
 
 ## 键盘操作
 
-原生支持 Arrow keys 按 step 调整、PageUp/PageDown 较大调整、Home/End 到边界。Tab 进入/离开。组件不重写浏览器键盘算法，只跟踪这些键来定义 complete 边界；屏幕阅读器组合键由平台保留。
+交互态原生支持 Arrow keys 按 step 调整、PageUp/PageDown 较大调整、Home/End 到边界。Tab 进入/离开。组件不重写浏览器键盘算法，只跟踪这些键来定义 complete 边界；屏幕阅读器组合键由平台保留。readOnly meter 不进入 Tab 路径。
 
 ## 触摸与手势
 
-- 整条轨道最小高度 44px，thumb 为 20/22/24px；依赖原生 pointer/touch 捕获和系统手势取消。
+- 整条轨道最小高度 44px，thumb 为 20/22/24px；`touch-action: pan-y` 保留页面纵向滚动，横向调值依赖原生 pointer/touch 捕获并响应系统手势取消。
 - 拖动期间 `onChange` 可高频触发；昂贵请求放在 `onChangeComplete` 或业务节流层。
 - 组件不阻止页面纵向滚动，也不安装 document 级监听，适合 H5/WKWebView 嵌入。
 
@@ -121,6 +131,7 @@ ref 指向真实 `input[type="range"]`，可使用原生 `focus()`、`blur()`、
 
 - 必须由 Field、`aria-label` 或 `aria-labelledby` 提供 accessible name；marks 和 output 不替代标签。
 - 原生 slider 暴露 min/max/now；单位/语义值可用原生 `aria-valuetext`，视觉 `formatValue` 不会自动转成可访问文本。
+- readOnly 用 meter 暴露 min/max/now/valuetext，并把装饰轨道从可访问树移除；Field 与调用方的 labelledby/describedby token 会合并去重，即使中间存在布局 wrapper 也不会丢失。
 - error 使用 `aria-invalid` 并关联 Field error；disabled 使用原生属性。
 - 无 Field/status error 时保留原生 range 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉，Field/status error 优先输出 `true`。
 - output 不使用 aria-live，避免拖动时逐帧打断读屏。
@@ -136,7 +147,7 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 ## SSR 与 Next.js
 
-- render 阶段不读取 window/document/layout；服务端输出确定的 range/value/output，effect 仅在客户端关联 form reset。
+- render 阶段不读取 window/document/layout；服务端输出确定的 range/value/output 或 meter/hidden value，effect 仅在客户端关联 form reset。独立 hydration 回归证明交互与只读节点不会被替换。
 
 ## RTL 与国际化
 
@@ -150,6 +161,7 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 ## 边界情况与已知限制
 
 - 仅单值、水平 slider；没有 range、vertical、tooltip、可点击 marks 或拖动前确认。
+- readOnly ref 是 hidden input，不能用于 focus；静态可访问对象是外层 meter。
 - `formatValue` 仅视觉；返回复杂交互节点会破坏 output 语义，不应这样使用。
 - 不同浏览器对 PageUp/PageDown 的增量可能不同，这是原生契约。
 - programmatic value 变化不触发 change/complete；业务副作用应监听自己的 state。
@@ -160,14 +172,16 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 ## 测试证据
 
-- Unit：覆盖原生 change/complete、Field/marks、ARIA invalid token/优先级、bounds/step、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
-- SSR：覆盖无浏览器全局时确定输出 range/value/output 与 ARIA invalid token。
-- Story interaction: `NativeFormReset` 验证输入后恢复默认值；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit：覆盖原生 change/complete、嵌套 Field idref 合并、Field/marks、ARIA invalid token/优先级、bounds/step、readOnly meter/FormData/ref、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
+- SSR：覆盖无浏览器全局时确定输出 range/value/output、readOnly meter/hidden value 与 ARIA invalid token。
+- Hydration：`Slider.hydration.test.tsx` 证明交互 range 与 readOnly hidden input 保持服务端 DOM identity，交互/FormData 可用且无 recoverable error。
+- Story interaction: `NativeFormReset` 验证输入后恢复默认值；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormSlider` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `volume:41`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer。
 - Next-H5 pointer E2E：`drags slider and rate with browser pointer events and resets cancelled sessions` 在两种移动引擎、390×844 视口中通过 `page.mouse` 产生 `isTrusted=true` 的 pointerdown，将原生 range 从 40 拖至至少 75，并验证 `onChangeComplete` 只触发一次；随后在可信 pointerdown 会话中派发 `isTrusted=false` 的 pointercancel，验证取消回调触发且不会补发完成回调。该证据不等同于物理触摸或系统级取消。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4323 B / 32768 B 预算，组合 Brotli 3848 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4759 B / 32768 B 预算，组合 Brotli 4269 B；共享样式由应用单独导入一次。
+- Figma：`Meu/Slider` set `56:134`，12 variants；Light `451:89`、Dark `451:139`、QA `451:179`。readOnly 仅记录为 non-interactive meter 契约，不伪造可拖视觉；合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：iOS/Android 物理触摸 drag、系统 pointercancel 与滚动竞争；forced-colors 聚焦截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 
 ## V2 优化记录
@@ -177,6 +191,7 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 - 统一 bounds/step/precision 规范化，消除 DOM、进度和回调不一致。
 - 修复 `onChangeComplete` 陈旧事件、无变化误报与重复抬手问题，并保留调用方 handlers。
 - 增加非受控 form reset、RTL 渐变/marks、兼容旧 WebView 的 focus fallback 和 forced-colors。
+- 将此前无效透传的 range `readOnly` 固化为 meter + hidden successful control，并补嵌套 Field idref 合并与 hydration。
 - 补全 TSDoc、SSR/单元/Story 契约与本事实源。
 - Next-H5 双引擎已验证 ArrowRight 改值、hydration、受控表单提交和无运行时错误。
 - Next-H5 双引擎已验证可信鼠标 pointer 拖动、单次完成和合成 cancel 收敛。
@@ -192,11 +207,12 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                      |
-| ---------- | ------ | ------------- | ---------------------------------------------------------- | ----------------------------- |
-| 2026-08-28 | 未发布 | behavior      | 值统一按 bounds/step 规范化，complete 改为交互结束单次     | 非法/不对齐受控值将显示规范值 |
-| 2026-08-28 | 未发布 | compatibility | 增加 reset、RTL、forced-colors 与 SSR 证明                 | 无                            |
-| 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                                  | README 改为仅指向本文件       |
-| 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification         |
-| 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、单次完成与合成 cancel 双引擎证据         | 状态仍为 verification         |
-| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级   | 无                            |
+| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                           |
+| ---------- | ------ | ------------- | ---------------------------------------------------------- | ---------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 值统一按 bounds/step 规范化，complete 改为交互结束单次     | 非法/不对齐受控值将显示规范值      |
+| 2026-08-28 | 未发布 | compatibility | 增加 reset、RTL、forced-colors 与 SSR 证明                 | 无                                 |
+| 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                                  | README 改为仅指向本文件            |
+| 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification              |
+| 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、单次完成与合成 cancel 双引擎证据         | 状态仍为 verification              |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级   | 无                                 |
+| 2026-08-29 | 未发布 | behavior      | readOnly 改为 meter + hidden form value，并补 hydration    | readOnly ref 现在指向 hidden input |

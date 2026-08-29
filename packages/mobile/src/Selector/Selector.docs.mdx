@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "58:66"
 storyIds:
   [
     data-entry-selector--single,
@@ -35,6 +35,7 @@ source: packages/mobile/src/Selector
 - `value` 同时作为选项 identity 与原生 FormData 值；string 与 number 分开识别，重复 identity 只保留第一项。
 - 值按 `options` 顺序归一化，不受用户点击顺序影响；单选只保留首个有效值，已删除的选项不会残留为幽灵值。
 - 支持 Field label/description/error/required 合并、原生 constraint validation、外部 `form` 关联、表单 reset、root ref 与 React Hook Form adapter。
+- 非受控 reset 监听绑定到组件自身 `ownerDocument`，因此在 iframe、Portal 到其他 Document 或 Hybrid 多文档宿主中不会错误监听主页面。
 - 没有 Field/status 错误时，显式 `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`，后两种 token 本身也进入错误视觉态。
 - 每个交互目标最小 44×44 CSS px；支持 RTL、200% 字号换行、reduced motion、forced colors 和服务端渲染。
 
@@ -109,9 +110,9 @@ source: packages/mobile/src/Selector
 - number identity 会按 HTML 规则序列化为字符串，服务端需按 schema 转型。
 - `form` 可关联组件外部的 `<form id>`；未传时使用最近祖先 form。
 - single required 使用原生 radio-group 必填。multiple required 在空值时将 required 放到第一项可用 checkbox，任一项选中后移除，从而表达“至少一项”而非“每项必选”。业务 schema 仍应重复验证。
-- 原生 reset 将非受控值恢复到首次 `defaultValue`；受控值只能由调用方 reset。
+- 原生 reset 将非受控值恢复到首次 `defaultValue`；受控值只能由调用方 reset。监听使用实际组件的 `ownerDocument`，外部 form 也必须位于同一 Document。
 - `maxCount` 仅约束 multiple，有限数值会取整并限制为不小于 0；达到上限后，未选项保持可聚焦并暴露 `aria-disabled=true`，选中项仍可取消。非受控 default/reset 使用同一限制；受控值保持权威，因此视觉 checked、原生 FormData 与上层表单值不会发生隐藏分叉。
-- `MeuFormSelector` 完成 React Hook Form 的 value、dirty、touched、disabled、required、error 与 root focus 连接。
+- `MeuFormSelector` 完成 React Hook Form 的 value、dirty、touched、disabled、required、error 与 root focus 连接；RHF error 与调用方显式 `status="error"` 取并集。
 
 ## Props
 
@@ -178,7 +179,7 @@ ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 允许表单库在校验�
 
 ## SSR 与 Next.js
 
-首次 render 仅使用 React `useId` 和 props，不读取浏览器全局。事件、reset 监听只在 effect 中注册；服务端输出真实 checked/required/name/value，适合 Next App Router client component 的 SSR。SSR 与客户端首帧必须使用同一 option 顺序和 identity。
+首次 render 仅使用 React `useId` 和 props，不读取浏览器全局。事件、reset 监听只在 effect 中注册并使用 root `ownerDocument`；服务端输出真实 checked/required/name/value，适合 Next App Router client component 的 SSR。SSR 与客户端首帧必须使用同一 option 顺序和 identity。独立 hydration 回归证明 input 节点、交互与 FormData 均保持有效。
 
 ## RTL 与国际化
 
@@ -205,10 +206,12 @@ render 的选择归一化为 O(options + selected values)，建议可见规模�
 
 - Unit: `Selector.test.tsx` 覆盖 single/multiple、受控/非受控收敛、点击/Space clear、完整 checkbox Tab/Space、maxCount、readOnly、24 项末项、order、duplicate、disabled、required、FormData、外部 form、reset、Field 合并、ARIA invalid token、ref 和 columns。
 - SSR: `Selector.ssr.test.tsx` 覆盖无 window/document 的原生 checked/required/name/value，以及 readOnly/maxCount 输出。
+- Hydration: `Selector.hydration.test.tsx` 使用 `onRecoverableError` 证明 native input identity、选择回调与 FormData 在 hydration 后保持一致。
 - Story interaction: `ControlledInteraction` 验证 single 受控回调，`ReadOnlyAndSelectionLimit` 验证只读点击不会改变 FormData；仓库门禁 `check-storybook-links` 的全量计数应在合并后重跑。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4973 B / 32768 B 预算，组合 Brotli 4436 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4979 B / 32768 B 预算，组合 Brotli 4451 B；共享样式由应用单独导入一次。
+- Figma：`Meu/Selector` set `58:66`，16 variants；Light `451:121`、Dark `451:171`、QA `451:179`。Stepper/Slider/Rate/Selector 合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - RTL / reduced motion / forced colors: CSS 契约与 `RtlAndLongContent` Story 已实现；仓库级场景扫描已有记录，最终基线截图审批仍待补。
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击“优先配送”后，`MeuFormSelector` 提交值由 `standard` 更新为 `fast`；页面内 Selector 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
 - Unit/SSR/Story 已补 24 项完整渲染、single Space clear、multiple Tab/Space、readOnly 和 maxCount；目标 WebView 的键盘/读屏组合及 Chromatic 最终视觉审批仍待补。
@@ -228,6 +231,7 @@ render 的选择归一化为 O(options + selected values)，建议可见规模�
 - 修复 Field idref 合并、required context、multiple 至少一项 native validation、外部 form 与 reset。
 - 保留 native radio/checkbox 正确键盘模型和 FormData 事实源。
 - 补齐 44 px 目标、RTL 逻辑属性、长文换行、reduced motion、forced colors、SSR、TSDoc、Story 与 Unit。
+- reset 与运行时 DOM 判断改为组件 `ownerDocument`，补独立 hydration，并让 form adapter 保留显式错误态。
 
 ## 维护规则
 
@@ -235,8 +239,9 @@ render 的选择归一化为 O(options + selected values)，建议可见规模�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                                          | 迁移说明                                                                                      |
-| ---------- | ------ | ------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的表单选择、提交值、hydration 与 44px 证据  | 无                                                                                            |
-| 2026-08-29 | 未发布 | behavior     | 增加 readOnly、multiple maxCount，并补 24 项、single/multiple 键盘与 SSR 证据 | 新属性均可选；达到 maxCount 的未选项仍可聚焦但不可选择                                        |
-| 2026-08-28 | 未发布 | behavior     | 完成 identity、Field/required、form/reset、键盘、兼容和永久文档加固           | 重复 value 后续项不再渲染；required single 不再允许清空；onChange 新增可选第三个 details 参数 |
+| 日期       | 版本   | 类型          | 内容                                                                          | 迁移说明                                                                                      |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 2026-08-29 | 未发布 | verification  | 记录 Next H5 移动 Chromium/WebKit 的表单选择、提交值、hydration 与 44px 证据  | 无                                                                                            |
+| 2026-08-29 | 未发布 | behavior      | 增加 readOnly、multiple maxCount，并补 24 项、single/multiple 键盘与 SSR 证据 | 新属性均可选；达到 maxCount 的未选项仍可聚焦但不可选择                                        |
+| 2026-08-28 | 未发布 | behavior      | 完成 identity、Field/required、form/reset、键盘、兼容和永久文档加固           | 重复 value 后续项不再渲染；required single 不再允许清空；onChange 新增可选第三个 details 参数 |
+| 2026-08-29 | 未发布 | compatibility | reset 使用 ownerDocument，并补 hydration 与 adapter 错误态证明                | 无                                                                                            |

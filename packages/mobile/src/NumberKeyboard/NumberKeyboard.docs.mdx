@@ -136,8 +136,8 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 ## 测试证据
 
 - Unit: `NumberKeyboard.test.tsx`，覆盖 SSR、输入来源、关闭原因、焦点保持、连续删除、pointer cancel/非主指针、运行时 disabled、关闭期事件隔离、空确认键、Portal config 边界、本地化/随机顺序，以及多实例 Escape 层级
-- Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
+- Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 6348 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 5577 B / 32768 B 预算，组合 Brotli 5565 B；共享样式由应用单独导入一次。
 - SSR/hydration: `NumberKeyboard.hydration.test.tsx` 使用真实 `hydrateRoot` 覆盖 initial-open Portal 移动、Provider 边界、输入事件与 0 hydration error

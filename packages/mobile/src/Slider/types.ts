@@ -32,7 +32,7 @@ export type SliderMark = {
  */
 export type SliderProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  "defaultValue" | "max" | "min" | "onChange" | "size" | "step" | "type" | "value"
+  "defaultValue" | "max" | "min" | "onChange" | "readOnly" | "size" | "step" | "type" | "value"
 > & {
   /** Initial value for an uncontrolled slider. It is clamped and snapped to the effective step. */
   defaultValue?: number;
@@ -48,6 +48,8 @@ export type SliderProps = Omit<
   onChange?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
   /** Runs once when a pointer or value-changing keyboard interaction finishes. */
   onChangeComplete?: (value: number, event: ChangeEvent<HTMLInputElement>) => void;
+  /** Presents a labelled, non-interactive meter while retaining a hidden native form value and input ref. @defaultValue false */
+  readOnly?: boolean;
   /** Shows the current formatted value beside the track. @defaultValue false */
   showValue?: boolean;
   /** Visual and touch-target size. @defaultValue "medium" */

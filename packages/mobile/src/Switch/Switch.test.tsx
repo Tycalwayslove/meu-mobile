@@ -64,11 +64,13 @@ describe("Switch", () => {
 
   it("blocks interaction while loading", () => {
     const onChange = vi.fn();
-    render(<Switch aria-label="同步设置" loading onChange={onChange} />);
+    const onClick = vi.fn();
+    render(<Switch aria-label="同步设置" loading onChange={onChange} onClick={onClick} />);
     const control = screen.getByRole("switch", { name: "同步设置" });
 
     fireEvent.click(control);
     expect(onChange).not.toHaveBeenCalled();
+    expect(onClick).not.toHaveBeenCalled();
     expect(control).toHaveProperty("disabled", false);
     expect(control.getAttribute("aria-disabled")).toBe("true");
     expect(control.getAttribute("aria-busy")).toBe("true");

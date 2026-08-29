@@ -113,6 +113,7 @@ export const input = style({
   margin: 0,
   opacity: 0,
   cursor: "pointer",
+  touchAction: "pan-y",
   selectors: {
     "&:disabled": { cursor: "not-allowed" }
   }

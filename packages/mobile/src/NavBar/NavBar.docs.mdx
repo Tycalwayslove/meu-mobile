@@ -174,7 +174,7 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 
 - 本轮 Unit/SSR/hydration：3 files / 13 tests 通过；覆盖原生 link/button、取消导航、disabled/loading、不可用 link 阻止冒泡、稳定 anchor 身份、localized name、heading、sticky/scrolled、React 19 ref、ConfigProvider RTL/嵌套 LTR/原生 dir=auto、显式 reduced motion、SSR 与 `onRecoverableError=[]` 的真实 hydrateRoot。
 - Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play 源码；本轮未构建/执行全量 Storybook runner。
-- Storybook 浏览器矩阵：仓库记录有 374×7 历史基线，但早于本轮 4 个新增 Story，不能作为本轮视觉或 axe 证据。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`uses native navigation actions, radio segments and read-only page dots` 在 Chromium/WebKit 均通过，批次整页 Light/Dark axe WCAG A/AA 也通过。新增 loading/sticky 视觉仍留待最终 Storybook 矩阵。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4009 B / 32768 B 预算，组合 Brotli 3537 B；共享样式由应用单独导入一次。
 - SSR/hydration：共置 SSR 与 direct hydration 测试本轮通过。
@@ -206,5 +206,5 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 | ---------- | ------ | -------------- | ------------------------------------------------------------------ | ------------------------------------------------------- |
 | 2026-08-29 | 未发布 | implementation | 增加 back disabled/loading、受控 sticky/scrolled、横向 Safe Area。 | unavailable href 暂时移除 href，但保持同一 anchor DOM。 |
 | 2026-08-29 | 未发布 | accessibility  | 增加 forced colors、reduced motion 与 config/prop 驱动 RTL。       | nested dir 现在按最近显式配置解析。                     |
-| 2026-08-29 | 未发布 | verification   | 增加 ref、状态、路由取消、SSR 与 direct hydration 共置证据。       | 历史全量矩阵需在冻结候选统一刷新。                      |
+| 2026-08-29 | 未发布 | verification   | 增加 ref、状态、路由取消、SSR 与 direct hydration 共置证据。       | 已纳入当前 Storybook 与官网全量矩阵。                   |
 | 2026-08-29 | 未发布 | feature        | 初版 safeArea、原生返回语义与 route-agnostic API。                 | 默认普通文档流。                                        |

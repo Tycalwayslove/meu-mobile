@@ -82,7 +82,7 @@ export function MeuFormCheckboxGroup<
                 field.onChange(nextValue);
                 if (onChange) onChange(nextValue);
               }}
-              status={fieldState.invalid ? "error" : "default"}
+              status={fieldState.invalid || groupProps.status === "error" ? "error" : "default"}
             />
           </Field>
         );

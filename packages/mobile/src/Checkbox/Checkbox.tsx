@@ -111,10 +111,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
     const form = element ? element.form : null;
     if (!element || !form || controlled || inGroup) return;
 
+    const view = form.ownerDocument.defaultView;
+    if (!view) return;
     let resetTimer: number | null = null;
     const handleReset = (event: Event) => {
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
-      resetTimer = window.setTimeout(() => {
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
+      resetTimer = view.setTimeout(() => {
         resetTimer = null;
         if (!event.defaultPrevented) setUncontrolledChecked(defaultChecked);
       }, 0);
@@ -122,13 +124,22 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
     form.addEventListener("reset", handleReset);
     return () => {
       form.removeEventListener("reset", handleReset);
-      if (resetTimer !== null) window.clearTimeout(resetTimer);
+      if (resetTimer !== null) view.clearTimeout(resetTimer);
     };
   }, [controlled, defaultChecked, form, inGroup]);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     if (resolvedDisabled || resolvedReadOnly) {
       event.preventDefault();
+      const element = event.currentTarget;
+      element.checked = currentChecked;
+      element.indeterminate = indeterminate;
+      void Promise.resolve().then(() => {
+        if (inputRef.current === element) {
+          element.checked = currentChecked;
+          element.indeterminate = indeterminate;
+        }
+      });
       return;
     }
     const nextChecked = event.target.checked;

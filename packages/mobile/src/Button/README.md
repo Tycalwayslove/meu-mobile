@@ -1,4 +1,4 @@
 # Button
 
-用于提交、确认和触发明确操作。无文字的操作必须改用 IconButton。加载时保留宽度、阻止重复触发，
-并通过 `aria-busy` 暴露状态。
+Button 的长期行为、表单/无障碍契约、验证证据和变更记录统一维护在
+[`Button.docs.mdx`](./Button.docs.mdx)。Props 类型事实源位于 [`types.ts`](./types.ts)。
