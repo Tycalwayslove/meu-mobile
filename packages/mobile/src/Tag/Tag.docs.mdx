@@ -137,10 +137,10 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2618 B / 32768 B 预算，组合 Brotli 2304 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种 DOM 模式；hydration 专测待补。
+- SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种 DOM 模式；隔离 Next 16 hydration 后静态与 action Tag 保持原生语义，0 hydration/runtime error。
 - RTL: 逻辑 CSS 已实现，专属截图待补。
 - Reduced motion: CSS 已实现，截图待补。
-- Mobile Chromium/WebKit E2E: 待补。
+- Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎渲染多 tone/variant，并激活“仅看待处理” action Tag 验证业务输出。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 待补。
 
@@ -148,15 +148,17 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 
 ### 待优化
 
-- 补 RTL/长翻译/forced-colors 视觉、移动键盘和真机读屏验证。
+- 补 RTL/长翻译/forced-colors 视觉、close 模式移动键盘和真机读屏；基础 action 路径已完成。
 
 ### 已完成
 
 - 分离静态、筛选、selected 与可关闭模式，避免嵌套按钮并冻结事件顺序。
 - 增加 44px close 目标、长文、reduced-motion、forced-colors、TSDoc、Unit/SSR/Story。
+- 在隔离 Next H5 中补多状态渲染、action 与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                  | 迁移说明                        |
-| ---------- | ------ | -------- | ----------------------------------------------------- | ------------------------------- |
-| 2026-08-29 | 未发布 | behavior | 增加 selected/onClose/closeAriaLabel 并分离双动作语义 | 现有静态和 onClick 模式保持兼容 |
+| 日期       | 版本   | 类型         | 内容                                                  | 迁移说明                        |
+| ---------- | ------ | ------------ | ----------------------------------------------------- | ------------------------------- |
+| 2026-08-29 | 未发布 | behavior     | 增加 selected/onClose/closeAriaLabel 并分离双动作语义 | 现有静态和 onClick 模式保持兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 action/hydration 证据             | 无                              |

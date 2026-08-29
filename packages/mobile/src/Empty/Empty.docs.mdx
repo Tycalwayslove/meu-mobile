@@ -125,10 +125,10 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 824 B / 32768 B 预算，组合 Brotli 729 B；共享样式由应用单独导入一次。
-- SSR/hydration: Node SSR 1 项；hydration 未执行。
+- SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后 group 名称、说明和 action 保持一致，0 hydration/runtime error。
 - RTL: 逻辑顺序契约；未做 E2E。
 - Reduced motion: 不适用，无动画。
-- Mobile Chromium/WebKit E2E: 未执行。
+- Mobile Chromium/WebKit E2E: 反馈场景在两种引擎断言命名 group、说明内容与“清除筛选”原生 action 的业务输出。
 - Chromatic Light/Dark: 未执行。
 - Real device: 未执行。
 
@@ -136,15 +136,17 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 
 ### 待优化
 
-- 移动窄屏、200% 字号、Chromatic 与真机读屏验证。
+- 补移动窄屏、200% 字号、Chromatic 与真机读屏；基础双引擎 group/action 路径已完成。
 
 ### 已完成
 
 - 明确非错误边界、原因分类、说明关系与主次操作槽位。
 - 增加窄屏长文案、forced-colors 和 SSR 契约。
+- 在隔离 Next H5 中补命名、说明、action 与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                | 迁移说明       |
-| ---------- | ------ | -------- | --------------------------------------------------- | -------------- |
-| 2026-08-29 | 未发布 | 兼容增强 | `action` 改为可选，新增 `secondaryAction`、`reason` | 旧调用无需迁移 |
+| 日期       | 版本   | 类型         | 内容                                                | 迁移说明       |
+| ---------- | ------ | ------------ | --------------------------------------------------- | -------------- |
+| 2026-08-29 | 未发布 | 兼容增强     | `action` 改为可选，新增 `secondaryAction`、`reason` | 旧调用无需迁移 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 group/action/hydration 证据     | 无             |

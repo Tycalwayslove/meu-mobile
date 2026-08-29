@@ -123,10 +123,10 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3175 B / 32768 B 预算，组合 Brotli 2814 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Avatar.ssr.test.tsx` 验证无浏览器全局的稳定 fallback markup；hydration 专测待补。
+- SSR/hydration: `Avatar.ssr.test.tsx` 验证稳定 fallback；隔离 Next 16 hydration 后图片与 initials fallback 均保持可访问名称，0 hydration/runtime error。
 - RTL: 逻辑无关；专属自动化不适用。
 - Reduced motion: 继承 Image CSS，截图待补。
-- Mobile Chromium/WebKit E2E: 待补。
+- Mobile Chromium/WebKit E2E: `renders atomic display components with native actions and fallbacks` 在两种引擎断言正常图片与空源 initials fallback 的 `img` 名称。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 待补。
 
@@ -134,15 +134,17 @@ render 不读取浏览器全局。空源服务端直接输出可访问 fallback�
 
 ### 待优化
 
-- 补 Chromatic、移动端图片失败/lazy loading 与 VoiceOver/TalkBack 真机验证。
+- 补 Chromatic、真实失败/lazy loading 与 VoiceOver/TalkBack 真机验证；基础图片/fallback 双引擎路径已完成。
 
 ### 已完成
 
 - 明确 fallback 优先级，增加 initials，补齐 alt/loading/error/ref 契约。
 - 增加 forced-colors、Unit、SSR、交互与 Light/Dark Story。
+- 在隔离 Next H5 中补图片、fallback 与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                 | 迁移说明                               |
-| ---------- | ------ | -------- | ------------------------------------ | -------------------------------------- |
-| 2026-08-29 | 未发布 | behavior | 增加显式 initials 与完整图片状态证据 | 现有 fallback 和派生首字符行为保持兼容 |
+| 日期       | 版本   | 类型         | 内容                                            | 迁移说明                               |
+| ---------- | ------ | ------------ | ----------------------------------------------- | -------------------------------------- |
+| 2026-08-29 | 未发布 | behavior     | 增加显式 initials 与完整图片状态证据            | 现有 fallback 和派生首字符行为保持兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎图片/fallback/hydration 证据 | 无                                     |

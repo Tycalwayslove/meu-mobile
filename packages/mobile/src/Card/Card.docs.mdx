@@ -125,10 +125,10 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2144 B / 32768 B 预算，组合 Brotli 1916 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Card.ssr.test.tsx` 覆盖 slots、heading/link 和非 button 根；hydration 专测待补。
+- SSR/hydration: `Card.ssr.test.tsx` 覆盖 slots、heading/link 和非 button 根；隔离 Next 16 hydration 后 header/body/footer 与独立 action 保持一致，0 hydration/runtime error。
 - RTL: 逻辑 CSS 已实现，专属截图待补。
 - Reduced motion: 无动画，不适用。
-- Mobile Chromium/WebKit E2E: 待补。
+- Mobile Chromium/WebKit E2E: `composes Card slots and controls accessible Collapse panels` 在两种引擎断言 Card 根、body 内容、header slots 与 footer action 业务输出。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 待补。
 
@@ -136,15 +136,17 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 
 ### 待优化
 
-- 补长内容/RTL/forced-colors/Light-Dark 视觉与移动端操作区验证。
+- 补长内容/RTL/forced-colors/Light-Dark 专属视觉；基础移动端 slots/action 已完成。
 
 ### 已完成
 
 - 冻结非交互根与嵌套交互边界，补 media ratio、显式 footer action layout、RTL 和 forced-colors。
 - 补齐 TSDoc、Unit、SSR 与组合 Story。
+- 在隔离 Next H5 中补 slots、footer action 与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                              | 迁移说明                     |
-| ---------- | ------ | -------- | ------------------------------------------------- | ---------------------------- |
-| 2026-08-29 | 未发布 | behavior | 增加 mediaAspectRatio，强化 footer/RTL/高对比边界 | 现有 slots 与 DOM 根保持兼容 |
+| 日期       | 版本   | 类型         | 内容                                              | 迁移说明                     |
+| ---------- | ------ | ------------ | ------------------------------------------------- | ---------------------------- |
+| 2026-08-29 | 未发布 | behavior     | 增加 mediaAspectRatio，强化 footer/RTL/高对比边界 | 现有 slots 与 DOM 根保持兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 slots/action/hydration 证据   | 无                           |

@@ -124,10 +124,10 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2100 B / 32768 B 预算，组合 Brotli 1875 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；hydration 专测待补。
+- SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；隔离 Next 16 hydration 后 99+ 与 dot accessible label 保持一致，0 hydration/runtime error。
 - RTL: Unit 覆盖 offset 数据归一化；逻辑定位由 CSS 实现，视觉截图待补。
 - Reduced motion: 无动画，不适用。
-- Mobile Chromium/WebKit E2E: 待补。
+- Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎断言 `128 → 99+` 与 dot 的“店铺在线”名称，并与 Avatar 组合。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 待补。
 
@@ -135,15 +135,17 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 
 ### 待优化
 
-- 完成 RTL/forced-colors/Light-Dark 视觉与真机状态朗读验证。
+- 完成 RTL/forced-colors/Light-Dark 视觉与真机状态朗读验证；基础 count/dot 双引擎路径已完成。
 
 ### 已完成
 
 - 固化 dot/count/max/zero/label 边界；改用逻辑定位并增加高对比降级。
 - 补齐 TSDoc、Unit、SSR 与状态 Story。
+- 在隔离 Next H5 中补 overflow count、dot label、组合与 hydration 双引擎证据。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型          | 内容                                                   | 迁移说明 |
 | ---------- | ------ | ------------- | ------------------------------------------------------ | -------- |
 | 2026-08-29 | 未发布 | accessibility | 明确 dot label、颜色之外的状态表达及 RTL/forced-colors | API 兼容 |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 count/dot/hydration 证据           | 无       |

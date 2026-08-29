@@ -117,10 +117,10 @@ grid row 动画在 Chrome/WebView 70+、iOS 13+ 可用；inert 在旧内核缺�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3662 B / 32768 B 预算，组合 Brotli 3218 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Collapse.ssr.test.tsx`；hydration 专测待补
+- SSR/hydration: `Collapse.ssr.test.tsx`；隔离 Next 16 hydration 后 disclosure/panel 关联与受控 accordion 状态保持一致，0 hydration/runtime error
 - RTL: LongContentRTL Story
 - Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: Card/Collapse 场景在两种引擎断言 `aria-expanded`、disabled、accordion 切换、旧 panel 关闭、新 panel region 与业务输出
 - Chromatic Light/Dark: 待建立
 - Real device: 待补
 
@@ -128,14 +128,15 @@ grid row 动画在 Chrome/WebView 70+、iOS 13+ 可用；inert 在旧内核缺�
 
 ### 待优化
 
-补真机读屏、嵌套 disclosure 与视觉动画基线。
+补真机读屏、嵌套 disclosure 与视觉动画基线；基础双引擎 accordion 路径已完成。
 
 ### 已完成
 
-动态 identity 归一、panel inert、逻辑方向、0 值 extra、forced-colors、SSR 和长内容覆盖。
+动态 identity 归一、panel inert、逻辑方向、0 值 extra、forced-colors、SSR、长内容与隔离 Next H5 覆盖。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                  | 迁移说明                                     |
-| ---------- | ------ | -------- | ------------------------------------- | -------------------------------------------- |
-| 2026-08-29 | 未发布 | behavior | V2 动态状态、焦点隔离、RTL 与验证加固 | API 兼容；删除 item 后旧非受控展开值不再恢复 |
+| 日期       | 版本   | 类型         | 内容                                         | 迁移说明                                     |
+| ---------- | ------ | ------------ | -------------------------------------------- | -------------------------------------------- |
+| 2026-08-29 | 未发布 | behavior     | V2 动态状态、焦点隔离、RTL 与验证加固        | API 兼容；删除 item 后旧非受控展开值不再恢复 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 accordion/hydration 证据 | 无                                           |

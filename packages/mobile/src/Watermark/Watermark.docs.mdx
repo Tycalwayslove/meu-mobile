@@ -120,10 +120,10 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2719 B / 32768 B 预算，组合 Brotli 2391 B；共享样式由应用单独导入一次。
-- SSR/hydration: Node SSR 已覆盖 stable pattern markup；hydration 专测未执行。
+- SSR/hydration: Node SSR 已覆盖 stable pattern markup；隔离 Next 16 hydration 后 overlay 与业务 children 保持稳定，0 hydration/runtime error。
 - RTL: 无方向性布局；bidi 内容待真机。
 - Reduced motion: 不适用，无动画。
-- Mobile Chromium/WebKit E2E: 未执行。
+- Mobile Chromium/WebKit E2E: `renders a non-interactive watermark and restores its removed overlay` 在两种引擎断言 `aria-hidden`、`pointer-events:none`、内部按钮可用、手动移除后恢复与 `onRemove` 输出。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 未执行。
 
@@ -131,14 +131,15 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 
 ### 待优化
 
-补打印/PDF、跨域 SVG image、无 MutationObserver、bidi 与移动端截图链路验证。
+补打印/PDF、跨域 SVG image、无 MutationObserver、bidi 与移动端截图；基础篡改恢复双引擎路径已完成。
 
 ### 已完成
 
-修复篡改保护误回滚业务 children 的商用阻断；固化弱安全、SSR、性能和无障碍边界。
+修复篡改保护误回滚业务 children 的商用阻断；固化弱安全、SSR、性能和无障碍边界；补隔离 Next H5 篡改恢复证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型 | 内容                                              | 迁移说明 |
-| ---------- | ------ | ---- | ------------------------------------------------- | -------- |
-| 2026-08-29 | 未发布 | fix  | 篡改监听只保护水印 overlay，不再干预业务 children | 无需迁移 |
+| 日期       | 版本   | 类型         | 内容                                              | 迁移说明 |
+| ---------- | ------ | ------------ | ------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | fix          | 篡改监听只保护水印 overlay，不再干预业务 children | 无需迁移 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎篡改恢复/hydration 证据        | 无       |
