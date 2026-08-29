@@ -14,6 +14,18 @@ export type InfiniteListStatus = "idle" | "loading" | "error" | "complete";
 export type InfiniteListTrigger = "auto" | "manual" | "retry";
 
 /**
+ * Request lifecycle supplied to an InfiniteList page loader.
+ *
+ * @public
+ */
+export type InfiniteListLoadContext = {
+  /** Aborts when the list completes or unmounts; loaders should forward it to cancellable I/O. */
+  signal: AbortSignal;
+  /** Entry point that initiated this request. */
+  trigger: InfiniteListTrigger;
+};
+
+/**
  * Details reported with an {@link InfiniteListStatus} transition.
  *
  * @public
@@ -41,10 +53,12 @@ export type InfiniteListProps = Omit<HTMLAttributes<HTMLDivElement>, "children">
   errorContent?: ReactNode;
   /** Caller-owned pagination fact; false is the only completion source. */
   hasMore: boolean;
-  /** Loads one additional page. Concurrent calls are locked. */
-  loadMore: () => Promise<void>;
+  /** Loads one additional page. Concurrent calls are locked; the signal supports cooperative cancellation. */
+  loadMore: (context: InfiniteListLoadContext) => Promise<void>;
   /** Accessible label for the manual load button. */
   loadMoreLabel?: string;
+  /** Polite live-region announcement after one page loads successfully. */
+  loadedAnnouncement?: ReactNode;
   /** Content displayed while a request is pending. */
   loadingContent?: ReactNode;
   /** Receives the current request rejection. */

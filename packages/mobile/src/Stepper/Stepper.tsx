@@ -5,7 +5,7 @@ import type { FocusEvent, ForwardedRef, KeyboardEvent, PointerEvent } from "reac
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
-import { normalizeSteppedNumber } from "../internal/numbers";
+import { decimalPlaces, normalizeSteppedNumber } from "../internal/numbers";
 import { button, input, root } from "./Stepper.css";
 import type { StepperProps } from "./types";
 
@@ -35,6 +35,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     dir,
     id,
     incrementAriaLabel,
+    inputMode = "decimal",
     max,
     min,
     onBlur,
@@ -43,6 +44,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     onKeyDown,
     precision,
     readOnly = false,
+    repeatOnLongPress = false,
     required: requiredProp = false,
     size = "medium",
     status = "default",
@@ -62,8 +64,25 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   const upper =
     finiteMin !== undefined && finiteMax !== undefined ? Math.max(finiteMin, finiteMax) : finiteMax;
   const safeStep = Number.isFinite(step) && step > 0 ? step : 1;
+  const safePrecision =
+    precision === undefined || !Number.isFinite(precision)
+      ? undefined
+      : Math.min(
+          Math.max(
+            Math.trunc(precision),
+            decimalPlaces(safeStep),
+            lower === undefined ? 0 : decimalPlaces(lower)
+          ),
+          12
+        );
   const normalize = (nextValue: number) =>
-    normalizeSteppedNumber({ max: upper, min: lower, precision, step: safeStep, value: nextValue });
+    normalizeSteppedNumber({
+      max: upper,
+      min: lower,
+      precision: safePrecision,
+      step: safeStep,
+      value: nextValue
+    });
   const normalizeNullable = (nextValue: number | null) =>
     nextValue === null ? null : normalize(nextValue);
   const normalizedDefaultValue = normalizeNullable(defaultValue);
@@ -75,6 +94,15 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   const inputRef = useRef<HTMLInputElement | null>(null);
   const defaultValueRef = useRef(normalizedDefaultValue);
   const stepButtonPointerRef = useRef(false);
+  const activeStepPointerRef = useRef<number | null>(null);
+  const repeatDelayRef = useRef(0);
+  const repeatIntervalRef = useRef(0);
+  const repeatStartedRef = useRef(false);
+  const suppressStepClickRef = useRef(false);
+  const pointerSequenceRef = useRef(0);
+  const mountedRef = useRef(true);
+  const repeatValueRef = useRef<number | null>(currentValue);
+  const repeatPublishedValueRef = useRef<number | null>(currentValue);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
   const callerInvalid =
@@ -111,6 +139,31 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   }, [normalizedDefaultValue]);
 
   useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      window.clearTimeout(repeatDelayRef.current);
+      window.clearInterval(repeatIntervalRef.current);
+      repeatDelayRef.current = 0;
+      repeatIntervalRef.current = 0;
+      pointerSequenceRef.current += 1;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!inert && repeatOnLongPress) return;
+    window.clearTimeout(repeatDelayRef.current);
+    window.clearInterval(repeatIntervalRef.current);
+    repeatDelayRef.current = 0;
+    repeatIntervalRef.current = 0;
+    repeatStartedRef.current = false;
+    suppressStepClickRef.current = false;
+    activeStepPointerRef.current = null;
+    stepButtonPointerRef.current = false;
+    pointerSequenceRef.current += 1;
+  }, [inert, repeatOnLongPress]);
+
+  useEffect(() => {
     if (controlled) return;
     const form = inputRef.current ? inputRef.current.form : null;
     if (!form) return;
@@ -141,7 +194,10 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   }
 
   function parseDraft(text: string) {
-    return Number(text.includes(".") ? text : text.replace(",", "."));
+    const trimmedText = text.trim();
+    const normalizedText = trimmedText.includes(".") ? trimmedText : trimmedText.replace(",", ".");
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(normalizedText)) return Number.NaN;
+    return Number(normalizedText);
   }
 
   function commitDraft() {
@@ -172,18 +228,114 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     if (onBlur) onBlur(event);
   }
 
-  function handleStepButtonPointerDown() {
+  function clearStepRepeat() {
+    window.clearTimeout(repeatDelayRef.current);
+    window.clearInterval(repeatIntervalRef.current);
+    repeatDelayRef.current = 0;
+    repeatIntervalRef.current = 0;
+  }
+
+  function handleStepButtonPointerDown(event: PointerEvent<HTMLButtonElement>, direction: -1 | 1) {
+    if (event.button !== 0 || event.isPrimary === false) return;
+    clearStepRepeat();
+    pointerSequenceRef.current += 1;
     stepButtonPointerRef.current = true;
+    activeStepPointerRef.current = event.pointerId;
+    repeatStartedRef.current = false;
+    suppressStepClickRef.current = false;
+    const parsedDraft = parseDraft(draft);
+    const startingValue = editing && Number.isFinite(parsedDraft) ? parsedDraft : currentValue;
+    repeatValueRef.current =
+      startingValue !== null ? startingValue : lower !== undefined ? lower : 0;
+    repeatPublishedValueRef.current = currentValue;
+    if (!repeatOnLongPress || inert) return;
+
+    if (typeof event.currentTarget.setPointerCapture === "function") {
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Browsers may reject capture when the pointer is no longer active.
+      }
+    }
+
+    const repeatStep = () => {
+      const repeatValue = repeatValueRef.current;
+      const base = repeatValue !== null ? repeatValue : lower !== undefined ? lower : 0;
+      const nextValue = normalize(base + safeStep * direction);
+      if (valuesEqual(base, nextValue)) {
+        clearStepRepeat();
+        return false;
+      }
+      repeatValueRef.current = nextValue;
+      setEditing(false);
+      setDraft(String(nextValue));
+      if (!controlled) setUncontrolledValue(nextValue);
+      if (!valuesEqual(repeatPublishedValueRef.current, nextValue) && onChange) {
+        onChange(nextValue);
+      }
+      repeatPublishedValueRef.current = nextValue;
+      return true;
+    };
+    repeatDelayRef.current = window.setTimeout(() => {
+      repeatStartedRef.current = true;
+      if (repeatStep()) repeatIntervalRef.current = window.setInterval(repeatStep, 100);
+    }, 500);
   }
 
   function handleStepButtonPointerCancel(event: PointerEvent<HTMLButtonElement>) {
+    if (activeStepPointerRef.current !== null && event.pointerId !== activeStepPointerRef.current)
+      return;
+    clearStepRepeat();
+    activeStepPointerRef.current = null;
+    const repeated = repeatStartedRef.current;
+    repeatStartedRef.current = false;
+    suppressStepClickRef.current = true;
+    const sequence = pointerSequenceRef.current + 1;
+    pointerSequenceRef.current = sequence;
+    void Promise.resolve().then(() => {
+      if (mountedRef.current && pointerSequenceRef.current === sequence) {
+        suppressStepClickRef.current = false;
+      }
+    });
     if (!stepButtonPointerRef.current) return;
     stepButtonPointerRef.current = false;
-    if (event.currentTarget.ownerDocument.activeElement !== inputRef.current) commitDraft();
+    if (!repeated && event.currentTarget.ownerDocument.activeElement !== inputRef.current) {
+      commitDraft();
+    }
+  }
+
+  function handleStepButtonPointerUp(event: PointerEvent<HTMLButtonElement>) {
+    if (activeStepPointerRef.current !== null && event.pointerId !== activeStepPointerRef.current)
+      return;
+    clearStepRepeat();
+    activeStepPointerRef.current = null;
+    const repeated = repeatStartedRef.current;
+    const ownerDocument = event.currentTarget.ownerDocument;
+    repeatStartedRef.current = false;
+    suppressStepClickRef.current = repeated;
+    const sequence = pointerSequenceRef.current + 1;
+    pointerSequenceRef.current = sequence;
+    void Promise.resolve().then(() => {
+      if (!mountedRef.current || pointerSequenceRef.current !== sequence) return;
+      if (!stepButtonPointerRef.current) return;
+      stepButtonPointerRef.current = false;
+      if (!repeated && ownerDocument.activeElement !== inputRef.current) {
+        commitDraft();
+      }
+    });
+  }
+
+  function handleStepButtonLostPointerCapture(event: PointerEvent<HTMLButtonElement>) {
+    if (activeStepPointerRef.current === event.pointerId) handleStepButtonPointerCancel(event);
   }
 
   function handleStepButtonClick(direction: -1 | 1) {
     stepButtonPointerRef.current = false;
+    pointerSequenceRef.current += 1;
+    if (suppressStepClickRef.current) {
+      suppressStepClickRef.current = false;
+      return;
+    }
     offset(direction);
   }
 
@@ -244,8 +396,10 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         disabled={inert || atMin}
         aria-controls={resolvedId}
         aria-label={decrementAriaLabel || (locale === "zh-CN" ? "减少" : "Decrease")}
-        onPointerDown={handleStepButtonPointerDown}
+        onPointerDown={(event) => handleStepButtonPointerDown(event, -1)}
+        onPointerUp={handleStepButtonPointerUp}
         onPointerCancel={handleStepButtonPointerCancel}
+        onLostPointerCapture={handleStepButtonLostPointerCapture}
         onClick={() => handleStepButtonClick(-1)}
       >
         <span aria-hidden="true">−</span>
@@ -260,7 +414,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         className={input}
         type="text"
         role="spinbutton"
-        inputMode="decimal"
+        inputMode={inputMode}
         value={editing ? draft : currentValue === null ? "" : String(currentValue)}
         disabled={disabled}
         dir={dir}
@@ -288,8 +442,10 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         disabled={inert || atMax}
         aria-controls={resolvedId}
         aria-label={incrementAriaLabel || (locale === "zh-CN" ? "增加" : "Increase")}
-        onPointerDown={handleStepButtonPointerDown}
+        onPointerDown={(event) => handleStepButtonPointerDown(event, 1)}
+        onPointerUp={handleStepButtonPointerUp}
         onPointerCancel={handleStepButtonPointerCancel}
+        onLostPointerCapture={handleStepButtonLostPointerCapture}
         onClick={() => handleStepButtonClick(1)}
       >
         <span aria-hidden="true">+</span>

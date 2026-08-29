@@ -8,7 +8,8 @@ const cases = [
   ["popover", '[data-meu-component="popover"]'],
   ["image-viewer", '[data-meu-overlay-layer="image-viewer"]'],
   ["floating-panel", '[data-meu-component="floating-panel"]'],
-  ["swipe-actions", '[data-meu-component="swipe-actions"]']
+  ["swipe-actions", '[data-meu-component="swipe-actions"]'],
+  ["form", '[data-meu-component="form"]']
 ] as const;
 
 test("hydrates measurement, portal and gesture boundaries without runtime errors", async ({
@@ -27,6 +28,19 @@ test("hydrates measurement, portal and gesture boundaries without runtime errors
       const scenario = page.locator('section[aria-label="专项 Hydration 场景"]');
       await expect(scenario).toHaveAttribute("data-hydrated", "true");
       await expect(page.locator(selector)).toBeAttached();
+      if (kind === "form") {
+        const input = page.getByRole("textbox", { name: "Hydration form name" });
+        const provider = page.locator('[data-meu-component="config-provider"]');
+        await expect(provider).toHaveAttribute("dir", "rtl");
+        await expect(provider).toHaveAttribute("data-meu-motion", "reduced");
+        await expect(input).toHaveCSS("direction", "rtl");
+        await expect(input).toHaveValue("Server default");
+        await page.getByRole("button", { name: "Apply client default" }).click();
+        await expect(input).toHaveValue("Client default");
+        await input.fill("Temporary edit");
+        await page.getByRole("button", { name: "Reset hydration form" }).click();
+        await expect(input).toHaveValue("Client default");
+      }
       expect(runtimeErrors, `${kind} runtime errors`).toEqual([]);
     });
   }

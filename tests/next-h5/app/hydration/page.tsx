@@ -12,7 +12,7 @@ export default async function HydrationPage({ searchParams }: HydrationPageProps
         <p className="integration-eyebrow">Meu Mobile / SSR Boundary</p>
         <h1>专项 Hydration 门禁</h1>
       </header>
-      <HydrationScenario kind={requestedCase} />
+      <HydrationScenario initialFormName="Server default" kind={requestedCase} />
     </main>
   );
 }

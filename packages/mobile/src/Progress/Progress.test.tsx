@@ -59,4 +59,19 @@ describe("Progress", () => {
     expect(progress.getAttribute("aria-atomic")).toBe("false");
     expect(progress.getAttribute("aria-valuetext")).toBe("");
   });
+
+  it("inherits the explicit reduced-motion and RTL provider contract", () => {
+    render(
+      <ConfigProvider dir="rtl" motion="reduced">
+        <Progress announce aria-label="同步" indeterminate />
+      </ConfigProvider>
+    );
+
+    const progress = screen.getByRole("progressbar", { name: "同步" });
+    const provider = progress.closest('[data-meu-component="config-provider"]');
+    expect(provider ? provider.getAttribute("dir") : null).toBe("rtl");
+    expect(provider ? provider.getAttribute("data-meu-motion") : null).toBe("reduced");
+    expect(progress.hasAttribute("aria-valuenow")).toBe(false);
+    expect(progress.getAttribute("aria-live")).toBe("polite");
+  });
 });

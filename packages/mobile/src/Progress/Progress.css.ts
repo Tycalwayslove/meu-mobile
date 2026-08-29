@@ -91,7 +91,12 @@ export const fill = recipe({
       determinate: {
         width: "100%",
         transform: "scaleX(var(--meu-progress-scale))",
-        transition: "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)"
+        transition: "transform var(--meu-motion-enter) var(--meu-motion-ease-standard)",
+        selectors: {
+          '[data-meu-motion="reduced"] &': {
+            transitionDuration: "0ms"
+          }
+        }
       },
       indeterminate: {
         width: "40%",
@@ -100,6 +105,10 @@ export const fill = recipe({
         selectors: {
           '[dir="rtl"] &': {
             animationName: indeterminateMotionRtl
+          },
+          '[data-meu-motion="reduced"] &': {
+            animation: "none",
+            transitionDuration: "0ms"
           }
         }
       }

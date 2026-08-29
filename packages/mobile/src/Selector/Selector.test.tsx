@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { useState } from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
@@ -38,6 +39,30 @@ describe("Selector", () => {
     );
   });
 
+  it("clears an optional active single selection with the native Space path", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <Selector
+        aria-label="履约方式"
+        options={options}
+        defaultValue={["delivery"]}
+        onChange={onChange}
+      />
+    );
+
+    const delivery = screen.getByRole("radio", { name: "配送" });
+    await user.tab();
+    expect(document.activeElement).toBe(delivery);
+    await user.keyboard(" ");
+    expect(delivery).toHaveProperty("checked", false);
+    expect(onChange).toHaveBeenLastCalledWith(
+      [],
+      [],
+      expect.objectContaining({ option: options[0], source: "clear" })
+    );
+  });
+
   it("maintains source option order, de-duplicates identities, and ignores disabled input", () => {
     const onChange = vi.fn();
     render(
@@ -62,6 +87,152 @@ describe("Selector", () => {
     expect(screen.getByRole("checkbox", { name: "快递柜" })).toHaveProperty("disabled", true);
   });
 
+  it("keeps every enabled checkbox in the native Tab and Space path", async () => {
+    const user = userEvent.setup();
+    render(<Selector aria-label="服务范围" options={options} multiple />);
+
+    const delivery = screen.getByRole("checkbox", { name: "配送" });
+    const pickup = screen.getByRole("checkbox", { name: "自提" });
+    await user.tab();
+    expect(document.activeElement).toBe(delivery);
+    await user.keyboard(" ");
+    expect(delivery).toHaveProperty("checked", true);
+    await user.tab();
+    expect(document.activeElement).toBe(pickup);
+    await user.keyboard(" ");
+    expect(pickup).toHaveProperty("checked", true);
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+    expect(document.activeElement).toBe(delivery);
+  });
+
+  it("enforces maxCount without removing blocked options from the keyboard path", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const limitOptions = [
+      { value: "delivery", label: "配送" },
+      { value: "pickup", label: "自提" },
+      { value: "store", label: "门店" }
+    ] as const;
+    render(
+      <Selector
+        aria-label="服务范围"
+        defaultValue={["delivery"]}
+        maxCount={2}
+        multiple
+        onChange={onChange}
+        options={limitOptions}
+      />
+    );
+
+    const delivery = screen.getByRole("checkbox", { name: "配送" });
+    const pickup = screen.getByRole("checkbox", { name: "自提" });
+    const store = screen.getByRole("checkbox", { name: "门店" });
+    await user.click(pickup);
+    expect(store.getAttribute("aria-disabled")).toBe("true");
+    expect(store).toHaveProperty("disabled", false);
+    delivery.focus();
+    await user.tab();
+    await user.tab();
+    expect(document.activeElement).toBe(store);
+    await user.keyboard(" ");
+    expect(store).toHaveProperty("checked", false);
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    await user.click(delivery);
+    expect(store.hasAttribute("aria-disabled")).toBe(false);
+    await user.click(store);
+    expect(store).toHaveProperty("checked", true);
+    expect(pickup).toHaveProperty("checked", true);
+  });
+
+  it("keeps read-only selections focusable and in FormData while blocking changes", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <form data-testid="readonly-form">
+        <Selector
+          aria-label="服务范围"
+          defaultValue={["delivery"]}
+          multiple
+          name="service"
+          onChange={onChange}
+          options={options}
+          readOnly
+        />
+      </form>
+    );
+
+    const group = screen.getByRole("group", { name: "服务范围" });
+    const delivery = screen.getByRole("checkbox", { name: "配送" });
+    const pickup = screen.getByRole("checkbox", { name: "自提" });
+    expect(group.hasAttribute("aria-readonly")).toBe(false);
+    expect(group.getAttribute("data-state")).toBe("readonly");
+    expect(delivery.getAttribute("aria-readonly")).toBe("true");
+    expect(delivery).toHaveProperty("disabled", false);
+    await user.click(pickup);
+    expect(pickup).toHaveProperty("checked", false);
+    pickup.focus();
+    await user.keyboard(" ");
+    expect(pickup).toHaveProperty("checked", false);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(
+      new FormData(screen.getByTestId<HTMLFormElement>("readonly-form")).getAll("service")
+    ).toEqual(["delivery"]);
+  });
+
+  it("blocks single selection and clear paths while exposing radiogroup read-only semantics", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <form data-testid="readonly-single-form">
+        <Selector
+          aria-label="履约方式"
+          defaultValue={["delivery"]}
+          name="shipping"
+          onChange={onChange}
+          options={options}
+          readOnly
+        />
+      </form>
+    );
+
+    const group = screen.getByRole("radiogroup", { name: "履约方式" });
+    const delivery = screen.getByRole("radio", { name: "配送" });
+    const pickup = screen.getByRole("radio", { name: "自提" });
+    expect(group.getAttribute("aria-readonly")).toBe("true");
+    expect(fireEvent.keyDown(delivery, { key: "ArrowRight" })).toBe(false);
+    await user.click(delivery);
+    await user.click(pickup);
+    expect(delivery).toHaveProperty("checked", true);
+    expect(pickup).toHaveProperty("checked", false);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(
+      new FormData(screen.getByTestId<HTMLFormElement>("readonly-single-form")).get("shipping")
+    ).toBe("delivery");
+  });
+
+  it("renders more than 20 options without truncating identity, focus, or form data", async () => {
+    const user = userEvent.setup();
+    const manyOptions = Array.from({ length: 24 }, (_, index) => ({
+      label: `选项 ${index + 1}`,
+      value: `option-${index + 1}`
+    }));
+    render(
+      <form data-testid="many-form">
+        <Selector aria-label="全部服务" multiple name="services" options={manyOptions} />
+      </form>
+    );
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes).toHaveLength(24);
+    checkboxes[23]!.focus();
+    await user.keyboard(" ");
+    expect(document.activeElement).toBe(checkboxes[23]);
+    expect(
+      new FormData(screen.getByTestId<HTMLFormElement>("many-form")).getAll("services")
+    ).toEqual(["option-24"]);
+  });
+
   it("keeps controlled state authoritative", () => {
     const onChange = vi.fn();
     render(
@@ -72,6 +243,94 @@ describe("Selector", () => {
     expect(onChange).toHaveBeenCalled();
     expect(screen.getByRole("radio", { name: "配送" })).toHaveProperty("checked", true);
     expect(screen.getByRole("radio", { name: "自提" })).toHaveProperty("checked", false);
+  });
+
+  it("keeps controlled values and native FormData aligned when they exceed maxCount", () => {
+    const onChange = vi.fn();
+    render(
+      <form data-testid="controlled-limit-form">
+        <Selector
+          aria-label="服务范围"
+          maxCount={1}
+          multiple
+          name="services"
+          onChange={onChange}
+          options={[
+            { value: "delivery", label: "配送" },
+            { value: "pickup", label: "自提" },
+            { value: "store", label: "门店" }
+          ]}
+          value={["delivery", "pickup", "store"]}
+        />
+      </form>
+    );
+
+    expect(
+      new FormData(screen.getByTestId<HTMLFormElement>("controlled-limit-form")).getAll("services")
+    ).toEqual(["delivery", "pickup", "store"]);
+    fireEvent.click(screen.getByRole("checkbox", { name: "配送" }));
+    expect(onChange.mock.calls[0]![0]).toEqual(["pickup", "store"]);
+    expect(
+      screen.getAllByRole<HTMLInputElement>("checkbox").every((option) => option.checked)
+    ).toBe(true);
+  });
+
+  it("normalizes uncontrolled limits while keeping controlled values authoritative", () => {
+    const onChange = vi.fn();
+    const dynamicOptions = [
+      { value: "delivery", label: "配送" },
+      { value: "pickup", label: "自提" },
+      { value: "store", label: "门店" }
+    ] as const;
+    const { rerender } = render(
+      <Selector
+        aria-label="服务范围"
+        defaultValue={["store", "pickup"]}
+        multiple
+        onChange={onChange}
+        options={dynamicOptions}
+      />
+    );
+
+    rerender(
+      <Selector
+        aria-label="服务范围"
+        defaultValue={["delivery"]}
+        maxCount={1.9}
+        multiple
+        onChange={onChange}
+        options={dynamicOptions.slice(0, 2)}
+      />
+    );
+    expect(screen.getByRole("checkbox", { name: "自提" })).toHaveProperty("checked", true);
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(
+      <Selector
+        aria-label="服务范围"
+        maxCount={1}
+        multiple
+        onChange={onChange}
+        options={dynamicOptions}
+        value={["store", "delivery", "pickup"]}
+      />
+    );
+    expect(screen.getByRole("checkbox", { name: "配送" })).toHaveProperty("checked", true);
+    expect(screen.getByRole("checkbox", { name: "自提" })).toHaveProperty("checked", true);
+    expect(screen.getByRole("checkbox", { name: "门店" })).toHaveProperty("checked", true);
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(
+      <Selector
+        aria-label="履约方式"
+        maxCount={0}
+        onChange={onChange}
+        options={dynamicOptions}
+        value={["pickup"]}
+      />
+    );
+    expect(screen.getByRole("radio", { name: "自提" })).toHaveProperty("checked", true);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("uses native required semantics for single and at-least-one multiple selection", () => {

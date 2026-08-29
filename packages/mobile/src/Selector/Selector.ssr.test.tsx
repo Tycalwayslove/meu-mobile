@@ -32,4 +32,29 @@ describe("Selector SSR", () => {
     expect(markup).toContain("checked");
     expect(markup).toContain("required");
   });
+
+  it("serializes read-only multiple limits without disabling selected form values", () => {
+    const markup = renderToString(
+      <Selector
+        aria-label="Services"
+        defaultValue={["delivery", "pickup"]}
+        maxCount={1}
+        multiple
+        name="services"
+        options={[
+          { label: "Delivery", value: "delivery" },
+          { label: "Pickup", value: "pickup" }
+        ]}
+        readOnly
+      />
+    );
+
+    expect(markup).toContain('role="group"');
+    expect(markup).toContain('aria-readonly="true"');
+    expect(markup).toContain('data-state="readonly"');
+    expect(markup).toContain('checked="" value="delivery"');
+    expect(markup).toContain('aria-disabled="true"');
+    expect(markup).toContain('value="pickup"');
+    expect(markup).not.toContain('disabled=""');
+  });
 });

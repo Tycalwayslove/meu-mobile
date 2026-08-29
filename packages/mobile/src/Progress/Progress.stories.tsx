@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Progress } from "./Progress";
 
 const meta = {
@@ -40,4 +41,28 @@ export const ClampedAndFormatted: Story = {
 };
 export const AnnouncedDanger: Story = {
   args: { announce: true, tone: "danger", value: 24, valueText: "上传失败前已完成百分之二十四" }
+};
+
+export const ReducedMotionRtl: Story = {
+  render: () => (
+    <ConfigProvider dir="rtl" motion="reduced">
+      <Progress announce aria-label="低动态 RTL 同步" indeterminate />
+    </ConfigProvider>
+  ),
+  play: ({ canvasElement }) => {
+    const progress = canvasElement.querySelector<HTMLElement>('[role="progressbar"]');
+    const fill = progress
+      ? progress.querySelector<HTMLElement>('[aria-hidden="true"] > div')
+      : null;
+    if (!progress || !fill) throw new window.Error("Expected reduced-motion Progress markup");
+    const provider = progress.closest<HTMLElement>('[data-meu-component="config-provider"]');
+    if (
+      !provider ||
+      provider.getAttribute("dir") !== "rtl" ||
+      provider.getAttribute("data-meu-motion") !== "reduced" ||
+      window.getComputedStyle(fill).animationName !== "none"
+    ) {
+      throw new window.Error("Progress did not honor the reduced-motion RTL provider contract");
+    }
+  }
 };

@@ -6,9 +6,9 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 18839,
-    "gzipBytes": 22670,
-    "rawBytes": 175731,
+    "brotliBytes": 18884,
+    "gzipBytes": 22722,
+    "rawBytes": 176112,
     "files": [
       {
         "filePath": "packages/tokens/dist/theme.css",
@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 114688,
-      "brotliBytes": 81986,
-      "gzipBytes": 104658,
-      "rawBytes": 546231,
+      "brotliBytes": 83083,
+      "gzipBytes": 106021,
+      "rawBytes": 555255,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -127,9 +127,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5767,
-          "gzipBytes": 6493,
-          "rawBytes": 25308,
+          "brotliBytes": 6558,
+          "gzipBytes": 7402,
+          "rawBytes": 31621,
           "name": "MeuFormStepper",
           "passesBudget": true
         },
@@ -151,9 +151,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5634,
-          "gzipBytes": 6331,
-          "rawBytes": 24864,
+          "brotliBytes": 6075,
+          "gzipBytes": 6815,
+          "rawBytes": 27575,
           "name": "MeuFormSelector",
           "passesBudget": true
         },
@@ -984,9 +984,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 2204,
-      "gzipBytes": 2564,
-      "rawBytes": 9048,
+      "brotliBytes": 2524,
+      "gzipBytes": 2905,
+      "rawBytes": 11228,
       "docsPath": "packages/mobile/src/InfiniteList/InfiniteList.docs.mdx",
       "name": "InfiniteList",
       "packageName": "@meu/mobile",
@@ -995,9 +995,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 2204,
-          "gzipBytes": 2564,
-          "rawBytes": 9048,
+          "brotliBytes": 2524,
+          "gzipBytes": 2905,
+          "rawBytes": 11228,
           "name": "InfiniteList",
           "passesBudget": true
         }
@@ -1386,9 +1386,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4003,
-      "gzipBytes": 4487,
-      "rawBytes": 17410,
+      "brotliBytes": 4436,
+      "gzipBytes": 4973,
+      "rawBytes": 20121,
       "docsPath": "packages/mobile/src/Selector/Selector.docs.mdx",
       "name": "Selector",
       "packageName": "@meu/mobile",
@@ -1397,9 +1397,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4003,
-          "gzipBytes": 4487,
-          "rawBytes": 17410,
+          "brotliBytes": 4436,
+          "gzipBytes": 4973,
+          "rawBytes": 20121,
           "name": "Selector",
           "passesBudget": true
         }
@@ -1491,9 +1491,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4185,
-      "gzipBytes": 4737,
-      "rawBytes": 18210,
+      "brotliBytes": 4968,
+      "gzipBytes": 5638,
+      "rawBytes": 24523,
       "docsPath": "packages/mobile/src/Stepper/Stepper.docs.mdx",
       "name": "Stepper",
       "packageName": "@meu/mobile",
@@ -1502,9 +1502,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4185,
-          "gzipBytes": 4737,
-          "rawBytes": 18210,
+          "brotliBytes": 4968,
+          "gzipBytes": 5638,
+          "rawBytes": 24523,
           "name": "Stepper",
           "passesBudget": true
         }

@@ -928,11 +928,27 @@
           "description": "Initial uncontrolled value. It is normalized to bounds, step and precision."
         },
         {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Disables the input and both buttons; disabled values do not enter FormData.",
+          "defaultValue": "false"
+        },
+        {
           "name": "incrementAriaLabel",
           "type": "string",
           "required": false,
           "event": false,
           "description": "Accessible name for the increment button. Localized by ConfigProvider when omitted."
+        },
+        {
+          "name": "inputMode",
+          "type": "\"text\" | \"search\" | \"none\" | \"tel\" | \"url\" | \"email\" | \"numeric\" | \"decimal\"",
+          "required": false,
+          "event": false,
+          "description": "Soft-keyboard hint for the native text input.",
+          "defaultValue": "\"decimal\""
         },
         {
           "name": "max",
@@ -953,7 +969,23 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Decimal places used after step alignment. Defaults to the precision implied by step/min."
+          "description": "Decimal places used after step alignment. A value below the precision required by `step` or\n`min` is promoted so repeated stepping cannot stall; values above 12 are capped and non-finite\nvalues fall back to inferred precision."
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Keeps the value selectable and serializable while blocking typing and every step control.",
+          "defaultValue": "false"
+        },
+        {
+          "name": "repeatOnLongPress",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Repeats the pressed step after 500 ms, then every 100 ms until release or cancellation.",
+          "defaultValue": "false"
         },
         {
           "name": "size",
@@ -990,7 +1022,7 @@
           "type": "(value: number | null) => void",
           "required": false,
           "event": true,
-          "description": "Runs after a button, keyboard step, or valid typed value commits."
+          "description": "Runs after a button, keyboard step, long-press tick, or valid typed value commits."
         }
       ],
       "SliderMark": [
@@ -1284,6 +1316,13 @@
           "description": "Associates all native inputs with a form by id, including outside that form."
         },
         {
+          "name": "maxCount",
+          "type": "number",
+          "required": false,
+          "event": false,
+          "description": "Maximum number of user-selected values in multiple mode. Finite values are truncated and clamped to zero or greater; controlled values remain authoritative."
+        },
+        {
           "name": "multiple",
           "type": "boolean",
           "required": false,
@@ -1304,6 +1343,14 @@
           "required": true,
           "event": false,
           "description": "Available options. Values are identities and must be unique; the first duplicate wins."
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Prevents user changes while keeping native inputs focusable and selected values in FormData.",
+          "defaultValue": "false"
         },
         {
           "name": "ref",
@@ -3942,6 +3989,13 @@
           "description": "Caller-owned pagination fact; false is the only completion source."
         },
         {
+          "name": "loadedAnnouncement",
+          "type": "ReactNode",
+          "required": false,
+          "event": false,
+          "description": "Polite live-region announcement after one page loads successfully."
+        },
+        {
           "name": "loadingContent",
           "type": "ReactNode",
           "required": false,
@@ -3950,10 +4004,10 @@
         },
         {
           "name": "loadMore",
-          "type": "() => Promise<void>",
+          "type": "(context: InfiniteListLoadContext) => Promise<void>",
           "required": true,
           "event": false,
-          "description": "Loads one additional page. Concurrent calls are locked."
+          "description": "Loads one additional page. Concurrent calls are locked; the signal supports cooperative cancellation."
         },
         {
           "name": "loadMoreLabel",
@@ -12493,11 +12547,27 @@
           "description": "Supporting content rendered with the field and associated with the stepper."
         },
         {
+          "name": "disabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Disables the input and both buttons; disabled values do not enter FormData.",
+          "defaultValue": "false"
+        },
+        {
           "name": "incrementAriaLabel",
           "type": "string",
           "required": false,
           "event": false,
           "description": "Accessible name for the increment button. Localized by ConfigProvider when omitted."
+        },
+        {
+          "name": "inputMode",
+          "type": "\"text\" | \"search\" | \"none\" | \"tel\" | \"url\" | \"email\" | \"numeric\" | \"decimal\"",
+          "required": false,
+          "event": false,
+          "description": "Soft-keyboard hint for the native text input.",
+          "defaultValue": "\"decimal\""
         },
         {
           "name": "label",
@@ -12532,7 +12602,23 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Decimal places used after step alignment. Defaults to the precision implied by step/min."
+          "description": "Decimal places used after step alignment. A value below the precision required by `step` or\n`min` is promoted so repeated stepping cannot stall; values above 12 are capped and non-finite\nvalues fall back to inferred precision."
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Keeps the value selectable and serializable while blocking typing and every step control.",
+          "defaultValue": "false"
+        },
+        {
+          "name": "repeatOnLongPress",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Repeats the pressed step after 500 ms, then every 100 ms until release or cancellation.",
+          "defaultValue": "false"
         },
         {
           "name": "required",
@@ -12863,6 +12949,13 @@
           "description": "Visible field label rendered by the surrounding `Field`."
         },
         {
+          "name": "maxCount",
+          "type": "number",
+          "required": false,
+          "event": false,
+          "description": "Maximum number of user-selected values in multiple mode. Finite values are truncated and clamped to zero or greater; controlled values remain authoritative."
+        },
+        {
           "name": "multiple",
           "type": "boolean",
           "required": false,
@@ -12883,6 +12976,14 @@
           "required": true,
           "event": false,
           "description": "Available options. Values are identities and must be unique; the first duplicate wins."
+        },
+        {
+          "name": "readOnly",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Prevents user changes while keeping native inputs focusable and selected values in FormData.",
+          "defaultValue": "false"
         },
         {
           "name": "ref",
@@ -16939,11 +17040,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2263,
+    "documentedFields": 2276,
     "eventFields": 237,
     "exportedTypes": 371,
     "exportedTypesWithFields": 222,
-    "fields": 2263,
+    "fields": 2276,
     "packages": 4
   }
 }

@@ -48,6 +48,52 @@ export const Disabled: Story = {
   args: { defaultValue: ["standard"], disabled: true }
 };
 
+export const ReadOnlyAndSelectionLimit: Story = {
+  render: () => (
+    <form aria-label="只读服务表单">
+      <Selector
+        aria-label="已选服务"
+        defaultValue={["standard", "pickup"]}
+        maxCount={2}
+        multiple
+        name="services"
+        options={options}
+        readOnly
+      />
+    </form>
+  ),
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector("form");
+    const express = canvasElement.querySelector<HTMLInputElement>('input[value="express"]');
+    if (!(form instanceof HTMLFormElement) || !express) {
+      throw new window.Error("Expected Selector read-only form controls");
+    }
+    express.click();
+    await Promise.resolve();
+    const submitted = new FormData(form).getAll("services");
+    if (
+      express.checked ||
+      submitted.length !== 2 ||
+      submitted[0] !== "standard" ||
+      submitted[1] !== "pickup"
+    ) {
+      throw new window.Error("Read-only Selector changed its submitted values");
+    }
+  }
+};
+
+export const ManyOptions: Story = {
+  args: {
+    "aria-label": "服务网点",
+    columns: 2,
+    multiple: true,
+    options: Array.from({ length: 24 }, (_, index) => ({
+      label: `服务网点 ${index + 1}`,
+      value: `location-${index + 1}`
+    }))
+  }
+};
+
 export const RtlAndLongContent: Story = {
   render: () => (
     <div dir="rtl">

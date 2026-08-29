@@ -25,6 +25,7 @@ import {
   MeuFormTreeSelect,
   useMeuForm
 } from "@meu/form-react";
+import { applyMeuFormErrors } from "@meu/form-react/server";
 import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
 import {
   ActionMenu,
@@ -300,6 +301,7 @@ export function ConsumerScenario() {
   const [refreshRequestCount, setRefreshRequestCount] = useState(0);
   const [refreshPending, setRefreshPending] = useState(false);
   const [infinitePage, setInfinitePage] = useState(1);
+  const [infiniteRequestStatus, setInfiniteRequestStatus] = useState("分页请求：空闲");
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [imageViewerIndex, setImageViewerIndex] = useState(0);
@@ -483,11 +485,35 @@ export function ConsumerScenario() {
           <InfiniteList
             autoLoad={false}
             hasMore={infinitePage < 3}
-            loadMore={async () => {
-              await new Promise<void>((resolve) => window.setTimeout(resolve, 100));
-              setInfinitePage((current) => current + 1);
-            }}
+            loadedAnnouncement="已加载下一页订单"
+            loadMore={({ signal, trigger }) =>
+              new Promise<void>((resolve, reject) => {
+                setInfiniteRequestStatus(`分页请求：${trigger}`);
+                const handleAbort = () => {
+                  window.clearTimeout(timer);
+                  setInfiniteRequestStatus(`分页请求已取消：${trigger}`);
+                  reject(new DOMException("Aborted", "AbortError"));
+                };
+                const timer = window.setTimeout(() => {
+                  signal.removeEventListener("abort", handleAbort);
+                  setInfinitePage((current) => current + 1);
+                  setInfiniteRequestStatus(`分页请求已完成：${trigger}`);
+                  resolve();
+                }, 100);
+                signal.addEventListener("abort", handleAbort, { once: true });
+              })
+            }
           />
+          <Button
+            size="small"
+            type="button"
+            variant="outline"
+            tone="neutral"
+            onClick={() => setInfinitePage(3)}
+          >
+            结束分页并取消请求
+          </Button>
+          <output aria-live="polite">{infiniteRequestStatus}</output>
         </section>
 
         <section className="integration-virtual-list" aria-label="虚拟列表">
@@ -940,7 +966,13 @@ export function ConsumerScenario() {
 
         <section className="integration-feedback" aria-label="反馈状态组件">
           <div className="integration-progress-demo">
-            <Progress label="资料上传" value={feedbackProgress} showValue />
+            <Progress
+              announce
+              label="资料上传"
+              value={feedbackProgress}
+              valueText={`已上传 ${feedbackProgress}%`}
+              showValue
+            />
             <Button
               size="small"
               variant="outline"
@@ -949,6 +981,9 @@ export function ConsumerScenario() {
             >
               推进上传
             </Button>
+            <ConfigProvider dir="rtl" motion="reduced">
+              <Progress announce aria-label="低动态 RTL 同步" indeterminate />
+            </ConfigProvider>
           </div>
           <div
             className="integration-loading"
@@ -1388,6 +1423,7 @@ export function ConsumerScenario() {
               }
             ]}
             required
+            serializeValue={(value) => JSON.stringify(value.map(formatLocalDate))}
             triggerProps={{ placeholder: "选择配送日期范围" }}
           />
           <MeuFormTimePicker<FormValues>
@@ -1427,6 +1463,27 @@ export function ConsumerScenario() {
               { value: "card", label: "卡片" }
             ]}
           />
+          <output aria-label="店铺表单状态" aria-live="polite">
+            {form.formState.isDirty ? "dirty" : "pristine"}/
+            {Object.keys(form.formState.touchedFields).length > 0 ? "touched" : "untouched"}/
+            {Object.keys(form.formState.errors).length > 0 ? "error" : "valid"}
+          </output>
+          <Button
+            type="button"
+            variant="outline"
+            tone="neutral"
+            onClick={() => {
+              applyMeuFormErrors(form, {
+                description: "服务端拒绝了当前店铺介绍",
+                storeName: "服务端提示店铺名称已存在"
+              });
+            }}
+          >
+            应用服务端错误
+          </Button>
+          <Button type="reset" variant="outline" tone="neutral">
+            原生重置店铺表单
+          </Button>
           <Button type="submit" block leadingIcon={<MeuIconCheck size={18} />}>
             保存店铺
           </Button>

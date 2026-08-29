@@ -13,12 +13,16 @@ describe("Stepper SSR", () => {
         min={0}
         max={8}
         name="quantity"
+        dir="rtl"
+        inputMode="numeric"
       />
     );
     expect(html).toContain('role="spinbutton"');
     expect(html).toContain('name="quantity"');
     expect(html).toContain('value="2"');
     expect(html).toContain('aria-invalid="spelling"');
+    expect(html).toContain('dir="rtl"');
+    expect(html).toContain('inputMode="numeric"');
     expect(html.match(/type="button"/g)).toHaveLength(2);
   });
 });

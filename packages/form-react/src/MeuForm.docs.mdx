@@ -167,7 +167,7 @@ Form 不生成文案。Field、组件默认 label、日期格式和错误消息�
 
 ## 浏览器与 WebView
 
-核心依赖原生 form 和 React Hook Form。隔离 Next H5 消费端会在 Pixel 5 mobile Chromium 与 iPhone 13 mobile WebKit 项目中运行；现有断言覆盖提交、客户端校验、清除、复杂值确认/取消、部分原生序列化和图片字段错误聚焦。软键盘、自动填充、密码管理、IME、原生 reset，以及首个错误滚动到可视区域仍需移动浏览器或真机验证。
+核心依赖原生 form 和 React Hook Form。隔离 Next H5 消费端会在 Pixel 5 mobile Chromium 与 iPhone 13 mobile WebKit 项目中运行；现有断言覆盖提交、客户端校验、清除、复杂值确认/取消、部分原生序列化、图片字段错误聚焦、原生 reset，以及服务端错误按 DOM 顺序聚焦并滚入可视区域。软键盘、自动填充、密码管理和 IME 仍需真机验证。
 
 ## 边界情况与已知限制
 
@@ -187,11 +187,11 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 - Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 104658 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 34307 B / 65536 B 预算，组合 Brotli 81986 B；共享样式由应用单独导入一次。
-- SSR/hydration: 隔离 Next H5 消费端会等待含 MeuForm 的页面完成 hydration，并要求每条用例都没有 `pageerror` 或 `console.error`；服务端/客户端默认值切换的 Form 专项矩阵待补
-- RTL: 待补
-- Reduced motion: Form 无自有动效，组合矩阵待补
-- Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接覆盖空提交后的错误与 `aria-invalid`、TextInput 清除、有效值提交；Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker 覆盖取消不提交草稿、确认提交值和关闭后恢复焦点。ImageUploader 路径还断言 hidden `productImages` 初始序列化、删除后省略、上传完成后恢复，以及必填错误聚焦真实 file input；自定义 JSON serializer、原生 reset、服务端错误映射与首次错误滚动尚无移动 E2E。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 106021 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 34307 B / 65536 B 预算，组合 Brotli 83083 B；共享样式由应用单独导入一次。
+- SSR/hydration: 隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，验证无 hydration 错误；客户端 `reset(nextDefaults)` 更新后，原生 reset 会恢复新的客户端默认值而不是旧服务端值
+- RTL: 隔离 Next H5 的 Form hydration 场景在 `dir="rtl"` 下验证输入方向继承、默认值与 reset 行为；adapter 继续依赖底层组件的逻辑属性
+- Reduced motion: Form 无自有动效；同一专项场景在 `motion="reduced"` Provider 下完成 hydration 与交互，Form 不新增 transition/animation
+- Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接覆盖空提交后的错误与 `aria-invalid`、TextInput 清除、有效值提交；原生 reset 恢复默认值并清除 dirty/touched/error；服务端错误即使按非 DOM 顺序传入，也会聚焦并滚动显示表单内第一个字段。Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker 覆盖取消不提交草稿、确认提交值和关闭后恢复焦点；DateRangePicker 还验证自定义 JSON serializer 在确认前后都只生成一个合法 `FormData` 条目。ImageUploader 路径断言 hidden `productImages` 初始序列化、删除后省略、上传完成后恢复，以及必填错误聚焦真实 file input。
 - Chromatic Light/Dark: 有静态 Story，待交互矩阵
 - Real device: 待补 iOS Safari/VoiceOver 与 Android Chrome/TalkBack
 
@@ -201,7 +201,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 - 冻结所有 overlay/复合 adapter 的 touched、ref 与 disabled/readOnly/required 矩阵。
 - 冻结复杂值 serializer 的后端版本迁移策略，并在真实业务接入时记录服务端解析样例。
-- 补服务端/客户端默认值切换、RTL、移动端原生 reset/服务端错误滚动、Chromatic Light/Dark 与真机输入记录。
+- 补 Chromatic Light/Dark 与真机输入记录。
 
 ### 已完成
 
@@ -224,3 +224,6 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 | 2026-08-29 | 未发布 | verification | 记录 mobile Chromium/WebKit 已覆盖的提交、清除、确认/取消、图片序列化与错误聚焦证据 | 状态保持 `verification`；原生 reset、服务端错误滚动、IME 与真机读屏仍待验证 |
 | 2026-08-29 | 未发布 | behavior     | 统一 22 个 adapter 的局部 disabled 与 RHF/native 提交省略语义                       | 禁用字段不再出现在 RHF `onSubmit`；重新启用后恢复原值提交                   |
 | 2026-08-29 | 未发布 | behavior     | Calendar 只在焦点离开整个复合控件时进入 touched 并运行 onBlur 校验                  | 组内日期/月份控件移焦不再提前触发 blur；消费方回调在 RHF 更新后执行         |
+| 2026-08-29 | 未发布 | verification | 增加移动 Chromium/WebKit 的原生 reset 与服务端错误滚动路径                          | reset 会清理值、dirty、touched 与错误；服务端错误聚焦首个 DOM 字段          |
+| 2026-08-29 | 未发布 | verification | 增加服务端默认值 hydration 与客户端默认值切换专项                                   | `reset(nextDefaults)` 后的原生 reset 恢复最新客户端默认值                   |
+| 2026-08-29 | 未发布 | verification | 在双移动引擎验证复杂日期范围的单条 JSON `FormData` 契约                             | 后端按 JSON 数组解析 `deliveryWindow`，不再依赖同名重复条目                 |

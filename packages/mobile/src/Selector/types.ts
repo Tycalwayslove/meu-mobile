@@ -46,6 +46,8 @@ export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<
   disabled?: boolean;
   /** Associates all native inputs with a form by id, including outside that form. */
   form?: string;
+  /** Maximum number of user-selected values in multiple mode. Finite values are truncated and clamped to zero or greater; controlled values remain authoritative. */
+  maxCount?: number;
   /** Switches from one native radio group to independent native checkboxes. @defaultValue false */
   multiple?: boolean;
   /** Native form field name shared by the options. A stable private name is generated when omitted. */
@@ -60,6 +62,8 @@ export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<
   options: readonly SelectorOption<TValue>[];
   /** Root element ref. Calling `focus()` forwards focus to the checked or first enabled native input. */
   ref?: Ref<HTMLDivElement>;
+  /** Prevents user changes while keeping native inputs focusable and selected values in FormData. @defaultValue false */
+  readOnly?: boolean;
   /** Requires one selection using native constraint validation. @defaultValue false */
   required?: boolean;
   /** Shows a visual check in selected cards. @defaultValue true */

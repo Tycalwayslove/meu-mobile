@@ -212,6 +212,47 @@ test("binds validation, clear action and successful submission", async ({ page }
   await expect(page.getByText("已保存：喵呜体验店")).toBeVisible();
 });
 
+test("synchronizes native reset with RHF values and interaction state", async ({ page }) => {
+  const input = page.getByLabel("店铺名称");
+  const textarea = page.getByLabel("店铺介绍");
+  const state = page.getByLabel("店铺表单状态");
+
+  await input.fill("等待重置的店铺");
+  await input.blur();
+  await textarea.fill("等待重置的店铺介绍内容");
+  await page.getByRole("button", { name: "应用服务端错误" }).click();
+
+  await expect(state).toHaveText("dirty/touched/error");
+  await expect(page.getByText("服务端提示店铺名称已存在")).toBeVisible();
+  await expect(page.getByText("服务端拒绝了当前店铺介绍")).toBeVisible();
+
+  await page.getByRole("button", { name: "原生重置店铺表单" }).click();
+
+  await expect(input).toHaveValue("");
+  await expect(textarea).toHaveValue("");
+  await expect(state).toHaveText("pristine/untouched/valid");
+  await expect(page.getByText("服务端提示店铺名称已存在")).toHaveCount(0);
+  await expect(page.getByText("服务端拒绝了当前店铺介绍")).toHaveCount(0);
+  await expect(input).not.toHaveAttribute("aria-invalid", /.+/);
+  await expect(textarea).not.toHaveAttribute("aria-invalid", /.+/);
+});
+
+test("focuses and reveals the first server error in form DOM order", async ({ page }) => {
+  await page.getByRole("button", { name: "应用服务端错误" }).click();
+
+  const input = page.getByLabel("店铺名称");
+  await expect(input).toBeFocused();
+  await expect(input).toHaveAttribute("aria-invalid", "true");
+  await expect(page.getByText("服务端提示店铺名称已存在")).toBeVisible();
+  await expect(page.getByText("服务端拒绝了当前店铺介绍")).toBeVisible();
+
+  const viewportHeight = await page.evaluate(() => window.innerHeight);
+  const box = await input.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box ? box.y : -1).toBeGreaterThanOrEqual(0);
+  expect(box ? box.y + box.height : viewportHeight + 1).toBeLessThanOrEqual(viewportHeight);
+});
+
 test("searches and clears with the SearchField contract", async ({ page }) => {
   const search = page.getByRole("searchbox", { name: "搜索组件" });
   await search.fill("TextArea");
@@ -345,18 +386,40 @@ test("loads infinite pages manually, locks each request and reaches completion",
   await expect(list.getByRole("listitem")).toHaveCount(2);
 
   const firstLoad = section.getByRole("button", { name: "加载更多" });
+  await firstLoad.focus();
   await firstLoad.evaluate((button) => {
     (button as HTMLButtonElement).click();
     (button as HTMLButtonElement).click();
   });
   await expect(root).toHaveAttribute("aria-busy", "true");
   await expect(list.getByRole("listitem")).toHaveCount(4);
+  const secondLoad = section.getByRole("button", { name: "加载更多" });
+  await expect(secondLoad).toBeFocused();
+  await expect(root.getByRole("status")).toHaveText("已加载下一页订单");
+  await expect(section.getByText("分页请求已完成：manual")).toBeVisible();
 
-  await section.getByRole("button", { name: "加载更多" }).click();
+  await secondLoad.click();
   await expect(list.getByRole("listitem")).toHaveCount(6);
   await expect(root).toHaveAttribute("data-status", "complete");
   await expect(section.getByText("没有更多内容了").last()).toBeVisible();
-  await expect(section.getByRole("button")).toHaveCount(0);
+  await expect(root.getByRole("button")).toHaveCount(0);
+});
+
+test("cooperatively aborts an in-flight infinite-list request on external completion", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "无限列表" });
+  const root = section.locator('[data-meu-component="infinite-list"]');
+
+  await section.getByRole("button", { name: "加载更多" }).click();
+  await expect(root).toHaveAttribute("aria-busy", "true");
+  await section.getByRole("button", { name: "结束分页并取消请求" }).click();
+
+  await expect(root).toHaveAttribute("data-status", "complete");
+  await expect(root).not.toHaveAttribute("aria-busy", "true");
+  await expect(section.getByText("分页请求已取消：manual")).toBeVisible();
+  await expect(root.getByRole("status")).toHaveText("没有更多内容了");
+  await expect(section.getByText("加载更多内容失败")).toHaveCount(0);
 });
 
 test("virtualizes ten thousand dynamic rows and retains the focused item", async ({ page }) => {
@@ -840,8 +903,32 @@ test("renders progress, skeleton, empty and result feedback contracts", async ({
   const section = page.getByRole("region", { name: "反馈状态组件" });
   const progress = section.getByRole("progressbar", { name: "资料上传" });
   await expect(progress).toHaveAttribute("aria-valuenow", "64");
+  await expect(progress).toHaveAttribute("aria-valuetext", "已上传 64%");
+  await expect(progress).toHaveAttribute("aria-live", "polite");
+  await expect(progress).toHaveAttribute("aria-atomic", "true");
   await section.getByRole("button", { name: "推进上传" }).click();
   await expect(progress).toHaveAttribute("aria-valuenow", "76");
+  await expect(progress).toHaveAttribute("aria-valuetext", "已上传 76%");
+
+  const reducedProgress = section.getByRole("progressbar", { name: "低动态 RTL 同步" });
+  await expect(reducedProgress).not.toHaveAttribute("aria-valuenow", /.+/);
+  await expect(reducedProgress).toHaveAttribute("aria-live", "polite");
+  const reducedProvider = reducedProgress.locator(
+    'xpath=ancestor::*[@data-meu-component="config-provider"][1]'
+  );
+  await expect(reducedProvider).toHaveAttribute("dir", "rtl");
+  await expect(reducedProvider).toHaveAttribute("data-meu-motion", "reduced");
+  const reducedFill = reducedProgress.locator('[aria-hidden="true"] > div');
+  await expect(reducedFill).toHaveCSS("animation-name", "none");
+  await expect(reducedFill).toHaveCSS("transition-duration", "0s");
+  const rtlOrigin = await reducedFill.evaluate((node) => {
+    const style = window.getComputedStyle(node);
+    return {
+      originX: Number.parseFloat(style.transformOrigin),
+      width: node.getBoundingClientRect().width
+    };
+  });
+  expect(rtlOrigin.originX).toBeCloseTo(rtlOrigin.width, 0);
 
   const loading = section.getByLabel("订单摘要加载中");
   await expect(loading).toHaveAttribute("aria-busy", "true");
@@ -1089,6 +1176,12 @@ test("normalizes DatePicker dates and commits only the confirmed draft", async (
 });
 
 test("rolls back DateRangePicker drafts and commits a complete preset", async ({ page }) => {
+  const form = page.locator('form[data-meu-component="form"]');
+  await expect
+    .poll(() =>
+      form.evaluate((node) => new FormData(node as HTMLFormElement).getAll("deliveryWindow"))
+    )
+    .toEqual(['["2026-08-08","2026-08-18"]']);
   const trigger = page.getByRole("button", { name: "配送日期范围" });
   await expect(trigger).toContainText("2026-08-08 – 2026-08-18");
   await trigger.click();
@@ -1115,6 +1208,11 @@ test("rolls back DateRangePicker drafts and commits a complete preset", async ({
   await expect(picker).toBeHidden();
   await expect(trigger).toBeFocused();
   await expect(trigger).toContainText("2026-08-10 – 2026-08-16");
+  await expect
+    .poll(() =>
+      form.evaluate((node) => new FormData(node as HTMLFormElement).getAll("deliveryWindow"))
+    )
+    .toEqual(['["2026-08-10","2026-08-16"]']);
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
 });
 

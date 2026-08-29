@@ -29,6 +29,14 @@ export const Decimal: Story = {
   args: { defaultValue: 1.5, step: 0.25, precision: 2 }
 };
 
+export const LongPressRepeat: Story = {
+  args: { defaultValue: 2, repeatOnLongPress: true }
+};
+
+export const IntegerKeyboardHint: Story = {
+  args: { defaultValue: 2, inputMode: "numeric", step: 1 }
+};
+
 export const InField: Story = {
   render: () => (
     <Field label="购买数量" description="每人限购 8 件">

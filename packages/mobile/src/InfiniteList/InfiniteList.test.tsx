@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
 import { InfiniteList } from "./InfiniteList";
+import type { InfiniteListLoadContext } from "./types";
 
 type ObserverRecord = {
   callback: IntersectionObserverCallback;
@@ -47,12 +48,12 @@ function intersect(record: ObserverRecord) {
 describe("InfiniteList", () => {
   it("preloads from the nearest scroll root and locks concurrent requests", async () => {
     let resolveLoad!: () => void;
-    const loadMore = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveLoad = resolve;
-        })
-    );
+    const loadMore = vi.fn((context: InfiniteListLoadContext) => {
+      void context;
+      return new Promise<void>((resolve) => {
+        resolveLoad = resolve;
+      });
+    });
     const onStatusChange = vi.fn();
     const { container } = render(
       <div
@@ -78,6 +79,8 @@ describe("InfiniteList", () => {
     act(() => intersect(observers[0]!));
     act(() => intersect(observers[0]!));
     expect(loadMore).toHaveBeenCalledTimes(1);
+    expect(loadMore.mock.calls[0]![0]).toMatchObject({ trigger: "auto" });
+    expect(loadMore.mock.calls[0]![0].signal.aborted).toBe(false);
     expect(
       container.querySelector('[data-meu-component="infinite-list"]')!.getAttribute("data-status")
     ).toBe("loading");
@@ -95,12 +98,22 @@ describe("InfiniteList", () => {
   it("stops automatic retries after an error and retries explicitly", async () => {
     const error = new Error("offline");
     let attempt = 0;
-    const loadMore = vi.fn(() => {
+    const loadMore = vi.fn((context: InfiniteListLoadContext) => {
+      void context;
       attempt += 1;
       return attempt === 1 ? Promise.reject(error) : Promise.resolve();
     });
     const onLoadError = vi.fn();
-    render(<InfiniteList autoLoad={false} hasMore loadMore={loadMore} onLoadError={onLoadError} />);
+    const onStatusChange = vi.fn();
+    render(
+      <InfiniteList
+        autoLoad={false}
+        hasMore
+        loadMore={loadMore}
+        onLoadError={onLoadError}
+        onStatusChange={onStatusChange}
+      />
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
     await waitFor(() => expect(onLoadError).toHaveBeenCalledWith(error));
@@ -109,7 +122,63 @@ describe("InfiniteList", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "重试" }));
     await waitFor(() => expect(loadMore).toHaveBeenCalledTimes(2));
+    expect(loadMore.mock.calls.map(([context]) => context.trigger)).toEqual(["manual", "retry"]);
     expect(screen.getByRole("button", { name: "加载更多" })).toBeTruthy();
+    expect(onStatusChange.mock.calls).toEqual([
+      ["loading", { trigger: "manual" }],
+      ["error", { error, trigger: "manual" }],
+      ["loading", { trigger: "retry" }],
+      ["idle", { trigger: "retry" }]
+    ]);
+  });
+
+  it("restores action focus and announces a successful retry", async () => {
+    const error = new Error("offline");
+    let attempt = 0;
+    const loadMore = vi.fn(() => {
+      attempt += 1;
+      return attempt === 1 ? Promise.reject(error) : Promise.resolve();
+    });
+    render(
+      <InfiniteList
+        autoLoad={false}
+        hasMore
+        loadMore={loadMore}
+        loadedAnnouncement="已追加 20 项"
+        onLoadError={() => undefined}
+      />
+    );
+
+    const loadAction = screen.getByRole("button", { name: "加载更多" });
+    loadAction.focus();
+    fireEvent.click(loadAction);
+
+    const retryAction = await screen.findByRole("button", { name: "重试" });
+    await waitFor(() => expect(document.activeElement).toBe(retryAction));
+    expect(screen.getByRole("status").textContent).toBe("加载更多内容失败");
+
+    fireEvent.click(retryAction);
+    const recoveredAction = await screen.findByRole("button", { name: "加载更多" });
+    await waitFor(() => expect(document.activeElement).toBe(recoveredAction));
+    expect(screen.getByRole("status").textContent).toBe("已追加 20 项");
+  });
+
+  it("does not steal focus after an automatic load", async () => {
+    const loadMore = vi.fn(() => Promise.resolve());
+    render(
+      <>
+        <button type="button">Elsewhere</button>
+        <InfiniteList hasMore loadMore={loadMore} />
+      </>
+    );
+    const elsewhere = screen.getByRole("button", { name: "Elsewhere" });
+    elsewhere.focus();
+
+    await waitFor(() => expect(observers).toHaveLength(1));
+    act(() => intersect(observers[0]!));
+    await waitFor(() => expect(loadMore).toHaveBeenCalledTimes(1));
+
+    expect(document.activeElement).toBe(elsewhere);
   });
 
   it("uses hasMore as the only completion source", async () => {
@@ -157,12 +226,14 @@ describe("InfiniteList", () => {
     await waitFor(() => expect(loadMore).toHaveBeenCalledTimes(1));
   });
 
-  it("disables retry and ignores a stale rejection after external completion", async () => {
+  it("aborts and ignores a stale rejection after external completion", async () => {
     let rejectLoad!: (error: unknown) => void;
+    let requestSignal!: AbortSignal;
     const error = new Error("stale offline response");
     const loadMore = vi.fn(
-      () =>
+      ({ signal }: InfiniteListLoadContext) =>
         new Promise<void>((_resolve, reject) => {
+          requestSignal = signal;
           rejectLoad = reject;
         })
     );
@@ -188,6 +259,7 @@ describe("InfiniteList", () => {
         onStatusChange={onStatusChange}
       />
     );
+    expect(requestSignal.aborted).toBe(true);
     await act(async () => {
       rejectLoad(error);
       await Promise.resolve();
@@ -200,6 +272,44 @@ describe("InfiniteList", () => {
       <InfiniteList autoLoad={false} disabled hasMore loadMore={() => Promise.reject(error)} />
     );
     expect(screen.getByRole("button", { name: "加载更多" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("aborts an active request on unmount without reporting a local error", async () => {
+    let requestSignal!: AbortSignal;
+    const onLoadError = vi.fn();
+    const onStatusChange = vi.fn();
+    const loadMore = vi.fn(
+      ({ signal }: InfiniteListLoadContext) =>
+        new Promise<void>((_resolve, reject) => {
+          requestSignal = signal;
+          signal.addEventListener(
+            "abort",
+            () => reject(new DOMException("Aborted", "AbortError")),
+            {
+              once: true
+            }
+          );
+        })
+    );
+    const { unmount } = render(
+      <InfiniteList
+        autoLoad={false}
+        hasMore
+        loadMore={loadMore}
+        onLoadError={onLoadError}
+        onStatusChange={onStatusChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
+    expect(requestSignal.aborted).toBe(false);
+    unmount();
+    expect(requestSignal.aborted).toBe(true);
+    await act(() => Promise.resolve());
+
+    expect(onLoadError).not.toHaveBeenCalled();
+    expect(onStatusChange).toHaveBeenCalledTimes(1);
+    expect(onStatusChange).toHaveBeenCalledWith("loading", { trigger: "manual" });
   });
 
   it("allows a new pagination generation after completion invalidates a stuck request", async () => {

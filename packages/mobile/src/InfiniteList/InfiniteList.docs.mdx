@@ -26,9 +26,10 @@ source: packages/mobile/src/InfiniteList
 ## 当前能力
 
 - 最近滚动祖先的 IntersectionObserver 预加载、始终可用的手动入口、失败重试和完成状态。
-- 同步并发锁保证 observer/按钮不会重复请求；`hasMore=false` 会使在途结果失效，卸载后不回写状态。
+- 同步并发锁保证 observer/按钮不会重复请求；`hasMore=false` 或卸载会中止本次 signal、使结果失效且不再回写状态。
 - error 不自动重试，disabled 同时关闭 auto/manual/retry；无 Observer 时原生按钮降级仍可用。
-- 中英文 live status、`aria-busy`、reduced-motion spinner 与 forced-colors 按钮边界已覆盖。
+- 手动加载/重试完成后焦点回到对应操作，自动加载不抢焦点；成功追加有可定制的 polite live announcement。
+- 中英文状态、`aria-busy`、reduced-motion spinner 与 forced-colors 按钮边界已覆盖。
 
 ## 何时使用
 
@@ -40,7 +41,7 @@ source: packages/mobile/src/InfiniteList
 
 ## 结构与状态
 
-状态为 idle/loading/error/complete。`hasMore=false` 是唯一 complete 事实源；内部 request id、mounted flag 和同步 loading lock 只管理并发与陈旧结果。
+状态为 idle/loading/error/complete。`hasMore=false` 是唯一 complete 事实源；内部 request id、AbortController、mounted flag 和同步 loading lock 管理并发、协作式取消与陈旧结果。
 
 ## 基础用法
 
@@ -51,7 +52,7 @@ source: packages/mobile/src/InfiniteList
 
 ## 受控与非受控
 
-`hasMore` 受调用方控制；request 状态内部维护。组件不持有 items、cursor、页码、错误缓存或请求取消器。
+`hasMore` 受调用方控制；request 状态内部维护。组件不持有 items、cursor、页码或错误缓存。每次请求创建一个 AbortSignal；数据层需要把它继续传给 `fetch` 或其他可取消客户端。
 
 ## 表单集成
 
@@ -59,11 +60,11 @@ source: packages/mobile/src/InfiniteList
 
 ## Props
 
-API 由 `InfiniteListProps` 生成。`threshold` 接受非负有限像素，异常值回退 250；`renderContent` 只替换视觉，原生加载/重试路径继续存在。
+API 由 `InfiniteListProps` 生成。`loadMore({ signal, trigger })` 接收取消信号与实际入口；原有不声明参数的回调仍可直接使用。`threshold` 接受非负有限像素，异常值回退 250；`renderContent` 只替换视觉，原生加载/重试路径继续存在。
 
 ## Events
 
-`onStatusChange` 报告去重状态和 `auto/manual/retry` trigger；外部完成不带 trigger。当前有效请求 reject 才调用 `onLoadError`，完成后到达的陈旧 rejection 会被忽略。
+`onStatusChange` 报告去重状态和 `auto/manual/retry` trigger；外部完成不带 trigger。当前有效请求 reject 才调用 `onLoadError`；完成或卸载触发的 abort，以及随后到达的陈旧 rejection，均不作为本地加载错误报告。
 
 ## Ref 与命令式方法
 
@@ -76,13 +77,15 @@ ref 指向根 div；不公开命令式 load，避免绕过并发锁。业务主�
 | Tab           | 进入当前可用的加载或重试按钮 |
 | Enter / Space | 发起一次受锁保护的请求       |
 
+手动加载或重试期间操作按钮会暂时退出 DOM；请求 settle 后，若仍有下一页且组件可用，焦点恢复到新的加载/重试按钮。Observer 自动加载不移动当前焦点。
+
 ## 触摸与手势
 
 不识别手势；原生 120×44 按钮承担触摸入口，Observer 仅是预加载增强。
 
 ## 无障碍
 
-loading 期间根使用 `aria-busy`，状态通过 atomic polite live region 公布。error 仍提供可操作 retry；disabled 同时设置原生 disabled 和 `aria-disabled`。
+loading 期间根使用 `aria-busy`，状态通过 atomic polite live region 公布；成功追加默认公布“已加载更多内容”，可用 `loadedAnnouncement` 注入包含新增数量的业务文案。error 仍提供可操作 retry；disabled 同时设置原生 disabled 和 `aria-disabled`。
 
 ## 动效
 
@@ -94,7 +97,7 @@ loading 期间根使用 `aria-busy`，状态通过 atomic polite live region 公
 
 ## SSR 与 Next.js
 
-SSR 输出 idle 手动降级或 complete 状态，不创建 Observer。客户端挂载后才发现最近滚动祖先并观察 sentinel，结构可 hydration。
+SSR 在默认 `autoLoad=true` 时也先输出可用的 idle 手动按钮，或按 `hasMore=false` 输出 complete，不创建 Observer。`hydrateRoot` 测试证明客户端结构无 mismatch，挂载后才发现最近滚动祖先并安装 Observer；浏览器缺失 Observer 时同一已 hydration 的原生按钮继续可用。
 
 ## RTL 与国际化
 
@@ -107,7 +110,8 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 ## 边界情况与已知限制
 
 - `loadMore` 必须返回 Promise；组件不猜测返回条数。
-- disabled 不取消已经发出的网络请求，只阻止新入口；卸载/完成仅忽略本地陈旧结果。
+- disabled 只阻止新入口，不取消已发出的请求；`hasMore=false` 或卸载会 abort 当前 signal 并忽略陈旧结果。
+- 取消是协作式的：若 loader 未把 signal 传给底层网络客户端，外部 I/O 仍可能继续，但不会回写组件状态或触发错误回调。
 - error 必须由用户重试，不会形成 observer 重试风暴。
 - 找不到可滚动祖先时 Observer 以 viewport 为 root。
 
@@ -117,27 +121,30 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 
 ## 测试证据
 
-- Unit: `InfiniteList.test.tsx` 覆盖 root discovery、并发锁、失败/重试、完成、Observer 降级、disabled、自定义视觉和陈旧 rejection。
-- Story interaction: `ErrorAndRetry.play` 验证失败、重试和恢复状态；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
+- Unit: `InfiniteList.test.tsx` 覆盖 root discovery、并发锁与 trigger、失败/重试、完成、Observer 降级、disabled、自定义视觉、完成/卸载取消、陈旧 rejection、焦点恢复、自动加载不抢焦点和成功公告。
+- Story interaction: `ErrorAndRetry.play` 验证失败、焦点恢复、重试、成功公告和恢复状态。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2564 B / 32768 B 预算，组合 Brotli 2204 B；共享样式由应用单独导入一次。
-- SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖 idle/complete；Observer hydration 待补。
-- Reduced motion/forced-colors/RTL: CSS 或无方向契约完成，视觉证据待补。
-- Mobile Chromium/WebKit、Chromatic、real device: 待发布批次统一验证。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2905 B / 32768 B 预算，组合 Brotli 2524 B；共享样式由应用单独导入一次。
+- SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖默认 auto 的首屏手动降级与 complete；`InfiniteList.hydration.test.tsx` 覆盖无 mismatch、挂载后安装 Observer，以及 Observer 缺失时按钮仍可请求。
+- Reduced motion/forced-colors/RTL: CSS 中 reduced-motion 停止旋转、forced-colors 使用系统按钮色；布局使用居中/无物理方向属性。自动 Storybook 矩阵覆盖继续适用，真机视觉仍见下方边界。
+- Mobile Chromium/WebKit: 隔离 Next H5 在两种引擎验证同步去重、手动加载后的焦点恢复与自定义成功公告、到达 complete，以及外部完成时 signal 协作取消且不进入 error。
+- Chromatic、real device: 待发布批次统一验证。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补嵌套 scroll root E2E、慢网/离线重试和 Light/Dark 视觉基线。
+- 补 iOS/WKWebView 嵌套 scroll root 时序、慢网/离线取消、真机 forced-colors/读屏公告与焦点体验。
 
 ### 已完成
 
-- 固化并发、在途完成竞态、卸载安全、disabled retry、Observer 降级、i18n、SSR、reduced-motion 与 forced-colors。
+- 固化并发、在途完成竞态、协作取消、卸载安全、disabled retry、Observer hydration/降级、焦点恢复、追加公告、i18n、SSR、reduced-motion 与 forced-colors。
+- 在隔离 Next H5 双移动引擎补手动触发、焦点/公告、完成与在途 abort 的真实浏览器路径。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                   | 迁移说明 |
-| ---------- | ------ | --------- | -------------------------------------- | -------- |
-| 2026-08-29 | 未发布 | hardening | 完成请求竞态、完成事实源与降级入口加固 | API 兼容 |
+| 日期       | 版本   | 类型      | 内容                                      | 迁移说明                    |
+| ---------- | ------ | --------- | ----------------------------------------- | --------------------------- |
+| 2026-08-29 | 未发布 | hardening | 补取消、hydration、焦点保持与追加公告证据 | `loadMore` 可选消费 context |
+| 2026-08-29 | 未发布 | hardening | 完成请求竞态、完成事实源与降级入口加固    | API 兼容                    |

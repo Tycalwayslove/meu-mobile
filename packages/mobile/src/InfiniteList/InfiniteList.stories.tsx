@@ -82,6 +82,7 @@ export const ErrorAndRetry: Story = {
       throw new window.Error("Expected InfiniteList manual load action");
     }
 
+    loadMore.focus();
     loadMore.click();
     await waitForStory(
       () => root.getAttribute("data-status") === "error",
@@ -91,6 +92,10 @@ export const ErrorAndRetry: Story = {
     if (!retry || retry.textContent !== "重试") {
       throw new window.Error("InfiniteList did not expose its retry action");
     }
+    await waitForStory(
+      () => document.activeElement === retry,
+      "InfiniteList did not restore focus to retry"
+    );
 
     retry.click();
     await waitForStory(
@@ -100,6 +105,14 @@ export const ErrorAndRetry: Story = {
     const recoveredAction = canvasElement.querySelector<HTMLButtonElement>("button");
     if (!recoveredAction || recoveredAction.textContent !== "加载更多") {
       throw new window.Error("InfiniteList did not return to its loadable state");
+    }
+    await waitForStory(
+      () => document.activeElement === recoveredAction,
+      "InfiniteList did not restore focus after retry"
+    );
+    const liveStatus = canvasElement.querySelector<HTMLElement>('[role="status"]');
+    if (!liveStatus || liveStatus.textContent !== "已加载更多内容") {
+      throw new window.Error("InfiniteList did not announce the successful append");
     }
   }
 };

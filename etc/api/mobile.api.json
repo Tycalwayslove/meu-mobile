@@ -10131,7 +10131,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ autoLoad, className, completeContent, disabled, errorContent, hasMore, loadMore, loadMoreLabel, loadingContent, onLoadError, onStatusChange, ref, renderContent, retryLabel, threshold, ...props }",
+              "parameterName": "{ autoLoad, className, completeContent, disabled, errorContent, hasMore, loadMore, loadMoreLabel, loadedAnnouncement, loadingContent, onLoadError, onStatusChange, ref, renderContent, retryLabel, threshold, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -10201,7 +10201,16 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    hasMore: boolean;\n    loadMore: () => "
+              "text": ";\n    hasMore: boolean;\n    loadMore: (context: "
+            },
+            {
+              "kind": "Reference",
+              "text": "InfiniteListLoadContext",
+              "canonicalReference": "@meu/mobile!~InfiniteListLoadContext:type"
+            },
+            {
+              "kind": "Content",
+              "text": ") => "
             },
             {
               "kind": "Reference",
@@ -10210,7 +10219,16 @@
             },
             {
               "kind": "Content",
-              "text": "<void>;\n    loadMoreLabel?: string;\n    loadingContent?: "
+              "text": "<void>;\n    loadMoreLabel?: string;\n    loadedAnnouncement?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ReactNode",
+              "canonicalReference": "@types/react!React.ReactNode:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    loadingContent?: "
             },
             {
               "kind": "Reference",
@@ -10285,7 +10303,7 @@
           "name": "InfiniteListProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 27
+            "endIndex": 31
           }
         },
         {
@@ -16570,7 +16588,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, allowClear, className, columns, defaultValue, disabled, form, id, multiple, name, onChange, onFocus, options, ref, required, showCheckMark, size, status, style, tabIndex, value, ...props }",
+              "parameterName": "{ \"aria-describedby\": ariaDescribedBy, \"aria-invalid\": ariaInvalid, \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, allowClear, className, columns, defaultValue, disabled, form, id, maxCount, multiple, name, onChange, onFocus, options, readOnly, ref, required, showCheckMark, size, status, style, tabIndex, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -16830,7 +16848,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    allowClear?: boolean;\n    columns?: number;\n    defaultValue?: TValue[];\n    disabled?: boolean;\n    form?: string;\n    multiple?: boolean;\n    name?: string;\n    onChange?: (value: TValue[], options: "
+              "text": ">, \"defaultValue\" | \"onChange\"> & {\n    allowClear?: boolean;\n    columns?: number;\n    defaultValue?: TValue[];\n    disabled?: boolean;\n    form?: string;\n    maxCount?: number;\n    multiple?: boolean;\n    name?: string;\n    onChange?: (value: TValue[], options: "
             },
             {
               "kind": "Reference",
@@ -16875,7 +16893,7 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    required?: boolean;\n    showCheckMark?: boolean;\n    size?: "
+              "text": ">;\n    readOnly?: boolean;\n    required?: boolean;\n    showCheckMark?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -18082,7 +18100,25 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"size\" | \"type\" | \"value\" | \"defaultValue\" | \"onChange\"> & {\n    allowEmpty?: boolean;\n    decrementAriaLabel?: string;\n    defaultValue?: number | null;\n    incrementAriaLabel?: string;\n    max?: number;\n    min?: number;\n    onChange?: (value: number | null) => void;\n    precision?: number;\n    size?: import(\"./types\")."
+              "text": ">, \"size\" | \"disabled\" | \"type\" | \"value\" | \"defaultValue\" | \"inputMode\" | \"onChange\" | \"readOnly\"> & {\n    allowEmpty?: boolean;\n    decrementAriaLabel?: string;\n    defaultValue?: number | null;\n    disabled?: boolean;\n    incrementAriaLabel?: string;\n    inputMode?: import(\"react\")."
+            },
+            {
+              "kind": "Reference",
+              "text": "InputHTMLAttributes",
+              "canonicalReference": "@types/react!React.InputHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"inputMode\"];\n    max?: number;\n    min?: number;\n    onChange?: (value: number | null) => void;\n    precision?: number;\n    readOnly?: boolean;\n    repeatOnLongPress?: boolean;\n    size?: import(\"./types\")."
             },
             {
               "kind": "Reference",
@@ -18127,7 +18163,7 @@
           "name": "Stepper",
           "variableTypeTokenRange": {
             "startIndex": 1,
-            "endIndex": 18
+            "endIndex": 22
           }
         },
         {
@@ -18164,7 +18200,25 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"defaultValue\" | \"onChange\" | \"size\" | \"type\" | \"value\"> & {\n    allowEmpty?: boolean;\n    decrementAriaLabel?: string;\n    defaultValue?: number | null;\n    incrementAriaLabel?: string;\n    max?: number;\n    min?: number;\n    onChange?: (value: number | null) => void;\n    precision?: number;\n    size?: "
+              "text": ">, \"defaultValue\" | \"disabled\" | \"inputMode\" | \"onChange\" | \"readOnly\" | \"size\" | \"type\" | \"value\"> & {\n    allowEmpty?: boolean;\n    decrementAriaLabel?: string;\n    defaultValue?: number | null;\n    disabled?: boolean;\n    incrementAriaLabel?: string;\n    inputMode?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "InputHTMLAttributes",
+              "canonicalReference": "@types/react!React.InputHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLInputElement",
+              "canonicalReference": "!HTMLInputElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"inputMode\"];\n    max?: number;\n    min?: number;\n    onChange?: (value: number | null) => void;\n    precision?: number;\n    readOnly?: boolean;\n    repeatOnLongPress?: boolean;\n    size?: "
             },
             {
               "kind": "Reference",
@@ -18194,7 +18248,7 @@
           "name": "StepperProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 11
+            "endIndex": 15
           }
         },
         {

@@ -117,13 +117,20 @@ export const option = recipe({
       },
       false: {}
     },
+    readOnly: {
+      true: {
+        cursor: "default",
+        selectors: { "&:active": { background: "var(--meu-color-surface)" } }
+      },
+      false: {}
+    },
     size: {
       small: { minHeight: 44, padding: "var(--meu-space-2) var(--meu-space-3)", fontSize: 14 },
       medium: { minHeight: 48, padding: "var(--meu-space-3) var(--meu-space-4)", fontSize: 16 },
       large: { minHeight: 52, padding: "var(--meu-space-3) var(--meu-space-4)", fontSize: 16 }
     }
   },
-  defaultVariants: { active: false, disabled: false, size: "medium" }
+  defaultVariants: { active: false, disabled: false, readOnly: false, size: "medium" }
 });
 
 export const label = style({ minWidth: 0, fontWeight: 500, lineHeight: 1.4 });

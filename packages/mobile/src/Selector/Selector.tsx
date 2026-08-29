@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, FocusEvent, ForwardedRef, MouseEvent } from "react";
+import type { CSSProperties, FocusEvent, ForwardedRef, KeyboardEvent, MouseEvent } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
 import {
@@ -53,18 +53,40 @@ function uniqueOptions<TValue extends SelectorValue>(
 function normalizeSelection<TValue extends SelectorValue>(
   options: readonly SelectorOption<TValue>[],
   candidates: readonly TValue[],
-  multiple: boolean
+  multiple: boolean,
+  maxCount?: number
 ): TValue[] {
+  const candidateIdentities = new Set(candidates.map(valueIdentity));
   const values = options
     .filter(
       (optionCandidate) =>
-        !optionCandidate.disabled &&
-        candidates.some(
-          (candidate) => valueIdentity(candidate) === valueIdentity(optionCandidate.value)
-        )
+        !optionCandidate.disabled && candidateIdentities.has(valueIdentity(optionCandidate.value))
     )
     .map((candidate) => candidate.value);
-  return multiple ? values : values.slice(0, 1);
+  return multiple
+    ? maxCount === undefined
+      ? values
+      : values.slice(0, maxCount)
+    : values.slice(0, 1);
+}
+
+function normalizeMaxCount(maxCount: number | undefined): number | undefined {
+  if (maxCount === undefined || !Number.isFinite(maxCount)) return undefined;
+  return Math.max(0, Math.trunc(maxCount));
+}
+
+function restoreCheckedAfterDefaultAction(inputElement: HTMLInputElement, checked: boolean) {
+  void Promise.resolve().then(() => {
+    inputElement.checked = checked;
+  });
+}
+
+function isNativeSelectionKey(key: string, multiple: boolean): boolean {
+  return (
+    key === " " ||
+    (!multiple &&
+      (key === "ArrowDown" || key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp"))
+  );
 }
 
 function optionsSignature<TValue extends SelectorValue>(
@@ -95,11 +117,13 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
   disabled = false,
   form,
   id,
+  maxCount,
   multiple = false,
   name,
   onChange,
   onFocus,
   options,
+  readOnly = false,
   ref,
   required = false,
   showCheckMark = true,
@@ -118,20 +142,34 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
   const [initialDefaultValue] = useState(defaultValue);
   const normalizedOptions = useMemo(() => uniqueOptions(options), [options]);
   const normalizedOptionsSignature = optionsSignature(normalizedOptions);
+  const safeMaxCount = normalizeMaxCount(maxCount);
   const controlled = value !== undefined;
   const [uncontrolledState, setUncontrolledState] = useState(() => ({
+    maxCount: normalizeMaxCount(maxCount),
     multiple,
     optionsSignature: optionsSignature(uniqueOptions(options)),
-    value: normalizeSelection(uniqueOptions(options), defaultValue, multiple)
+    value: normalizeSelection(
+      uniqueOptions(options),
+      defaultValue,
+      multiple,
+      normalizeMaxCount(maxCount)
+    )
   }));
   let uncontrolledValue = uncontrolledState.value;
   if (
     !controlled &&
-    (uncontrolledState.multiple !== multiple ||
+    (uncontrolledState.maxCount !== safeMaxCount ||
+      uncontrolledState.multiple !== multiple ||
       uncontrolledState.optionsSignature !== normalizedOptionsSignature)
   ) {
-    uncontrolledValue = normalizeSelection(normalizedOptions, uncontrolledValue, multiple);
+    uncontrolledValue = normalizeSelection(
+      normalizedOptions,
+      uncontrolledValue,
+      multiple,
+      safeMaxCount
+    );
     setUncontrolledState({
+      maxCount: safeMaxCount,
       multiple,
       optionsSignature: normalizedOptionsSignature,
       value: uncontrolledValue
@@ -140,7 +178,8 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
   const currentValue = normalizeSelection(
     normalizedOptions,
     controlled ? value : uncontrolledValue,
-    multiple
+    multiple,
+    controlled ? undefined : safeMaxCount
   );
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const optionIdPrefix = resolvedId || `meu-selector-${generatedId}`;
@@ -173,8 +212,14 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
   const safeColumns = Number.isFinite(columns) ? Math.min(Math.max(Math.trunc(columns), 1), 6) : 2;
   const rootStyle: SelectorStyle = { ...style, "--meu-selector-columns": String(safeColumns) };
   const firstEnabledIndex = normalizedOptions.findIndex((candidate) => !candidate.disabled);
-  const resetValue = normalizeSelection(normalizedOptions, initialDefaultValue, multiple);
+  const resetValue = normalizeSelection(
+    normalizedOptions,
+    initialDefaultValue,
+    multiple,
+    safeMaxCount
+  );
   const resetConfigRef = useRef({
+    maxCount: safeMaxCount,
     multiple,
     optionsSignature: normalizedOptionsSignature,
     value: resetValue
@@ -182,6 +227,7 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
 
   useLayoutEffect(() => {
     resetConfigRef.current = {
+      maxCount: safeMaxCount,
       multiple,
       optionsSignature: normalizedOptionsSignature,
       value: resetValue
@@ -210,6 +256,7 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
         );
       });
       setUncontrolledState({
+        maxCount: resetConfig.maxCount,
         multiple: resetConfig.multiple,
         optionsSignature: resetConfig.optionsSignature,
         value: resetConfig.value
@@ -245,12 +292,18 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
   }
 
   function publish(nextCandidates: TValue[], details: SelectorChangeDetails<TValue>) {
-    const nextValue = normalizeSelection(normalizedOptions, nextCandidates, multiple);
+    const nextValue = normalizeSelection(
+      normalizedOptions,
+      nextCandidates,
+      multiple,
+      controlled ? undefined : safeMaxCount
+    );
     const selectedOptions = normalizedOptions.filter((candidate) =>
       nextValue.some((itemValue) => valueIdentity(itemValue) === valueIdentity(candidate.value))
     );
     if (!controlled) {
       setUncontrolledState({
+        maxCount: safeMaxCount,
         multiple,
         optionsSignature: normalizedOptionsSignature,
         value: nextValue
@@ -263,12 +316,24 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
     event: MouseEvent<HTMLInputElement>,
     candidate: SelectorOption<TValue>,
     active: boolean,
-    optionDisabled: boolean
+    interactionBlocked: boolean
   ) {
-    if (!multiple && active && allowClear && !resolvedRequired && !optionDisabled) {
+    if (interactionBlocked) {
+      event.preventDefault();
+      restoreCheckedAfterDefaultAction(event.currentTarget, active);
+      return;
+    }
+    if (!multiple && active && allowClear && !resolvedRequired) {
       event.preventDefault();
       publish([], { event, option: candidate, source: "clear" });
     }
+  }
+
+  function handleBlockedKeyDown(
+    event: KeyboardEvent<HTMLInputElement>,
+    interactionBlocked: boolean
+  ) {
+    if (interactionBlocked && isNativeSelectionKey(event.key, multiple)) event.preventDefault();
   }
 
   return (
@@ -293,17 +358,22 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
       aria-invalid={resolvedAriaInvalid}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabel ? undefined : labelledBy}
+      aria-readonly={!multiple && readOnly && !disabled ? true : undefined}
       aria-required={!multiple && resolvedRequired ? true : undefined}
       data-meu-component="selector"
       data-mode={multiple ? "multiple" : "single"}
       data-size={size}
-      data-state={disabled ? "disabled" : invalid ? "error" : "default"}
+      data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
     >
       {normalizedOptions.map((candidate, index) => {
         const active = currentValue.some(
           (itemValue) => valueIdentity(itemValue) === valueIdentity(candidate.value)
         );
         const optionDisabled = disabled || Boolean(candidate.disabled);
+        const selectionLimitBlocked =
+          multiple && safeMaxCount !== undefined && currentValue.length >= safeMaxCount && !active;
+        const optionReadOnly = readOnly && !optionDisabled;
+        const interactionBlocked = optionDisabled || optionReadOnly || selectionLimitBlocked;
         const optionId = `${optionIdPrefix}-option-${index}`;
         const optionLabelId = `${optionId}-label`;
         const hasDescription =
@@ -317,7 +387,9 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
           <div
             className={item}
             key={valueIdentity(candidate.value)}
-            data-disabled={optionDisabled ? "true" : "false"}
+            data-disabled={optionDisabled || selectionLimitBlocked ? "true" : "false"}
+            data-limit-disabled={selectionLimitBlocked ? "true" : "false"}
+            data-readonly={optionReadOnly ? "true" : "false"}
             data-selected={active ? "true" : "false"}
           >
             <input
@@ -335,12 +407,18 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
               checked={active}
               disabled={optionDisabled}
               required={multiple ? checkboxRequired : resolvedRequired}
+              aria-disabled={selectionLimitBlocked || undefined}
+              aria-readonly={multiple && optionReadOnly ? true : undefined}
               aria-describedby={mergeIdReferences(describedBy, optionDescriptionId)}
               aria-label={candidate.ariaLabel}
               aria-labelledby={candidate.ariaLabel ? undefined : optionLabelId}
-              onClick={(event) => handleSingleClick(event, candidate, active, optionDisabled)}
+              onKeyDown={(event) => handleBlockedKeyDown(event, interactionBlocked)}
+              onClick={(event) => handleSingleClick(event, candidate, active, interactionBlocked)}
               onChange={(event) => {
-                if (optionDisabled) return;
+                if (interactionBlocked) {
+                  restoreCheckedAfterDefaultAction(event.currentTarget, active);
+                  return;
+                }
                 if (multiple) {
                   publish(
                     event.target.checked
@@ -361,9 +439,12 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
             />
             <label
               htmlFor={optionId}
-              className={`${option({ active, disabled: optionDisabled, size })}${
-                active && showCheckMark ? ` ${withCheckMark}` : ""
-              }`}
+              className={`${option({
+                active,
+                disabled: optionDisabled || selectionLimitBlocked,
+                readOnly: optionReadOnly && !selectionLimitBlocked,
+                size
+              })}${active && showCheckMark ? ` ${withCheckMark}` : ""}`}
             >
               <span id={optionLabelId} className={label}>
                 {candidate.label}

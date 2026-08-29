@@ -14,6 +14,7 @@ import type {
 } from "./types";
 
 type InfiniteListRequestStatus = Exclude<InfiniteListStatus, "complete">;
+type InfiniteListAnnouncement = InfiniteListStatus | "loaded";
 
 function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
   if (typeof ref === "function") ref(value);
@@ -52,6 +53,7 @@ export function InfiniteList({
   hasMore,
   loadMore,
   loadMoreLabel,
+  loadedAnnouncement,
   loadingContent,
   onLoadError,
   onStatusChange,
@@ -63,7 +65,9 @@ export function InfiniteList({
 }: InfiniteListProps) {
   const { locale } = useMeuConfig();
   const rootRef = useRef<HTMLDivElement>(null);
+  const actionRef = useRef<HTMLButtonElement>(null);
   const mountedRef = useRef(true);
+  const activeAbortControllerRef = useRef<AbortController | null>(null);
   const activeRequestIdRef = useRef<number | null>(null);
   const requestIdRef = useRef(0);
   const hasMoreRef = useRef(hasMore);
@@ -71,7 +75,11 @@ export function InfiniteList({
   const onStatusChangeRef = useRef(onStatusChange);
   const statusRef = useRef<InfiniteListRequestStatus>("idle");
   const reportedStatusRef = useRef<InfiniteListStatus>(hasMore ? "idle" : "complete");
+  const restoreActionFocusRef = useRef(false);
   const [status, setStatus] = useState<InfiniteListRequestStatus>("idle");
+  const [announcement, setAnnouncement] = useState<InfiniteListAnnouncement>(
+    hasMore ? "idle" : "complete"
+  );
 
   useEffect(() => {
     onLoadErrorRef.current = onLoadError;
@@ -85,6 +93,7 @@ export function InfiniteList({
           error: "Could not load more content",
           idle: "More content is available",
           loadMore: "Load more",
+          loaded: "More content loaded",
           loading: "Loading more content…",
           retry: "Retry"
         }
@@ -93,6 +102,7 @@ export function InfiniteList({
           error: "加载更多内容失败",
           idle: "还有更多内容",
           loadMore: "加载更多",
+          loaded: "已加载更多内容",
           loading: "正在加载更多内容…",
           retry: "重试"
         };
@@ -104,6 +114,7 @@ export function InfiniteList({
       statusRef.current = nextStatus;
       reportedStatusRef.current = nextStatus;
       setStatus(nextStatus);
+      setAnnouncement(nextStatus);
       const callback = onStatusChangeRef.current;
       if (callback) callback(nextStatus, details);
     },
@@ -114,17 +125,25 @@ export function InfiniteList({
     async (trigger: InfiniteListTrigger) => {
       if (disabled || !hasMoreRef.current || activeRequestIdRef.current !== null) return;
       if (statusRef.current === "error" && trigger === "auto") return;
+      restoreActionFocusRef.current =
+        trigger !== "auto" &&
+        typeof document !== "undefined" &&
+        actionRef.current === document.activeElement;
       requestIdRef.current += 1;
       const requestId = requestIdRef.current;
+      const abortController = new AbortController();
+      activeAbortControllerRef.current = abortController;
       activeRequestIdRef.current = requestId;
       publishStatus("loading", { trigger });
       try {
-        await loadMore();
+        await loadMore({ signal: abortController.signal, trigger });
         if (!mountedRef.current) return;
         if (requestIdRef.current !== requestId || activeRequestIdRef.current !== requestId) return;
+        activeAbortControllerRef.current = null;
         activeRequestIdRef.current = null;
         statusRef.current = "idle";
         setStatus("idle");
+        setAnnouncement("loaded");
         if (hasMoreRef.current && reportedStatusRef.current !== "idle") {
           reportedStatusRef.current = "idle";
           const callback = onStatusChangeRef.current;
@@ -133,6 +152,7 @@ export function InfiniteList({
       } catch (error) {
         if (!mountedRef.current) return;
         if (requestIdRef.current !== requestId || activeRequestIdRef.current !== requestId) return;
+        activeAbortControllerRef.current = null;
         activeRequestIdRef.current = null;
         publishStatus("error", { error, trigger });
         const callback = onLoadErrorRef.current;
@@ -146,8 +166,11 @@ export function InfiniteList({
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      if (activeAbortControllerRef.current) activeAbortControllerRef.current.abort();
+      activeAbortControllerRef.current = null;
       requestIdRef.current += 1;
       activeRequestIdRef.current = null;
+      restoreActionFocusRef.current = false;
     };
   }, []);
 
@@ -155,8 +178,11 @@ export function InfiniteList({
     const hadMore = hasMoreRef.current;
     hasMoreRef.current = hasMore;
     if (hadMore && !hasMore) {
+      if (activeAbortControllerRef.current) activeAbortControllerRef.current.abort();
+      activeAbortControllerRef.current = null;
       requestIdRef.current += 1;
       activeRequestIdRef.current = null;
+      restoreActionFocusRef.current = false;
       statusRef.current = "idle";
       // External completion is a committed pagination-generation boundary. Resetting while the
       // complete UI is rendered prevents a prior error/loading state from reviving on re-enable.
@@ -166,10 +192,27 @@ export function InfiniteList({
     const resolvedStatus: InfiniteListStatus = hasMore ? statusRef.current : "complete";
     if (reportedStatusRef.current !== resolvedStatus) {
       reportedStatusRef.current = resolvedStatus;
+      // External completion/reopening replaces any request-specific live announcement.
+      setAnnouncement(resolvedStatus);
       const callback = onStatusChangeRef.current;
       if (callback) callback(resolvedStatus, {});
     }
   }, [hasMore]);
+
+  const resolvedStatus = hasMore ? status : "complete";
+
+  useEffect(() => {
+    if (!restoreActionFocusRef.current) return;
+    if (resolvedStatus === "loading") return;
+    if (disabled || !hasMore || resolvedStatus === "complete") {
+      restoreActionFocusRef.current = false;
+      return;
+    }
+    const actionNode = actionRef.current;
+    if (!actionNode) return;
+    actionNode.focus();
+    restoreActionFocusRef.current = false;
+  }, [disabled, hasMore, resolvedStatus]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -197,7 +240,6 @@ export function InfiniteList({
     return () => observer.disconnect();
   }, [autoLoad, disabled, hasMore, requestLoad, resolvedThreshold, status]);
 
-  const resolvedStatus = hasMore ? status : "complete";
   const manualLoad = useCallback(() => requestLoad("manual"), [requestLoad]);
   const retry = useCallback(() => requestLoad("retry"), [requestLoad]);
   const defaultStatusContent =
@@ -213,11 +255,18 @@ export function InfiniteList({
     ) : null;
   const defaultAction =
     resolvedStatus === "error" ? (
-      <button className={action} type="button" disabled={disabled} onClick={() => void retry()}>
+      <button
+        ref={actionRef}
+        className={action}
+        type="button"
+        disabled={disabled}
+        onClick={() => void retry()}
+      >
         {retryLabel || labels.retry}
       </button>
     ) : resolvedStatus === "idle" ? (
       <button
+        ref={actionRef}
         className={action}
         type="button"
         disabled={disabled}
@@ -243,7 +292,11 @@ export function InfiniteList({
       data-status={resolvedStatus}
     >
       <VisuallyHidden role="status" aria-live="polite" aria-atomic="true">
-        {labels[resolvedStatus]}
+        {hasMore && announcement === "loaded"
+          ? loadedAnnouncement === undefined
+            ? labels.loaded
+            : loadedAnnouncement
+          : labels[hasMore ? announcement : "complete"]}
       </VisuallyHidden>
       <div className={content}>
         {renderContent ? renderContent(resolvedStatus) : defaultStatusContent}

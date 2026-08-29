@@ -1138,8 +1138,9 @@ export type InfiniteListProps = Omit<HTMLAttributes<HTMLDivElement>, "children">
     disabled?: boolean;
     errorContent?: ReactNode;
     hasMore: boolean;
-    loadMore: () => Promise<void>;
+    loadMore: (context: InfiniteListLoadContext) => Promise<void>;
     loadMoreLabel?: string;
+    loadedAnnouncement?: ReactNode;
     loadingContent?: ReactNode;
     onLoadError?: (error: unknown) => void;
     onStatusChange?: (status: InfiniteListStatus, details: InfiniteListStatusChangeDetails) => void;
@@ -1825,11 +1826,13 @@ export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<H
     defaultValue?: TValue[];
     disabled?: boolean;
     form?: string;
+    maxCount?: number;
     multiple?: boolean;
     name?: string;
     onChange?: (value: TValue[], options: SelectorOption<TValue>[], details?: SelectorChangeDetails<TValue>) => void;
     options: readonly SelectorOption<TValue>[];
     ref?: Ref<HTMLDivElement>;
+    readOnly?: boolean;
     required?: boolean;
     showCheckMark?: boolean;
     size?: SelectorSize;
@@ -1965,15 +1968,19 @@ export type StepItem = {
 };
 
 // @public
-export const Stepper: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "value" | "defaultValue" | "onChange"> & {
+export const Stepper: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "disabled" | "type" | "value" | "defaultValue" | "inputMode" | "onChange" | "readOnly"> & {
 allowEmpty?: boolean;
 decrementAriaLabel?: string;
 defaultValue?: number | null;
+disabled?: boolean;
 incrementAriaLabel?: string;
+inputMode?: InputHTMLAttributes<HTMLInputElement>["inputMode"];
 max?: number;
 min?: number;
 onChange?: (value: number | null) => void;
 precision?: number;
+readOnly?: boolean;
+repeatOnLongPress?: boolean;
 size?: StepperSize;
 status?: StepperStatus;
 step?: number;
@@ -1981,15 +1988,19 @@ value?: number | null;
 } & RefAttributes<HTMLInputElement>>;
 
 // @public
-export type StepperProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "onChange" | "size" | "type" | "value"> & {
+export type StepperProps = Omit<InputHTMLAttributes<HTMLInputElement>, "defaultValue" | "disabled" | "inputMode" | "onChange" | "readOnly" | "size" | "type" | "value"> & {
     allowEmpty?: boolean;
     decrementAriaLabel?: string;
     defaultValue?: number | null;
+    disabled?: boolean;
     incrementAriaLabel?: string;
+    inputMode?: InputHTMLAttributes<HTMLInputElement>["inputMode"];
     max?: number;
     min?: number;
     onChange?: (value: number | null) => void;
     precision?: number;
+    readOnly?: boolean;
+    repeatOnLongPress?: boolean;
     size?: StepperSize;
     status?: StepperStatus;
     step?: number;
@@ -2542,6 +2553,7 @@ export type WatermarkProps = Omit<HTMLAttributes<HTMLDivElement>, "children" | "
 // Warnings were encountered during analysis:
 //
 // src/Card/types.ts:32:3 - (ae-forgotten-export) The symbol "CardFooterLayout" needs to be exported by the entry point index.d.ts
+// src/InfiniteList/types.ts:57:3 - (ae-forgotten-export) The symbol "InfiniteListLoadContext" needs to be exported by the entry point index.d.ts
 // src/SafeArea/SafeArea.tsx:23:22 - (ae-forgotten-export) The symbol "SafeAreaPosition" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

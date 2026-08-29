@@ -15,6 +15,8 @@ storyIds:
   [
     data-entry-stepper--default,
     data-entry-stepper--decimal,
+    data-entry-stepper--long-press-repeat,
+    data-entry-stepper--integer-keyboard-hint,
     data-entry-stepper--in-field,
     data-entry-stepper--controlled,
     data-entry-stepper--native-form-reset,
@@ -34,9 +36,9 @@ source: packages/mobile/src/Stepper
 
 ## 当前能力
 
-- 文本输入 + 两个原生按钮组成的 spinbutton，支持点击、触摸、键盘、直接输入、复制粘贴、受控/非受控与 ref。
-- min/max/step/precision 统一规范化；反向 bounds 排序、非法 step 回退 1、浮点按 step base 对齐。
-- 支持 `allowEmpty` 的 null、decimal inputMode、小数逗号、无效草稿回滚、IME 保护、可取消的调用方 keydown。
+- 文本输入 + 两个原生按钮组成的 spinbutton，支持点击、可选长按重复、触摸、键盘、直接输入、复制粘贴、受控/非受控与 ref。
+- min/max/step/precision 统一规范化；反向 bounds 排序、非法 step 回退 1、浮点按 step base 对齐；过粗 precision 会提升到 step/min 所需位数，避免连续步进停滞。
+- 支持 `allowEmpty` 的 null、可配置 inputMode、小数点/小数逗号、严格十进制粘贴、无效草稿回滚、IME 保护、可取消的调用方 keydown。
 - 原生 form name/required/disabled/readOnly/reset；readOnly 会保留 FormData 并忽略所有内建改值键；Field label、必填、说明和错误关联；增减按钮通过 aria-controls 指向输入。
 - 44px 按钮、三档高度、RTL 逻辑边框、reduced-motion 和 forced-colors 降级。
 
@@ -82,12 +84,12 @@ DOM 顺序为 decrement button、text input(role spinbutton)、increment button�
 
 - 有限 min/max 转升序；单边 bounds 保留；NaN/Infinity 输入回滚或规范化。
 - step 必须正且有限；以有效 min（没有则 0）为基准吸附。max 不在步长网格上时，有效上限为最后一个可达步进值；End、增加按钮、ARIA 上限和发布值统一使用该端点。
-- precision 显式时限制 0–12；省略时取 step/min 的十进制位数。回调是 number，不保留视觉末尾零。
-- 仅包含逗号而无点号的草稿将首个逗号作为 decimal separator；不解析千分位、货币符号或本地化数字字形。
+- precision 显式且有限时限制 0–12；若小于 step/min 所需位数，组件提升到所需位数，保证每次 step 都可表示并继续前进。省略或传非有限值时取 step/min 的十进制位数。回调是 number，不保留视觉末尾零。
+- 草稿只接受带可选正负号的十进制整数或小数；仅含一个逗号且不含点号时，逗号作为 decimal separator。科学计数、十六进制、分组空格、千分位、货币符号和本地化数字字形会回滚。
 
 ## 表单集成
 
-- input 透传 name、form、required、disabled、readOnly、onInvalid、autocomplete 等适用属性。
+- input 透传 name、form、required、disabled、readOnly、onInvalid、autocomplete、paste/composition handlers 等适用属性。`inputMode` 默认 decimal，也可设为 numeric/text 等原生提示；它只选择软键盘，不改变十进制解析规则。
 - Field required 会落到原生 text required 与 `aria-required`；空值可被浏览器 validity/RHF 捕获。
 - min/max/step 是组件数值契约，不是 text input 的原生 constraint validation；服务端/schema 必须重复验证。
 - readOnly 仍进入 FormData且可聚焦/选择；ArrowUp/ArrowDown/Home/End 不修改受控或非受控值，调用方 onKeyDown 仍先执行，Home/End 的原生光标行为不被组件阻止。disabled 不进入 FormData且按钮不可操作。
@@ -99,7 +101,7 @@ DOM 顺序为 decrement button、text input(role spinbutton)、increment button�
 
 ## Events
 
-- `onChange(value)`：按钮、键盘步进或有效草稿 commit 后，且规范值确实变化时触发。
+- `onChange(value)`：按钮、键盘步进、长按重复 tick 或有效草稿 commit 后，且规范值确实变化时触发。
 - `onFocus/onBlur/onKeyDown` 保留调用方 handler；blur 在内部 commit 后交给调用方。
 - 调用方 onKeyDown 先运行；preventDefault 会取消内建处理。IME composing/keyCode 229 不触发步进。
 - 原生 onInput/composition/paste 可透传，但自定义 onChange 不是逐字符事件。
@@ -122,7 +124,7 @@ ref 指向中央真实 input，可使用原生 `focus()`、`blur()`、`select()`
 
 ## 触摸与手势
 
-按钮最小 44×44 CSS px并使用原生 button 激活语义；当前没有长按连加、滑动或 document 监听。快速点击逐次提交，业务请求应做幂等/节流。页面滚动与系统手势不被阻止。
+按钮最小 44×44 CSS px并使用原生 button 激活语义。`repeatOnLongPress=false` 保持单击一次一步；启用后，按住 500ms 触发第一步，此后每 100ms 重复，pointerup/pointercancel/lost capture、readOnly/disabled、关闭开关或卸载都会清理计时器。重复开始后抑制尾随 click；取消发生在首次重复前时，只提交输入框已编辑的草稿。组件不处理滑动，也不安装 document 监听；页面滚动与系统手势保持原生。
 
 ## 无障碍
 
@@ -134,7 +136,7 @@ ref 指向中央真实 input，可使用原生 `focus()`、`blur()`、`select()`
 
 ## 动效
 
-只有边框/focus 过渡和即时 active 背景；reduced-motion 把过渡缩至 1ms。组件没有长按连续计时器或惯性动画。
+只有边框/focus 过渡和即时 active 背景；reduced-motion 把过渡缩至 1ms。长按计时控制值变化，不是视觉动画；reduced-motion 不改变其 500/100ms 输入节奏。
 
 ## 主题与定制
 
@@ -144,7 +146,7 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 
 ## SSR 与 Next.js
 
-- render 不读取浏览器全局；服务端确定输出两按钮、spinbutton、ARIA 和规范值。effect 只在客户端关联 form reset。
+- render 不读取浏览器全局；服务端确定输出两按钮、spinbutton、ARIA、dir、inputMode 和规范值。JSDOM hydrateRoot 已证明相同 RTL 首屏无 recoverable error；effect 只在客户端关联 form reset 与清理长按计时器。
 
 ## RTL 与国际化
 
@@ -152,13 +154,12 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 
 ## 浏览器与 WebView
 
-构建产物通过 Chrome 70 / iOS 13 语法基线。`inputMode=decimal` 只提示软键盘，不保证包含负号/小数符号；IME、decimal
-comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真机验证。
+构建产物通过 Chrome 70 / iOS 13 语法基线。inputMode 只提示软键盘，不保证 decimal 键盘包含负号/小数符号；Unit 已验证 paste/composition 事件、十进制逗号与 commit 状态机，但键盘布局、候选栏、selection 和系统级 pointercancel 仍需在目标 WKWebView/Android WebView 真机验证。
 
 ## 边界情况与已知限制
 
 - JS number 最多 12 位小数保护，不适合金融 arbitrary precision。
-- 没有 formatter/parser、单位前后缀、长按连续步进或 wheel 步进。
+- 没有 formatter/parser、单位前后缀或 wheel 步进；长按重复需显式开启，不做加速。
 - 受控 value 被规范化显示；父级若持续传超界值，回调不会自动修正父状态。
 - 原生 text validity 不认识 min/max/step；必须有业务/schema 校验。
 - decimal comma 只处理简单单逗号，不处理 locale grouping。
@@ -169,13 +170,13 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 
 ## 测试证据
 
-- Unit：覆盖按钮/键盘/bounds、小数与空值、Field、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、草稿单次发布与 ARIA 同步、decimal comma/无效草稿、取消/IME、readOnly 受控/非受控键盘与 FormData、required/controls、同步 FormData/reset 与取消边界。
-- SSR：覆盖确定 spinbutton、name/value、ARIA invalid token 与两个原生按钮。
+- Unit：覆盖按钮/键盘/bounds、小数与空值、Field、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、粗 precision 连续步进、草稿单次发布与 ARIA 同步、decimal-comma paste/IME、严格十进制拒绝、取消键盘处理、readOnly/disabled、长按重复及 pointerup/pointercancel/卸载清理、FormData、required/controls、reset/取消和 RTL hydration。
+- SSR：覆盖确定 spinbutton、name/value、dir/inputMode、ARIA invalid token 与两个原生按钮。
 - Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4737 B / 32768 B 预算，组合 Brotli 4185 B；共享样式由应用单独导入一次。
-- 待补：软键盘/IME/粘贴移动 E2E、forced-colors/200%/Light/Dark 视觉基线、VoiceOver/TalkBack。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5638 B / 32768 B 预算，组合 Brotli 4968 B；共享样式由应用单独导入一次。
+- 待补：软键盘/IME/粘贴与物理长按移动 E2E、系统 pointercancel/滚动竞争、forced-colors 聚焦截图、Light/Dark 视觉基线、VoiceOver/TalkBack。
 
 ## V2 优化记录
 
@@ -184,12 +185,13 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 - 默认值、受控值、bounds、step、precision 统一规范化。
 - 增加 form reset、required/aria-required、aria-controls 与 readOnly FormData 说明。
 - 增加 decimal comma、无效草稿回滚、Escape/Home/End、IME 防误触与可取消 keydown。
+- 修复 inputMode 覆盖与粗 precision 停滞；增加严格十进制 paste/IME 状态机和可取消长按重复。
 - RTL 逻辑边框、forced-colors、TSDoc、SSR/单元/Story 与本事实源。
 
 ### 待优化
 
 - 完成移动浏览器、真机读屏与视觉验收。
-- 依据真实电商长按需求评估可取消的 repeat 契约；没有埋点和跨端规范前不默认启用。
+- 在 iOS/Android 真机验证软键盘布局、输入法候选、物理长按、滚动竞争和系统 pointercancel；长按默认保持关闭。
 - 若需要本地化 formatter/parser，必须同时冻结编辑态、光标与服务端序列化契约。
 
 ## 维护规则
@@ -198,10 +200,12 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                     | 迁移说明                         |
-| ---------- | ------ | ------------- | -------------------------------------------------------- | -------------------------------- |
-| 2026-08-28 | 未发布 | behavior      | 全链路数值规范化、草稿/IME/键盘契约与 form reset         | 超界或 step 不对齐值会显示规范值 |
-| 2026-08-28 | 未发布 | accessibility | Field required、aria-controls、RTL/高对比                | 无                               |
-| 2026-08-28 | 未发布 | docs          | 建立 Stepper V2 永久事实源                               | README 改为仅指向本文件          |
-| 2026-08-29 | 未发布 | bugfix        | readOnly 拦截 Arrow/Home/End 改值并保留 FormData         | 无                               |
-| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级 | 无                               |
+| 日期       | 版本   | 类型          | 内容                                                            | 迁移说明                         |
+| ---------- | ------ | ------------- | --------------------------------------------------------------- | -------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 全链路数值规范化、草稿/IME/键盘契约与 form reset                | 超界或 step 不对齐值会显示规范值 |
+| 2026-08-28 | 未发布 | accessibility | Field required、aria-controls、RTL/高对比                       | 无                               |
+| 2026-08-28 | 未发布 | docs          | 建立 Stepper V2 永久事实源                                      | README 改为仅指向本文件          |
+| 2026-08-29 | 未发布 | bugfix        | readOnly 拦截 Arrow/Home/End 改值并保留 FormData                | 无                               |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级        | 无                               |
+| 2026-08-29 | 未发布 | behavior      | inputMode 透传、严格十进制输入、precision 防停滞与可选长按重复  | 新能力默认关闭，既有单击兼容     |
+| 2026-08-29 | 未发布 | verification  | 增加 paste/IME、长按取消/卸载、disabled 与 RTL hydration 自动化 | 无                               |

@@ -1,5 +1,6 @@
 "use client";
 
+import { MeuForm, MeuFormTextInput, useMeuForm } from "@meu/form-react";
 import {
   BottomSheet,
   Button,
@@ -28,7 +29,27 @@ const subscribeToHydration = () => () => undefined;
 const getClientHydrationSnapshot = () => true;
 const getServerHydrationSnapshot = () => false;
 
-export function HydrationScenario({ kind }: { kind: string }) {
+function HydrationFormScenario({ initialName }: { initialName: string }) {
+  const form = useMeuForm<{ name: string }>({ defaultValues: { name: initialName } });
+
+  return (
+    <MeuForm form={form} onSubmit={() => undefined}>
+      <MeuFormTextInput name="name" label="Hydration form name" />
+      <Button type="button" onClick={() => form.reset({ name: "Client default" })}>
+        Apply client default
+      </Button>
+      <Button type="reset">Reset hydration form</Button>
+    </MeuForm>
+  );
+}
+
+export function HydrationScenario({
+  initialFormName,
+  kind
+}: {
+  initialFormName: string;
+  kind: string;
+}) {
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
     getClientHydrationSnapshot,
@@ -99,6 +120,9 @@ export function HydrationScenario({ kind }: { kind: string }) {
         </SwipeActions>
       );
       break;
+    case "form":
+      content = <HydrationFormScenario initialName={initialFormName} />;
+      break;
     default:
       content = (
         <VirtualList
@@ -113,7 +137,10 @@ export function HydrationScenario({ kind }: { kind: string }) {
   }
 
   return (
-    <ConfigProvider theme="system">
+    <ConfigProvider
+      {...(kind === "form" ? { dir: "rtl" as const, motion: "reduced" as const } : {})}
+      theme="system"
+    >
       <section
         aria-label="专项 Hydration 场景"
         data-case={kind}
