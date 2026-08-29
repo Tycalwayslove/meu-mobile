@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 114688,
-      "brotliBytes": 80827,
-      "gzipBytes": 102314,
-      "rawBytes": 529345,
+      "brotliBytes": 80930,
+      "gzipBytes": 102350,
+      "rawBytes": 529566,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -127,9 +127,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5644,
-          "gzipBytes": 6354,
-          "rawBytes": 24512,
+          "brotliBytes": 5704,
+          "gzipBytes": 6389,
+          "rawBytes": 24733,
           "name": "MeuFormStepper",
           "passesBudget": true
         },
@@ -1491,9 +1491,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4068,
-      "gzipBytes": 4606,
-      "rawBytes": 17499,
+      "brotliBytes": 4099,
+      "gzipBytes": 4641,
+      "rawBytes": 17720,
       "docsPath": "packages/mobile/src/Stepper/Stepper.docs.mdx",
       "name": "Stepper",
       "packageName": "@meu/mobile",
@@ -1502,9 +1502,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4068,
-          "gzipBytes": 4606,
-          "rawBytes": 17499,
+          "brotliBytes": 4099,
+          "gzipBytes": 4641,
+          "rawBytes": 17720,
           "name": "Stepper",
           "passesBudget": true
         }

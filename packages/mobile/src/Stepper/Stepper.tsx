@@ -180,6 +180,13 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
     if (onKeyDown) onKeyDown(event);
     if (event.defaultPrevented || event.nativeEvent.isComposing || event.keyCode === 229) return;
 
+    const changesValue =
+      event.key === "ArrowUp" ||
+      event.key === "ArrowDown" ||
+      event.key === "Home" ||
+      event.key === "End";
+    if (inert && changesValue) return;
+
     if (event.key === "ArrowUp") {
       event.preventDefault();
       offset(1);

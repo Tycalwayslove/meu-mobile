@@ -39,7 +39,7 @@ source: packages/mobile/src/Rate
 - RTL 指针位置与原生 range 方向同步；半填充使用逻辑方向；forced-colors 保留系统 Highlight/GrayText。
 - readOnly 输出为有名称和值的 meter 语义，同时保留 hidden input 的 FormData 和 input ref；disabled readOnly 不提交。
 
-当前为 V2 `verification`，本地 axe、移动双引擎与扩展场景矩阵已通过；仍需最终视觉审批与真机读屏验收后才能标 commercial。
+当前为 V2 `verification`。本地 axe 与扩展场景矩阵已通过；Next-H5 集成场景已在移动 Chromium/WebKit 中验证键盘改值和表单提交。真实 pointer drag、重复点击清零、pointer cancel、最终视觉审批与真机读屏仍待验收，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -162,8 +162,9 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 - Story interaction: `NativeFormReset.play` 验证原生 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
+- Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormRate` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `rating:4`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer 清零或拖动。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4490 B / 32768 B 预算，组合 Brotli 4001 B；共享样式由应用单独导入一次。
-- 待补：pointer drag/keyboard 移动 E2E、forced-colors/200%/Light-Dark、VoiceOver/TalkBack。
+- 待补：移动 Chromium/WebKit 真实 pointer drag、重复点击当前值清零和 pointer cancel；forced-colors 聚焦与半星截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 
 ## V2 优化记录
 
@@ -173,10 +174,11 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 - 修复 RTL 重复点击清除映射、拖动尾随 click 误清零与 pointer cancel；保留调用方 pointer/click handlers。
 - 增加非受控 reset、readOnly hidden FormData/ref、Field readOnly naming。
 - 半填充改逻辑方向，增加 forced-colors、TSDoc、SSR/单元/Story 与本事实源。
+- Next-H5 双引擎已验证 ArrowRight 改值、hydration、受控表单提交和无运行时错误。
 
 ### 待优化
 
-- 完成真实触摸拖动、移动键盘、真机读屏与视觉验收。
+- 完成真实移动 pointer drag、重复点击清零、pointer cancel、forced-colors 聚焦/半星截图、Chromatic 与真机读屏验收。
 - 收到真实需求后评估 onChangeComplete/hover preview；不可复制 Slider 契约而忽略评分清除语义。
 
 ## 维护规则
@@ -185,9 +187,10 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                        | 迁移说明                           |
-| ---------- | ------ | ------------- | ------------------------------------------- | ---------------------------------- |
-| 2026-08-28 | 未发布 | behavior      | 值按整/半档规范化，修复 RTL 清除与 reset    | 非对齐受控值会显示规范值           |
-| 2026-08-28 | 未发布 | accessibility | readOnly Field naming、FormData/ref、高对比 | readOnly ref 现在指向 hidden input |
-| 2026-08-28 | 未发布 | docs          | 建立 Rate V2 永久事实源                     | README 改为仅指向本文件            |
-| 2026-08-29 | 未发布 | behavior      | 拖动产生 change 后忽略尾随 click 清除       | 无                                 |
+| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                           |
+| ---------- | ------ | ------------- | ---------------------------------------------------------- | ---------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 值按整/半档规范化，修复 RTL 清除与 reset                   | 非对齐受控值会显示规范值           |
+| 2026-08-28 | 未发布 | accessibility | readOnly Field naming、FormData/ref、高对比                | readOnly ref 现在指向 hidden input |
+| 2026-08-28 | 未发布 | docs          | 建立 Rate V2 永久事实源                                    | README 改为仅指向本文件            |
+| 2026-08-29 | 未发布 | behavior      | 拖动产生 change 后忽略尾随 click 清除                      | 无                                 |
+| 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification              |

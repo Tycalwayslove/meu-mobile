@@ -149,6 +149,51 @@ describe("Stepper", () => {
     expect(input).toHaveProperty("value", "1");
   });
 
+  it("keeps read-only controlled and uncontrolled values immutable for built-in keys", () => {
+    const onChange = vi.fn();
+    const onKeyDown = vi.fn();
+    render(
+      <form aria-label="订单">
+        <Stepper
+          aria-label="非受控件数"
+          name="uncontrolled"
+          defaultValue={1}
+          min={0}
+          max={2}
+          readOnly
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+        />
+        <Stepper
+          aria-label="受控件数"
+          name="controlled"
+          value={1}
+          min={0}
+          max={2}
+          readOnly
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+        />
+      </form>
+    );
+    const form = screen.getByRole("form", { name: "订单" });
+    if (!(form instanceof HTMLFormElement)) throw new Error("Expected a form element");
+    const uncontrolled = screen.getByRole("spinbutton", { name: "非受控件数" });
+    const controlled = screen.getByRole("spinbutton", { name: "受控件数" });
+
+    for (const input of [uncontrolled, controlled]) {
+      for (const key of ["ArrowUp", "ArrowDown", "Home", "End"]) {
+        fireEvent.keyDown(input, { key });
+      }
+      expect(input).toHaveProperty("value", "1");
+    }
+
+    expect(onKeyDown).toHaveBeenCalledTimes(8);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(new FormData(form).get("uncontrolled")).toBe("1");
+    expect(new FormData(form).get("controlled")).toBe("1");
+  });
+
   it("propagates required semantics and exposes button-control relationships", () => {
     render(
       <Field label="购买数量" required>
