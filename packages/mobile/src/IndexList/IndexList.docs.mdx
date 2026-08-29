@@ -129,9 +129,9 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3568 B / 32768 B 预算，组合 Brotli 3151 B；共享样式由应用单独导入一次。
-- SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构；hydration 专测待补。
+- SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构；隔离 Next 16 hydration 后索引按钮、活动分组与业务输出保持一致，0 hydration/runtime error。
 - RTL / Reduced motion / forced-colors: CSS 与契约完成，视觉矩阵待补。
-- Mobile Chromium/WebKit E2E、Chromatic Light/Dark、real device: 待发布批次统一验证。
+- Mobile Chromium/WebKit E2E: `navigates indexed sections and vertical category panels` 在两种引擎点击 B 索引并断言 `aria-current=location`、活动内容和业务输出。Chromatic Light/Dark 与 real device 待最终批次。
 
 ## V2 优化记录
 
@@ -142,10 +142,12 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 ### 已完成
 
 - 增加连续 pointer 索引、中英文稳定可访问名称、RTL 逻辑边界、forced-colors、TSDoc、SSR 与动态数据测试。
+- 在隔离 Next H5 中补索引跳转、活动分组、业务输出与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                   | 迁移说明                                    |
-| ---------- | ------ | --------- | -------------------------------------- | ------------------------------------------- |
-| 2026-08-29 | 未发布 | hardening | 完成索引触摸、动态分组与跨平台语义加固 | 新增可选 `section.ariaLabel`，其余 API 兼容 |
-| 2026-08-29 | 未发布 | fix       | 英文 locale 的内容 region 使用英文名称 | API 兼容；读屏不再混入中文默认标签          |
+| 日期       | 版本   | 类型         | 内容                                   | 迁移说明                                    |
+| ---------- | ------ | ------------ | -------------------------------------- | ------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening    | 完成索引触摸、动态分组与跨平台语义加固 | 新增可选 `section.ariaLabel`，其余 API 兼容 |
+| 2026-08-29 | 未发布 | fix          | 英文 locale 的内容 region 使用英文名称 | API 兼容；读屏不再混入中文默认标签          |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎索引/hydration 证据 | 无                                          |

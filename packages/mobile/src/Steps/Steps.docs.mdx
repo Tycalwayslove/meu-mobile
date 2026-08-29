@@ -118,7 +118,7 @@ O(items)，无监听、测量或第三方运行时。
 - SSR/hydration: `Steps.ssr.test.tsx`
 - RTL: 逻辑边界 + 嵌套 RTL/LTR Story，真实截图待补
 - Reduced motion: 不适用
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `connects tab panels, primary navigation and read-only progress semantics` 在两种引擎断言有序列表、三项状态、`aria-current=step` 与 visually-hidden 状态前缀
 - Chromatic Light/Dark: 发布后建立
 - Real device: 待补
 
@@ -126,14 +126,15 @@ O(items)，无监听、测量或第三方运行时。
 
 ### 待优化
 
-补双引擎、200% 字号与 RTL 截图。
+补 200% 字号与 RTL 专属截图；基础双引擎语义路径已完成。
 
 ### 已完成
 
-确认 ol/li、aria-current、状态公告、长标题滚动响应与 forced-colors。
+确认 ol/li、aria-current、状态公告、长标题滚动响应与 forced-colors；补隔离 Next H5 状态与 hydration 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                     | 迁移说明    |
-| ---------- | ------ | -------- | ------------------------ | ----------- |
-| 2026-08-29 | 未发布 | behavior | 响应式长标题和高对比模式 | 无 API 破坏 |
+| 日期       | 版本   | 类型         | 内容                                       | 迁移说明    |
+| ---------- | ------ | ------------ | ------------------------------------------ | ----------- |
+| 2026-08-29 | 未发布 | behavior     | 响应式长标题和高对比模式                   | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎步骤语义/hydration 证据 | 无          |

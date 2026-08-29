@@ -118,7 +118,7 @@ DOM 数量压缩为 O(maxVisible)，不随巨大 count 线性增长。
 - SSR/hydration: `PaginationDots.ssr.test.tsx`
 - RTL: Unit + Story
 - Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `uses native navigation actions, radio segments and read-only page dots` 在两种引擎断言只读 `img` 语义、variant、无伪按钮，并验证外部翻页后的 accessible name
 - Chromatic Light/Dark: 发布后建立
 - Real device: 待补
 
@@ -126,14 +126,15 @@ DOM 数量压缩为 O(maxVisible)，不随巨大 count 线性增长。
 
 ### 待优化
 
-补双引擎和真机读屏证据。
+补 interactive 模式专项双引擎与真机读屏证据；只读消费路径已完成。
 
 ### 已完成
 
-冻结只读默认；新增显式交互、压缩、44px、页码名称、RTL、forced-colors 与 SSR。
+冻结只读默认；新增显式交互、压缩、44px、页码名称、RTL、forced-colors 与 SSR；补只读 Next H5/hydration 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型    | 内容                          | 迁移说明             |
-| ---------- | ------ | ------- | ----------------------------- | -------------------- |
-| 2026-08-29 | 未发布 | feature | interactive、压缩与可访问页码 | 默认仍为只读，无破坏 |
+| 日期       | 版本   | 类型         | 内容                                       | 迁移说明             |
+| ---------- | ------ | ------------ | ------------------------------------------ | -------------------- |
+| 2026-08-29 | 未发布 | feature      | interactive、压缩与可访问页码              | 默认仍为只读，无破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎只读页码/hydration 证据 | 无                   |

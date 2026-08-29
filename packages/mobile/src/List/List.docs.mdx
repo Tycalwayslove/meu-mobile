@@ -118,10 +118,10 @@ List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1999 B / 32768 B 预算，组合 Brotli 1765 B；共享样式由应用单独导入一次。
-- SSR/hydration: `List.ssr.test.tsx` 覆盖原生结构；hydration 专测待补
+- SSR/hydration: `List.ssr.test.tsx` 覆盖原生结构；隔离 Next 16 hydration 后 list/listitem 与 Cell 原生节点保持一致，0 hydration/runtime error
 - RTL: LongContentAndRTL Story；自动视觉回归待补
 - Reduced motion: CSS 降级已实现
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `keeps Cell actions, links and List semantics native` 在两种引擎断言命名 list、4 个 listitem、原生 button/link、href、disabled 与业务输出
 - Chromatic Light/Dark: 待建立
 - Real device: 待补
 
@@ -129,14 +129,15 @@ List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获
 
 ### 待优化
 
-补双引擎、真机与嵌套内容开发期警告证据。
+补真机与嵌套内容开发期警告证据；基础双引擎原生节点路径已完成。
 
 ### 已完成
 
-冻结原生根语义、disabled 链接、0 值槽位、逻辑方向、长内容、forced-colors 和 SSR 边界。
+冻结原生根语义、disabled 链接、0 值槽位、逻辑方向、长内容、forced-colors 和 SSR 边界；补隔离 Next H5/hydration 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                         | 迁移说明                        |
-| ---------- | ------ | -------- | ---------------------------- | ------------------------------- |
-| 2026-08-29 | 未发布 | behavior | V2 语义、RTL、0 值和验证加固 | 现有 props 与根选择规则保持兼容 |
+| 日期       | 版本   | 类型         | 内容                                             | 迁移说明                        |
+| ---------- | ------ | ------------ | ------------------------------------------------ | ------------------------------- |
+| 2026-08-29 | 未发布 | behavior     | V2 语义、RTL、0 值和验证加固                     | 现有 props 与根选择规则保持兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 list/原生节点/hydration 证据 | 无                              |

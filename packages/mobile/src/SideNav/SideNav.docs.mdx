@@ -118,10 +118,10 @@ rail O(items)；默认 panels 也 O(items)，destroyInactive 降低 DOM 但丢�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3471 B / 32768 B 预算，组合 Brotli 3071 B；共享样式由应用单独导入一次。
-- SSR/hydration: `SideNav.ssr.test.tsx`；hydration 专测待补
+- SSR/hydration: `SideNav.ssr.test.tsx`；隔离 Next 16 hydration 后 vertical tabs、tabpanel 与状态输出保持一致，0 hydration/runtime error
 - RTL: LongScrollableRTL Story
 - Reduced motion: 无动画，不适用
-- Mobile Chromium/WebKit E2E: 待补长列表滚动
+- Mobile Chromium/WebKit E2E: `navigates indexed sections and vertical category panels` 在两种引擎断言 vertical tablist、ArrowDown 自动激活、tabpanel 关联、disabled 与业务输出；超长 rail 仍待专项
 - Chromatic Light/Dark: 待建立
 - Real device: 待补
 
@@ -129,14 +129,15 @@ rail O(items)；默认 panels 也 O(items)，destroyInactive 降低 DOM 但丢�
 
 ### 待优化
 
-补双引擎、真机长 rail 与路由 adapter 示例；混合 content 开发期提示。
+补真机长 rail 与路由 adapter 示例、混合 content 开发期提示；基础双引擎键盘/面板路径已完成。
 
 ### 已完成
 
-修复无效受控值、动态 identity、active 入视；补 badge label、RTL、forced-colors、SSR 与长内容。
+修复无效受控值、动态 identity、active 入视；补 badge label、RTL、forced-colors、SSR、长内容与隔离 Next H5 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                | 迁移说明                      |
-| ---------- | ------ | -------- | ----------------------------------- | ----------------------------- |
-| 2026-08-29 | 未发布 | behavior | V2 APG、动态 items、滚动与 RTL 加固 | API 兼容；新增可选 badgeLabel |
+| 日期       | 版本   | 类型         | 内容                                             | 迁移说明                      |
+| ---------- | ------ | ------------ | ------------------------------------------------ | ----------------------------- |
+| 2026-08-29 | 未发布 | behavior     | V2 APG、动态 items、滚动与 RTL 加固              | API 兼容；新增可选 badgeLabel |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 vertical-tabs/hydration 证据 | 无                            |

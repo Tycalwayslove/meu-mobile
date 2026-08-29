@@ -122,7 +122,7 @@ tab O(items)；默认 panel 也为 O(items)，lazy 可延迟昂贵内容但不�
 - SSR/hydration: `Tabs.ssr.test.tsx`
 - RTL: Unit + Story
 - Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `connects tab panels, primary navigation and read-only progress semantics` 在两种引擎断言 tablist/tabpanel 关联、ArrowRight 焦点与自动激活、disabled 跳过
 - Chromatic Light/Dark: 发布后建立
 - Real device: 待补
 
@@ -130,14 +130,15 @@ tab O(items)；默认 panel 也为 O(items)，lazy 可延迟昂贵内容但不�
 
 ### 待优化
 
-补双引擎、真机读屏与大量 tabs 滚动证据。
+补真机读屏与大量 tabs 横向滚动证据；基础双引擎键盘/面板路径已完成。
 
 ### 已完成
 
-冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约。
+冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约；补隔离 Next H5 键盘、面板和 hydration 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型    | 内容                                   | 迁移说明         |
-| ---------- | ------ | ------- | -------------------------------------- | ---------------- |
-| 2026-08-29 | 未发布 | feature | lazy retain、RTL 键盘与 scrollIntoView | 默认挂载行为不变 |
+| 日期       | 版本   | 类型         | 内容                                             | 迁移说明         |
+| ---------- | ------ | ------------ | ------------------------------------------------ | ---------------- |
+| 2026-08-29 | 未发布 | feature      | lazy retain、RTL 键盘与 scrollIntoView           | 默认挂载行为不变 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 tabs/keyboard/hydration 证据 | 无               |

@@ -178,13 +178,13 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3949 B / 32768 B 预算，组合 Brotli 3508 B；共享样式由应用单独导入一次。
 - RTL / reduced motion / forced colors: 实现已落地，专属快照矩阵待补。
-- 移动 Chromium/WebKit E2E、VoiceOver/TalkBack 真机：待补。
+- 移动 Chromium/WebKit E2E：`uses native navigation actions, radio segments and read-only page dots` 验证原生 radio 选择与受控输出；表单场景验证 adapter 提交，双引擎通过。VoiceOver/TalkBack 真机待补。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 接入 Light/Dark/forced-colors/200% 字号截图和移动 Chromium/WebKit E2E。
+- 接入 Light/Dark/forced-colors/200% 字号专属截图；移动 Chromium/WebKit 选择与表单路径已完成。
 - 在 iOS VoiceOver 与 Android TalkBack 真机确认 group label、disabled selected 和 required 空值公告。
 - 收集业务中的 2–5 项长翻译，验证截断策略是否需要产品层改用 Selector。
 
@@ -194,13 +194,15 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 - 修复 Field idref/required 合并、native FormData/constraint validation、外部 form 与 reset。
 - 明确使用 native radio roving，而非重复实现 keydown/focus 算法。
 - 补齐 44 px 目标、RTL、long content、reduced motion、forced colors、SSR、TSDoc、Story 与 Unit。
+- 在隔离 Next H5 中补原生 radio 选择、表单提交、44px 目标与 hydration 双引擎证据。
 
 ## 维护规则
 
-修改公开类型、默认选择、radio/required 语义、键盘、DOM/data 属性或视觉状态时，必须同步本文件、README、Story、Unit/SSR 与 API 报告。未取得自动化及真机证据前保持 `status: implementation`。
+修改公开类型、默认选择、radio/required 语义、键盘、DOM/data 属性或视觉状态时，必须同步本文件、README、Story、Unit/SSR 与 API 报告。自动化已完成但真机和最终视觉未签字前保持 `status: verification`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                              | 迁移说明                                                                   |
-| ---------- | ------ | -------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固 | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option |
+| 日期       | 版本   | 类型         | 内容                                                              | 迁移说明                                                                   |
+| ---------- | ------ | ------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior     | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固 | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎选择/form/hydration 证据                       | 无                                                                         |

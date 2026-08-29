@@ -119,7 +119,7 @@ O(items)，建议最多五项；无监听、测量和第三方运行时。
 - SSR/hydration: `TabBar.ssr.test.tsx`
 - RTL: 原生 flex 继承，视觉待补
 - Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `connects tab panels, primary navigation and read-only progress semantics` 在两种引擎断言 navigation、原生 link、button 当前态、badge 名称、disabled 与 44px 目标
 - Chromatic Light/Dark: 发布后建立
 - Real device: 待补
 
@@ -127,14 +127,15 @@ O(items)，建议最多五项；无监听、测量和第三方运行时。
 
 ### 待优化
 
-补 Next 路由示例、双引擎、横屏真机与读屏证据。
+补 Next 路由示例、横屏真机与读屏证据；基础双引擎 link/button/current 路径已完成。
 
 ### 已完成
 
-冻结 link/button、aria-current、Badge、安全区、44px、横屏与 forced-colors 契约。
+冻结 link/button、aria-current、Badge、安全区、44px、横屏与 forced-colors 契约；补隔离 Next H5/hydration 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型    | 内容                              | 迁移说明           |
-| ---------- | ------ | ------- | --------------------------------- | ------------------ |
-| 2026-08-29 | 未发布 | feature | badgeLabel/ariaLabel 与横屏高对比 | 新属性可选，无破坏 |
+| 日期       | 版本   | 类型         | 内容                                        | 迁移说明           |
+| ---------- | ------ | ------------ | ------------------------------------------- | ------------------ |
+| 2026-08-29 | 未发布 | feature      | badgeLabel/ariaLabel 与横屏高对比           | 新属性可选，无破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/current/target 证据 | 无                 |

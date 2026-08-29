@@ -118,10 +118,10 @@ Safe Area 使用带 fallback 的 env；不支持时按 0px。旧内核不支持 
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3282 B / 32768 B 预算，组合 Brotli 2891 B；共享样式由应用单独导入一次。
-- SSR/hydration: `NavBar.ssr.test.tsx`；hydration 专测待补
+- SSR/hydration: `NavBar.ssr.test.tsx`；隔离 Next 16 App Router hydration 后返回按钮、标题与业务输出保持可用，0 hydration/runtime error
 - RTL: LongTitleRTL Story
 - Reduced motion: 无动画，不适用
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `uses native navigation actions, radio segments and read-only page dots` 在两种引擎激活原生返回按钮并验证业务输出
 - Chromatic Light/Dark: 待建立
 - Real device: 待补 Safe Area 真机
 
@@ -129,14 +129,15 @@ Safe Area 使用带 fallback 的 env；不支持时按 0px。旧内核不支持 
 
 ### 待优化
 
-补真机安全区、嵌套 landmark、长标题视觉和路由适配示例。
+补真机安全区、嵌套 landmark、长标题视觉和路由适配示例；基础返回路径已进入双引擎门禁。
 
 ### 已完成
 
-新增显式 safeArea，固化返回取消、标题层级边界、RTL、forced-colors 与 SSR。
+新增显式 safeArea，固化返回取消、标题层级边界、RTL、forced-colors 与 SSR；补隔离 Next H5 返回与 hydration 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型    | 内容                                  | 迁移说明                   |
-| ---------- | ------ | ------- | ------------------------------------- | -------------------------- |
-| 2026-08-29 | 未发布 | feature | 增加 safeArea 并完成 V2 语义/RTL 加固 | 默认 false，不改变现有布局 |
+| 日期       | 版本   | 类型         | 内容                                   | 迁移说明                   |
+| ---------- | ------ | ------------ | -------------------------------------- | -------------------------- |
+| 2026-08-29 | 未发布 | feature      | 增加 safeArea 并完成 V2 语义/RTL 加固  | 默认 false，不改变现有布局 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎返回/hydration 证据 | 无                         |
