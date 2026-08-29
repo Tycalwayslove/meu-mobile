@@ -145,7 +145,7 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。激活�
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记与 hydration 后移动
 - RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
 - Reduced motion: 不适用，无动画
-- Mobile Chromium/WebKit E2E: 待补
+- Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 hydration 后内容位于调用方 custom container；Popup 等浮层套件继续覆盖 body Portal、焦点与滚动锁
 - Chromatic Light/Dark: 已有 CustomContainer Story，更新基线待 CI 发布
 - Real device: 待补
 
@@ -155,7 +155,7 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。激活�
 
 - 增加真实 iframe/跨 Document 样式、焦点与事件验证。
 - 与 Popup/Dialog 批次继续验证跨 iframe Portal、退出动画和真实读屏浏览模式。
-- 补移动 Chromium/WebKit E2E 和真实 iOS/Android WebView 证据。
+- 完成 custom container 移动 Chromium/WebKit E2E；真实 iOS/Android WebView 仍待验证。
 
 ### 已完成
 
@@ -164,10 +164,12 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。激活�
 - 增加目标切换、Fragment、SSR/hydration 与卸载清理单测。
 - 补齐公开 Props、容器类型 TSDoc 和 release tag。
 - focus trap 补齐正 tabindex/radio/disabled fieldset 过滤、嵌套栈顶背景隔离、自定义容器与关联非模态分支。
+- 在隔离 Next H5 中补 custom container 目标迁移与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                            | 迁移说明                                       |
-| ---------- | ------ | --------- | ----------------------------------------------- | ---------------------------------------------- |
-| 2026-08-28 | 0.1.0  | behavior  | SSR 改为原地输出；扩展跨文档容器类型与清理证据  | 依赖 SSR 空字符串的调用方需在业务层条件渲染    |
-| 2026-08-29 | 未发布 | hardening | 原生 tabbable 顺序与 modal background isolation | API 兼容；模态外背景从可访问树移除并可嵌套恢复 |
+| 日期       | 版本   | 类型         | 内容                                                | 迁移说明                                       |
+| ---------- | ------ | ------------ | --------------------------------------------------- | ---------------------------------------------- |
+| 2026-08-28 | 0.1.0  | behavior     | SSR 改为原地输出；扩展跨文档容器类型与清理证据      | 依赖 SSR 空字符串的调用方需在业务层条件渲染    |
+| 2026-08-29 | 未发布 | hardening    | 原生 tabbable 顺序与 modal background isolation     | API 兼容；模态外背景从可访问树移除并可嵌套恢复 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 custom-container/hydration 证据 | 无                                             |

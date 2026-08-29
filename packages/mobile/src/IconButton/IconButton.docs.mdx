@@ -131,10 +131,10 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1918 B / 32768 B 预算，组合 Brotli 1693 B；共享样式由应用单独导入一次。
-- SSR/hydration: 结构无浏览器读取，待增加独立证明
+- SSR/hydration: 隔离 Next 16 App Router 首屏输出可访问名称，hydration 后 Enter 操作成功且 0 hydration/runtime error
 - RTL: 对称控件，方向性图标待矩阵验证
 - Reduced motion: CSS 静态降级已实现，待浏览器证明
-- Mobile Chromium/WebKit E2E: 通用 44px 目标覆盖，待增加 IconButton 专属断言
+- Mobile Chromium/WebKit E2E: 专属场景在两种引擎断言可访问名称、Enter 激活、业务输出与 44×44px 最小目标
 - Chromatic Light/Dark: 现有 Story 可生成基线，待显式矩阵
 - Real device: 待补
 
@@ -142,7 +142,7 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ### 待优化
 
-- 增加 SSR/hydration、RTL 方向图标、高对比与 200% 字号证据。
+- 继续补 RTL 方向图标、高对比与 200% 字号专属证据；SSR/hydration 与基础键盘路径已完成。
 - 在真机读屏验证 labelledby、toggle pressed 和 loading 状态公告策略。
 - Figma 暂缺独立 IconButton node，设计补齐后更新 frontmatter。
 
@@ -152,9 +152,11 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 - 冻结 44px 触控、pressed 状态、loading 锁与 reduced-motion 静态降级。
 - 完成 title 级 Story play 门禁与本地 Light/Dark axe 扫描。
 - 补齐公开 API TSDoc、单测、Story 与永久留存文档。
+- 在隔离 Next H5 中补 Enter 激活、44px 目标与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型           | 内容                                                     | 迁移说明                     |
-| ---------- | ----- | -------------- | -------------------------------------------------------- | ---------------------------- |
-| 2026-08-28 | 0.1.0 | implementation | 增加 labelledby、pressed、装饰图标与 reduced-motion 契约 | 现有 aria-label 用法无需迁移 |
+| 日期       | 版本   | 类型           | 内容                                                     | 迁移说明                     |
+| ---------- | ------ | -------------- | -------------------------------------------------------- | ---------------------------- |
+| 2026-08-28 | 0.1.0  | implementation | 增加 labelledby、pressed、装饰图标与 reduced-motion 契约 | 现有 aria-label 用法无需迁移 |
+| 2026-08-29 | 未发布 | verification   | 增加 Next H5 双引擎键盘、目标尺寸与 hydration 证据       | 无                           |

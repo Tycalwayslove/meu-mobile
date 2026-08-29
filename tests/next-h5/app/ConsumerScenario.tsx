@@ -40,11 +40,13 @@ import {
   ConfigProvider,
   Dialog,
   DialogProvider,
+  Divider,
   Ellipsis,
   Empty,
   FloatingPanel,
   Image,
   ImageViewer,
+  IconButton,
   IndexList,
   InfiniteList,
   List,
@@ -57,10 +59,12 @@ import {
   Popup,
   Radio,
   Result,
+  SafeArea,
   SearchField,
   SegmentedControl,
   SideNav,
   Skeleton,
+  Space,
   Steps,
   SwipeActions,
   TabBar,
@@ -72,6 +76,7 @@ import {
   useDialog,
   useToast
 } from "@meu/mobile";
+import { Portal, VisuallyHidden } from "@meu/primitives-react";
 import type { NumberKeyboardInputDetails, VirtualListRange, VirtualListRef } from "@meu/mobile";
 import { useRef, useState, useSyncExternalStore } from "react";
 import { z } from "zod";
@@ -270,6 +275,7 @@ export function ConsumerScenario() {
     getServerHydrationSnapshot
   );
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [foundationMessage, setFoundationMessage] = useState("等待基础组件操作");
   const [savedName, setSavedName] = useState("");
   const [savedSettings, setSavedSettings] = useState("");
   const [savedAdvanced, setSavedAdvanced] = useState("");
@@ -318,6 +324,7 @@ export function ConsumerScenario() {
   const actionMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const imageViewerTriggerRef = useRef<HTMLButtonElement>(null);
   const virtualListRef = useRef<VirtualListRef>(null);
+  const portalTargetRef = useRef<HTMLDivElement>(null);
   const form = useMeuForm<FormValues>({
     schema,
     defaultValues: {
@@ -364,6 +371,35 @@ export function ConsumerScenario() {
             切换主题
           </Button>
         </div>
+
+        <section className="integration-foundations" aria-label="基础布局与原语">
+          <VisuallyHidden id="foundation-status-label">基础布局状态</VisuallyHidden>
+          <Divider align="start">基础布局</Divider>
+          <Space block gap={3} wrap>
+            <Button
+              size="small"
+              variant="outline"
+              tone="neutral"
+              onClick={() => setFoundationMessage("普通按钮已执行")}
+            >
+              普通操作
+            </Button>
+            <IconButton
+              aria-label="刷新基础组件"
+              tone="accent"
+              variant="outline"
+              onClick={() => setFoundationMessage("图标按钮已执行")}
+            >
+              <MeuIconSearch size={20} />
+            </IconButton>
+          </Space>
+          <output aria-labelledby="foundation-status-label">{foundationMessage}</output>
+          <div ref={portalTargetRef} data-testid="foundation-portal-target" />
+          <Portal container={() => portalTargetRef.current}>
+            <span data-testid="foundation-portal-content">自定义容器 Portal 内容</span>
+          </Portal>
+          <SafeArea data-testid="foundation-safe-area" fallback={12} position="bottom" />
+        </section>
 
         <div className="integration-search">
           <SearchField

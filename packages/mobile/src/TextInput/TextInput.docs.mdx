@@ -127,10 +127,10 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3634 B / 32768 B 预算，组合 Brotli 3206 B；共享样式由应用单独导入一次。
-- SSR/hydration: 待补组件级证明
+- SSR/hydration: 隔离 Next 16 App Router 首屏渲染 Field-aware input，hydration 后 clear、错误修正与提交成功且 0 hydration/runtime error
 - RTL: 待补
 - Reduced motion: 不适用，待静态验证
-- Mobile Chromium/WebKit E2E: 有通用表单路径，待专属 IME/autofill 真机记录
+- Mobile Chromium/WebKit E2E: 两种引擎断言 Zod invalid、Field 归属、受控 fill、clear 后值与焦点恢复、修正后提交；IME/autofill/password 仍待专项与真机
 - Chromatic Light/Dark: 有视觉快照，待矩阵化
 - Real device: 待补
 
@@ -139,16 +139,18 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 ### 待优化
 
 - 继续验证 IME、autofill、password、selection 与 native form reset。
-- 补齐 TSDoc、Form adapter、SSR、RTL 和真机证据。
+- 继续补 RTL、IME、autofill/password 与真机证据；Form adapter、SSR/hydration 和基础移动双引擎路径已完成。
 
 ### 已完成
 
 - V1 已使用原生 input、Field 关联、ref 和错误语义。
 - V2 已冻结 clear 事件顺序，保留 `aria-invalid` token，并补齐受控 clear、locale、readOnly、逻辑定位和 Props TSDoc。
+- 在隔离 Next H5 中补 Field invalid、clear/focus、提交与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                           | 迁移说明 |
-| ---------- | ------ | -------- | ------------------------------ | -------- |
-| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线           | 无       |
-| 2026-08-29 | 未发布 | behavior | 保留 `aria-invalid` token 语义 | 无       |
+| 日期       | 版本   | 类型         | 内容                                                    | 迁移说明 |
+| ---------- | ------ | ------------ | ------------------------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                    | 无       |
+| 2026-08-29 | 未发布 | behavior     | 保留 `aria-invalid` token 语义                          | 无       |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 clear/invalid/submit/hydration 证据 | 无       |

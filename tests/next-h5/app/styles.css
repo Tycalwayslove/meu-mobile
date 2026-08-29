@@ -79,6 +79,23 @@ textarea {
   margin-bottom: 24px;
 }
 
+.integration-foundations {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.integration-foundations output,
+.integration-foundations [data-testid="foundation-portal-target"] {
+  min-height: 16px;
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
 .integration-form > * + * {
   margin-top: 20px;
 }

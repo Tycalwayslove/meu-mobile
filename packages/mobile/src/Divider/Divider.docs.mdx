@@ -134,10 +134,10 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1764 B / 32768 B 预算，组合 Brotli 1560 B；共享样式由应用单独导入一次。
-- SSR/hydration: 实现无环境分支，尚无独立 hydration 测试
+- SSR/hydration: 隔离 Next 16 App Router 首屏渲染并 hydration 后直接断言 separator 名称、方向和逻辑起始对齐，0 hydration/runtime error
 - RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
 - Reduced motion: 不适用；没有内建动效
-- Mobile Chromium/WebKit E2E: 待补组件专属断言
+- Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 horizontal separator、内容名称与 `align=start`
 - Chromatic Light/Dark: 默认、文案、对齐、vertical、长文本与 RTL Story 可构建，显式 Light/Dark 快照矩阵待补
 - Real device: 待补
 
@@ -145,7 +145,7 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 
 ### 待优化
 
-- 在 Chromium/WebKit 建立 long content、RTL 和 vertical stretch 的几何断言。
+- 继续补 long content、RTL 和 vertical stretch 的浏览器几何断言；基础 horizontal/start 已进入双引擎门禁。
 - 完成 Windows High Contrast、VoiceOver 与 TalkBack 真机/系统验收记录。
 - 根据真实产品案例决定是否需要 thickness 或 tone；当前不新增推测 API。
 
@@ -154,9 +154,11 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 - 补齐公开 TSDoc、separator 语义、自动文本名称、orientation、逻辑对齐与 vertical 内容边界。
 - 修复数字 0 children 被误判为空，长文案允许收缩和断行。
 - 增加 forced-colors 系统色降级以及 vertical、长文案、RTL Story。
+- 在隔离 Next H5 中补 separator 名称、方向、对齐与 hydration 断言。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型      | 内容                                     | 迁移说明 |
-| ---------- | ----- | --------- | ---------------------------------------- | -------- |
-| 2026-08-28 | 0.1.0 | hardening | 完善语义、长文案、高对比、RTL 与测试证据 | 无       |
+| 日期       | 版本   | 类型         | 内容                                         | 迁移说明 |
+| ---------- | ------ | ------------ | -------------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0  | hardening    | 完善语义、长文案、高对比、RTL 与测试证据     | 无       |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 separator/hydration 证据 | 无       |

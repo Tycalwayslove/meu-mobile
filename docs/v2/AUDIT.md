@@ -132,7 +132,7 @@ V2 采用以下事实源：
 - 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
 - 官网生产构建已通过 68 个组件页 × Light/Dark 的本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景。
 - `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 22,670 B / 32 KiB，逐组件结果已同步到留存文档。
-- 隔离 Next H5：完整套件在移动 Chromium/WebKit 中 84/84 通过，每条用例均断言 0 `pageerror`、0 `console.error`；8 个初始 open Portal/测量/手势 hydration 案例在两种引擎均通过。
+- 隔离 Next H5：完整套件在移动 Chromium/WebKit 中 86/86 通过，每条用例均断言 0 `pageerror`、0 `console.error`；新增基础布局、IconButton、自定义 Portal、VisuallyHidden 与真实 Field/TextInput/TextArea 断言，8 个初始 open Portal/测量/手势 hydration 案例在两种引擎均通过。
 - 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 240 次 pointermove 均在仓库预算内，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 202 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 

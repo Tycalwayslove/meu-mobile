@@ -17,7 +17,7 @@
 
 ## 当前可复查状态
 
-- 移动 Chromium/WebKit 隔离 Next H5：84/84 通过，逐用例断言 0 `pageerror`、0 `console.error`。
+- 移动 Chromium/WebKit 隔离 Next H5：86/86 通过，逐用例断言 0 `pageerror`、0 `console.error`。
 - Storybook：374 个 Story × 7 场景，共 2,618 个组合通过。
 - 官网：68 个组件页 × Light/Dark，共 136 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
 - 客户端静态兼容扫描：202 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。

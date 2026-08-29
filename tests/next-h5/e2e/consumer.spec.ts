@@ -28,6 +28,42 @@ test("renders the isolated Next consumer without hydration errors", async ({ pag
   expect(runtimeErrorsByPage.get(page)).toEqual([]);
 });
 
+test("composes layout, icon action, custom portal and hidden accessible text", async ({ page }) => {
+  const section = page.getByRole("region", { name: "基础布局与原语" });
+  const divider = section.locator('[data-meu-component="divider"]');
+  await expect(divider).toHaveAttribute("role", "separator");
+  await expect(divider).toHaveAttribute("aria-label", "基础布局");
+  await expect(divider).toHaveAttribute("aria-orientation", "horizontal");
+  await expect(divider).toHaveAttribute("data-align", "start");
+
+  const space = section.locator('[data-meu-component="space"]');
+  await expect(space).toHaveAttribute("data-gap", "3");
+  await expect(space).toHaveAttribute("data-wrap", "true");
+
+  const iconAction = section.getByRole("button", { name: "刷新基础组件" });
+  const iconActionBox = await iconAction.boundingBox();
+  expect(iconActionBox).not.toBeNull();
+  expect(iconActionBox ? iconActionBox.width : 0).toBeGreaterThanOrEqual(44);
+  expect(iconActionBox ? iconActionBox.height : 0).toBeGreaterThanOrEqual(44);
+  await iconAction.focus();
+  await iconAction.press("Enter");
+  await expect(section.getByText("图标按钮已执行")).toBeVisible();
+
+  const portalTarget = section.getByTestId("foundation-portal-target");
+  await expect(portalTarget.getByTestId("foundation-portal-content")).toHaveText(
+    "自定义容器 Portal 内容"
+  );
+
+  const hiddenLabel = page.locator("#foundation-status-label");
+  await expect(hiddenLabel).toBeAttached();
+  await expect(hiddenLabel).toHaveCSS("position", "absolute");
+  await expect(hiddenLabel).toHaveCSS("width", "1px");
+
+  const safeArea = section.getByTestId("foundation-safe-area");
+  await expect(safeArea).toHaveAttribute("data-position", "bottom");
+  await expect(safeArea).toHaveAttribute("aria-hidden", "true");
+});
+
 test("has no WCAG A/AA violations in light and dark themes", async ({ page }) => {
   await page.addScriptTag({ content: axe.source });
 
@@ -110,18 +146,24 @@ test("navigates indexed sections and vertical category panels", async ({ page })
 
 test("binds validation, clear action and successful submission", async ({ page }) => {
   const input = page.getByLabel("店铺名称");
+  const textarea = page.getByLabel("店铺介绍");
   await page.getByRole("button", { name: "保存店铺" }).click();
 
   await expect(page.getByText("店铺名称至少输入 2 个字符")).toBeVisible();
   await expect(page.getByText("店铺介绍至少输入 6 个字符")).toBeVisible();
   await expect(input).toHaveAttribute("aria-invalid", "true");
+  await expect(textarea).toHaveAttribute("aria-invalid", "true");
+  await expect(input).toHaveAttribute("data-meu-component", "text-input");
+  await expect(textarea).toHaveAttribute("data-meu-component", "text-area");
+  await expect(input.locator('xpath=ancestor::*[@data-meu-component="field"]')).toHaveCount(1);
+  await expect(textarea.locator('xpath=ancestor::*[@data-meu-component="field"]')).toHaveCount(1);
 
   await input.fill("喵呜体验店");
   await page.getByRole("button", { name: "清除输入" }).click();
   await expect(input).toHaveValue("");
 
   await input.fill("喵呜体验店");
-  await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
+  await textarea.fill("专注宠物生活方式的体验店");
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(page.getByText("已保存：喵呜体验店")).toBeVisible();
 });

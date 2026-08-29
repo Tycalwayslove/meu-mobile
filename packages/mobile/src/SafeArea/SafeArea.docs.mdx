@@ -130,10 +130,10 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1723 B / 32768 B 预算，组合 Brotli 1521 B；共享样式由应用单独导入一次。
-- SSR/hydration: SSR 单测覆盖稳定标记；独立 hydration 断言待补
+- SSR/hydration: SSR 单测覆盖稳定标记；隔离 Next 16 App Router hydration 后保持 bottom、aria-hidden 与 fallback 输入，0 hydration/runtime error
 - RTL: 文档明确物理边语义，浏览器视觉证明待补
 - Reduced motion: 不适用，无动画
-- Mobile Chromium/WebKit E2E: 待补设备 emulation 与 viewport-fit 页面
+- Mobile Chromium/WebKit E2E: 基础消费场景在两种引擎断言 bottom 物理边与隐藏 spacer；真实 `env()`、viewport-fit、旋转和软键盘仍待设备级验证
 - Chromatic Light/Dark: Bottom/Top/Landscape Stories 更新基线待 CI 发布
 - Real device: 刘海 iPhone/iPad、Android 打孔屏、旋转和键盘场景待补
 
@@ -151,9 +151,11 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 - 增加显式 CSS fallback 与 number/string API，并明确不是最小 inset。
 - 明确组件不自动去重安全区，避免对合法的多边组合施加隐式布局规则。
 - 补 Props/release tag、SSR 与 targeted unit evidence。
+- 在隔离 Next H5 中补 bottom spacer、隐藏语义与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型    | 内容                                        | 迁移说明                                           |
-| ---------- | ----- | ------- | ------------------------------------------- | -------------------------------------------------- |
-| 2026-08-28 | 0.1.0 | feature | 新增左右安全区与 fallback，建立 V2 留存文档 | 原有 top/bottom 用法保持兼容；重复消费由调用方排查 |
+| 日期       | 版本   | 类型         | 内容                                        | 迁移说明                                           |
+| ---------- | ------ | ------------ | ------------------------------------------- | -------------------------------------------------- |
+| 2026-08-28 | 0.1.0  | feature      | 新增左右安全区与 fallback，建立 V2 留存文档 | 原有 top/bottom 用法保持兼容；重复消费由调用方排查 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 bottom/hydration 证据   | 无                                                 |

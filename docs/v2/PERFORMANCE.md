@@ -53,7 +53,7 @@ pnpm bundle:size:check
 | TreeSelect 搜索       |      1,500 个平铺节点 | 精确筛选并完成两帧提交 ≤500ms                                                             |
 | SwipeActions 高频移动 |   单行、右侧双 action | 连续分发 240 次 pointermove 加 settle 的同步主线程成本 ≤250ms，并正确进入 right open 状态 |
 
-`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 6/6 通过。完整隔离 Next H5 套件共 84/84 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
+`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 6/6 通过。完整隔离 Next H5 套件共 86/86 通过，每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
 
 ## 仍需独立证明
 
