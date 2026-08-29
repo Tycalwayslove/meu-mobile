@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "428:4"
@@ -150,7 +150,7 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。只有�
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记、SSR 不执行 resolver、hydration 后移动和零 recoverable error
 - RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
 - Reduced motion: 不适用，无动画
-- Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 hydration 后内容位于调用方 custom container；Popup 等浮层套件继续覆盖 body Portal、焦点与滚动锁
+- Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 hydration 后内容位于调用方 custom container；独立 `overlay-lifecycle.spec.ts` 通过 Popup 组合验证打开时切换目标不会留下重复 Portal children，退出中断后旧 presence timer 不会误删重开的内容，并保持单一焦点圈定与 body lock
 - Chromatic Light/Dark: 已有 CustomContainer Story，更新基线待 CI 发布
 - Real device: 待补
 

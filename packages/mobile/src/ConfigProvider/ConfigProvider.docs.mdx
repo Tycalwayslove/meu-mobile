@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "428:2"
@@ -29,6 +29,7 @@ source: packages/mobile/src/ConfigProvider
 - 根级默认值为 `zh-CN`、`ltr`、`system` theme、`system` motion 和 `document.body` Portal 策略。
 - 嵌套 Provider 对未传入字段执行逐字段继承；显式 `portalContainer={null}` 不会被当作缺省值。
 - DOM 边界同步输出 `lang`、`dir`、`data-meu-theme` 与 `data-meu-motion`，便于语义继承和 CSS Token 生效。
+- 统一 Overlay Portal boundary 除复制上述属性与 motion Token 外，也复制主题边界 class，因此移出 Provider DOM 后的原生控件仍保留 `color-scheme`。
 - `system` theme 和 motion 都通过 CSS media query 解析；渲染期间不读取 `window`、`document`、`matchMedia` 或本地存储。
 - `portalContainer` 函数仅作为惰性配置保存，ConfigProvider 渲染和 SSR 阶段不会调用它。
 - light/dark/system 边界同步声明 `color-scheme`，原生表单控件可与 Meu 主题匹配；旧 WebView 不支持时安全忽略。
@@ -182,7 +183,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
 - Reduced motion: 单元测试覆盖嵌套策略，CSS media/reduced class 已实现；真实浏览器 computed style 待 E2E。
-- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 Provider 初始 `theme="light"` 边界、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规；独立 `theme="system"` / `motion="system"` 边界会随模拟系统 Light/Dark 切换 ink/canvas Token，并在 `prefers-reduced-motion: reduce` 下把 enter duration 从 180ms 解析为 0ms。所有路径 hydration 后保持 0 `pageerror` / `console.error`；嵌套 Portal boundary 仍待专测。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 Provider 初始 `theme="light"` 边界、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规；独立 `theme="system"` / `motion="system"` 边界会随模拟系统 Light/Dark 切换 ink/canvas Token，并在 `prefers-reduced-motion: reduce` 下把 enter duration 从 180ms 解析为 0ms。隔离的 `overlay-lifecycle.spec.ts` 进一步覆盖嵌套 ConfigProvider/ThemeProvider 下 Popup Portal 的 locale、dir、theme、motion、颜色与时长 Token 及 `color-scheme`；所有路径 hydration 后保持 0 `pageerror` / `console.error`。
 - Chromatic Light/Dark: Story 可生成快照；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView 与 iOS Safari。
 
@@ -191,7 +192,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 ### 待优化
 
 - 完成其余 Overlay 在 body Portal 根节点复用统一 locale、dir、theme 与 motion boundary。
-- 补移动 Chromium/WebKit 的嵌套 Portal boundary 专测，并扩展更多语义色 Token 对照。
+- 扩展嵌套 Portal boundary 的更多语义色 Token 对照。
 - 补强制色彩、高对比、200% 字号及 Android/iOS 真机证据。
 - 评估跨 Document/iframe Portal；在有真实业务需求前不扩展现有容器类型。
 
@@ -206,6 +207,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - 为真实 Provider DOM 边界增加 React 19 `ref` 与 callback cleanup 证据。
 - 为公开类型、Props、函数和 ThemeProvider alias 补充 TSDoc/release tag；新增 Context 字段在公开类型中保持 optional，以兼容已有 `MeuConfig` 对象字面量，运行时始终解析为具体值。
 - Next H5 production consumer 已在 Chromium/WebKit 验证固定 light/dark 受控切换、system 主题/动效媒体查询、实际 Token 计算值、全页无障碍与无运行时错误；该证据不替代真机验收。
+- 新增隔离 Next H5 嵌套 Provider → Popup Portal 生命周期矩阵，并让统一 Portal boundary 保留主题 `color-scheme` class。
 
 ## 变更记录
 
@@ -217,3 +219,4 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 | 2026-08-28 | 未发布 | docs         | 建立 ConfigProvider V2 留存文档与测试基线                                          | 无                                         |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定/system 主题、motion、computed Token、axe 与 hydration 证据 | 无                                         |
 | 2026-08-29 | 未发布 | hardening    | 增加原生控件 `color-scheme` 与 React 19 DOM ref                                    | API 仅新增可选 ref，无迁移                 |
+| 2026-08-30 | 未发布 | hardening    | Portal 配置边界同步主题 class，并增加嵌套 Provider 浏览器生命周期矩阵              | 无                                         |

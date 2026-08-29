@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "428:3"
@@ -142,7 +142,7 @@ ThemeProvider 自身不执行主题过渡，避免大面积颜色动画、首屏
 
 - 不内置 localStorage/cookie 持久化、跨标签页同步或系统主题 JavaScript 事件。
 - system 在不支持 `prefers-color-scheme` 的环境中降级为浅色。
-- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；核心 Mask/Dialog/Popup/BottomSheet/Popover 已通过统一 boundary 复制 `data-meu-theme`，其余 Overlay 按对应批次继续审计。
+- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；统一 Overlay boundary 会复制 `data-meu-theme` 与主题 class，使 Token 和 `color-scheme` 一并生效；其余 Overlay 仍按对应批次继续审计。
 - 主题切换没有 transition；这是当前明确行为，不是缺失动画。
 - ThemeProvider 接受完整 ConfigProvider Props，因为它是兼容 alias；当前不通过收窄 Props 制造破坏性变化。
 
@@ -161,7 +161,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 hydration 单测覆盖 system 标记一致和零 recoverable error。
 - RTL: 单元与 Theme-only Story 验证主题覆盖不改变方向。
 - Reduced motion: Provider 不做主题动画；应用自定义过渡仍需独立验证。
-- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接挂载 ThemeProvider alias 的 `theme="system"` / `motion="system"` 边界，模拟系统 Light/Dark 后分别读取 ink/canvas 的实际 computed color，并验证 reduced-motion 将 enter duration 从 180ms 解析为 0ms；外层固定主题仍覆盖 light→dark 受控切换、两种主题下 axe WCAG A/AA 0 违规和 hydration 后 0 `pageerror` / `console.error`。独立固定主题视觉截图仍待最终审批。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接挂载 ThemeProvider alias 的 `theme="system"` / `motion="system"` 边界，模拟系统 Light/Dark 后分别读取 ink/canvas 的实际 computed color，并验证 reduced-motion 将 enter duration 从 180ms 解析为 0ms；隔离的 Overlay 生命周期场景还验证内层 ThemeProvider 省略所有配置时，Portal 继续继承外层固定 dark、en-US、RTL 与 reduced motion，并保留原生 `color-scheme`。独立固定主题视觉截图仍待最终审批。
 - Chromatic Light/Dark: `LightAndDark` 提供双主题快照入口；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView、iOS Safari 及系统主题切换。
 
@@ -178,6 +178,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 
 - 明确 ThemeProvider 是 ConfigProvider 的精确 alias，补充可审查的公开声明与测试。
 - 修复 theme-only 嵌套导致 locale/dir/portal 等配置被重置的问题。
+- 统一 Overlay Portal boundary 同步主题 class，避免移出 Provider DOM 后原生控件回退到错误 `color-scheme`。
 - 保持 system 纯 CSS 解析，SSR/hydration 不访问浏览器环境。
 - 增加 light/dark、system 与嵌套继承 Story。
 - 为固定和 system 主题增加 `color-scheme`，并补原生控件 Story。

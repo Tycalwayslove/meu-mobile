@@ -132,7 +132,7 @@ Provider 只渲染一个 toast；visible、queued 与 exiting 记录合计由 `m
 - Story interaction: `WarningWithAction` 验证 Portal 公告、action 焦点与关闭回调；`ProviderQueue` 验证同 id 替换、单队首和 clear 精确回调。最新本地 `check-storybook-links` 已验证 444 stories、415 个共置 storyIds 与 81/81 个带 play 的 title。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 6890 B / 32768 B 预算；最大单值 `ToastProvider` 为 6797 B / 32768 B 预算，组合 Brotli 6088 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 6919 B / 32768 B 预算；最大单值 `ToastProvider` 为 6825 B / 32768 B 预算，组合 Brotli 6119 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Toast.ssr.test.tsx` 覆盖无浏览器全局时 closed/provider 与 open/config/live/action 输出；`Toast.hydration.test.tsx` 断言 open 首帧原位 hydration 后迁移到 body、配置边界保留且无 React hydration error。隔离 Next 16 的历史证据另覆盖 hydration 后命令式 open Portal、队列切换与清理。
 - RTL/reduced-motion/forced-colors: config 与 CSS 完成，视觉证据待补。
 - Mobile Chromium/WebKit E2E: 重新构建本地 production 站后，`queues accessible Toast messages without trapping focus or scroll` 在两种引擎断言 alert/status、上下位置、FIFO、`maxToasts=2` 的 overflow 拒绝、44px action、业务输出、trigger 焦点保留、无 scroll lock 与 clear；同批 Light/Dark 全页 axe WCAG A/AA 通过。Chromatic/real device 延后到全部组件完成后的统一门禁。

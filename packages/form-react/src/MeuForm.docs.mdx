@@ -33,7 +33,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "446:3770"
@@ -61,7 +61,7 @@ source: packages/form-react/src/MeuForm
 - 重复原生 submit 默认在当前提交 Promise 完成前忽略；拒绝可由 `onSubmitError` 明确接收。
 - 客户端与服务端错误均按所属表单内的 DOM 顺序聚焦首个可用字段；新一批服务端错误默认替换上一批 server error。
 
-当前状态为 V2 `verification`。复杂 Picker、日期、树与上传值的 adapter、可配置 FormData serializer、移动 E2E 和浏览器集成证据已建立；真机输入法与读屏证明尚未完成，因此不能标记为 commercial。
+当前状态为 V2 `verification`。22 个 adapter 的 touched、ref、required 与适用 readOnly 参数化矩阵，以及复杂 Picker、日期、树与上传值的 FormData、移动 E2E 和浏览器集成证据已建立；真机输入法与读屏证明尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -120,6 +120,17 @@ export function StoreForm() {
 - 默认 `noValidate=true`，避免浏览器气泡与 React Hook Form 错误重复。显式设置 `noValidate={false}` 会启用浏览器原生约束阻断。
 - `useMeuForm` 默认 `shouldUnregister=true`，条件卸载字段不会继续进入 RHF values/submit；确需保存分步表单的离屏值时显式传 `shouldUnregister=false`。
 - 原生 `FormData` 只包含当前 DOM 中有 name 且未禁用的 successful controls；readOnly 仍提交，disabled 与已卸载字段省略，同名 hidden controls 通过 `getAll(name)` 保持数组顺序。
+
+### Adapter 商用契约矩阵
+
+| 分类            | Adapter                                                                                    | touched 契约                                                       | RHF ref 目标                                                          | required 契约                                                                                | readOnly 契约                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| native input    | TextInput、TextArea、SearchField、Checkbox、Switch、Stepper、Slider、Rate、PasscodeInput   | 原生输入失焦后 touched                                             | 对应 native input；Slider/Rate 只读态的 hidden input 不用于命令式聚焦 | 9/9 下传原生 required                                                                        | 9/9 支持；冻结修改但保留 successful control/FormData                            |
+| group           | CheckboxGroup、RadioGroup、Selector、SegmentedControl                                      | 仅焦点离开整组后 touched，组内移焦不提前触发                       | CheckboxGroup/RadioGroup 为可聚焦 group 根；其余为底层注册目标        | RadioGroup、Selector、SegmentedControl 下传原生 required；CheckboxGroup 使用可访问“必填”说明 | CheckboxGroup、RadioGroup、Selector 支持；SegmentedControl 未定义 readOnly      |
+| overlay trigger | Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker、TreeSelect、NumberKeyboard | 关闭态 trigger 失焦，或一次已打开交互的确认/取消/关闭后 touched    | 原生 trigger button                                                   | trigger 通过 `aria-describedby` 关联可访问“必填”说明                                         | 仅 TreeSelect 支持，并保留可查看、可提交但不可确认改值；其余六项未定义 readOnly |
+| complex value   | Calendar、ImageUploader                                                                    | Calendar 离开整个复合根后 touched；Uploader 失焦或值变化后 touched | Calendar 的当前日期按钮；Uploader 的真实 file input                   | 复合控件通过 `aria-describedby` 关联可访问“必填”说明                                         | ImageUploader 支持，已完成 URL 仍由 hidden input 提交；Calendar 未定义 readOnly |
+
+矩阵中的“未定义 readOnly”表示公开底层控件没有该状态，adapter 不模拟只读。需要只展示既有值时应使用对应展示组件；需要从提交中排除时使用 `disabled`，两者不要混用。22 个 adapter 都有参数化 touched/ref/required 证据；readOnly 证据只统计真实支持该能力的 14 个 adapter，另外 8 个明确冻结为不支持清单。
 
 ## Props
 
@@ -199,11 +210,11 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx`、`MeuFormValueControls.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序、server error 替换、adapter 显式 error 保留与 readOnly Slider hidden FormData；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交；统一 reset 矩阵还验证重置后的真实控件、原生 FormData 与 RHF 提交快照保持一致。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormCommercialContract.test.tsx`、`MeuFormDisabledContract.test.tsx`、`MeuFormValueControls.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序、server error 替换、adapter 显式 error 保留与 readOnly Slider hidden FormData。商用契约矩阵以 82 个参数化断言固定 22/22 adapter 分类、touched、RHF ref 和 required，以及 14/14 可用 readOnly 的语义与 FormData 保留，并显式列出 8 个未定义 readOnly 的 adapter。Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交；统一 reset 矩阵还验证重置后的真实控件、原生 FormData 与 RHF 提交快照保持一致。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
 - Story interaction: `check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 115288 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38288 B / 65536 B 预算，组合 Brotli 90363 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 115249 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38319 B / 65536 B 预算，组合 Brotli 90260 B；共享样式由应用单独导入一次。
 - SSR/hydration: `MeuForm.ssr.test.tsx` 验证确定性原生 form shell 与 React 19 hydration 0 mismatch；隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，客户端 `reset(nextDefaults)` 后原生 reset 恢复新的客户端默认值而不是旧服务端值
 - RTL: 隔离 Next H5 的 Form hydration 场景在 `dir="rtl"` 下验证输入方向继承、默认值与 reset 行为；adapter 继续依赖底层组件的逻辑属性
 - Reduced motion: Form 无自有动效；同一专项场景在 `motion="reduced"` Provider 下完成 hydration 与交互，Form 不新增 transition/animation
@@ -215,7 +226,6 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 
 ### 待优化
 
-- 冻结所有 overlay/复合 adapter 的 touched、ref 与 disabled/readOnly/required 矩阵。
 - 冻结复杂值 serializer 的后端版本迁移策略，并在真实业务接入时记录服务端解析样例。
 - 补 Chromatic Light/Dark 与真机输入记录。
 
@@ -228,11 +238,13 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 - 新增 server-safe 子路径，移除 React Hook Form wildcard 公共面，排除 Story declarations，并声明 tree-shaking side effects。
 - 服务端错误首次聚焦按 DOM 顺序执行；MeuForm 支持原生 form ref。
 - NumberKeyboard、PasscodeInput、Picker、CascadePicker、DatePicker、DateRangePicker、Calendar、TimePicker、TreeSelect 与 ImageUploader 已进入原生 FormData；复杂集合使用同名重复条目，调用方也可显式序列化为 JSON。
+- 22 个 adapter 已按 native input、group、overlay trigger 与 complex value 分类，参数化冻结 touched、RHF ref、required，以及 14 个适用 adapter 的 readOnly/FormData 契约；其余 8 个明确记录为未定义 readOnly。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型         | 内容                                                                                | 迁移说明                                                                    |
 | ---------- | ------ | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 2026-08-30 | 未发布 | verification | 增加 22 个 adapter 的商用契约参数化矩阵与分类文档                                   | 状态保持 `verification`；真机 IME、VoiceOver 与 TalkBack 仍待验证           |
 | 2026-08-28 | 未发布 | behavior     | disabled、required 与复合控件 touched 契约统一                                      | 全局 disabled 现在会真实禁用 adapter；required 进入原生语义                 |
 | 2026-08-28 | 未发布 | types        | 字段 path 按值类型收紧，支持 Zod transform 输入/输出                                | 误绑定到不兼容字段的代码会出现类型错误                                      |
 | 2026-08-28 | 未发布 | breaking     | 移除 RHF wildcard，服务端辅助函数迁移到 `/server`                                   | 从 `react-hook-form` 直接导入上游 API；改用 `@meu/form-react/server`        |

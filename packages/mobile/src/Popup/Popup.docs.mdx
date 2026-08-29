@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "151:724"
@@ -30,6 +30,7 @@ source: packages/mobile/src/Popup
 - 四方向 Portal 浮层，支持受控/非受控 open、Mask、滚动锁、焦点圈定/恢复、Escape 和关闭按钮。
 - 支持自定义 portal container、forceMount、safe area、initial/return focus ref；打开时切换容器会重新绑定焦点圈定。
 - 用户关闭意图提供 `mask | escape | close-button` reason；程序化 prop 变化不发事件。退出动画结束后卸载，退出中重开会取消卸载。
+- Portal layer 逐项继承最近 ConfigProvider/ThemeProvider 的 locale、dir、theme、motion、语义 Token 与原生 `color-scheme`。
 
 ## 何时使用
 
@@ -126,11 +127,11 @@ Chrome 70 与 iOS 13 可解析实现；不依赖 dvh、CSS logical inset 或 tra
 - Story interaction: `Bottom.play` 验证打开、可访问对话框、关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 9053 B / 32768 B 预算，组合 Brotli 7993 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 9078 B / 32768 B 预算，组合 Brotli 8012 B；共享样式由应用单独导入一次。
 - SSR/hydration: Popup Node SSR 与 JSDOM hydrateRoot 已独立覆盖；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成组合 hydration，0 `pageerror`、0 `console.error`。
 - RTL: RightToLeft Story 覆盖 close button 布局与物理 left position；浏览器矩阵截图仍待重跑。
 - Reduced motion: CSS 1ms 降级已实现；新增 Stories 尚未进入扩展浏览器矩阵。
-- Mobile Chromium/WebKit E2E: 打开、focus trap、Escape/关闭、焦点恢复、scroll lock 与 action 链路通过；嵌套 isolation 已有 Unit，读屏浏览模式留待真机。
+- Mobile Chromium/WebKit E2E: 打开、focus trap、Escape/关闭、焦点恢复、scroll lock 与 action 链路通过；隔离的 `overlay-lifecycle.spec.ts` 覆盖嵌套 Provider Portal 配置/Token、开态迁移容器、mask pointercancel、退出中重开，以及迁移/中断前后仅一个 Popup layer、焦点圈定和 scroll lock；读屏浏览模式留待真机。
 - Chromatic Light/Dark: Figma 与 stories 已有基线，待显式矩阵
 - Real device: 待补
 
@@ -139,11 +140,11 @@ Chrome 70 与 iOS 13 可解析实现；不依赖 dvh、CSS logical inset 或 tra
 ### 待优化
 
 - 补软键盘/visualViewport、安全区旋转、iOS 滚动链、跨 Document/ShadowRoot 与真机读屏证明。
-- 为 mask pointercancel、动态容器和退出中断补移动浏览器 E2E；Unit 已覆盖状态机。
 
 ### 已完成
 
 - 已统一 Portal、Mask、受控模型、焦点、滚动锁、关闭原因与四方向样式；补齐栈顶 modal background isolation、自定义/动态容器、非模态关联分支、退出重开、独立 SSR/hydration 及隔离 Next H5 双引擎焦点/关闭证据。
+- 新增独立 Next H5 Popup 生命周期场景，覆盖嵌套配置、动态 Portal、mask cancel、退出中断与单实例焦点/滚动锁，并修复 Portal theme boundary class 丢失。
 
 ## 变更记录
 
@@ -155,3 +156,4 @@ Chrome 70 与 iOS 13 可解析实现；不依赖 dvh、CSS logical inset 或 tra
 | 2026-08-29 | 未发布 | fix           | 动态 Portal 容器重新绑定焦点圈定；退出重开取消卸载                      | API 兼容                                     |
 | 2026-08-29 | 未发布 | accessibility | 收紧固定 dialog 类型入口，补 RTL 与 forced-colors 边界                  | 移除无效 role/hidden/inert/tabIndex 覆盖类型 |
 | 2026-08-29 | 未发布 | verification  | 增加 SSR/hydration、forceMount、mask cancel 与重开竞态自动化            | 无                                           |
+| 2026-08-30 | 未发布 | hardening     | Portal 保留 `color-scheme`；补嵌套配置与完整生命周期双引擎矩阵          | 无                                           |

@@ -202,6 +202,56 @@ describe("SearchField", () => {
     expect(new FormData(form).get("query")).toBe("保留修改");
   });
 
+  it("observes a late-mounted and replacement external owner without remounting the input", async () => {
+    const { rerender } = render(
+      <>
+        <SearchField
+          aria-label="动态表单搜索"
+          defaultValue="初始搜索"
+          form="dynamic-search-owner"
+          name="query"
+        />
+        <div data-testid="search-owner-slot" />
+      </>
+    );
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "动态表单搜索" });
+    fireEvent.change(input, { target: { value: "第一次修改" } });
+
+    rerender(
+      <>
+        <SearchField
+          aria-label="动态表单搜索"
+          defaultValue="初始搜索"
+          form="dynamic-search-owner"
+          name="query"
+        />
+        <form id="dynamic-search-owner" key="first" />
+      </>
+    );
+    const firstOwner = document.getElementById("dynamic-search-owner") as HTMLFormElement;
+    expect(screen.getByRole("searchbox", { name: "动态表单搜索" })).toBe(input);
+    act(() => firstOwner.reset());
+    await waitFor(() => expect(input.value).toBe("初始搜索"));
+
+    fireEvent.change(input, { target: { value: "第二次修改" } });
+    rerender(
+      <>
+        <SearchField
+          aria-label="动态表单搜索"
+          defaultValue="初始搜索"
+          form="dynamic-search-owner"
+          name="query"
+        />
+        <form id="dynamic-search-owner" key="replacement" />
+      </>
+    );
+    const replacementOwner = document.getElementById("dynamic-search-owner") as HTMLFormElement;
+    expect(replacementOwner).not.toBe(firstOwner);
+    act(() => replacementOwner.reset());
+    await waitFor(() => expect(input.value).toBe("初始搜索"));
+    expect(new FormData(replacementOwner).get("query")).toBe("初始搜索");
+  });
+
   it("keeps the latest controlled value after native form reset", async () => {
     const { container, rerender } = render(
       <form>

@@ -239,25 +239,28 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
 
   useEffect(() => {
     const element = textAreaRef.current;
-    const ownerForm = element ? element.form : null;
-    if (!element || !ownerForm) return undefined;
+    const ownerDocument = element ? element.ownerDocument : null;
+    if (!element || !ownerDocument) return undefined;
+    const timerWindow = ownerDocument.defaultView || window;
 
-    const handleReset = () => {
-      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = window.setTimeout(() => {
+    const handleReset = (event: Event) => {
+      const currentElement = textAreaRef.current;
+      if (!currentElement || event.target !== currentElement.form) return;
+      if (resetTimerRef.current !== null) timerWindow.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = timerWindow.setTimeout(() => {
         resetTimerRef.current = null;
-        const currentElement = textAreaRef.current;
-        if (!currentElement) return;
-        if (controlled) currentElement.value = normalizeValue(value);
-        else setUncontrolledValue(currentElement.value);
-        if (autoSizeRef.current) resizeTextArea(currentElement, autoSizeRef.current);
+        const resetElement = textAreaRef.current;
+        if (!resetElement || event.defaultPrevented) return;
+        if (controlled) resetElement.value = normalizeValue(value);
+        else setUncontrolledValue(resetElement.value);
+        if (autoSizeRef.current) resizeTextArea(resetElement, autoSizeRef.current);
       }, 0);
     };
 
-    ownerForm.addEventListener("reset", handleReset);
+    ownerDocument.addEventListener("reset", handleReset);
     return () => {
-      ownerForm.removeEventListener("reset", handleReset);
-      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      ownerDocument.removeEventListener("reset", handleReset);
+      if (resetTimerRef.current !== null) timerWindow.clearTimeout(resetTimerRef.current);
       resetTimerRef.current = null;
     };
   }, [controlled, form, value]);

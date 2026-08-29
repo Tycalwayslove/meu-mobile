@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "446:3672"
@@ -203,7 +203,7 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 
 ## 性能预算
 
-每个实例仅维护一个非受控 value state 与一个 composition ref，不注册 effect、observer、timer 或全局 listener。每次输入只产生一次本地更新和调用方回调；请求、防抖与竞态取消由业务层负责。
+每个实例维护一个非受控 value state、composition ref 与 reset timer ref。组件在 input 的 `ownerDocument` 注册一个 reset 委托 listener，并核对 `event.target === input.form`；因此外部 owner 可晚挂载或同 id 替换，且无关表单不会触发同步。listener 与 timer 在卸载时清理。每次输入只产生一次本地更新和调用方回调；请求、防抖与竞态取消由业务层负责。
 
 ## 测试证据
 
@@ -211,11 +211,11 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 - Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`NativeFormReset.play` 验证 clear 后恢复默认值及 FormData。RTL Story 提供方向与阿拉伯语检查入口。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5240 B / 32768 B 预算，组合 Brotli 4620 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5263 B / 32768 B 预算，组合 Brotli 4641 B；共享样式由应用单独导入一次。
 - SSR/hydration: `SearchField.ssr.test.tsx` 覆盖 native searchbox、ARIA invalid、loading 与 disabled；`SearchField.hydration.test.tsx` 直接覆盖无 mismatch 及 hydration 后 clear/focus。
 - RTL: 使用 logical CSS，单元测试覆盖显式 `dir` 的 wrapper/input 同步，并有 RTL Story；混合双向和真机软键盘待补。
 - Reduced motion/forced colors: CSS 分别关闭 spinner animation、压缩 transition，并使用系统按钮/边框色；旧版与真机 computed-style 证明待补。
-- Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接输入字符串 `TextArea` 并按 Enter，断言 `onSearch` 结果只显示该实时值；随后点击内置 clear，断言值为空且焦点回到 searchbox。details payload、无 `onSearch` 时的原生 form submit、loading/repeat/cancellation 与 IME 尚无这两个移动项目的专项断言。
+- Mobile Chromium/WebKit E2E: `consumer.spec.ts` 保留基础输入、Enter、clear/focus 路径；独立 `input-contract.spec.ts` 已在 Pixel 5 Chromium 与 iPhone 13 WebKit 覆盖 change/search details source、无 `onSearch` 的原生 form submit、loading、repeat Enter、IME composition、调用方取消旧请求、受控拒绝、晚挂载外部 form 与取消/允许 reset。两引擎共 8/8 输入生命周期场景通过。
 - Chromatic Light/Dark: Story 集已覆盖状态入口，显式双主题审批待补
 - Real device: 待补
 
@@ -223,7 +223,7 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 
 ### 待优化
 
-- 增加强制色、200% 字号、Light/Dark Chromatic，以及移动双浏览器的外部 form/reset、details、loading/repeat/cancellation 专项证据。
+- 增加强制色、200% 字号与最终 Light/Dark 人工视觉审批；移动双浏览器输入生命周期专项已完成。
 - 在真实 iOS 中文输入法、Android Gboard、VoiceOver 与 TalkBack 验证 Enter、loading 公告和 tap-clear 键盘保持。
 - 与 Field V2 契约合并 required、显式 id、description/error 和 composite label 修复后的集成证据。
 - Figma 暂缺可追溯 file key/node ID，设计资产补齐后更新 frontmatter。
@@ -238,6 +238,7 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 - 补齐原生 form reset/取消/外部关联、受控 reset、hydration、loading 焦点移交和 RTL Story 证据。
 - 修复显式 `aria-describedby` 覆盖 Field description/error，改为组合并去重。
 - 标准化 iOS/WKWebView search 外观与 touch 行为，补原生属性/ref、Escape cancel 边界和 Story 证据。
+- 将 reset 改为 ownerDocument 委托，支持外部 owner 晚挂载/替换，并以双引擎验证 details、原生提交、IME、repeat、loading 与业务取消。
 
 ## 变更记录
 
@@ -248,3 +249,4 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 | 2026-08-29 | 未发布 | accessibility  | 保留 ARIA invalid token 并统一 Field/status error 优先级                                        | 无                                                                               |
 | 2026-08-29 | 未发布 | hardening      | 修复 form reset 同步、loading 焦点移交，并补 hydration/RTL/取消边界证据                         | 非受控 reset 现恢复 `defaultValue` 且不触发 change                               |
 | 2026-08-29 | 未发布 | accessibility  | 合并调用方与 Field 的 describedby，并标准化移动 WebView search 外观                             | 若测试依赖显式 describedby 覆盖 Field ID，应改为验证组合集合；Props 无迁移       |
+| 2026-08-30 | 未发布 | hardening      | 外部 form reset 改为 ownerDocument 委托并补完整移动双引擎输入生命周期                           | 无；reset、Enter 与回调签名保持兼容                                              |

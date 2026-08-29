@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "446:3273"
@@ -203,7 +203,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 - 隐藏容器首次 scrollHeight 可能为 0；容器显示并产生宽度变化时会重新测量，若显示过程完全不改变宽度，业务应触发一次 viewport resize 或重新挂载。
 - 调用方在 autoSize 开启时设置 style.height/overflowY 会与组件所有权冲突，不保证结果。
 - 浏览器拼写检查、自动更正、语音输入和密码管理器行为保持原生，不做统一拦截。
-- 外部 form 在 TextArea 挂载后才动态插入且 TextArea 自身未重渲染时，reset listener 可能要到下一次组件更新才关联。
+- 外部 form 可在 TextArea 后挂载或同 id 替换；reset 由 ownerDocument 委托并核对当前 `textarea.form`，被业务 `preventDefault()` 的 reset 不改变值、counter 或 autosize。
 - 当前没有 count formatter、grapheme strategy、手动 resize 命令或 onHeightChange；没有真实跨端契约前不新增 API。
 
 ## 性能预算
@@ -219,11 +219,11 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 - Story interaction: `NativeFormReset` 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4151 B / 32768 B 预算，组合 Brotli 3680 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4220 B / 32768 B 预算，组合 Brotli 3736 B；共享样式由应用单独导入一次。
 - SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；`TextArea.hydration.test.tsx` 直接验证 autosize/count 首屏无 mismatch，hydrate 后 IME 编辑、计数和 change 继续工作；隔离 Next 16 App Router hydration 后 autosize Field、错误关联和受控输入无运行时异常。
 - RTL: 依赖原生 textarea/逻辑布局，待移动浏览器视觉证明。
 - Reduced motion: 无动效，不适用；仍待 E2E 证明无 height transition。
-- Mobile Chromium/WebKit E2E: 两种引擎断言空值 Zod invalid、Field 归属、受控 fill、错误清除与成功提交；软键盘、IME、旋转、paste 与 form reset 仍待专项。
+- Mobile Chromium/WebKit E2E: 基础场景覆盖 Zod invalid、Field 归属、受控 fill、错误清除与成功提交；独立 `input-contract.spec.ts` 在 Pixel 5 Chromium 与 iPhone 13 WebKit 覆盖 late external form、取消/允许 reset、FormData、受控拒绝、带 `insertFromPaste` details 的粘贴，以及容器/viewport 收窄后的 ResizeObserver autosize 重测。两引擎共 8/8 输入生命周期场景通过；真实软键盘旋转与真机 IME 仍待人工。
 - Chromatic Light/Dark: Story 入口已齐，视觉基线待接受。
 - Real device: 待补 iOS Safari/VoiceOver 与 Android Chrome/TalkBack。
 
@@ -232,7 +232,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 ### 待优化
 
 - 继续补 RTL、200% 字号、forced-colors 与 Light/Dark 专属视觉回归；隔离 Next hydration 已完成。
-- 在移动 Chromium/WebKit 覆盖 IME、paste、软键盘 viewport、旋转、受控拒绝和 reset。
+- 在真实设备覆盖软键盘 viewport、旋转与输入法；自动化移动 Chromium/WebKit 的 paste、响应式收窄、受控拒绝和 reset 已完成。
 - 完成 iOS/Android 真机与读屏记录。
 - 评估 grapheme/byte/formatter API；只有服务端和 uni-app 计数算法冻结后才能增加。
 - 评估隐藏容器主动 remeasure 与高度变化事件；不在缺少真实使用方时扩展命令式 API。
@@ -250,6 +250,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 - 修复显式 RTL 时布局根与 counter 对齐不同步；counter 数字采用隔离 LTR 顺序。
 - 标准化移动 WebView 原生外观，并将 small 输入字号提升至 16px，避免 iOS 聚焦自动缩放。
 - 增加独立 hydration、IME 派生值、原生 ref/属性与 RTL Story 证据。
+- reset 改为 ownerDocument 委托，支持外部 form 晚挂载/替换并尊重取消；补移动双引擎 paste、受控拒绝与响应式 autosize 证据。
 
 ## 变更记录
 
@@ -262,3 +263,4 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 | 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 invalid/input/submit/hydration 证据                 | 无                                                                                  |
 | 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级                | 无                                                                                  |
 | 2026-08-29 | 未发布 | hardening     | 同步 RTL 根方向、稳定计数方向、iOS 16px 输入字号并补 hydration/IME 证据 | small 的可编辑文字由 14px 调整为 16px；如视觉快照锁定旧字号需更新基线，Props 无迁移 |
+| 2026-08-30 | 未发布 | hardening     | 外部 form reset 委托与移动双引擎 paste、受控拒绝、响应式 autosize 专项  | 无 API 迁移；被取消的 reset 现在明确保持派生状态不变                                |

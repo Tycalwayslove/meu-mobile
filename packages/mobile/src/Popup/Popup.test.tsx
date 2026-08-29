@@ -5,10 +5,48 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider, ThemeProvider } from "../ConfigProvider";
+import { motionReduced, themeBoundary } from "../ConfigProvider/ConfigProvider.css";
 import { NumberKeyboard } from "../NumberKeyboard";
 import { Popup } from "./Popup";
 
 describe("Popup", () => {
+  it("carries a nested provider boundary into its configured portal target", async () => {
+    const portalTarget = document.createElement("div");
+    document.body.append(portalTarget);
+
+    const view = render(
+      <ConfigProvider
+        dir="rtl"
+        locale="en-US"
+        motion="reduced"
+        portalContainer={portalTarget}
+        theme="dark"
+      >
+        <ThemeProvider>
+          <Popup aria-label="Delivery options" open showCloseButton>
+            <button type="button">Confirm delivery</button>
+          </Popup>
+        </ThemeProvider>
+      </ConfigProvider>
+    );
+
+    const layer = portalTarget.querySelector<HTMLElement>("[data-meu-overlay-layer='popup']");
+    if (!layer) throw new Error("Expected nested Popup portal boundary");
+    expect(layer.getAttribute("dir")).toBe("rtl");
+    expect(layer.getAttribute("lang")).toBe("en-US");
+    expect(layer.getAttribute("data-meu-theme")).toBe("dark");
+    expect(layer.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(layer.classList.contains(themeBoundary)).toBe(true);
+    expect(layer.classList.contains(motionReduced)).toBe(true);
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Close" }))
+    );
+
+    view.unmount();
+    portalTarget.remove();
+  });
+
   it("uses modal dialog semantics and reports every dismissal source", async () => {
     const onOpenChange = vi.fn();
     render(

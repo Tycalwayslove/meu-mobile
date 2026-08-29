@@ -119,20 +119,16 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
 
   useEffect(() => {
     const element = inputRef.current;
-    const ownerForm = element ? element.form : null;
-    if (!element || !ownerForm) return undefined;
+    const ownerDocument = element ? element.ownerDocument : null;
+    if (!element || !ownerDocument) return undefined;
+    const timerWindow = ownerDocument.defaultView || window;
 
     const handleReset = (event: Event) => {
       const currentElement = inputRef.current;
-      if (currentElement) {
-        currentElement.defaultValue = controlled
-          ? value === undefined
-            ? ""
-            : value
-          : defaultValue;
-      }
-      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = window.setTimeout(() => {
+      if (!currentElement || event.target !== currentElement.form) return;
+      currentElement.defaultValue = controlled ? (value === undefined ? "" : value) : defaultValue;
+      if (resetTimerRef.current !== null) timerWindow.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = timerWindow.setTimeout(() => {
         resetTimerRef.current = null;
         const resetElement = inputRef.current;
         if (!resetElement || event.defaultPrevented) return;
@@ -142,10 +138,10 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
       }, 0);
     };
 
-    ownerForm.addEventListener("reset", handleReset);
+    ownerDocument.addEventListener("reset", handleReset);
     return () => {
-      ownerForm.removeEventListener("reset", handleReset);
-      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      ownerDocument.removeEventListener("reset", handleReset);
+      if (resetTimerRef.current !== null) timerWindow.clearTimeout(resetTimerRef.current);
       resetTimerRef.current = null;
     };
   }, [controlled, defaultValue, form, value]);

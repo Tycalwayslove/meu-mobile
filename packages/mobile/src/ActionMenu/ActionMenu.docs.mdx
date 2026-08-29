@@ -120,7 +120,7 @@ O(actions) 分组；关闭 Provider 记录仅为退出动画短暂保留。confi
 - Story interaction: `Default` 验证打开、首操作聚焦、动作关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 13726 B / 32768 B 预算；最大单值 `ActionMenuProvider` 为 13641 B / 32768 B 预算，组合 Brotli 12088 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 13761 B / 32768 B 预算；最大单值 `ActionMenuProvider` 为 13675 B / 32768 B 预算，组合 Brotli 12090 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ActionMenu.ssr.test.tsx`；隔离 Next 16 hydration 后触发器稳定，打开菜单与二级确认 Portal 无 hydration/runtime error
 - Mobile Chromium/WebKit E2E: `runs ActionMenu actions with danger confirmation` 在两种引擎断言三分组、首操作焦点、async busy/关闭、危险二级 alertdialog、安全焦点、scroll lock 和最终焦点恢复。Chromatic / 真机读屏仍属最终门禁。
 

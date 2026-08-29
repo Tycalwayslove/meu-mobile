@@ -7,7 +7,7 @@ status: verification
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "446:131"
@@ -185,7 +185,7 @@ V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13
 - Hydration：真实 `hydrateRoot` 无 mismatch，hydration 后 clear/change/focus。
 - Story interaction：Clearable 覆盖值/回调/focus；NativeFormReset 覆盖 default/FormData；LoadingFocusTransfer 覆盖 loading 焦点移交；NativeMobileContract 覆盖 autocomplete/inputMode/enterKeyHint/required 与 16 px 防缩放；ReducedMotionLoading 覆盖 provider motion 与 loading/error 语义。Password/autofill 与 RTL Story 提供人工入口。
 - Storybook 浏览器矩阵：本批在 390×844 视口验证 TextInput 14 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 98 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。
-- 官网 Next 运行时：既有本地 production 双引擎证据覆盖 Field invalid、受控 fill、clear/focus、修正与提交；本轮未重新执行或扩大共享 E2E，loading、外部 form/reset 与受控拒绝仍待后续定向浏览器验证。
+- Next H5 production 双引擎：独立 `input-contract.spec.ts` 已在 Pixel 5 Chromium 与 iPhone 13 WebKit 覆盖晚挂载外部 form、被取消/允许的 reset、FormData、受控拒绝，以及 clear action 获得焦点后切入 loading 时把焦点交还真实 input；两引擎共 8/8 输入生命周期场景通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4934 B / 32768 B 预算，组合 Brotli 4354 B；共享样式由应用单独导入一次。
 
 ## V2 优化记录
@@ -201,7 +201,7 @@ V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13
 
 - iOS 13/WKWebView 与 Chrome 70 的中文/日文 IME、系统 autofill/password manager、selection handle 和软键盘。
 - VoiceOver/TalkBack、mixed bidi、200% 字号、真机 reduced-motion/forced-colors。
-- 移动双浏览器的 loading、外部 form/reset 与受控拒绝专项。
+- 真实设备上的 loading 公告、外部 form 与软键盘组合；自动化移动 Chromium/WebKit 专项已完成。
 
 ## 变更记录
 
@@ -211,3 +211,4 @@ V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13
 | 2026-08-29 | 未发布 | accessibility | 保留 ARIA token，并统一 Field/status error 优先级          | 无                                                              |
 | 2026-08-29 | 未发布 | hardening     | 补 clear、form reset、loading/focus、RTL 与 hydration 契约 | 新增可选 loading/labels；空值不再显示 clear                     |
 | 2026-08-29 | 未发布 | hardening     | 补嵌套 Field、跨 Document 与 iOS 聚焦缩放防护              | small 输入字号由 14 px 调整为 16 px；控件高度与 `size` API 不变 |
+| 2026-08-30 | 未发布 | verification  | 补移动双引擎外部 form/reset、受控拒绝与 loading 焦点专项   | 无                                                              |

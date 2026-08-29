@@ -222,6 +222,42 @@ textarea {
   max-width: 680px;
 }
 
+.input-contract-shell {
+  max-width: 720px;
+}
+
+.input-contract-grid,
+.input-contract-card {
+  display: grid;
+  gap: 16px;
+}
+
+.input-contract-card {
+  padding: 20px;
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.input-contract-card h2,
+.input-contract-card p,
+.input-contract-card output {
+  margin: 0;
+}
+
+.input-contract-card p,
+.input-contract-card output {
+  color: var(--meu-color-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.input-contract-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .verification-links,
 .verification-actions {
   display: flex;

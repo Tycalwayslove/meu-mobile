@@ -130,6 +130,56 @@ describe("TextArea", () => {
     expect(Number.parseFloat(textArea.style.height)).toBeLessThan(expandedHeight);
   });
 
+  it("observes a late-mounted external owner and honors a cancelled reset", async () => {
+    let cancelReset = true;
+    const { rerender } = render(
+      <>
+        <TextArea
+          aria-label="动态表单说明"
+          autoSize
+          defaultValue="初始说明"
+          form="dynamic-area-owner"
+          name="description"
+          showCount
+        />
+        <div data-testid="area-owner-slot" />
+      </>
+    );
+    const textArea = getTextArea("动态表单说明");
+    fireEvent.change(textArea, { target: { value: "保留修改内容" } });
+
+    rerender(
+      <>
+        <TextArea
+          aria-label="动态表单说明"
+          autoSize
+          defaultValue="初始说明"
+          form="dynamic-area-owner"
+          name="description"
+          showCount
+        />
+        <form
+          id="dynamic-area-owner"
+          onReset={(event) => {
+            if (cancelReset) event.preventDefault();
+          }}
+        />
+      </>
+    );
+    const form = document.getElementById("dynamic-area-owner") as HTMLFormElement;
+    expect(screen.getByRole("textbox", { name: "动态表单说明" })).toBe(textArea);
+    act(() => form.reset());
+    await act(() => new Promise<void>((resolve) => window.setTimeout(resolve, 0)));
+    expect(textArea.value).toBe("保留修改内容");
+    expect(screen.getByText("6")).toBeTruthy();
+
+    cancelReset = false;
+    act(() => form.reset());
+    await waitFor(() => expect(textArea.value).toBe("初始说明"));
+    await waitFor(() => expect(screen.getByText("4")).toBeTruthy());
+    expect(new FormData(form).get("description")).toBe("初始说明");
+  });
+
   it("sizes before the first painted frame and respects row bounds", () => {
     const descriptor = Object.getOwnPropertyDescriptor(
       HTMLTextAreaElement.prototype,
