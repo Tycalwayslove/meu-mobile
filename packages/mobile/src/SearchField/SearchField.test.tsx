@@ -73,6 +73,47 @@ describe("SearchField", () => {
     expect(input.selectionEnd).toBe(0);
   });
 
+  it("merges caller and Field descriptions without duplicate IDs", () => {
+    render(
+      <>
+        <span id="external-search-help">外部搜索提示</span>
+        <Field label="订单搜索" description="支持订单号" error="请输入关键词">
+          <SearchField aria-describedby="external-search-help external-search-help" />
+        </Field>
+      </>
+    );
+    const input = screen.getByRole("searchbox", { name: "订单搜索" });
+    const ids = (input.getAttribute("aria-describedby") || "").split(" ");
+
+    expect(ids).toContain("external-search-help");
+    expect(ids.some((id) => id.includes("description"))).toBe(true);
+    expect(ids.some((id) => id.includes("error"))).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("forwards native attributes and the real input ref", () => {
+    const ref = { current: null as HTMLInputElement | null };
+    render(
+      <SearchField
+        ref={ref}
+        aria-label="原生属性搜索"
+        autoComplete="search"
+        inputMode="search"
+        maxLength={40}
+        name="query"
+        required
+      />
+    );
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "原生属性搜索" });
+
+    expect(ref.current).toBe(input);
+    expect(input.name).toBe("query");
+    expect(input.required).toBe(true);
+    expect(input.autocomplete).toBe("search");
+    expect(input.inputMode).toBe("search");
+    expect(input.maxLength).toBe(40);
+  });
+
   it("lets a native form own Enter when onSearch is absent", async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn((event: React.FormEvent<HTMLFormElement>) => event.preventDefault());
@@ -214,6 +255,25 @@ describe("SearchField", () => {
 
     expect(nativeSearch).toHaveBeenCalledOnce();
     expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("does not claim Escape as a cross-browser cancel action", () => {
+    const onKeyDown = vi.fn();
+    const onSearch = vi.fn();
+    render(
+      <SearchField
+        aria-label="取消边界"
+        defaultValue="订单"
+        onKeyDown={onKeyDown}
+        onSearch={onSearch}
+      />
+    );
+    const input = screen.getByRole<HTMLInputElement>("searchbox", { name: "取消边界" });
+
+    expect(fireEvent.keyDown(input, { key: "Escape" })).toBe(true);
+    expect(onKeyDown).toHaveBeenCalledOnce();
+    expect(onSearch).not.toHaveBeenCalled();
+    expect(input.value).toBe("订单");
   });
 
   it("does not search while an IME composition is active or for repeated Enter", () => {

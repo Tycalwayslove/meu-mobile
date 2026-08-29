@@ -71,6 +71,37 @@ export const ExplicitControlId: Story = {
   )
 };
 
+export const NestedLayout: Story = {
+  args: {
+    children: (
+      <div style={{ display: "grid", gap: 8 }}>
+        <TextInput autoComplete="name" name="contact" placeholder="请输入联系人" />
+      </div>
+    ),
+    description: "用于配送通知",
+    label: "联系人",
+    labelAssociation: "auto",
+    required: true
+  },
+  play: ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>('input[name="contact"]');
+    const inputWrapper = input ? input.parentElement : null;
+    const layout = inputWrapper ? inputWrapper.parentElement : null;
+    if (
+      !input ||
+      !input.required ||
+      !input.getAttribute("aria-labelledby") ||
+      !input.getAttribute("aria-describedby") ||
+      (layout ? layout.hasAttribute("id") : false)
+    ) {
+      throw new window.Error("Nested Field-aware input lost its label or required semantics");
+    }
+    if (canvasElement.querySelectorAll(`[id="${input.id}"]`).length !== 1) {
+      throw new window.Error("Nested Field-aware input produced a duplicate control id");
+    }
+  }
+};
+
 export const CompositeControl: Story = {
   args: {
     children: (

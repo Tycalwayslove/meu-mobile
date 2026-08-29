@@ -61,6 +61,7 @@ export function MeuFormStepper<TFieldValues extends FieldValues>({
         const currentValue = typeof fieldValue === "number" ? fieldValue : null;
         return (
           <Field
+            data-meu-form-field={field.name}
             label={label}
             description={description}
             required={required}

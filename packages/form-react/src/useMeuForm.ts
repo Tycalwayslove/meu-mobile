@@ -30,7 +30,10 @@ export type MeuUseFormProps<
  * Creates a React Hook Form instance with an optional Zod schema.
  *
  * `schema` and `resolver` are intentionally mutually exclusive. Use the input and transformed
- * generics when a schema changes the submitted value shape.
+ * generics when a schema changes the submitted value shape. By default, conditionally unmounted
+ * fields unregister so RHF submission matches native successful-control behavior, and MeuForm owns
+ * DOM-order error focus. Pass `shouldUnregister: false` or `shouldFocusError: true` to restore raw
+ * React Hook Form behavior deliberately.
  *
  * @public
  */
@@ -45,6 +48,8 @@ export function useMeuForm<
   const resolver = schema ? zodResolver(schema) : suppliedResolver;
 
   return useForm<TFieldValues, TContext, TTransformedValues>({
+    shouldFocusError: false,
+    shouldUnregister: true,
     ...formOptions,
     ...(resolver ? { resolver } : {})
   });

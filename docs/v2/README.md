@@ -14,9 +14,9 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 ## 当前基线
 
 - Manifest 登记 68 个组件族、125 个公开值、383 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
-- Figma 已为 54/68 个组件族建立永久页面链接；尚待补齐 MeuForm、Button、Checkbox、Field、Radio、Rate、SearchField、SegmentedControl、Selector、Slider、Stepper、Switch、TextArea、TextInput 共 14 项，完成后再冻结最终候选。
+- Figma 已为 59/68 个组件族建立永久页面链接；尚待补齐 Button、Checkbox、Radio、Rate、SegmentedControl、Selector、Slider、Stepper、Switch 共 9 项，完成后再冻结最终候选。
 - 68/68 个组件族已由 `audit/implementation` 进入 `verification`；这表示本地实现与自动化证据齐全到可执行最终验收，不代表已越过真机、Chromatic 和发布门禁。
-- API 属性清单已覆盖 226 个结构化类型、2355 个字段与 241 个事件；2355/2355 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
+- API 属性清单已覆盖 226 个结构化类型、2359 个字段与 242 个事件；2359/2359 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
 - Storybook 当前包含 80 个标题、436 个 Story；68 个官网组件链接、407 个留存文档 Story ID 与对应 Autodocs entry 均通过本地静态构建校验。
 - 80 个 Storybook 标题均至少包含一项关键 `play` 交互。上一次完整浏览器矩阵基线覆盖 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合且为 0 违规、0 `pageerror`；当前 436 Story 矩阵按开发期策略留待 68 个组件冻结后统一重跑。
 - 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；Props / Events 来自完整的生成 API 模型。

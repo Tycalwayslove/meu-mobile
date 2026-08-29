@@ -6,9 +6,9 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 20526,
-    "gzipBytes": 24879,
-    "rawBytes": 194119,
+    "brotliBytes": 20601,
+    "gzipBytes": 24959,
+    "rawBytes": 194974,
     "files": [
       {
         "filePath": "packages/tokens/dist/theme.css",
@@ -27,10 +27,10 @@
   },
   "products": [
     {
-      "budgetBytes": 114688,
-      "brotliBytes": 88297,
-      "gzipBytes": 112984,
-      "rawBytes": 594111,
+      "budgetBytes": 115712,
+      "brotliBytes": 89814,
+      "gzipBytes": 114853,
+      "rawBytes": 603383,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -39,193 +39,193 @@
       "valueBundles": [
         {
           "budgetBytes": 65536,
-          "brotliBytes": 687,
-          "gzipBytes": 830,
-          "rawBytes": 2211,
+          "brotliBytes": 1939,
+          "gzipBytes": 2264,
+          "rawBytes": 7827,
           "name": "MeuForm",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5616,
-          "gzipBytes": 6327,
-          "rawBytes": 22939,
+          "brotliBytes": 5979,
+          "gzipBytes": 6720,
+          "rawBytes": 25164,
           "name": "MeuFormTextInput",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 8006,
-          "gzipBytes": 9052,
-          "rawBytes": 35632,
+          "brotliBytes": 8185,
+          "gzipBytes": 9243,
+          "rawBytes": 36518,
           "name": "MeuFormNumberKeyboard",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 9311,
-          "gzipBytes": 10537,
-          "rawBytes": 42752,
+          "brotliBytes": 9477,
+          "gzipBytes": 10721,
+          "rawBytes": 43638,
           "name": "MeuFormPasscodeInput",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 33144,
-          "gzipBytes": 38101,
-          "rawBytes": 169809,
+          "brotliBytes": 33332,
+          "gzipBytes": 38288,
+          "rawBytes": 170695,
           "name": "MeuFormImageUploader",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5327,
-          "gzipBytes": 5989,
-          "rawBytes": 22955,
+          "brotliBytes": 5510,
+          "gzipBytes": 6199,
+          "rawBytes": 23878,
           "name": "MeuFormTextArea",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 6048,
-          "gzipBytes": 6830,
-          "rawBytes": 25153,
+          "brotliBytes": 6286,
+          "gzipBytes": 7101,
+          "rawBytes": 26363,
           "name": "MeuFormSearchField",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4590,
-          "gzipBytes": 5127,
-          "rawBytes": 19976,
+          "brotliBytes": 4753,
+          "gzipBytes": 5327,
+          "rawBytes": 20862,
           "name": "MeuFormCheckbox",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4241,
-          "gzipBytes": 4776,
-          "rawBytes": 17715,
+          "brotliBytes": 4412,
+          "gzipBytes": 4967,
+          "rawBytes": 18601,
           "name": "MeuFormCheckboxGroup",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4225,
-          "gzipBytes": 4759,
-          "rawBytes": 17587,
+          "brotliBytes": 4400,
+          "gzipBytes": 4958,
+          "rawBytes": 18473,
           "name": "MeuFormRadioGroup",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 4348,
-          "gzipBytes": 4897,
-          "rawBytes": 18437,
+          "brotliBytes": 4538,
+          "gzipBytes": 5099,
+          "rawBytes": 19323,
           "name": "MeuFormSwitch",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 6565,
-          "gzipBytes": 7414,
-          "rawBytes": 31660,
+          "brotliBytes": 6741,
+          "gzipBytes": 7609,
+          "rawBytes": 32546,
           "name": "MeuFormStepper",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5532,
-          "gzipBytes": 6175,
-          "rawBytes": 23470,
+          "brotliBytes": 5725,
+          "gzipBytes": 6375,
+          "rawBytes": 24356,
           "name": "MeuFormSlider",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 5668,
-          "gzipBytes": 6325,
-          "rawBytes": 23154,
+          "brotliBytes": 5831,
+          "gzipBytes": 6525,
+          "rawBytes": 24040,
           "name": "MeuFormRate",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 6075,
-          "gzipBytes": 6815,
-          "rawBytes": 27575,
+          "brotliBytes": 6256,
+          "gzipBytes": 7009,
+          "rawBytes": 28461,
           "name": "MeuFormSelector",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 28469,
-          "gzipBytes": 33578,
-          "rawBytes": 146753,
+          "brotliBytes": 28713,
+          "gzipBytes": 33876,
+          "rawBytes": 147963,
           "name": "MeuFormTreeSelect",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 14279,
-          "gzipBytes": 16221,
-          "rawBytes": 68611,
+          "brotliBytes": 14439,
+          "gzipBytes": 16402,
+          "rawBytes": 69497,
           "name": "MeuFormPicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 14899,
-          "gzipBytes": 16971,
-          "rawBytes": 73586,
+          "brotliBytes": 15048,
+          "gzipBytes": 17154,
+          "rawBytes": 74472,
           "name": "MeuFormCascadePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 18900,
-          "gzipBytes": 21512,
-          "rawBytes": 94852,
+          "brotliBytes": 19028,
+          "gzipBytes": 21695,
+          "rawBytes": 95738,
           "name": "MeuFormDatePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 20662,
-          "gzipBytes": 24027,
-          "rawBytes": 106960,
+          "brotliBytes": 20844,
+          "gzipBytes": 24209,
+          "rawBytes": 107846,
           "name": "MeuFormDateRangePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 12145,
-          "gzipBytes": 13828,
-          "rawBytes": 59727,
+          "brotliBytes": 12321,
+          "gzipBytes": 14011,
+          "rawBytes": 60613,
           "name": "MeuFormCalendar",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 17251,
-          "gzipBytes": 19632,
-          "rawBytes": 86245,
+          "brotliBytes": 17392,
+          "gzipBytes": 19813,
+          "rawBytes": 87131,
           "name": "MeuFormTimePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 6960,
-          "gzipBytes": 7825,
-          "rawBytes": 33494,
+          "brotliBytes": 7146,
+          "gzipBytes": 8025,
+          "rawBytes": 34380,
           "name": "MeuFormSegmentedControl",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 1469,
-          "gzipBytes": 1642,
-          "rawBytes": 4099,
+          "brotliBytes": 1601,
+          "gzipBytes": 1806,
+          "rawBytes": 4442,
           "name": "useMeuForm",
           "passesBudget": true
         }
@@ -837,9 +837,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 1684,
-      "gzipBytes": 1921,
-      "rawBytes": 6191,
+      "brotliBytes": 1854,
+      "gzipBytes": 2118,
+      "rawBytes": 7042,
       "docsPath": "packages/mobile/src/Field/Field.docs.mdx",
       "name": "Field",
       "packageName": "@meu/mobile",
@@ -848,9 +848,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 1684,
-          "gzipBytes": 1921,
-          "rawBytes": 6191,
+          "brotliBytes": 1854,
+          "gzipBytes": 2118,
+          "rawBytes": 7042,
           "name": "Field",
           "passesBudget": true
         }
@@ -1344,9 +1344,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4503,
-      "gzipBytes": 5131,
-      "rawBytes": 18156,
+      "brotliBytes": 4620,
+      "gzipBytes": 5240,
+      "rawBytes": 18480,
       "docsPath": "packages/mobile/src/SearchField/SearchField.docs.mdx",
       "name": "SearchField",
       "packageName": "@meu/mobile",
@@ -1355,9 +1355,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4503,
-          "gzipBytes": 5131,
-          "rawBytes": 18156,
+          "brotliBytes": 4620,
+          "gzipBytes": 5240,
+          "rawBytes": 18480,
           "name": "SearchField",
           "passesBudget": true
         }
@@ -1638,9 +1638,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 3664,
-      "gzipBytes": 4135,
-      "rawBytes": 15669,
+      "brotliBytes": 3680,
+      "gzipBytes": 4151,
+      "rawBytes": 15706,
       "docsPath": "packages/mobile/src/TextArea/TextArea.docs.mdx",
       "name": "TextArea",
       "packageName": "@meu/mobile",
@@ -1649,9 +1649,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 3664,
-          "gzipBytes": 4135,
-          "rawBytes": 15669,
+          "brotliBytes": 3680,
+          "gzipBytes": 4151,
+          "rawBytes": 15706,
           "name": "TextArea",
           "passesBudget": true
         }
@@ -1659,9 +1659,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4086,
-      "gzipBytes": 4617,
-      "rawBytes": 16018,
+      "brotliBytes": 4354,
+      "gzipBytes": 4934,
+      "rawBytes": 17349,
       "docsPath": "packages/mobile/src/TextInput/TextInput.docs.mdx",
       "name": "TextInput",
       "packageName": "@meu/mobile",
@@ -1670,9 +1670,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4086,
-          "gzipBytes": 4617,
-          "rawBytes": 16018,
+          "brotliBytes": 4354,
+          "gzipBytes": 4934,
+          "rawBytes": 17349,
           "name": "TextInput",
           "passesBudget": true
         }
@@ -1791,9 +1791,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 25805,
-      "gzipBytes": 30282,
-      "rawBytes": 132501,
+      "brotliBytes": 25882,
+      "gzipBytes": 30363,
+      "rawBytes": 132825,
       "docsPath": "packages/mobile/src/TreeSelect/TreeSelect.docs.mdx",
       "name": "TreeSelect",
       "packageName": "@meu/mobile",
@@ -1802,9 +1802,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 25805,
-          "gzipBytes": 30282,
-          "rawBytes": 132501,
+          "brotliBytes": 25882,
+          "gzipBytes": 30363,
+          "rawBytes": 132825,
           "name": "TreeSelect",
           "passesBudget": true
         }

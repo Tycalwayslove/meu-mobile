@@ -109,6 +109,27 @@ export const Error: Story = {
     </Field>
   )
 };
+export const DescriptionComposition: Story = {
+  render: () => (
+    <div>
+      <p id="search-policy">搜索结果只展示当前店铺商品</p>
+      <Field label="搜索店铺" description="支持商品名或品牌" error="请输入至少两个字符">
+        <SearchField aria-describedby="search-policy" defaultValue="喵" />
+      </Field>
+    </div>
+  ),
+  play: ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>('input[type="search"]');
+    if (!input) throw new globalThis.Error("Expected SearchField description control");
+    const ids = (input.getAttribute("aria-describedby") || "").split(" ").filter(Boolean);
+    if (!ids.includes("search-policy") || !ids.some((id) => id.includes("description"))) {
+      throw new globalThis.Error("SearchField did not merge caller and Field descriptions");
+    }
+    if (!ids.some((id) => id.includes("error")) || new Set(ids).size !== ids.length) {
+      throw new globalThis.Error("SearchField description IDs were incomplete or duplicated");
+    }
+  }
+};
 export const Disabled: Story = { args: { defaultValue: "不可搜索", disabled: true } };
 export const ReadOnly: Story = { args: { defaultValue: "固定筛选条件", readOnly: true } };
 export const Loading: Story = {

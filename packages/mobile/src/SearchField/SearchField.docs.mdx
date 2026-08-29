@@ -9,14 +9,15 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "446:3672"
 storyIds:
   [
     forms-searchfield--default,
     forms-searchfield--controlled-and-submitted,
     forms-searchfield--clear-and-focus-contract,
     forms-searchfield--error,
+    forms-searchfield--description-composition,
     forms-searchfield--disabled,
     forms-searchfield--read-only,
     forms-searchfield--loading,
@@ -39,6 +40,7 @@ source: packages/mobile/src/SearchField
 - loading 时输入仍可编辑，但会隐藏 clear、公告搜索中状态，并阻止 Enter 产生重复回调或原生提交。
 - 非受控值遵循原生 `form.reset()`，包括外部 `form=` 关联和可取消 reset；受控值始终由 `value` 决定。
 - clear 获得键盘焦点后若被 loading 状态替换，焦点会回到输入，避免落到 document。
+- 调用方与 Field 提供的全部 `aria-describedby` ID 会合并并去重，显式辅助说明不再覆盖 Field description/error。
 
 当前状态为 `verification`。单元、SSR、Story play、本地 axe，以及 mobile Chromium/WebKit 的 Enter 搜索与清除路径已有证据；完整 Light/Dark 视觉审批、移动浏览器原生 form/details 专项、真机 IME 与读屏尚未完成，因此不能标记为 commercial。
 
@@ -114,6 +116,7 @@ API 表由 `SearchFieldProps`、`SearchFieldSize`、`SearchFieldStatus` 与事�
 - `defaultValue` 是非受控初值及原生 reset 的恢复值；`value` 是受控事实源。
 - `enterKeyHint` 默认 `search`，只提示软键盘外观，不改变 Enter 所有权。
 - `className/style` 作用在视觉 wrapper；`dir` 同时作用于 wrapper 与真实 input，使组件级 RTL 能翻转视觉顺序；其余原生 input 属性传给真实 input。内部 class 与 DOM 层级不是稳定 API。
+- 显式 `aria-describedby` 会与 Field description/error 合并并去重；若业务确实需要替换 Field 文案，应在 Field 层调整，而不是依赖覆盖 ID。
 - `clearLabel/loadingLabel` 可覆盖内置中英文 accessible name；未覆盖时跟随 `ConfigProvider.locale`。
 - `status="error"`、Field error 或有效 `aria-invalid` 都进入 error 状态；无 contextual error 时 `false/grammar/spelling` 原样保留，Field/status error 优先输出 `true`。
 
@@ -147,6 +150,8 @@ ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()
 
 浏览器对 `input[type="search"]` 的 Escape 行为并不一致，Escape 清空不属于当前公开契约；使用内置 clear button 可获得一致事件和焦点行为。
 
+SearchField 不内置“退出搜索模式”的 cancel action。移动页面若需要“取消”，应在 SearchField 外放置有明确文案的原生 button，由页面负责清空、关闭建议层或返回上一页；不要把这些不同业务语义压缩成 Escape。
+
 ## 触摸与手势
 
 没有自定义手势。输入区高度与 clear button 均至少 44 CSS px；clear 使用原生 button，tap 后重新聚焦输入，鼠标按下不会先夺走焦点。组件不拦截页面滚动、不注册全局 pointer listener，也不自行 debounce 快速输入。
@@ -154,6 +159,8 @@ ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()
 ## 无障碍
 
 输入使用原生 searchbox 语义，必须通过 `Field label`、`aria-label` 或有效 `aria-labelledby` 获得名称。搜索图标为装饰内容。clear 是有名称的原生 button；loading 插入 `role="status"` 并在 input 设置 `aria-busy`，避免 busy 容器延迟状态公告。error 通过 `aria-invalid` 以及 Field 的 description/error 关联表达，不能只看边框颜色。
+
+调用方 `aria-describedby`、Field description 与 Field error 会组合而不是相互覆盖，并过滤重复 ID。这样外部搜索策略、字段帮助和当前错误能同时被读屏获得。
 
 ARIA invalid token 只位于原生 searchbox，不复制到图标、clear 或 loading status。`grammar/spelling` 触发错误视觉但保持原 token；显式 `false` 在无 Field/status error 时保持为 `false`。
 
@@ -179,7 +186,7 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 
 ## 浏览器与 WebView
 
-实现使用原生 input/button、Flex、CSS logical properties、`:focus-within`、native click、基础 key/composition events 和 `setTimeout`，没有依赖超出 Chrome/WebView 70 与 iOS 13 的强制运行时 API。`enterKeyHint` 在不识别它的旧宿主中仅作为无害属性，不影响硬键盘 Enter 或 form submit。静态兼容和 jsdom 证据不等于真机运行时证明，Chrome 70 与 iOS 13 仍需目标宿主回归。
+实现使用原生 input/button、Flex、CSS logical properties、`:focus-within`、native click、基础 key/composition events 和 `setTimeout`，没有依赖超出 Chrome/WebView 70 与 iOS 13 的强制运行时 API。输入使用 16px 字号并关闭 WebKit 原生 search 外观，避免 iOS 聚焦自动缩放与宿主装饰覆盖内建 clear。`enterKeyHint` 在不识别它的旧宿主中仅作为无害属性，不影响硬键盘 Enter 或 form submit。静态兼容和 jsdom 证据不等于真机运行时证明，Chrome 70 与 iOS 13 仍需目标宿主回归。
 
 待补 iOS 中文输入法、Android Gboard、WKWebView 软键盘 `enterKeyHint`、VoiceOver/TalkBack 和 tap-clear 键盘保持的真机记录。
 
@@ -200,11 +207,11 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 
 ## 测试证据
 
-- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 ARIA invalid token/Field 优先级、clear 请求空值后恢复焦点、loading 替换 clear 的焦点移交、readOnly/disabled 原生 FormData、模拟 composition、repeat Enter、consumer cancellation 与受控 live native value。它还证明 Enter 单一所有权，以及祖先/外部 form reset、取消 reset、受控 reset、reset 后 IME 状态和不发布 change。
+- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 ARIA invalid token/Field 优先级、调用方/Field describedby 合并去重、原生 ref/属性、clear 请求空值后恢复焦点、loading 替换 clear 的焦点移交、readOnly/disabled 原生 FormData、模拟 composition、repeat Enter、Escape 非所有权、consumer cancellation 与受控 live native value。它还证明 Enter 单一所有权，以及祖先/外部 form reset、取消 reset、受控 reset、reset 后 IME 状态和不发布 change。
 - Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`NativeFormReset.play` 验证 clear 后恢复默认值及 FormData。RTL Story 提供方向与阿拉伯语检查入口。
 - Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代最终冻结候选的完整视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5131 B / 32768 B 预算，组合 Brotli 4503 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5240 B / 32768 B 预算，组合 Brotli 4620 B；共享样式由应用单独导入一次。
 - SSR/hydration: `SearchField.ssr.test.tsx` 覆盖 native searchbox、ARIA invalid、loading 与 disabled；`SearchField.hydration.test.tsx` 直接覆盖无 mismatch 及 hydration 后 clear/focus。
 - RTL: 使用 logical CSS，单元测试覆盖显式 `dir` 的 wrapper/input 同步，并有 RTL Story；混合双向和真机软键盘待补。
 - Reduced motion/forced colors: CSS 分别关闭 spinner animation、压缩 transition，并使用系统按钮/边框色；旧版与真机 computed-style 证明待补。
@@ -229,6 +236,8 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 - loading 改为可公告状态，reduced motion 改为静态 ring；补齐强制色与 44px clear 目标。
 - 补齐公开 TSDoc、SSR/单元测试、Story play、完整留存文档和 README 指针。
 - 补齐原生 form reset/取消/外部关联、受控 reset、hydration、loading 焦点移交和 RTL Story 证据。
+- 修复显式 `aria-describedby` 覆盖 Field description/error，改为组合并去重。
+- 标准化 iOS/WKWebView search 外观与 touch 行为，补原生属性/ref、Escape cancel 边界和 Story 证据。
 
 ## 变更记录
 
@@ -238,3 +247,4 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 | 2026-08-29 | 未发布 | verification   | 记录 mobile Chromium/WebKit 已覆盖 Enter 搜索、清除与焦点恢复；区分 details/form 单测和移动证据 | 状态保持 `verification`；IME、真机读屏及未设 `onSearch` 的移动 form 路径仍待验证 |
 | 2026-08-29 | 未发布 | accessibility  | 保留 ARIA invalid token 并统一 Field/status error 优先级                                        | 无                                                                               |
 | 2026-08-29 | 未发布 | hardening      | 修复 form reset 同步、loading 焦点移交，并补 hydration/RTL/取消边界证据                         | 非受控 reset 现恢复 `defaultValue` 且不触发 change                               |
+| 2026-08-29 | 未发布 | accessibility  | 合并调用方与 Field 的 describedby，并标准化移动 WebView search 外观                             | 若测试依赖显式 describedby 覆盖 Field ID，应改为验证组合集合；Props 无迁移       |

@@ -14,6 +14,9 @@ export const textarea = recipe({
     borderRadius: "var(--meu-radius-control)",
     fontFamily: "var(--meu-font-ui)",
     outline: "none",
+    appearance: "none",
+    WebkitAppearance: "none",
+    touchAction: "manipulation",
     resize: "vertical",
     selectors: {
       "&::placeholder": { color: "var(--meu-color-muted)" },
@@ -31,6 +34,12 @@ export const textarea = recipe({
         background: "var(--meu-color-subtle)",
         resize: "none"
       }
+    },
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "ButtonText",
+        forcedColorAdjust: "auto"
+      }
     }
   },
   variants: {
@@ -42,7 +51,8 @@ export const textarea = recipe({
       small: {
         minHeight: 80,
         padding: "var(--meu-space-2) var(--meu-space-3)",
-        fontSize: 14,
+        // Keep editable text at 16px so iOS Safari/WKWebView does not zoom the page on focus.
+        fontSize: 16,
         lineHeight: "20px"
       },
       medium: {
@@ -73,6 +83,8 @@ export const textarea = recipe({
 
 export const counter = style({
   justifySelf: "end",
+  direction: "ltr",
+  unicodeBidi: "isolate",
   color: "var(--meu-color-muted)",
   fontFamily: "var(--meu-font-ui)",
   fontSize: "var(--meu-font-meta-font-size)",

@@ -9,8 +9,8 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "446:3273"
 storyIds:
   [
     forms-textarea--default,
@@ -18,11 +18,13 @@ storyIds:
     forms-textarea--auto-size,
     forms-textarea--controlled-rollback,
     forms-textarea--native-form-reset,
+    forms-textarea--composition-and-count,
     forms-textarea--small,
     forms-textarea--large,
     forms-textarea--error,
     forms-textarea--read-only,
-    forms-textarea--disabled
+    forms-textarea--disabled,
+    forms-textarea--right-to-left
   ]
 source: packages/mobile/src/TextArea
 ---
@@ -37,6 +39,8 @@ source: packages/mobile/src/TextArea
 - `ResizeObserver` 不存在时退回 `window.resize`；旋转使用 `orientationchange`，Portal 或外层布局变宽时可重新测量。
 - 合并调用方、Field description/error 与 count 的全部 `aria-describedby` ID，并去重。
 - autosize 过程中保留 textarea 的 `scrollTop`，超过 `maxRows` 后使用内部纵向滚动。
+- 显式 `dir` 同时作用于布局根与 textarea；计数始终以隔离的 LTR 数字顺序呈现，并在 RTL 下靠逻辑末端对齐。
+- 三档输入字号均不低于 16 CSS px，避免 iOS Safari/WKWebView 聚焦小号 TextArea 时自动放大页面；仍由高度与 padding 区分密度。
 
 当前为 V2 `verification`，200% 字号、移动 Chromium/WebKit 与本地 Light/Dark 场景矩阵已通过；IME、Android/iOS 真机记录与最终视觉审批尚未完成，不能标记为 commercial。
 
@@ -116,6 +120,7 @@ Props 表由 TypeScript/TSDoc 与 API Extractor 生成。专有 Props 与跨字�
 - `status`: `default | error`，默认 default；Field error 或 `aria-invalid="true"` 同样进入 error 状态。
 - `rows`: 保留原生属性。autosize 时作为初始/无 JavaScript 行数提示；对象形式的 minRows 决定计算下限。
 - `maxLength`: 完全采用原生限制和 UTF-16 语义；受控程序值可以超过 maxLength，组件不会偷偷截断。
+- `dir`: 透传给真实 textarea，同时设置在视觉根上，使 counter 对齐与显式组件方向保持一致；counter 数字本身使用隔离 LTR 顺序。
 
 ## Events
 
@@ -176,6 +181,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 ## RTL 与国际化
 
 - textarea 继承上层 `dir`/`lang`，CSS padding 使用逻辑方向，无左右位置假设。
+- 显式 `dir` 同步设置在外层布局与 textarea；这修复了“输入为 RTL、计数仍按页面方向对齐”的分裂状态。
 - 组件没有内建文案；counter 使用浏览器数字字形，不做 locale number formatting。
 - 字符计数采用 UTF-16，与语言无关。需要用户可见 grapheme 计数时应由产品先冻结跨端/后端算法，再评估兼容 API，当前不使用 `Intl.Segmenter`。
 - 中英文长文本和双向文本由原生 textarea 处理；方向性内容可使用原生 `dir` 属性显式覆盖。
@@ -185,6 +191,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13–14、Chromium 79–88 为观察档。Chrome 70 静态语法门禁只检查构建语法，不代表运行时支持。
 
 - ResizeObserver 可用时仅在宽度发生实质变化时重新测量，避免自身高度变化形成 observer loop。
+- 原生 textarea 外观被标准化；输入字号保持至少 16px，避免 iOS Safari/WKWebView 的聚焦自动缩放。
 - ResizeObserver 不可用时监听 window resize；orientationchange 始终作为旋转兜底。
 - `document.fonts.ready` 与 loadingdone 可用时触发字体重测；不支持 Font Loading API 时仍保留首次、输入与 viewport 测量。
 - `requestAnimationFrame` 不可用时，受控回滚和观察器调度退回 0ms timer。
@@ -208,12 +215,12 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 
 ## 测试证据
 
-- Unit: `TextArea.test.tsx` 覆盖 ARIA 合并/去重与 invalid token/优先级、无 live counter、UTF-16、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权和 readOnly；SSR 同时覆盖 token 输出。
+- Unit: `TextArea.test.tsx` 覆盖 ARIA 合并/去重与 invalid token/优先级、无 live counter、UTF-16、IME 事件透传、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权、原生 ref/属性、RTL 和 readOnly；SSR 同时覆盖 token 与双层 dir 输出。
 - Story interaction: `NativeFormReset` 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4135 B / 32768 B 预算，组合 Brotli 3664 B；共享样式由应用单独导入一次。
-- SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；隔离 Next 16 App Router hydration 后 autosize Field、错误关联和受控输入无运行时异常。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4151 B / 32768 B 预算，组合 Brotli 3680 B；共享样式由应用单独导入一次。
+- SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；`TextArea.hydration.test.tsx` 直接验证 autosize/count 首屏无 mismatch，hydrate 后 IME 编辑、计数和 change 继续工作；隔离 Next 16 App Router hydration 后 autosize Field、错误关联和受控输入无运行时异常。
 - RTL: 依赖原生 textarea/逻辑布局，待移动浏览器视觉证明。
 - Reduced motion: 无动效，不适用；仍待 E2E 证明无 height transition。
 - Mobile Chromium/WebKit E2E: 两种引擎断言空值 Zod invalid、Field 归属、受控 fill、错误清除与成功提交；软键盘、IME、旋转、paste 与 form reset 仍待专项。
@@ -240,14 +247,18 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 - 新增 readOnly 视觉/data 状态；合并调用方与 Field 的全部 describedby。
 - 补齐公开类型/Props/组件 TSDoc、SSR/单元测试、Story play、本地 axe 和留存文档。
 - 在隔离 Next H5 中补 Field invalid、受控输入、提交与 hydration 双引擎证据。
+- 修复显式 RTL 时布局根与 counter 对齐不同步；counter 数字采用隔离 LTR 顺序。
+- 标准化移动 WebView 原生外观，并将 small 输入字号提升至 16px，避免 iOS 聚焦自动缩放。
+- 增加独立 hydration、IME 派生值、原生 ref/属性与 RTL Story 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                     | 迁移说明                                                                        |
-| ---------- | ------ | ------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | fix           | reset、受控回滚、宽度/字体/旋转 autosize 同步            | 无 API 迁移                                                                     |
-| 2026-08-28 | 未发布 | accessibility | describedby 改为合并；counter 不再逐键 aria-live         | 若测试依赖 `aria-live="polite"`，应改为验证 describedby；业务重要阈值请单独播报 |
-| 2026-08-28 | 未发布 | behavior      | readOnly 增加独立 data-state 与 subtle 背景              | 原生提交/聚焦语义不变                                                           |
-| 2026-08-28 | 未发布 | docs          | 建立 TextArea V2 留存文档与 README 指针                  | 无                                                                              |
-| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 invalid/input/submit/hydration 证据  | 无                                                                              |
-| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级 | 无                                                                              |
+| 日期       | 版本   | 类型          | 内容                                                                    | 迁移说明                                                                            |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | fix           | reset、受控回滚、宽度/字体/旋转 autosize 同步                           | 无 API 迁移                                                                         |
+| 2026-08-28 | 未发布 | accessibility | describedby 改为合并；counter 不再逐键 aria-live                        | 若测试依赖 `aria-live="polite"`，应改为验证 describedby；业务重要阈值请单独播报     |
+| 2026-08-28 | 未发布 | behavior      | readOnly 增加独立 data-state 与 subtle 背景                             | 原生提交/聚焦语义不变                                                               |
+| 2026-08-28 | 未发布 | docs          | 建立 TextArea V2 留存文档与 README 指针                                 | 无                                                                                  |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 invalid/input/submit/hydration 证据                 | 无                                                                                  |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级                | 无                                                                                  |
+| 2026-08-29 | 未发布 | hardening     | 同步 RTL 根方向、稳定计数方向、iOS 16px 输入字号并补 hydration/IME 证据 | small 的可编辑文字由 14px 调整为 16px；如视觉快照锁定旧字号需更新基线，Props 无迁移 |

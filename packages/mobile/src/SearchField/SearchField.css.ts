@@ -27,7 +27,10 @@ export const root = recipe({
       }
     },
     "@media": {
-      "(forced-colors: active)": { borderColor: "ButtonText" },
+      "(forced-colors: active)": {
+        borderColor: "ButtonText",
+        forcedColorAdjust: "auto"
+      },
       "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" }
     }
   },
@@ -84,11 +87,16 @@ export const input = style({
   background: "transparent",
   border: 0,
   outline: 0,
+  appearance: "none",
+  WebkitAppearance: "none",
+  touchAction: "manipulation",
   fontFamily: "var(--meu-font-ui)",
   fontSize: 16,
   selectors: {
     "&::placeholder": { color: "var(--meu-color-muted)" },
+    "&::-webkit-search-decoration": { display: "none" },
     "&::-webkit-search-cancel-button": { display: "none" },
+    "&::-webkit-search-results-button": { display: "none" },
     "&:disabled": { color: "var(--meu-color-muted)", cursor: "not-allowed" },
     "&:read-only:not(:disabled)": { cursor: "text" }
   }
@@ -107,6 +115,7 @@ export const clearButton = style({
   borderRadius: "var(--meu-radius-control)",
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
+  touchAction: "manipulation",
   selectors: {
     "&:active": { background: "var(--meu-color-subtle)" },
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -3 }
@@ -127,6 +136,7 @@ export const loadingIndicator = style({
 export const spinner = style({
   width: 16,
   height: 16,
+  boxSizing: "border-box",
   border: "2px solid currentColor",
   borderRightColor: "transparent",
   borderRadius: "50%",

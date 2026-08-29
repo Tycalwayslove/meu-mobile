@@ -95,6 +95,33 @@ export const Clearable: Story = {
 };
 export const Small: Story = { args: { size: "small" } };
 export const Large: Story = { args: { size: "large" } };
+export const NativeMobileContract: Story = {
+  args: {
+    "aria-label": "收货手机号",
+    autoComplete: "tel",
+    clearable: true,
+    defaultValue: "13800138000",
+    enterKeyHint: "next",
+    inputMode: "tel",
+    name: "phone",
+    required: true,
+    size: "small"
+  },
+  play: ({ canvasElement }) => {
+    const input = canvasElement.querySelector<HTMLInputElement>('input[name="phone"]');
+    if (
+      !input ||
+      input.autocomplete !== "tel" ||
+      input.inputMode !== "tel" ||
+      input.enterKeyHint !== "next" ||
+      !input.required ||
+      Number.parseFloat(canvasElement.ownerDocument.defaultView!.getComputedStyle(input).fontSize) <
+        16
+    ) {
+      throw new window.Error("TextInput lost its native mobile keyboard or no-zoom contract");
+    }
+  }
+};
 export const PasswordAndAutofill: Story = {
   args: {
     "aria-label": "账户密码",

@@ -493,7 +493,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children, form, noValidate, onInvalid, onReset, onSubmit, ref, ...props }",
+              "parameterName": "{ action, children, form, noValidate, onInvalid, onReset, onSubmit, onSubmitError, ref, shouldFocusError, submitConcurrency, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -4479,7 +4479,25 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"onSubmit\"> & {\n    form: "
+              "text": ">, \"action\" | \"onSubmit\"> & {\n    action?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "FormHTMLAttributes",
+              "canonicalReference": "@types/react!React.FormHTMLAttributes:interface"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "HTMLFormElement",
+              "canonicalReference": "!HTMLFormElement:interface"
+            },
+            {
+              "kind": "Content",
+              "text": ">[\"action\"];\n    form: "
             },
             {
               "kind": "Reference",
@@ -4497,7 +4515,7 @@
             },
             {
               "kind": "Content",
-              "text": "<TFieldValues>;\n    onSubmit: "
+              "text": "<TFieldValues>;\n    onSubmitError?: (error: unknown) => void;\n    onSubmit: "
             },
             {
               "kind": "Reference",
@@ -4524,7 +4542,16 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n}"
+              "text": ">;\n    shouldFocusError?: boolean;\n    submitConcurrency?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "MeuFormSubmitConcurrency",
+              "canonicalReference": "@meu/form-react!MeuFormSubmitConcurrency:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n}"
             },
             {
               "kind": "Content",
@@ -4571,7 +4598,7 @@
           ],
           "typeTokenRange": {
             "startIndex": 7,
-            "endIndex": 23
+            "endIndex": 29
           }
         },
         {
@@ -6189,6 +6216,32 @@
           "typeTokenRange": {
             "startIndex": 3,
             "endIndex": 21
+          }
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/form-react!MeuFormSubmitConcurrency:type",
+          "docComment": "/**\n * Concurrent native-submit behavior.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type MeuFormSubmitConcurrency = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"allow\" | \"ignore\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/MeuForm.tsx",
+          "releaseTag": "Public",
+          "name": "MeuFormSubmitConcurrency",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
           }
         },
         {
@@ -7934,7 +7987,7 @@
         {
           "kind": "Function",
           "canonicalReference": "@meu/form-react!useMeuForm:function(1)",
-          "docComment": "/**\n * Creates a React Hook Form instance with an optional Zod schema.\n *\n * `schema` and `resolver` are intentionally mutually exclusive. Use the input and transformed generics when a schema changes the submitted value shape.\n *\n * @public\n */\n",
+          "docComment": "/**\n * Creates a React Hook Form instance with an optional Zod schema.\n *\n * `schema` and `resolver` are intentionally mutually exclusive. Use the input and transformed generics when a schema changes the submitted value shape. By default, conditionally unmounted fields unregister so RHF submission matches native successful-control behavior, and MeuForm owns DOM-order error focus. Pass `shouldUnregister: false` or `shouldFocusError: true` to restore raw React Hook Form behavior deliberately.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

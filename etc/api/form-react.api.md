@@ -343,11 +343,15 @@ export type MeuFormPickerProps<TFieldValues extends FieldValues, TValue extends 
 };
 
 // @public (undocumented)
-export type MeuFormProps<TFieldValues extends FieldValues, TContext = unknown, TTransformedValues = TFieldValues> = Omit<FormHTMLAttributes<HTMLFormElement>, "onSubmit"> & {
+export type MeuFormProps<TFieldValues extends FieldValues, TContext = unknown, TTransformedValues = TFieldValues> = Omit<FormHTMLAttributes<HTMLFormElement>, "action" | "onSubmit"> & {
+    action?: FormHTMLAttributes<HTMLFormElement>["action"];
     form: UseFormReturn<TFieldValues, TContext, TTransformedValues>;
     onInvalid?: SubmitErrorHandler<TFieldValues>;
+    onSubmitError?: (error: unknown) => void;
     onSubmit: SubmitHandler<TTransformedValues>;
     ref?: Ref<HTMLFormElement>;
+    shouldFocusError?: boolean;
+    submitConcurrency?: MeuFormSubmitConcurrency;
 };
 
 // @public
@@ -446,6 +450,9 @@ export type MeuFormStepperProps<TFieldValues extends FieldValues> = Omit<Stepper
     required?: boolean;
     rules?: UseControllerProps<TFieldValues, MeuNumberFieldPath<TFieldValues>>["rules"];
 };
+
+// @public
+export type MeuFormSubmitConcurrency = "allow" | "ignore";
 
 // @public
 export function MeuFormSwitch<TFieldValues extends FieldValues>(input: MeuFormSwitchProps<TFieldValues>): JSX.Element;

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -69,6 +69,7 @@ describe("TextInput", () => {
 
   it("clears controlled values through the native change contract", () => {
     const callOrder: string[] = [];
+    const onInput = vi.fn();
     const onChange = vi.fn();
     const onClear = vi.fn();
 
@@ -79,6 +80,10 @@ describe("TextInput", () => {
           aria-label="店铺名称"
           clearable
           value={value}
+          onInput={() => {
+            callOrder.push("input");
+            onInput();
+          }}
           onChange={(event) => {
             callOrder.push("change");
             onChange(event.currentTarget.value);
@@ -95,9 +100,10 @@ describe("TextInput", () => {
     render(<ControlledInput />);
     fireEvent.click(screen.getByRole("button", { name: "清除输入" }));
 
+    expect(onInput).toHaveBeenCalledOnce();
     expect(onChange).toHaveBeenCalledWith("");
     expect(onClear).toHaveBeenCalledOnce();
-    expect(callOrder).toEqual(["change", "clear"]);
+    expect(callOrder).toEqual(["input", "change", "clear"]);
     expect(screen.getByRole("textbox", { name: "店铺名称" })).toHaveProperty("value", "");
   });
 
@@ -148,6 +154,34 @@ describe("TextInput", () => {
     expect(input.value).toBe("");
     expect(input.type).toBe("password");
     expect(document.activeElement).toBe(input);
+  });
+
+  it("uses the input owner window when clearing a cross-document control", () => {
+    const frame = document.createElement("iframe");
+    document.body.append(frame);
+    const frameDocument = frame.contentDocument!;
+    const frameWindow = frame.contentWindow!;
+    const FrameEvent = (frameWindow as Window & typeof globalThis).Event;
+    const container = frameDocument.createElement("div");
+    frameDocument.body.append(container);
+    const onInput = vi.fn((event: React.FormEvent<HTMLInputElement>) => {
+      expect(event.nativeEvent).toBeInstanceOf(FrameEvent);
+    });
+    const view = render(
+      <TextInput aria-label="跨文档名称" clearable defaultValue="Meu" onInput={onInput} />,
+      { container }
+    );
+
+    const frameQueries = within(container);
+    fireEvent.click(frameQueries.getByRole("button", { name: "清除输入" }));
+
+    const control = frameQueries.getByRole<HTMLInputElement>("textbox", { name: "跨文档名称" });
+    expect(onInput).toHaveBeenCalledOnce();
+    expect(control.value).toBe("");
+    expect(frameDocument.activeElement).toBe(control);
+
+    view.unmount();
+    frame.remove();
   });
 
   it("passes composition events and edits through without formatting IME input", () => {

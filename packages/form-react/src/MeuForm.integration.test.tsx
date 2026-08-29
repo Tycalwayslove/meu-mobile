@@ -45,6 +45,7 @@ function NestedAndArrayExample({ onSubmit }: { onSubmit: (values: NestedValues) 
 }
 
 type AsyncValues = { code: string };
+type ValidationRequest = { resolve: (result: true | string) => void; value: string };
 
 function AsyncValidationExample({ onSubmit }: { onSubmit: (values: AsyncValues) => void }) {
   const form = useMeuForm<AsyncValues>({ defaultValues: { code: "" } });
@@ -65,13 +66,33 @@ function AsyncValidationExample({ onSubmit }: { onSubmit: (values: AsyncValues) 
   );
 }
 
+function ValidationRaceExample({ requests }: { requests: ValidationRequest[] }) {
+  const form = useMeuForm<AsyncValues>({ defaultValues: { code: "" }, mode: "onChange" });
+  return (
+    <MeuForm form={form} onSubmit={() => undefined}>
+      <MeuFormTextInput<AsyncValues>
+        name="code"
+        label="竞态邀请码"
+        rules={{
+          validate: (value) =>
+            new Promise<true | string>((resolve) => requests.push({ resolve, value }))
+        }}
+      />
+      <output aria-label="校验状态">
+        {form.formState.isValidating ? "validating" : "settled"}/
+        {form.formState.errors.code ? form.formState.errors.code.message : "valid"}
+      </output>
+    </MeuForm>
+  );
+}
+
 type ServerValues = { contact: string; storeName: string };
 
-function ServerErrorsExample() {
+function ServerErrorsExample({ disableStore = false }: { disableStore?: boolean }) {
   const form = useMeuForm<ServerValues>({ defaultValues: { contact: "", storeName: "" } });
   return (
     <MeuForm form={form} onSubmit={() => undefined}>
-      <MeuFormTextInput<ServerValues> name="storeName" label="店铺名称" />
+      <MeuFormTextInput<ServerValues> name="storeName" label="店铺名称" disabled={disableStore} />
       <MeuFormTextInput<ServerValues> name="contact" label="联系人" />
       <Button
         type="button"
@@ -83,6 +104,17 @@ function ServerErrorsExample() {
         }
       >
         模拟服务端错误
+      </Button>
+      <Button type="button" onClick={() => applyMeuFormErrors(form, { contact: "联系人已占用" })}>
+        替换服务端错误
+      </Button>
+      <Button
+        type="button"
+        onClick={() =>
+          applyMeuFormErrors(form, { contact: "联系人仍不可用" }, { clearPrevious: false })
+        }
+      >
+        合并服务端错误
       </Button>
     </MeuForm>
   );
@@ -189,6 +221,26 @@ describe("MeuForm advanced integration", () => {
     );
   });
 
+  it("keeps the newest result when asynchronous field validation resolves out of order", async () => {
+    const requests: ValidationRequest[] = [];
+    render(<ValidationRaceExample requests={requests} />);
+    const input = screen.getByRole("textbox", { name: "竞态邀请码" });
+
+    fireEvent.change(input, { target: { value: "OLD" } });
+    await waitFor(() => expect(requests).toHaveLength(1));
+    fireEvent.change(input, { target: { value: "NEW" } });
+    await waitFor(() => expect(requests).toHaveLength(2));
+
+    requests[1]!.resolve(true);
+    await waitFor(() =>
+      expect(screen.getByLabelText("校验状态").textContent).toBe("settled/valid")
+    );
+    requests[0]!.resolve("stale error");
+    await waitFor(() =>
+      expect(screen.getByLabelText("校验状态").textContent).toBe("settled/valid")
+    );
+  });
+
   it("maps server errors and focuses the first invalid field", async () => {
     render(<ServerErrorsExample />);
     fireEvent.click(screen.getByRole("button", { name: "模拟服务端错误" }));
@@ -198,6 +250,31 @@ describe("MeuForm advanced integration", () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "店铺名称" }))
     );
+  });
+
+  it("replaces prior server errors and skips disabled fields when choosing focus", async () => {
+    render(<ServerErrorsExample disableStore />);
+    fireEvent.click(screen.getByRole("button", { name: "模拟服务端错误" }));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "联系人" }))
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "替换服务端错误" }));
+    await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(1));
+    expect(screen.getByRole("alert").textContent).toBe("联系人已占用");
+  });
+
+  it("can merge a partial server response when explicitly requested", async () => {
+    render(<ServerErrorsExample />);
+    fireEvent.click(screen.getByRole("button", { name: "模拟服务端错误" }));
+    await screen.findAllByRole("alert");
+    fireEvent.click(screen.getByRole("button", { name: "合并服务端错误" }));
+
+    await waitFor(() => expect(screen.getAllByRole("alert")).toHaveLength(2));
+    expect(screen.getAllByRole("alert").map((node) => node.textContent)).toEqual([
+      "店铺名称已存在",
+      "联系人仍不可用"
+    ]);
   });
 
   it("orders server-error focus inside the owning form when field names are repeated", async () => {

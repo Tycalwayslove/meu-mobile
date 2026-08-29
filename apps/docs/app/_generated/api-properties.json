@@ -11720,6 +11720,13 @@
     "@meu/form-react": {
       "MeuFormProps": [
         {
+          "name": "action",
+          "type": "string | ((formData: FormData) => void | Promise<void>)",
+          "required": false,
+          "event": false,
+          "description": "Runs after RHF validation and `onSubmit`; function actions receive current native FormData."
+        },
+        {
           "name": "form",
           "type": "UseFormReturn<TFieldValues, TContext, TTransformedValues>",
           "required": true,
@@ -11734,6 +11741,22 @@
           "description": "Ref forwarded to the underlying native `form` element."
         },
         {
+          "name": "shouldFocusError",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Focuses the first enabled invalid field in this form's DOM order.",
+          "defaultValue": "true"
+        },
+        {
+          "name": "submitConcurrency",
+          "type": "MeuFormSubmitConcurrency",
+          "required": false,
+          "event": false,
+          "description": "Ignores a second native submit while the current submit promise is pending.",
+          "defaultValue": "\"ignore\""
+        },
+        {
           "name": "onInvalid",
           "type": "ReactEventHandler<HTMLFormElement> & SubmitErrorHandler<TFieldValues>",
           "required": false,
@@ -11746,6 +11769,13 @@
           "required": true,
           "event": true,
           "description": "Called with validated, transformed values after a successful native form submission."
+        },
+        {
+          "name": "onSubmitError",
+          "type": "(error: unknown) => void",
+          "required": false,
+          "event": true,
+          "description": "Reports a rejected `onSubmit`/`onInvalid` promise instead of producing an unhandled rejection."
         }
       ],
       "MeuFormTextInputProps": [
@@ -17631,11 +17661,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2355,
-    "eventFields": 241,
-    "exportedTypes": 383,
+    "documentedFields": 2359,
+    "eventFields": 242,
+    "exportedTypes": 384,
     "exportedTypesWithFields": 226,
-    "fields": 2355,
+    "fields": 2359,
     "packages": 4
   }
 }

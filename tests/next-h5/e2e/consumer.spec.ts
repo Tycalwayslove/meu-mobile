@@ -328,6 +328,20 @@ test("searches and clears with the SearchField contract", async ({ page }) => {
   const search = page.getByRole("searchbox", { name: "搜索组件" });
   await expect(search).toHaveAttribute("dir", "rtl");
   await expect(search.locator("xpath=parent::*")).toHaveAttribute("dir", "rtl");
+  const describedByValue = await search.getAttribute("aria-describedby");
+  const describedBy = describedByValue ? describedByValue.split(/\s+/) : [];
+  expect(describedBy).toContain("integration-search-policy");
+  expect(describedBy.length).toBe(new Set(describedBy).size);
+  expect(
+    await page.evaluate(
+      (ids) =>
+        ids.map((id) => {
+          const description = document.getElementById(id);
+          return description ? description.textContent || "" : "";
+        }),
+      describedBy
+    )
+  ).toContain("支持组件名和能力关键词");
   await search.fill("TextArea");
   await search.press("Enter");
   await expect(page.getByText("正在搜索：TextArea")).toBeVisible();
@@ -335,6 +349,50 @@ test("searches and clears with the SearchField contract", async ({ page }) => {
   await search.locator("xpath=parent::*").getByRole("button", { name: "清除搜索" }).click();
   await expect(search).toHaveValue("");
   await expect(search).toBeFocused();
+
+  const nestedInput = page.getByRole("textbox", { name: /嵌套联系人/ });
+  await expect(nestedInput).toHaveAttribute("required", "");
+  await expect(nestedInput).toHaveAttribute("id", "integration-nested-field-control");
+  await expect(page.locator("#integration-nested-field-control")).toHaveCount(1);
+  expect(
+    await nestedInput.evaluate((input) => Number.parseFloat(getComputedStyle(input).fontSize))
+  ).toBeGreaterThanOrEqual(16);
+
+  const rtlTextArea = page.getByRole("textbox", { name: "RTL 备注" });
+  await expect(rtlTextArea).toHaveAttribute("dir", "rtl");
+  const rtlTextAreaRoot = rtlTextArea.locator("..");
+  await expect(rtlTextAreaRoot).toHaveAttribute("dir", "rtl");
+  const counter = rtlTextAreaRoot.locator('[data-meu-slot="count"]');
+  await expect(counter).toContainText("/ 80");
+  await expect(counter).toHaveAttribute("dir", "ltr");
+  expect(
+    await rtlTextArea.evaluate((input) => Number.parseFloat(getComputedStyle(input).fontSize))
+  ).toBeGreaterThanOrEqual(16);
+});
+
+test("unregisters dynamic values and serializes one pending submit with its submitter", async ({
+  page
+}) => {
+  const section = page.getByRole("region", { name: "表单核心加固" });
+  const form = section.getByRole("form", { name: "表单核心加固表单" });
+  await expect(form.getByRole("textbox", { name: "动态可选字段" })).toHaveValue("应随卸载移除");
+  await form.getByRole("button", { name: "卸载可选字段" }).click();
+  await expect(form.getByRole("textbox", { name: "动态可选字段" })).toHaveCount(0);
+
+  const submit = form.getByRole("button", { name: "提交加固表单" });
+  await submit.click();
+  await expect(form.getByLabel("加固表单提交次数")).toHaveText("提交尝试：1");
+  await expect(form.getByLabel("加固表单状态")).toHaveText("submitting");
+  await submit.click();
+  await expect(form.getByLabel("加固表单提交次数")).toHaveText("提交尝试：1");
+  await expect(form.getByLabel("加固表单 Action")).toHaveText("Action 尚未执行");
+
+  await form.getByRole("button", { name: "完成异步提交" }).click();
+  await expect(form.getByLabel("加固表单提交值")).toHaveText("提交值：Meu 商店/optional:absent");
+  await expect(form.getByLabel("加固表单 Action")).toHaveText(
+    "Action：Meu 商店/save/optional:absent"
+  );
+  await expect(form.getByLabel("加固表单状态")).toHaveText("idle");
 });
 
 test("lets a native search form submit once and restore its uncontrolled default", async ({
@@ -1459,7 +1517,7 @@ test("normalizes DatePicker dates and commits only the confirmed draft", async (
 });
 
 test("rolls back DateRangePicker drafts and commits a complete preset", async ({ page }) => {
-  const form = page.locator('form[data-meu-component="form"]');
+  const form = page.locator("form.integration-form");
   await expect
     .poll(() =>
       form.evaluate((node) => new FormData(node as HTMLFormElement).getAll("deliveryWindow"))

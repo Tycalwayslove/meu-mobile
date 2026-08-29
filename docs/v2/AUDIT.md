@@ -125,7 +125,7 @@ V2 采用以下事实源：
 
 - `docs:manifest:report`：68 个产品条目、125 个公开值、383 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
 - 68/68 个产品条目状态为 `verification`；尚无条目提前标记为 `commercial`。
-- `api:properties:strict`：226 个结构化类型、2355 个字段、2355 个已描述字段、241 个事件，公开字段文档覆盖率 100%。
+- `api:properties:strict`：226 个结构化类型、2359 个字段、2359 个已描述字段、242 个事件，公开字段文档覆盖率 100%。
 - `api:extract:strict`：mobile、form-react、icons-react、primitives-react 四包均为 0 warning；公开声明全部具有明确 release tag。
 - `storybook:validate-links`：当前本地 Storybook 构建含 436 个 Story，组件文档引用 407 个 Story ID 且无缺失；80/80 个标题至少包含一项关键交互或语义断言。开发阶段只保留本地构建证据，不上传 Chromatic。
 - `check-storybook-a11y.mjs`：最近一次完整矩阵在 390×844 视口运行 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），2,618 个组合通过且无 `pageerror`。该基线早于本轮新增 Story；按开发期本地优先策略，全部组件冻结后统一刷新。

@@ -25,6 +25,17 @@ function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
   }
 }
 
+function mergeDescriptionIds(...values: Array<string | undefined>): string | undefined {
+  const ids: string[] = [];
+  values.forEach((value) => {
+    if (!value) return;
+    value.split(/\s+/).forEach((descriptionId) => {
+      if (descriptionId && ids.indexOf(descriptionId) === -1) ids.push(descriptionId);
+    });
+  });
+  return ids.length > 0 ? ids.join(" ") : undefined;
+}
+
 /**
  * A native mobile search input with clear, loading, IME, and single-owner Enter semantics.
  *
@@ -72,12 +83,10 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
   const controlled = value !== undefined;
   const currentValue = controlled ? value : uncontrolledValue;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy =
-    ariaDescribedBy !== undefined
-      ? ariaDescribedBy
-      : fieldContext
-        ? fieldContext.describedBy
-        : undefined;
+  const describedBy = mergeDescriptionIds(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||

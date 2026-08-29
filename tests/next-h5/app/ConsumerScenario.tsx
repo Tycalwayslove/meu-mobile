@@ -44,6 +44,7 @@ import {
   Divider,
   Ellipsis,
   Empty,
+  Field,
   FloatingPanel,
   Image,
   ImageViewer,
@@ -71,6 +72,8 @@ import {
   TabBar,
   Tabs,
   Tag,
+  TextArea,
+  TextInput,
   ThemeProvider,
   ToastProvider,
   VirtualList,
@@ -315,6 +318,90 @@ function BottomSheetToastDemo({ onResult }: { onResult: (message: string) => voi
   );
 }
 
+type FormHardeningValues = {
+  name: string;
+  optional?: string;
+};
+
+function FormHardeningProbe() {
+  const [showOptional, setShowOptional] = useState(true);
+  const [submitCount, setSubmitCount] = useState(0);
+  const [submitState, setSubmitState] = useState("idle");
+  const [submitResult, setSubmitResult] = useState("表单尚未完成提交");
+  const [actionResult, setActionResult] = useState("Action 尚未执行");
+  const submitResolveRef = useRef<(() => void) | null>(null);
+  const probeForm = useMeuForm<FormHardeningValues>({
+    defaultValues: {
+      name: "Meu 商店",
+      optional: "应随卸载移除"
+    }
+  });
+
+  return (
+    <section className="integration-form-hardening" aria-label="表单核心加固">
+      <MeuForm<FormHardeningValues>
+        aria-label="表单核心加固表单"
+        action={(formData) => {
+          const name = formData.get("name");
+          const intent = formData.get("intent");
+          setActionResult(
+            `Action：${typeof name === "string" ? name : ""}/${typeof intent === "string" ? intent : ""}/optional:${formData.has("optional") ? "present" : "absent"}`
+          );
+        }}
+        form={probeForm}
+        onSubmit={async (values) => {
+          setSubmitCount((count) => count + 1);
+          setSubmitState("submitting");
+          await new Promise<void>((resolve) => {
+            submitResolveRef.current = resolve;
+          });
+          setSubmitResult(
+            `提交值：${values.name}/optional:${Object.prototype.hasOwnProperty.call(values, "optional") ? "present" : "absent"}`
+          );
+          setSubmitState("idle");
+        }}
+      >
+        <MeuFormTextInput<FormHardeningValues> name="name" label="加固表单名称" />
+        {showOptional ? (
+          <MeuFormTextInput<FormHardeningValues> name="optional" label="动态可选字段" />
+        ) : null}
+        <Space block gap={2} wrap>
+          <Button
+            size="small"
+            type="button"
+            tone="neutral"
+            variant="outline"
+            onClick={() => setShowOptional((visible) => !visible)}
+          >
+            {showOptional ? "卸载可选字段" : "重新挂载可选字段"}
+          </Button>
+          <Button size="small" type="submit" name="intent" value="save">
+            提交加固表单
+          </Button>
+          <Button
+            size="small"
+            type="button"
+            tone="neutral"
+            variant="outline"
+            disabled={submitState !== "submitting"}
+            onClick={() => {
+              const resolve = submitResolveRef.current;
+              submitResolveRef.current = null;
+              if (resolve) resolve();
+            }}
+          >
+            完成异步提交
+          </Button>
+        </Space>
+        <output aria-label="加固表单提交次数">提交尝试：{submitCount}</output>
+        <output aria-label="加固表单状态">{submitState}</output>
+        <output aria-label="加固表单提交值">{submitResult}</output>
+        <output aria-label="加固表单 Action">{actionResult}</output>
+      </MeuForm>
+    </section>
+  );
+}
+
 export function ConsumerScenario() {
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
@@ -483,17 +570,33 @@ export function ConsumerScenario() {
         </section>
 
         <div className="integration-search">
-          <SearchField
-            aria-label="搜索组件"
-            dir="rtl"
-            placeholder="搜索 Meu 组件"
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onSearch={setSearchedFor}
-          />
+          <p id="integration-search-policy">搜索结果仅匹配组件名称和能力关键词。</p>
+          <Field label="搜索组件" description="支持组件名和能力关键词">
+            <SearchField
+              aria-describedby="integration-search-policy"
+              dir="rtl"
+              placeholder="搜索 Meu 组件"
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSearch={setSearchedFor}
+            />
+          </Field>
           <output aria-live="polite">
             {searchedFor ? `正在搜索：${searchedFor}` : "等待搜索"}
           </output>
+          <Field
+            id="integration-nested-field"
+            label="嵌套联系人"
+            description="用于验证布局包装后的关联"
+            required
+          >
+            <div data-testid="integration-nested-control">
+              <TextInput name="nestedContact" size="small" defaultValue="Meu" />
+            </div>
+          </Field>
+          <Field label="RTL 备注">
+            <TextArea defaultValue="تفاصيل الطلب" dir="rtl" maxLength={80} showCount size="small" />
+          </Field>
           <form
             aria-label="原生搜索表单"
             onSubmit={(event) => {
@@ -510,6 +613,8 @@ export function ConsumerScenario() {
             <output aria-live="polite">{nativeSearchSubmit}</output>
           </form>
         </div>
+
+        <FormHardeningProbe />
 
         <section className="integration-refresh" aria-label="下拉刷新">
           <PullToRefresh

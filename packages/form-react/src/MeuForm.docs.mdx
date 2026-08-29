@@ -35,9 +35,9 @@ since: 0.1.0
 implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
-  fileKey: null
-  nodeId: null
-storyIds: [forms-formtextinput--validation-and-submit]
+  fileKey: 1EjHFQkfyM4FNsfIuhFF1v
+  nodeId: "446:3770"
+storyIds: [forms-form--core-lifecycle, forms-formtextinput--validation-and-submit]
 source: packages/form-react/src/MeuForm
 ---
 
@@ -56,6 +56,9 @@ source: packages/form-react/src/MeuForm
 - 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按所属 `MeuForm` 内的 DOM 顺序聚焦首个已注册错误字段；同页多表单的同名字段不会互相干扰。
 - `MeuForm` 透传原生 form 属性，`ref` 指向真实 `HTMLFormElement`。
 - 原生 reset 会先调用消费方 `onReset`；事件未被阻止时，再同步重置 RHF 的值、dirty、touched 与 error 状态。
+- 条件字段默认在卸载时注销，使 RHF 提交与原生 successful controls 一致；连续异步校验保留最新字段结果。
+- 重复原生 submit 默认在当前提交 Promise 完成前忽略；拒绝可由 `onSubmitError` 明确接收。
+- 客户端与服务端错误均按所属表单内的 DOM 顺序聚焦首个可用字段；新一批服务端错误默认替换上一批 server error。
 
 当前状态为 V2 `verification`。复杂 Picker、日期、树与上传值的 adapter、可配置 FormData serializer、移动 E2E 和浏览器集成证据已建立；真机输入法与读屏证明尚未完成，因此不能标记为 commercial。
 
@@ -101,7 +104,7 @@ export function StoreForm() {
 
 ## 受控与非受控
 
-由 React Hook Form 管理。`defaultValues` 是推荐事实源；不要同时向 adapter 传 `value/defaultValue`。业务需要外部同步时使用 RHF `values`、`reset`、`setValue` 或 `useWatch`，并遵守各自的 dirty/touched 语义。
+由 React Hook Form 管理。`defaultValues` 是推荐事实源；不要同时向 adapter 传 `value/defaultValue`。业务需要受控外部同步时使用 RHF `values`，需要建立新的 dirty 基线时使用 `reset(nextValues)`，局部更新使用 `setValue`，订阅使用 `useWatch`。`values` 更新可能按 RHF `resetOptions` 重置 dirty/touched/errors，调用方必须显式选择保留策略。
 
 ## 表单集成
 
@@ -113,10 +116,12 @@ export function StoreForm() {
 - 无论 `disabled` 来自 adapter 自身、Picker trigger 还是 NumberKeyboard 键盘/trigger，禁用字段都会同时从 RHF 提交值和原生 successful controls 中省略；不要把 `disabled` 当作仅视觉状态。`readOnly` 字段仍保留提交值。
 - `rules.required` 决定 RHF 校验；视觉 `required` 同时表达字段必填并下传原生语义。二者需要由调用方保持一致。
 - 默认 `noValidate=true`，避免浏览器气泡与 React Hook Form 错误重复。显式设置 `noValidate={false}` 会启用浏览器原生约束阻断。
+- `useMeuForm` 默认 `shouldUnregister=true`，条件卸载字段不会继续进入 RHF values/submit；确需保存分步表单的离屏值时显式传 `shouldUnregister=false`。
+- 原生 `FormData` 只包含当前 DOM 中有 name 且未禁用的 successful controls；readOnly 仍提交，disabled 与已卸载字段省略，同名 hidden controls 通过 `getAll(name)` 保持数组顺序。
 
 ## Props
 
-`MeuFormProps` 继承原生 form 属性并要求 `form` 与 `onSubmit`。`onInvalid`、`noValidate` 和 `ref` 为主要表单级能力。adapter 的 Props 表由 API Extractor 从各公开类型生成。
+`MeuFormProps` 继承原生 form 属性，但以经过 RHF 校验的 `action` 与 `onSubmit` 契约替代原生同名属性，并要求 `form` 与类型安全的 RHF `onSubmit`。`action`、`onInvalid`、`onSubmitError`、`shouldFocusError`、`submitConcurrency`、`noValidate` 和 `ref` 为主要表单级能力。`submitConcurrency` 默认 `ignore`，可显式设为 `allow` 允许并行提交。adapter 的 Props 表由 API Extractor 从各公开类型生成。
 
 `useMeuForm` 接受 React Hook Form 配置，并在 `schema` 与 `resolver` 中二选一。字段 adapter 使用 `MeuStringFieldPath`、`MeuBooleanFieldPath`、`MeuNumberFieldPath`、`MeuSelectionFieldPath` 与 `MeuCollectionFieldPath` 阻止明显的错误值形状绑定；日期范围与时间分别公开 `MeuDateRangePickerFieldPath`、`MeuTimePickerFieldPath`，避免公开 Props 引用不可导入的内部别名。
 
@@ -124,13 +129,14 @@ export function StoreForm() {
 
 - `onSubmit(values, event)`：校验通过后触发；Zod transform 存在时 values 是 transform 后类型。
 - `onInvalid(errors, event)`：RHF 校验未通过时触发。
+- `onSubmitError(error)`：接收 `onSubmit` 或异步 `onInvalid` 的 rejection；省略时错误会在异步任务中重新抛出，避免静默失败。
 - adapter 的 `onChange/onBlur`：先更新 RHF value/touched，再调用消费方同名回调；业务回调读取 `getValues()` 时已得到新值。
 - 原生 `onReset` 先交给消费方；未调用 `preventDefault()` 时，`MeuForm` 会同步执行 `form.reset()`。`onInput/onChange` 等其余 form 事件继续透传。
-- `applyMeuFormErrors(form, errors, options)`：先写入所有 server error，再按所属表单的 DOM 顺序聚焦首个具名控件；返回实际首字段 path。未由 `MeuForm` 承载的裸 RHF 实例保持 document fallback。
+- `applyMeuFormErrors(form, errors, options)`：默认先清除该 form 上一批由本 helper 写入的 server error，再写入新响应；按所属表单的 DOM 顺序跳过 disabled/inert/aria-hidden 字段并聚焦首个可用具名控件。`clearPrevious=false` 可合并响应，`shouldFocusFirst=false` 可禁止聚焦。未由 `MeuForm` 承载的裸 RHF 实例保持 document fallback。
 
 ## Ref 与命令式方法
 
-`MeuForm` ref 指向 `HTMLFormElement`，可使用 `requestSubmit()`、`reset()` 和原生查询。字段聚焦优先使用 RHF `setFocus()`；不要依赖 Meu 内部 DOM class。
+`MeuForm` ref 指向 `HTMLFormElement`，可使用 `requestSubmit()`、`reset()` 和原生查询。字段聚焦优先使用 RHF `setFocus()`；所有官方 adapter 会在 Field 根暴露内部诊断属性 `data-meu-form-field`，用于稳定计算复合控件与空值控件的 DOM 顺序，但业务样式和逻辑不得依赖它。
 
 ## 键盘操作
 
@@ -140,11 +146,11 @@ export function StoreForm() {
 | Enter           | 单行字段遵循浏览器 submit 规则；SearchField 另有契约 |
 | Space           | 切换 checkbox、switch 或当前可操作按钮               |
 
-首次错误聚焦必须落到可操作控件，并在错误文字更新后保持清晰 accessible description。
+首次错误聚焦默认由 MeuForm 在错误提交后按 DOM 顺序执行；`useMeuForm` 因此默认关闭 RHF 自己的注册顺序聚焦。直接传入裸 `useForm()` 实例时建议设置 `shouldFocusError:false`，避免两套聚焦策略竞争。
 
 ## 触摸与手势
 
-Form 不定义手势。所有 adapter 继承底层组件至少 44×44 CSS px 的触控目标、pointer cancel 和滚动冲突策略。提交按钮的重复请求由业务 loading 状态阻止。
+Form 不定义手势。所有 adapter 继承底层组件至少 44×44 CSS px 的触控目标、pointer cancel 和滚动冲突策略。`submitConcurrency="ignore"` 在 Promise 完成前阻止重复原生提交；业务仍应使用 `formState.isSubmitting` 呈现 loading 和禁用状态。
 
 ## 无障碍
 
@@ -162,6 +168,10 @@ Form 不创建视觉容器。布局、间距、Field 和底层控件使用 Meu T
 
 `@meu/form-react` 主入口是 Client Component 边界。纯服务端错误类型和辅助函数从 `@meu/form-react/server` 导入，避免穿过带有 `"use client"` 的根入口。默认值必须在服务端数据与首次客户端渲染之间稳定。
 
+RHF 的异步 `handleSubmit` 必须先阻止浏览器默认提交，因此 MeuForm 在客户端校验及 `onSubmit` 成功后显式执行 `action`：React 19/Next function action 收到所属 document 构造的 native `FormData`（包含同名多值和原始 submitter），字符串 action 通过带原始 submitter 的 `requestSubmit()` 继续原生提交。action rejection 进入 `onSubmitError`；iframe/多 document 场景不会错误依赖顶层 window 的 DOM 构造器。
+
+这是 client-mediated action 边界，不等同于浏览器在 hydration 前的 progressive enhancement，也不建立 React 原生 action 的 `useFormStatus` pending 上下文。必须依赖这两项能力时使用独立原生 form；使用 MeuForm 时以 `formState.isSubmitting` 展示 pending，并用 `applyMeuFormErrors` 映射 action 返回的结构化字段错误。
+
 ## RTL 与国际化
 
 Form 不生成文案。Field、组件默认 label、日期格式和错误消息分别由 ConfigProvider、adapter 或业务提供。服务端错误必须使用当前 locale，且中英文长文案需在 200% 字号下测试。
@@ -177,19 +187,21 @@ Form 不生成文案。Field、组件默认 label、日期格式和错误消息�
 - overlay adapter 在打开并把焦点移入 Portal 时保持 untouched；确认、取消、遮罩或 Escape 关闭时才标记 touched。受控模式拒绝打开不会触碰字段，拒绝关闭仍会记录已经发生的用户交互。
 - 仅设置 `required` 不会自动生成 RHF `rules.required`；自动合成会改变校验消息和现有行为，因此当前不隐式处理。
 - 从根入口移除了 React Hook Form wildcard re-export；消费者必须直接依赖并导入 `react-hook-form`。
+- 默认卸载即注销；多步骤表单若通过条件卸载保存离屏步骤值，升级时需显式设置 `shouldUnregister:false`。
+- `action` 现在在 RHF 校验与 `onSubmit` 成功后执行；此前虽然类型继承但会被 `preventDefault` 静默截断。依赖原生 progressive enhancement/`useFormStatus` 的页面仍应使用原生 form。
 
 ## 性能预算
 
-Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时按需扫描具名控件确定首个错误顺序。adapter 不复制业务值，也不增加全局事件监听。
+Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或应用服务端错误时，才在所属 form 内按需扫描 adapter 标记与具名控件，确定首个错误顺序。adapter 不复制业务值，也不增加全局事件监听。
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组和 dirty/touched；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦。
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx`、`MeuFormDisabledContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、全局/局部 disabled、required、事件顺序、嵌套、数组、动态卸载、dirty/touched、DOM 首错聚焦、重复提交、rejection、异步校验乱序和 server error 替换；Calendar 单测验证组内移焦保持 untouched、离开后 RHF/消费方 blur 顺序、`mode="onBlur"` 校验及 reset 清理。22 个 adapter 的非空值矩阵验证局部禁用会同时从 DOM successful controls 与 RHF `onSubmit` 省略，并在动态启用后恢复提交。原生 reset 未被取消时恢复默认值并清除 dirty/touched/errors，被消费方取消时完整保留状态。复杂 adapter 的 `FormData` 单测覆盖标量、同名重复条目、自定义 JSON、空值与 disabled 省略；服务端错误单测覆盖所属表单内的 DOM 顺序聚焦及 disabled 跳过。
 - Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 112984 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 38101 B / 65536 B 预算，组合 Brotli 88297 B；共享样式由应用单独导入一次。
-- SSR/hydration: 隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，验证无 hydration 错误；客户端 `reset(nextDefaults)` 更新后，原生 reset 会恢复新的客户端默认值而不是旧服务端值
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 114853 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38288 B / 65536 B 预算，组合 Brotli 89814 B；共享样式由应用单独导入一次。
+- SSR/hydration: `MeuForm.ssr.test.tsx` 验证确定性原生 form shell 与 React 19 hydration 0 mismatch；隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，客户端 `reset(nextDefaults)` 后原生 reset 恢复新的客户端默认值而不是旧服务端值
 - RTL: 隔离 Next H5 的 Form hydration 场景在 `dir="rtl"` 下验证输入方向继承、默认值与 reset 行为；adapter 继续依赖底层组件的逻辑属性
 - Reduced motion: Form 无自有动效；同一专项场景在 `motion="reduced"` Provider 下完成 hydration 与交互，Form 不新增 transition/animation
 - Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接覆盖空提交后的错误与 `aria-invalid`、TextInput 清除、有效值提交；原生 reset 恢复默认值并清除 dirty/touched/error；服务端错误即使按非 DOM 顺序传入，也会聚焦并滚动显示表单内第一个字段。Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker 覆盖取消不提交草稿、确认提交值和关闭后恢复焦点；DateRangePicker 还验证自定义 JSON serializer 在确认前后都只生成一个合法 `FormData` 条目。ImageUploader 路径断言 hidden `productImages` 初始序列化、删除后省略、上传完成后恢复，以及必填错误聚焦真实 file input。
@@ -228,3 +240,5 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 | 2026-08-29 | 未发布 | verification | 增加移动 Chromium/WebKit 的原生 reset 与服务端错误滚动路径                          | reset 会清理值、dirty、touched 与错误；服务端错误聚焦首个 DOM 字段          |
 | 2026-08-29 | 未发布 | verification | 增加服务端默认值 hydration 与客户端默认值切换专项                                   | `reset(nextDefaults)` 后的原生 reset 恢复最新客户端默认值                   |
 | 2026-08-29 | 未发布 | verification | 在双移动引擎验证复杂日期范围的单条 JSON `FormData` 契约                             | 后端按 JSON 数组解析 `deliveryWindow`，不再依赖同名重复条目                 |
+| 2026-08-29 | 未发布 | hardening    | 核心注册、卸载、并发提交、异步错误与首错聚焦契约加固                                | 默认卸载注销；`action` 改为显式边界；新增可选错误/并发 props                |
+| 2026-08-29 | 未发布 | hardening    | 22 个 adapter 增加稳定的内部字段顺序标记，字符串 action 保留原始 submitter          | 复合/空值字段也按 DOM 顺序聚焦；业务不得依赖内部诊断属性                    |

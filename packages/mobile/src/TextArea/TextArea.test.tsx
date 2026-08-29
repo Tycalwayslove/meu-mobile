@@ -76,6 +76,34 @@ describe("TextArea", () => {
     expect(onChange).toHaveBeenCalledOnce();
   });
 
+  it("keeps IME events native while synchronizing derived count and autosize", () => {
+    const onCompositionStart = vi.fn();
+    const onCompositionEnd = vi.fn();
+    const onChange = vi.fn();
+    render(
+      <TextArea
+        aria-label="输入法说明"
+        autoSize={{ minRows: 1, maxRows: 4 }}
+        onChange={onChange}
+        onCompositionEnd={onCompositionEnd}
+        onCompositionStart={onCompositionStart}
+        showCount
+      />
+    );
+    const textArea = getTextArea("输入法说明");
+    setScrollHeight(textArea, () => 88);
+
+    fireEvent.compositionStart(textArea, { data: "猫" });
+    fireEvent.change(textArea, { target: { value: "猫🐱" } });
+    fireEvent.compositionEnd(textArea, { data: "🐱" });
+
+    expect(onCompositionStart).toHaveBeenCalledOnce();
+    expect(onCompositionEnd).toHaveBeenCalledOnce();
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(screen.getByText("3")).toBeTruthy();
+    expect(textArea.style.height).not.toBe("");
+  });
+
   it("synchronizes uncontrolled count and autosize after native form reset", async () => {
     render(
       <form aria-label="编辑表单">
@@ -264,5 +292,33 @@ describe("TextArea", () => {
     expect(textArea.getAttribute("readonly")).not.toBeNull();
     expect(textArea.getAttribute("disabled")).toBeNull();
     expect(textArea.getAttribute("data-state")).toBe("readonly");
+  });
+
+  it("forwards native attributes and ref while keeping an explicit RTL counter readable", () => {
+    const ref = { current: null as HTMLTextAreaElement | null };
+    render(
+      <TextArea
+        ref={ref}
+        aria-label="RTL 备注"
+        autoComplete="off"
+        defaultValue="طلب"
+        dir="rtl"
+        inputMode="text"
+        name="note"
+        required
+        showCount
+      />
+    );
+    const textArea = getTextArea("RTL 备注");
+    const count = screen.getByText("3");
+
+    expect(ref.current).toBe(textArea);
+    expect(textArea.name).toBe("note");
+    expect(textArea.required).toBe(true);
+    expect(textArea.autocomplete).toBe("off");
+    expect(textArea.inputMode).toBe("text");
+    expect(textArea.dir).toBe("rtl");
+    expect(textArea.parentElement && textArea.parentElement.dir).toBe("rtl");
+    expect(count.getAttribute("dir")).toBe("ltr");
   });
 });

@@ -2391,6 +2391,11 @@
           "sourcePath": "packages/form-react/src/MeuFormStepper"
         },
         {
+          "kind": "type",
+          "name": "MeuFormSubmitConcurrency",
+          "sourcePath": "packages/form-react/src/MeuForm"
+        },
+        {
           "kind": "value",
           "name": "MeuFormSwitch",
           "sourcePath": "packages/form-react/src/MeuFormSwitch"
@@ -2484,8 +2489,8 @@
       "externalWildcardExports": [],
       "packageName": "@meu/form-react",
       "stats": {
-        "total": 73,
-        "types": 49,
+        "total": 74,
+        "types": 50,
         "values": 24
       }
     },
@@ -3975,6 +3980,10 @@
         {
           "kind": "type",
           "name": "MeuFormStepperProps"
+        },
+        {
+          "kind": "type",
+          "name": "MeuFormSubmitConcurrency"
         },
         {
           "kind": "value",
@@ -6385,8 +6394,8 @@
     "packages": 4,
     "products": 68,
     "productsWithoutPublicExports": 0,
-    "publicExports": 508,
-    "publicTypes": 383,
+    "publicExports": 509,
+    "publicTypes": 384,
     "publicValues": 125,
     "undocumentedPublicExports": 0,
     "unclaimedPublicValues": 0

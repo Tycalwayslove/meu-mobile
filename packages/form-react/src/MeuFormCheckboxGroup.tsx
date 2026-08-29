@@ -61,6 +61,7 @@ export function MeuFormCheckboxGroup<
         const currentValue = Array.isArray(field.value) ? (field.value as TValue[]) : [];
         return (
           <Field
+            data-meu-form-field={field.name}
             label={label}
             description={description}
             required={required}

@@ -94,6 +94,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     autoSize = false,
     className,
     defaultValue,
+    dir,
     disabled = false,
     form,
     id,
@@ -278,7 +279,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   }
 
   return (
-    <span className={root}>
+    <span className={root} dir={dir}>
       <textarea
         {...props}
         ref={(element) => {
@@ -288,6 +289,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         id={resolvedId}
         className={className ? `${classes} ${className}` : classes}
         defaultValue={controlled ? undefined : defaultValue}
+        dir={dir}
         disabled={disabled}
         form={form}
         maxLength={maxLength}
@@ -304,7 +306,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
       />
       {showCount ? (
-        <span id={countId} className={counter} data-meu-slot="count">
+        <span id={countId} className={counter} dir="ltr" data-meu-slot="count">
           {displayedValue.length}
           {typeof maxLength === "number" ? ` / ${maxLength}` : null}
         </span>

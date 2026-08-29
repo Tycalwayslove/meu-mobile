@@ -10,7 +10,7 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "446:131"
 storyIds:
   [
     forms-textinput--default,
@@ -21,6 +21,7 @@ storyIds:
     forms-textinput--clearable,
     forms-textinput--small,
     forms-textinput--large,
+    forms-textinput--native-mobile-contract,
     forms-textinput--password-and-autofill,
     forms-textinput--native-form-reset,
     forms-textinput--loading-focus-transfer,
@@ -36,7 +37,7 @@ source: packages/mobile/src/TextInput
 
 - 使用真实单行 input，支持 ref、受控/非受控值，以及除原生 `size` 外的 input 属性。
 - 支持 small/medium/large、default/error、disabled、readOnly、loading 与 clearable。
-- 自动继承 Field 的 id、description、error；保留 caller 的 `false/grammar/spelling` ARIA invalid token，Field/status error 优先输出 `true`。
+- 自动继承 Field 的 id、label、required、description、error，包括位于一个原生布局 wrapper 内的场景；保留 caller 的 `false/grammar/spelling` ARIA invalid token，Field/status error 优先输出 `true`。
 - clear 只在可编辑非空值时出现；通过真实 input event 请求空值，恢复 input 焦点后再调用 `onClear`。受控调用方可接受或拒绝空值。
 - 非受控值遵循祖先或外部 `form=` 的原生 reset；受控 reset 恢复最新 `value`，取消 reset 不改变当前值。
 - loading 公布 caller-owned 异步工作并隐藏 clear，但不锁住编辑、FormData 或原生 form submit；focused clear 被替换时焦点回到 input。
@@ -103,6 +104,8 @@ DOM 为 wrapper → native input + 可选 clear button/loading status。
 - `status`：default/error 视觉状态；error 会设置 `aria-invalid=true`。
 - `dir`：同时设置 wrapper 与 input，保证组件级 RTL 的文本和尾部操作一致。
 
+`small` 仍保持 44 px 最小高度，但输入文字固定不低于 16 px，避免 iOS Safari/WKWebView 聚焦时自动放大页面。
+
 其余 Props 来自 native input；API 表由 `TextInputProps` 生成。
 
 ## Events
@@ -112,7 +115,7 @@ DOM 为 wrapper → native input + 可选 clear button/loading status。
 - `onClear`：上述事件处理和 input focus 恢复后调用；当前无 details，不区分 pointer/keyboard 来源。
 - `onBlur/onFocus/onComposition*/onKeyDown`：原样透传；组件不拦截 IME 或 Enter。
 
-clear 顺序固定为 DOM value 置空 → 冒泡 input → React `onInput/onChange` → focus input → `onClear`。它不会额外派发浏览器原生 `change` event。
+clear 顺序固定为 DOM value 置空 → 冒泡 input → React `onInput/onChange` → focus input → `onClear`。事件使用 input 所属 `ownerDocument` 的构造器，因此 Portal/iframe 等跨 Document 渲染不会混用 realm；它不会额外派发浏览器原生 `change` event。
 
 ## Ref 与命令式方法
 
@@ -141,7 +144,7 @@ IME 完全由 native input 处理；组件不拦截 composition 事件，也不�
 
 ## 无障碍
 
-input 必须有 label，推荐由 Field 生成。error 通过 `aria-invalid` 与 `aria-describedby` 关联；通过嵌套布局消费 Field context 时，显式 `aria-describedby`（包括空字符串 opt-out）优先于 context，直接子控件仍遵循 Field 的 ID 合并契约。grammar/spelling token 不会无故折叠。clear 是有名称的 native button，可用 `clearLabel` 为密码等场景具体化。loading 使用 atomic polite status，并在 input 设置 `aria-busy`；它不是 disabled/readOnly 的替代。
+input 必须有 label，推荐由 Field 生成。TextInput 会从 Field context 继承 `aria-labelledby` 与 native `required`，因此增加一个原生布局 wrapper 时不会丢失标签或 constraint validation。error 通过 `aria-invalid` 与 `aria-describedby` 关联；通过嵌套布局消费 Field context 时，显式 `aria-describedby`（包括空字符串 opt-out）优先于 context，直接子控件仍遵循 Field 的 ID 合并契约。grammar/spelling token 不会无故折叠。clear 是有名称的 native button，可用 `clearLabel` 为密码等场景具体化。loading 使用 atomic polite status，并在 input 设置 `aria-busy`；它不是 disabled/readOnly 的替代。
 
 ## 动效
 
@@ -161,7 +164,7 @@ SSR 输出真实 input、value/type/autoComplete/disabled/error 与 loading stat
 
 ## 浏览器与 WebView
 
-运行时代码使用 native input/button、value descriptor、基础 Event、setTimeout 和 React state/effect，没有引入超出 Chrome/WebView 70 或 iOS 13 的强制 JS API。logical padding 在目标基线可用；旧宿主可安全忽略不识别的 forced-colors/reduced-motion media query。静态兼容与 jsdom 不代表真机通过。
+V2 正式支持 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；iOS 13–14 和 Chromium 79–88 为观察档。运行时代码使用 native input/button、value descriptor、基础 Event、setTimeout 和 React state/effect，没有引入超出 Chrome 70 / iOS 13 静态门禁的强制 JS API。clear/reset 使用 input 自身 `ownerDocument.defaultView`；small/medium/large 均保持至少 16 px 输入字号，避免 iOS 聚焦缩放；disabled 在 WebKit 明确保持 opacity 与文字填充色。旧宿主可安全忽略不识别的 forced-colors/reduced-motion media query。静态兼容与 jsdom 不代表真机通过。
 
 ## 边界情况与已知限制
 
@@ -177,12 +180,13 @@ SSR 输出真实 input、value/type/autoComplete/disabled/error 与 loading stat
 
 ## 测试证据
 
-- Unit：Field/ARIA token、受控接受/拒绝 clear、非受控 input/autofill-like 更新、password clear、IME 事件透传、selection/focus、祖先/外部/晚挂载/替换/cancel/controlled reset、disabled/readOnly FormData、loading 编辑和 form submit、loading+error、provider reduced motion、RTL、locale。
+- Unit：Field label/required 与嵌套布局、ARIA token、受控接受/拒绝 clear、clear 事件顺序、跨 Document realm、非受控 input/autofill-like 更新、password clear、IME 事件透传、selection/focus、祖先/外部/晚挂载/替换/cancel/controlled reset、disabled/readOnly FormData、loading 编辑和 form submit、loading+error、provider reduced motion、RTL、locale。
 - SSR：native token、password/autoComplete、loading 与 disabled。
 - Hydration：真实 `hydrateRoot` 无 mismatch，hydration 后 clear/change/focus。
-- Story interaction：Clearable 覆盖值/回调/focus；NativeFormReset 覆盖 default/FormData；LoadingFocusTransfer 覆盖 loading 焦点移交；ReducedMotionLoading 覆盖 provider motion 与 loading/error 语义。Password/autofill 与 RTL Story 提供人工入口。
+- Story interaction：Clearable 覆盖值/回调/focus；NativeFormReset 覆盖 default/FormData；LoadingFocusTransfer 覆盖 loading 焦点移交；NativeMobileContract 覆盖 autocomplete/inputMode/enterKeyHint/required 与 16 px 防缩放；ReducedMotionLoading 覆盖 provider motion 与 loading/error 语义。Password/autofill 与 RTL Story 提供人工入口。
+- Storybook 浏览器矩阵：本批在 390×844 视口验证 TextInput 14 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 98 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。
 - 官网 Next 运行时：既有本地 production 双引擎证据覆盖 Field invalid、受控 fill、clear/focus、修正与提交；本轮未重新执行或扩大共享 E2E，loading、外部 form/reset 与受控拒绝仍待后续定向浏览器验证。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4617 B / 32768 B 预算，组合 Brotli 4086 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4934 B / 32768 B 预算，组合 Brotli 4354 B；共享样式由应用单独导入一次。
 
 ## V2 优化记录
 
@@ -191,6 +195,7 @@ SSR 输出真实 input、value/type/autoComplete/disabled/error 与 loading stat
 - 冻结 native value/event/Field/ARIA 契约。
 - 修复 clear 可见性、受控/外部/取消 form reset、loading/focus 与组件级 RTL。
 - 补 password/autofill-like、FormData、IME、SSR/hydration 和 Story 证据。
+- 补 Field label/required context、嵌套布局、跨 Document clear 事件与 iOS 16 px 防聚焦缩放契约。
 
 ### 待验证
 
@@ -200,8 +205,9 @@ SSR 输出真实 input、value/type/autoComplete/disabled/error 与 loading stat
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                                    |
-| ---------- | ------ | ------------- | ---------------------------------------------------------- | ------------------------------------------- |
-| 2026-08-28 | 0.1.0  | docs          | 建立 V2 留存文档基线                                       | 无                                          |
-| 2026-08-29 | 未发布 | accessibility | 保留 ARIA token，并统一 Field/status error 优先级          | 无                                          |
-| 2026-08-29 | 未发布 | hardening     | 补 clear、form reset、loading/focus、RTL 与 hydration 契约 | 新增可选 loading/labels；空值不再显示 clear |
+| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                                                        |
+| ---------- | ------ | ------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs          | 建立 V2 留存文档基线                                       | 无                                                              |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA token，并统一 Field/status error 优先级          | 无                                                              |
+| 2026-08-29 | 未发布 | hardening     | 补 clear、form reset、loading/focus、RTL 与 hydration 契约 | 新增可选 loading/labels；空值不再显示 clear                     |
+| 2026-08-29 | 未发布 | hardening     | 补嵌套 Field、跨 Document 与 iOS 聚焦缩放防护              | small 输入字号由 14 px 调整为 16 px；控件高度与 `size` API 不变 |

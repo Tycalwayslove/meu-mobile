@@ -182,6 +182,7 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
 
   return (
     <Field
+      data-meu-form-field={field.name}
       label={label}
       description={description}
       required={required}

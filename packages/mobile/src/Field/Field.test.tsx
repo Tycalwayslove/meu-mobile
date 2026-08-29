@@ -88,6 +88,58 @@ describe("Field", () => {
     expect(control.getAttribute("aria-describedby")).toBe("account-policy shop-name-description");
   });
 
+  it("associates a nested Field-aware input without cloning a layout wrapper", () => {
+    render(
+      <Field label="联系人" description="用于配送通知" error="请输入联系人" required>
+        <div data-testid="control-layout">
+          <TextInput name="contact" />
+        </div>
+      </Field>
+    );
+
+    const layout = screen.getByTestId("control-layout");
+    const control = screen.getByRole<HTMLInputElement>("textbox", { name: "联系人" });
+    const describedBy = (control.getAttribute("aria-describedby") || "").split(" ");
+
+    expect(layout.getAttribute("id")).toBeNull();
+    expect(layout.getAttribute("aria-labelledby")).toBeNull();
+    expect(control.required).toBe(true);
+    expect(control.getAttribute("aria-invalid")).toBe("true");
+    expect(describedBy).toContain(`${control.id}-required`);
+    expect(describedBy).toContain(`${control.id}-description`);
+    expect(describedBy).toContain(`${control.id}-error`);
+    expect(document.querySelectorAll(`[id="${control.id}"]`)).toHaveLength(1);
+  });
+
+  it("keeps the visible native label in an existing aria-labelledby chain", () => {
+    render(
+      <>
+        <span id="name-policy">实名信息</span>
+        <Field label="收货人姓名">
+          <input aria-labelledby="name-policy" />
+        </Field>
+      </>
+    );
+
+    const control = screen.getByRole("textbox", { name: "实名信息 收货人姓名" });
+    expect(control.getAttribute("aria-labelledby")).toBe(`name-policy ${control.id}-label`);
+  });
+
+  it("does not create empty labels, descriptions, alerts, or invalid state", () => {
+    render(
+      <Field label={<></>} description={[]} error={<>{false}</>}>
+        <input aria-label="独立名称" />
+      </Field>
+    );
+
+    const control = screen.getByRole("textbox", { name: "独立名称" });
+    expect(control.getAttribute("aria-describedby")).toBeNull();
+    expect(control.getAttribute("aria-invalid")).toBeNull();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(document.querySelector('[data-meu-slot="label"]')).toBeNull();
+    expect(document.querySelector('[data-meu-slot="description"]')).toBeNull();
+  });
+
   it("lets an explicit accessible name take precedence over the visible ARIA label", () => {
     render(
       <Field label="订单操作">

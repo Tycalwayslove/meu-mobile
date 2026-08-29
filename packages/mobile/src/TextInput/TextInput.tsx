@@ -21,6 +21,12 @@ function valueToString(value: TextInputValue) {
   return value === undefined ? "" : String(value);
 }
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
+
 /**
  * Props for a Field-aware native text input with an optional clear action.
  *
@@ -61,6 +67,8 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
     "aria-busy": ariaBusy,
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     className,
     clearLabel: clearLabelProp,
     clearable = false,
@@ -75,6 +83,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
     onClear,
     onInput,
     readOnly = false,
+    required = false,
     size = "medium",
     status = "default",
     value,
@@ -93,12 +102,17 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
   );
   const hasValue = controlled ? valueHasText(value) : uncontrolledHasValue;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
+  const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const describedBy =
     ariaDescribedBy !== undefined
       ? ariaDescribedBy
       : fieldContext
         ? fieldContext.describedBy
         : undefined;
+  const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
+  const labelledBy = hasExplicitAriaLabel
+    ? ariaLabelledBy
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -134,13 +148,14 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
     const element = inputRef.current;
     const ownerDocument = element ? element.ownerDocument : null;
     if (!element || !ownerDocument) return undefined;
+    const timerWindow = ownerDocument.defaultView || window;
 
     const handleReset = (event: Event) => {
       const currentElement = inputRef.current;
       if (!currentElement || event.target !== currentElement.form) return;
       if (controlled) currentElement.defaultValue = valueToString(value);
-      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = window.setTimeout(() => {
+      if (resetTimerRef.current !== null) timerWindow.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = timerWindow.setTimeout(() => {
         resetTimerRef.current = null;
         const resetElement = inputRef.current;
         if (!resetElement || event.defaultPrevented) return;
@@ -152,7 +167,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
     ownerDocument.addEventListener("reset", handleReset);
     return () => {
       ownerDocument.removeEventListener("reset", handleReset);
-      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      if (resetTimerRef.current !== null) timerWindow.clearTimeout(resetTimerRef.current);
       resetTimerRef.current = null;
     };
   }, [controlled, defaultValue, form, value]);
@@ -173,10 +188,19 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
     if (disabled || readOnly || loading) return;
     const element = inputRef.current;
     if (element) {
-      const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+      const ownerWindow = element.ownerDocument.defaultView;
+      const ownerGlobal = ownerWindow;
+      const inputPrototype = ownerGlobal ? ownerGlobal.HTMLInputElement.prototype : undefined;
+      const valueDescriptor = inputPrototype
+        ? Object.getOwnPropertyDescriptor(inputPrototype, "value")
+        : undefined;
       if (valueDescriptor && valueDescriptor.set) valueDescriptor.set.call(element, "");
       else element.value = "";
-      element.dispatchEvent(new Event("input", { bubbles: true }));
+      const inputEvent = ownerGlobal
+        ? new ownerGlobal.Event("input", { bubbles: true })
+        : element.ownerDocument.createEvent("Event");
+      if (!ownerGlobal) inputEvent.initEvent("input", true, false);
+      element.dispatchEvent(inputEvent);
       element.focus();
     }
     if (onClear) {
@@ -199,12 +223,15 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
         disabled={disabled}
         form={form}
         readOnly={readOnly}
+        required={resolvedRequired}
         value={value}
         onChange={onChange}
         onInput={handleInput}
         aria-busy={loading ? true : ariaBusy}
         aria-describedby={describedBy}
         aria-invalid={resolvedAriaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         data-meu-component="text-input"
         data-size={size}
         data-state={

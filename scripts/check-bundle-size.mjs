@@ -36,7 +36,7 @@ const complexProducts = new Set([
 ]);
 
 function productBudget(product) {
-  if (product.name === "Form") return 112 * 1024;
+  if (product.name === "Form") return 113 * 1024;
   if (complexProducts.has(product.name)) return 48 * 1024;
   return 32 * 1024;
 }

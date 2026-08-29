@@ -15,7 +15,7 @@ export type {
   MeuStringFieldPath
 } from "./adapter-types";
 export { MeuForm } from "./MeuForm";
-export type { MeuFormProps } from "./MeuForm";
+export type { MeuFormProps, MeuFormSubmitConcurrency } from "./MeuForm";
 export { MeuFormTextInput } from "./MeuFormTextInput";
 export type { MeuFormTextInputProps } from "./MeuFormTextInput";
 export { MeuFormNumberKeyboard } from "./MeuFormNumberKeyboard";

@@ -10,12 +10,13 @@ implementedVersion: null
 lastReviewed: 2026-08-29
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
-  nodeId: null
+  nodeId: "444:3183"
 storyIds:
   [
     forms-field--default,
     forms-field--error,
     forms-field--explicit-control-id,
+    forms-field--nested-layout,
     forms-field--composite-control,
     forms-field--external-validation
   ]
@@ -27,9 +28,9 @@ source: packages/mobile/src/Field
 ## 当前能力
 
 - 将一个主要控件与可见 label、description、error、required 和 invalid 状态组合。
-- 为单个直接 React 子元素注入稳定 `id`，并合并调用方与 Field 的 `aria-describedby`，不会覆盖调用方已有的说明节点。
+- 为单个可关联的直接 React 子元素注入稳定 `id`，并合并调用方与 Field 的 `aria-describedby`，不会覆盖调用方已有的说明节点。原生布局 wrapper 不会被误当成控件；内部 Field-aware 控件直接消费 context，避免重复 id。
 - 原生 labelable HTML 元素默认使用 `label[for]`；React 组件默认使用 `aria-labelledby`，避免把 `label[for]` 指向 `div`、`role=group` 等非 labelable 节点。
-- `required` 与 `invalid` 同时进入 Field context；native 关联收到真实 `required`，不支持 required 的 ARIA/按钮路径通过本地化隐藏说明表达，避免输出无效属性。
+- `required` 与 `invalid` 同时进入 Field context；native 关联以及 Field-aware 原生控件收到真实 `required`，不支持 required 的 ARIA/按钮路径通过本地化隐藏说明表达，避免输出无效属性。
 - 根节点支持标准 div 属性、`style`、`className`、`id`、事件与 `HTMLDivElement` ref。
 
 这些能力已进入 `verification`。Next H5 移动 Chromium/WebKit 已覆盖 TextInput/TextArea 的 Field 归属、invalid/error 与修正后提交；最终 Chromatic Light/Dark 审批和真机读屏记录尚未完成，不能标记为 commercial。
@@ -71,6 +72,16 @@ Meu 单一原生控件包装器应显式选择 `native`，以保留点击标签�
 </Field>
 ```
 
+需要控制区布局时，可以增加原生 wrapper。Field 不会把无 role 的 `div/span` 克隆成控件；TextInput 等 Field-aware 控件仍会取得 label、required、description 与 error：
+
+```tsx
+<Field label="联系人" description="用于配送通知" required>
+  <div className={styles.controlLayout}>
+    <TextInput name="contact" autoComplete="name" />
+  </div>
+</Field>
+```
+
 组合控件使用 ARIA 命名，不生成无效的 `label[for]`：
 
 ```tsx
@@ -96,10 +107,10 @@ API 表由 API Extractor 根据 `FieldProps` 生成。跨字段规则：
 
 - 直接子元素的显式 `id` 优先于 `controlId`；两者都没有时使用稳定的 React `useId`。
 - 根 `id` 只标识 Field 容器；若未提供 control id，则控制 id 为 `${rootId}-control`，不会复用根 id。
-- `labelAssociation="auto"` 只将直接原生 labelable HTML 元素识别为 native；React 组件使用 aria。封装单一 input/textarea 的组件应明确传 `native`。
+- `labelAssociation="auto"` 只将直接原生 labelable HTML 元素识别为 native；无 role/contentEditable 的原生布局 wrapper 不参与属性注入，React 组件使用 aria。封装单一 input/textarea 的组件可明确传 `native`，Field-aware 组件也可从 context 继承原生 required。
 - `requiredText` 可覆盖 ARIA 回退路径的“必填/Required”文案；默认值跟随 `ConfigProvider.locale`。控件已自行声明合法 required 语义时不会重复追加。
-- `aria-label` 是调用方的明确命名选择，因此不会再追加 Field label 的 `aria-labelledby`。
-- `description`、`error` 和 `label` 接受 `0` 或空字符串；只有 `null`、`undefined`、`false` 表示不渲染。
+- 非空 `aria-label` 是调用方的明确命名选择，因此不会再追加 Field label 的 `aria-labelledby`。已有 `aria-labelledby` 的原生控件会合并可见 Field label，避免视觉标签与读屏名称脱节。
+- `description`、`error` 和 `label` 接受 `0`；空字符串、仅空白字符串、空数组、空 Fragment、`null`、`undefined`、`false` 均不渲染，也不会制造空 alert 或错误状态。
 
 ## Events
 
@@ -152,7 +163,7 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 
 ## 边界情况与已知限制
 
-- 自动属性注入只适用于一个直接 React element。Fragment、多个控件或中间布局组件必须由内部控件调用 `useFieldContext` 并合并自身 ARIA；当前不会递归克隆后代。
+- 自动属性注入只适用于一个可关联的直接 React element。Fragment、多个控件或原生中间布局组件不会被递归克隆；内部控件必须调用 `useFieldContext` 并合并自身 ARIA。一个 Field 仍只能拥有一个主要控件。
 - `auto` 无法从 React 组件类型可靠判断最终 DOM，因此默认使用更安全的 ARIA 组合语义。单一 input wrapper 若需要 native label 点击和 constraint validation，必须设置 `labelAssociation="native"`。
 - Field-aware 旧组件中仍有使用 `callerAria || fieldAria` 的实现；Field 对直接子元素的合并已避免丢失，但深层包装组件需要在各自 V2 批次改为 token 合并。
 - 首次错误自动聚焦与整表 error summary 由 Form 层负责，Field 不自行抢焦点。
@@ -163,11 +174,11 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 
 ## 测试证据
 
-- Unit: `Field.test.tsx`，覆盖显式 id、说明合并/去重、native/composite 标签、required/invalid context、ARIA 命名优先级、根 DOM/ref
-- Story interaction: `Default` 验证原生 label、required 与说明 IDREF；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `Field.test.tsx`，覆盖显式 id、说明合并/去重、native/composite 标签、嵌套布局无重复 id、required/invalid context、ARIA 命名合并、空结构内容、根 DOM/ref
+- Story interaction: `Default` 验证原生 label、required 与说明 IDREF；`NestedLayout` 验证嵌套关联与唯一 id。当前本地静态 Storybook 含 442 个 Story、413 个共置 storyId，81/81 title 至少有一项关键 play。
+- Storybook 浏览器矩阵：本批在 390×844 视口验证 Field 6 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 42 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库 374 个 Story × 7 场景是上一轮历史基线，最终冻结时统一重跑当前全量矩阵。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1921 B / 32768 B 预算，组合 Brotli 1684 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2118 B / 32768 B 预算，组合 Brotli 1854 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Field.ssr.test.tsx` 覆盖稳定原生关联；隔离 Next 16 表单 hydration 后 description/error IDREF、invalid 与首次错误路径无运行时异常
 - RTL: 使用逻辑属性，待专属自动化证明
 - Reduced motion: 不适用，无动效
@@ -192,6 +203,8 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 - 增加根 DOM props、style、id、事件与 `HTMLDivElement` ref 契约。
 - 补齐公开 Props/context TSDoc、Unit、SSR、Story 与共置文档。
 - 在隔离 Next H5 中补两个真实 Field 的 invalid、错误修正、提交与 hydration 双引擎证据。
+- 修复原生布局 wrapper 被误克隆导致的重复 id；Field-aware 输入可在嵌套布局中继承 label 与 required。
+- 忽略空字符串、空数组和空 Fragment，避免生成空 label/alert 与伪 invalid 状态；原生 `aria-labelledby` 会保留可见 Field label。
 
 ## 变更记录
 
@@ -199,3 +212,4 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 | ---------- | ------ | ------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-28 | 未发布 | behavior     | 修复关联、ARIA 合并、required/invalid 与根 DOM/ref 契约 | React 单控件 wrapper 如需 native label 点击与原生 required，设置 `labelAssociation="native"`；组合控件使用 `aria`，仅在其 role 合法时自行声明 `aria-required` |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 Field invalid/submit/hydration 证据 | 无                                                                                                                                                            |
+| 2026-08-29 | 未发布 | hardening    | 修复布局 wrapper 重复 id、嵌套关联、空内容与命名链      | 空字符串/空数组/空 Fragment 不再创建 label、description 或 error；如依赖空节点占位，请改用样式布局                                                            |

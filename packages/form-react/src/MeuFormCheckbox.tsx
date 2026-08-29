@@ -58,6 +58,7 @@ export function MeuFormCheckbox<TFieldValues extends FieldValues>({
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (
         <Field
+          data-meu-form-field={field.name}
           label={label}
           description={description}
           required={required}

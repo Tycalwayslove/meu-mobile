@@ -113,6 +113,36 @@ export const NativeFormReset: Story = {
   }
 };
 
+export const CompositionAndCount: Story = {
+  args: {
+    autoSize: { minRows: 2, maxRows: 5 },
+    maxLength: 40,
+    showCount: true
+  },
+  play: async ({ canvasElement }) => {
+    const textArea = canvasElement.querySelector("textarea");
+    if (!(textArea instanceof HTMLTextAreaElement)) {
+      throw new window.Error("Expected TextArea composition control");
+    }
+    const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value");
+    textArea.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true, data: "猫" }));
+    if (valueDescriptor && valueDescriptor.set) valueDescriptor.set.call(textArea, "猫🐱");
+    else textArea.value = "猫🐱";
+    textArea.dispatchEvent(new Event("input", { bubbles: true }));
+    textArea.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true, data: "🐱" }));
+
+    const deadline = window.performance.now() + 2_000;
+    let count = canvasElement.querySelector("[data-meu-slot='count']");
+    while (!count || count.textContent !== "3 / 40") {
+      if (window.performance.now() >= deadline) {
+        throw new window.Error("TextArea did not synchronize count after composition input");
+      }
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
+      count = canvasElement.querySelector("[data-meu-slot='count']");
+    }
+  }
+};
+
 export const Small: Story = { args: { size: "small" } };
 export const Large: Story = { args: { size: "large" } };
 
@@ -142,3 +172,13 @@ export const ReadOnly: Story = {
 };
 
 export const Disabled: Story = { args: { defaultValue: "不可编辑内容", disabled: true } };
+
+export const RightToLeft: Story = {
+  args: {
+    defaultValue: "تفاصيل الطلب",
+    dir: "rtl",
+    maxLength: 80,
+    placeholder: "أدخل تفاصيل الطلب",
+    showCount: true
+  }
+};

@@ -3,11 +3,17 @@ import { recipe } from "@vanilla-extract/recipes";
 
 const spin = keyframes({ to: { transform: "rotate(360deg)" } });
 
-export const wrapper = style({ position: "relative", display: "flex", alignItems: "center" });
+export const wrapper = style({
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  minWidth: 0
+});
 
 export const input = recipe({
   base: {
     width: "100%",
+    minWidth: 0,
     boxSizing: "border-box",
     color: "var(--meu-color-ink)",
     background: "var(--meu-color-surface)",
@@ -24,7 +30,9 @@ export const input = recipe({
       "&:disabled": {
         color: "var(--meu-color-muted)",
         background: "var(--meu-color-subtle)",
-        cursor: "not-allowed"
+        cursor: "not-allowed",
+        opacity: 1,
+        WebkitTextFillColor: "var(--meu-color-muted)"
       },
       "&:read-only:not(:disabled)": {
         background: "var(--meu-color-subtle)"
@@ -36,7 +44,7 @@ export const input = recipe({
   },
   variants: {
     size: {
-      small: { minHeight: 44, paddingInline: "var(--meu-space-3)", fontSize: 14 },
+      small: { minHeight: 44, paddingInline: "var(--meu-space-3)", fontSize: 16 },
       medium: {
         minHeight: "var(--meu-size-control-medium)",
         paddingInline: "var(--meu-space-4)",
@@ -71,6 +79,7 @@ export const clearButton = style({
   background: "transparent",
   border: 0,
   cursor: "pointer",
+  touchAction: "manipulation",
   selectors: {
     '[dir="rtl"] &': {
       right: "auto",

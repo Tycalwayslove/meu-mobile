@@ -61,6 +61,7 @@ export function MeuFormSlider<TFieldValues extends FieldValues>({
         const currentValue = typeof field.value === "number" ? field.value : fallback;
         return (
           <Field
+            data-meu-form-field={field.name}
             label={label}
             description={description}
             required={required}

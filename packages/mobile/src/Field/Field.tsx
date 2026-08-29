@@ -1,6 +1,6 @@
 "use client";
 
-import { cloneElement, forwardRef, Fragment, isValidElement, useId } from "react";
+import { Children, cloneElement, forwardRef, Fragment, isValidElement, useId } from "react";
 import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
@@ -67,8 +67,10 @@ type AssociableChildProps = {
   "aria-label"?: string;
   "aria-labelledby"?: string;
   "aria-required"?: HTMLAttributes<HTMLElement>["aria-required"];
+  contentEditable?: HTMLAttributes<HTMLElement>["contentEditable"];
   id?: string;
   required?: boolean;
+  role?: string;
 };
 
 const nativeLabelableElements = new Set([
@@ -81,8 +83,12 @@ const nativeLabelableElements = new Set([
   "textarea"
 ]);
 
-function hasContent(content: ReactNode): boolean {
-  return content !== undefined && content !== null && content !== false;
+function hasRenderableContent(content: ReactNode): boolean {
+  return Children.toArray(content).some((child) => {
+    if (typeof child === "string") return child.trim().length > 0;
+    if (!isValidElement<{ children?: ReactNode }>(child) || child.type !== Fragment) return true;
+    return hasRenderableContent(child.props.children);
+  });
 }
 
 function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
@@ -92,9 +98,19 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
 }
 
 function getAssociableChild(children: ReactNode): ReactElement<AssociableChildProps> | null {
-  return isValidElement<AssociableChildProps>(children) && children.type !== Fragment
-    ? children
-    : null;
+  if (!isValidElement<AssociableChildProps>(children) || children.type === Fragment) return null;
+  const contentEditable = children.props.contentEditable;
+  const isContentEditable =
+    contentEditable === true || contentEditable === "true" || contentEditable === "plaintext-only";
+  if (
+    typeof children.type === "string" &&
+    !nativeLabelableElements.has(children.type) &&
+    !children.props.role &&
+    !isContentEditable
+  ) {
+    return null;
+  }
+  return children;
 }
 
 function resolveLabelAssociation(
@@ -137,9 +153,9 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   const childControlId = child ? child.props.id : undefined;
   const controlId =
     childControlId || controlIdProp || (rootId ? `${rootId}-control` : `meu-field-${generatedId}`);
-  const hasLabel = hasContent(labelContent);
-  const hasDescription = hasContent(description);
-  const hasError = hasContent(error);
+  const hasLabel = hasRenderableContent(labelContent);
+  const hasDescription = hasRenderableContent(description);
+  const hasError = hasRenderableContent(error);
   const labelId = hasLabel ? `${controlId}-label` : undefined;
   const descriptionId = hasDescription ? `${controlId}-description` : undefined;
   const errorId = hasError ? `${controlId}-error` : undefined;
@@ -166,8 +182,11 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   let resolvedChildren = children;
   if (child) {
     const childDescribedBy = mergeIdReferences(child.props["aria-describedby"], fieldDescribedBy);
+    const childAriaLabel = child.props["aria-label"];
+    const hasExplicitAriaLabel = Boolean(childAriaLabel && childAriaLabel.trim());
     const childLabelledBy =
-      resolvedAssociation === "aria" && !child.props["aria-label"]
+      !hasExplicitAriaLabel &&
+      (resolvedAssociation === "aria" || child.props["aria-labelledby"] !== undefined)
         ? mergeIdReferences(child.props["aria-labelledby"], labelId)
         : child.props["aria-labelledby"];
     const accessibilityProps: AssociableChildProps = { id: controlId };

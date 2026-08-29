@@ -61,6 +61,7 @@ export function MeuFormPasscodeInput<TFieldValues extends FieldValues>({
 
   return (
     <Field
+      data-meu-form-field={field.name}
       label={label}
       labelAssociation="native"
       description={description}
