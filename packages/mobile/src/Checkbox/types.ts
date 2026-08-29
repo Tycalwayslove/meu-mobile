@@ -34,7 +34,7 @@ export type CheckboxProps = Omit<
   children?: ReactNode;
   /** Initial state for an uncontrolled checkbox. Native form reset restores this value. */
   defaultChecked?: boolean;
-  /** Displays and exposes the native mixed state without changing the submitted value. */
+  /** Keeps the native mixed property and `aria-checked="mixed"` active until this prop becomes false, without changing the submitted value. */
   indeterminate?: boolean;
   /** Called after an accepted native change with the next state and original event. */
   onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -42,7 +42,7 @@ export type CheckboxProps = Omit<
   readOnly?: boolean;
   /** Visual and touch-target scale. */
   size?: CheckboxSize;
-  /** Visual validation state; use `aria-invalid` or Field for accessible validation. */
+  /** Visual validation state that emits `aria-invalid="true"`; explicit `grammar` or `spelling` tokens remain intact. */
   status?: CheckboxStatus;
   /** Native submitted value. Defaults to the browser value `"on"` when omitted. */
   value?: CheckboxValue;
@@ -73,7 +73,7 @@ export type CheckboxGroupProps<TValue extends CheckboxValue = CheckboxValue> = O
   readOnly?: boolean;
   /** Ref to the semantic group container. */
   ref?: Ref<HTMLDivElement>;
-  /** Visual validation state for the group and descendants. */
+  /** Marks the group invalid and applies error visuals to descendants without adding ARIA invalid tokens to each checkbox. */
   status?: CheckboxStatus;
   /** Controlled selected values. Passing a new array is required after `onChange`. */
   value?: TValue[];

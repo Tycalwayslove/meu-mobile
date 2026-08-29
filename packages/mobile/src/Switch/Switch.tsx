@@ -57,11 +57,21 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
     fieldContext ? fieldContext.describedBy : undefined
   );
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const resetChecked = controlled ? currentChecked : defaultChecked;
 
   useEffect(() => {
@@ -154,7 +164,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
         aria-checked={currentChecked}
         aria-describedby={describedBy}
         aria-disabled={loading || undefined}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
         aria-readonly={readOnly || undefined}
       />
       <span

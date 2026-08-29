@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ChangeEvent, ForwardedRef, MouseEvent } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
@@ -64,11 +64,23 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
   const resolvedReadOnly = readOnly || Boolean(groupContext && groupContext.readOnly);
   const resolvedStatus =
     status === "error" || (groupContext && groupContext.status === "error") ? "error" : "default";
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    resolvedStatus === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const fieldInvalid = Boolean(fieldContext && fieldContext.invalid);
+  const contextualInvalid = status === "error" || (!groupContext && fieldInvalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const visualInvalid = invalid || resolvedStatus === "error" || fieldInvalid;
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const resolvedId = id || (fieldContext && !inGroup ? fieldContext.controlId : undefined);
   const describedBy = mergeIdReferences(
     ariaDescribedBy,
@@ -83,7 +95,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
         ? currentChecked
         : defaultChecked;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = inputRef.current;
     if (element) element.indeterminate = indeterminate;
   }, [indeterminate]);
@@ -119,6 +131,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
       return;
     }
     const nextChecked = event.target.checked;
+    event.currentTarget.indeterminate = indeterminate;
     if (inGroup && groupContext && value !== undefined) groupContext.toggle(value, nextChecked);
     else if (!controlled) setUncontrolledChecked(nextChecked);
     if (onChange) onChange(nextChecked, event);
@@ -182,7 +195,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
         onChange={handleChange}
         aria-checked={indeterminate ? "mixed" : currentChecked}
         aria-describedby={describedBy}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
         aria-readonly={resolvedReadOnly || undefined}
       />
       <span
@@ -191,7 +204,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
           disabled: resolvedDisabled,
           indeterminate,
           size,
-          status: invalid ? "error" : resolvedStatus
+          status: visualInvalid ? "error" : resolvedStatus
         })}
         aria-hidden="true"
       />

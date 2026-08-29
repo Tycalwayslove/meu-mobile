@@ -38,6 +38,18 @@ describe("Switch", () => {
     expect(control.getAttribute("aria-describedby")).toContain("error");
   });
 
+  it.each([
+    [false, "false"],
+    ["false", "false"],
+    ["grammar", "grammar"],
+    ["spelling", "spelling"]
+  ] as const)("preserves aria-invalid=%s on the native switch", (ariaInvalid, expected) => {
+    render(<Switch aria-invalid={ariaInvalid} aria-label="语义开关" />);
+    expect(screen.getByRole("switch", { name: "语义开关" }).getAttribute("aria-invalid")).toBe(
+      expected
+    );
+  });
+
   it("blocks interaction while loading", () => {
     const onChange = vi.fn();
     render(<Switch aria-label="同步设置" loading onChange={onChange} />);

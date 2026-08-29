@@ -11,6 +11,7 @@ describe("Selector SSR", () => {
 
     const markup = renderToString(
       <Selector
+        aria-invalid="grammar"
         aria-label="Shipping"
         defaultValue={["delivery"]}
         name="shipping"
@@ -24,6 +25,7 @@ describe("Selector SSR", () => {
 
     expect(markup).toContain('data-meu-component="selector"');
     expect(markup).toContain('role="radiogroup"');
+    expect(markup).toContain('aria-invalid="grammar"');
     expect(markup).toContain('type="radio"');
     expect(markup).toContain('name="shipping"');
     expect(markup).toContain('value="delivery"');

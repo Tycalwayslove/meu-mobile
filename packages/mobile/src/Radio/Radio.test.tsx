@@ -68,6 +68,18 @@ describe("Radio", () => {
     );
   });
 
+  it.each([
+    [false, "false"],
+    ["false", "false"],
+    ["grammar", "grammar"],
+    ["spelling", "spelling"]
+  ] as const)("preserves aria-invalid=%s on a standalone radio", (ariaInvalid, expected) => {
+    render(<Radio aria-invalid={ariaInvalid}>语义单选项</Radio>);
+    expect(screen.getByRole("radio", { name: "语义单选项" }).getAttribute("aria-invalid")).toBe(
+      expected
+    );
+  });
+
   it("rebinds reset behavior when the external form owner changes", async () => {
     const { rerender } = render(
       <>
@@ -112,6 +124,7 @@ describe("RadioGroup", () => {
     const standard = screen.getByRole("radio", { name: "标准配送" });
     const express = screen.getByRole("radio", { name: "急速配送" });
     expect(group.getAttribute("aria-invalid")).toBe("true");
+    expect(standard.getAttribute("aria-invalid")).toBeNull();
     expect(standard.getAttribute("name")).toBe(express.getAttribute("name"));
     expect(standard).toHaveProperty("checked", true);
 
@@ -120,6 +133,29 @@ describe("RadioGroup", () => {
     expect(express).toHaveProperty("checked", true);
     expect(standard).toHaveProperty("checked", false);
   });
+
+  it.each([
+    [false, "false"],
+    ["false", "false"],
+    ["grammar", "grammar"],
+    ["spelling", "spelling"]
+  ] as const)(
+    "keeps group aria-invalid=%s on the semantic root without manufacturing child tokens",
+    (ariaInvalid, expected) => {
+      render(
+        <RadioGroup aria-invalid={ariaInvalid} aria-label="配送方式">
+          <Radio value="standard">标准配送</Radio>
+        </RadioGroup>
+      );
+
+      expect(
+        screen.getByRole("radiogroup", { name: "配送方式" }).getAttribute("aria-invalid")
+      ).toBe(expected);
+      expect(
+        screen.getByRole("radio", { name: "标准配送" }).getAttribute("aria-invalid")
+      ).toBeNull();
+    }
+  );
 
   it("inherits Field required semantics and merges caller descriptions", () => {
     render(

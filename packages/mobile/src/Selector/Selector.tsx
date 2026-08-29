@@ -152,11 +152,21 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
     ariaLabel ? undefined : ariaLabelledBy,
     ariaLabel ? undefined : fieldContext ? fieldContext.labelId : undefined
   );
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const resolvedName = name || generatedName;
   const safeColumns = Number.isFinite(columns) ? Math.min(Math.max(Math.trunc(columns), 1), 6) : 2;
@@ -279,7 +289,7 @@ export function Selector<TValue extends SelectorValue = SelectorValue>({
       onFocus={handleRootFocus}
       aria-describedby={describedBy}
       aria-disabled={disabled || undefined}
-      aria-invalid={invalid || undefined}
+      aria-invalid={resolvedAriaInvalid}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabel ? undefined : labelledBy}
       aria-required={!multiple && resolvedRequired ? true : undefined}

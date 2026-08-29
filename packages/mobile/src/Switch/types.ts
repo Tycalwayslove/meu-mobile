@@ -34,6 +34,6 @@ export type SwitchProps = Omit<
   readOnly?: boolean;
   /** Visual scale; every size keeps a minimum 44×44 CSS px target. */
   size?: SwitchSize;
-  /** Visual validation state; use `aria-invalid` or Field for accessible validation. */
+  /** Visual validation state that emits `aria-invalid="true"`; explicit `grammar` or `spelling` tokens remain intact. */
   status?: SwitchStatus;
 };

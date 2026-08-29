@@ -40,7 +40,7 @@ export type RadioProps = Omit<
   readOnly?: boolean;
   /** Visual and touch-target scale. */
   size?: RadioSize;
-  /** Visual validation state; use `aria-invalid` or Field for accessible validation. */
+  /** Visual validation state that emits `aria-invalid="true"`; explicit `grammar` or `spelling` tokens remain intact. */
   status?: RadioStatus;
   /** Native submitted value and the identity used by RadioGroup. */
   value?: RadioValue;
@@ -73,7 +73,7 @@ export type RadioGroupProps<TValue extends RadioValue = RadioValue> = Omit<
   ref?: Ref<HTMLDivElement>;
   /** Requires one radio in the shared native name group. */
   required?: boolean;
-  /** Visual validation state for the group and descendants. */
+  /** Marks the radiogroup invalid and applies error visuals to descendants without adding ARIA invalid tokens to each radio. */
   status?: RadioStatus;
   /** Controlled selection. Use `null` to render a controlled empty group. */
   value?: TValue | null;

@@ -59,11 +59,21 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
     ariaLabelledBy,
     fieldContext ? fieldContext.labelId : undefined
   );
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
 
   function isSelected(optionValue: CheckboxValue) {
     return currentValue.some((item) => item === optionValue);
@@ -120,6 +130,8 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
         toggle
       }}
     >
+      {/* aria-invalid is a global WAI-ARIA state that applies to the semantic group root. */}
+      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */}
       <div
         {...props}
         ref={(element) => {
@@ -131,6 +143,7 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
         tabIndex={tabIndex}
         className={className ? `${group({ direction })} ${className}` : group({ direction })}
         aria-describedby={describedBy}
+        aria-invalid={resolvedAriaInvalid}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabel ? undefined : labelledBy}
         data-meu-component="checkbox-group"

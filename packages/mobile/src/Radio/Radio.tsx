@@ -63,11 +63,23 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
   const resolvedReadOnly = readOnly || Boolean(groupContext && groupContext.readOnly);
   const resolvedStatus =
     status === "error" || (groupContext && groupContext.status === "error") ? "error" : "default";
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    resolvedStatus === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const fieldInvalid = Boolean(fieldContext && fieldContext.invalid);
+  const contextualInvalid = status === "error" || (!groupContext && fieldInvalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const visualInvalid = invalid || resolvedStatus === "error" || fieldInvalid;
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const resolvedId = id || (fieldContext && !inGroup ? fieldContext.controlId : undefined);
   const describedBy = mergeIdReferences(
     ariaDescribedBy,
@@ -178,14 +190,14 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
         onChange={handleChange}
         aria-describedby={describedBy}
         aria-disabled={!inGroup && resolvedReadOnly ? true : undefined}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
       />
       <span
         className={indicator({
           checked: currentChecked,
           disabled: resolvedDisabled,
           size,
-          status: invalid ? "error" : resolvedStatus
+          status: visualInvalid ? "error" : resolvedStatus
         })}
         aria-hidden="true"
       />

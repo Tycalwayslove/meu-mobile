@@ -45,7 +45,25 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Checked: Story = { args: { defaultChecked: true } };
-export const Indeterminate: Story = { args: { children: "选择全部", indeterminate: true } };
+export const Indeterminate: Story = {
+  args: { children: "选择全部", indeterminate: true },
+  play: async ({ canvasElement }) => {
+    const control = canvasElement.querySelector<HTMLInputElement>("input[type='checkbox']");
+    if (!control) throw new window.Error("Expected indeterminate Checkbox input");
+
+    control.click();
+    await Promise.resolve();
+    if (
+      !control.checked ||
+      !control.indeterminate ||
+      control.getAttribute("aria-checked") !== "mixed"
+    ) {
+      throw new window.Error(
+        "Checkbox did not preserve its controlled mixed semantics after click"
+      );
+    }
+  }
+};
 export const Disabled: Story = { args: { defaultChecked: true, disabled: true } };
 export const Error: Story = {
   render: () => (

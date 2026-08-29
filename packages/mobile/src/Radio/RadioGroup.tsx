@@ -62,11 +62,21 @@ export function RadioGroup<TValue extends RadioValue = RadioValue>({
     fieldContext ? fieldContext.labelId : undefined
   );
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
 
   function isSelected(optionValue: RadioValue) {
     return currentValue === optionValue;
@@ -130,7 +140,7 @@ export function RadioGroup<TValue extends RadioValue = RadioValue>({
         tabIndex={tabIndex}
         className={className ? `${group({ direction })} ${className}` : group({ direction })}
         aria-describedby={describedBy}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
         aria-label={ariaLabel}
         aria-labelledby={ariaLabel ? undefined : labelledBy}
         aria-readonly={readOnly || undefined}

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import type { ChangeEvent } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -37,6 +38,56 @@ describe("Checkbox", () => {
 
     expect(checkbox).toHaveProperty("indeterminate", true);
     expect(checkbox.getAttribute("aria-checked")).toBe("mixed");
+  });
+
+  it("restores the native mixed property after an accepted uncontrolled change", () => {
+    let indeterminateDuringChange = false;
+    const onChange = vi.fn((_checked: boolean, event: ChangeEvent<HTMLInputElement>) => {
+      indeterminateDuringChange = event.currentTarget.indeterminate;
+    });
+    render(
+      <Checkbox indeterminate onChange={onChange}>
+        选择全部
+      </Checkbox>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "选择全部" });
+
+    fireEvent.click(checkbox);
+
+    expect(checkbox).toHaveProperty("checked", true);
+    expect(checkbox).toHaveProperty("indeterminate", true);
+    expect(checkbox.getAttribute("aria-checked")).toBe("mixed");
+    expect(indeterminateDuringChange).toBe(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.anything());
+  });
+
+  it("keeps controlled checked state authoritative while restoring the mixed property", () => {
+    const onChange = vi.fn();
+    render(
+      <Checkbox checked={false} indeterminate onChange={onChange}>
+        受控全选
+      </Checkbox>
+    );
+    const checkbox = screen.getByRole("checkbox", { name: "受控全选" });
+
+    fireEvent.click(checkbox);
+
+    expect(checkbox).toHaveProperty("checked", false);
+    expect(checkbox).toHaveProperty("indeterminate", true);
+    expect(checkbox.getAttribute("aria-checked")).toBe("mixed");
+    expect(onChange).toHaveBeenCalledWith(true, expect.anything());
+  });
+
+  it.each([
+    [false, "false"],
+    ["false", "false"],
+    ["grammar", "grammar"],
+    ["spelling", "spelling"]
+  ] as const)("preserves aria-invalid=%s on a standalone checkbox", (ariaInvalid, expected) => {
+    render(<Checkbox aria-invalid={ariaInvalid}>语义复选框</Checkbox>);
+    expect(screen.getByRole("checkbox", { name: "语义复选框" }).getAttribute("aria-invalid")).toBe(
+      expected
+    );
   });
 
   it("keeps an indeterminate checkbox inert when disabled", () => {
@@ -158,13 +209,38 @@ describe("CheckboxGroup", () => {
       </Field>
     );
 
-    expect(screen.getByRole("group", { name: "服务范围" }).getAttribute("data-state")).toBe(
-      "error"
-    );
-    expect(screen.getByRole("checkbox", { name: "配送" })).toHaveProperty("checked", true);
+    const group = screen.getByRole("group", { name: "服务范围" });
+    const delivery = screen.getByRole("checkbox", { name: "配送" });
+    expect(group.getAttribute("data-state")).toBe("error");
+    expect(group.getAttribute("aria-invalid")).toBe("true");
+    expect(delivery.getAttribute("aria-invalid")).toBeNull();
+    expect(delivery).toHaveProperty("checked", true);
     fireEvent.click(screen.getByRole("checkbox", { name: "自提" }));
     expect(onChange).toHaveBeenLastCalledWith(["delivery", "pickup"]);
   });
+
+  it.each([
+    [false, "false"],
+    ["false", "false"],
+    ["grammar", "grammar"],
+    ["spelling", "spelling"]
+  ] as const)(
+    "keeps group aria-invalid=%s on the semantic root without manufacturing child tokens",
+    (ariaInvalid, expected) => {
+      render(
+        <CheckboxGroup aria-invalid={ariaInvalid} aria-label="服务范围">
+          <Checkbox value="delivery">配送</Checkbox>
+        </CheckboxGroup>
+      );
+
+      expect(screen.getByRole("group", { name: "服务范围" }).getAttribute("aria-invalid")).toBe(
+        expected
+      );
+      expect(
+        screen.getByRole("checkbox", { name: "配送" }).getAttribute("aria-invalid")
+      ).toBeNull();
+    }
+  );
 
   it("resets an uncontrolled group and submits repeated native names", async () => {
     const { container } = render(

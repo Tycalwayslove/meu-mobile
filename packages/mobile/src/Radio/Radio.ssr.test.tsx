@@ -7,7 +7,7 @@ import { RadioGroup } from "./RadioGroup";
 describe("Radio SSR", () => {
   it("keeps generated native names and selection stable in one server render", () => {
     const markup = renderToString(
-      <RadioGroup defaultValue="standard" required>
+      <RadioGroup aria-invalid="grammar" defaultValue="standard" required>
         <Radio value="standard">标准配送</Radio>
         <Radio value="express">急速配送</Radio>
       </RadioGroup>
@@ -17,6 +17,8 @@ describe("Radio SSR", () => {
     expect(names).toHaveLength(2);
     expect(new Set(names).size).toBe(1);
     expect(markup).toContain('role="radiogroup"');
+    expect(markup).toContain('aria-invalid="grammar"');
+    expect(markup.match(/aria-invalid=/g)).toHaveLength(1);
     expect(markup).toContain('aria-required="true"');
   });
 });

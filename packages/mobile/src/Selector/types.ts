@@ -66,7 +66,7 @@ export type SelectorProps<TValue extends SelectorValue = SelectorValue> = Omit<
   showCheckMark?: boolean;
   /** Controls minimum touch-target height and spacing. @defaultValue "medium" */
   size?: SelectorSize;
-  /** Applies validation styling and `aria-invalid`. @defaultValue "default" */
+  /** Applies validation styling and `aria-invalid="true"`; explicit `grammar` or `spelling` tokens remain intact. @defaultValue "default" */
   status?: SelectorStatus;
   /** Selected identities for a controlled Selector. */
   value?: TValue[];

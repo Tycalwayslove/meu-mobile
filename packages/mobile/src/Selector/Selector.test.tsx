@@ -258,6 +258,22 @@ describe("Selector", () => {
     expect(screen.getByRole("radio", { name: "配送" })).toHaveProperty("required", true);
   });
 
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s without collapsing its semantics",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<Selector aria-invalid={ariaInvalid} aria-label="履约方式" options={options} />);
+
+      const group = screen.getByRole("radiogroup", { name: "履约方式" });
+      expect(group.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      expect(group.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
+
   it("keeps native controls in the keyboard path while the group is programmatically focusable", () => {
     const ref = { current: null as HTMLDivElement | null };
     render(<Selector ref={ref} aria-label="履约方式" options={options} />);
