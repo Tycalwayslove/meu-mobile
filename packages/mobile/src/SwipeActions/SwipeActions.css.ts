@@ -134,7 +134,7 @@ export const keyboardAction = style({
   selectors: {
     "&:focus": {
       opacity: 1,
-      pointerEvents: "auto",
+      pointerEvents: "none",
       outline: "2px solid var(--meu-color-surface)",
       outlineOffset: -4,
       transform: "translate3d(0, 0, 0)"

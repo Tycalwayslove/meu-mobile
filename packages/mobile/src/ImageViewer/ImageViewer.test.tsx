@@ -84,7 +84,9 @@ afterEach(() => {
 
 describe("ImageViewer", () => {
   it("server-renders closed without browser globals", () => {
-    expect(renderToString(<ImageViewer images={images} />)).toBe("");
+    const renderFooter = vi.fn(() => "说明");
+    expect(renderToString(<ImageViewer images={images} renderFooter={renderFooter} />)).toBe("");
+    expect(renderFooter).not.toHaveBeenCalled();
   });
 
   it("uses modal semantics, locks scroll, closes with Escape and restores focus", async () => {
@@ -143,6 +145,43 @@ describe("ImageViewer", () => {
     await waitFor(() => expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1"));
   });
 
+  it("atomically resets zoom when the active item identity changes A to B to A", () => {
+    const first = [{ alt: "A", key: "a", src: "/a.svg" }] as const;
+    const second = [{ alt: "B", key: "b", src: "/b.svg" }] as const;
+    const { rerender } = render(<ImageViewer open images={first} />);
+    const viewer = screen.getByRole("dialog", { name: "图片预览" });
+    const carousel = screen.getByRole("group", { name: "图片预览" });
+
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
+    expect(viewer.getAttribute("data-scale")).toBe("1.5");
+
+    rerender(<ImageViewer open images={second} />);
+    expect(viewer.getAttribute("data-scale")).toBe("1");
+    expect(carousel.getAttribute("data-drag-enabled")).toBe("true");
+    const activeMedia = document.querySelector(
+      '[data-meu-carousel-slide][data-active="true"] [data-meu-image-viewer-media]'
+    );
+    expect(activeMedia && activeMedia.getAttribute("data-scale")).toBe("1");
+
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
+    rerender(<ImageViewer open images={first} />);
+    expect(viewer.getAttribute("data-scale")).toBe("1");
+    expect(carousel.getAttribute("data-drag-enabled")).toBe("true");
+  });
+
+  it("resets zoom when a stable item key changes its responsive source", () => {
+    const first = [{ alt: "A", key: "stable", src: "/a.svg", srcSet: "/a-2x.svg 2x" }] as const;
+    const second = [{ alt: "B", key: "stable", src: "/b.svg", srcSet: "/b-2x.svg 2x" }] as const;
+    const { rerender } = render(<ImageViewer open images={first} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
+    expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1.5");
+    rerender(<ImageViewer open images={second} />);
+    expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1");
+    rerender(<ImageViewer open images={first} />);
+    expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1");
+  });
+
   it("supports button and keyboard zoom, reset, and disables gallery drag while zoomed", () => {
     const onScaleChange = vi.fn();
     render(<ImageViewer open images={images} maxZoom={2} onScaleChange={onScaleChange} />);
@@ -199,6 +238,53 @@ describe("ImageViewer", () => {
     expect(onScaleChange).toHaveBeenLastCalledWith(2, { index: 0, reason: "pinch" });
   });
 
+  it("cleans up mouse pan state when pointer capture is lost", () => {
+    render(<ImageViewer open images={images.slice(0, 1)} />);
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
+    const stage = document.querySelector<HTMLElement>('[data-meu-image-viewer-stage="true"]');
+    const media = document.querySelector<HTMLElement>('[data-meu-image-viewer-media="true"]');
+    if (!stage || !media) throw new Error("Expected image gesture elements");
+    Object.defineProperties(stage, {
+      hasPointerCapture: { configurable: true, value: vi.fn(() => true) },
+      releasePointerCapture: { configurable: true, value: vi.fn() },
+      setPointerCapture: { configurable: true, value: vi.fn() }
+    });
+
+    fireEvent.pointerDown(stage, {
+      button: 0,
+      clientX: 20,
+      clientY: 20,
+      pointerId: 7,
+      pointerType: "mouse"
+    });
+    expect(media.getAttribute("data-interacting")).toBe("true");
+    fireEvent.lostPointerCapture(stage, { pointerId: 7, pointerType: "mouse" });
+    expect(media.getAttribute("data-interacting")).toBe("false");
+  });
+
+  it("does not start mouse pan when pointer capture cannot be acquired", () => {
+    render(<ImageViewer open images={images.slice(0, 1)} />);
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
+    const stage = document.querySelector<HTMLElement>('[data-meu-image-viewer-stage="true"]');
+    const media = document.querySelector<HTMLElement>('[data-meu-image-viewer-media="true"]');
+    if (!stage || !media) throw new Error("Expected image gesture elements");
+    Object.defineProperty(stage, "setPointerCapture", {
+      configurable: true,
+      value: vi.fn(() => {
+        throw new DOMException("capture unavailable", "InvalidStateError");
+      })
+    });
+
+    fireEvent.pointerDown(stage, {
+      button: 0,
+      clientX: 20,
+      clientY: 20,
+      pointerId: 8,
+      pointerType: "mouse"
+    });
+    expect(media.getAttribute("data-interacting")).toBe("false");
+  });
+
   it("exposes imperative navigation and zoom reset through platform-neutral methods", () => {
     const ref = createRef<ImageViewerRef>();
     const onIndexChange = vi.fn();
@@ -216,15 +302,43 @@ describe("ImageViewer", () => {
     expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1");
   });
 
-  it("renders localized empty and image error states while keeping a close action", () => {
+  it("renders localized errors, announces the final failure, and restores drag at 1x", () => {
     const { rerender } = render(<ImageViewer open images={[]} />);
     expect(screen.getByText("暂无可预览图片")).toBeTruthy();
     expect(screen.getByRole("button", { name: "关闭图片预览" })).toBeTruthy();
 
     rerender(<ImageViewer open images={images.slice(0, 1)} />);
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
     const image = screen.getByAltText("商品正面");
     fireEvent.error(image);
     expect(screen.getByText("图片加载失败")).toBeTruthy();
+    expect(screen.getByText("商品正面：图片加载失败").getAttribute("role")).toBe("status");
+    expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1");
+    expect(screen.getByRole("group", { name: "图片预览" }).getAttribute("data-drag-enabled")).toBe(
+      "true"
+    );
+  });
+
+  it("associates footer content with its image through figure and figcaption", () => {
+    render(<ImageViewer open images={images.slice(0, 1)} renderFooter={() => "商品说明"} />);
+    const caption = screen.getByText("商品说明");
+    expect(caption.tagName).toBe("FIGCAPTION");
+    const figure = caption.closest("figure");
+    expect(figure).toBeTruthy();
+    expect(figure && figure.contains(screen.getByAltText("商品正面"))).toBe(true);
+  });
+
+  it("copies explicit motion, locale, direction, and theme to the portal boundary", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <ImageViewer open images={images.slice(0, 1)} />
+      </ConfigProvider>
+    );
+    const layer = document.querySelector<HTMLElement>('[data-meu-overlay-layer="image-viewer"]');
+    expect(layer && layer.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(layer && layer.getAttribute("data-meu-theme")).toBe("dark");
+    expect(layer && layer.getAttribute("dir")).toBe("rtl");
+    expect(layer && layer.getAttribute("lang")).toBe("en-US");
   });
 
   it("supports minimal controls and explicit close-button reasons", () => {

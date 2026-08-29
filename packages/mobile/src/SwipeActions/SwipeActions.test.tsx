@@ -52,6 +52,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -121,6 +122,9 @@ describe("SwipeActions", () => {
 
     await user.keyboard("{Enter}");
     await waitFor(() => expect(root.getAttribute("data-open-side")).toBe("none"));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "显示右侧操作" }))
+    );
     expect(onAction).toHaveBeenCalledWith(rightActions[0], { index: 0, side: "right" });
     expect(onOpenSideChange).toHaveBeenLastCalledWith(null, {
       actionKey: "archive",
@@ -162,7 +166,7 @@ describe("SwipeActions", () => {
     expect(root.getAttribute("data-open-side")).toBe("none");
 
     drag(root, 200, 120);
-    fireEvent.click(screen.getByRole("button", { name: "打开订单" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开订单" }), { detail: 1 });
     expect(contentAction).not.toHaveBeenCalled();
   });
 
@@ -233,6 +237,185 @@ describe("SwipeActions", () => {
       await Promise.resolve();
     });
     expect(root.getAttribute("data-open-side")).toBe("none");
+  });
+
+  it("restores an async keyboard action after a controlled close request is refused", async () => {
+    let resolveAction!: () => void;
+    const onOpenSideChange = vi.fn();
+    const actions: SwipeActionsAction[] = [
+      {
+        key: "save",
+        label: "保存",
+        onPress: () =>
+          new Promise<void>((resolve) => {
+            resolveAction = resolve;
+          })
+      }
+    ];
+    render(
+      <SwipeActions openSide="right" rightActions={actions} onOpenSideChange={onOpenSideChange}>
+        <span>订单</span>
+      </SwipeActions>
+    );
+    const button = screen.getByRole<HTMLButtonElement>("button", { name: "保存" });
+    button.focus();
+    fireEvent.click(button);
+    expect(button.disabled).toBe(true);
+    button.blur();
+
+    await act(async () => {
+      resolveAction();
+      await Promise.resolve();
+    });
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+
+    expect(onOpenSideChange).toHaveBeenCalledWith(null, {
+      actionKey: "save",
+      reason: "action"
+    });
+    expect(button.disabled).toBe(false);
+    expect(document.activeElement).toBe(button);
+  });
+
+  it("finishes the business chain without closing a newly controlled side", async () => {
+    let resolveAction!: () => void;
+    const onAction = vi.fn();
+    const onOpenSideChange = vi.fn();
+    const actions: SwipeActionsAction[] = [
+      {
+        key: "save",
+        label: "保存",
+        onPress: () =>
+          new Promise<void>((resolve) => {
+            resolveAction = resolve;
+          })
+      }
+    ];
+    const { container, rerender } = render(
+      <SwipeActions
+        leftActions={leftActions}
+        openSide="right"
+        rightActions={actions}
+        onAction={onAction}
+        onOpenSideChange={onOpenSideChange}
+      >
+        <span>订单</span>
+      </SwipeActions>
+    );
+    const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+    const button = screen.getByRole<HTMLButtonElement>("button", { name: "保存" });
+    button.focus();
+    fireEvent.click(button);
+    button.blur();
+
+    rerender(
+      <SwipeActions
+        leftActions={leftActions}
+        openSide="left"
+        rightActions={actions}
+        onAction={onAction}
+        onOpenSideChange={onOpenSideChange}
+      >
+        <span>订单</span>
+      </SwipeActions>
+    );
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(root.getAttribute("data-open-side")).toBe("left");
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "显示左侧操作" }));
+
+    await act(async () => {
+      resolveAction();
+      await Promise.resolve();
+    });
+    expect(root.getAttribute("data-open-side")).toBe("left");
+    expect(onAction).toHaveBeenCalledWith(actions[0], { index: 0, side: "right" });
+    expect(onOpenSideChange).not.toHaveBeenCalled();
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "置顶" }));
+  });
+
+  it("does not emit stale callbacks after an async action unmounts", async () => {
+    let resolveAction!: () => void;
+    const onAction = vi.fn();
+    const onOpenSideChange = vi.fn();
+    const actions: SwipeActionsAction[] = [
+      {
+        key: "save",
+        label: "保存",
+        onPress: () =>
+          new Promise<void>((resolve) => {
+            resolveAction = resolve;
+          })
+      }
+    ];
+    const { unmount } = render(
+      <SwipeActions
+        defaultOpenSide="right"
+        rightActions={actions}
+        onAction={onAction}
+        onOpenSideChange={onOpenSideChange}
+      >
+        <span>订单</span>
+      </SwipeActions>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    unmount();
+
+    await act(async () => {
+      resolveAction();
+      await Promise.resolve();
+    });
+    expect(onAction).not.toHaveBeenCalled();
+    expect(onOpenSideChange).not.toHaveBeenCalled();
+  });
+
+  it("finishes the business chain without closing after the row becomes disabled", async () => {
+    let resolveAction!: () => void;
+    const onAction = vi.fn();
+    const onOpenSideChange = vi.fn();
+    const actions: SwipeActionsAction[] = [
+      {
+        key: "save",
+        label: "保存",
+        onPress: () =>
+          new Promise<void>((resolve) => {
+            resolveAction = resolve;
+          })
+      }
+    ];
+    const { container, rerender } = render(
+      <SwipeActions
+        defaultOpenSide="right"
+        rightActions={actions}
+        onAction={onAction}
+        onOpenSideChange={onOpenSideChange}
+      >
+        <span>订单</span>
+      </SwipeActions>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    rerender(
+      <SwipeActions
+        disabled
+        defaultOpenSide="right"
+        rightActions={actions}
+        onAction={onAction}
+        onOpenSideChange={onOpenSideChange}
+      >
+        <span>订单</span>
+      </SwipeActions>
+    );
+    const disabledRoot = container.querySelector<HTMLElement>(
+      '[data-meu-component="swipe-actions"]'
+    )!;
+    expect(disabledRoot.getAttribute("data-open-side")).toBe("none");
+
+    await act(async () => {
+      resolveAction();
+      await Promise.resolve();
+    });
+    expect(onAction).toHaveBeenCalledWith(actions[0], { index: 0, side: "right" });
+    expect(onOpenSideChange).not.toHaveBeenCalled();
   });
 
   it("keeps the actions open when a handler returns false", async () => {
@@ -353,6 +536,83 @@ describe("SwipeActions", () => {
     expect(root.getAttribute("data-open-side")).toBe("right");
   });
 
+  it.each(["missing", "throwing"] as const)(
+    "finishes a drag outside the root when pointer capture is %s",
+    (captureMode) => {
+      const { container } = renderSwipeActions();
+      const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+      Object.defineProperty(root, "setPointerCapture", {
+        configurable: true,
+        value:
+          captureMode === "missing"
+            ? undefined
+            : vi.fn(() => {
+                throw new DOMException("Pointer capture is unavailable", "NotSupportedError");
+              })
+      });
+
+      fireEvent.pointerDown(root, {
+        button: 0,
+        clientX: 200,
+        clientY: 20,
+        isPrimary: true,
+        pointerId: 17,
+        timeStamp: 0
+      });
+      fireEvent.pointerMove(root, {
+        clientX: 120,
+        clientY: 20,
+        isPrimary: true,
+        pointerId: 17,
+        timeStamp: 200
+      });
+      expect(root.getAttribute("data-dragging")).toBe("true");
+      fireEvent.pointerUp(document, {
+        clientX: 100,
+        clientY: 20,
+        isPrimary: true,
+        pointerId: 17,
+        timeStamp: 240
+      });
+
+      expect(root.getAttribute("data-dragging")).toBe("false");
+      expect(root.getAttribute("data-open-side")).toBe("right");
+    }
+  );
+
+  it("expires compatibility-click suppression when no click follows a drag", async () => {
+    vi.useFakeTimers();
+    const contentAction = vi.fn();
+    const { container, rerender } = render(
+      <SwipeActions rightActions={rightActions}>
+        <button type="button" onClick={contentAction}>
+          打开订单
+        </button>
+      </SwipeActions>
+    );
+    const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+    drag(root, 200, 120);
+    rerender(
+      <SwipeActions disabled rightActions={rightActions}>
+        <button type="button" onClick={contentAction}>
+          打开订单
+        </button>
+      </SwipeActions>
+    );
+    rerender(
+      <SwipeActions rightActions={rightActions}>
+        <button type="button" onClick={contentAction}>
+          打开订单
+        </button>
+      </SwipeActions>
+    );
+    expect(root.getAttribute("data-open-side")).toBe("none");
+    await act(() => vi.advanceTimersByTime(500));
+
+    fireEvent.click(screen.getByRole("button", { name: "打开订单" }));
+    expect(contentAction).toHaveBeenCalledTimes(1);
+  });
+
   it("cancels an active swipe when pointer capture is lost", async () => {
     const { container } = renderSwipeActions();
     const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
@@ -387,6 +647,23 @@ describe("SwipeActions", () => {
     await user.keyboard("{Enter}");
     await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
     expect(document.activeElement).toBe(reveal);
+    expect(
+      screen.getByRole("button", { name: "归档", hidden: true }).getAttribute("tabindex")
+    ).toBe("-1");
+  });
+
+  it("moves focus into the authoritative rail when a controlled side switches", async () => {
+    const { rerender } = renderSwipeActions({ openSide: "right" });
+    screen.getByRole<HTMLButtonElement>("button", { name: "归档" }).focus();
+
+    rerender(
+      <SwipeActions leftActions={leftActions} openSide="left" rightActions={rightActions}>
+        <button type="button">打开订单</button>
+      </SwipeActions>
+    );
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "置顶" }));
     expect(
       screen.getByRole("button", { name: "归档", hidden: true }).getAttribute("tabindex")
     ).toBe("-1");

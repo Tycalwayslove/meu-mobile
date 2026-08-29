@@ -40,7 +40,7 @@ Portal 全屏模态画廊，支持受控/非受控 open 与 index、scroll lock�
 
 ## 结构与状态
 
-Portal layer → Mask → dialog → close/counter → Carousel/ZoomableImage → zoom controls/footer。状态包括 open/closed presence、index、scale、loading/error/empty、full/minimal controls。
+Portal config boundary → Mask → dialog → close/counter → Carousel → figure/ZoomableImage/figcaption → zoom controls。状态包括 open/closed presence、active item request identity、index、scale、loading/error/empty、full/minimal controls。
 
 ## 基础用法
 
@@ -64,7 +64,7 @@ open 使用 `open/defaultOpen/onOpenChange`；index 使用 `index/defaultIndex/o
 
 ## Props
 
-API 由 `ImageViewerProps` 生成。maxZoom 最小 1、非有限回退 3；doubleTapZoom 被限制在 1..maxZoom。每个 item 必须提供 src 与 alt；装饰图也应考虑画廊是否仍有可理解名称。
+API 由 `ImageViewerProps` 生成。maxZoom 最小 1、非有限回退 3；doubleTapZoom 被限制在 1..maxZoom。每个 item 必须提供 src 与 alt；装饰图也应考虑画廊是否仍有可理解名称。当前项的 index、key 或完整请求参数（src/srcSet/sizes/CORS/referrer policy）变化时会原子重置 transform 与外层 scale，A → B → A 不恢复旧资源的缩放。
 
 ## Events
 
@@ -86,19 +86,19 @@ API 由 `ImageViewerProps` 生成。maxZoom 最小 1、非有限回退 3；doubl
 
 ## 触摸与手势
 
-双指缩放、双击切换缩放、放大后单指/鼠标平移；scale>1 时暂停 Carousel 横向拖动。控制按钮均为 44×44。实际 iOS 边缘返回、页面滚动和多指取消仍需真机验证。
+双指缩放、双击切换缩放、放大后单指/鼠标平移；scale>1 时暂停 Carousel 横向拖动。鼠标 pointer up/cancel、lost pointer capture 与窗口失焦都会清理平移；无法取得 pointer capture 时不启动鼠标平移，按钮与键盘缩放继续可用。touch cancel 不参与双击判定。控制按钮均为 44×44。实际 iOS 边缘返回、页面滚动和多指取消仍需真机验证。
 
 ## 无障碍
 
-根为命名 `aria-modal` dialog，打开时锁滚动并圈定/恢复焦点。图片使用 item.alt；计数器 polite/atomic。空和错误状态保留关闭操作。minimal 只隐藏画廊与缩放控制，不隐藏关闭按钮。
+根为命名 `aria-modal` dialog，打开时锁滚动并圈定/恢复焦点。图片使用 item.alt；计数器 polite/atomic。`renderFooter` 是当前图片 figure 的 figcaption。最终图片错误会重置为 1×、恢复 Carousel drag，并用“alt + 加载失败”的独立 polite status 宣告；空和错误状态保留关闭操作。minimal 只隐藏画廊与缩放控制，不隐藏关闭按钮。
 
 ## 动效
 
-layer opacity 和 transform 使用 Meu motion；reduced-motion 缩为 1ms。手势交互中 transition 为 0，松手后立即 clamp。
+layer opacity 和 transform 使用 Meu motion。Portal 根复制 ConfigProvider 的 motion class 与 `data-meu-motion`；显式 reduced 为 0ms，系统 `prefers-reduced-motion` 为 0–1ms。手势交互中 transition 为 0，松手后立即 clamp。
 
 ## 主题与定制
 
-Mask、surface、ink、border、shadow 与 focus 来自 Token；Portal 根同步 theme。稳定入口为 controls、labels、renderFooter、container 和 data 属性，内部 Carousel/ZoomableImage class 非 API。
+Mask、surface、ink、border、shadow 与 focus 来自 Token；Portal 根同步 locale、dir、theme 与 motion。稳定入口为 controls、labels、renderFooter、container 和 data 属性，内部 Carousel/ZoomableImage class 非 API。
 
 ## SSR 与 Next.js
 
@@ -110,7 +110,7 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 
 ## 浏览器与 WebView
 
-依赖 Portal、focus trap、Pointer/Touch、pointer capture、CSS transform 与 visual viewport 宿主行为。目标为 Chrome/WebView 70 与 iOS 13；需继续验证系统缩放、地址栏和刘海安全区。
+依赖 Portal、focus trap、Pointer/Touch、pointer capture、CSS transform 与 visual viewport 宿主行为。完整运行时支持档为 Android Chrome/WebView 89+ 与 iOS Safari/WKWebView 15+；iOS 13–14、Chromium/WebView 79–88 属观察档，Chrome 70 仅为构建产物旧语法扫描，它们都不构成完整支持承诺。系统缩放、地址栏、刘海安全区和真机多指手势仍需发布验收。
 
 ## 边界情况与已知限制
 
@@ -118,6 +118,7 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 - 平移边界按 stage 尺寸近似，不读取图片自然宽高。
 - footer 内容过长会在受限宽度内换行；交互 footer 需自行验证焦点顺序。
 - 受控导航请求只有在权威 index 实际改变后才重置缩放；owner 拒绝请求时保留当前图片与缩放。外部直接改变 index 时，调用方应同步业务 footer 状态。
+- 图片最终错误会发布一次 `reset` scale reason（仅在错误前 scale 实际大于 1 时）；Viewer item 当前没有 fallbackSrc，因此原生 error 即最终错误。
 
 ## 性能预算
 
@@ -125,14 +126,14 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 
 ## 测试证据
 
-- Unit: `ImageViewer.test.tsx` 覆盖 SSR、模态/焦点/滚动、受控导航拒绝与缩放保留、键盘/按钮/手势缩放、ref、空/错误、RTL。
+- Unit: `ImageViewer.test.tsx` 覆盖 SSR、模态/焦点/滚动、受控导航拒绝与缩放保留、A → B → A 身份/响应式换源原子重置、键盘/按钮/手势缩放、最终错误重置与宣告、mouse lost capture、Portal motion boundary、figure/figcaption、ref、空状态和 RTL。
 - Story interaction: `KeyboardInteraction.play` 验证打开、键盘缩放与关闭；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 30501 B / 49152 B 预算，组合 Brotli 26517 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 30963 B / 49152 B 预算，组合 Brotli 26920 B；共享样式由应用单独导入一次。
 - SSR/hydration: closed Node SSR 已验证；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
 - RTL: 键盘方向单测，视觉/drag 待 E2E。
-- Reduced motion: CSS 已实现，截图待补。
+- Reduced motion: 系统媒体查询与显式 ConfigProvider motion 均已接入 Portal boundary；属性/类 Unit 已覆盖，浏览器截图待补。
 - Mobile Chromium/WebKit E2E: 打开、按钮/键盘缩放、图片切换、关闭、焦点恢复与 body scroll lock 清理均通过；持续 pinch/pan 帧率仍留待真机。
 - Chromatic Light/Dark: 状态 Story 已有，基线待执行。
 - Real device: 未执行。
@@ -145,7 +146,7 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 
 ### 已完成
 
-修正极端 pinch 的平移边界和受控 owner 拒绝导航时的缩放丢失；补 RTL 键盘和逻辑定位；固化 modal/gesture/SSR 与隔离 Next H5 契约。
+修正极端 pinch 的平移边界、受控 owner 拒绝导航时的缩放丢失，以及 active item 换源与最终 error 的 scale/drag 双状态失配；补 RTL 键盘、capture 清理、Portal motion boundary 和 figure/error 语义；固化 modal/gesture/SSR 与隔离 Next H5 契约。
 
 ## 变更记录
 
@@ -153,4 +154,6 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 | ---------- | ------ | ------------ | -------------------------------------------------------- | --------------------------------- |
 | 2026-08-29 | 未发布 | behavior     | RTL 键盘与极端缩放边界完善                               | LTR 与既有 API 不变               |
 | 2026-08-29 | 未发布 | fix          | 受控拒绝导航保留当前缩放                                 | API 兼容；仅权威 index 改变后重置 |
+| 2026-08-29 | 未发布 | fix          | active item 换源与最终 error 原子重置 scale/drag         | API 不变                          |
+| 2026-08-29 | 未发布 | a11y         | Portal motion、capture 清理、figcaption 与错误宣告       | API 不变                          |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 modal/zoom/navigation/hydration 证据 | 无                                |

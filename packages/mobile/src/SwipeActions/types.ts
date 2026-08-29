@@ -84,7 +84,7 @@ export type SwipeActionsProps = Omit<
   onActionError?: (error: unknown, action: SwipeActionsAction) => void;
   /** Root capture observer called after internal click-suppression handling. */
   onClickCapture?: (event: React.MouseEvent<HTMLDivElement>) => void;
-  /** Root capture observer called after internal Escape and arrow-key handling. */
+  /** Root capture observer called after internal Escape handling. */
   onKeyDownCapture?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   /** Root lost-pointer-capture observer; internal cancellation runs afterward. */
   onLostPointerCapture?: (event: ReactPointerEvent<HTMLDivElement>) => void;

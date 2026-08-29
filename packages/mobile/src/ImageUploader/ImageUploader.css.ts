@@ -7,7 +7,14 @@ export const root = style({
   gap: "var(--meu-space-2)",
   gridTemplateColumns: "repeat(var(--meu-image-uploader-columns), minmax(0, 1fr))",
   color: "var(--meu-color-ink)",
-  fontFamily: "var(--meu-font-ui)"
+  fontFamily: "var(--meu-font-ui)",
+  selectors: {
+    '&[data-native-input-focused="true"]': {
+      outline: "2px solid var(--meu-color-accent)",
+      outlineOffset: 4,
+      borderRadius: "var(--meu-radius-control)"
+    }
+  }
 });
 
 export const cell = style({

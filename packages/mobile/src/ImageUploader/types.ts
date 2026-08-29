@@ -162,7 +162,7 @@ export type ImageUploaderProps = Omit<
   disabled?: boolean;
   /** CSS `object-fit` used for completed and pending thumbnails. @defaultValue "cover" */
   imageFit?: ImageFit;
-  /** Maximum completed-plus-queued item count, including failed tasks reserved for retry. */
+  /** Maximum completed-plus-queued item count; finite non-negative values are floored and failed tasks reserve capacity. */
   maxCount?: number;
   /** Byte limit, or predicate returning `true` when a file must be rejected. */
   maxSize?: number | ((file: File) => boolean);
@@ -176,7 +176,7 @@ export type ImageUploaderProps = Omit<
   onChange?: (items: ImageUploaderItem[], details: ImageUploaderChangeDetails) => void;
   /** Called with the number of otherwise accepted files that exceed remaining `maxCount` capacity. */
   onCountExceed?: (exceed: number) => void;
-  /** Runs before removing a completed item; returning `false` or rejecting prevents removal. */
+  /** Runs before removing a completed item; returning `false` or rejecting prevents removal. Stable item keys are required across async controlled-list reorders. */
   onDelete?: (item: ImageUploaderItem) => boolean | void | Promise<boolean | void>;
   /** Called after a completed thumbnail opens the built-in viewer. */
   onPreview?: (item: ImageUploaderItem, index: number) => void;
@@ -196,7 +196,7 @@ export type ImageUploaderProps = Omit<
   renderUpload?: (input: ReactElement) => ReactNode;
   /** Label for failed-task retry buttons. Defaults to localized text. */
   retryLabel?: string;
-  /** Keeps failed task tiles visible for retry or removal. @defaultValue true */
+  /** Keeps failed tasks visible and reserved for retry; false discards failures and releases their capacity. @defaultValue true */
   showFailed?: boolean;
   /** Shows the visible add tile when capacity remains; the native input stays mounted when hidden. @defaultValue true */
   showUpload?: boolean;

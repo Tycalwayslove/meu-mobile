@@ -23,7 +23,7 @@ source: packages/mobile/src/SwipeActions
 - 任意内容的物理 left/right 操作轨，支持受控/非受控 side、单/双侧、disabled 和宽度阈值。
 - Pointer Events 在 6px 后锁定横向，纵向交还页面；距离或 0.5px/ms 快速横扫决定开合，offset 限制在轨宽。
 - 动作是最少 44px 的原生 button，支持同步/异步结果、失败上报、重复锁和 false veto。
-- 隐藏轨不进 Tab 顺序；每侧有 focus 时显现的 reveal button，Escape、内容、外部 pointer/focus 均可关闭。
+- 隐藏轨不进 Tab 顺序；每侧有 focus 时显现且不拦截内容指针的 reveal button，Escape、内容、外部 pointer/focus 均可关闭。
 
 ## 何时使用
 
@@ -47,7 +47,7 @@ root → reveal buttons → left/right action groups → translated content。�
 
 ## 受控与非受控
 
-`openSide` 存在即受控；未提交请求时位移下一帧回到权威 side，键盘焦点不会进入被拒绝的隐藏轨。非受控使用 `defaultOpenSide`。动作被移除或切换 disabled 时，非受控 side 会永久归一为 null，恢复动作后不会意外重开。
+`openSide` 存在即受控；未提交请求时位移下一帧回到权威 side，键盘焦点不会进入被拒绝的隐藏轨。外部从一侧切到另一侧时，隐藏轨中的焦点进入新权威轨的首个可用动作；若异步锁定使动作暂不可用，先停在该侧 reveal，解锁后再进入动作。非受控使用 `defaultOpenSide`。动作被移除或切换 disabled 时，非受控 side 会永久归一为 null，恢复动作后不会意外重开。
 
 ## 表单集成
 
@@ -59,7 +59,7 @@ API 表由 `SwipeActionsProps` 生成。action `key` 是轨内稳定 identity；
 
 ## Events
 
-`onOpenSideChange` 区分 swipe、keyboard、content、outside、escape、action。`onPointerDown` 先执行，`preventDefault()` 可阻止内部起始；move/up/cancel/lost-capture 回调是观察器。item handler 先于 root `onAction`；任一返回 false 保持展开，throw/reject 调用 `onActionError`。
+`onOpenSideChange` 区分 swipe、keyboard、content、outside、escape、action。`onPointerDown` 先执行，`preventDefault()` 可阻止内部起始；move/up/cancel/lost-capture 回调是观察器。item handler 先于 root `onAction`；任一返回 false 保持展开，throw/reject 调用 `onActionError`。异步动作绑定发起侧：等待期间切侧或 disabled 不会误关新的权威状态，已经开始的 item/root 业务链仍按顺序完成；卸载后不再进入尚未调用的 root handler 或组件回调，已经进入的 Promise 本身无法取消。
 
 ## Ref 与命令式方法
 
@@ -70,16 +70,16 @@ ref 指向根 `HTMLDivElement`。不公开命令式开合；程序化状态使�
 | 按键          | 行为                                                 |
 | ------------- | ---------------------------------------------------- |
 | Tab           | 进入 focus-visible reveal button；打开后进入动作按钮 |
-| Enter / Space | 打开轨或执行动作                                     |
+| Enter / Space | 打开轨或执行动作；完成后按权威 side 恢复焦点         |
 | Escape        | 关闭当前轨并恢复到对应 reveal button                 |
 
 ## 触摸与手势
 
-只接受主指针和主按钮；6px 前不认领，纵向优势达到 6px 即取消，横向后 capture 并 preventDefault。pointercancel/lostpointercapture 回到权威 side；release 结合距离和速度。旧 WebView 在 capture 检查后丢失 capture 的异常会被安全吸收。动作按钮不启动滑动。
+只接受主指针和主按钮；6px 前不认领，纵向优势达到 6px 即取消，横向后 capture 并 preventDefault。pointercancel/lostpointercapture 回到权威 side；release 结合距离和速度。pointer capture 缺失或获取失败时，组件在手势存续期临时监听 window move/up/cancel 并在结束、disabled 或卸载时清理；capture 检查后丢失 capture 的异常也会被安全吸收。动作按钮不启动滑动。横拖后的兼容 click 最多抑制 500ms，并在新的 pointerdown 时立即失效，避免吞掉之后的真实点按。
 
 ## 无障碍
 
-轨为具名 group，动作和替代入口均为原生 button。隐藏轨 aria-hidden 且移出 Tab；受控拒绝、外部关闭或 disabled 不把焦点留在隐藏 subtree。危险 tone 只有视觉含义，确认必须由业务实现。
+轨为具名 group，动作和替代入口均为原生 button。隐藏轨 aria-hidden 且移出 Tab；受控拒绝恢复原动作，关闭恢复对应 reveal，受控切侧进入新轨，disabled 不把焦点留在隐藏 subtree。聚焦后的 reveal 保持键盘可激活，但不承接指针命中，避免遮挡内容区的原生按钮或链接。危险 tone 只有视觉含义，确认必须由业务实现。
 
 ## 动效
 
@@ -91,7 +91,7 @@ ref 指向根 `HTMLDivElement`。不公开命令式开合；程序化状态使�
 
 ## SSR 与 Next.js
 
-组件是 client component。服务端以 offset 0 输出关闭视觉；ResizeObserver 挂载后测量。`defaultOpenSide` 会在首次测量后展开，首屏必须打开的动作不应依赖 SSR 视觉。
+组件是 client component。服务端以 offset 0 输出关闭视觉；未完成首次测量时，默认打开轨也保持 aria-hidden、tabindex=-1 与 `data-open-side=none`，避免视觉被内容遮挡时暴露可聚焦动作。ResizeObserver 挂载后测量，`defaultOpenSide` 随后展开；首屏必须打开的动作不应依赖 SSR 视觉。
 
 ## RTL 与国际化
 
@@ -99,12 +99,12 @@ left/right 是物理屏幕方向，不随 `dir` 重命名；正 offset 显示物
 
 ## 浏览器与 WebView
 
-Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window resize。iOS 13.0–13.3 没有完整 Pointer Events，滑动可能不可用，但 reveal/action 原生按钮仍可用；iOS 13.4+ 才作为滑动目标基线。尚无目标 App 真机证明。
+完整运行时支持档与仓库总矩阵一致：Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chromium/WebView 79–88 与 iOS 13–14 仅属观察档，Chrome 70 只做构建产物静态语法扫描。ResizeObserver 缺失时退回 window resize，pointer capture 缺失时使用窗口事件兜底；尚无目标 App 真机证明。
 
 ## 边界情况与已知限制
 
 - action key 必须轨内唯一；组件不自动确认危险动作。
-- 异步 handler 无 AbortSignal；卸载后忽略本地 loading 更新。
+- 异步 handler 无 AbortSignal；切侧或 disabled 只阻止陈旧自动关闭，不取消业务链；卸载会阻止尚未进入的 root handler 和组件回调，但无法取消已经进入的 Promise。
 - closed SSR 无轨宽，默认打开视觉在 layout measurement 后出现。
 - 多列表项仅通过 outside pointer/focus 互相关闭，无全局 provider。
 
@@ -114,12 +114,12 @@ Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window
 
 ## 测试证据
 
-- Unit: `SwipeActions.test.tsx`（键盘、阈值、纵向仲裁、受控拒绝、动态动作归一、capture 异常、取消、outside/Escape、异步、disabled）。
+- Unit: `SwipeActions.test.tsx`（键盘与完成焦点、阈值、纵向仲裁、受控拒绝/切侧、动态动作归一、capture 获取/释放 fallback、兼容 click 过期、取消、outside/Escape、异步陈旧完成、disabled）。
 - Story interaction: `Default` 验证 reveal 按钮与操作区状态；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5346 B / 32768 B 预算，组合 Brotli 4723 B；共享样式由应用单独导入一次。
-- SSR/hydration: `SwipeActions.ssr.test.tsx` 覆盖关闭 markup；隔离 Next production 以服务端 `defaultOpenSide=right` 状态在 Chromium/WebKit 完成 hydration，0 `pageerror`、0 `console.error`。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 6295 B / 32768 B 预算，组合 Brotli 5577 B；共享样式由应用单独导入一次。
+- SSR/hydration: `SwipeActions.ssr.test.tsx` 覆盖关闭 markup 与未测宽 default-open 的隐藏语义；隔离 Next production 以服务端 `defaultOpenSide=right` 状态在 Chromium/WebKit 完成 hydration，0 `pageerror`、0 `console.error`。
 - RTL: 物理方向契约已记录，浏览器矩阵待补。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
 - Mobile Chromium/WebKit E2E: 受控键盘替代、触摸 pointer 序列、异步 action 与等价菜单通过；240 次 pointermove + settle 同步成本预算 ≤250ms，两种引擎均通过。真实滚动容器竞争留待真机。
@@ -130,7 +130,7 @@ Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window
 
 ### 待优化
 
-- 补 iOS 13.4+/Android WebView 滑动、纵向滚动与多行列表 E2E。
+- 补正式支持档 iOS 15+/Android WebView 89+ 的真实触摸滑动、纵向滚动与多行列表 E2E。
 - 补 ResizeObserver 尺寸变化专项和主题视觉基线；服务端初始 open hydration 已完成。
 
 ### 已完成

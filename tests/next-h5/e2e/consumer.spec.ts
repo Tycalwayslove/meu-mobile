@@ -608,6 +608,7 @@ test("binds image upload tasks to serializable form values and native input focu
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(page.getByText("请至少上传一张商品图片")).toBeVisible();
   await expect(input).toBeFocused();
+  await expect(uploader).toHaveAttribute("data-native-input-focused", "true");
   await expect(uploader).toHaveAttribute("aria-invalid", "true");
   await expect(input).not.toHaveAttribute("aria-invalid", /.+/);
   await expect(input).toHaveAttribute("aria-describedby", /-error(?:\s|$)/);
@@ -719,6 +720,11 @@ test("opens a modal image gallery with zoom, keyboard navigation and focus resto
   await expect(close).toBeFocused();
   await expect(viewer.getByText("1 / 3")).toBeVisible();
   await expect(viewer.getByRole("img", { name: "商品正面图片" })).toBeVisible();
+  await expect(viewer.locator("figcaption")).toContainText("商品正面图片");
+  await expect(page.locator('[data-meu-overlay-layer="image-viewer"]')).toHaveAttribute(
+    "data-meu-motion",
+    "system"
+  );
 
   const closeBox = await close.boundingBox();
   expect(closeBox).not.toBeNull();
@@ -732,7 +738,10 @@ test("opens a modal image gallery with zoom, keyboard navigation and focus resto
   await viewer.getByRole("button", { name: "放大图片" }).click();
   await expect(viewer).toHaveAttribute("data-scale", "1.5");
   await expect(gallery).toHaveAttribute("data-drag-enabled", "false");
-  await page.keyboard.press("0");
+  await viewer.getByRole("img", { name: "商品侧面图片" }).evaluate((image) => {
+    image.dispatchEvent(new Event("error"));
+  });
+  await expect(viewer.getByText("图片加载失败", { exact: true })).toBeVisible();
   await expect(viewer).toHaveAttribute("data-scale", "1");
   await expect(gallery).toHaveAttribute("data-drag-enabled", "true");
 
@@ -759,6 +768,7 @@ test("runs controlled swipe actions and preserves a non-gesture action menu", as
   await page.keyboard.press("Enter");
   await expect(root).toHaveAttribute("data-open-side", "none");
   await expect(section.getByText("滑动操作：已归档")).toBeVisible();
+  await expect(reveal).toBeFocused();
 
   const box = await root.boundingBox();
   if (!box) throw new Error("Expected SwipeActions bounds");
@@ -792,6 +802,7 @@ test("runs controlled swipe actions and preserves a non-gesture action menu", as
   await section.getByRole("button", { name: "删除" }).click();
   await expect(root).toHaveAttribute("data-open-side", "none");
   await expect(section.getByText("滑动操作：已删除")).toBeVisible();
+  await expect(reveal).toBeFocused();
 
   await section.getByRole("button", { name: "更多操作" }).click();
   const menu = page.getByRole("dialog", { name: "滑动操作的等价菜单" });

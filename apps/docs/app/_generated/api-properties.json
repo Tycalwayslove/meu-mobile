@@ -2416,7 +2416,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Maximum completed-plus-queued item count, including failed tasks reserved for retry."
+          "description": "Maximum completed-plus-queued item count; finite non-negative values are floored and failed tasks reserve capacity."
         },
         {
           "name": "maxSize",
@@ -2489,7 +2489,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Keeps failed task tiles visible for retry or removal.",
+          "description": "Keeps failed tasks visible and reserved for retry; false discards failures and releases their capacity.",
           "defaultValue": "true"
         },
         {
@@ -2548,7 +2548,7 @@
           "type": "(item: ImageUploaderItem) => boolean | void | Promise<boolean | void>",
           "required": false,
           "event": true,
-          "description": "Runs before removing a completed item; returning `false` or rejecting prevents removal."
+          "description": "Runs before removing a completed item; returning `false` or rejecting prevents removal. Stable item keys are required across async controlled-list reorders."
         },
         {
           "name": "onPreview",
@@ -4982,7 +4982,7 @@
           "type": "(event: React.KeyboardEvent<HTMLDivElement>) => void",
           "required": false,
           "event": true,
-          "description": "Root capture observer called after internal Escape and arrow-key handling."
+          "description": "Root capture observer called after internal Escape handling."
         },
         {
           "name": "onLostPointerCapture",
@@ -12385,7 +12385,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Maximum completed-plus-queued item count, including failed tasks reserved for retry."
+          "description": "Maximum completed-plus-queued item count; finite non-negative values are floored and failed tasks reserve capacity."
         },
         {
           "name": "maxSize",
@@ -12472,7 +12472,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Keeps failed task tiles visible for retry or removal.",
+          "description": "Keeps failed tasks visible and reserved for retry; false discards failures and releases their capacity.",
           "defaultValue": "true"
         },
         {
@@ -12516,7 +12516,7 @@
           "type": "(item: ImageUploaderItem) => boolean | void | Promise<boolean | void>",
           "required": false,
           "event": true,
-          "description": "Runs before removing a completed item; returning `false` or rejecting prevents removal."
+          "description": "Runs before removing a completed item; returning `false` or rejecting prevents removal. Stable item keys are required across async controlled-list reorders."
         },
         {
           "name": "onPreview",

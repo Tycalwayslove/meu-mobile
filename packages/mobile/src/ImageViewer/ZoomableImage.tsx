@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type {
   CSSProperties,
   PointerEvent as ReactPointerEvent,
@@ -8,7 +8,7 @@ import type {
 } from "react";
 
 import { Image } from "../Image";
-import { image, media, slideStage, stateMessage } from "./ImageViewer.css";
+import { errorAnnouncement, image, media, slideStage, stateMessage } from "./ImageViewer.css";
 import type { ImageViewerItem, ImageViewerScaleChangeReason } from "./types";
 
 type Transform = { scale: number; x: number; y: number };
@@ -66,6 +66,7 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
     const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(null);
     const [transform, setTransform] = useState(initialTransform);
     const [interacting, setInteracting] = useState(false);
+    const [failed, setFailed] = useState(false);
 
     function clamp(next: Transform) {
       const stage = stageRef.current;
@@ -134,10 +135,20 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
     }
 
     function finishGesture() {
+      if (!gestureRef.current && !interacting) return;
       gestureRef.current = null;
       setInteracting(false);
       publish(transformRef.current);
     }
+
+    useEffect(() => {
+      const cancelGesture = () => {
+        gestureRef.current = null;
+        setInteracting(false);
+      };
+      window.addEventListener("blur", cancelGesture);
+      return () => window.removeEventListener("blur", cancelGesture);
+    }, []);
 
     function handleTouchStart(event: ReactTouchEvent<HTMLDivElement>) {
       if (!zoom) return;
@@ -196,7 +207,13 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
 
     function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
       if (event.pointerType !== "mouse" || event.button !== 0 || transform.scale <= 1) return;
-      event.currentTarget.setPointerCapture(event.pointerId);
+      try {
+        if (!event.currentTarget.setPointerCapture) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // Keep button and keyboard zoom available instead of starting a pan that cannot terminate.
+        return;
+      }
       startPan(event.clientX, event.clientY);
     }
 
@@ -207,9 +224,25 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
 
     function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
       if (event.pointerType !== "mouse" || !gestureRef.current) return;
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
+      finishGesture();
+      try {
+        if (
+          event.currentTarget.hasPointerCapture &&
+          event.currentTarget.hasPointerCapture(event.pointerId)
+        ) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+      } catch {
+        // The browser may already have released capture during cancellation.
       }
+    }
+
+    function handleLostPointerCapture() {
+      finishGesture();
+    }
+
+    function handleTouchCancel() {
+      lastTapRef.current = null;
       finishGesture();
     }
 
@@ -229,10 +262,11 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
+        onLostPointerCapture={handleLostPointerCapture}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
       >
         <div
           className={media}
@@ -254,7 +288,20 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
             width="100%"
             height="100%"
             fallback={<span className={stateMessage}>{errorText}</span>}
+            onLoad={() => setFailed(false)}
+            onError={() => {
+              setFailed(true);
+              lastTapRef.current = null;
+              gestureRef.current = null;
+              setInteracting(false);
+              reset();
+            }}
           />
+          {failed ? (
+            <span className={errorAnnouncement} role="status" aria-live="polite" aria-atomic="true">
+              {item.alt ? `${item.alt}：${errorText}` : errorText}
+            </span>
+          ) : null}
         </div>
       </div>
     );

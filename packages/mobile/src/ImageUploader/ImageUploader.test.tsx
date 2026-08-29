@@ -14,6 +14,7 @@ const existingItem: ImageUploaderItem = {
   name: "front.jpg",
   url: "/front.jpg"
 };
+const revokeObjectURL = vi.fn();
 
 function choose(files: File[]) {
   const input = screen.getByLabelText<HTMLInputElement>("添加图片");
@@ -21,9 +22,10 @@ function choose(files: File[]) {
 }
 
 beforeEach(() => {
+  revokeObjectURL.mockReset();
   vi.stubGlobal("URL", {
     createObjectURL: vi.fn((file: File) => `blob:${file.name}`),
-    revokeObjectURL: vi.fn()
+    revokeObjectURL
   });
   vi.stubGlobal(
     "matchMedia",
@@ -234,6 +236,55 @@ describe("ImageUploader", () => {
     );
   });
 
+  it("does not start transport when async preprocessing finishes after becoming disabled or read-only", async () => {
+    let finishPreprocessing: ((file: File) => void) | undefined;
+    const file = new File(["x"], "late.jpg", { type: "image/jpeg" });
+    const upload = vi.fn();
+    const beforeUpload = vi.fn(
+      () =>
+        new Promise<File>((resolve) => {
+          finishPreprocessing = resolve;
+        })
+    );
+    const { rerender } = render(<ImageUploader upload={upload} beforeUpload={beforeUpload} />);
+
+    choose([file]);
+    await waitFor(() => expect(beforeUpload).toHaveBeenCalledTimes(1));
+    rerender(<ImageUploader upload={upload} beforeUpload={beforeUpload} disabled />);
+    await act(async () => {
+      if (!finishPreprocessing) throw new Error("Expected preprocessing resolver");
+      finishPreprocessing(file);
+      await Promise.resolve();
+    });
+    expect(upload).not.toHaveBeenCalled();
+
+    rerender(<ImageUploader upload={upload} beforeUpload={beforeUpload} />);
+    choose([file]);
+    await waitFor(() => expect(beforeUpload).toHaveBeenCalledTimes(2));
+    rerender(<ImageUploader upload={upload} beforeUpload={beforeUpload} readOnly />);
+    await act(async () => {
+      if (!finishPreprocessing) throw new Error("Expected preprocessing resolver");
+      finishPreprocessing(file);
+      await Promise.resolve();
+    });
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it("normalizes fractional maxCount before reserving upload capacity", async () => {
+    const upload = vi
+      .fn<(_: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>>()
+      .mockImplementation(() => new Promise(() => {}));
+    const onCountExceed = vi.fn();
+    render(<ImageUploader upload={upload} multiple maxCount={1.9} onCountExceed={onCountExceed} />);
+
+    choose([
+      new File(["a"], "first.jpg", { type: "image/jpeg" }),
+      new File(["b"], "second.jpg", { type: "image/jpeg" })
+    ]);
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+    expect(onCountExceed).toHaveBeenCalledWith(1);
+  });
+
   it("keeps a controlled value authoritative, supports delete veto and opens ImageViewer", async () => {
     const onChange = vi.fn();
     const onPreview = vi.fn();
@@ -267,6 +318,64 @@ describe("ImageUploader", () => {
     expect(screen.queryByRole("button", { name: "商品正面，预览" })).toBeNull();
   });
 
+  it("deletes a rebuilt controlled item by stable key and never guesses after a keyless reorder", async () => {
+    let approveDelete: (() => void) | undefined;
+    const onDelete = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          approveDelete = resolve;
+        })
+    );
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <ImageUploader
+        value={[existingItem]}
+        upload={vi.fn()}
+        onDelete={onDelete}
+        onChange={onChange}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "删除 商品正面" }));
+    rerender(
+      <ImageUploader
+        value={[{ ...existingItem }]}
+        upload={vi.fn()}
+        onDelete={onDelete}
+        onChange={onChange}
+      />
+    );
+    await act(async () => {
+      if (!approveDelete) throw new Error("Expected delete resolver");
+      approveDelete();
+      await Promise.resolve();
+    });
+    expect(onChange).toHaveBeenLastCalledWith([], {
+      item: existingItem,
+      reason: "remove"
+    });
+
+    onChange.mockClear();
+    const keyless = { alt: "无 key 图片", url: "/keyless.jpg" };
+    rerender(
+      <ImageUploader value={[keyless]} upload={vi.fn()} onDelete={onDelete} onChange={onChange} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "删除 无 key 图片" }));
+    rerender(
+      <ImageUploader
+        value={[{ alt: "插入图片", url: "/inserted.jpg" }, { ...keyless }]}
+        upload={vi.fn()}
+        onDelete={onDelete}
+        onChange={onChange}
+      />
+    );
+    await act(async () => {
+      if (!approveDelete) throw new Error("Expected delete resolver");
+      approveDelete();
+      await Promise.resolve();
+    });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("retains failed tasks for retry and exposes a focusable native input through ref", async () => {
     const ref = createRef<ImageUploaderRef>();
     const uploaded = { alt: "重试成功", url: "/retry.jpg" };
@@ -287,6 +396,30 @@ describe("ImageUploader", () => {
     await waitFor(() =>
       expect(onChange).toHaveBeenCalledWith([uploaded], { item: uploaded, reason: "upload" })
     );
+  });
+
+  it("discards hidden failures and releases their max-count capacity", async () => {
+    const upload = vi
+      .fn<(_: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>>()
+      .mockRejectedValue(new Error("network"));
+    const onUploadQueueChange = vi.fn();
+    render(
+      <ImageUploader
+        upload={upload}
+        maxCount={1}
+        showFailed={false}
+        onUploadQueueChange={onUploadQueueChange}
+      />
+    );
+
+    choose([new File(["x"], "hidden-error.jpg", { type: "image/jpeg" })]);
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "添加图片" })).toHaveProperty("disabled", false)
+    );
+    expect(screen.queryByRole("button", { name: "重试" })).toBeNull();
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:hidden-error.jpg");
+    expect(onUploadQueueChange).toHaveBeenLastCalledWith([]);
   });
 
   it("blocks a failed-task retry when controlled items already exceed its reserved capacity", async () => {
@@ -449,6 +582,25 @@ describe("ImageUploader", () => {
     expect(group.getAttribute("data-state")).toBe("error");
     expect(group.getAttribute("aria-invalid")).toBe("true");
     expect(group.querySelectorAll("[aria-invalid]")).toHaveLength(0);
+  });
+
+  it("shows a visible group focus state for the native input and gives empty-alt actions a name", () => {
+    render(
+      <ImageUploader
+        aria-label="商品图片"
+        value={[{ alt: "", name: "receipt.jpg", url: "/receipt.jpg" }]}
+        upload={vi.fn()}
+      />
+    );
+    const group = screen.getByRole("group", { name: "商品图片" });
+    const input = group.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error("Expected native file input");
+    act(() => input.focus());
+    expect(group.getAttribute("data-native-input-focused")).toBe("true");
+    act(() => input.blur());
+    expect(group.getAttribute("data-native-input-focused")).toBeNull();
+    expect(screen.getByRole("button", { name: "receipt.jpg，预览" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "删除 receipt.jpg" })).toBeTruthy();
   });
 
   it("exposes task progress semantics and locks an asynchronous delete", async () => {

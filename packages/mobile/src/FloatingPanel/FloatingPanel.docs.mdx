@@ -23,7 +23,7 @@ source: packages/mobile/src/FloatingPanel
 - 常驻、非模态的顶部或底部浮动面板；不创建 Mask、Portal、滚动锁或焦点圈定。
 - 正像素 anchors 会过滤、排序、去重并夹紧至 44px–visual viewport；支持受控/非受控高度。
 - 原生 44px handle 支持拖拽、点击、方向键、PageUp/PageDown、Home/End；非交互内容只辅助向更高 anchor 展开。
-- 有限速度投影；pointer cancel/lost capture、disabled 切换和卸载会清理临时拖拽状态。
+- 有限速度投影；pointer cancel/lost capture、拖拽配置变化和卸载会清理临时拖拽状态。
 
 ## 何时使用
 
@@ -76,7 +76,7 @@ API 表由 `FloatingPanelProps` 生成。`anchors` 是物理像素高度；`plac
 
 ## 触摸与手势
 
-handle 在 6px 后锁定纵向，横向意图取消；pointer capture 丢失或 cancel 会回滚。内容区只在低于最高 anchor、起点非交互元素时接管向展开方向的拖拽；收起始终使用 handle。速度阈值 0.5px/ms，投影由 `inertiaFactor` 限制在 0–200ms。
+handle 在 6px 后锁定纵向，横向意图取消；pointer capture 获取失败时临时监听 window，丢失 capture 或 cancel 会回滚，所有兜底监听在结束、配置变化或卸载时清理。anchors、placement、disabled 或 `dragFromContent` 在拖拽中改变会取消旧手势。内容区只在低于最高 anchor、起点非交互元素时接管向展开方向的拖拽；原生控件、可聚焦节点、常见 ARIA widget 与带 `data-meu-floating-panel-drag-ignore` 的区域不会被接管，收起始终使用 handle。速度阈值 0.5px/ms，投影由 `inertiaFactor` 限制在 0–200ms。
 
 ## 无障碍
 
@@ -100,7 +100,7 @@ handle 是具名原生 button，关联 body 与实时高度说明；disabled 或
 
 ## 浏览器与 WebView
 
-Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerHeight，pointer capture 缺失或抛错可降级。iOS 13.0–13.3 没有完整 Pointer Events，拖拽可能不可用，但原生 handle 点击和键盘仍可调整；iOS 13.4+ 才作为拖拽目标基线。尚无目标 App 真机证明。
+完整运行时支持档与仓库总矩阵一致：Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chromium/WebView 79–88 与 iOS 13–14 仅属观察档，Chrome 70 只做构建产物静态语法扫描，不构成运行时承诺。visualViewport 缺失时退回 innerHeight，pointer capture 缺失或抛错可降级；尚无目标 App 真机证明。
 
 ## 边界情况与已知限制
 
@@ -114,15 +114,15 @@ Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerH
 
 ## 测试证据
 
-- Unit: `FloatingPanel.test.tsx`（归一化、单 anchor 禁用、受控、速度/方向锁、cancel、disabled、键盘、ref）。
+- Unit/SSR: 2 个文件共 21 tests，覆盖归一化、单 anchor 禁用、受控、速度/方向锁、capture fallback、配置与 visual viewport 变化取消、交互内容边界、原生根事件、键盘、ref 和确定 SSR shell。
 - Story interaction: `Bottom` 验证 handle 点击与锚点状态变化；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5025 B / 32768 B 预算，组合 Brotli 4434 B；共享样式由应用单独导入一次。
-- SSR/hydration: `FloatingPanel.ssr.test.tsx` 覆盖确定 shell；隔离 Next production 以 3 个 anchors 和初始 300px 高度在 Chromium/WebKit 完成真实 hydration，0 `pageerror`、0 `console.error`。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5591 B / 32768 B 预算，组合 Brotli 4960 B；共享样式由应用单独导入一次。
+- SSR/hydration: `FloatingPanel.ssr.test.tsx` 在 Node 覆盖确定 shell；隔离 Next production 的 Chromium/WebKit 聚合检查确认组件已挂载且无 `pageerror` / `console.error`，尚未单独断言服务端根节点复用、`data-measured` 或初始 300px 高度。
 - RTL: 垂直方向不适用；排版矩阵待补。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
-- Mobile Chromium/WebKit E2E: 键盘 snap、pointer 拖动、最高点内容滚动恢复和受控高度输出均通过。
+- Mobile Chromium/WebKit E2E: 键盘 snap、合成 pointer 拖动、最高点的内容拖拽标记移交和受控高度输出均通过；尚未用真实 touch 或 `scrollTop` 断言原生滚动恢复。
 - Chromatic Light/Dark: stories 可采集，正式基线待确认。
 - Real device: 待补。
 
@@ -130,16 +130,16 @@ Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerH
 
 ### 待优化
 
-- 补 iOS 13.4+/Android WebView 的拖拽、visual viewport/键盘和滚动移交 E2E。
-- 补主题视觉基线；服务端初始高度 hydration 已完成。
+- 补正式支持档 iOS 15+/Android WebView 89+ 的真实触摸拖拽、visual viewport/键盘和 `scrollTop` 滚动移交 E2E；补 hydration 根节点复用与测量后高度断言。
+- 补主题视觉基线。
 
 ### 已完成
 
-- 固化受控状态、异常 anchor、有限速度、原生 handle、内容展开边界、取消/卸载清理、reduced-motion、forced-colors、SSR 与隔离 Next H5 手势/性能证据。
+- 固化受控状态、异常 anchor、有限速度、原生 handle、内容展开边界、配置变化取消、capture fallback/卸载清理、reduced-motion、forced-colors、SSR shell 与隔离 Next H5 聚合证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                        | 迁移说明     |
-| ---------- | ------ | ------------ | ----------------------------------------------------------- | ------------ |
-| 2026-08-29 | 0.1.0  | hardening    | 完成 modeless snap、手势取消、键盘替代与兼容事实源          | 无破坏性变更 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 snap/drag/scroll-handoff/hydration 证据 | 无           |
+| 日期       | 版本   | 类型      | 内容                                                                         | 迁移说明     |
+| ---------- | ------ | --------- | ---------------------------------------------------------------------------- | ------------ |
+| 2026-08-29 | 0.1.0  | hardening | 完成 modeless snap、手势取消、键盘替代与兼容事实源                           | 无破坏性变更 |
+| 2026-08-29 | 未发布 | hardening | 修复配置竞态、capture fallback 与交互内容边界，并校准 E2E/hydration 证据口径 | 无           |

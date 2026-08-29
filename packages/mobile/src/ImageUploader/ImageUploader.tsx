@@ -49,6 +49,11 @@ function normalizeColumns(columns: number | undefined) {
   return Math.min(8, Math.max(1, Math.floor(columns)));
 }
 
+function normalizeMaxCount(maxCount: number | undefined) {
+  if (maxCount === undefined || !Number.isFinite(maxCount) || maxCount < 0) return undefined;
+  return Math.floor(maxCount);
+}
+
 function normalizeProgress(progress: number) {
   if (!Number.isFinite(progress)) return 0;
   return Math.min(100, Math.max(0, progress));
@@ -76,6 +81,27 @@ function isOversize(file: File, maxSize: ImageUploaderProps["maxSize"]) {
 
 function itemKey(item: ImageUploaderItem, index: number) {
   return item.key === undefined ? `${item.url}-${index}` : item.key;
+}
+
+function deletionIdentity(item: ImageUploaderItem, index: number) {
+  return item.key === undefined ? `position:${index}:${item.url}` : `key:${String(item.key)}`;
+}
+
+function findDeletionIndex(
+  items: readonly ImageUploaderItem[],
+  target: ImageUploaderItem,
+  originalIndex: number
+) {
+  if (target.key !== undefined) {
+    return items.findIndex((item) => item.key !== undefined && Object.is(item.key, target.key));
+  }
+  const referenceIndex = items.indexOf(target);
+  if (referenceIndex >= 0) return referenceIndex;
+  const positionalItem = items[originalIndex];
+  if (positionalItem && positionalItem.key === undefined && positionalItem.url === target.url) {
+    return originalIndex;
+  }
+  return -1;
 }
 
 /**
@@ -133,6 +159,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const inputRef = useRef<HTMLInputElement>(null);
     const rootRef = useRef<HTMLDivElement>(null);
     const mountedRef = useRef(true);
+    const interactionRef = useRef({ disabled, readOnly, showFailed });
     const taskCounterRef = useRef(0);
     const controlled = value !== undefined;
     const [uncontrolledValue, setUncontrolledValue] = useState<ImageUploaderItem[]>(() => [
@@ -145,6 +172,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const [previewIndex, setPreviewIndex] = useState(0);
     const [viewerOpen, setViewerOpen] = useState(false);
     const [deletingKeys, setDeletingKeys] = useState<Set<string>>(() => new Set());
+    const deletingKeysRef = useRef(new Set<string>());
+    const [nativeInputFocused, setNativeInputFocused] = useState(false);
     const resolvedId =
       id || (fieldContext ? fieldContext.controlId : `meu-image-uploader-${generatedId}`);
     const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
@@ -168,14 +197,17 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const localizedAddLabel = addLabel || (config.locale === "en-US" ? "Add image" : "添加图片");
     const localizedRetryLabel = retryLabel || (config.locale === "en-US" ? "Retry" : "重试");
     const localizedRemoveLabel = config.locale === "en-US" ? "Remove" : "删除";
+    const localizedImageLabel = config.locale === "en-US" ? "Image" : "图片";
     const resolvedColumns = normalizeColumns(columns);
+    const resolvedMaxCount = normalizeMaxCount(maxCount);
     const count = items.length + tasks.length;
-    const atLimit = typeof maxCount === "number" && maxCount >= 0 && count >= maxCount;
+    const atLimit = resolvedMaxCount !== undefined && count >= resolvedMaxCount;
     const canUpload = showUpload && !atLimit;
     const rootStyle: RootStyle = { ...style, "--meu-image-uploader-columns": resolvedColumns };
 
     itemsRef.current = items;
     tasksRef.current = tasks;
+    interactionRef.current = { disabled, readOnly, showFailed };
 
     const viewerImages = items.map((item) => ({
       alt: item.alt,
@@ -248,6 +280,10 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         removeTask(task.id, false);
       } catch (error) {
         if (!mountedRef.current || task.controller.signal.aborted) return;
+        if (!interactionRef.current.showFailed) {
+          removeTask(task.id, false);
+          return;
+        }
         setTasks((current) =>
           current.map((entry) =>
             entry.id === task.id ? { ...entry, error, status: "error" } : entry
@@ -302,6 +338,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           })
         );
         if (!mountedRef.current) return;
+        if (interactionRef.current.disabled || interactionRef.current.readOnly) return;
         const beforeRejected = processed
           .filter((entry) => !entry.result)
           .map((entry) => entry.original);
@@ -313,9 +350,11 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         }
       }
 
-      if (typeof maxCount === "number" && maxCount >= 0) {
+      if (interactionRef.current.disabled || interactionRef.current.readOnly) return;
+
+      if (resolvedMaxCount !== undefined) {
         const occupied = itemsRef.current.length + tasksRef.current.length;
-        const available = Math.max(0, maxCount - occupied);
+        const available = Math.max(0, resolvedMaxCount - occupied);
         if (accepted.length > available) {
           const rejected = accepted.slice(available);
           accepted = accepted.slice(0, available);
@@ -332,9 +371,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       const previous = tasksRef.current.find((task) => task.id === taskId);
       if (!previous || previous.status !== "error" || disabled || readOnly) return;
       if (
-        typeof maxCount === "number" &&
-        maxCount >= 0 &&
-        itemsRef.current.length + tasksRef.current.length > maxCount
+        resolvedMaxCount !== undefined &&
+        itemsRef.current.length + tasksRef.current.length > resolvedMaxCount
       ) {
         if (onCountExceed) onCountExceed(1);
         reportReject("max-count", [previous.file], [], [previous.file]);
@@ -353,15 +391,20 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
 
     async function requestDelete(item: ImageUploaderItem) {
       const currentIndex = itemsRef.current.indexOf(item);
-      const deletionKey = String(itemKey(item, currentIndex));
-      if (deletingKeys.has(deletionKey)) return;
+      if (currentIndex < 0) return;
+      const deletionKey = deletionIdentity(item, currentIndex);
+      if (deletingKeysRef.current.has(deletionKey)) return;
+      deletingKeysRef.current.add(deletionKey);
       setDeletingKeys((current) => new Set(current).add(deletionKey));
       try {
         const result = onDelete ? await onDelete(item) : undefined;
         if (!mountedRef.current) return;
         if (result === false) return;
+        const latestItems = itemsRef.current;
+        const latestIndex = findDeletionIndex(latestItems, item, currentIndex);
+        if (latestIndex < 0) return;
         publish(
-          itemsRef.current.filter((entry) => entry !== item),
+          latestItems.filter((_, index) => index !== latestIndex),
           item,
           "remove"
         );
@@ -369,6 +412,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         return;
       } finally {
         if (mountedRef.current) {
+          deletingKeysRef.current.delete(deletionKey);
           setDeletingKeys((current) => {
             const next = new Set(current);
             next.delete(deletionKey);
@@ -422,9 +466,21 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     }, [onUploadQueueChange, tasks]);
 
     useEffect(() => {
+      if (showFailed) return;
+      const failedTasks = tasksRef.current.filter((task) => task.status === "error");
+      if (failedTasks.length === 0) return;
+      const failedIds = new Set(failedTasks.map((task) => task.id));
+      failedTasks.forEach(revokeTaskUrl);
+      tasksRef.current = tasksRef.current.filter((task) => !failedIds.has(task.id));
+      setTasks((current) => current.filter((task) => !failedIds.has(task.id)));
+    }, [showFailed, tasks]);
+
+    useEffect(() => {
+      const mountedDeletingKeys = deletingKeysRef.current;
       mountedRef.current = true;
       return () => {
         mountedRef.current = false;
+        mountedDeletingKeys.clear();
         tasksRef.current.forEach((task) => {
           task.controller.abort();
           revokeTaskUrl(task);
@@ -446,7 +502,11 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         aria-label={ariaLabel || (labelledBy ? undefined : localizedAddLabel)}
         aria-labelledby={labelledBy}
         aria-describedby={describedBy}
-        onBlur={onBlur}
+        onFocus={() => setNativeInputFocused(true)}
+        onBlur={(event) => {
+          setNativeInputFocused(false);
+          if (onBlur) onBlur(event);
+        }}
         onChange={(event) => {
           void handleSelection(event);
         }}
@@ -469,12 +529,16 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           aria-invalid={resolvedAriaInvalid}
           data-disabled={disabled || undefined}
           data-meu-component="image-uploader"
+          data-native-input-focused={nativeInputFocused ? "true" : undefined}
           data-readonly={readOnly || undefined}
           data-state={invalid ? "error" : "default"}
         >
           {items.map((item, index) => {
-            const deletionKey = String(itemKey(item, index));
+            const deletionKey = deletionIdentity(item, index);
             const deleting = deletingKeys.has(deletionKey);
+            const itemName = item.name ? item.name.trim() : "";
+            const accessibleItemLabel =
+              item.alt.trim() || itemName || `${localizedImageLabel} ${index + 1}`;
             const imageNode = (
               <Image
                 src={item.thumbnailUrl || item.url}
@@ -499,7 +563,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                       <button
                         type="button"
                         className={previewButton}
-                        aria-label={`${item.alt}，${config.locale === "en-US" ? "Preview" : "预览"}`}
+                        aria-label={`${accessibleItemLabel}，${config.locale === "en-US" ? "Preview" : "预览"}`}
                         disabled={disabled}
                         onClick={() => {
                           setPreviewIndex(index);
@@ -517,7 +581,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                     <button
                       type="button"
                       className={actionButton}
-                      aria-label={`${localizedRemoveLabel} ${item.alt}`}
+                      aria-label={`${localizedRemoveLabel} ${accessibleItemLabel}`}
                       aria-busy={deleting || undefined}
                       disabled={deleting}
                       onClick={() => {

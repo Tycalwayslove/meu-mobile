@@ -6,6 +6,7 @@ import { useEffect, useImperativeHandle, useRef, useState } from "react";
 
 import { Carousel } from "../Carousel";
 import { useMeuConfig } from "../ConfigProvider";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useControllableOpen } from "../internal/useControllableOpen";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
 import { Mask } from "../Mask";
@@ -14,6 +15,7 @@ import {
   counter,
   dialog,
   empty,
+  figure,
   footer,
   gallery,
   layer,
@@ -42,6 +44,19 @@ function normalizeMaxZoom(value: number) {
 function normalizeDoubleTapZoom(value: number, maxZoom: number) {
   if (!Number.isFinite(value)) return Math.min(2, maxZoom);
   return Math.min(maxZoom, Math.max(1, value));
+}
+
+function itemIdentity(item: ImageViewerProps["images"][number] | undefined, index: number) {
+  if (!item) return `empty:${index}`;
+  return JSON.stringify([
+    index,
+    item.key === undefined ? null : String(item.key),
+    item.src,
+    item.srcSet || "",
+    item.sizes || "",
+    item.crossOrigin || "",
+    item.referrerPolicy || ""
+  ]);
 }
 
 /**
@@ -92,8 +107,13 @@ export function ImageViewer({
     normalizeIndex(defaultIndex, images.length)
   );
   const currentIndex = normalizeIndex(controlledIndex ? index : uncontrolledIndex, images.length);
-  const previousIndexRef = useRef(currentIndex);
-  const [scale, setScale] = useState(1);
+  const currentItem = images[currentIndex];
+  const currentItemIdentity = itemIdentity(currentItem, currentIndex);
+  const [scaleState, setScaleState] = useState(() => ({
+    identity: currentItemIdentity,
+    value: 1
+  }));
+  const scale = scaleState.identity === currentItemIdentity ? scaleState.value : 1;
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
     defaultOpen,
     onOpenChange,
@@ -103,7 +123,7 @@ export function ImageViewer({
   const resolvedMaxZoom = normalizeMaxZoom(maxZoom);
   const resolvedDoubleTapZoom = normalizeDoubleTapZoom(doubleTapZoom, resolvedMaxZoom);
   const portalContainer = container === undefined ? config.portalContainer : container;
-  const currentItem = images[currentIndex];
+  const configBoundary = getConfigBoundaryProps(config);
   const labels =
     config.locale === "en-US"
       ? {
@@ -136,7 +156,7 @@ export function ImageViewer({
   function resetCurrentZoom(reason: ImageViewerScaleChangeReason = "reset") {
     const handle = zoomRefs.current[currentIndex];
     if (handle) handle.reset(reason);
-    else setScale(1);
+    else setScaleState({ identity: currentItemIdentity, value: 1 });
   }
 
   function requestIndex(nextIndex: number, reason: ImageViewerIndexChangeReason) {
@@ -184,42 +204,49 @@ export function ImageViewer({
   }, [controlledIndex, images.length, uncontrolledIndex]);
 
   useEffect(() => {
-    const previousIndex = previousIndexRef.current;
-    if (previousIndex === currentIndex) return;
-    const previousHandle = zoomRefs.current[previousIndex];
-    if (previousHandle) previousHandle.reset();
-    setScale(1);
-    previousIndexRef.current = currentIndex;
-  }, [currentIndex]);
+    zoomRefs.current.forEach((handle) => {
+      if (handle) handle.reset();
+    });
+    setScaleState({ identity: currentItemIdentity, value: 1 });
+  }, [currentItemIdentity]);
 
   useEffect(() => {
     if (resolvedOpen) return;
     zoomRefs.current.forEach((handle) => {
       if (handle) handle.reset();
     });
-    setScale(1);
-  }, [resolvedOpen]);
+    setScaleState({ identity: currentItemIdentity, value: 1 });
+  }, [currentItemIdentity, resolvedOpen]);
 
+  const footerContent =
+    shouldRender && currentItem && renderFooter ? renderFooter(currentItem, currentIndex) : null;
   const carouselItems = images.map((item, itemIndex) => ({
     ariaLabel: item.alt || labels.slide(itemIndex + 1, images.length),
     content: (
-      <ZoomableImage
-        key={`${item.key === undefined ? item.src : String(item.key)}-${itemIndex === currentIndex ? "active" : "inactive"}`}
-        ref={(handle) => {
-          zoomRefs.current[itemIndex] = handle;
-        }}
-        active={itemIndex === currentIndex}
-        doubleTapZoom={resolvedDoubleTapZoom}
-        errorText={labels.error}
-        item={item}
-        maxZoom={resolvedMaxZoom}
-        zoom={zoom}
-        onScaleChange={(nextScale, reason) => {
-          if (itemIndex !== currentIndex) return;
-          setScale(nextScale);
-          if (onScaleChange) onScaleChange(nextScale, { index: itemIndex, reason });
-        }}
-      />
+      <figure className={figure}>
+        <ZoomableImage
+          key={itemIdentity(item, itemIndex)}
+          ref={(handle) => {
+            zoomRefs.current[itemIndex] = handle;
+          }}
+          active={itemIndex === currentIndex}
+          doubleTapZoom={resolvedDoubleTapZoom}
+          errorText={labels.error}
+          item={item}
+          maxZoom={resolvedMaxZoom}
+          zoom={zoom}
+          onScaleChange={(nextScale, reason) => {
+            if (itemIndex !== currentIndex) return;
+            setScaleState({ identity: currentItemIdentity, value: nextScale });
+            if (onScaleChange) onScaleChange(nextScale, { index: itemIndex, reason });
+          }}
+        />
+        {itemIndex === currentIndex && footerContent ? (
+          <figcaption className={footer} aria-live="polite" aria-atomic="true">
+            {footerContent}
+          </figcaption>
+        ) : null}
+      </figure>
     ),
     key: item.key === undefined ? `${item.src}-${itemIndex}` : item.key
   }));
@@ -256,19 +283,15 @@ export function ImageViewer({
 
   if (!shouldRender) return null;
 
-  const footerContent =
-    currentItem && renderFooter ? renderFooter(currentItem, currentIndex) : null;
-
   return (
     <Portal container={portalContainer}>
       <div
-        className={layer({ state: visualState })}
-        dir={config.dir}
+        {...configBoundary}
+        className={`${layer({ state: visualState })} ${configBoundary.className}`}
         hidden={hidden}
         inert={!resolvedOpen}
         aria-hidden={resolvedOpen ? undefined : "true"}
         data-meu-overlay-layer="image-viewer"
-        data-meu-theme={config.theme}
         data-state={visualState}
       >
         <Mask
@@ -375,7 +398,6 @@ export function ImageViewer({
               </button>
             </div>
           ) : null}
-          {footerContent ? <div className={footer}>{footerContent}</div> : null}
         </div>
       </div>
     </Portal>

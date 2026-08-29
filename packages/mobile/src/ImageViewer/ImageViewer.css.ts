@@ -43,6 +43,13 @@ export const dialog = style({
 
 export const gallery = style({ width: "100%", height: "100%", color: "inherit" });
 
+export const figure = style({
+  position: "relative",
+  width: "100%",
+  height: "100%",
+  margin: 0
+});
+
 globalStyle(`${gallery} [data-meu-carousel-viewport]`, { height: "100%" });
 globalStyle(`${gallery} [data-meu-carousel-track]`, { height: "100%", touchAction: "none" });
 globalStyle(`${gallery} [data-meu-carousel-slide]`, { height: "100%" });
@@ -116,6 +123,18 @@ export const stateMessage = style({
   fontSize: 14,
   lineHeight: 1.5,
   textAlign: "center"
+});
+
+export const errorAnnouncement = style({
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0
 });
 
 const floatingControl = {

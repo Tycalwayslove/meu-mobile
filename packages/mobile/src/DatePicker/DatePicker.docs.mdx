@@ -120,7 +120,7 @@ min 大于 max、边界之间没有可表示网格点、所有 option 被 filter
 - Story interaction：`DefaultDate` 验证打开、日期选项与 dialog 命名关系；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 17384 B / 49152 B 预算；最大单值 `DatePicker` 为 17380 B / 49152 B 预算，组合 Brotli 15447 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 17386 B / 49152 B 预算；最大单值 `DatePicker` 为 17382 B / 49152 B 预算，组合 Brotli 15459 B；共享样式由应用单独导入一次。
 - SSR：DatePicker.ssr.test.tsx 覆盖 dialog、列名与选中值。
 - Figma：Meu/DatePicker 231:1047；6 variants、48px options、Light/Dark token QA。
 - 双引擎、Chromatic、真机滚轮/读屏：最终统一门禁。

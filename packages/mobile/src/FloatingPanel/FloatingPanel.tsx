@@ -27,6 +27,8 @@ type FloatingPanelStyle = CSSProperties & { "--meu-floating-panel-translate"?: s
 
 type DragSession = {
   active: boolean;
+  captureTarget: HTMLElement | null;
+  configurationKey: string;
   pointerId: number;
   source: "content" | "handle";
   startHeight: number;
@@ -78,9 +80,56 @@ function heightDelta(deltaY: number, placement: FloatingPanelPlacement) {
 function isInteractiveContent(target: EventTarget | null, boundary: HTMLElement | null) {
   if (!(target instanceof Element) || !boundary) return false;
   const interactive = target.closest(
-    "a, button, input, select, textarea, summary, [contenteditable='true'], [role='button'], [role='link']"
+    [
+      "a",
+      "button",
+      "input",
+      "label",
+      "select",
+      "textarea",
+      "summary",
+      "audio[controls]",
+      "video[controls]",
+      "iframe",
+      "[contenteditable]:not([contenteditable='false'])",
+      "[tabindex]:not([tabindex='-1'])",
+      "[role='button']",
+      "[role='checkbox']",
+      "[role='combobox']",
+      "[role='link']",
+      "[role='menuitem']",
+      "[role='menuitemcheckbox']",
+      "[role='menuitemradio']",
+      "[role='option']",
+      "[role='radio']",
+      "[role='scrollbar']",
+      "[role='searchbox']",
+      "[role='slider']",
+      "[role='spinbutton']",
+      "[role='switch']",
+      "[role='tab']",
+      "[role='textbox']",
+      "[role='treeitem']",
+      "[data-meu-floating-panel-drag-ignore]"
+    ].join(", ")
   );
   return interactive ? boundary.contains(interactive) : false;
+}
+
+function releaseDragPointerCapture(session: DragSession) {
+  const target = session.captureTarget;
+  if (!target) return;
+  try {
+    if (
+      typeof target.hasPointerCapture === "function" &&
+      typeof target.releasePointerCapture === "function" &&
+      target.hasPointerCapture(session.pointerId)
+    ) {
+      target.releasePointerCapture(session.pointerId);
+    }
+  } catch {
+    // Pointer capture can already be gone after a browser-level cancellation.
+  }
 }
 
 /**
@@ -115,6 +164,7 @@ export function FloatingPanel({
   const suppressHandleClickTimerRef = useRef<number | null>(null);
   const immediateFrameRef = useRef(0);
   const cancelledDragFrameRef = useRef(0);
+  const fallbackPointerCleanupRef = useRef<(() => void) | null>(null);
   const [availableHeight, setAvailableHeight] = useState(0);
   const [uncontrolledHeight, setUncontrolledHeight] = useState(defaultHeight);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
@@ -130,6 +180,7 @@ export function FloatingPanel({
   const activeHeight = resolvedAnchors[activeIndex] || 0;
   const minimumHeight = resolvedAnchors[0] || 0;
   const maximumHeight = resolvedAnchors[resolvedAnchors.length - 1] || 0;
+  const dragConfigurationKey = `${placement}|${disabled ? 1 : 0}|${dragFromContent ? 1 : 0}|${resolvedAnchors.join(",")}`;
   const effectiveDragging = dragging && !disabled && resolvedAnchors.length > 1;
   const visibleHeight = effectiveDragging && dragHeight !== null ? dragHeight : activeHeight;
   const translate = Math.max(0, maximumHeight - visibleHeight) * (placement === "top" ? -1 : 1);
@@ -144,6 +195,12 @@ export function FloatingPanel({
   const localizedHandleLabel =
     handleLabel ||
     (config.locale === "en-US" ? "Adjust floating panel height" : "调整浮动面板高度");
+
+  const clearFallbackPointerListeners = useCallback(() => {
+    if (!fallbackPointerCleanupRef.current) return;
+    fallbackPointerCleanupRef.current();
+    fallbackPointerCleanupRef.current = null;
+  }, []);
 
   useEffect(() => {
     const update = () => setAvailableHeight(viewportHeight());
@@ -166,14 +223,20 @@ export function FloatingPanel({
       if (suppressHandleClickTimerRef.current !== null) {
         window.clearTimeout(suppressHandleClickTimerRef.current);
       }
+      clearFallbackPointerListeners();
       dragSessionRef.current = null;
     },
-    []
+    [clearFallbackPointerListeners]
   );
 
   useEffect(() => {
-    if (!disabled && resolvedAnchors.length > 1) return;
+    const session = dragSessionRef.current;
+    const configurationChanged =
+      session !== null && session.configurationKey !== dragConfigurationKey;
+    if (!configurationChanged && !disabled && resolvedAnchors.length > 1) return;
     dragSessionRef.current = null;
+    if (session) releaseDragPointerCapture(session);
+    clearFallbackPointerListeners();
     if (cancelledDragFrameRef.current) {
       window.cancelAnimationFrame(cancelledDragFrameRef.current);
     }
@@ -182,7 +245,7 @@ export function FloatingPanel({
       setDragging(false);
       setDragHeight(null);
     });
-  }, [disabled, resolvedAnchors.length]);
+  }, [clearFallbackPointerListeners, disabled, dragConfigurationKey, resolvedAnchors.length]);
 
   const requestHeight = useCallback(
     (nextIndex: number, reason: FloatingPanelHeightChangeReason, skipAnimation = false) => {
@@ -217,43 +280,31 @@ export function FloatingPanel({
     [requestHeight, resolvedAnchors]
   );
 
-  const beginDrag = useCallback(
-    (event: ReactPointerEvent<HTMLElement>, source: DragSession["source"]) => {
-      if (disabled || event.button !== 0 || !event.isPrimary || resolvedAnchors.length < 2) return;
-      if (source === "content") {
-        if (!canDragFromContent || isInteractiveContent(event.target, bodyRef.current)) return;
-      }
-      dragSessionRef.current = {
-        active: false,
-        pointerId: event.pointerId,
-        source,
-        startHeight: activeHeight,
-        startIndex: activeIndex,
-        startTime: event.timeStamp,
-        startX: event.clientX,
-        startY: event.clientY
-      };
-      if (typeof event.currentTarget.setPointerCapture === "function") {
-        try {
-          event.currentTarget.setPointerCapture(event.pointerId);
-        } catch {
-          // Some WebViews expose Pointer Events without pointer-capture support.
-        }
-      }
-    },
-    [activeHeight, activeIndex, canDragFromContent, disabled, resolvedAnchors.length]
-  );
-
   const moveDrag = useCallback(
-    (event: ReactPointerEvent<HTMLElement>) => {
+    (
+      event: Pick<
+        PointerEvent,
+        "cancelable" | "clientX" | "clientY" | "pointerId" | "preventDefault"
+      >
+    ) => {
       const session = dragSessionRef.current;
       if (!session || session.pointerId !== event.pointerId) return;
+      if (session.configurationKey !== dragConfigurationKey) {
+        dragSessionRef.current = null;
+        releaseDragPointerCapture(session);
+        clearFallbackPointerListeners();
+        setDragging(false);
+        setDragHeight(null);
+        return;
+      }
       const deltaX = event.clientX - session.startX;
       const deltaY = event.clientY - session.startY;
       if (!session.active) {
         if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < DRAG_LOCK_DISTANCE) return;
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
           dragSessionRef.current = null;
+          releaseDragPointerCapture(session);
+          clearFallbackPointerListeners();
           return;
         }
         session.active = true;
@@ -261,6 +312,8 @@ export function FloatingPanel({
       }
       if (session.source === "content" && heightDelta(deltaY, placement) <= 0) {
         dragSessionRef.current = null;
+        releaseDragPointerCapture(session);
+        clearFallbackPointerListeners();
         setDragging(false);
         setDragHeight(null);
         return;
@@ -270,28 +323,26 @@ export function FloatingPanel({
         clamp(session.startHeight + heightDelta(deltaY, placement), minimumHeight, maximumHeight)
       );
     },
-    [maximumHeight, minimumHeight, placement]
+    [clearFallbackPointerListeners, dragConfigurationKey, maximumHeight, minimumHeight, placement]
   );
 
   const finishDrag = useCallback(
-    (event: ReactPointerEvent<HTMLElement>, cancelled = false) => {
+    (event: Pick<PointerEvent, "clientY" | "pointerId" | "timeStamp">, cancelled = false) => {
       const session = dragSessionRef.current;
       if (!session || session.pointerId !== event.pointerId) return;
       dragSessionRef.current = null;
-      try {
-        if (
-          typeof event.currentTarget.hasPointerCapture === "function" &&
-          typeof event.currentTarget.releasePointerCapture === "function" &&
-          event.currentTarget.hasPointerCapture(event.pointerId)
-        ) {
-          event.currentTarget.releasePointerCapture(event.pointerId);
-        }
-      } catch {
-        // Pointer capture can already be gone after a browser-level cancellation.
-      }
+      clearFallbackPointerListeners();
+      releaseDragPointerCapture(session);
       setDragging(false);
       setDragHeight(null);
-      if (!session.active || cancelled || disabled) return;
+      if (
+        !session.active ||
+        cancelled ||
+        disabled ||
+        session.configurationKey !== dragConfigurationKey
+      ) {
+        return;
+      }
       if (session.source === "handle") {
         suppressHandleClickRef.current = true;
         if (suppressHandleClickTimerRef.current !== null) {
@@ -325,12 +376,78 @@ export function FloatingPanel({
     },
     [
       disabled,
+      clearFallbackPointerListeners,
+      dragConfigurationKey,
       maximumHeight,
       minimumHeight,
       normalizedInertia,
       placement,
       requestHeight,
       resolvedAnchors
+    ]
+  );
+
+  const beginDrag = useCallback(
+    (event: ReactPointerEvent<HTMLElement>, source: DragSession["source"]) => {
+      if (disabled || event.button !== 0 || !event.isPrimary || resolvedAnchors.length < 2) return;
+      if (source === "content") {
+        if (!canDragFromContent || isInteractiveContent(event.target, bodyRef.current)) return;
+      }
+      clearFallbackPointerListeners();
+      if (cancelledDragFrameRef.current) {
+        window.cancelAnimationFrame(cancelledDragFrameRef.current);
+        cancelledDragFrameRef.current = 0;
+      }
+      setDragging(false);
+      setDragHeight(null);
+      dragSessionRef.current = {
+        active: false,
+        captureTarget: null,
+        configurationKey: dragConfigurationKey,
+        pointerId: event.pointerId,
+        source,
+        startHeight: activeHeight,
+        startIndex: activeIndex,
+        startTime: event.timeStamp,
+        startX: event.clientX,
+        startY: event.clientY
+      };
+      let captured = false;
+      if (typeof event.currentTarget.setPointerCapture === "function") {
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+          dragSessionRef.current.captureTarget = event.currentTarget;
+          captured =
+            typeof event.currentTarget.hasPointerCapture !== "function" ||
+            event.currentTarget.hasPointerCapture(event.pointerId);
+        } catch {
+          captured = false;
+        }
+      }
+      if (captured) return;
+
+      const move = (pointerEvent: PointerEvent) => moveDrag(pointerEvent);
+      const finish = (pointerEvent: PointerEvent) => finishDrag(pointerEvent);
+      const cancel = (pointerEvent: PointerEvent) => finishDrag(pointerEvent, true);
+      window.addEventListener("pointermove", move, { passive: false });
+      window.addEventListener("pointerup", finish);
+      window.addEventListener("pointercancel", cancel);
+      fallbackPointerCleanupRef.current = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", finish);
+        window.removeEventListener("pointercancel", cancel);
+      };
+    },
+    [
+      activeHeight,
+      activeIndex,
+      canDragFromContent,
+      clearFallbackPointerListeners,
+      disabled,
+      dragConfigurationKey,
+      finishDrag,
+      moveDrag,
+      resolvedAnchors.length
     ]
   );
 
