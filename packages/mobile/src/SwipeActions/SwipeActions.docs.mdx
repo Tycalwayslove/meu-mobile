@@ -131,14 +131,15 @@ Chrome/WebView 70+ 支持 Pointer Events；ResizeObserver 缺失时退回 window
 ### 待优化
 
 - 补 iOS 13.4+/Android WebView 滑动、纵向滚动与多行列表 E2E。
-- 补 ResizeObserver hydration 和主题视觉基线。
+- 补 ResizeObserver 尺寸变化专项和主题视觉基线；服务端初始 open hydration 已完成。
 
 ### 已完成
 
-- 固化受控回滚、方向锁、速度/距离阈值、cancel/lost capture、异步锁、键盘替代、隐藏焦点、RTL 物理方向、reduced-motion、forced-colors 与 SSR。
+- 固化受控回滚、方向锁、速度/距离阈值、cancel/lost capture、异步锁、键盘替代、隐藏焦点、RTL 物理方向、reduced-motion、forced-colors、SSR 与隔离 Next H5 手势/性能证据。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型      | 内容                                         | 迁移说明                               |
-| ---------- | ----- | --------- | -------------------------------------------- | -------------------------------------- |
-| 2026-08-29 | 0.1.0 | hardening | 完成手势仲裁、受控焦点、异步动作与兼容事实源 | 新增可选 lost-pointer-capture 观察回调 |
+| 日期       | 版本   | 类型         | 内容                                                                 | 迁移说明                               |
+| ---------- | ------ | ------------ | -------------------------------------------------------------------- | -------------------------------------- |
+| 2026-08-29 | 0.1.0  | hardening    | 完成手势仲裁、受控焦点、异步动作与兼容事实源                         | 新增可选 lost-pointer-capture 观察回调 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 pointer/keyboard/menu/performance/hydration 证据 | 无                                     |

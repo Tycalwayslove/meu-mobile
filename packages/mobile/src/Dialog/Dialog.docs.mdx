@@ -115,21 +115,22 @@ O(actions)，无布局测量；关闭记录仅为退出动画短暂保留。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 9552 B / 32768 B 预算；最大单值 `DialogProvider` 为 9471 B / 32768 B 预算，组合 Brotli 8474 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Dialog.ssr.test.tsx`；hydration 专测待补
-- Mobile Chromium-WebKit / Chromatic / 真机读屏: 最终统一门禁
+- SSR/hydration: `Dialog.ssr.test.tsx`；隔离 Next 16 hydration 后 declarative/Provider 触发器稳定，打开 Portal 无 hydration/runtime error
+- Mobile Chromium/WebKit E2E: `runs accessible declarative and provider-scoped Dialog flows` 在两种引擎断言 alertdialog、初始安全焦点、异步 busy/禁用、scroll lock、业务结果与焦点恢复。Chromatic / 真机读屏仍属最终门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-补软键盘、200% 字号、嵌套模态和 VoiceOver/TalkBack 证据。
+补软键盘、200% 字号、嵌套模态和 VoiceOver/TalkBack；declarative/Provider 双引擎路径已完成。
 
 ### 已完成
 
-冻结语义分支与异步生命周期，补长内容、小视口、forced-colors、TSDoc、SSR、Provider 和永久文档。
+冻结语义分支与异步生命周期，补长内容、小视口、forced-colors、TSDoc、SSR、Provider、隔离 Next H5 与永久文档。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                         | 迁移说明    |
-| ---------- | ------ | -------- | ---------------------------- | ----------- |
-| 2026-08-29 | 未发布 | behavior | 商用模态、异步与文档证据加固 | 无 API 破坏 |
+| 日期       | 版本   | 类型         | 内容                                                      | 迁移说明    |
+| ---------- | ------ | ------------ | --------------------------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior     | 商用模态、异步与文档证据加固                              | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎异步、Provider、focus/scroll-lock 证据 | 无          |

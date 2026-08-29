@@ -133,22 +133,24 @@ Provider 只挂载一个 toast；每个 active/queued record 为小对象和至�
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 5440 B / 32768 B 预算；最大单值 `ToastProvider` 为 5348 B / 32768 B 预算，组合 Brotli 4817 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Toast.ssr.test.tsx` 覆盖 closed/provider；open Portal hydration 待补。
+- SSR/hydration: `Toast.ssr.test.tsx` 覆盖 closed/provider；隔离 Next 16 hydration 后命令式 open Portal、队列切换与清理无 hydration/runtime error。
 - RTL/reduced-motion/forced-colors: config 与 CSS 完成，视觉证据待补。
-- Mobile Chromium/WebKit、Chromatic Light/Dark、real device: 待发布批次统一验证。
+- Mobile Chromium/WebKit E2E: `queues accessible Toast messages without trapping focus or scroll` 在两种引擎断言 alert/status、上下位置、FIFO、44px action、业务输出、trigger 焦点保留、无 scroll lock 与 clear。Chromatic/real device 待最终批次。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补连续公告节流策略评审、screen reader 实测、系统 reduced-motion 队列、safe-area 和 Portal 宿主 E2E。
+- 补连续公告节流策略评审、screen reader、系统 reduced-motion 队列和真实 safe-area；Portal 队列双引擎路径已完成。
 
 ### 已完成
 
 - 完成 Portal config boundary、RTL logical CSS、reduced-motion/forced-colors、异步 action 生命周期、FIFO 清理、TSDoc、SSR 与完整契约文档。
+- 在隔离 Next H5 中补双 tone 队列、action、焦点/滚动边界与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                                    | 迁移说明 |
-| ---------- | ------ | --------- | ------------------------------------------------------- | -------- |
-| 2026-08-29 | 未发布 | hardening | 完成队列、Portal 配置、异步 action 与跨平台可访问性加固 | API 兼容 |
+| 日期       | 版本   | 类型         | 内容                                                    | 迁移说明 |
+| ---------- | ------ | ------------ | ------------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | hardening    | 完成队列、Portal 配置、异步 action 与跨平台可访问性加固 | API 兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 queue/action/focus/hydration 证据   | 无       |

@@ -112,21 +112,22 @@ O(1) DOM，无测量、Observer 或持续监听；仅 open 且 lockScroll 时参
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3928 B / 32768 B 预算，组合 Brotli 3463 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Mask.ssr.test.tsx`；hydration 专测待补
-- Mobile Chromium-WebKit / Chromatic / 真机读屏: 最终统一门禁
+- SSR/hydration: `Mask.ssr.test.tsx`；隔离 Next 16 hydration 后 inline 装饰 Mask 与 Popup Portal Mask 均保持稳定，0 hydration/runtime error
+- Mobile Chromium/WebKit E2E: Popup 场景在两种引擎断言 inline Mask 的 `aria-hidden`/absolute、自身不锁滚动；Portal Mask 点击产生 `reason=mask` 并清理 scroll lock。Chromatic / 真机读屏仍属最终门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-补真实 iOS 滚动锁、嵌套 Overlay 和高对比视觉截图。
+补真实 iOS 滚动锁、嵌套 Overlay 和高对比视觉截图；基础 inline/Portal Mask 双引擎路径已完成。
 
 ### 已完成
 
-冻结装饰语义、数值归一、Portal/滚动锁/forceMount 契约，补 forced-colors、TSDoc、Unit、SSR 与永久文档。
+冻结装饰语义、数值归一、Portal/滚动锁/forceMount 契约，补 forced-colors、TSDoc、Unit、SSR、隔离 Next H5 与永久文档。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                           | 迁移说明    |
-| ---------- | ------ | -------- | ------------------------------ | ----------- |
-| 2026-08-29 | 未发布 | behavior | 商用边界、强制颜色与证据链加固 | 无 API 破坏 |
+| 日期       | 版本   | 类型         | 内容                                                | 迁移说明    |
+| ---------- | ------ | ------------ | --------------------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior     | 商用边界、强制颜色与证据链加固                      | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 inline/Portal/close-reason 证据 | 无          |

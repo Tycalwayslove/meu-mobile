@@ -131,14 +131,15 @@ Chrome/WebView 70+ 支持 Pointer Events；visualViewport 缺失时退回 innerH
 ### 待优化
 
 - 补 iOS 13.4+/Android WebView 的拖拽、visual viewport/键盘和滚动移交 E2E。
-- 补 hydration 与主题视觉基线。
+- 补主题视觉基线；服务端初始高度 hydration 已完成。
 
 ### 已完成
 
-- 固化受控状态、异常 anchor、有限速度、原生 handle、内容展开边界、取消/卸载清理、reduced-motion、forced-colors 和 SSR。
+- 固化受控状态、异常 anchor、有限速度、原生 handle、内容展开边界、取消/卸载清理、reduced-motion、forced-colors、SSR 与隔离 Next H5 手势/性能证据。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型      | 内容                                               | 迁移说明     |
-| ---------- | ----- | --------- | -------------------------------------------------- | ------------ |
-| 2026-08-29 | 0.1.0 | hardening | 完成 modeless snap、手势取消、键盘替代与兼容事实源 | 无破坏性变更 |
+| 日期       | 版本   | 类型         | 内容                                                        | 迁移说明     |
+| ---------- | ------ | ------------ | ----------------------------------------------------------- | ------------ |
+| 2026-08-29 | 0.1.0  | hardening    | 完成 modeless snap、手势取消、键盘替代与兼容事实源          | 无破坏性变更 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 snap/drag/scroll-handoff/hydration 证据 | 无           |
