@@ -255,7 +255,7 @@ type TreeSelectBaseProps<TValue extends TreeSelectValue> = Omit<
   searchValue?: string;
   /** Restricts selection to leaf nodes or permits any selectable node. @defaultValue "leaf" */
   selectionMode?: TreeSelectSelectionMode;
-  /** Visual validation state announced through `aria-invalid`. @defaultValue "default" */
+  /** Visual validation state announced as `aria-invalid="true"` on the tree; caller grammar/spelling tokens are otherwise preserved there. @defaultValue "default" */
   status?: TreeSelectStatus;
   /** Accessible name for the inner tree; defaults to the configured locale. */
   treeAriaLabel?: string;

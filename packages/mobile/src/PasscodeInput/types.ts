@@ -125,7 +125,10 @@ export type PasscodeInputProps = Omit<
   onComplete?: (value: string) => void;
   /** Renders individual rounded cells instead of a connected group. */
   separated?: boolean;
-  /** Validation presentation state. Prefer Field error content for accessible feedback. */
+  /**
+   * Validation presentation state. `error` and Field errors expose `aria-invalid="true"` on the
+   * native input; otherwise caller grammar, spelling, true, and false tokens are preserved.
+   */
   status?: PasscodeInputStatus;
   /** Controlled value. Invalid characters and overflow are normalized for rendering. */
   value?: string;

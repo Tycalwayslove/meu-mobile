@@ -108,7 +108,7 @@ API 表由 `SearchFieldProps`、`SearchFieldSize`、`SearchFieldStatus` 与事�
 - `enterKeyHint` 默认 `search`，只提示软键盘外观，不改变 Enter 所有权。
 - `className/style` 作用在视觉 wrapper；其余原生 input 属性传给真实 input。内部 class 与 DOM 层级不是稳定 API。
 - `clearLabel/loadingLabel` 可覆盖内置中英文 accessible name；未覆盖时跟随 `ConfigProvider.locale`。
-- `status="error"`、Field error 或有效 `aria-invalid` 都进入 error 状态；`grammar/spelling` 值会原样保留。
+- `status="error"`、Field error 或有效 `aria-invalid` 都进入 error 状态；无 contextual error 时 `false/grammar/spelling` 原样保留，Field/status error 优先输出 `true`。
 
 ## Events
 
@@ -145,6 +145,8 @@ ref 指向真实 `HTMLInputElement`，可调用 `focus()`、`blur()`、`select()
 ## 无障碍
 
 输入使用原生 searchbox 语义，必须通过 `Field label`、`aria-label` 或有效 `aria-labelledby` 获得名称。搜索图标为装饰内容。clear 是有名称的原生 button；loading 插入 `role="status"` 并在 input 设置 `aria-busy`，避免 busy 容器延迟状态公告。error 通过 `aria-invalid` 以及 Field 的 description/error 关联表达，不能只看边框颜色。
+
+ARIA invalid token 只位于原生 searchbox，不复制到图标、clear 或 loading status。`grammar/spelling` 触发错误视觉但保持原 token；显式 `false` 在无 Field/status error 时保持为 `false`。
 
 内置中文/英文 clear 和 loading 名称只覆盖现有 locale；其他语言必须传 `clearLabel/loadingLabel`。当前尚未留下 VoiceOver/TalkBack 与 200% 字号证据。
 
@@ -188,12 +190,12 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 
 ## 测试证据
 
-- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 clear 请求空值后恢复焦点、readOnly/disabled/loading、模拟 composition、repeat Enter、consumer cancellation 与受控 live native value。它还证明未传 `onSearch` 时原生 form 收到一次 submit，传入 `onSearch` 时只有搜索回调收到一次 Enter，不会双重提交。
+- Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 ARIA invalid token/Field 优先级、clear 请求空值后恢复焦点、readOnly/disabled/loading、模拟 composition、repeat Enter、consumer cancellation 与受控 live native value。它还证明未传 `onSearch` 时原生 form 收到一次 submit，传入 `onSearch` 时只有搜索回调收到一次 Enter，不会双重提交。
 - Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4560 B / 32768 B 预算，组合 Brotli 4018 B；共享样式由应用单独导入一次。
-- SSR/hydration: `renderToString` 覆盖 native type/name/value/readOnly；隔离 Next H5 会断言 hydration 完成且无运行时错误，服务端/客户端状态不一致矩阵待补
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4603 B / 32768 B 预算，组合 Brotli 4075 B；共享样式由应用单独导入一次。
+- SSR/hydration: `SearchField.ssr.test.tsx` 覆盖 native searchbox 与 ARIA invalid token；隔离 Next H5 会断言 hydration 完成且无运行时错误，服务端/客户端状态不一致矩阵待补
 - RTL: 使用 logical CSS；浏览器矩阵待补
 - Reduced motion: CSS 静态 ring 已实现；浏览器 computed-style 证明待补
 - Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接输入字符串 `TextArea` 并按 Enter，断言 `onSearch` 结果只显示该实时值；随后点击内置 clear，断言值为空且焦点回到 searchbox。details payload、无 `onSearch` 时的原生 form submit、loading/repeat/cancellation 与 IME 尚无这两个移动项目的专项断言。
@@ -223,3 +225,4 @@ RTL、阿拉伯语 IME、混合双向长文本和系统字体放大仍缺独立�
 | ---------- | ------ | -------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | 2026-08-28 | 0.1.0  | implementation | 增加 details、单一 Enter 所有权、IME/readOnly/loading/focus 与动效契约                          | 旧单参回调继续可用；依赖 onSearch+form 双触发的代码迁移到单一请求入口            |
 | 2026-08-29 | 未发布 | verification   | 记录 mobile Chromium/WebKit 已覆盖 Enter 搜索、清除与焦点恢复；区分 details/form 单测和移动证据 | 状态保持 `verification`；IME、真机读屏及未设 `onSearch` 的移动 form 路径仍待验证 |
+| 2026-08-29 | 未发布 | accessibility  | 保留 ARIA invalid token 并统一 Field/status error 优先级                                        | 无                                                                               |

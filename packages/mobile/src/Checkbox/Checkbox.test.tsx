@@ -90,6 +90,18 @@ describe("Checkbox", () => {
     );
   });
 
+  it("lets Field validation override a caller grammar token", () => {
+    render(
+      <Field label="确认条款" error="必须确认">
+        <Checkbox aria-invalid="grammar">同意条款</Checkbox>
+      </Field>
+    );
+
+    expect(screen.getByRole("checkbox", { name: "确认条款" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
+
   it("keeps an indeterminate checkbox inert when disabled", () => {
     const onChange = vi.fn();
     render(
@@ -241,6 +253,20 @@ describe("CheckboxGroup", () => {
       ).toBeNull();
     }
   );
+
+  it("lets group validation override a caller spelling token", () => {
+    render(
+      <Field label="服务范围" error="请选择服务">
+        <CheckboxGroup aria-invalid="spelling">
+          <Checkbox value="delivery">配送</Checkbox>
+        </CheckboxGroup>
+      </Field>
+    );
+
+    expect(screen.getByRole("group", { name: "服务范围" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
 
   it("resets an uncontrolled group and submits repeated native names", async () => {
     const { container } = render(

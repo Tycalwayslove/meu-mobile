@@ -70,11 +70,22 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   const pointerSessionRef = useRef<PointerSession | null>(null);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const inert = disabled || readOnly;
   const valueLabel = getValueLabel
     ? getValueLabel(currentValue, safeCount)
@@ -178,6 +189,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
             "aria-label": props["aria-label"] || valueLabel,
             "aria-labelledby": props["aria-labelledby"],
             "aria-describedby": describedBy,
+            "aria-invalid": resolvedAriaInvalid,
             "aria-valuemin": 0,
             "aria-valuemax": safeCount,
             "aria-valuenow": currentValue,
@@ -210,7 +222,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
           onClick={handleClick}
           aria-valuetext={ariaValueText || valueLabel}
           aria-describedby={describedBy}
-          aria-invalid={invalid || undefined}
+          aria-invalid={resolvedAriaInvalid}
         />
       ) : (
         <input

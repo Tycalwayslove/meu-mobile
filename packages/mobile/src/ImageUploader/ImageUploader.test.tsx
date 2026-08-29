@@ -66,11 +66,42 @@ afterEach(() => {
 
 describe("ImageUploader", () => {
   it("server-renders without browser globals", () => {
-    expect(
-      renderToString(
-        <ImageUploader value={[existingItem]} upload={vi.fn()} aria-label="商品图片" />
-      )
-    ).toContain('data-meu-component="image-uploader"');
+    const html = renderToString(
+      <ImageUploader
+        value={[existingItem]}
+        upload={vi.fn()}
+        aria-label="商品图片"
+        aria-invalid="spelling"
+      />
+    );
+    expect(html).toContain('data-meu-component="image-uploader"');
+    expect(html).toContain('aria-invalid="spelling"');
+    expect(html.match(/aria-invalid=/g)).toHaveLength(1);
+  });
+
+  it("keeps native aria-invalid tokens on the uploader group", () => {
+    const upload = vi.fn();
+    const { rerender } = render(
+      <ImageUploader upload={upload} aria-label="商品图片" aria-invalid={false} />
+    );
+    const group = screen.getByRole("group", { name: "商品图片" });
+    const input = group.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error("Expected native file input");
+    expect(group.getAttribute("aria-invalid")).toBe("false");
+    expect(input.getAttribute("aria-invalid")).toBeNull();
+
+    rerender(<ImageUploader upload={upload} aria-label="商品图片" aria-invalid="grammar" />);
+    expect(group.getAttribute("aria-invalid")).toBe("grammar");
+    expect(group.getAttribute("data-state")).toBe("error");
+
+    rerender(<ImageUploader upload={upload} aria-label="商品图片" aria-invalid="spelling" />);
+    expect(group.getAttribute("aria-invalid")).toBe("spelling");
+
+    rerender(
+      <ImageUploader upload={upload} aria-label="商品图片" aria-invalid="grammar" status="error" />
+    );
+    expect(group.getAttribute("aria-invalid")).toBe("true");
+    expect(group.querySelectorAll("[aria-invalid]")).toHaveLength(0);
   });
 
   it("uses the native file input, reports progress and publishes successful serializable items", async () => {
@@ -404,19 +435,20 @@ describe("ImageUploader", () => {
   it("inherits Field semantics and disables mutation in read-only mode", () => {
     render(
       <Field label="商品图片" description="最多上传一张" error="请上传商品图片" required>
-        <ImageUploader value={[existingItem]} upload={vi.fn()} readOnly />
+        <ImageUploader value={[existingItem]} upload={vi.fn()} readOnly aria-invalid="grammar" />
       </Field>
     );
     const input = document.querySelector<HTMLInputElement>('input[type="file"]');
     if (!input) throw new Error("Expected native file input");
     expect(input.disabled).toBe(true);
-    expect(input.getAttribute("aria-invalid")).toBe("true");
+    expect(input.getAttribute("aria-invalid")).toBeNull();
     expect(input.getAttribute("aria-describedby")).toContain("description");
     expect(input.getAttribute("aria-describedby")).toContain("error");
     expect(screen.queryByRole("button", { name: "删除 商品正面" })).toBeNull();
-    expect(screen.getByRole("group", { name: /商品图片/ }).getAttribute("data-state")).toBe(
-      "error"
-    );
+    const group = screen.getByRole("group", { name: /商品图片/ });
+    expect(group.getAttribute("data-state")).toBe("error");
+    expect(group.getAttribute("aria-invalid")).toBe("true");
+    expect(group.querySelectorAll("[aria-invalid]")).toHaveLength(0);
   });
 
   it("exposes task progress semantics and locks an asynchronous delete", async () => {

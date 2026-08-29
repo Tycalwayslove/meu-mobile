@@ -66,10 +66,11 @@ export function CheckboxGroup<TValue extends CheckboxValue = CheckboxValue>({
     ariaInvalid === "spelling";
   const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
   const invalid = callerInvalid || contextualInvalid;
-  const resolvedAriaInvalid =
-    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
       ? ariaInvalid
-      : invalid
+      : callerInvalid
         ? true
         : ariaInvalid === false || ariaInvalid === "false"
           ? ariaInvalid

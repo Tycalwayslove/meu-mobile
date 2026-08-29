@@ -197,8 +197,22 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
   const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
-  const invalid =
-    ariaInvalid === true || ariaInvalid === "true" || Boolean(fieldContext && fieldContext.invalid);
+  const callerInvalid =
+    ariaInvalid === true ||
+    ariaInvalid === "true" ||
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   void _ariaRequired;
   const titleId = resolvedId ? `${resolvedId}-month` : `meu-calendar-month-${generatedId}`;
   const calendarLabel = ariaLabel || (config.locale === "en-US" ? "Calendar" : "日历");
@@ -441,6 +455,8 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   const monthLabel = formatMonthTitle(resolvedAdapter, currentMonth, config.locale);
 
   return (
+    /* aria-invalid is a global WAI-ARIA state carried by the calendar's semantic group root. */
+    /* eslint-disable-next-line jsx-a11y/role-supports-aria-props */
     <div
       {...nativeProps}
       ref={rootRef}
@@ -450,6 +466,7 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
       className={className ? `${root({ invalid })} ${className}` : root({ invalid })}
       style={style}
       aria-describedby={describedBy}
+      aria-invalid={resolvedAriaInvalid}
       aria-label={ariaLabel ? ariaLabel : labelledBy ? undefined : calendarLabel}
       aria-labelledby={ariaLabel ? undefined : labelledBy}
       data-meu-component="calendar"

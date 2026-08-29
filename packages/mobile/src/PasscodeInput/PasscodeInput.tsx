@@ -131,11 +131,22 @@ export const PasscodeInput = forwardRef<PasscodeInputRef, PasscodeInputProps>(
     const labelledBy = ariaLabelledby || (fieldContext ? fieldContext.labelId : undefined);
     const required =
       requiredProp === undefined ? (fieldContext ? fieldContext.required : false) : requiredProp;
-    const invalid =
+    const callerInvalid =
       ariaInvalid === true ||
       ariaInvalid === "true" ||
-      status === "error" ||
-      Boolean(fieldContext && fieldContext.invalid);
+      ariaInvalid === "grammar" ||
+      ariaInvalid === "spelling";
+    const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+    const invalid = callerInvalid || contextualInvalid;
+    const resolvedAriaInvalid = contextualInvalid
+      ? true
+      : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+        ? ariaInvalid
+        : callerInvalid
+          ? true
+          : ariaInvalid === false || ariaInvalid === "false"
+            ? ariaInvalid
+            : undefined;
     const localizedLabel = config.locale === "zh-CN" ? "密码输入" : "Passcode input";
     const keyboardLabel = keyboardAriaLabel
       ? keyboardAriaLabel
@@ -355,7 +366,7 @@ export const PasscodeInput = forwardRef<PasscodeInputRef, PasscodeInputProps>(
           aria-label={ariaLabel || (labelledBy ? undefined : localizedLabel)}
           aria-labelledby={labelledBy}
           aria-describedby={describedBy}
-          aria-invalid={invalid || undefined}
+          aria-invalid={resolvedAriaInvalid}
           aria-controls={keyboard && keyboardOpen ? keyboardId : undefined}
           onChange={handleNativeChange}
           onFocus={(event) => {

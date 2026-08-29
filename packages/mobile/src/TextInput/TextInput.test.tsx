@@ -11,7 +11,7 @@ describe("TextInput", () => {
   it("inherits label and error semantics from Field", () => {
     render(
       <Field label="手机号" error="手机号格式不正确">
-        <TextInput />
+        <TextInput aria-invalid="grammar" />
       </Field>
     );
     const input = screen.getByRole("textbox", { name: "手机号" });

@@ -18,8 +18,10 @@ describe("Picker SSR", () => {
     expect(picker).toContain('role="dialog"');
     expect(picker).toContain('role="listbox"');
     expect(picker).toContain('aria-selected="true"');
-    const trigger = renderToString(<PickerTrigger open value="普通配送" />);
+    const trigger = renderToString(<PickerTrigger open value="普通配送" aria-invalid="spelling" />);
     expect(trigger).toContain('aria-haspopup="dialog"');
     expect(trigger).toContain('aria-expanded="true"');
+    expect(trigger).toContain('aria-invalid="spelling"');
+    expect(trigger.match(/aria-invalid=/g)).toHaveLength(1);
   });
 });

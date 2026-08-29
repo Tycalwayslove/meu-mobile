@@ -74,15 +74,22 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
       : fieldContext
         ? fieldContext.describedBy
         : undefined;
-  const explicitlyInvalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
     ariaInvalid === "grammar" ||
     ariaInvalid === "spelling";
-  const invalid =
-    explicitlyInvalid || status === "error" || Boolean(fieldContext && fieldContext.invalid);
-  const resolvedAriaInvalid =
-    ariaInvalid === "grammar" || ariaInvalid === "spelling" ? ariaInvalid : invalid || undefined;
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const rootClasses = root({ disabled, readOnly, size, status: invalid ? "error" : status });
   const clearLabel =
     clearLabelProp !== undefined

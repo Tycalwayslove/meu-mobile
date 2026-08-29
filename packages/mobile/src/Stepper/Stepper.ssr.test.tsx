@@ -6,11 +6,19 @@ import { Stepper } from "./Stepper";
 describe("Stepper SSR", () => {
   it("renders a deterministic spinbutton and native buttons", () => {
     const html = renderToString(
-      <Stepper aria-label="数量" defaultValue={2} min={0} max={8} name="quantity" />
+      <Stepper
+        aria-invalid="spelling"
+        aria-label="数量"
+        defaultValue={2}
+        min={0}
+        max={8}
+        name="quantity"
+      />
     );
     expect(html).toContain('role="spinbutton"');
     expect(html).toContain('name="quantity"');
     expect(html).toContain('value="2"');
+    expect(html).toContain('aria-invalid="spelling"');
     expect(html.match(/type="button"/g)).toHaveLength(2);
   });
 });

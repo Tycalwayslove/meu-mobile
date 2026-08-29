@@ -50,6 +50,18 @@ describe("Switch", () => {
     );
   });
 
+  it("lets Field validation override a caller spelling token", () => {
+    render(
+      <Field label="自动续费" error="暂时无法修改">
+        <Switch aria-invalid="spelling" />
+      </Field>
+    );
+
+    expect(screen.getByRole("switch", { name: "自动续费" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
+
   it("blocks interaction while loading", () => {
     const onChange = vi.fn();
     render(<Switch aria-label="同步设置" loading onChange={onChange} />);

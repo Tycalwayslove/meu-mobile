@@ -40,7 +40,7 @@ export type RateProps = Omit<
   readOnly?: boolean;
   /** Visual and touch-target size. @defaultValue "medium" */
   size?: RateSize;
-  /** Visual validation state. Field errors and `aria-invalid` also activate error styling. */
+  /** Visual validation state that emits `aria-invalid="true"`; caller grammar/spelling tokens are otherwise preserved on the slider or read-only meter. */
   status?: RateStatus;
   /** Controlled rating. It is clamped and aligned to the active increment. */
   value?: number;

@@ -369,11 +369,57 @@ describe("TreeSelect", () => {
   });
 
   it("marks validation status for assistive technology", () => {
-    render(
-      <TreeSelect open title="商品类目" options={categories} status="error" virtual={false} />
+    const { rerender } = render(
+      <TreeSelect
+        open
+        aria-invalid="grammar"
+        title="商品类目"
+        options={categories}
+        virtual={false}
+      />
     );
-    expect(screen.getByRole("tree").getAttribute("aria-invalid")).toBe("true");
+    const tree = screen.getByRole("tree");
+    expect(tree.getAttribute("aria-invalid")).toBe("grammar");
+    expect(tree.getAttribute("data-status")).toBe("error");
+    expect(document.querySelectorAll('[aria-invalid="grammar"]')).toHaveLength(1);
+
+    rerender(
+      <TreeSelect
+        open
+        aria-invalid="grammar"
+        title="商品类目"
+        options={categories}
+        status="error"
+        virtual={false}
+      />
+    );
+    expect(tree.getAttribute("aria-invalid")).toBe("true");
+    expect(document.querySelectorAll("[aria-invalid]")).toHaveLength(1);
   });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s only on the tree semantic root",
+    (ariaInvalid, expectedAttribute, expectedStatus) => {
+      render(
+        <TreeSelect
+          open
+          aria-invalid={ariaInvalid}
+          aria-label="语义类目"
+          options={categories}
+          virtual={false}
+        />
+      );
+
+      const tree = screen.getByRole("tree");
+      expect(tree.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      expect(tree.getAttribute("data-status")).toBe(expectedStatus);
+      expect(document.querySelectorAll("[aria-invalid]")).toHaveLength(1);
+    }
+  );
 
   it("permanently normalizes an uncontrolled value when options disappear", () => {
     const onConfirm = vi.fn();

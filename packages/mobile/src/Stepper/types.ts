@@ -40,7 +40,7 @@ export type StepperProps = Omit<
   precision?: number;
   /** Visual and touch-target size. @defaultValue "medium" */
   size?: StepperSize;
-  /** Visual validation state. Field errors and `aria-invalid` also activate error styling. */
+  /** Visual validation state that emits `aria-invalid="true"`; caller grammar/spelling tokens are otherwise preserved on the spinbutton. */
   status?: StepperStatus;
   /** Positive increment. Invalid values fall back to 1. @defaultValue 1 */
   step?: number;

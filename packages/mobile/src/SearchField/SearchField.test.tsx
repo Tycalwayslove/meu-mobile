@@ -189,10 +189,10 @@ describe("SearchField", () => {
     expect(root && root.getAttribute("data-state")).toBe("loading");
   });
 
-  it("inherits Field semantics, preserves aria-invalid grammar and hides actions while disabled", () => {
-    const { rerender } = render(
+  it("lets Field errors override caller grammar and hides actions while disabled", () => {
+    render(
       <Field label="站内搜索" error="请输入关键词">
-        <SearchField defaultValue="订单" disabled />
+        <SearchField aria-invalid="grammar" defaultValue="订单" disabled />
       </Field>
     );
 
@@ -200,12 +200,23 @@ describe("SearchField", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.disabled).toBe(true);
     expect(screen.queryByRole("button", { name: "清除搜索" })).toBeNull();
-
-    rerender(<SearchField aria-label="语法搜索" aria-invalid="grammar" />);
-    expect(screen.getByRole("searchbox", { name: "语法搜索" }).getAttribute("aria-invalid")).toBe(
-      "grammar"
-    );
   });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s on the searchbox",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<SearchField aria-invalid={ariaInvalid} aria-label="语义搜索" />);
+      const input = screen.getByRole("searchbox", { name: "语义搜索" });
+      expect(input.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      const root = input.parentElement;
+      expect(root && root.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
 
   it("searches the live native value before a controlled render catches up", () => {
     const onSearch = vi.fn();

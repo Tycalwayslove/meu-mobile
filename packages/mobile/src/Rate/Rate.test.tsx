@@ -29,13 +29,37 @@ describe("Rate", () => {
   it("inherits Field labels and errors", () => {
     render(
       <Field label="服务评分" error="请完成评分">
-        <Rate />
+        <Rate aria-invalid="grammar" />
       </Field>
     );
 
     const rating = screen.getByRole("slider", { name: "服务评分" });
     expect(rating.getAttribute("aria-invalid")).toBe("true");
     expect(rating.getAttribute("aria-describedby")).toContain("error");
+  });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s on the interactive semantic root",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<Rate aria-invalid={ariaInvalid} aria-label="语义评分" />);
+      const rating = screen.getByRole("slider", { name: "语义评分" });
+      expect(rating.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      const root = rating.parentElement;
+      expect(root && root.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
+
+  it("puts the caller token on the read-only meter without duplicating it on the hidden input", () => {
+    render(<Rate aria-invalid="spelling" aria-label="只读语义评分" readOnly value={4} />);
+    expect(screen.getByRole("meter", { name: "只读语义评分" }).getAttribute("aria-invalid")).toBe(
+      "spelling"
+    );
+    expect(document.querySelectorAll('[aria-invalid="spelling"]')).toHaveLength(1);
   });
 
   it("clamps and aligns controlled and uncontrolled values", () => {

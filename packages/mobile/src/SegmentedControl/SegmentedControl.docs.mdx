@@ -133,6 +133,7 @@ ref 指向根 `HTMLDivElement`。默认 `tabIndex=-1` 供表单库错误聚焦�
 
 - radiogroup 必须由 `aria-label`、`aria-labelledby` 或 Field label 命名；单项名称来自可见 label，图标不重复朗读。
 - description/error 同时关联 root 与 radio；invalid 位于 radiogroup，并有 Field 错误文字。
+- 无 Field/status error 时保留 radiogroup 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉。Field/status error 优先输出 `true`，token 不复制到子 radio。
 - 整体 disabled 输出 root `aria-disabled` 与每项 native disabled，选中事实保留。
 - 焦点落在真实 1px 裁剪 input，label 绘制 2px focus outline；不会让 `display:none` 控件退出读屏/键盘树。
 - forced colors 使用 ButtonText、Highlight、HighlightText、GrayText；reduced motion 把 transition 降为 1 ms。
@@ -171,12 +172,12 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 
 ## 测试证据
 
-- Unit: `SegmentedControl.test.tsx` 覆盖默认/controlled null、identity/duplicate、disabled、Field/required、FormData、外部 form、reset、option 删除回退、ref 和 native keyboard path。
-- SSR: `SegmentedControl.ssr.test.tsx` 覆盖无浏览器全局的 radio/name/value/checked/required 输出。
+- Unit: `SegmentedControl.test.tsx` 覆盖默认/controlled null、identity/duplicate、disabled、Field/required、ARIA invalid token/优先级、FormData、外部 form、reset、option 删除回退、ref 和 native keyboard path。
+- SSR: `SegmentedControl.ssr.test.tsx` 覆盖无浏览器全局的 radio/name/value/checked/required 与 radiogroup token 输出。
 - Story interaction: `ControlledInteraction` 验证选择状态与回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3949 B / 32768 B 预算，组合 Brotli 3508 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4041 B / 32768 B 预算，组合 Brotli 3595 B；共享样式由应用单独导入一次。
 - RTL / reduced motion / forced colors: 实现已落地，专属快照矩阵待补。
 - 移动 Chromium/WebKit E2E：`uses native navigation actions, radio segments and read-only page dots` 验证原生 radio 选择与受控输出；表单场景验证 adapter 提交，双引擎通过。VoiceOver/TalkBack 真机待补。
 
@@ -202,7 +203,8 @@ render 为 O(options)，预期 2–5 项；无测量和全局监听。非受控�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                              | 迁移说明                                                                   |
-| ---------- | ------ | ------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior     | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固 | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎选择/form/hydration 证据                       | 无                                                                         |
+| 日期       | 版本   | 类型          | 内容                                                                | 迁移说明                                                                   |
+| ---------- | ------ | ------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 完成 identity、Field/form/reset、native keyboard 和兼容性商用加固   | 重复 value 后续项不再渲染；非受控当前 option 删除时改为首个 enabled option |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎选择/form/hydration 证据                         | 无                                                                         |
+| 2026-08-29 | 未发布 | accessibility | 保留 radiogroup ARIA invalid token 并统一 Field/status error 优先级 | 无                                                                         |

@@ -80,6 +80,18 @@ describe("Radio", () => {
     );
   });
 
+  it("lets Field validation override a caller grammar token", () => {
+    render(
+      <Field label="默认地址" error="请选择地址">
+        <Radio aria-invalid="grammar">家庭地址</Radio>
+      </Field>
+    );
+
+    expect(screen.getByRole("radio", { name: "默认地址" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
+
   it("rebinds reset behavior when the external form owner changes", async () => {
     const { rerender } = render(
       <>
@@ -156,6 +168,20 @@ describe("RadioGroup", () => {
       ).toBeNull();
     }
   );
+
+  it("lets group validation override a caller spelling token", () => {
+    render(
+      <Field label="配送方式" error="请选择配送方式">
+        <RadioGroup aria-invalid="spelling">
+          <Radio value="standard">标准配送</Radio>
+        </RadioGroup>
+      </Field>
+    );
+
+    expect(screen.getByRole("radiogroup", { name: "配送方式" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
 
   it("inherits Field required semantics and merges caller descriptions", () => {
     render(

@@ -274,6 +274,18 @@ describe("Selector", () => {
     }
   );
 
+  it("lets Field validation override a caller grammar token", () => {
+    render(
+      <Field label="服务类型" error="请选择服务">
+        <Selector aria-invalid="grammar" options={options} />
+      </Field>
+    );
+
+    expect(screen.getByRole("radiogroup", { name: "服务类型" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+  });
+
   it("keeps native controls in the keyboard path while the group is programmatically focusable", () => {
     const ref = { current: null as HTMLDivElement | null };
     render(<Selector ref={ref} aria-label="履约方式" options={options} />);

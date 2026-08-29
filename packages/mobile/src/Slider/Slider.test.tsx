@@ -36,6 +36,7 @@ describe("Slider", () => {
     render(
       <Field label="配送距离" error="距离不可用">
         <Slider
+          aria-invalid="grammar"
           marks={[
             { value: 0, label: "近" },
             { value: 100, label: "远" }
@@ -49,6 +50,23 @@ describe("Slider", () => {
     expect(slider.getAttribute("aria-describedby")).toContain("error");
     expect(screen.getByText("近")).toBeTruthy();
   });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s on the native range",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<Slider aria-invalid={ariaInvalid} aria-label="语义滑块" />);
+      const slider = screen.getByRole("slider", { name: "语义滑块" });
+      expect(slider.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      const controlRow = slider.parentElement;
+      const root = controlRow ? controlRow.parentElement : null;
+      expect(root && root.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
 
   it("normalizes reversed bounds, invalid steps and controlled values", () => {
     const { rerender } = render(

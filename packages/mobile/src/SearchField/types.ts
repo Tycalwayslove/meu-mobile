@@ -8,7 +8,8 @@ import type { ChangeEvent, InputHTMLAttributes, KeyboardEvent, MouseEvent } from
 export type SearchFieldSize = "small" | "medium" | "large";
 
 /**
- * Visual and semantic validation state. `error` also sets `aria-invalid`.
+ * Visual and semantic validation state. `error` emits `aria-invalid="true"`; caller grammar/spelling
+ * tokens are otherwise preserved.
  *
  * @public
  */
@@ -110,7 +111,7 @@ export type SearchFieldProps = Omit<
    */
   size?: SearchFieldSize;
   /**
-   * Visual validation state.
+   * Visual validation state. Field or status errors override a caller ARIA invalid token with `true`.
    *
    * @defaultValue `"default"`
    */

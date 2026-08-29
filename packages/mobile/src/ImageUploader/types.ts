@@ -200,7 +200,12 @@ export type ImageUploaderProps = Omit<
   showFailed?: boolean;
   /** Shows the visible add tile when capacity remains; the native input stays mounted when hidden. @defaultValue true */
   showUpload?: boolean;
-  /** Visual validation state; `error` also sets `aria-invalid` on the native input. @defaultValue "default" */
+  /**
+   * Visual validation state. `error` exposes `aria-invalid="true"` on the uploader group and
+   * overrides a caller grammar, spelling, true, or false token.
+   *
+   * @defaultValue "default"
+   */
   status?: ImageUploaderStatus;
   /** Uploads one validated file; resolve with the completed item or reject to retain a failed task. */
   upload: (file: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>;

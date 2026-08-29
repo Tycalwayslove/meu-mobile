@@ -30,7 +30,7 @@ source: packages/mobile/src/Radio
 - 支持 `string | number` 值、受控/非受控、controlled empty (`value=null`)、required、disabled、readOnly、错误态和三档尺寸。
 - 非受控 Group 监听原生 form reset 并恢复 defaultValue；checked 值按原生 FormData 提交。
 - Field label/description/error/required 与调用方 IDREF 无损组合。
-- `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；Group 错误只在语义根输出，子 Radio 继承错误视觉。
+- 没有 Field/status 错误时，`aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`。Group 错误只在语义根输出，子 Radio 继承错误视觉。
 - 选择目标至少 44×44；RTL 使用自然文档流；forced-colors 和 reduced-motion 有静态降级。
 
 状态为 `verification`；Unit/SSR/Story contract、本地 axe 与 Next H5 移动 Chromium/WebKit 的基础选择路径已建立，Chromatic 主题最终审批和真机读屏尚未达到发布证据线。
@@ -148,7 +148,7 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 - Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3867 B / 32768 B 预算；最大单值 `Radio` 为 3239 B / 32768 B 预算，组合 Brotli 3440 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3877 B / 32768 B 预算；最大单值 `Radio` 为 3245 B / 32768 B 预算，组合 Brotli 3446 B；共享样式由应用单独导入一次。
 - Touch target: CSS `minWidth/minHeight: 44`
 - RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证从“标准配送”聚焦后按 ArrowRight，原生 radio 选择“急速配送”，随后表单提交值为 `express`；页面内 Radio 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`

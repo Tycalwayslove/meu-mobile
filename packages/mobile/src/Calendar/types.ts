@@ -102,7 +102,8 @@ type CalendarNativeProps = Omit<
 >;
 
 /**
- * Props shared by every calendar selection mode.
+ * Props shared by every calendar selection mode. Native `aria-invalid` tokens are exposed on the
+ * calendar group; an invalid Field context overrides a caller token with `true`.
  *
  * @public
  */

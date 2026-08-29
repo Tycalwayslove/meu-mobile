@@ -44,7 +44,7 @@ export type SegmentedControlProps<TValue extends SegmentedControlValue = Segment
     required?: boolean;
     /** Controls minimum touch-target height and typography. @defaultValue "medium" */
     size?: SegmentedControlSize;
-    /** Applies validation styling and `aria-invalid`. @defaultValue "default" */
+    /** Applies validation styling and `aria-invalid="true"`; caller grammar/spelling tokens are otherwise preserved on the radiogroup. @defaultValue "default" */
     status?: SegmentedControlStatus;
     /** Selected identity for a controlled control; `null` intentionally leaves every option unchecked. */
     value?: TValue | null;

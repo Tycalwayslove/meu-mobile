@@ -77,11 +77,22 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   const stepButtonPointerRef = useRef(false);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const inert = disabled || readOnly;
   const required = requiredProp || Boolean(fieldContext && fieldContext.required);
   const effectiveLower = lower === undefined ? undefined : normalize(lower);
@@ -269,7 +280,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         aria-valuemax={effectiveUpper}
         aria-required={required || undefined}
         aria-describedby={describedBy}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
       />
       <button
         className={button}

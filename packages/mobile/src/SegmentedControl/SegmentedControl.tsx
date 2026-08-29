@@ -140,11 +140,22 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
     ariaLabel ? undefined : ariaLabelledBy,
     ariaLabel ? undefined : fieldContext ? fieldContext.labelId : undefined
   );
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const resolvedName = name || generatedName;
   const classes = root({ block, status: invalid ? "error" : status });
@@ -229,7 +240,7 @@ export function SegmentedControl<TValue extends SegmentedControlValue = Segmente
       onFocus={handleRootFocus}
       aria-describedby={describedBy}
       aria-disabled={disabled || undefined}
-      aria-invalid={invalid || undefined}
+      aria-invalid={resolvedAriaInvalid}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabel ? undefined : labelledBy}
       aria-required={resolvedRequired || undefined}

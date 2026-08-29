@@ -9,6 +9,7 @@ describe("TreeSelect SSR", () => {
     const html = renderToString(
       <TreeSelect
         open
+        aria-invalid="spelling"
         title="商品类目"
         options={[
           {
@@ -22,6 +23,8 @@ describe("TreeSelect SSR", () => {
     );
     expect(html).toContain('role="dialog"');
     expect(html).toContain('role="tree"');
+    expect(html).toContain('aria-invalid="spelling"');
+    expect(html.match(/aria-invalid=/g)).toHaveLength(1);
     expect(html.match(/role="treeitem"/g)).toHaveLength(2);
     expect(html).toContain("智能手机");
   });

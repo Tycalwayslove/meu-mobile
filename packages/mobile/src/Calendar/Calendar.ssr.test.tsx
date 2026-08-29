@@ -20,4 +20,14 @@ describe("Calendar SSR", () => {
     expect(html).toContain('data-date="2026-08-12"');
     expect(html).toContain('aria-pressed="true"');
   });
+
+  it("server-renders the caller's aria-invalid token only on the calendar root", () => {
+    const html = renderToString(
+      <Calendar defaultMonth={date(1)} aria-label="Delivery calendar" aria-invalid="grammar" />
+    );
+
+    expect(html).toContain('role="group"');
+    expect(html).toContain('aria-invalid="grammar"');
+    expect(html.match(/aria-invalid=/g)).toHaveLength(1);
+  });
 });

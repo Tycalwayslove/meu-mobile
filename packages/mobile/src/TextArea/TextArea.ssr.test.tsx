@@ -11,6 +11,7 @@ describe("TextArea SSR", () => {
 
     const markup = renderToString(
       <TextArea
+        aria-invalid="grammar"
         aria-label="Server note"
         autoSize={{ minRows: 2, maxRows: 5 }}
         defaultValue="Meu"
@@ -23,6 +24,7 @@ describe("TextArea SSR", () => {
     expect(markup).toContain('data-meu-component="text-area"');
     expect(markup).toContain('data-auto-size="true"');
     expect(markup).toContain('data-state="readonly"');
+    expect(markup).toContain('aria-invalid="grammar"');
     expect(markup.replace("<!-- -->", "")).toContain("3 / 20");
     expect(markup).not.toContain("aria-live");
   });

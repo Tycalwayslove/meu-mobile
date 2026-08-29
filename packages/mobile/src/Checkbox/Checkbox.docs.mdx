@@ -32,7 +32,7 @@ source: packages/mobile/src/Checkbox
 - 文本与指示器组成同一个 label；无文案时根目标仍至少 44×44 CSS px。
 - 非受控单项和组都监听所在原生 form 的 reset，恢复 `defaultChecked` / `defaultValue`。
 - 调用方和 Field 的 `aria-describedby` 无损合并并去重；Field invalid/required 进入单项原生语义。
-- `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；Group 在语义根输出错误，子项只继承错误视觉。
+- 没有 Field/status 错误时，`aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`。Group 在语义根输出错误，子项只继承错误视觉。
 - forced-colors 保留选择标记和焦点，reduced-motion 将状态过渡缩短到 1ms。
 
 状态为 `verification`：代码、Unit、SSR、Story contract 与全库移动双引擎门禁已建立，但 VoiceOver/TalkBack 真机与最终 Chromatic 主题审批尚未形成发布证据。
@@ -152,7 +152,7 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 - Story interaction: `Indeterminate` 覆盖 accepted click 后 checked、DOM mixed property 与 ARIA 一致；`NativeFormContract` 覆盖点击、重复 FormData 与 reset；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3963 B / 32768 B 预算；最大单值 `Checkbox` 为 3353 B / 32768 B 预算，组合 Brotli 3528 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 3973 B / 32768 B 预算；最大单值 `Checkbox` 为 3359 B / 32768 B 预算，组合 Brotli 3536 B；共享样式由应用单独导入一次。
 - Touch target: CSS root `minWidth/minHeight: 44`
 - Reduced motion / forced colors / RTL: CSS 和专属 Story 已建立；真实浏览器视觉证据待补
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击 CheckboxGroup 的“到店自提”后，表单提交值由 `delivery` 更新为 `delivery,pickup`；页面内 Checkbox 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`

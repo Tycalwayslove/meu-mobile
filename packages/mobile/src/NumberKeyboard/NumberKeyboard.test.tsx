@@ -4,7 +4,9 @@ import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
+import { Field } from "../Field";
 import { NumberKeyboard } from "./NumberKeyboard";
+import { NumberKeyboardTrigger } from "./NumberKeyboardTrigger";
 
 afterEach(() => {
   vi.useRealTimers();
@@ -193,5 +195,40 @@ describe("NumberKeyboard", () => {
     const layer = document.querySelector('[data-meu-overlay-layer="number-keyboard"]');
     expect(layer ? layer.getAttribute("aria-hidden") : null).toBe("true");
     expect(screen.queryByRole("group", { name: "Number keyboard" })).toBeNull();
+  });
+});
+
+describe("NumberKeyboardTrigger", () => {
+  it("preserves caller aria-invalid tokens unless status or Field reports an error", () => {
+    const { rerender } = render(<NumberKeyboardTrigger aria-label="金额" aria-invalid={false} />);
+    const trigger = screen.getByRole("button", { name: "金额" });
+    expect(trigger.getAttribute("aria-invalid")).toBe("false");
+
+    rerender(<NumberKeyboardTrigger aria-label="金额" aria-invalid="grammar" />);
+    expect(trigger.getAttribute("aria-invalid")).toBe("grammar");
+    expect(trigger.getAttribute("data-state")).toBe("error");
+
+    rerender(<NumberKeyboardTrigger aria-label="金额" aria-invalid="spelling" />);
+    expect(trigger.getAttribute("aria-invalid")).toBe("spelling");
+
+    rerender(<NumberKeyboardTrigger aria-label="金额" aria-invalid="grammar" status="error" />);
+    expect(trigger.getAttribute("aria-invalid")).toBe("true");
+    expect(trigger.querySelectorAll("[aria-invalid]")).toHaveLength(0);
+  });
+
+  it("lets Field errors override grammar and server-renders only the trigger token", () => {
+    const { unmount } = render(
+      <Field label="金额" error="请输入金额">
+        <NumberKeyboardTrigger aria-invalid="grammar" />
+      </Field>
+    );
+    expect(screen.getByRole("button", { name: "金额" }).getAttribute("aria-invalid")).toBe("true");
+    unmount();
+
+    const html = renderToString(
+      <NumberKeyboardTrigger aria-label="金额" aria-invalid="spelling" />
+    );
+    expect(html).toContain('aria-invalid="spelling"');
+    expect(html.match(/aria-invalid=/g)).toHaveLength(1);
   });
 });

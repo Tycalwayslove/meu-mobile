@@ -129,6 +129,7 @@ ref 指向中央真实 input，可使用原生 `focus()`、`blur()`、`select()`
 - input role=spinbutton 暴露 value now/min/max/required/invalid；有效编辑草稿会同步 value now，不完整或非法草稿不沿用旧值；必须有 Field label 或 ARIA name。
 - 增减按钮有 ConfigProvider 本地化名称（中：增加/减少，英：Increase/Decrease）和 aria-controls。
 - 边界、readOnly/disabled 会禁用相应按钮；错误由 Field describedby + aria-invalid 公布。
+- 无 Field/status error 时保留 spinbutton 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉。Field/status error 优先输出 `true`，token 不复制到增减按钮。
 - 状态不只靠颜色；按钮 disabled、input readonly/disabled 和 ARIA 提供语义。
 
 ## 动效
@@ -168,12 +169,12 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 
 ## 测试证据
 
-- Unit 13 项：按钮/键盘/bounds、小数与空值、Field、反向 bounds/受控、非整步有效上限、草稿单次发布与 ARIA 同步、decimal comma/无效草稿、取消/IME、readOnly 受控/非受控键盘与 FormData、required/controls、同步 FormData/reset 与取消边界。
-- SSR 1 项：确定 spinbutton、name/value 与两个原生按钮。
+- Unit：覆盖按钮/键盘/bounds、小数与空值、Field、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、草稿单次发布与 ARIA 同步、decimal comma/无效草稿、取消/IME、readOnly 受控/非受控键盘与 FormData、required/controls、同步 FormData/reset 与取消边界。
+- SSR：覆盖确定 spinbutton、name/value、ARIA invalid token 与两个原生按钮。
 - Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4641 B / 32768 B 预算，组合 Brotli 4099 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4737 B / 32768 B 预算，组合 Brotli 4185 B；共享样式由应用单独导入一次。
 - 待补：软键盘/IME/粘贴移动 E2E、forced-colors/200%/Light/Dark 视觉基线、VoiceOver/TalkBack。
 
 ## V2 优化记录
@@ -197,9 +198,10 @@ comma、selection 与 blur commit 仍需在目标 WKWebView/Android WebView 真�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                             | 迁移说明                         |
-| ---------- | ------ | ------------- | ------------------------------------------------ | -------------------------------- |
-| 2026-08-28 | 未发布 | behavior      | 全链路数值规范化、草稿/IME/键盘契约与 form reset | 超界或 step 不对齐值会显示规范值 |
-| 2026-08-28 | 未发布 | accessibility | Field required、aria-controls、RTL/高对比        | 无                               |
-| 2026-08-28 | 未发布 | docs          | 建立 Stepper V2 永久事实源                       | README 改为仅指向本文件          |
-| 2026-08-29 | 未发布 | bugfix        | readOnly 拦截 Arrow/Home/End 改值并保留 FormData | 无                               |
+| 日期       | 版本   | 类型          | 内容                                                     | 迁移说明                         |
+| ---------- | ------ | ------------- | -------------------------------------------------------- | -------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 全链路数值规范化、草稿/IME/键盘契约与 form reset         | 超界或 step 不对齐值会显示规范值 |
+| 2026-08-28 | 未发布 | accessibility | Field required、aria-controls、RTL/高对比                | 无                               |
+| 2026-08-28 | 未发布 | docs          | 建立 Stepper V2 永久事实源                               | README 改为仅指向本文件          |
+| 2026-08-29 | 未发布 | bugfix        | readOnly 拦截 Arrow/Home/End 改值并保留 FormData         | 无                               |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级 | 无                               |

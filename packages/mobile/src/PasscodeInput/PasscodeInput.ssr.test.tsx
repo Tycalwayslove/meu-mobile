@@ -37,4 +37,11 @@ describe("PasscodeInput SSR", () => {
     expect(html).toContain("😀");
     expect(html).toContain("好");
   });
+
+  it("server-renders a caller token only on the native input", () => {
+    const html = renderToString(<PasscodeInput aria-label="验证码" aria-invalid="grammar" />);
+
+    expect(html).toContain('aria-invalid="grammar"');
+    expect(html.match(/aria-invalid=/g)).toHaveLength(1);
+  });
 });

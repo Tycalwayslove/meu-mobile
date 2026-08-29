@@ -33,7 +33,7 @@ source: packages/mobile/src/Selector
 - `value` 同时作为选项 identity 与原生 FormData 值；string 与 number 分开识别，重复 identity 只保留第一项。
 - 值按 `options` 顺序归一化，不受用户点击顺序影响；单选只保留首个有效值，已删除的选项不会残留为幽灵值。
 - 支持 Field label/description/error/required 合并、原生 constraint validation、外部 `form` 关联、表单 reset、root ref 与 React Hook Form adapter。
-- 显式 `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；后两者进入错误视觉态。
+- 没有 Field/status 错误时，显式 `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`，后两种 token 本身也进入错误视觉态。
 - 每个交互目标最小 44×44 CSS px；支持 RTL、200% 字号换行、reduced motion、forced colors 和服务端渲染。
 
 当前状态为 `verification`。全库移动 Chromium/WebKit E2E 与本地 Light/Dark 场景矩阵已完成；最终 Chromatic 审批与真机 VoiceOver/TalkBack 证据尚未完成，不能标记为 commercial。
@@ -191,7 +191,7 @@ render 为 O(options × selected values)，建议规模不超过 20 项；无全
 - Story interaction: `ControlledInteraction` 验证多选状态与受控回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4479 B / 32768 B 预算，组合 Brotli 3993 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4487 B / 32768 B 预算，组合 Brotli 4003 B；共享样式由应用单独导入一次。
 - RTL / reduced motion / forced colors: CSS 契约已实现，专属自动化与截图矩阵待补。
 - Mobile Chromium/WebKit E2E: Pixel 5 Chromium 与 iPhone 13 WebKit 配置均验证点击“优先配送”后，`MeuFormSelector` 提交值由 `standard` 更新为 `fast`；页面内 Selector 根目标高度均不小于 44 CSS px，且无 hydration、`pageerror` 或 `console.error`
 - 20+ options 的替代方案、single clear 与 multiple 键盘路径仍待更完整的目标 WebView 场景；VoiceOver/TalkBack 真机与 Chromatic 最终视觉审批：待补

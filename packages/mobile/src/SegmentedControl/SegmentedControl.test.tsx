@@ -65,6 +65,7 @@ describe("SegmentedControl", () => {
         <Field label="展示方式" description="切换内容布局" error="请选择展示方式" required>
           <SegmentedControl
             aria-describedby="business-hint"
+            aria-invalid="grammar"
             disabled
             options={options}
             value={null}
@@ -82,6 +83,24 @@ describe("SegmentedControl", () => {
     expect(group.getAttribute("aria-describedby")).toContain("error");
     expect(screen.getByRole("radio", { name: "列表" })).toHaveProperty("disabled", true);
   });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s only on the radiogroup root",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(
+        <SegmentedControl aria-invalid={ariaInvalid} aria-label="语义分段器" options={options} />
+      );
+      const group = screen.getByRole("radiogroup", { name: "语义分段器" });
+      expect(group.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      expect(group.getAttribute("data-state")).toBe(expectedState);
+      expect(group.querySelectorAll("input[aria-invalid]")).toHaveLength(0);
+    }
+  );
 
   it("does not let a disabled controlled selection satisfy required or enter FormData", () => {
     const { rerender } = render(

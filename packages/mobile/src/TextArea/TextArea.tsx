@@ -128,11 +128,22 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     fieldDescribedBy,
     showCount ? countId : undefined
   );
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const classes = textarea({
     autoSize: Boolean(autoSize),
     size,
@@ -286,7 +297,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         style={style}
         value={controlled ? value : undefined}
         aria-describedby={describedBy}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
         data-auto-size={autoSize ? "true" : "false"}
         data-meu-component="text-area"
         data-size={size}

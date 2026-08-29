@@ -122,12 +122,12 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 
 ## 测试证据
 
-- Unit: `TextInput.test.tsx`，覆盖 Field、受控/非受控 clear、locale、readOnly，以及 `aria-invalid` false/grammar/spelling token
+- Unit: `TextInput.test.tsx`，覆盖 Field 对 caller token 的优先级、受控/非受控 clear、locale、readOnly，以及 `aria-invalid` false/grammar/spelling token
 - Story interaction: `Clearable` 验证清除后的值、回调状态与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3634 B / 32768 B 预算，组合 Brotli 3206 B；共享样式由应用单独导入一次。
-- SSR/hydration: 隔离 Next 16 App Router 首屏渲染 Field-aware input，hydration 后 clear、错误修正与提交成功且 0 hydration/runtime error
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3653 B / 32768 B 预算，组合 Brotli 3227 B；共享样式由应用单独导入一次。
+- SSR/hydration: `TextInput.ssr.test.tsx` 覆盖原生 input 的 token 输出；隔离 Next 16 App Router 首屏渲染 Field-aware input，hydration 后 clear、错误修正与提交成功且 0 hydration/runtime error
 - RTL: 待补
 - Reduced motion: 不适用，待静态验证
 - Mobile Chromium/WebKit E2E: 两种引擎断言 Zod invalid、Field 归属、受控 fill、clear 后值与焦点恢复、修正后提交；IME/autofill/password 仍待专项与真机
@@ -149,8 +149,9 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                    | 迁移说明 |
-| ---------- | ------ | ------------ | ------------------------------------------------------- | -------- |
-| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                    | 无       |
-| 2026-08-29 | 未发布 | behavior     | 保留 `aria-invalid` token 语义                          | 无       |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 clear/invalid/submit/hydration 证据 | 无       |
+| 日期       | 版本   | 类型          | 内容                                                    | 迁移说明 |
+| ---------- | ------ | ------------- | ------------------------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0  | docs          | 建立 V2 留存文档基线                                    | 无       |
+| 2026-08-29 | 未发布 | behavior      | 保留 `aria-invalid` token 语义                          | 无       |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 clear/invalid/submit/hydration 证据 | 无       |
+| 2026-08-29 | 未发布 | accessibility | 统一 Field/status error 覆盖 caller token 的优先级      | 无       |

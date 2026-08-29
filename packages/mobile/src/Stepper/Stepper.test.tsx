@@ -52,7 +52,7 @@ describe("Stepper", () => {
   it("inherits Field labelling and error semantics", () => {
     render(
       <Field label="购买数量" error="库存不足">
-        <Stepper />
+        <Stepper aria-invalid="grammar" />
       </Field>
     );
 
@@ -60,6 +60,22 @@ describe("Stepper", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.getAttribute("aria-describedby")).toContain("error");
   });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s on the spinbutton",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<Stepper aria-invalid={ariaInvalid} aria-label="语义步进器" />);
+      const input = screen.getByRole("spinbutton", { name: "语义步进器" });
+      expect(input.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      const root = input.parentElement;
+      expect(root && root.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
 
   it("normalizes defaults, controlled values and reversed bounds", () => {
     const { rerender } = render(

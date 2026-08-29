@@ -40,6 +40,6 @@ export type TextAreaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "c
   showCount?: boolean;
   /** Controls padding, type size, and the default fixed minimum height. @defaultValue "medium" */
   size?: TextAreaSize;
-  /** Applies error styling and `aria-invalid`. @defaultValue "default" */
+  /** Applies error styling and `aria-invalid="true"`; caller grammar/spelling tokens are otherwise preserved. @defaultValue "default" */
   status?: TextAreaStatus;
 };

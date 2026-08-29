@@ -42,7 +42,7 @@ export type CheckboxProps = Omit<
   readOnly?: boolean;
   /** Visual and touch-target scale. */
   size?: CheckboxSize;
-  /** Visual validation state that emits `aria-invalid="true"`; explicit `grammar` or `spelling` tokens remain intact. */
+  /** Visual validation state; an error emits `aria-invalid="true"` and overrides caller tokens, otherwise native invalid tokens remain intact. */
   status?: CheckboxStatus;
   /** Native submitted value. Defaults to the browser value `"on"` when omitted. */
   value?: CheckboxValue;

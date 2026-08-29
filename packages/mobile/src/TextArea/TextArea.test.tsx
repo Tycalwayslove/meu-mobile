@@ -33,7 +33,7 @@ describe("TextArea", () => {
       <>
         <span id="external-help">外部提示</span>
         <Field label="商品介绍" description="用于商品详情" error="介绍不能为空">
-          <TextArea aria-describedby="external-help" showCount />
+          <TextArea aria-describedby="external-help" aria-invalid="grammar" showCount />
         </Field>
       </>
     );
@@ -48,6 +48,21 @@ describe("TextArea", () => {
     expect(new Set(descriptionIds).size).toBe(descriptionIds.length);
     expect(screen.getByText("0").getAttribute("aria-live")).toBeNull();
   });
+
+  it.each([
+    [false, "false", "default"],
+    ["false", "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s on the textarea",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<TextArea aria-invalid={ariaInvalid} aria-label="语义文本域" />);
+      const textArea = screen.getByRole("textbox", { name: "语义文本域" });
+      expect(textArea.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      expect(textArea.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
 
   it("counts UTF-16 code units in an uncontrolled value", () => {
     const onChange = vi.fn();

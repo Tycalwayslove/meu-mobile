@@ -87,7 +87,7 @@ CalendarRef 提供 focus、goToMonth 和 goToToday。goToToday 聚焦今天；�
 
 ## 无障碍
 
-始终为 grid 生成稳定 title id 和 accessible name；gridcell 暴露 aria-selected，按钮暴露 aria-current/date、aria-pressed、disabled 和完整 YYYY-MM-DD 名称；禁用全月时根可聚焦。
+始终为 grid 生成稳定 title id 和 accessible name；gridcell 暴露 aria-selected，按钮暴露 aria-current/date、aria-pressed、disabled 和完整 YYYY-MM-DD 名称；禁用全月时根可聚焦。调用方的 `aria-invalid=false/grammar/spelling` 原样保留在 calendar group，grammar/spelling 同时启用错误视觉；Field 错误优先输出 `true`，grid 与日期按钮不重复该 token。
 
 ## 动效
 
@@ -123,7 +123,7 @@ min 大于 max 时没有可选日；disabledDate 可能被一个月内多次调�
 - Story interaction：`Single` 验证受控日期选择、`aria-pressed` 与 gridcell 选择语义；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）9 个公开值组合 gzip 10927 B / 49152 B 预算；最大单值 `Calendar` 为 10897 B / 49152 B 预算，组合 Brotli 9632 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）9 个公开值组合 gzip 11120 B / 49152 B 预算；最大单值 `Calendar` 为 11090 B / 49152 B 预算，组合 Brotli 9809 B；共享样式由应用单独导入一次。
 - SSR：Calendar.ssr.test.tsx 覆盖稳定网格与 label 关系。
 - Figma：Meu/Calendar 257:722；42 个 DayCell、44×44 DayButton、Light/Dark 对比通过。
 - Chromium/WebKit E2E、Chromatic、真机读屏：最终统一门禁。
@@ -140,7 +140,8 @@ min 大于 max 时没有可选日；disabledDate 可能被一个月内多次调�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                      | 迁移说明    |
-| ---------- | ------ | --------- | ----------------------------------------- | ----------- |
-| 2026-08-29 | 未发布 | hardening | 月历状态、RTL、a11y、兼容与文档加固       | 无 API 破坏 |
-| 2026-08-29 | 未发布 | bugfix    | goToToday 完成同月/跨月聚焦并收敛禁用边界 | 无          |
+| 日期       | 版本   | 类型      | 内容                                                | 迁移说明    |
+| ---------- | ------ | --------- | --------------------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | hardening | 月历状态、RTL、a11y、兼容与文档加固                 | 无 API 破坏 |
+| 2026-08-29 | 未发布 | bugfix    | goToToday 完成同月/跨月聚焦并收敛禁用边界           | 无          |
+| 2026-08-29 | 未发布 | a11y      | invalid token 固定在 group，并由 Field 错误优先覆盖 | 无          |

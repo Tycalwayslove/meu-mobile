@@ -73,10 +73,11 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
   const contextualInvalid = status === "error" || (!groupContext && fieldInvalid);
   const invalid = callerInvalid || contextualInvalid;
   const visualInvalid = invalid || resolvedStatus === "error" || fieldInvalid;
-  const resolvedAriaInvalid =
-    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
       ? ariaInvalid
-      : invalid
+      : callerInvalid
         ? true
         : ariaInvalid === false || ariaInvalid === "false"
           ? ariaInvalid

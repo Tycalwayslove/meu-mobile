@@ -6,6 +6,7 @@ import { act, cleanup, fireEvent, render, screen, within } from "@testing-librar
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
+import { Field } from "../Field";
 import { Calendar } from "./Calendar";
 import { compareCalendarDays, normalizeCalendarValue } from "./resolveCalendar";
 import type { CalendarRef } from "./types";
@@ -74,6 +75,38 @@ describe("Calendar", () => {
       screen.getByRole("group", { name: "配送日历" }).getAttribute("aria-required")
     ).toBeNull();
     expect(screen.getByRole("grid").getAttribute("aria-required")).toBeNull();
+  });
+
+  it("preserves native aria-invalid tokens on the semantic root", () => {
+    const { rerender } = render(
+      <Calendar defaultMonth={date(1)} aria-label="配送日历" aria-invalid={false} />
+    );
+    const root = screen.getByRole("group", { name: "配送日历" });
+    const defaultClassName = root.className;
+    expect(root.getAttribute("aria-invalid")).toBe("false");
+    expect(screen.getByRole("grid").getAttribute("aria-invalid")).toBeNull();
+
+    rerender(<Calendar defaultMonth={date(1)} aria-label="配送日历" aria-invalid="false" />);
+    expect(root.getAttribute("aria-invalid")).toBe("false");
+
+    rerender(<Calendar defaultMonth={date(1)} aria-label="配送日历" aria-invalid="grammar" />);
+    expect(root.getAttribute("aria-invalid")).toBe("grammar");
+    expect(root.className).not.toBe(defaultClassName);
+
+    rerender(<Calendar defaultMonth={date(1)} aria-label="配送日历" aria-invalid="spelling" />);
+    expect(root.getAttribute("aria-invalid")).toBe("spelling");
+  });
+
+  it("lets Field errors override a caller grammar aria-invalid token", () => {
+    render(
+      <Field label="配送日期" error="请选择配送日期">
+        <Calendar defaultMonth={date(1)} aria-invalid="grammar" />
+      </Field>
+    );
+
+    const root = screen.getByRole("group", { name: "配送日期" });
+    expect(root.getAttribute("aria-invalid")).toBe("true");
+    expect(root.querySelectorAll("[aria-invalid]")).toHaveLength(0);
   });
 
   it("supports uncontrolled single selection and explicit clearing", () => {

@@ -11,6 +11,7 @@ describe("SegmentedControl SSR", () => {
 
     const markup = renderToString(
       <SegmentedControl
+        aria-invalid="grammar"
         aria-label="View"
         defaultValue="grid"
         name="view"
@@ -24,6 +25,8 @@ describe("SegmentedControl SSR", () => {
 
     expect(markup).toContain('data-meu-component="segmented-control"');
     expect(markup).toContain('role="radiogroup"');
+    expect(markup).toContain('aria-invalid="grammar"');
+    expect(markup.match(/aria-invalid=/g)).toHaveLength(1);
     expect(markup).toContain('type="radio"');
     expect(markup).toContain('name="view"');
     expect(markup).toContain('value="grid"');

@@ -83,7 +83,10 @@ describe("MeuFormImageUploader", () => {
       selector: 'input[type="file"]'
     });
     expect(alert.textContent).toBe("请上传商品图片");
-    expect(input.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByRole("group", { name: "商品图片" }).getAttribute("aria-invalid")).toBe(
+      "true"
+    );
+    expect(input.getAttribute("aria-invalid")).toBeNull();
     expect(input.getAttribute("aria-describedby")).toContain("error");
     await waitFor(() => expect(document.activeElement).toBe(input));
   });

@@ -174,7 +174,7 @@ describe("PasscodeInput", () => {
     const ref = createRef<PasscodeInputRef>();
     render(
       <Field label="短信验证码" description="六位数字" error="验证码错误">
-        <PasscodeInput ref={ref} status="error" />
+        <PasscodeInput ref={ref} status="error" aria-invalid="grammar" />
       </Field>
     );
     const input = screen.getByLabelText<HTMLInputElement>("短信验证码");
@@ -190,6 +190,25 @@ describe("PasscodeInput", () => {
       if (ref.current) ref.current.blur();
     });
     expect(document.activeElement).not.toBe(input);
+  });
+
+  it("preserves caller aria-invalid tokens unless status reports an error", () => {
+    const { rerender } = render(<PasscodeInput aria-label="验证码" aria-invalid={false} />);
+    const input = screen.getByLabelText<HTMLInputElement>("验证码");
+    expect(input.getAttribute("aria-invalid")).toBe("false");
+
+    rerender(<PasscodeInput aria-label="验证码" aria-invalid="grammar" />);
+    expect(input.getAttribute("aria-invalid")).toBe("grammar");
+    const root = input.closest('[data-meu-component="passcode-input"]');
+    if (!root) throw new Error("Expected passcode root");
+    expect(root.getAttribute("data-state")).toBe("error");
+
+    rerender(<PasscodeInput aria-label="验证码" aria-invalid="spelling" />);
+    expect(input.getAttribute("aria-invalid")).toBe("spelling");
+
+    rerender(<PasscodeInput aria-label="验证码" aria-invalid="grammar" status="error" />);
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+    expect(root.querySelectorAll("[aria-invalid]")).toHaveLength(1);
   });
 
   it("merges Field and caller descriptions without duplicates and inherits required", () => {

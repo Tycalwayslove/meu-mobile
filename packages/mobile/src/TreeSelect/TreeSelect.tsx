@@ -83,6 +83,7 @@ function finiteInteger(
 
 /** Searchable, virtualizable, confirmation-based mobile tree selector. @public */
 export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
+  "aria-invalid": ariaInvalid,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   allowClear = true,
@@ -301,6 +302,22 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
       : loadErrorText;
   const resolvedTreeLabel =
     treeAriaLabel || (config.locale === "en-US" ? "Selectable options" : "可选项");
+  const callerInvalid =
+    ariaInvalid === true ||
+    ariaInvalid === "true" ||
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error";
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const readOnlyDescriptionId = `${generatedId}-readonly-description`;
   const searching = searchable && currentSearch.trim().length > 0;
   const resolvedVirtual = virtual && virtualReady;
@@ -757,7 +774,7 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
         ref={ref}
         className={className ? `${root} ${className}` : root}
         data-meu-component="tree-select"
-        data-state={disabled ? "disabled" : readOnly ? "readonly" : status}
+        data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
       >
         <div className={header}>
           <Button
@@ -808,12 +825,12 @@ export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>({
           aria-busy={loadingValues.size > 0 || undefined}
           aria-describedby={readOnly ? readOnlyDescriptionId : undefined}
           aria-disabled={disabled || undefined}
-          aria-invalid={status === "error" || undefined}
+          aria-invalid={resolvedAriaInvalid}
           aria-label={resolvedTreeLabel}
           aria-multiselectable={rows.length > 0 && multiple ? true : undefined}
           className={tree}
           data-readonly={readOnly || undefined}
-          data-status={status}
+          data-status={invalid ? "error" : "default"}
           style={{ height: resolvedHeight }}
         >
           {rows.length === 0 ? (

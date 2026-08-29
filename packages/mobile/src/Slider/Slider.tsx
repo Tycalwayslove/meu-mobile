@@ -102,11 +102,22 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   const keyboardInteractionRef = useRef(false);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const progress =
     effectiveUpper === lower ? 0 : ((currentValue - lower) / (effectiveUpper - lower)) * 100;
   const sliderStyle: SliderStyle = {
@@ -243,7 +254,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           aria-describedby={describedBy}
-          aria-invalid={invalid || undefined}
+          aria-invalid={resolvedAriaInvalid}
         />
         {showValue ? (
           <output className={valueText} htmlFor={resolvedId} aria-hidden="true">

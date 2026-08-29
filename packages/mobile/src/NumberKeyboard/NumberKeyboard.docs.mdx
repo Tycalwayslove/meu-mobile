@@ -97,7 +97,7 @@ NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命
 
 ## 无障碍
 
-根为有名称的 group；每个按键为原生 button 并有 accessible name。非模态设计不使用 aria-modal；调用方必须保留真实 input 或等价字段语义。Trigger 的 button 不支持 `aria-required`，该属性从公开类型排除；必填状态由 Field 的本地化隐藏说明与校验错误表达。
+根为有名称的 group；每个按键为原生 button 并有 accessible name。非模态设计不使用 aria-modal；调用方必须保留真实 input 或等价字段语义。Trigger 的原生 button 原样保留调用方 `aria-invalid=false/grammar/spelling`，grammar/spelling 同时启用错误视觉；`status="error"` 或 Field 错误优先输出 `true`，button 子节点不重复 token。Trigger 不支持 `aria-required`，该属性从公开类型排除；必填状态由 Field 的本地化隐藏说明与校验错误表达。
 
 ## 动效
 
@@ -136,7 +136,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 - Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 5510 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 4926 B / 32768 B 预算，组合 Brotli 4862 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 5697 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 4926 B / 32768 B 预算，组合 Brotli 5019 B；共享样式由应用单独导入一次。
 - SSR/hydration: Unit 已覆盖服务端渲染；开放 Portal hydration 仍待专门证明
 - RTL: 待补
 - Reduced motion: 待补
@@ -160,8 +160,9 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                       | 迁移说明                                                    |
-| ---------- | ------ | -------- | ------------------------------------------ | ----------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | Trigger 合并 Field 语义并移除无效 required | 不再向 Trigger 传 `aria-required`；在 Field 上声明 required |
-| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                       | 无                                                          |
-| 2026-08-29 | 未发布 | behavior | Escape 仅由最后开放的顶层实例响应          | 无                                                          |
+| 日期       | 版本   | 类型     | 内容                                                    | 迁移说明                                                    |
+| ---------- | ------ | -------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | Trigger 合并 Field 语义并移除无效 required              | 不再向 Trigger 传 `aria-required`；在 Field 上声明 required |
+| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                                    | 无                                                          |
+| 2026-08-29 | 未发布 | behavior | Escape 仅由最后开放的顶层实例响应                       | 无                                                          |
+| 2026-08-29 | 未发布 | a11y     | Trigger 保留原生 invalid token，错误上下文优先输出 true | 无                                                          |

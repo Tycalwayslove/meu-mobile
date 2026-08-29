@@ -122,6 +122,7 @@ ref 指向真实 `input[type="range"]`，可使用原生 `focus()`、`blur()`、
 - 必须由 Field、`aria-label` 或 `aria-labelledby` 提供 accessible name；marks 和 output 不替代标签。
 - 原生 slider 暴露 min/max/now；单位/语义值可用原生 `aria-valuetext`，视觉 `formatValue` 不会自动转成可访问文本。
 - error 使用 `aria-invalid` 并关联 Field error；disabled 使用原生属性。
+- 无 Field/status error 时保留原生 range 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉，Field/status error 优先输出 `true`。
 - output 不使用 aria-live，避免拖动时逐帧打断读屏。
 
 ## 动效
@@ -159,14 +160,14 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 ## 测试证据
 
-- Unit 7 项：原生 change/complete、Field/marks、bounds/step、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
-- SSR 1 项：无浏览器全局时确定输出 range/value/output。
+- Unit：覆盖原生 change/complete、Field/marks、ARIA invalid token/优先级、bounds/step、单次完成、同步 form reset/FormData 与取消边界、RTL logical position。
+- SSR：覆盖无浏览器全局时确定输出 range/value/output 与 ARIA invalid token。
 - Story interaction: `NativeFormReset` 验证输入后恢复默认值；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormSlider` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `volume:41`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer。
 - Next-H5 pointer E2E：`drags slider and rate with browser pointer events and resets cancelled sessions` 在两种移动引擎、390×844 视口中通过 `page.mouse` 产生 `isTrusted=true` 的 pointerdown，将原生 range 从 40 拖至至少 75，并验证 `onChangeComplete` 只触发一次；随后在可信 pointerdown 会话中派发 `isTrusted=false` 的 pointercancel，验证取消回调触发且不会补发完成回调。该证据不等同于物理触摸或系统级取消。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4232 B / 32768 B 预算，组合 Brotli 3769 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4323 B / 32768 B 预算，组合 Brotli 3848 B；共享样式由应用单独导入一次。
 - 待补：iOS/Android 物理触摸 drag、系统 pointercancel 与滚动竞争；forced-colors 聚焦截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 
 ## V2 优化记录
@@ -198,3 +199,4 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 | 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                                  | README 改为仅指向本文件       |
 | 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification         |
 | 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、单次完成与合成 cancel 双引擎证据         | 状态仍为 verification         |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级   | 无                            |

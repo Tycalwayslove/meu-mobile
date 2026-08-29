@@ -86,7 +86,7 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ## 无障碍
 
-根 group 与 native input 同步接受 Field/显式名称和描述，invalid 保留在 native input 与根 `data-state`；每张成功图有独立预览/删除名称。上传任务使用 progressbar 数值语义，失败保留原生重试按钮。disabled 禁止全部预览与变更；readOnly 允许预览但禁止添加/删除/重试。
+根 group 接受 Field/显式名称、描述和 invalid 语义，native file input 只保留选择文件所需的名称与描述。调用方的 `aria-invalid=false/grammar/spelling` 原样留在 group，grammar/spelling 同时启用错误视觉；`status="error"` 或 Field 错误优先输出 `true`，input 与任务子节点不重复 token。每张成功图有独立预览/删除名称。上传任务使用 progressbar 数值语义，失败保留原生重试按钮。disabled 禁止全部预览与变更；readOnly 允许预览但禁止添加/删除/重试。
 
 ## 动效
 
@@ -126,7 +126,7 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 - Story interaction: `Interaction.play` 验证预览与关闭链路；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31929 B / 49152 B 预算，组合 Brotli 27800 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 32020 B / 49152 B 预算，组合 Brotli 27844 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 已覆盖；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 上传场景中保持 0 `pageerror` / `console.error`，独立最小化 hydration 专测仍未执行。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。
@@ -151,3 +151,4 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 | 2026-08-29 | 未发布 | bugfix       | 失败任务容量与异步 hook 安全                          | 既有回调签名不变 |
 | 2026-08-29 | 未发布 | behavior     | 上传任务语义和异步删除锁完善                          | 既有回调签名不变 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎本地上传、校验聚焦与表单序列化证据 | 无               |
+| 2026-08-29 | 未发布 | a11y         | invalid token 迁移到唯一 uploader group 语义根        | 无               |

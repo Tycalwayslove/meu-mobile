@@ -149,11 +149,22 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       id || (fieldContext ? fieldContext.controlId : `meu-image-uploader-${generatedId}`);
     const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
     const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
-    const invalid =
+    const callerInvalid =
       ariaInvalid === true ||
       ariaInvalid === "true" ||
-      status === "error" ||
-      Boolean(fieldContext && fieldContext.invalid);
+      ariaInvalid === "grammar" ||
+      ariaInvalid === "spelling";
+    const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+    const invalid = callerInvalid || contextualInvalid;
+    const resolvedAriaInvalid = contextualInvalid
+      ? true
+      : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+        ? ariaInvalid
+        : callerInvalid
+          ? true
+          : ariaInvalid === false || ariaInvalid === "false"
+            ? ariaInvalid
+            : undefined;
     const localizedAddLabel = addLabel || (config.locale === "en-US" ? "Add image" : "添加图片");
     const localizedRetryLabel = retryLabel || (config.locale === "en-US" ? "Retry" : "重试");
     const localizedRemoveLabel = config.locale === "en-US" ? "Remove" : "删除";
@@ -435,7 +446,6 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         aria-label={ariaLabel || (labelledBy ? undefined : localizedAddLabel)}
         aria-labelledby={labelledBy}
         aria-describedby={describedBy}
-        aria-invalid={invalid || undefined}
         onBlur={onBlur}
         onChange={(event) => {
           void handleSelection(event);
@@ -445,6 +455,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
 
     return (
       <>
+        {/* aria-invalid is a global WAI-ARIA state carried by the uploader's semantic group root. */}
+        {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */}
         <div
           {...props}
           ref={rootRef}
@@ -454,6 +466,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           aria-label={ariaLabel}
           aria-labelledby={ariaLabel ? undefined : labelledBy}
           aria-describedby={describedBy}
+          aria-invalid={resolvedAriaInvalid}
           data-disabled={disabled || undefined}
           data-meu-component="image-uploader"
           data-readonly={readOnly || undefined}

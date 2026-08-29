@@ -34,15 +34,28 @@ export function NumberKeyboardTrigger({
       .join(" ") || undefined;
   const labelledBy =
     ariaLabelledBy || (!ariaLabel && fieldContext ? fieldContext.labelId : undefined);
-  const invalid =
+  const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
-    status === "error" ||
-    Boolean(fieldContext && fieldContext.invalid);
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : callerInvalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const hasValue = value !== undefined && value !== null && value !== "";
   const classes = trigger({ status: invalid ? "error" : status });
 
   return (
+    /* aria-invalid is a global WAI-ARIA state carried by the native trigger. */
+    /* eslint-disable-next-line jsx-a11y/role-supports-aria-props */
     <button
       {...props}
       ref={ref}
@@ -52,6 +65,7 @@ export function NumberKeyboardTrigger({
       disabled={disabled}
       aria-describedby={describedBy}
       aria-expanded={open}
+      aria-invalid={resolvedAriaInvalid}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabel ? undefined : labelledBy}
       data-invalid={invalid || undefined}

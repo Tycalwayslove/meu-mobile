@@ -40,7 +40,7 @@ export type RadioProps = Omit<
   readOnly?: boolean;
   /** Visual and touch-target scale. */
   size?: RadioSize;
-  /** Visual validation state that emits `aria-invalid="true"`; explicit `grammar` or `spelling` tokens remain intact. */
+  /** Visual validation state; an error emits `aria-invalid="true"` and overrides caller tokens, otherwise native invalid tokens remain intact. */
   status?: RadioStatus;
   /** Native submitted value and the identity used by RadioGroup. */
   value?: RadioValue;

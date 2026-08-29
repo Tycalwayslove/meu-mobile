@@ -506,7 +506,9 @@ test("binds image upload tasks to serializable form values and native input focu
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(page.getByText("请至少上传一张商品图片")).toBeVisible();
   await expect(input).toBeFocused();
-  await expect(input).toHaveAttribute("aria-invalid", "true");
+  await expect(uploader).toHaveAttribute("aria-invalid", "true");
+  await expect(input).not.toHaveAttribute("aria-invalid", /.+/);
+  await expect(input).toHaveAttribute("aria-describedby", /-error(?:\s|$)/);
 
   await input.setInputFiles({
     name: "uploaded-product.jpg",

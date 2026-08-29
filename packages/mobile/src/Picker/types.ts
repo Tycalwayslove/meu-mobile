@@ -191,7 +191,10 @@ export type PickerTriggerProps = Omit<
   placeholder?: ReactNode;
   /** Ref to the native trigger button. */
   ref?: Ref<HTMLButtonElement>;
-  /** Visual validation state; Field context errors also resolve to `error`. */
+  /**
+   * Visual validation state. `error` and Field errors expose `aria-invalid="true"` on the native
+   * button; otherwise caller grammar, spelling, true, and false tokens are preserved.
+   */
   status?: PickerTriggerStatus;
   /** Committed value summary. */
   value?: ReactNode;

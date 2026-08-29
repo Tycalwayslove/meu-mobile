@@ -20,7 +20,7 @@ export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size">
   onClear?: () => void;
   /** Controls the input height and horizontal padding. @defaultValue "medium" */
   size?: "small" | "medium" | "large";
-  /** Applies validation styling and `aria-invalid`. @defaultValue "default" */
+  /** Applies validation styling and `aria-invalid="true"`; caller grammar/spelling tokens are otherwise preserved. @defaultValue "default" */
   status?: "default" | "error";
 };
 
@@ -63,12 +63,13 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
     ariaInvalid === "true" ||
     ariaInvalid === "grammar" ||
     ariaInvalid === "spelling";
-  const invalid =
-    callerInvalid || status === "error" || Boolean(fieldContext && fieldContext.invalid);
-  const resolvedAriaInvalid =
-    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+  const contextualInvalid = status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const invalid = callerInvalid || contextualInvalid;
+  const resolvedAriaInvalid = contextualInvalid
+    ? true
+    : ariaInvalid === "grammar" || ariaInvalid === "spelling"
       ? ariaInvalid
-      : invalid
+      : callerInvalid
         ? true
         : ariaInvalid === false || ariaInvalid === "false"
           ? ariaInvalid

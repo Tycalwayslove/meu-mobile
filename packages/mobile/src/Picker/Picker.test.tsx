@@ -305,7 +305,7 @@ describe("PickerTrigger", () => {
   it("inherits Field naming, descriptions and error state", () => {
     render(
       <Field label="配送方式" description="请选择可用方式" error="配送方式必填">
-        <PickerTrigger open placeholder="请选择" />
+        <PickerTrigger open placeholder="请选择" aria-invalid="grammar" />
       </Field>
     );
 
@@ -313,8 +313,26 @@ describe("PickerTrigger", () => {
     expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
     expect(trigger.getAttribute("data-invalid")).toBe("true");
+    expect(trigger.getAttribute("aria-invalid")).toBe("true");
     expect(trigger.getAttribute("aria-describedby")).toContain("description");
     expect(trigger.getAttribute("aria-describedby")).toContain("error");
     expect(within(trigger).getByText("请选择")).toBeTruthy();
+  });
+
+  it("preserves caller aria-invalid tokens unless status reports an error", () => {
+    const { rerender } = render(<PickerTrigger aria-label="配送方式" aria-invalid={false} />);
+    const trigger = screen.getByRole("button", { name: "配送方式" });
+    expect(trigger.getAttribute("aria-invalid")).toBe("false");
+
+    rerender(<PickerTrigger aria-label="配送方式" aria-invalid="grammar" />);
+    expect(trigger.getAttribute("aria-invalid")).toBe("grammar");
+    expect(trigger.getAttribute("data-state")).toBe("error");
+
+    rerender(<PickerTrigger aria-label="配送方式" aria-invalid="spelling" />);
+    expect(trigger.getAttribute("aria-invalid")).toBe("spelling");
+
+    rerender(<PickerTrigger aria-label="配送方式" aria-invalid="grammar" status="error" />);
+    expect(trigger.getAttribute("aria-invalid")).toBe("true");
+    expect(trigger.querySelectorAll("[aria-invalid]")).toHaveLength(0);
   });
 });

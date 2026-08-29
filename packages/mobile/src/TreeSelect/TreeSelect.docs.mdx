@@ -100,7 +100,7 @@ RTL 时左右键镜像；上下、Home/End 不变。Tab 依次经过 cancel、se
 
 ## 无障碍
 
-遵循 APG tree/treeitem，提供 aria-level/posinset/setsize、expanded、selected/checked、disabled、busy 和 multiselectable。loading/error 同时有形状与本地化 role=status 文案；error status 在 tree 上设置 aria-invalid。
+遵循 APG tree/treeitem，提供 aria-level/posinset/setsize、expanded、selected/checked、disabled、busy 和 multiselectable。loading/error 同时有形状与本地化 role=status 文案；ARIA invalid token 只放在 tree 语义根，不复制到 popup、内容根、搜索框或 treeitem。无 status error 时保留显式 `false/grammar/spelling`，grammar/spelling 触发错误视觉；`status="error"` 优先输出 `true`。
 
 ## 动效
 
@@ -136,12 +136,12 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 ## 测试证据
 
-- Unit: single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window 与 aria-invalid
+- Unit: single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window，以及 ARIA invalid token/归属/优先级
 - Story interaction: `Single` 验证 Portal 打开、draft 选择、确认提交与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 28974 B / 49152 B 预算，组合 Brotli 24852 B；共享样式由应用单独导入一次。
-- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 29138 B / 49152 B 预算，组合 Brotli 24929 B；共享样式由应用单独导入一次。
+- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏和 tree 单一 token 归属；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
 - RTL: RightToLeft Story 与 unit
 - Reduced motion: CSS 静态规则；浏览器 computed-style 待补
 - Mobile Chromium/WebKit E2E: 搜索、虚拟焦点、draft 确认/回滚与焦点恢复通过；1,500 节点性能门禁要求打开 ≤750ms、搜索 ≤500ms、DOM treeitem ≤30，两种引擎均通过。async cancel 由 unit 覆盖。
@@ -160,7 +160,8 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                     | 迁移说明                           |
-| ---------- | ------ | -------- | ---------------------------------------- | ---------------------------------- |
-| 2026-08-29 | 未发布 | behavior | 异步取消/错误、RTL、disabled 与 SSR 加固 | 新增可选 loadingText/loadErrorText |
-| 2026-08-29 | 未发布 | docs     | 建立 TreeSelect 共置永久文档             | 无                                 |
+| 日期       | 版本   | 类型          | 内容                                                   | 迁移说明                           |
+| ---------- | ------ | ------------- | ------------------------------------------------------ | ---------------------------------- |
+| 2026-08-29 | 未发布 | behavior      | 异步取消/错误、RTL、disabled 与 SSR 加固               | 新增可选 loadingText/loadErrorText |
+| 2026-08-29 | 未发布 | docs          | 建立 TreeSelect 共置永久文档                           | 无                                 |
+| 2026-08-29 | 未发布 | accessibility | 将 ARIA invalid token 收敛到 tree 并统一 status 优先级 | 无                                 |

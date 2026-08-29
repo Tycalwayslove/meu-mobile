@@ -89,7 +89,12 @@ export type NumberKeyboardTriggerProps = Omit<
   placeholder?: ReactNode;
   /** Ref to the native trigger button. */
   ref?: Ref<HTMLButtonElement>;
-  /** Visual validation state; Field context errors also resolve to `error`. @defaultValue "default" */
+  /**
+   * Visual validation state. `error` and Field errors expose `aria-invalid="true"` on the native
+   * button; otherwise caller grammar, spelling, true, and false tokens are preserved.
+   *
+   * @defaultValue "default"
+   */
   status?: NumberKeyboardTriggerStatus;
   /** Current value summary shown inside the trigger. */
   value?: ReactNode;

@@ -59,7 +59,7 @@ Anatomy 为原生 textarea + 可选视觉 counter，外层 `span` 只负责纵�
 
 - default：可输入、固定高度或 autosize。
 - focus：accent 边框与 1px 外环。
-- error：danger 边框与 `aria-invalid`，可由 `status`、显式 ARIA 或 Field error 触发。
+- error：danger 边框与 `aria-invalid`，可由 `status`、显式 ARIA 或 Field error 触发；无 contextual error 时保留 `false/grammar/spelling` token。
 - readOnly：保留可聚焦、可选择与可提交语义，使用 subtle 背景，禁止拖动改变高度。
 - disabled：muted 文字、subtle 背景，不可聚焦且不会进入 FormData。
 
@@ -153,6 +153,7 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 - 必须通过 Field label、`aria-label` 或 `aria-labelledby` 提供 accessible name；placeholder 不是可靠标签。
 - 使用原生 textbox/multiline 语义，不添加冗余 role。
 - error 状态使用 `aria-invalid`，Field error 通过 `aria-describedby` 关联并作为 alert 呈现。
+- `grammar/spelling` 触发错误视觉但保持原 token；显式 `false` 在无 Field/status error 时保留，Field/status error 优先输出 `true`。
 - counter 也在 `aria-describedby` 中，因此聚焦时可获得长度上下文；它故意不使用 `aria-live`，避免每次输入都打断读屏。
 - UTF-16 计数意味着多数 BMP 汉字/拉丁字符为 1，常见 emoji 可能为 2 或更多。文档明确这一点，避免把视觉字符数误当作当前契约。
 - readOnly 仍可聚焦和选择，disabled 不可聚焦；状态不只依赖背景色，还通过原生属性和 data-state 表达。
@@ -207,11 +208,11 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 
 ## 测试证据
 
-- Unit: `TextArea.test.tsx` 11 项覆盖 ARIA 合并/去重、无 live counter、UTF-16、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权和 readOnly；另有 1 项 SSR 测试。
+- Unit: `TextArea.test.tsx` 覆盖 ARIA 合并/去重与 invalid token/优先级、无 live counter、UTF-16、form reset、首帧与行约束、ResizeObserver、旧 WebView fallback、字体加载、受控回滚、scrollTop、style 所有权和 readOnly；SSR 同时覆盖 token 输出。
 - Story interaction: `NativeFormReset` 使用原生 value setter/input/reset 并断言 value 与 counter 恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4047 B / 32768 B 预算，组合 Brotli 3583 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4135 B / 32768 B 预算，组合 Brotli 3664 B；共享样式由应用单独导入一次。
 - SSR/hydration: `TextArea.ssr.test.tsx` 已证明无浏览器全局 SSR；隔离 Next 16 App Router hydration 后 autosize Field、错误关联和受控输入无运行时异常。
 - RTL: 依赖原生 textarea/逻辑布局，待移动浏览器视觉证明。
 - Reduced motion: 无动效，不适用；仍待 E2E 证明无 height transition。
@@ -242,10 +243,11 @@ ref 指向真实 `HTMLTextAreaElement`，可使用 `focus()`、`select()`、`set
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                    | 迁移说明                                                                        |
-| ---------- | ------ | ------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | fix           | reset、受控回滚、宽度/字体/旋转 autosize 同步           | 无 API 迁移                                                                     |
-| 2026-08-28 | 未发布 | accessibility | describedby 改为合并；counter 不再逐键 aria-live        | 若测试依赖 `aria-live="polite"`，应改为验证 describedby；业务重要阈值请单独播报 |
-| 2026-08-28 | 未发布 | behavior      | readOnly 增加独立 data-state 与 subtle 背景             | 原生提交/聚焦语义不变                                                           |
-| 2026-08-28 | 未发布 | docs          | 建立 TextArea V2 留存文档与 README 指针                 | 无                                                                              |
-| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 invalid/input/submit/hydration 证据 | 无                                                                              |
+| 日期       | 版本   | 类型          | 内容                                                     | 迁移说明                                                                        |
+| ---------- | ------ | ------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | fix           | reset、受控回滚、宽度/字体/旋转 autosize 同步            | 无 API 迁移                                                                     |
+| 2026-08-28 | 未发布 | accessibility | describedby 改为合并；counter 不再逐键 aria-live         | 若测试依赖 `aria-live="polite"`，应改为验证 describedby；业务重要阈值请单独播报 |
+| 2026-08-28 | 未发布 | behavior      | readOnly 增加独立 data-state 与 subtle 背景              | 原生提交/聚焦语义不变                                                           |
+| 2026-08-28 | 未发布 | docs          | 建立 TextArea V2 留存文档与 README 指针                  | 无                                                                              |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 invalid/input/submit/hydration 证据  | 无                                                                              |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级 | 无                                                                              |

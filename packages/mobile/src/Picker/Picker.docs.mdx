@@ -96,7 +96,7 @@ Picker ref 指向 panel 内根 div，PickerTrigger ref 指向原生 button。组
 
 ## 无障碍
 
-Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activedescendant 暴露当前 option。disabled、selected 和空列均有程序化状态。PickerTrigger 是原生 button，合并 Field 的 label、description 和 error。
+Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activedescendant 暴露当前 option。disabled、selected 和空列均有程序化状态。PickerTrigger 是原生 button，合并 Field 的 label、description 和 error，并原样保留调用方 `aria-invalid=false/grammar/spelling`；grammar/spelling 同时启用错误视觉，`status="error"` 或 Field 错误优先输出 `true`。token 只在 trigger 上，不复制到 popup。Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker 与 TreeSelect 的表单触发器均复用该契约。
 
 ## 动效
 
@@ -135,7 +135,7 @@ Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activ
 - Story interaction: `SingleColumn.play` 验证选择、确认、表单显示和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 12843 B / 49152 B 预算；最大单值 `Picker` 为 12152 B / 49152 B 预算，组合 Brotli 11328 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 13028 B / 49152 B 预算；最大单值 `Picker` 为 12152 B / 49152 B 预算，组合 Brotli 11490 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Picker.ssr.test.tsx`；真实 Next hydration 由隔离 H5 站覆盖基础路径
 - RTL: LongLabelsRTL Story 与 Portal unit
 - Reduced motion: ConfigProvider Portal unit；视觉时长待浏览器矩阵
@@ -155,7 +155,8 @@ Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activ
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                      | 迁移说明 |
-| ---------- | ------ | -------- | ----------------------------------------- | -------- |
-| 2026-08-29 | 未发布 | behavior | V2 键盘、动态数据、视觉兼容与 SSR 加固    | API 兼容 |
-| 2026-08-29 | 未发布 | docs     | 建立 Picker 与 PickerTrigger 共置永久文档 | 无       |
+| 日期       | 版本   | 类型     | 内容                                                    | 迁移说明 |
+| ---------- | ------ | -------- | ------------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | behavior | V2 键盘、动态数据、视觉兼容与 SSR 加固                  | API 兼容 |
+| 2026-08-29 | 未发布 | docs     | 建立 Picker 与 PickerTrigger 共置永久文档               | 无       |
+| 2026-08-29 | 未发布 | a11y     | Trigger 保留原生 invalid token，错误上下文优先输出 true | 无       |
