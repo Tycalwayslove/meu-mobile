@@ -423,6 +423,8 @@ export type CellProps = Omit<HTMLAttributes<CellRef>, "children" | "dangerouslyS
     download?: boolean | string;
     extra?: ReactNode;
     href?: string;
+    loading?: boolean;
+    loadingLabel?: string;
     onClick?: MouseEventHandler<CellRef>;
     prefix?: ReactNode;
     ref?: Ref<CellRef>;
@@ -1223,17 +1225,25 @@ export type MeuTheme = "light" | "dark" | "system";
 export function NavBar(input: NavBarProps): JSX.Element;
 
 // @public
-export type NavBarProps = Omit<ComponentProps<"header">, "children" | "title"> & {
+export type NavBarPosition = "static" | "sticky";
+
+// @public
+export type NavBarProps = Omit<ComponentProps<"header">, "children" | "dir" | "title"> & {
     backAriaLabel?: string;
+    backDisabled?: boolean;
     backHref?: string;
     backIcon?: ReactNode;
     backLabel?: ReactNode;
+    backLoading?: boolean;
     bordered?: boolean;
+    dir?: ComponentProps<"header">["dir"];
     left?: ReactNode;
     onBack?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
+    position?: NavBarPosition;
     ref?: Ref<HTMLElement>;
     right?: ReactNode;
     safeArea?: boolean;
+    scrolled?: boolean;
     title?: ReactNode;
 };
 

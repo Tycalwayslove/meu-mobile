@@ -17,7 +17,11 @@ storyIds:
     navigation-navbar--with-actions,
     navigation-navbar--borderless,
     navigation-navbar--safe-area,
+    navigation-navbar--sticky-scrolled,
+    navigation-navbar--loading-back,
     navigation-navbar--back-action,
+    navigation-navbar--router-adapter,
+    navigation-navbar--disabled-back,
     navigation-navbar--long-title-rtl
   ]
 source: packages/mobile/src/NavBar
@@ -27,117 +31,180 @@ source: packages/mobile/src/NavBar
 
 ## 当前能力
 
-普通文档流 header、视觉居中长标题、原生 back link/button、左右槽、可选底边与顶部 Safe Area；不绑定路由、history、fixed 或 sticky。
+- 移动页面 header，包含视觉居中的单行标题、原生返回 link/button 和左右业务槽。
+- 返回动作覆盖 enabled、disabled、loading；loading 阻止重复触发并提供 `aria-busy`。
+- `safeArea` 叠加 top/left/right device inset，覆盖竖屏顶部与横屏刘海边缘。
+- `position="sticky"` 与 `scrolled` 提供无监听的受控滚动表现，默认保持普通文档流。
+- 不读取 `window`、history 或路由上下文；支持 SSR、直接 hydration、RTL、forced colors、reduced motion 与 React 19 ref。
 
 ## 何时使用
 
-用于移动 H5 二级页面页头。backHref 适合真实导航，onBack-only 适合业务动作。
+用于移动 H5、PWA 或 Hybrid WebView 的二级页面页头。`backHref` 适合浏览器可理解的真实目标；`onBack` 单独使用时适合业务动作，与 `backHref` 同用时可取消默认导航并交给框架路由。
 
 ## 何时不要使用
 
-桌面站点全局导航、TabBar 一级入口或浏览器原生 chrome 不使用。需要吸顶时由页面布局容器负责 sticky 和占位。
+桌面全局导航、一级 TabBar、浏览器 chrome 不使用。需要组件自动监听滚动、修改 history、决定页面标题层级或管理滚动容器层级时，应由页面壳负责这些策略。
 
 ## 结构与状态
 
-`header → left(back? + slot) + title + right slot`。back 有 link/button、focus-visible、active；header 有 bordered/borderless 与 safe-area。
+`header → leading track(back + left) + title + trailing track(right)`。三列网格的两侧轨道等宽，左右内容不对称时标题仍以组件几何中心为基准。标题和 backLabel 单行省略；back 可收缩但保持至少 44×44 CSS px。
+
+back 状态为 hidden、default、disabled、loading。`backHref` 存在时 DOM 始终为 anchor；disabled/loading 移除 live `href`，保留 `role="link"`、`aria-disabled`、`tabIndex=-1` 和 anchor 身份。没有 href 时使用 native button，disabled/loading 使用 native `disabled`。
+
+`bordered=false && scrolled=true` 时恢复结构线。sticky 只使用 CSS `position: sticky; top: 0`，不读取滚动。
 
 ## 基础用法
 
 ```tsx
-<NavBar title={<h1>订单</h1>} backHref="/orders" right={<Button>帮助</Button>} />
+<NavBar title={<h1>订单</h1>} backHref="/orders" right={<Button>查看帮助</Button>} />
+```
+
+路由接管：
+
+```tsx
+<NavBar
+  title={<h1>订单详情</h1>}
+  backHref="/orders"
+  onBack={(event) => {
+    event.preventDefault();
+    router.push("/orders");
+  }}
+/>
+```
+
+受控滚动表现：
+
+```tsx
+<NavBar position="sticky" bordered={false} scrolled={hasScrolled} title="商品详情" />
 ```
 
 ## 受控与非受控
 
-不适用；NavBar 没有内部状态。
+NavBar 没有内部业务状态。`scrolled` 是完全受控的表现输入；调用方可用 IntersectionObserver 或自身 scroll store 提供，但组件不会建立监听。disabled/loading 同样由业务控制，组件只执行语义、视觉和重复触发约束。
 
 ## 表单集成
 
-back action 固定 type=button；左右业务控件遵守自身表单语义。NavBar 不提交值。
+无值提交。没有 href 的返回动作固定 `type="button"`，不会意外提交外层 form。左右槽中的控件遵守自身表单契约。
 
 ## Props
 
-backHref 非空时输出 anchor；没有 href 且有 onBack 时输出 button；两者都无则不伪造控件。safeArea 只增加 `env(safe-area-inset-top)` 内边距，不定位组件。title 是 ReactNode，不自动制造标题层级。
+类型签名由 API Extractor 生成；以下只记录跨字段约束：
+
+| Prop          | 默认值    | 跨字段契约                                                                                 |
+| ------------- | --------- | ------------------------------------------------------------------------------------------ |
+| title         | undefined | 字符串只提供视觉文本；页面主标题应传 `h1`，嵌套区块传真实 heading 层级。                   |
+| backHref      | undefined | 非空时保留 anchor 身份；enabled 才带 href，空字符串按未提供处理。                          |
+| onBack        | undefined | 只有 enabled 激活才调用；与 href 同用时可取消默认导航。                                    |
+| backDisabled  | false     | href 模式移除 href 并暴露 unavailable link；button 模式使用 native disabled。              |
+| backLoading   | false     | 优先于 disabled 显示 loading，设置 `aria-busy` 并阻止重复激活。                            |
+| backAriaLabel | locale    | `zh-CN` 默认“返回”，`en-US` 默认“Back”；可见 backLabel 不替代 accessible name。            |
+| dir           | config    | 原生 `ltr \| rtl \| auto`；显式 ltr/rtl 覆盖返回图标方向，auto 的图标沿用 ConfigProvider。 |
+| left / right  | undefined | 只负责槽位布局，不修改子元素语义、事件或触摸尺寸。                                         |
+| bordered      | true      | 常驻底部结构线；scrolled=true 可在 borderless 模式恢复结构线。                             |
+| position      | `static`  | `static \| sticky`；sticky 不安装监听器。                                                  |
+| scrolled      | false     | 受控表现状态，同时输出稳定 `data-scrolled`。                                               |
+| safeArea      | false     | 叠加 top/left/right CSS environment inset，不自动定位。                                    |
+| ref           | undefined | React 19 ref，指向真实 `HTMLElement` header。                                              |
+
+`backLoading && backDisabled` 时状态记为 loading。没有 `backHref` 和 `onBack` 时不渲染返回控件；仅传 disabled/loading 不会制造伪 action。原生 header 属性继续透传；显式 `dir="ltr"/"rtl"` 可覆盖返回图标方向，`dir="auto"` 仍原样透传给 header，图标方向沿用 ConfigProvider 的确定值。
 
 ## Events
 
-onBack 接收原生 click。anchor handler 可 preventDefault 取消导航；组件先交给浏览器事件模型，不调用 history.back。
+`onBack` 接收原生 React mouse event。enabled anchor 先遵循浏览器事件模型；业务路由必须显式 `preventDefault()`，否则 href 继续导航。Unavailable anchor 在 SSR markup 中已无 href，hydration 后 handler 仍会取消 pointer 或程序化 click、停止冒泡，且不通知业务。Native disabled button 不产生激活事件。
 
 ## Ref 与命令式方法
 
-ref 指向 header；无 back/focus 命令式 API。
+`ref.current` 是 header，可用于测量、定位或 IntersectionObserver 边界。组件不公开 `goBack()`、`focusBack()` 或 scroll 命令，避免绕过路由和 disabled/loading 契约。
 
 ## 键盘操作
 
-| 按键  | 行为                                  |
-| ----- | ------------------------------------- |
-| Tab   | 到达 back 与左右槽真实控件            |
-| Enter | 激活 back link/button                 |
-| Space | 激活 back button；link 遵守浏览器规则 |
+| 按键  | 行为                                                                      |
+| ----- | ------------------------------------------------------------------------- |
+| Tab   | 到达 enabled back 和左右槽真实控件；disabled/loading back 离开 Tab 顺序。 |
+| Enter | 激活 enabled link/button。                                                |
+| Space | 激活 enabled button；anchor 保持浏览器原生规则。                          |
 
 ## 触摸与手势
 
-默认 back 目标至少 44×44px；组件不处理边缘返回手势或滚动。
+内置 back 最小 44×44 CSS px。组件不接管系统边缘返回手势。左右槽业务 action 必须自行满足 44×44 目标。
 
 ## 无障碍
 
-header 提供 banner 语义；back 有本地化 aria-label，图标隐藏。页面主标题需要调用方传适当 h1–h6，避免组件猜测文档层级。
+- root 是原生 header。多个顶层 NavBar 应通过 `aria-label` / `aria-labelledby` 区分 banner landmark；嵌套工具栏可按文档结构传 `role="group"` 和名称。
+- `title="订单"` 不自动制造 heading；页面唯一主标题传 `<h1>`，不要为了视觉字号伪造层级。
+- back 是原生 anchor 或 button，图标子树 `aria-hidden`。Enabled、disabled、loading 同时通过 native/ARIA、颜色、背景和 data state 表达，不只改变透明度。
+- Unavailable href 从 server HTML 起就没有可导航 href，避免 hydration 前的导航窗口；恢复 enabled 后同一 anchor 获得 href，不替换 DOM 身份。
+- 焦点环使用 `:focus` 而非仅 `:focus-visible`，这是旧 WebView 外接键盘可见性的兼容取舍；pointer 用户在部分宿主也可能看到焦点环。
 
 ## 动效
 
-无动画，reduced-motion 不适用。
+back press 只使用 1px transform 和 Token 时长；边框滚动态使用同一短时过渡。loading ring 仅在任务进行时旋转。系统 `prefers-reduced-motion: reduce` 或显式 ConfigProvider `motion="reduced"` 都会停止 ring，并将可配置过渡压缩到静态/最短反馈；缺口与 `aria-busy` 继续表达状态。
 
 ## 主题与定制
 
-使用 surface/ink/border/accent/navbar-size Token；forced-colors 为 back 恢复边框。稳定入口为 bordered/safeArea/className/style/data 属性。
+稳定入口为 surface/ink/muted/subtle/border/accent、navbar size、motion 与 radius Token，以及 `bordered`、`safeArea`、`position`、`scrolled`、className、style、左右槽和 backIcon。Forced colors 下 header 使用 Canvas/CanvasText，返回控件恢复系统边框，disabled 使用 GrayText。内部 class 不是公开 API。
+
+稳定 data 属性：`data-meu-component`、`data-back-state`、`data-bordered`、`data-position`、`data-safe-area`、`data-scrolled`；back 自身输出 `data-state`。
 
 ## SSR 与 Next.js
 
-纯 props render，无 effect/browser API。可在 Next App Router Client 边界使用；路由 Link 由调用方在 left/right 组合，backHref 保持原生 anchor。
+实现是 props 到 DOM/CSS 的确定性渲染，不访问 browser API。可用于 Next App Router Client 边界；框架 Link/router 不会被内置绑定，使用 `backHref + onBack.preventDefault()` adapter。`NavBar.ssr.test.tsx` 覆盖 server 语义，`NavBar.hydration.test.tsx` 验证 server anchor 节点复用、无 hydration console error，且 hydration 后路由取消继续生效。
 
 ## RTL 与国际化
 
-三列网格与 padding 使用逻辑方向，默认 back chevron 通过 :dir(rtl) 镜像；名称支持中英文，业务标题自行本地化。
+三列网格和 padding 使用逻辑方向。返回图标方向由显式 `dir` 或 ConfigProvider resolved dir 驱动，不依赖 `:dir()`；因此 Chrome/WebView 70 可镜像，外层 RTL 中嵌套 `dir="ltr"` 也不会误翻转。自定义 backIcon 位于同一镜像容器。内置名称支持 zh-CN/en-US；业务标题和 backLabel 自行本地化。
 
 ## 浏览器与 WebView
 
-Safe Area 使用带 fallback 的 env；不支持时按 0px。旧内核不支持 :dir 时仅图标方向降级，link/button 与布局可用。
+完整支持矩阵为 Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chrome/WebView 70+ 与 iOS 13+ 仅用于构建产物旧语法静态扫描，不代表完整运行时承诺；Chromium/WebView 79–88 与 iOS 13–14 属观察档。Safe Area 使用带 0px fallback 的 `env()`；不支持时保持基础 padding。横向 inset 对应物理屏幕边缘，不随 RTL 交换。spinner 使用物理 `borderRightColor`，避免依赖逻辑 border color。sticky 是否生效取决于最近滚动祖先及其 overflow/transform，页面集成必须验证。
 
 ## 边界情况与已知限制
 
-极宽左右槽会压缩标题但保持两侧等宽轨道；业务应限制操作数量。backLabel 过长会 ellipsis。组件不判断外层是否已有 banner。
+- 极宽左右槽会压缩标题；移动页头应限制操作数量。三列布局不能同时保证无限标题宽度和无限操作数。
+- 标题和 backLabel 省略时 DOM 仍保留完整文本，但移动端没有 hover tooltip；关键区分信息应进入详情或更短标题。
+- unavailable href 保持 ARIA link 语义但不在 Tab 顺序中；若产品需要解释不可用原因，应在附近提供可读说明。
+- sticky 使用局部 `z-index: 1`，复杂页面壳需自行建立层级上下文，不能依赖 NavBar 覆盖 modal/toast。
+- 组件不判断外层是否已经存在 banner landmark 或 Safe Area。
 
 ## 性能预算
 
-无监听、测量或 effect，节点固定加 slots。
+无 effect、监听、测量或 layout read；滚动只改变受控 class。固定 DOM 加 slots，loading 仅增加一个 CSS ring。包构建和本地 bundle-size 生成器已在本轮通过，精确结果见下方自动维护的 Bundle 证据。
 
 ## 测试证据
 
-- Unit: 原生 back button/link、无伪交互、本地化、取消导航、safe-area、heading slot
-- Story interaction: `BackAction.play` 验证调用方收到返回动作；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3282 B / 32768 B 预算，组合 Brotli 2891 B；共享样式由应用单独导入一次。
-- SSR/hydration: `NavBar.ssr.test.tsx`；隔离 Next 16 App Router hydration 后返回按钮、标题与业务输出保持可用，0 hydration/runtime error
-- RTL: LongTitleRTL Story
-- Reduced motion: 无动画，不适用
-- Mobile Chromium/WebKit E2E: `uses native navigation actions, radio segments and read-only page dots` 在两种引擎激活原生返回按钮并验证业务输出
-- Chromatic Light/Dark: 待建立
-- Real device: 待补 Safe Area 真机
+- 本轮 Unit/SSR/hydration：3 files / 13 tests 通过；覆盖原生 link/button、取消导航、disabled/loading、不可用 link 阻止冒泡、稳定 anchor 身份、localized name、heading、sticky/scrolled、React 19 ref、ConfigProvider RTL/嵌套 LTR/原生 dir=auto、显式 reduced motion、SSR 与 `onRecoverableError=[]` 的真实 hydrateRoot。
+- Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play 源码；本轮未构建/执行全量 Storybook runner。
+- Storybook 浏览器矩阵：仓库记录有 374×7 历史基线，但早于本轮 4 个新增 Story，不能作为本轮视觉或 axe 证据。
+- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`uses native navigation actions, radio segments and read-only page dots` 在 Chromium/WebKit 均通过，批次整页 Light/Dark axe WCAG A/AA 也通过。新增 loading/sticky 视觉仍留待最终 Storybook 矩阵。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3900 B / 32768 B 预算，组合 Brotli 3434 B；共享样式由应用单独导入一次。
+- SSR/hydration：共置 SSR 与 direct hydration 测试本轮通过。
+- RTL：unit 覆盖 config RTL 与 nested LTR override；LongTitleRTL Story 待视觉审批。
+- Reduced motion：系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 覆盖显式策略，真实浏览器视觉留到最终矩阵。
+- Mobile Chromium/WebKit E2E：本轮 NavBar 原生返回动作在两种引擎均通过；disabled/loading 与 sticky 的精细表现由共置测试和最终视觉矩阵分别负责。
+- Chromatic Light/Dark：未执行，本轮禁止。
+- Real device：待补 iOS Safari/VoiceOver、Android Chrome/TalkBack、横屏刘海与 200% 字号。
 
 ## V2 优化记录
 
 ### 待优化
 
-补真机安全区、嵌套 landmark、长标题视觉和路由适配示例；基础返回路径已进入双引擎门禁。
+- 新增 Story 的 Light/Dark、RTL、forced colors、reduced motion、200% 字号视觉审批与 axe 矩阵。
+- iOS/Android 真机 Safe Area、loading/disabled announcement 和嵌套滚动 sticky 层级。
+- 实际 Next/React Router adapter；共享 Storybook index、component manifest、API 与 bundle-size 清单由整合流程刷新。
 
 ### 已完成
 
-新增显式 safeArea，固化返回取消、标题层级边界、RTL、forced-colors 与 SSR；补隔离 Next H5 返回与 hydration 证据。
+- [P1] back disabled/loading 与 hydration 前无 live href，阻止异步重复触发。
+- [P2] Safe Area 从 top 扩展到 left/right；增加无监听的 position/scrolled API。
+- [P2] 增加 direct hydration、SSR、ref、路由取消和稳定 DOM 身份测试。
+- [P3] RTL 从祖先 selector 改为 ConfigProvider/显式 dir 驱动，覆盖 nested LTR override。
+- 保留原有等宽侧轨、44px target、route-agnostic handler、原生 landmark 与 Token 主题。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                   | 迁移说明                   |
-| ---------- | ------ | ------------ | -------------------------------------- | -------------------------- |
-| 2026-08-29 | 未发布 | feature      | 增加 safeArea 并完成 V2 语义/RTL 加固  | 默认 false，不改变现有布局 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎返回/hydration 证据 | 无                         |
+| 日期       | 版本   | 类型           | 内容                                                               | 迁移说明                                                |
+| ---------- | ------ | -------------- | ------------------------------------------------------------------ | ------------------------------------------------------- |
+| 2026-08-29 | 未发布 | implementation | 增加 back disabled/loading、受控 sticky/scrolled、横向 Safe Area。 | unavailable href 暂时移除 href，但保持同一 anchor DOM。 |
+| 2026-08-29 | 未发布 | accessibility  | 增加 forced colors、reduced motion 与 config/prop 驱动 RTL。       | nested dir 现在按最近显式配置解析。                     |
+| 2026-08-29 | 未发布 | verification   | 增加 ref、状态、路由取消、SSR 与 direct hydration 共置证据。       | 历史全量矩阵需在冻结候选统一刷新。                      |
+| 2026-08-29 | 未发布 | feature        | 初版 safeArea、原生返回语义与 route-agnostic API。                 | 默认普通文档流。                                        |

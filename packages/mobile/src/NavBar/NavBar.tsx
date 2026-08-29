@@ -1,12 +1,14 @@
 "use client";
 
 import { MeuIconChevronLeft } from "@meu/icons-react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import {
   back,
   backIcon as backIconStyle,
   backLabel as backLabelStyle,
+  backSpinner,
   leftContent,
   leftSide,
   rightSide,
@@ -23,30 +25,48 @@ import type { NavBarProps } from "./types";
  */
 export function NavBar({
   backAriaLabel,
+  backDisabled = false,
   backHref,
   backIcon,
   backLabel,
+  backLoading = false,
   bordered = true,
   className,
+  dir,
   left,
   onBack,
+  position = "static",
   ref,
   right,
   safeArea = false,
+  scrolled = false,
   title,
   ...props
 }: NavBarProps) {
-  const { locale } = useMeuConfig();
+  const { dir: configuredDir, locale, motion } = useMeuConfig();
+  const resolvedDir = dir === "ltr" || dir === "rtl" ? dir : configuredDir;
   const resolvedBackLabel = backAriaLabel || (locale === "en-US" ? "Back" : "返回");
   const resolvedBackIcon =
     backIcon !== undefined ? backIcon : <MeuIconChevronLeft size={22} strokeWidth={2} />;
   const showBack = Boolean(backHref) || Boolean(onBack);
-  const classes = root({ bordered, safeArea });
+  const backUnavailable = backDisabled || backLoading;
+  const backState = backLoading ? "loading" : backDisabled ? "disabled" : "default";
+  const classes = root({ bordered, position, safeArea, scrolled });
+  const backClasses = back({ disabled: backUnavailable });
+
+  function handleBack(event: ReactMouseEvent<HTMLAnchorElement | HTMLButtonElement>) {
+    if (backUnavailable) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    if (onBack) onBack(event);
+  }
 
   const backContent = (
     <>
-      <span className={backIconStyle} aria-hidden="true">
-        {resolvedBackIcon}
+      <span className={backIconStyle({ direction: resolvedDir })} aria-hidden="true">
+        {backLoading ? <span className={backSpinner({ motion })} /> : resolvedBackIcon}
       </span>
       {backLabel !== undefined && backLabel !== null ? (
         <span className={backLabelStyle}>{backLabel}</span>
@@ -59,18 +79,41 @@ export function NavBar({
       {...props}
       ref={ref}
       className={className ? `${classes} ${className}` : classes}
+      dir={dir}
       data-meu-component="nav-bar"
+      data-back-state={showBack ? backState : "hidden"}
       data-bordered={bordered ? "true" : "false"}
+      data-position={position}
       data-safe-area={safeArea ? "true" : "false"}
+      data-scrolled={scrolled ? "true" : "false"}
     >
       <div className={`${side} ${leftSide}`}>
         {showBack ? (
           backHref ? (
-            <a className={back} href={backHref} aria-label={resolvedBackLabel} onClick={onBack}>
+            // eslint-disable-next-line jsx-a11y/anchor-is-valid -- Unavailable links intentionally keep anchor identity while SSR omits href.
+            <a
+              className={backClasses}
+              href={backUnavailable ? undefined : backHref}
+              role={backUnavailable ? "link" : undefined}
+              aria-busy={backLoading || undefined}
+              aria-disabled={backUnavailable || undefined}
+              aria-label={resolvedBackLabel}
+              data-state={backState}
+              onClick={handleBack}
+              tabIndex={backUnavailable ? -1 : undefined}
+            >
               {backContent}
             </a>
           ) : (
-            <button className={back} type="button" aria-label={resolvedBackLabel} onClick={onBack}>
+            <button
+              className={backClasses}
+              type="button"
+              disabled={backUnavailable}
+              aria-busy={backLoading || undefined}
+              aria-label={resolvedBackLabel}
+              data-state={backState}
+              onClick={handleBack}
+            >
               {backContent}
             </button>
           )

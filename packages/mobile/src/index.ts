@@ -110,7 +110,7 @@ export type { CardPadding, CardProps, CardVariant } from "./Card";
 export { Collapse } from "./Collapse";
 export type { CollapseArrow, CollapseItem, CollapseProps, CollapseVariant } from "./Collapse";
 export { NavBar } from "./NavBar";
-export type { NavBarProps } from "./NavBar";
+export type { NavBarPosition, NavBarProps } from "./NavBar";
 export { IndexList } from "./IndexList";
 export type {
   IndexListChangeDetails,

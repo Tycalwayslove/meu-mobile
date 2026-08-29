@@ -8,7 +8,13 @@ export const root = style({
   color: "var(--meu-color-muted)",
   background: "var(--meu-color-surface)",
   borderTop: "1px solid var(--meu-color-border)",
-  fontFamily: "var(--meu-font-ui)"
+  fontFamily: "var(--meu-font-ui)",
+  selectors: {
+    "&[data-safe-area='true']": {
+      paddingLeft: [0, "env(safe-area-inset-left, 0px)"],
+      paddingRight: [0, "env(safe-area-inset-right, 0px)"]
+    }
+  }
 });
 
 export const items = style({
@@ -38,21 +44,40 @@ export const item = recipe({
     font: "inherit",
     textDecoration: "none",
     cursor: "pointer",
+    touchAction: "manipulation",
+    userSelect: "none",
     WebkitTapHighlightColor: "transparent",
-    transition: "color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+    transition: [
+      "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+      "color var(--meu-motion-exit) var(--meu-motion-ease-standard)"
+    ].join(", "),
     selectors: {
       "&:focus": {
         zIndex: 1,
         outline: "2px solid var(--meu-color-accent)",
         outlineOffset: -3
       },
-      "&:active": { background: "var(--meu-color-subtle)" }
+      "&:not(:disabled):not([aria-disabled='true']):active": {
+        background: "var(--meu-color-subtle)"
+      }
     },
     "@media": {
       "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
-      "(forced-colors: active)": { color: "LinkText", border: "1px solid ButtonText" },
+      "(hover: hover)": {
+        selectors: {
+          "&:not(:disabled):not([aria-disabled='true']):hover": {
+            color: "var(--meu-color-ink)",
+            background: "var(--meu-color-subtle)"
+          }
+        }
+      },
+      "(forced-colors: active)": {
+        color: "ButtonText",
+        border: "1px solid ButtonText",
+        forcedColorAdjust: "auto"
+      },
       "(orientation: landscape) and (max-height: 500px)": {
-        minHeight: 44,
+        minHeight: 48,
         paddingTop: 2,
         paddingBottom: 2
       }
@@ -62,21 +87,50 @@ export const item = recipe({
     active: {
       true: {
         color: "var(--meu-color-accent)",
-        "@media": { "(forced-colors: active)": { color: "Highlight" } }
+        "@media": {
+          "(forced-colors: active)": {
+            color: "HighlightText",
+            background: "Highlight",
+            borderColor: "Highlight"
+          }
+        }
       },
       false: {}
     },
     disabled: {
       true: {
         color: "var(--meu-color-muted)",
+        background: "var(--meu-color-subtle)",
         cursor: "not-allowed",
-        opacity: 0.5,
-        pointerEvents: "none"
+        opacity: 0.65,
+        "@media": {
+          "(forced-colors: active)": {
+            color: "GrayText",
+            background: "Canvas",
+            borderColor: "GrayText",
+            opacity: 1
+          }
+        }
       },
       false: {}
+    },
+    kind: {
+      link: {
+        "@media": {
+          "(forced-colors: active)": {
+            selectors: {
+              "&:not([aria-current='page']):not([aria-disabled='true'])": {
+                color: "LinkText",
+                borderColor: "LinkText"
+              }
+            }
+          }
+        }
+      },
+      button: {}
     }
   },
-  defaultVariants: { active: false, disabled: false }
+  defaultVariants: { active: false, disabled: false, kind: "button" }
 });
 
 export const icon = style({

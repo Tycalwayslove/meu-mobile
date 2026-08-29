@@ -37,7 +37,11 @@ export type CellProps = Omit<
   extra?: ReactNode;
   /** Non-empty navigation target; causes Cell to render a native anchor. */
   href?: string;
-  /** Activates an action Cell and receives its rendered anchor or button; disabled Cells suppress it. */
+  /** Marks the row busy, shows an end-aligned progress indicator, and suppresses activation. */
+  loading?: boolean;
+  /** Accessible status announced while loading. Defaults to the nearest Meu locale; an empty string disables the internal live region. */
+  loadingLabel?: string;
+  /** Activates an action Cell and receives its rendered anchor or button; disabled/loading Cells suppress it. */
   onClick?: MouseEventHandler<CellRef>;
   /** Leading decorative or semantic content. Do not nest controls when the row is interactive. */
   prefix?: ReactNode;

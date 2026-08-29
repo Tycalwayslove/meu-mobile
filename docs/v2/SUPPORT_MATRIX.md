@@ -2,23 +2,23 @@
 
 ## 首发决定
 
-V2 Web 首发支持 React 19 与 Next.js 16 App Router。组件包不依赖 Next.js 运行时，但 Next H5 是首要消费形态；当前隔离消费者、官网与真实 MeuMall H5 开发版本均处于这一代际。
+V2 Web 首发支持 React 19 与 Next.js 16 App Router。组件包不依赖 Next.js 运行时，但 Next H5 是首要消费形态；官网与隔离消费者已按下表精确验证。现有 MeuMall H5 只观察到 React 19 / Next 16 版本线，本项目按约定不接入其真实链路，因此它不构成 V2 消费兼容证据。
 
 React 18、Next.js 14–15、Pages Router 和直接运行于 uni-app 的能力不在 V2 首发支持范围。它们可能在部分场景工作，但在建立独立消费者、类型、SSR、hydration、浏览器和表单矩阵前，不作兼容承诺，也不允许只放宽 peerDependencies 来宣称支持。
 
 ## 版本范围
 
-| 层级            | 支持范围             | 当前验证版本                      | 说明                                                                     |
-| --------------- | -------------------- | --------------------------------- | ------------------------------------------------------------------------ |
-| React           | `>=19.0.0 <20.0.0`   | 19.2.8                            | 所有 React 包的公共 peer 边界                                            |
-| React DOM       | `>=19.0.0 <20.0.0`   | 19.2.8                            | Portal、flushSync 与 DOM refs 的运行时 peer                              |
-| Next.js         | 16.x App Router      | 16.3.3                            | 官网与隔离 Next H5 production build、SSR、hydration、Chromium/WebKit E2E |
-| React Hook Form | `>=7.55.0 <8.0.0`    | 7.86.0                            | 仅 `@meu/form-react` 需要                                                |
-| Zod             | `>=4.0.0 <5.0.0`     | 4.4.3                             | 可选 schema 入口；也支持 Standard Schema 兼容验证器                      |
-| Node.js         | `>=20.19.0`          | 由本地/CI记录                     | 仅构建、测试和 Next 工具链；浏览器组件运行时不依赖 Node                  |
-| pnpm            | 10.19.0              | 10.19.0                           | 私有 monorepo 与 workspace 消费                                          |
-| iOS Web         | Safari/WKWebView 15+ | 自动化 WebKit已通过；真机待签字   | iOS 13–14 为观察档                                                       |
-| Android Web     | Chrome/WebView 89+   | 自动化 Chromium已通过；真机待签字 | Chromium/WebView 79–88 为观察档                                          |
+| 层级            | 支持范围             | 当前验证版本                               | 说明                                                                     |
+| --------------- | -------------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
+| React           | `>=19.0.0 <20.0.0`   | 19.2.8                                     | 所有 React 包的公共 peer 边界                                            |
+| React DOM       | `>=19.0.0 <20.0.0`   | 19.2.8                                     | Portal、flushSync 与 DOM refs 的运行时 peer                              |
+| Next.js         | 16.x App Router      | 16.3.3                                     | 官网与隔离 Next H5 production build、SSR、hydration、Chromium/WebKit E2E |
+| React Hook Form | `>=7.55.0 <8.0.0`    | 7.86.0                                     | 仅 `@meu/form-react` 需要                                                |
+| Zod             | `>=4.0.0 <5.0.0`     | 4.4.3                                      | 可选 schema 入口；也支持 Standard Schema 兼容验证器                      |
+| Node.js         | `>=20.19.0`          | 由本地/CI记录                              | 仅构建、测试和 Next 工具链；浏览器组件运行时不依赖 Node                  |
+| pnpm            | 10.19.0              | 10.19.0                                    | 私有 monorepo 与 workspace 消费                                          |
+| iOS Web         | Safari/WKWebView 15+ | 隔离 Next H5 WebKit 定向通过；真机待签字   | iOS 13–14 为观察档；完整套件候选冻结后统一复验                           |
+| Android Web     | Chrome/WebView 89+   | 隔离 Next H5 Chromium 定向通过；真机待签字 | Chromium/WebView 79–88 为观察档；完整套件候选冻结后统一复验              |
 
 `pnpm support:check` 会校验运行时包 peer、私有发布边界、官网和隔离消费者的精确验证版本，以及已安装 Next、React Hook Form 与 Zod 的兼容声明。该检查进入 `pnpm check`，版本变化必须连同本文件、消费者证据和相关组件留存文档一起提交。
 

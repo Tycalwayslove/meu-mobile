@@ -1,8 +1,10 @@
 "use client";
 
 import { MeuIconChevronLeft } from "@meu/icons-react";
+import { VisuallyHidden } from "@meu/primitives-react";
 import type { MouseEvent, Ref } from "react";
 
+import { useMeuConfig } from "../ConfigProvider";
 import {
   arrow as arrowStyle,
   cellFrame,
@@ -11,8 +13,10 @@ import {
   description as descriptionStyle,
   divider as dividerStyle,
   extra as extraStyle,
+  loadingIndicator,
   prefix as prefixStyle,
   row,
+  spinner,
   suffix as suffixStyle,
   title as titleStyle
 } from "./List.css";
@@ -33,6 +37,8 @@ export function Cell({
   download,
   extra,
   href,
+  loading = false,
+  loadingLabel: loadingLabelProp,
   onClick,
   prefix,
   ref,
@@ -43,16 +49,27 @@ export function Cell({
   type = "button",
   ...props
 }: CellProps) {
+  const config = useMeuConfig();
   const listContext = useListContext();
+  const resolvedDir = props.dir === "ltr" || props.dir === "rtl" ? props.dir : config.dir;
   const hasHref = Boolean(href);
   const interactive = Boolean(hasHref || clickable || onClick);
-  const showDefaultArrow = arrow === undefined && interactive;
-  const classes = row({ disabled, interactive });
+  const unavailable = disabled || loading;
+  const showDefaultArrow = arrow === undefined && interactive && !loading;
+  const classes = row({ disabled: disabled || (loading && interactive), interactive });
   const resolvedClasses = className ? `${classes} ${className}` : classes;
-  const arrowNode = showDefaultArrow ? (
-    <MeuIconChevronLeft className={defaultArrowIcon} size={18} strokeWidth={2} />
-  ) : arrow === true ? (
-    <MeuIconChevronLeft className={defaultArrowIcon} size={18} strokeWidth={2} />
+  const loadingLabel =
+    loadingLabelProp !== undefined
+      ? loadingLabelProp
+      : config.locale === "en-US"
+        ? "Loading"
+        : "正在加载";
+  const arrowNode = loading ? null : showDefaultArrow || arrow === true ? (
+    <MeuIconChevronLeft
+      className={defaultArrowIcon({ direction: resolvedDir })}
+      size={18}
+      strokeWidth={2}
+    />
   ) : (
     arrow || null
   );
@@ -72,6 +89,11 @@ export function Cell({
       {suffix !== undefined && suffix !== null ? (
         <span className={suffixStyle}>{suffix}</span>
       ) : null}
+      {loading ? (
+        <span className={loadingIndicator} aria-hidden="true">
+          <span className={spinner({ motion: config.motion })} />
+        </span>
+      ) : null}
       {arrowNode ? (
         <span className={arrowStyle} aria-hidden="true">
           {arrowNode}
@@ -80,7 +102,7 @@ export function Cell({
     </>
   );
 
-  function handleDisabledLink(event: MouseEvent<HTMLAnchorElement>) {
+  function handleUnavailableLink(event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
     event.stopPropagation();
   }
@@ -92,15 +114,17 @@ export function Cell({
         {...props}
         ref={ref as Ref<HTMLAnchorElement>}
         className={resolvedClasses}
-        href={disabled ? undefined : href}
+        href={unavailable ? undefined : href}
+        role={unavailable ? "link" : props.role}
         target={target}
         rel={rel}
         download={download}
-        tabIndex={disabled ? -1 : props.tabIndex}
-        aria-disabled={disabled || undefined}
-        onClick={disabled ? handleDisabledLink : onClick}
+        tabIndex={unavailable ? -1 : props.tabIndex}
+        aria-busy={loading ? true : props["aria-busy"]}
+        aria-disabled={unavailable || undefined}
+        onClick={unavailable ? handleUnavailableLink : onClick}
         data-meu-component="cell"
-        data-state={disabled ? "disabled" : "interactive"}
+        data-state={loading ? "loading" : disabled ? "disabled" : "interactive"}
       >
         {cellContent}
       </a>
@@ -112,10 +136,11 @@ export function Cell({
         ref={ref as Ref<HTMLButtonElement>}
         className={resolvedClasses}
         type={type}
-        disabled={disabled}
+        disabled={unavailable}
+        aria-busy={loading ? true : props["aria-busy"]}
         onClick={onClick}
         data-meu-component="cell"
-        data-state={disabled ? "disabled" : "interactive"}
+        data-state={loading ? "loading" : disabled ? "disabled" : "interactive"}
       >
         {cellContent}
       </button>
@@ -127,8 +152,9 @@ export function Cell({
         ref={ref as Ref<HTMLDivElement>}
         className={resolvedClasses}
         aria-disabled={disabled || undefined}
+        aria-busy={loading ? true : props["aria-busy"]}
         data-meu-component="cell"
-        data-state={disabled ? "disabled" : "static"}
+        data-state={loading ? "loading" : disabled ? "disabled" : "static"}
       >
         {cellContent}
       </div>
@@ -138,6 +164,11 @@ export function Cell({
   return (
     <div className={cellFrame} role={listContext.insideList ? "listitem" : undefined}>
       {rowNode}
+      {loading && loadingLabel ? (
+        <VisuallyHidden role="status" aria-atomic="true" aria-live="polite">
+          {loadingLabel}
+        </VisuallyHidden>
+      ) : null}
       {listContext.insideList && listContext.divider !== "none" ? (
         <span
           className={dividerStyle({

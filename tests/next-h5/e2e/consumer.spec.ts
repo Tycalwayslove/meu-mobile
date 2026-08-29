@@ -847,7 +847,8 @@ test("snaps a non-modal floating panel and returns content to native scrolling",
 test("keeps Cell actions, links and List semantics native", async ({ page }) => {
   const list = page.getByRole("list", { name: "店铺入口" });
   await expect(list).toBeVisible();
-  await expect(list.getByRole("listitem")).toHaveCount(4);
+  await expect(list).toHaveAttribute("aria-describedby", "shop-entry-help");
+  await expect(list.getByRole("listitem")).toHaveCount(5);
 
   const action = list.getByRole("button", { name: /商品搜索/ });
   await action.click();
@@ -855,6 +856,18 @@ test("keeps Cell actions, links and List semantics native", async ({ page }) => 
 
   await expect(list.getByRole("link", { name: /订单中心/ })).toHaveAttribute("href", "#orders");
   await expect(list.getByRole("button", { name: "停用店铺" })).toBeDisabled();
+
+  const loadingAction = list.getByRole("button", { name: /同步库存/ });
+  await expect(loadingAction).toBeDisabled();
+  await expect(loadingAction).toHaveAttribute("aria-busy", "true");
+  const loadingStatus = list.locator('[role="status"]');
+  await expect(loadingStatus).toContainText("正在同步库存");
+  await expect(loadingAction.locator('[role="status"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "完成库存同步" }).click();
+  await expect(loadingAction).toBeEnabled();
+  await expect(loadingAction).not.toHaveAttribute("aria-busy");
+  await loadingAction.click();
+  await expect(page.getByText("已打开库存同步")).toBeVisible();
 });
 
 test("renders atomic display components with native actions and fallbacks", async ({ page }) => {
@@ -926,11 +939,18 @@ test("connects tab panels, primary navigation and read-only progress semantics",
   const overview = tabList.getByRole("tab", { name: "概览" });
   const settings = tabList.getByRole("tab", { name: "设置" });
   await expect(overview).toHaveAttribute("aria-selected", "true");
+  await expect(tabList).toHaveAttribute("data-overflow-right", "true");
   await overview.focus();
   await page.keyboard.press("ArrowRight");
   await expect(settings).toBeFocused();
   await expect(settings).toHaveAttribute("aria-selected", "true");
   await expect(section.getByRole("tabpanel", { name: "设置" })).toContainText("订单设置");
+
+  await section.getByRole("button", { name: "外部切换售后" }).click();
+  const afterSales = tabList.getByRole("tab", { name: "售后服务" });
+  await expect(afterSales).toHaveAttribute("aria-selected", "true");
+  await expect(afterSales).toHaveAttribute("tabindex", "0");
+  await expect(section.getByRole("tabpanel", { name: "售后服务" })).toContainText("订单售后服务");
 
   const progress = section.getByRole("list", { name: "进度" });
   await expect(progress.locator("li")).toHaveCount(3);

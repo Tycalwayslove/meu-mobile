@@ -3724,7 +3724,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ arrow, className, clickable, description, disabled, download, extra, href, onClick, prefix, ref, rel, suffix, target, title, type, ...props }",
+              "parameterName": "{ arrow, className, clickable, description, disabled, download, extra, href, loading, loadingLabel: loadingLabelProp, onClick, prefix, ref, rel, suffix, target, title, type, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -3803,7 +3803,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    href?: string;\n    onClick?: "
+              "text": ";\n    href?: string;\n    loading?: boolean;\n    loadingLabel?: string;\n    onClick?: "
             },
             {
               "kind": "Reference",
@@ -10494,7 +10494,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, children, className, divider, footer, header, mode, ref, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, \"aria-describedby\": ariaDescribedBy, children, className, divider, footer, header, mode, ref, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -11023,7 +11023,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ backAriaLabel, backHref, backIcon, backLabel, bordered, className, left, onBack, ref, right, safeArea, title, ...props }",
+              "parameterName": "{ backAriaLabel, backDisabled, backHref, backIcon, backLabel, backLoading, bordered, className, dir, left, onBack, position, ref, right, safeArea, scrolled, title, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -11040,6 +11040,32 @@
             }
           ],
           "name": "NavBar"
+        },
+        {
+          "kind": "TypeAlias",
+          "canonicalReference": "@meu/mobile!NavBarPosition:type",
+          "docComment": "/**\n * Layout mode applied to the page header.\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export type NavBarPosition = "
+            },
+            {
+              "kind": "Content",
+              "text": "\"static\" | \"sticky\""
+            },
+            {
+              "kind": "Content",
+              "text": ";"
+            }
+          ],
+          "fileUrlPath": "src/NavBar/types.ts",
+          "releaseTag": "Public",
+          "name": "NavBarPosition",
+          "typeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         },
         {
           "kind": "TypeAlias",
@@ -11066,7 +11092,7 @@
             },
             {
               "kind": "Content",
-              "text": "<\"header\">, \"children\" | \"title\"> & {\n    backAriaLabel?: string;\n    backHref?: string;\n    backIcon?: "
+              "text": "<\"header\">, \"children\" | \"dir\" | \"title\"> & {\n    backAriaLabel?: string;\n    backDisabled?: boolean;\n    backHref?: string;\n    backIcon?: "
             },
             {
               "kind": "Reference",
@@ -11084,7 +11110,16 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    bordered?: boolean;\n    left?: "
+              "text": ";\n    backLoading?: boolean;\n    bordered?: boolean;\n    dir?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "ComponentProps",
+              "canonicalReference": "@types/react!React.ComponentProps:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<\"header\">[\"dir\"];\n    left?: "
             },
             {
               "kind": "Reference",
@@ -11120,7 +11155,16 @@
             },
             {
               "kind": "Content",
-              "text": ">;\n    ref?: "
+              "text": ">;\n    position?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "NavBarPosition",
+              "canonicalReference": "@meu/mobile!NavBarPosition:type"
+            },
+            {
+              "kind": "Content",
+              "text": ";\n    ref?: "
             },
             {
               "kind": "Reference",
@@ -11147,7 +11191,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n    safeArea?: boolean;\n    title?: "
+              "text": ";\n    safeArea?: boolean;\n    scrolled?: boolean;\n    title?: "
             },
             {
               "kind": "Reference",
@@ -11168,7 +11212,7 @@
           "name": "NavBarProps",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 25
+            "endIndex": 29
           }
         },
         {
@@ -19378,7 +19422,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ \"aria-label\": ariaLabel, className, defaultValue, items, onChange, ref, safeArea, value, ...props }",
+              "parameterName": "{ \"aria-label\": ariaLabel, \"aria-labelledby\": ariaLabelledBy, className, defaultValue, items, onBlurCapture, onChange, onFocusCapture, ref, safeArea, value, ...props }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0

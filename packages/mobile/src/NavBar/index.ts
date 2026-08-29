@@ -1,2 +1,2 @@
 export { NavBar } from "./NavBar";
-export type { NavBarProps } from "./types";
+export type { NavBarPosition, NavBarProps } from "./types";

@@ -2,6 +2,7 @@ import { MeuIconCheck, MeuIconSearch } from "@meu/icons-react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Cell } from "./Cell";
 import { List } from "./List";
 
@@ -63,17 +64,51 @@ export const NoDividers: Story = {
     </List>
   )
 };
+export const Loading: Story = {
+  render: () => (
+    <List header="同步状态" footer="加载期间会阻止重复操作" mode="card">
+      <Cell
+        title="提交订单"
+        description="正在校验库存"
+        loading
+        loadingLabel="正在提交订单"
+        onClick={() => undefined}
+      />
+      <Cell title="打开物流详情" href="#delivery" loading loadingLabel="正在打开物流详情" />
+      <Cell title="账户余额" extra="读取中" loading loadingLabel="正在读取账户余额" />
+    </List>
+  ),
+  play: ({ canvasElement }) => {
+    const loadingButton = canvasElement.querySelector<HTMLButtonElement>(
+      "button[aria-busy='true']"
+    );
+    if (!loadingButton || !loadingButton.disabled) {
+      throw new window.Error("Expected the loading action Cell to be a disabled busy button");
+    }
+    const loadingLink = canvasElement.querySelector<HTMLAnchorElement>("a[aria-busy='true']");
+    if (!loadingLink || loadingLink.hasAttribute("href") || loadingLink.tabIndex !== -1) {
+      throw new window.Error(
+        "Expected the loading navigation Cell to remain an unavailable anchor"
+      );
+    }
+    if (canvasElement.querySelectorAll("[role='status']").length !== 3) {
+      throw new window.Error("Expected every loading Cell to expose a status");
+    }
+  }
+};
 export const LongContentAndRTL: Story = {
   render: () => (
-    <div dir="rtl" style={{ width: 320 }}>
-      <List header="إعدادات الحساب ذات العنوان الطويل" mode="card">
-        <Cell
-          title="عنوان طويل يلتف دون إخفاء الإجراء الأصلي"
-          description="وصف طويل لا يعتمد على اتجاه يسار أو يمين ثابت"
-          extra="قيمة طويلة قابلة للالتفاف"
-          href="#details"
-        />
-      </List>
-    </div>
+    <ConfigProvider dir="rtl">
+      <div style={{ width: 320 }}>
+        <List header="إعدادات الحساب ذات العنوان الطويل" mode="card">
+          <Cell
+            title="عنوان طويل يلتف دون إخفاء الإجراء الأصلي"
+            description="وصف طويل لا يعتمد على اتجاه يسار أو يمين ثابت"
+            extra="قيمة طويلة قابلة للالتفاف"
+            href="#details"
+          />
+        </List>
+      </div>
+    </ConfigProvider>
   )
 };

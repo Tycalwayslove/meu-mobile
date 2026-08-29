@@ -15,6 +15,7 @@ storyIds:
   [
     navigation-tabs--stretched,
     navigation-tabs--scrollable,
+    navigation-tabs--overflow-and-disabled,
     navigation-tabs--manual-activation,
     navigation-tabs--lazy-panels,
     navigation-tabs--keyboard-interaction,
@@ -27,7 +28,7 @@ source: packages/mobile/src/Tabs
 
 ## 当前能力
 
-完整 APG tablist/tab/tabpanel，支持 automatic/manual 激活、禁用跳过、Arrow/Home/End、RTL、滚动入视、受控/非受控及三种 panel 挂载策略。
+完整 APG tablist/tab/tabpanel，支持 automatic/manual 激活、禁用跳过、Arrow/Home/End、RTL、滚动入视与双边溢出提示、受控/非受控及三种 panel 挂载策略。
 
 ## 何时使用
 
@@ -49,7 +50,7 @@ source: packages/mobile/src/Tabs
 
 ## 受控与非受控
 
-传 `value`（含 null）即受控；否则从有效 `defaultValue` 或首个 enabled item 初始化。无效或禁用的受控值不选择 panel，但首个 enabled tab 仍保留 roving focus。非受控当前项被删除或禁用时会永久归一到首个 enabled item。
+传 `value`（含 null）即受控；否则从有效 `defaultValue` 或首个 enabled item 初始化。无效或禁用的受控值不选择 panel，但首个 enabled tab 仍保留 roving focus。外部改变受控值且焦点不在 tablist 内时，新选中项成为下一次 Tab 进入点；manual 模式在列表内移动焦点时，焦点项可暂时与选中项不同。非受控当前项被删除或禁用时会永久归一到首个 enabled item。组件挂载后不要在受控与非受控模式之间切换。
 
 ## 表单集成
 
@@ -57,15 +58,28 @@ source: packages/mobile/src/Tabs
 
 ## Props
 
-`lazy=false,destroyInactive=false` 默认挂载并保留全部 panel。`lazy=true` 首次激活才挂载并随后保留；`destroyInactive=true` 每次离开都卸载，优先级最高并丢弃内部状态。
+| Prop              | 类型                   | 默认值        | 契约                                                                   |
+| ----------------- | ---------------------- | ------------- | ---------------------------------------------------------------------- |
+| `items`           | `readonly TabsItem[]`  | 必填          | 有序项；`key` 必须唯一、稳定，支持任意字符串；`disabled` 不可激活/聚焦 |
+| `value`           | `string \| null`       | `undefined`   | 受控 active key；`null`、无效或 disabled key 表示无选中项              |
+| `defaultValue`    | `string`               | 首个 enabled  | 仅用于非受控初始化；无效值回退到首个 enabled                           |
+| `activationMode`  | `automatic \| manual`  | `automatic`   | 方向键随焦点自动激活，或等待 Enter/Space                               |
+| `lazy`            | `boolean`              | `false`       | panel 首次 active 时挂载，之后保留                                     |
+| `destroyInactive` | `boolean`              | `false`       | inactive panel 卸载；优先于 `lazy`，会丢失 panel 内部状态              |
+| `stretch`         | `boolean`              | `true`        | 平分可用宽度；`false` 使用内容宽度并允许横向滚动                       |
+| `aria-label`      | `string`               | 内置中/英文名 | 建议提供业务名称；也可用 `aria-labelledby`                             |
+| `onChange`        | `(key, event) => void` | —             | 新 enabled key 的激活请求                                              |
+| `ref`             | `Ref<HTMLDivElement>`  | —             | React 19 根节点 ref                                                    |
+
+其余 root `div` 属性可透传，但 `children/defaultValue/onChange` 使用组件专用契约。
 
 ## Events
 
-`onChange(key,event)` 在点击、automatic 方向键或 manual Enter/Space 激活新 key 后发出；受控状态不乐观改变。
+`onChange(key,event)` 在点击、automatic 方向键或 manual Enter/Space 请求激活“不同的新 key”时发出；disabled 或当前 key 不触发。受控状态不乐观改变，由调用者回写 `value`。事件为触发按钮的 React mouse/keyboard event。
 
 ## Ref 与命令式方法
 
-ref 指向根 div；不公开切换方法，使用 value 或原生 tab focus。
+ref 指向根 div，支持 React 19 `ref` prop 与对象/回调 ref；不公开命令式切换方法，使用 `value` 控制选择，使用原生 `focus()` 只移动焦点。
 
 ## 键盘操作
 
@@ -78,11 +92,11 @@ ref 指向根 div；不公开切换方法，使用 value 或原生 tab focus。
 
 ## 触摸与手势
 
-每个 tab 高度至少 48px；横向列表原生滚动，不拦截滑动。
+每个 tab 高度至少 48px；横向列表原生滚动，不拦截滑动。左右物理边缘仅在该方向仍有被裁切 tab 时显示渐隐提示；ResizeObserver 跟踪容器/标签尺寸，缺失时回退到 window resize。键盘和点击激活会把目标滚入最近可见区域。
 
 ## 无障碍
 
-tablist 有名称；tab 与 panel 通过 aria-controls/aria-labelledby 双向关联；aria-selected 与 roving tabindex 同步；disabled 使用原生 disabled。
+tablist 有名称和 horizontal orientation；tab 与 panel 通过 aria-controls/aria-labelledby 双向关联；aria-selected 与 roving tabindex 同步；disabled 使用原生 disabled 并从方向键序列移除。全 disabled 时没有 tab stop，也没有 active panel。forced-colors 下取消渐隐 mask、恢复原生滚动条，并以系统色表达 tab/active 状态。
 
 ## 动效
 
@@ -94,51 +108,48 @@ tablist 有名称；tab 与 panel 通过 aria-controls/aria-labelledby 双向关
 
 ## SSR 与 Next.js
 
-useId 保持关联稳定；lazy SSR 只输出首个 active panel。首屏 items/value 必须一致，避免 hydration 结构变化。
+useId 保持单次 SSR/hydration 的关联稳定；lazy SSR 只输出首个 active panel。溢出属性以 `false` 输出，hydration 后再测量，不制造服务端/客户端结构差异。首屏 items/value 必须一致，避免调用方造成 hydration mismatch。
 
 ## RTL 与国际化
 
-左右键优先使用最近显式 `dir=ltr|rtl` 祖先，否则使用 ConfigProvider；局部 LTR 可覆盖外层 RTL。滚动和视觉顺序继承 dir，默认 tablist 名称支持中英文。
+左右键优先使用最近显式 `dir=ltr|rtl` 祖先，否则使用 ConfigProvider；局部 LTR 可覆盖外层 RTL。滚动与双边提示按物理可见边缘测量，不依赖各浏览器不同的 RTL `scrollLeft` 模型。默认 tablist 名称支持中英文。
 
 ## 浏览器与 WebView
 
-scrollIntoView 仅在方法存在时调用，旧 WebView 无该方法时仍完成焦点与激活。兼容目标 Chrome/WebView 70+、iOS 13+。
+完整支持矩阵为 Android Chrome/WebView 89+、iOS Safari/WKWebView 15+；Chrome/WebView 70+ 与 iOS 13+ 仅是源码/构建产物的旧语法扫描基线，不代表完整运行时承诺。iOS 13–14、Chromium/WebView 79–88 属观察档，仍待运行时抽测。`scrollIntoView`、ResizeObserver 不可用时分别降级为不自动入视、window resize 重测，选择与键盘契约不受影响。
 
 ## 边界情况与已知限制
 
-item.key 必须唯一稳定。动态删除 item 会清理其访问身份；同 key 后续再出现按新 panel 处理。销毁 inactive panel 会丢失未提升的输入/滚动状态；lazy 保留可能增加长期 DOM，应按内容成本选择。
+item.key 必须唯一稳定。内部 ref 使用 Map，因此 `__proto__` 等任意字符串不会发生对象原型碰撞，删除项也会释放节点引用。动态删除 item 会清理其访问身份；同 key 后续再出现按新 panel 处理。销毁 inactive panel 会丢失未提升的输入/滚动状态；lazy 保留可能增加长期 DOM，应按内容成本选择。
 
 ## 性能预算
 
-tab O(items)；默认 panel 也为 O(items)，lazy 可延迟昂贵内容但不自动回收。
+每次 render 的选择、enabled、visited 归一为 O(items)；一个 ResizeObserver 观察 tablist 与 tab 节点，不为每项创建 observer。默认 panel DOM 为 O(items)，lazy 可延迟昂贵内容但不自动回收，destroyInactive 将 panel DOM 限制为 O(1)。
 
 ## 测试证据
 
-- Unit: APG 关联、禁用跳过、无效受控值、动态 remove/disable 归一、automatic/manual、controlled null、destroy、受控与非受控 lazy retain、嵌套 RTL/LTR、scrollIntoView
-- Story interaction: `KeyboardInteraction` 验证 End 键焦点移动；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4150 B / 32768 B 预算，组合 Brotli 3668 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Tabs.ssr.test.tsx`
-- RTL: Unit + Story
-- Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: `connects tab panels, primary navigation and read-only progress semantics` 在两种引擎断言 tablist/tabpanel 关联、ArrowRight 焦点与自动激活、disabled 跳过
-- Chromatic Light/Dark: 发布后建立
-- Real device: 待补
+- 本轮 Unit/SSR/hydration：2 files / 19 tests 通过。覆盖 APG 关联、禁用跳过、Home/End/方向键、automatic/manual、controlled null/无效值、外部受控值的 roving tab stop、destroy、受控/非受控 lazy retain、动态 remove/disable 的真实焦点恢复、外部焦点不抢占、并发 transition + StrictMode、RTL/LTR、scrollIntoView、物理双边 overflow、特殊字符串 key、React 19 ref、SSR 与真实 hydrateRoot。
+- SSR/hydration (`Tabs.ssr.test.tsx`)：SSR role/选择/lazy 结构；真实 `hydrateRoot` 验证 useId 关联、ref、键盘交互与 0 recoverable error。
+- Story interaction：`KeyboardInteraction` 验证 End 后的焦点、automatic selection 与可见 panel；`OverflowAndDisabled` 保留窄屏、长标签、badge、disabled 的人工/视觉入口。
+- CSS 静态契约：reduced-motion 缩短 tab/indicator transition；forced-colors 取消 mask、恢复 scrollbar 并使用系统色。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4839 B / 32768 B 预算，组合 Brotli 4271 B；共享样式由应用单独导入一次。
+- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖外部受控切换、panel 关联与溢出状态；批次整页 Light/Dark axe WCAG A/AA 也通过。
+- 本轮未执行/不可声称：Storybook 全矩阵、Storybook axe/截图扫描、Chromatic、真机读屏、真实 iOS/Android WebView、全量 E2E。
 
 ## V2 优化记录
 
 ### 待优化
 
-补真机读屏与大量 tabs 横向滚动证据；基础双引擎键盘/面板路径已完成。
+补真机读屏、触摸横向滚动与完整支持档/观察档运行时证据；补 Storybook axe/forced-colors/reduced-motion 浏览器门禁与发布后 Chromatic。
 
 ### 已完成
 
-冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约；补隔离 Next H5 键盘、面板和 hydration 证据。
+冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约；修复外部受控值的 resting tab stop、任意字符串 key ref 注册、双边溢出提示；增加真实 hydrateRoot、StrictMode/transition/ref 单测。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                             | 迁移说明         |
-| ---------- | ------ | ------------ | ------------------------------------------------ | ---------------- |
-| 2026-08-29 | 未发布 | feature      | lazy retain、RTL 键盘与 scrollIntoView           | 默认挂载行为不变 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 tabs/keyboard/hydration 证据 | 无               |
+| 日期       | 版本   | 类型         | 内容                                           | 迁移说明         |
+| ---------- | ------ | ------------ | ---------------------------------------------- | ---------------- |
+| 2026-08-29 | 未发布 | fix          | roving focus、特殊 key ref、overflow indicator | 无               |
+| 2026-08-29 | 未发布 | verification | 真实 hydration、React 19 StrictMode/transition | 无               |
+| 2026-08-29 | 未发布 | feature      | lazy retain、RTL 键盘与 scrollIntoView         | 默认挂载行为不变 |

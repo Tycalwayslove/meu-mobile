@@ -17,7 +17,34 @@ export const tabList = style({
   borderBottom: "1px solid var(--meu-color-border)",
   scrollbarWidth: "none",
   WebkitOverflowScrolling: "touch",
-  selectors: { "&::-webkit-scrollbar": { display: "none" } }
+  WebkitMaskImage: "none",
+  maskImage: "none",
+  selectors: {
+    "&::-webkit-scrollbar": { display: "none" },
+    '&[data-overflow-left="true"][data-overflow-right="false"]': {
+      WebkitMaskImage: "linear-gradient(to right, transparent, #000 24px, #000 100%)",
+      maskImage: "linear-gradient(to right, transparent, #000 24px, #000 100%)"
+    },
+    '&[data-overflow-left="false"][data-overflow-right="true"]': {
+      WebkitMaskImage:
+        "linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%)",
+      maskImage: "linear-gradient(to right, #000 0, #000 calc(100% - 24px), transparent 100%)"
+    },
+    '&[data-overflow-left="true"][data-overflow-right="true"]': {
+      WebkitMaskImage:
+        "linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent)",
+      maskImage:
+        "linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent)"
+    }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      WebkitMaskImage: "none",
+      maskImage: "none",
+      scrollbarWidth: "auto",
+      selectors: { "&::-webkit-scrollbar": { display: "block" } }
+    }
+  }
 });
 
 export const tab = recipe({

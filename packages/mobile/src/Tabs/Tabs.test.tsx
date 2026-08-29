@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { createRef, startTransition, StrictMode, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
 import { Tabs } from "./Tabs";
+import type { TabsItem } from "./types";
 
 const items = [
   { key: "overview", label: "概览", content: "概览内容" },
@@ -28,7 +30,7 @@ describe("Tabs", () => {
     const onChange = vi.fn();
     render(<Tabs items={items} onChange={onChange} />);
     const overview = screen.getByRole("tab", { name: "概览" });
-    overview.focus();
+    act(() => overview.focus());
     fireEvent.keyDown(overview, { key: "ArrowRight" });
 
     const settings = screen.getByRole("tab", { name: "设置" });
@@ -44,7 +46,7 @@ describe("Tabs", () => {
     const onChange = vi.fn();
     render(<Tabs items={items} activationMode="manual" onChange={onChange} />);
     const overview = screen.getByRole("tab", { name: "概览" });
-    overview.focus();
+    act(() => overview.focus());
     fireEvent.keyDown(overview, { key: "End" });
 
     const settings = screen.getByRole("tab", { name: "设置" });
@@ -127,7 +129,7 @@ describe("Tabs", () => {
     const settings = screen.getByRole("tab", { name: "设置" });
     const scrollIntoView = vi.fn();
     settings.scrollIntoView = scrollIntoView;
-    overview.focus();
+    act(() => overview.focus());
     fireEvent.keyDown(overview, { key: "ArrowLeft" });
     expect(document.activeElement).toBe(settings);
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", inline: "nearest" });
@@ -147,8 +149,131 @@ describe("Tabs", () => {
       </ConfigProvider>
     );
     const middle = screen.getByRole("tab", { name: "第二" });
-    middle.focus();
+    act(() => middle.focus());
     fireEvent.keyDown(middle, { key: "ArrowRight" });
     expect(document.activeElement).toBe(screen.getByRole("tab", { name: "第三" }));
+  });
+
+  it("moves the resting roving tab stop when a controlled value changes", () => {
+    const { rerender } = render(<Tabs items={items} value="overview" />);
+    rerender(<Tabs items={items} value="settings" />);
+
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("tabindex")).toBe("-1");
+    expect(screen.getByRole("tab", { name: "设置" }).getAttribute("tabindex")).toBe("0");
+
+    const overview = screen.getByRole("tab", { name: "概览" });
+    act(() => overview.focus());
+    expect(overview.getAttribute("tabindex")).toBe("0");
+    fireEvent.blur(overview, { relatedTarget: document.body });
+    expect(screen.getByRole("tab", { name: "设置" }).getAttribute("tabindex")).toBe("0");
+  });
+
+  it("supports arbitrary string keys without corrupting the internal ref registry", () => {
+    const onChange = vi.fn();
+    render(
+      <Tabs
+        items={[
+          { key: "safe", label: "普通", content: "普通内容" },
+          { key: "__proto__", label: "特殊", content: "特殊内容" }
+        ]}
+        onChange={onChange}
+      />
+    );
+    const safe = screen.getByRole("tab", { name: "普通" });
+    fireEvent.keyDown(safe, { key: "ArrowRight" });
+
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "特殊" }));
+    expect(onChange).toHaveBeenCalledWith("__proto__", expect.anything());
+  });
+
+  it("updates physical overflow indicators after scrolling", () => {
+    render(<Tabs items={items} stretch={false} />);
+    const list = screen.getByRole("tablist");
+    const tabs = screen.getAllByRole("tab");
+    let firstLeft = -40;
+    let lastRight = 140;
+    list.getBoundingClientRect = () => ({ left: 0, right: 100, width: 100 }) as DOMRect;
+    tabs[0]!.getBoundingClientRect = () =>
+      ({ left: firstLeft, right: firstLeft + 40, width: 40 }) as DOMRect;
+    tabs[tabs.length - 1]!.getBoundingClientRect = () =>
+      ({ left: lastRight - 40, right: lastRight, width: 40 }) as DOMRect;
+
+    fireEvent.scroll(list);
+    expect(list.getAttribute("data-overflow-left")).toBe("true");
+    expect(list.getAttribute("data-overflow-right")).toBe("true");
+
+    firstLeft = -80;
+    lastRight = 100;
+    fireEvent.scroll(list);
+    expect(list.getAttribute("data-overflow-left")).toBe("true");
+    expect(list.getAttribute("data-overflow-right")).toBe("false");
+  });
+
+  it("exposes its root ref under React 19 StrictMode", () => {
+    const rootRef = createRef<HTMLDivElement>();
+    render(
+      <StrictMode>
+        <Tabs ref={rootRef} items={items} />
+      </StrictMode>
+    );
+
+    expect(rootRef.current).toBeInstanceOf(HTMLDivElement);
+    expect(rootRef.current && rootRef.current.dataset.meuComponent).toBe("tabs");
+  });
+
+  it("normalizes dynamic items committed in a concurrent transition", () => {
+    function Harness() {
+      const [dynamicItems, setDynamicItems] = useState<readonly TabsItem[]>(items);
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => startTransition(() => setDynamicItems(items.slice(0, 2)))}
+          >
+            删除当前项
+          </button>
+          <Tabs items={dynamicItems} defaultValue="settings" lazy />
+        </>
+      );
+    }
+
+    render(
+      <StrictMode>
+        <Harness />
+      </StrictMode>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "删除当前项" }));
+
+    expect(screen.getByRole("tab", { name: "概览" }).getAttribute("aria-selected")).toBe("true");
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(1);
+  });
+
+  it("recovers focus after a focused tab is removed or disabled without stealing outside focus", () => {
+    const renderHarness = (dynamicItems: readonly TabsItem[]) => (
+      <>
+        <button type="button">页面外操作</button>
+        <Tabs items={dynamicItems} defaultValue="settings" />
+      </>
+    );
+    const { rerender } = render(renderHarness(items));
+    const settings = screen.getByRole("tab", { name: "设置" });
+    act(() => settings.focus());
+
+    rerender(renderHarness(items.slice(0, 2)));
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "概览" }));
+
+    rerender(renderHarness(items));
+    const restoredSettings = screen.getByRole("tab", { name: "设置" });
+    act(() => restoredSettings.focus());
+    const disabledSettings = items.map((item) =>
+      item.key === "settings" ? { ...item, disabled: true } : item
+    );
+    rerender(renderHarness(disabledSettings));
+    expect(document.activeElement).toBe(screen.getByRole("tab", { name: "概览" }));
+
+    const outside = screen.getByRole("button", { name: "页面外操作" });
+    act(() => outside.focus());
+    rerender(renderHarness(items.slice(0, 2)));
+    expect(document.activeElement).toBe(outside);
   });
 });

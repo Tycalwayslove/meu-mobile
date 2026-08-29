@@ -330,6 +330,7 @@ export function ConsumerScenario() {
   const [searchedFor, setSearchedFor] = useState("");
   const [nativeSearchSubmit, setNativeSearchSubmit] = useState("原生搜索尚未提交");
   const [selectedEntry, setSelectedEntry] = useState("等待列表操作");
+  const [cellLoading, setCellLoading] = useState(true);
   const [displayAction, setDisplayAction] = useState("等待展示组件操作");
   const [watermarkMessage, setWatermarkMessage] = useState("水印未发生 DOM 变更");
   const [openHelp, setOpenHelp] = useState<readonly string[]>(["delivery"]);
@@ -803,14 +804,20 @@ export function ConsumerScenario() {
           />
           <Tabs
             aria-label="订单内容"
+            stretch={false}
             value={contentTab}
             onChange={setContentTab}
             items={[
               { key: "overview", label: "概览", content: "订单经营概览" },
               { key: "activity", label: "动态", content: "订单动态", disabled: true },
-              { key: "settings", label: "设置", content: "订单设置" }
+              { key: "settings", label: "设置", content: "订单设置" },
+              { key: "delivery", label: "履约管理", content: "订单履约管理" },
+              { key: "after-sales", label: "售后服务", content: "订单售后服务" }
             ]}
           />
+          <Button size="small" variant="outline" onClick={() => setContentTab("after-sales")}>
+            外部切换售后
+          </Button>
           <Steps
             current={1}
             items={[
@@ -908,7 +915,12 @@ export function ConsumerScenario() {
         </section>
 
         <div className="integration-list">
-          <List header="店铺入口" footer="用于验证原生按钮、链接与列表语义" mode="card">
+          <List
+            aria-describedby="shop-entry-help"
+            header="店铺入口"
+            footer={<span id="shop-entry-help">用于验证原生按钮、链接、加载与列表语义</span>}
+            mode="card"
+          >
             <Cell
               title="商品搜索"
               description="按名称或货号查找"
@@ -923,7 +935,16 @@ export function ConsumerScenario() {
               arrow={false}
             />
             <Cell title="停用店铺" disabled onClick={() => setSelectedEntry("不应触发")} />
+            <Cell
+              title="同步库存"
+              loading={cellLoading}
+              loadingLabel="正在同步库存"
+              onClick={() => setSelectedEntry("已打开库存同步")}
+            />
           </List>
+          <Button size="small" variant="outline" onClick={() => setCellLoading(false)}>
+            完成库存同步
+          </Button>
           <output aria-live="polite">{selectedEntry}</output>
         </div>
 

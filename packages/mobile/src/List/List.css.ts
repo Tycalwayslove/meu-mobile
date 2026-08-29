@@ -1,4 +1,4 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 export const root = style({
@@ -166,6 +166,46 @@ export const suffix = style({
   marginInlineStart: "var(--meu-space-3)"
 });
 
+const spin = keyframes({ to: { transform: "rotate(360deg)" } });
+
+export const loadingIndicator = style({
+  display: "grid",
+  placeItems: "center",
+  flex: "0 0 auto",
+  width: 44,
+  height: 44,
+  marginBlock: -10,
+  marginInlineStart: "var(--meu-space-2)",
+  color: "var(--meu-color-muted)"
+});
+
+export const spinner = recipe({
+  base: {
+    width: 16,
+    height: 16,
+    boxSizing: "border-box",
+    border: "2px solid currentColor",
+    borderRightColor: "transparent",
+    borderRadius: "50%",
+    animation: `${spin} 700ms linear infinite`,
+    "@media": {
+      "(forced-colors: active)": {
+        borderColor: "GrayText",
+        borderRightColor: "transparent",
+        forcedColorAdjust: "auto"
+      },
+      "(prefers-reduced-motion: reduce)": { animation: "none" }
+    }
+  },
+  variants: {
+    motion: {
+      system: {},
+      reduced: { animation: "none" }
+    }
+  },
+  defaultVariants: { motion: "system" }
+});
+
 export const arrow = style({
   display: "flex",
   flex: "0 0 auto",
@@ -174,9 +214,15 @@ export const arrow = style({
   color: "var(--meu-color-muted)"
 });
 
-export const defaultArrowIcon = style({
-  transform: "rotate(180deg)",
-  selectors: { "&:dir(rtl)": { transform: "none" } }
+export const defaultArrowIcon = recipe({
+  base: { transform: "rotate(180deg)" },
+  variants: {
+    direction: {
+      ltr: {},
+      rtl: { transform: "none" }
+    }
+  },
+  defaultVariants: { direction: "ltr" }
 });
 
 export const divider = recipe({

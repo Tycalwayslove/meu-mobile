@@ -25,7 +25,7 @@ export type TabsItem = {
   content?: ReactNode;
   /** Removes the tab from activation and roving focus. */
   disabled?: boolean;
-  /** Stable identity used for value, DOM association, and state retention. */
+  /** Stable, unique identity used for value and state retention; every string is supported. */
   key: string;
   /** Visible tab label. */
   label: ReactNode;
@@ -47,11 +47,12 @@ export type TabsProps = Omit<ComponentProps<"div">, "children" | "defaultValue" 
   items: readonly TabsItem[];
   /** Mounts a panel only after its tab has first become active, then retains it. */
   lazy?: boolean;
-  /** Called after an activation request; controlled callers remain authoritative. */
+  /** Called for a new enabled-key activation request; controlled callers remain authoritative. */
   onChange?: (
     key: string,
     event: ReactMouseEvent<HTMLButtonElement> | ReactKeyboardEvent<HTMLButtonElement>
   ) => void;
+  /** React 19 ref for the root `HTMLDivElement`. */
   ref?: Ref<HTMLDivElement>;
   /** Makes every tab share the available row width. @defaultValue true */
   stretch?: boolean;

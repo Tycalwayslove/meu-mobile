@@ -16,6 +16,7 @@ storyIds:
     information-cell-list--card,
     information-cell-list--plain,
     information-cell-list--no-dividers,
+    information-cell-list--loading,
     information-cell-list--long-content-and-rtl
   ]
 source: packages/mobile/src/List
@@ -25,7 +26,7 @@ source: packages/mobile/src/List
 
 ## 当前能力
 
-移动端信息行，根据 `href`、点击能力或静态用途分别输出原生 anchor、button 或 div；支持 title/description/prefix/extra/suffix、箭头、禁用、RTL、长内容和 List 列表语义。
+移动端信息行，根据 `href`、点击能力或静态用途分别输出原生 anchor、button 或 div；支持 title/description/prefix/extra/suffix、箭头、禁用、loading、RTL、长内容和 List 列表语义。
 
 ## 何时使用
 
@@ -37,7 +38,7 @@ source: packages/mobile/src/List
 
 ## 结构与状态
 
-`frame[role=listitem] → a|button|div + optional divider`。状态包括 static、interactive、disabled、active、focus-visible。
+`frame[role=listitem] → a|button|div + optional divider`。状态包括 static、interactive、disabled、loading、active press 与 focus。
 
 ## 基础用法
 
@@ -47,7 +48,7 @@ source: packages/mobile/src/List
 
 ## 受控与非受控
 
-不适用；Cell 不持有业务选中值。active 仅表达调用方给定的当前视觉状态。
+Cell 不持有业务选中值或请求。`loading` 是由调用方控制的忙碌标记；请求成功、失败、取消和卸载时都应由业务收敛。
 
 ## 表单集成
 
@@ -55,11 +56,11 @@ source: packages/mobile/src/List
 
 ## Props
 
-非空 href 优先渲染 anchor；否则 clickable/onClick 渲染 button。title、description、prefix、extra、suffix 保留数值 0。disabled anchor 移除 href 与 Tab stop；arrow 默认按可交互性显示。
+非空 href 优先渲染 anchor；否则 clickable/onClick 渲染 button。title、description、prefix、extra、suffix 保留数值 0。disabled/loading anchor 保留节点和 link role，但移除 href 与 Tab stop；loading 显示 spinner、设置 `aria-busy`，并用 `loadingLabel` 或 ConfigProvider locale 提供状态名称。调用方原有 `role` / `aria-busy` 类型入口继续保留：非 loading 时照常透传；unavailable anchor 强制 link role，loading 强制 `aria-busy=true`。arrow 默认按可交互性显示，loading 时由 spinner 替代。
 
 ## Events
 
-沿用原生 onClick。disabled button 不派发；disabled anchor 阻止默认与冒泡，也不调用业务回调。
+沿用原生 onClick。disabled/loading button 不派发；disabled/loading anchor 阻止默认与冒泡，也不调用业务回调。
 
 ## Ref 与命令式方法
 
@@ -67,7 +68,7 @@ ref 指向实际 `HTMLAnchorElement | HTMLButtonElement | HTMLDivElement`；无�
 
 ## 键盘操作
 
-Tab 只到达 enabled anchor/button；Enter 激活二者；Space 激活 button，anchor 保持浏览器原生滚动行为。
+Tab 只到达非 disabled/loading anchor/button；Enter 激活二者；Space 激活 button，anchor 保持浏览器原生滚动行为。
 
 ## 触摸与手势
 
@@ -75,11 +76,11 @@ Tab 只到达 enabled anchor/button；Enter 激活二者；Space 激活 button�
 
 ## 无障碍
 
-在 List 中 frame 提供 listitem，真实节点保留原生链接/按钮语义。箭头装饰隐藏；业务槽位中的语义内容会参与 accessible name。
+在 List 中 frame 提供 listitem，真实节点保留原生链接/按钮语义。箭头和 spinner 图形隐藏；loading status 使用 polite live region 并允许业务覆盖名称。业务槽位中的语义内容会参与 accessible name。
 
 ## 动效
 
-只使用短暂背景/颜色反馈；reduced-motion 不影响语义。无位移或高度动画。
+只使用短暂背景/颜色反馈和 loading spinner；reduced-motion 停止 spinner 并压缩过渡，不影响语义。无位移或高度动画。
 
 ## 主题与定制
 
@@ -91,15 +92,15 @@ Tab 只到达 enabled anchor/button；Enter 激活二者；Space 激活 button�
 
 ## RTL 与国际化
 
-prefix/suffix/arrow 使用逻辑端布局并随 dir 镜像；组件无内置可见文案。
+prefix/suffix/arrow 使用逻辑端布局；默认箭头由显式 Cell `dir="ltr"/"rtl"` 或最近的 ConfigProvider 决定，不依赖新内核的 `:dir()`。组件无内置可见业务文案。loading status 默认跟随最近的 ConfigProvider locale 输出中文或英文；仅当父级已有等价公告时，才应传 `loadingLabel=""` 显式静默。
 
 ## 浏览器与 WebView
 
-基于 flex 与原生 a/button/div，兼容 Chrome/WebView 70+、iOS 13+。
+完整支持矩阵为 Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chrome/WebView 70+ 与 iOS 13+ 仅用于构建产物旧语法静态扫描，不代表完整运行时承诺；Chromium/WebView 79–88 与 iOS 13–14 属观察档。forced-colors 使用系统 GrayText 保持 spinner 可见。
 
 ## 边界情况与已知限制
 
-key/路由身份由父列表管理；超长文本允许换行。自定义复杂 children 需避免破坏整行唯一交互目标原则。
+key/路由身份由父列表管理；超长文本允许换行。自定义复杂 slot 需避免破坏整行唯一交互目标原则。loading 只阻止激活，不拥有 Promise、取消、重试或超时策略。
 
 ## 性能预算
 
@@ -107,27 +108,29 @@ O(1) DOM，无测量、Observer 或监听；大量行应结合 VirtualList。
 
 ## 测试证据
 
-- Unit: 静态/button/link、disabled link、0 值槽、RTL、长内容、List 语义
-- Story interaction: `List.stories.tsx` 的 `Card.play` 验证 action Cell 到业务输出的事件链；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3690 B / 32768 B 预算，组合 Brotli 3279 B；共享样式由应用单独导入一次。
-- SSR/hydration: `List.ssr.test.tsx` 覆盖 Cell 原生节点；隔离 Next 16 hydration 后 button/link/static/disabled 节点保持一致，0 hydration/runtime error
-- Mobile Chromium/WebKit E2E: `keeps Cell actions, links and List semantics native` 在两种引擎断言 action button、原生 href、disabled button 与业务输出。Chromatic / 真机读屏仍属最终门禁。
+- 本轮 Unit/SSR/hydration：`pnpm --filter @meu/mobile exec vitest run src/List --maxWorkers=1`，3 files / 15 tests 通过；覆盖静态/button/link、disabled/loading、live status 位于 disabled action 外、本地化与显式静默、系统/config reduced motion、ConfigProvider RTL 与显式 Cell direction override、0 值槽、List 语义、SSR 与真实 hydrateRoot。
+- Story interaction: `List.stories.tsx` 的 `Card.play` 验证 action Cell 到业务输出的事件链；仓库曾记录 play-fn 80/80 的历史基线，本轮新增 Loading Story 尚未执行全量 Storybook runner。
+- Storybook 浏览器矩阵：374 个 Story × 7 场景、共 2,618 个组合是新增 Loading Story 前的历史基线，不能证明本轮 loading、live status 或 reduced-motion 表现；按当前开发策略留待所有组件完成后统一刷新。
+- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；Chromium/WebKit 共 8 个批次定向场景通过，其中 Cell 用例验证原生 button/link、disabled/loading、status、ready 后动作恢复与业务事件，批次整页 Light/Dark axe WCAG A/AA 也通过。loading link 的 href 恢复由共置 hydration 测试证明。68 页 × Light/Dark、共 136 场景仍只是本轮变更前的历史全量基线。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4350 B / 32768 B 预算，组合 Brotli 3846 B；共享样式由应用单独导入一次。
+- SSR/hydration: `List.ssr.test.tsx` 覆盖 Cell 原生节点；`List.hydration.test.tsx` 覆盖 loading 到 ready 的节点稳定与 0 mismatch；隔离 Next 16 hydration 后 button/link/static/disabled 节点保持一致，0 hydration/runtime error
+- Reduced motion: 系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 已覆盖显式策略，真实浏览器视觉留到最终矩阵。
+- Mobile Chromium/WebKit E2E: `keeps Cell actions, links and List semantics native` 在两种引擎断言 action button、原生 href、disabled/loading、status 与业务输出。Chromatic / 真机读屏仍属最终门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-补 200% 字号、长多语言、VoiceOver 链接/按钮公告与真机触摸证据；基础双引擎节点路径已完成。
+补 200% 字号、长多语言、VoiceOver 链接/按钮/loading 公告与真机触摸证据；基础双引擎节点路径已完成。
 
 ### 已完成
 
-冻结原生节点选择、disabled link、0 值槽和 RTL/forced-colors 契约，补永久文档、SSR 与隔离 Next H5 证据。
+冻结原生节点选择、disabled/loading link、0 值槽和 RTL/forced-colors 契约，补永久文档、SSR/hydration 与隔离 Next H5 证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                       | 迁移说明    |
-| ---------- | ------ | ------------ | ------------------------------------------ | ----------- |
-| 2026-08-29 | 未发布 | behavior     | 商用语义、兼容与文档证据加固               | 无 API 破坏 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎原生节点/hydration 证据 | 无          |
+| 日期       | 版本   | 类型         | 内容                                       | 迁移说明           |
+| ---------- | ------ | ------------ | ------------------------------------------ | ------------------ |
+| 2026-08-29 | 未发布 | behavior     | 商用语义、兼容与文档证据加固               | 无 API 破坏        |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎原生节点/hydration 证据 | 无                 |
+| 2026-08-29 | 未发布 | feature      | 增加 loading、交互锁与本地化状态公告       | 异步状态由业务控制 |

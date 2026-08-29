@@ -1,12 +1,34 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 
 import { Badge } from "../Badge";
 import { useMeuConfig } from "../ConfigProvider";
 import { label, panel, root, tab, tabList } from "./Tabs.css";
 import type { TabsProps } from "./types";
+
+const overflowTolerance = 1;
+
+function updateOverflowIndicators(tabListNode: HTMLDivElement) {
+  const firstTab = tabListNode.querySelector<HTMLElement>('[role="tab"]');
+  const lastTab = tabListNode.querySelector<HTMLElement>('[role="tab"]:last-of-type');
+  let overflowLeft = false;
+  let overflowRight = false;
+
+  if (firstTab && lastTab) {
+    const listRect = tabListNode.getBoundingClientRect();
+    const firstRect = firstTab.getBoundingClientRect();
+    const lastRect = lastTab.getBoundingClientRect();
+    const leftEdge = Math.min(firstRect.left, lastRect.left);
+    const rightEdge = Math.max(firstRect.right, lastRect.right);
+    overflowLeft = leftEdge < listRect.left - overflowTolerance;
+    overflowRight = rightEdge > listRect.right + overflowTolerance;
+  }
+
+  tabListNode.setAttribute("data-overflow-left", String(overflowLeft));
+  tabListNode.setAttribute("data-overflow-right", String(overflowRight));
+}
 
 /**
  * Renders an accessible tab list with optional associated panels.
@@ -51,12 +73,11 @@ export function Tabs({
   }
   const enabledItems = items.filter((item) => !item.disabled);
   const [focusedKey, setFocusedKey] = useState<string | null>(currentValue);
+  const [focusWithin, setFocusWithin] = useState(false);
   const fallbackFocusKey = currentValue || (firstEnabled ? firstEnabled.key : null);
   const focusIsValid = enabledItems.some((item) => item.key === focusedKey);
-  if (!focusIsValid && focusedKey !== fallbackFocusKey) {
-    setFocusedKey(fallbackFocusKey);
-  }
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const tabRefs = useRef(new Map<string, HTMLButtonElement>());
+  const tabListRef = useRef<HTMLDivElement>(null);
   const itemKeySignature = JSON.stringify(items.map((item) => item.key));
   const [visitedState, setVisitedState] = useState<{
     activeKey: string | null | undefined;
@@ -80,16 +101,49 @@ export function Tabs({
     setVisitedState({ activeKey: currentValue, itemKeySignature, keys: visitedKeys });
   }
   const hasPanels = items.some((item) => item.content !== undefined);
-  const rovingFocusKey = focusIsValid && focusedKey ? focusedKey : fallbackFocusKey;
+  const visitedKeySet = new Set(visitedKeys);
+  const rovingFocusKey = focusWithin && focusIsValid ? focusedKey : fallbackFocusKey;
   const resolvedLabel =
     ariaLabel || (!ariaLabelledBy ? (locale === "en-US" ? "Content tabs" : "内容标签") : undefined);
+
+  useEffect(() => {
+    const tabListNode = tabListRef.current;
+    if (!tabListNode) return;
+
+    const update = () => updateOverflowIndicators(tabListNode);
+    update();
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(update);
+      observer.observe(tabListNode);
+      for (const tabNode of tabListNode.querySelectorAll<HTMLElement>('[role="tab"]')) {
+        observer.observe(tabNode);
+      }
+    } else {
+      window.addEventListener("resize", update);
+    }
+
+    return () => {
+      if (observer) observer.disconnect();
+      else window.removeEventListener("resize", update);
+    };
+  }, [itemKeySignature, stretch]);
+
+  useLayoutEffect(() => {
+    if (!focusWithin || focusIsValid) return;
+    const fallback = fallbackFocusKey ? tabRefs.current.get(fallbackFocusKey) : undefined;
+    if (fallback && fallbackFocusKey) {
+      fallback.focus();
+    }
+  }, [fallbackFocusKey, focusIsValid, focusWithin]);
 
   function activate(
     key: string,
     event: ReactMouseEvent<HTMLButtonElement> | ReactKeyboardEvent<HTMLButtonElement>
   ) {
     if (key === currentValue) return;
-    const target = tabRefs.current[key];
+    const target = tabRefs.current.get(key);
     if (target && typeof target.scrollIntoView === "function") {
       target.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
@@ -99,7 +153,7 @@ export function Tabs({
 
   function focusAndMaybeActivate(targetKey: string, event: ReactKeyboardEvent<HTMLButtonElement>) {
     setFocusedKey(targetKey);
-    const target = tabRefs.current[targetKey];
+    const target = tabRefs.current.get(targetKey);
     if (target) {
       target.focus();
       if (typeof target.scrollIntoView === "function") {
@@ -158,10 +212,20 @@ export function Tabs({
     >
       <div
         className={tabList}
+        ref={tabListRef}
         role="tablist"
         aria-label={resolvedLabel}
         aria-labelledby={ariaLabel ? undefined : ariaLabelledBy}
         aria-orientation="horizontal"
+        data-overflow-left="false"
+        data-overflow-right="false"
+        onBlur={(event) => {
+          const nextTarget = event.relatedTarget;
+          if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+            setFocusWithin(false);
+          }
+        }}
+        onScroll={(event) => updateOverflowIndicators(event.currentTarget)}
       >
         {items.map((item, index) => {
           const active = item.key === currentValue;
@@ -174,13 +238,17 @@ export function Tabs({
               role="tab"
               id={tabId}
               ref={(node) => {
-                tabRefs.current[item.key] = node;
+                if (node) tabRefs.current.set(item.key, node);
+                else tabRefs.current.delete(item.key);
               }}
               aria-controls={hasPanels ? panelId : undefined}
               aria-selected={active}
               disabled={item.disabled}
               tabIndex={item.disabled ? -1 : item.key === rovingFocusKey ? 0 : -1}
-              onFocus={() => setFocusedKey(item.key)}
+              onFocus={() => {
+                setFocusWithin(true);
+                setFocusedKey(item.key);
+              }}
               onKeyDown={(event) => handleKeyDown(event, item.key)}
               onClick={(event) => activate(item.key, event)}
               key={item.key}
@@ -200,7 +268,7 @@ export function Tabs({
         ? items.map((item, index) => {
             const active = item.key === currentValue;
             if (destroyInactive && !active) return null;
-            if (lazy && !active && !visitedKeys.includes(item.key)) return null;
+            if (lazy && !active && !visitedKeySet.has(item.key)) return null;
             const tabId = `${generatedId}-tab-${index}`;
             const panelId = `${generatedId}-panel-${index}`;
             return (

@@ -19,6 +19,15 @@ export const WithActions: Story = {
 };
 export const Borderless: Story = { args: { bordered: false } };
 export const SafeArea: Story = { args: { safeArea: true } };
+
+export const StickyScrolled: Story = {
+  args: { bordered: false, position: "sticky", scrolled: true }
+};
+
+export const LoadingBack: Story = {
+  args: { backHref: "", backLabel: "订单", backLoading: true, onBack: () => undefined }
+};
+
 function BackActionDemo() {
   const [result, setResult] = useState("等待返回");
   return (
@@ -42,6 +51,64 @@ export const BackAction: Story = {
     }
   }
 };
+
+function RouterAdapterDemo() {
+  const [result, setResult] = useState("等待路由接管");
+  return (
+    <div>
+      <NavBar
+        title="订单"
+        backHref="/orders"
+        onBack={(event) => {
+          event.preventDefault();
+          setResult("已交给业务路由");
+        }}
+      />
+      <output aria-live="polite">{result}</output>
+    </div>
+  );
+}
+
+export const RouterAdapter: Story = {
+  render: () => <RouterAdapterDemo />,
+  play: async ({ canvasElement }) => {
+    const link = canvasElement.querySelector<HTMLAnchorElement>('a[href="/orders"]');
+    if (!link) throw new window.Error("Expected a native back link");
+    link.click();
+    await Promise.resolve();
+    const output = canvasElement.querySelector("output");
+    if (!output || output.textContent !== "已交给业务路由") {
+      throw new window.Error("NavBar did not allow the router adapter to cancel navigation");
+    }
+  }
+};
+
+function DisabledBackDemo() {
+  const [result, setResult] = useState("未触发");
+  return (
+    <div>
+      <NavBar title="订单" backHref="/orders" backDisabled onBack={() => setResult("不应触发")} />
+      <output aria-live="polite">{result}</output>
+    </div>
+  );
+}
+
+export const DisabledBack: Story = {
+  render: () => <DisabledBackDemo />,
+  play: async ({ canvasElement }) => {
+    const link = canvasElement.querySelector<HTMLAnchorElement>('a[aria-disabled="true"]');
+    if (!link || link.hasAttribute("href") || link.tabIndex !== -1) {
+      throw new window.Error("Expected a stable unavailable link without a live href");
+    }
+    link.click();
+    await Promise.resolve();
+    const output = canvasElement.querySelector("output");
+    if (!output || output.textContent !== "未触发") {
+      throw new window.Error("Disabled back control reached its caller");
+    }
+  }
+};
+
 export const LongTitleRTL: Story = {
   render: (args) => (
     <div dir="rtl" style={{ width: 320 }}>

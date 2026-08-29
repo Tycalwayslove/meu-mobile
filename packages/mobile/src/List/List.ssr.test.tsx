@@ -18,4 +18,18 @@ describe("List SSR", () => {
     expect(html).toContain('href="/details"');
     expect(html).toContain('type="button"');
   });
+
+  it("server-renders localized loading semantics without a live navigation target", () => {
+    const html = renderToString(
+      <List aria-label="订单">
+        <Cell title="提交" onClick={() => undefined} loading loadingLabel="正在提交" />
+        <Cell title="详情" href="/orders/1" loading loadingLabel="正在打开" />
+      </List>
+    );
+    expect(html).toContain('aria-busy="true"');
+    expect(html).toContain('role="status"');
+    expect(html).toContain("正在提交");
+    expect(html).toContain("正在打开");
+    expect(html).not.toContain('href="/orders/1"');
+  });
 });

@@ -123,16 +123,17 @@ V2 采用以下事实源：
 
 已由当前仓库命令重新生成或执行的证据：
 
-- `docs:manifest:report`：68 个产品条目、125 个公开值、371 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
+- `docs:manifest:report`：68 个产品条目、125 个公开值、372 个公开类型、68 份共置文档，未认领值与覆盖问题均为 0。
 - 68/68 个产品条目状态为 `verification`；尚无条目提前标记为 `commercial`。
-- `api:properties:strict`：222 个结构化类型、2283 个字段、2283 个已描述字段、237 个事件，公开字段文档覆盖率 100%。
+- `api:properties:strict`：222 个结构化类型、2290 个字段、2290 个已描述字段、237 个事件，公开字段文档覆盖率 100%。
 - `api:extract:strict`：mobile、form-react、icons-react、primitives-react 四包均为 0 warning；公开声明全部具有明确 release tag。
-- `storybook:validate-links`：当前 68 个组件链接、394 个 Story、365 个文档 Story ID 全部有效；Autodocs 覆盖所有链接标题，80 个标题均至少有一项关键 `play`。
-- `check-storybook-a11y.mjs`：390×844 视口逐一运行 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors）；有 `play` 时必须先成功结束，再执行 axe WCAG A/AA，2,618 个组合全部通过且无 `pageerror`。
+- `storybook:validate-links`：最近一次已构建索引含 394 个 Story；当前源码静态计数为 404 个 Story exports，组件文档含 376 项 Story ID 引用（371 个唯一 ID）。本轮新增 10 个 Story 后未重建静态索引，当前验证器预期有 11 项引用待索引刷新（同一 Loading Story 被 List 与 Cell 分别引用）；开发阶段不把陈旧索引冒充当前全绿证据。
+- `check-storybook-a11y.mjs`：最近一次完整矩阵在 390×844 视口运行 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），2,618 个组合通过且无 `pageerror`。该基线早于本轮新增 Story；按开发期本地优先策略，全部组件冻结后统一刷新。
 - 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
-- 官网生产构建已通过 68 个组件页 × Light/Dark 的本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景。
-- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 23,000 B / 32 KiB，逐组件结果已同步到留存文档。
-- 隔离 Next H5：最近一次完整套件在移动 Chromium/WebKit 中 92/92 通过，每条用例均断言 0 `pageerror`、0 `console.error`；本批重新构建 production 站后，Light/Dark 全页 axe、BottomSheet（含模态 Toast 键盘循环）、Dialog 与 Toast 共 8/8 条双引擎定向用例通过。新增用例将在候选冻结后随完整套件统一复验。
+- 官网生产构建通过 68 个组件页 × Light/Dark 的历史本地浏览器门禁，覆盖主题恢复、H1/预览/API 结构、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 136 个场景；本轮改动后尚未重跑官网全量矩阵。
+- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 23,580 B / 32 KiB，逐组件结果已同步到留存文档。
+- 隔离 Next H5：最近一次完整套件在移动 Chromium/WebKit 中 92/92 通过；本批重新构建 Next 16 production 站后，List/Cell、NavBar、Tabs、TabBar 与 Light/Dark 全页 axe 共 8/8 条双引擎定向场景通过。完整套件将在候选冻结后统一复验。
+- 本批共置 Unit/SSR/hydration：Tabs、NavBar、TabBar、List/Cell 合计 11 files / 63 tests 通过；新增 Story 源码已完成但尚未进入已构建索引，其余 API、Next H5 用例、API Extractor、生成式 Props、组件 manifest、bundle 与支持矩阵检查均已本地验证。
 - 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect 与 SwipeActions 240 次 pointermove 均在仓库预算内，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 199 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 

@@ -1478,6 +1478,20 @@
           "description": "Non-empty navigation target; causes Cell to render a native anchor."
         },
         {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Marks the row busy, shows an end-aligned progress indicator, and suppresses activation."
+        },
+        {
+          "name": "loadingLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible status announced while loading. Defaults to the nearest Meu locale; an empty string disables the internal live region."
+        },
+        {
           "name": "prefix",
           "type": "ReactNode",
           "required": false,
@@ -1531,7 +1545,7 @@
           "type": "MouseEventHandler<CellRef>",
           "required": false,
           "event": true,
-          "description": "Activates an action Cell and receives its rendered anchor or button; disabled Cells suppress it."
+          "description": "Activates an action Cell and receives its rendered anchor or button; disabled/loading Cells suppress it."
         }
       ],
       "ListProps": [
@@ -3005,11 +3019,19 @@
           "description": "Accessible name of the back link/button. Defaults to the configured locale."
         },
         {
+          "name": "backDisabled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Prevents back navigation. Buttons use native disabled; anchors keep their DOM identity and\nlink role but remove `href`, leave the tab order, and expose `aria-disabled`.",
+          "defaultValue": "`false`"
+        },
+        {
           "name": "backHref",
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Native navigation target. When present, the back control is an anchor."
+          "description": "Native navigation target. A non-empty value always renders an anchor; unavailable state removes\nthe live `href` until enabled. `onBack` may cancel navigation for a framework router."
         },
         {
           "name": "backIcon",
@@ -3026,11 +3048,27 @@
           "description": "Optional visible label next to the back icon."
         },
         {
+          "name": "backLoading",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Marks an in-flight back action, exposes `aria-busy`, shows a static-capable progress mark,\nand prevents repeat activation.",
+          "defaultValue": "`false`"
+        },
+        {
           "name": "bordered",
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Whether the bottom separator is visible."
+          "description": "Whether the bottom separator is visible.",
+          "defaultValue": "`true`"
+        },
+        {
+          "name": "dir",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Native direction. Explicit `ltr`/`rtl` also controls the back icon; `auto` leaves icon direction to ConfigProvider."
         },
         {
           "name": "left",
@@ -3038,6 +3076,14 @@
           "required": false,
           "event": false,
           "description": "Additional leading controls after the optional back control."
+        },
+        {
+          "name": "position",
+          "type": "NavBarPosition",
+          "required": false,
+          "event": false,
+          "description": "Controls normal-flow or CSS sticky positioning without installing a scroll listener.",
+          "defaultValue": "`\"static\"`"
         },
         {
           "name": "ref",
@@ -3058,7 +3104,16 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Adds `safe-area-inset-top` padding while keeping the component in document flow."
+          "description": "Adds top and horizontal device safe-area insets. Positioning remains controlled by `position`.",
+          "defaultValue": "`false`"
+        },
+        {
+          "name": "scrolled",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Controlled scroll presentation state. It restores the separator when `bordered` is false and\nexposes a stable data attribute; the caller remains responsible for observing scroll.",
+          "defaultValue": "`false`"
         },
         {
           "name": "title",
@@ -3072,7 +3127,7 @@
           "type": "MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>",
           "required": false,
           "event": true,
-          "description": "Back handler. It may call `preventDefault()` when `backHref` is present."
+          "description": "Observes an enabled back activation. It may call `preventDefault()` when `backHref` is present;\ndisabled and loading activations never invoke it."
         }
       ],
       "IndexListChangeDetails": [
@@ -3509,7 +3564,7 @@
           "type": "string",
           "required": true,
           "event": false,
-          "description": "Stable identity used for value, DOM association, and state retention."
+          "description": "Stable, unique identity used for value and state retention; every string is supported."
         },
         {
           "name": "label",
@@ -3561,7 +3616,7 @@
           "type": "Ref<HTMLDivElement>",
           "required": false,
           "event": false,
-          "description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref)."
+          "description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref).\nReact 19 ref for the root `HTMLDivElement`."
         },
         {
           "name": "stretch",
@@ -3583,7 +3638,7 @@
           "type": "(key: string, event: ReactMouseEvent<HTMLButtonElement> | ReactKeyboardEvent<HTMLButtonElement>) => void",
           "required": false,
           "event": true,
-          "description": "Called after an activation request; controlled callers remain authoritative."
+          "description": "Called for a new enabled-key activation request; controlled callers remain authoritative."
         }
       ],
       "TabBarItem": [
@@ -3592,63 +3647,64 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Overrides the link/button accessible name when the visual label is insufficient."
+          "description": "Overrides the link or button accessible name when the visual label is insufficient."
         },
         {
           "name": "badge",
           "type": "ReactNode",
           "required": false,
           "event": false,
-          "description": "Optional badge content."
+          "description": "Optional compact count or status rendered over the icon."
         },
         {
           "name": "badgeLabel",
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Accessible badge description, for example \"3 unread orders\"."
+          "description": "Accessible meaning for the badge, for example \"3 unread orders\"."
         },
         {
           "name": "disabled",
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Disables button items; href items fall back to disabled button semantics."
+          "description": "Prevents activation and excludes the item from sequential focus. Buttons use native\n`disabled`; links retain their anchor/link identity, omit the live `href`, and expose\n`aria-disabled`.",
+          "defaultValue": "false"
         },
         {
           "name": "href",
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Uses native link navigation when present and enabled."
+          "description": "Uses a native anchor when this is a non-empty URL. Disabled links keep the anchor and explicit\nlink role without a live `href`. Omit it for a router-controlled button; an empty string also\nrenders a button."
         },
         {
           "name": "icon",
           "type": "ReactNode | ((active: boolean) => ReactNode)",
           "required": true,
           "event": false,
-          "description": "Decorative icon or active-aware icon renderer."
+          "description": "Decorative icon or render function that receives whether this destination is current."
         },
         {
           "name": "key",
           "type": "string",
           "required": true,
           "event": false,
-          "description": "Stable route identity."
+          "description": "Stable selection and React identity. Keys must be unique; the first duplicate wins."
         },
         {
           "name": "label",
           "type": "ReactNode",
           "required": true,
           "event": false,
-          "description": "Visible navigation label."
+          "description": "Visible navigation label. Avoid nested interactive content."
         },
         {
           "name": "onClick",
           "type": "MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>",
           "required": false,
           "event": true,
-          "description": "Item click callback called before selection; `preventDefault()` cancels selection and link navigation."
+          "description": "Called before a selection request. `preventDefault()` cancels both `onChange` and native\nlink navigation. Disabled items do not call this handler."
         }
       ],
       "TabBarProps": [
@@ -3657,28 +3713,28 @@
           "type": "string | (readonly string[] & string)",
           "required": false,
           "event": false,
-          "description": "Initial uncontrolled route key."
+          "description": "Initial uncontrolled key. Invalid or disabled keys fall back to the first enabled item."
         },
         {
           "name": "items",
           "type": "readonly TabBarItem[]",
           "required": true,
           "event": false,
-          "description": "Two to five primary destinations are recommended."
+          "description": "Ordered primary destinations. Two to five items are recommended. Keys must stay stable;\nthe first duplicate is retained."
         },
         {
           "name": "ref",
           "type": "Ref<HTMLElement>",
           "required": false,
           "event": false,
-          "description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref)."
+          "description": "Allows getting a ref to the component instance.\nOnce the component unmounts, React will set `ref.current` to `null`\n(or call the ref with `null` if you passed a callback ref).\nReact 19 ref to the root `nav` landmark."
         },
         {
           "name": "safeArea",
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Appends the shared bottom safe-area primitive.",
+          "description": "Consumes bottom and physical inline viewport safe-area insets. The component does not\nbecome fixed and the page must still reserve its layout space.",
           "defaultValue": "false"
         },
         {
@@ -3686,14 +3742,14 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Controlled current route. `null` marks no route current."
+          "description": "Controlled current key. `null`, unknown, and disabled keys mark no destination current."
         },
         {
           "name": "onChange",
           "type": "(key: string, event: ReactMouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void",
           "required": false,
           "event": true,
-          "description": "Called after a new enabled route is requested."
+          "description": "Called after a different enabled destination is requested. Controlled state stays caller-owned."
         }
       ],
       "StepItem": [
@@ -17095,11 +17151,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2283,
+    "documentedFields": 2290,
     "eventFields": 237,
-    "exportedTypes": 371,
+    "exportedTypes": 372,
     "exportedTypesWithFields": 222,
-    "fields": 2283,
+    "fields": 2290,
     "packages": 4
   }
 }

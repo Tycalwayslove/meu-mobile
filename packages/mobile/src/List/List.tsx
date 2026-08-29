@@ -14,6 +14,7 @@ import type { ListProps } from "./types";
 export function List({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
+  "aria-describedby": ariaDescribedBy,
   children,
   className,
   divider = "inset",
@@ -47,6 +48,7 @@ export function List({
         role="list"
         aria-label={ariaLabel}
         aria-labelledby={resolvedLabelledBy}
+        aria-describedby={ariaDescribedBy}
         data-meu-list-body
       >
         <ListContext.Provider value={{ divider, insideList: true }}>

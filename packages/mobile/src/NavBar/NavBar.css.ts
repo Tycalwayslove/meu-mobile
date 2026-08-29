@@ -1,5 +1,9 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
+
+const spin = keyframes({
+  to: { transform: "rotate(360deg)" }
+});
 
 export const root = recipe({
   base: {
@@ -11,7 +15,12 @@ export const root = recipe({
     paddingInline: "var(--meu-space-2)",
     color: "var(--meu-color-ink)",
     background: "var(--meu-color-surface)",
-    fontFamily: "var(--meu-font-ui)"
+    fontFamily: "var(--meu-font-ui)",
+    transition: "border-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { background: "Canvas", color: "CanvasText" }
+    }
   },
   variants: {
     bordered: {
@@ -21,12 +30,28 @@ export const root = recipe({
     safeArea: {
       true: {
         minHeight: "calc(var(--meu-size-navbar) + env(safe-area-inset-top, 0px))",
-        paddingBlockStart: "env(safe-area-inset-top, 0px)"
+        paddingBlockStart: "env(safe-area-inset-top, 0px)",
+        paddingLeft: "calc(var(--meu-space-2) + env(safe-area-inset-left, 0px))",
+        paddingRight: "calc(var(--meu-space-2) + env(safe-area-inset-right, 0px))"
       },
+      false: {}
+    },
+    position: {
+      static: {},
+      sticky: { position: "sticky", top: 0, zIndex: 1 }
+    },
+    scrolled: {
+      true: {},
       false: {}
     }
   },
-  defaultVariants: { bordered: true, safeArea: false }
+  compoundVariants: [
+    {
+      variants: { bordered: false, scrolled: true },
+      style: { borderBottomColor: "var(--meu-color-border)" }
+    }
+  ],
+  defaultVariants: { bordered: true, position: "static", safeArea: false, scrolled: false }
 });
 
 export const side = style({
@@ -39,36 +64,98 @@ export const side = style({
 export const leftSide = style({ justifyContent: "flex-start" });
 export const rightSide = style({ justifyContent: "flex-end" });
 
-export const back = style({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: "var(--meu-space-1)",
-  minWidth: 44,
-  minHeight: 44,
-  boxSizing: "border-box",
-  padding: "0 var(--meu-space-2)",
-  color: "inherit",
-  background: "transparent",
-  border: 0,
-  borderRadius: "var(--meu-radius-control)",
-  font: "inherit",
-  textDecoration: "none",
-  cursor: "pointer",
-  WebkitTapHighlightColor: "transparent",
-  selectors: {
-    "&:focus": {
-      outline: "2px solid var(--meu-color-accent)",
-      outlineOffset: 1
+export const back = recipe({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: "0 1 auto",
+    gap: "var(--meu-space-1)",
+    minWidth: 44,
+    maxWidth: "100%",
+    minHeight: 44,
+    boxSizing: "border-box",
+    padding: "0 var(--meu-space-2)",
+    color: "inherit",
+    background: "transparent",
+    border: 0,
+    borderRadius: "var(--meu-radius-control)",
+    font: "inherit",
+    textDecoration: "none",
+    cursor: "pointer",
+    WebkitTapHighlightColor: "transparent",
+    transition: [
+      "transform var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+      "background-color var(--meu-motion-exit) var(--meu-motion-ease-standard)",
+      "color var(--meu-motion-exit) var(--meu-motion-ease-standard)"
+    ].join(", "),
+    selectors: {
+      "&:active:not(:disabled):not([aria-disabled='true'])": {
+        background: "var(--meu-color-subtle)",
+        transform: "translateY(1px)"
+      },
+      "&:focus": {
+        outline: "2px solid var(--meu-color-accent)",
+        outlineOffset: 1
+      }
+    },
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      "(forced-colors: active)": { border: "1px solid ButtonText", color: "ButtonText" }
     }
   },
-  "@media": { "(forced-colors: active)": { border: "1px solid ButtonText" } }
+  variants: {
+    disabled: {
+      true: {
+        color: "var(--meu-color-muted)",
+        background: "var(--meu-color-subtle)",
+        cursor: "not-allowed",
+        selectors: { "&:focus": { outlineColor: "var(--meu-color-border)" } },
+        "@media": {
+          "(forced-colors: active)": { borderColor: "GrayText", color: "GrayText" }
+        }
+      },
+      false: {}
+    }
+  },
+  defaultVariants: { disabled: false }
 });
 
-export const backIcon = style({
-  display: "inline-flex",
-  flex: "0 0 auto",
-  selectors: { "&:dir(rtl)": { transform: "scaleX(-1)" } }
+export const backIcon = recipe({
+  base: {
+    display: "inline-flex",
+    flex: "0 0 auto"
+  },
+  variants: {
+    direction: {
+      ltr: {},
+      rtl: { transform: "scaleX(-1)" }
+    }
+  },
+  defaultVariants: { direction: "ltr" }
+});
+
+export const backSpinner = recipe({
+  base: {
+    width: 18,
+    height: 18,
+    boxSizing: "border-box",
+    border: "2px solid currentColor",
+    borderRightColor: "transparent",
+    borderRadius: "50%",
+    animation: `${spin} 700ms linear infinite`,
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { animation: "none" },
+      "(forced-colors: active)": { borderRightColor: "Canvas" }
+    }
+  },
+  variants: {
+    motion: {
+      system: {},
+      reduced: { animation: "none" }
+    }
+  },
+  defaultVariants: { motion: "system" }
 });
 
 export const backLabel = style({
@@ -82,7 +169,9 @@ export const backLabel = style({
 export const leftContent = style({
   display: "inline-flex",
   alignItems: "center",
-  minWidth: 0
+  flex: "0 1 auto",
+  minWidth: 0,
+  maxWidth: "100%"
 });
 
 export const title = style({

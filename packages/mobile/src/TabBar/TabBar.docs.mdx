@@ -16,6 +16,10 @@ storyIds:
     navigation-tabbar--default,
     navigation-tabbar--with-safe-area,
     navigation-tabbar--route-interaction,
+    navigation-tabbar--controlled-router,
+    navigation-tabbar--disabled-destination,
+    navigation-tabbar--narrow-long-labels,
+    navigation-tabbar--rtl,
     navigation-tabbar--landscape
   ]
 source: packages/mobile/src/TabBar
@@ -25,7 +29,7 @@ source: packages/mobile/src/TabBar
 
 ## 当前能力
 
-2–5 个一级目的地导航；href 使用原生 link，无 href 使用 button。支持 aria-current、受控路由、Badge 名称、安全区、禁用、横屏与 active-aware icon。
+2–5 个一级目的地导航；非空 `href` 使用原生 link，无 `href` 使用 `type="button"`。支持 `aria-current="page"`、受控/非受控路由、Badge 名称、动态 items、Safe Area、禁用、横屏、RTL、长文案和 active-aware icon。
 
 ## 何时使用
 
@@ -37,7 +41,7 @@ source: packages/mobile/src/TabBar
 
 ## 结构与状态
 
-`nav → items → a|button → decorative icon + label`，可选 Badge 与底部 SafeArea。状态为 current、idle、disabled、pressed、focus-visible。
+`nav → items → a|button → decorative icon + label`，可选 Badge 与底部 SafeArea。`nav` 透传原生属性；调用方可用 `aria-label` 或 `aria-labelledby` 命名，没有提供时按 locale 使用「主导航」/“Primary navigation”。状态为 current、idle、disabled、hover（仅 hover 设备）、pressed、focus。
 
 ## 基础用法
 
@@ -47,7 +51,7 @@ source: packages/mobile/src/TabBar
 
 ## 受控与非受控
 
-`value !== undefined` 时受控，null 或无效/禁用 key 表示无当前页；非受控从有效 defaultValue 或首个 enabled item 初始化。当前项被删除或禁用时会永久归一到首个 enabled item。路由框架应使用受控模式。
+`value !== undefined` 时受控，`null` 或无效/禁用 key 表示无当前页，组件不会擅自回写；非受控从有效 `defaultValue` 或首个 enabled item 初始化。当前项被删除或禁用时会永久归一到首个 enabled item；只重排稳定 key 不改变 current。重复 key 只保留第一项，避免多重 current 和 React identity 冲突。路由框架应使用受控模式。
 
 ## 表单集成
 
@@ -55,15 +59,35 @@ source: packages/mobile/src/TabBar
 
 ## Props
 
-item.href 决定 link/button；disabled href 会降为原生 disabled button。`badgeLabel` 为读屏补充未读/待办含义，`ariaLabel` 可覆盖整项名称。
+| 属性           | 契约                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| `items`        | 有序目的地；建议 2–5 项；key 必须唯一稳定，重复时第一项生效                                            |
+| `value`        | 受控 current key；`null`、未知或 disabled key 均不标记 current                                         |
+| `defaultValue` | 非受控初值；无效时回退首个 enabled item                                                                |
+| `onChange`     | 新 enabled 目的地请求成为 current 后触发；同一 key 不重复触发                                          |
+| `safeArea`     | 消费 bottom 以及物理 left/right viewport inset；不负责 fixed 或页面占位                                |
+| 原生 nav props | 支持 `id`、`className`、`style`、`aria-label`、`aria-labelledby` 等；`children`/原生 `onChange` 不开放 |
+
+`TabBarItem`：
+
+| 字段                   | 契约                                                                                                                  |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `key`                  | 选择值与 React identity；必须稳定唯一                                                                                 |
+| `label`                | 可见标签及默认 accessible name；不要嵌套交互元素                                                                      |
+| `icon`                 | 装饰图标或 `(active) => ReactNode`；始终从可访问树隐藏                                                                |
+| `href`                 | 非空时固定渲染 anchor；空串/省略时渲染 button                                                                         |
+| `disabled`             | button 使用原生 `disabled`；link 保持 anchor/role，但从 SSR 起移除 live `href`，使用 `aria-disabled` 与 `tabIndex=-1` |
+| `badge` / `badgeLabel` | 短计数/状态与其可访问含义；纯计数可沿用可见文本，业务状态应给 `badgeLabel`                                            |
+| `ariaLabel`            | 可见 label 不足以命名目的地时覆盖整项 accessible name                                                                 |
+| `onClick`              | enabled 项选择前调用；`preventDefault()` 同时取消选择请求和原生链接导航                                               |
 
 ## Events
 
-item.onClick 先执行；调用 `event.preventDefault()` 会同时取消选择请求与链接导航。未取消时，`onChange(key,event)` 仅在新 enabled 项请求成为 current 时触发。
+`item.onClick` 先执行；调用 `event.preventDefault()` 会同时取消选择请求与链接导航。未取消时，`onChange(key,event)` 仅在新 enabled 项请求成为 current 时触发。disabled 项会取消默认行为并停止冒泡，不调用两个回调。受控模式只发布事件，不进行乐观 current 更新。
 
 ## Ref 与命令式方法
 
-ref 指向 nav；无命令式路由 API。
+React 19 `ref` prop 指向稳定的 `nav`；支持 object/callback ref，无命令式路由 API。需要聚焦具体目的地时由路由层管理，不公开内部 item ref。
 
 ## 键盘操作
 
@@ -73,69 +97,73 @@ ref 指向 nav；无命令式路由 API。
 | Enter           | 激活 link 或 button                 |
 | Space           | 激活 button；link 保持原生行为      |
 
+组件不把主导航伪装成 ARIA tablist，因此不劫持方向键。动态删除或禁用已聚焦项时，焦点移到归一后的 current，受控值无效时移到首个 enabled item；若用户焦点不在 TabBar 内则不抢焦点。
+
 ## 触摸与手势
 
-每项至少 44px 高并均分宽度；无滑动或长按手势。
+支持范围内每项至少 44×44 CSS px 并均分宽度，默认 56px 高；横屏低高度使用 48px 最小高度。使用 `touch-action: manipulation`，无滑动或长按手势。组件不是 fixed，页面布局必须为其保留实际高度。
 
 ## 无障碍
 
-nav 必须有名称；当前目的地使用 aria-current=page；icon aria-hidden；Badge 可通过 badgeLabel 提供状态含义；禁用项使用原生 disabled。
+nav 必须有名称；当前目的地使用 `aria-current="page"`；icon `aria-hidden`；Badge 可通过 `badgeLabel` 提供状态含义。禁用 button 使用原生 `disabled`；禁用 link 保持 anchor 与显式 link role，从服务端 HTML 起移除 live `href`，以 `aria-disabled` 暴露状态并退出顺序焦点，因此 hydration 前后都没有可触发的导航 URL。键盘焦点使用基础 `:focus` 轮廓，不依赖 `:focus-visible`；因此支持档可靠可见，静态语法基线中的 Chrome 70/iOS 13 也能识别，代价是浏览器在点击后保留焦点时仍可能显示焦点环。这是可见性优先的明确取舍。选中与禁用均不只靠颜色：forced-colors 使用 Highlight/HighlightText/GrayText，普通主题下 disabled 同时使用持久 surface 与透明度。disabled 不是授权边界，业务权限必须由路由和服务端继续校验。
 
 ## 动效
 
-颜色过渡使用 motion token；reduced-motion 缩短到 1ms。
+背景与颜色过渡使用 motion token；`prefers-reduced-motion: reduce` 缩短到 1ms。无循环动效和 layout 动画。
 
 ## 主题与定制
 
-使用 surface/border/muted/accent token；forced-colors 使用 LinkText/ButtonText/Highlight。
+使用 surface/border/subtle/muted/ink/accent token；不硬编码品牌色。forced-colors 分别使用 LinkText、ButtonText、Highlight/HighlightText 和 GrayText。
 
 ## SSR 与 Next.js
 
-纯确定性 nav。Next Link 可由上层包装/路由适配，核心不依赖 next/navigation；首屏 value/items 应一致。
+服务端输出确定性 nav、current、disabled link/button、Badge 与 SafeArea；render 不读取 `window`/`document`。真实 `hydrateRoot` 覆盖零 recoverable error 以及 hydration 后 button 路由更新。核心不依赖 `next/navigation`；需要 Next 路由时可让 link 保留 `href`，在 `item.onClick` 中 `preventDefault()` 后交给 router。服务端与客户端首屏 `value`、items、locale 和 label 必须一致。
 
 ## RTL 与国际化
 
-flex 顺序继承 dir；路由 key 不本地化，label/ariaLabel/badgeLabel 由业务翻译。默认 nav 名称支持中文/英文。
+flex 与逻辑 Badge 偏移继承最近的 `dir`；Safe Area 使用物理 left/right inset，避免横屏刘海。路由 key 不本地化，label/ariaLabel/badgeLabel 由业务翻译。默认 nav 名称支持中文/英文。长标签保留完整可访问文本，视觉在单行边界内省略；NarrowLongLabels Story 固定覆盖 320px/四项/长中英文类文案。
 
 ## 浏览器与 WebView
 
-原生 link/button 与 flex，兼容 Chrome/WebView 70+、iOS 13+；横屏低高度保持至少 44px。
+完整支持矩阵为 Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chrome/WebView 70+ 与 iOS 13+ 仅用于构建产物旧语法静态扫描，不代表完整运行时承诺；Chromium/WebView 79–88 与 iOS 13–14 属观察档。焦点只使用基础 `:focus`；`safeArea` 需要应用 viewport 配置允许系统 inset，不支持 `env()` 时回退 0。组件没有 ResizeObserver、媒体查询 JS 或 UA 分支。
 
 ## 边界情况与已知限制
 
-item.key 必须唯一。动态删除/禁用当前非受控项会清理旧身份，重新加入时不会意外跳回。组件不 fixed、不拥有浏览历史或路由 pending；异步导航失败时受控 value 应保持原路由。
+动态删除/禁用当前非受控项会清理旧 identity，重新加入时不会意外跳回；重复 key 第一项胜出。空 `href` 按无目的地 button 处理。`ariaLabel` 会覆盖 label 与 Badge 的组合 accessible name。组件不 fixed、不拥有浏览历史、pending、prefetch、target/rel 或路由错误状态；这些由路由适配层负责。异步导航失败时受控 `value` 应保持原路由。少于 2 或多于 5 项仍会渲染，但信息架构与触控宽度不在推荐契约内。
 
 ## 性能预算
 
-O(items)，建议最多五项；无监听、测量和第三方运行时。
+每次 render 对最多五项做 O(n) 去重、current 查找和焦点可用性判断；无监听、测量、ID 生成或第三方运行时。Badge/SafeArea 是共享已有原语。稳定 key 使重排复用既有 link/button DOM；变更 `href` 有无会按契约更换元素类型。
 
 ## 测试证据
 
-- Unit: link/button、current、controlled null、动态 remove/disable 归一、可取消点击、Badge 名称、安全区和 locale
-- Story interaction: `RouteInteraction` 验证 button route 的当前态切换；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3675 B / 32768 B 预算，组合 Brotli 3255 B；共享样式由应用单独导入一次。
-- SSR/hydration: `TabBar.ssr.test.tsx`
-- RTL: 原生 flex 继承，视觉待补
-- Reduced motion: CSS 实现
-- Mobile Chromium/WebKit E2E: `connects tab panels, primary navigation and read-only progress semantics` 在两种引擎断言 navigation、原生 link、button 当前态、badge 名称、disabled 与 44px 目标
-- Chromatic Light/Dark: 发布后建立
-- Real device: 待补
+- 本轮 Unit/SSR/hydration：`pnpm --filter @meu/mobile exec vitest run src/TabBar/TabBar.test.tsx src/TabBar/TabBar.ssr.test.tsx src/TabBar/TabBar.hydration.test.tsx --maxWorkers=1`，3 files / 15 tests 通过。覆盖 link/button/current、受控 null、aria-labelledby、React 19 ref、Badge 名称、可取消事件、disabled link/button、原生 Tab/Enter、dynamic remove/disable/reorder、duplicate first-wins、普通重渲染/多实例/外部焦点不抢占、locale、SafeArea、SSR 与真实 hydrateRoot。
+- 构建与客户端兼容：`pnpm --filter @meu/mobile build` 通过；随后 `pnpm compat:check` 对 199 个构建文件通过 Chrome 70 / iOS 13 静态基线检查。发布 CSS 不含 TabBar 的 `:focus-visible` 选择器。
+- Story/play 源码：`RouteInteraction`、`ControlledRouter`、`DisabledDestination` 含交互断言；`WithSafeArea`、`NarrowLongLabels`、`RTL`、旋转 viewport 的 `Landscape` 覆盖表现面。本轮未运行 Storybook 浏览器 runner、axe 或截图矩阵，需在合入候选上复验。
+- 包级 typecheck：`pnpm --filter @meu/mobile typecheck` 最终重跑通过。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4833 B / 32768 B 预算，组合 Brotli 4281 B；共享样式由应用单独导入一次。
+- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖 current、原生目标与动态切换，批次整页 Light/Dark axe WCAG A/AA 也通过。
+- Reduced motion / forced-colors / RTL / Safe Area：有代码与 Story 覆盖，本轮没有真实浏览器视觉证据。
+- Chromatic Light/Dark：本轮按统一部署策略不运行；全部组件冻结后集中验证。
+- iOS Safari/VoiceOver、Android Chrome/TalkBack、横屏刘海与 200% 字号真机：待验证。
 
 ## V2 优化记录
 
 ### 待优化
 
-补 Next 路由示例、横屏真机与读屏证据；基础双引擎 link/button/current 路径已完成。
+运行 Storybook axe/视觉矩阵与隔离 Next 路由示例；补横屏刘海、200% 字号、iOS Safari/VoiceOver 与 Android Chrome/TalkBack 真机证据。
 
 ### 已完成
 
-冻结 link/button、aria-current、Badge、安全区、44px、横屏与 forced-colors 契约；补隔离 Next H5/hydration 证据。
+冻结稳定 link/button 根语义、`aria-current`、Badge、Safe Area、dynamic identity、duplicate first-wins、焦点接管、44px、横屏、RTL、forced-colors、reduced-motion 与 React 19 ref 契约；补 Node SSR 与真实 hydration 证据及受控/禁用 Story play。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                        | 迁移说明           |
-| ---------- | ------ | ------------ | ------------------------------------------- | ------------------ |
-| 2026-08-29 | 未发布 | feature      | badgeLabel/ariaLabel 与横屏高对比           | 新属性可选，无破坏 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/current/target 证据 | 无                 |
+| 日期       | 版本   | 类型         | 内容                                                                               | 迁移说明                                                           |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 2026-08-29 | 未发布 | fix          | disabled href 保持 anchor/link identity，SSR 起移除 live URL；支持 aria-labelledby | disabled href 不再降为 button；依赖 button 查询的调用方需改为 link |
+| 2026-08-29 | 未发布 | fix          | 动态 key 去重、重排保态与删除/禁用焦点接管                                         | 重复 key 现在只渲染第一项                                          |
+| 2026-08-29 | 未发布 | a11y         | 基线兼容的始终可见 focus、forced-colors 分态、横屏 inline Safe Area                | 点击后可能保留焦点环，换取 Chrome 70/iOS 13 可靠键盘指示           |
+| 2026-08-29 | 未发布 | verification | 增加真实 hydrateRoot、语义/键盘/ref/动态 identity 测试与 Story play                | 无                                                                 |
+| 2026-08-29 | 未发布 | feature      | badgeLabel/ariaLabel 与横屏高对比                                                  | 新属性可选，无破坏                                                 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/current/target 证据                                        | 无                                                                 |
