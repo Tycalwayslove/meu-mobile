@@ -66,6 +66,47 @@ describe("NumberKeyboard", () => {
     expect(onOpenChange).toHaveBeenNthCalledWith(3, false, { reason: "confirm" });
   });
 
+  it("routes Escape only to the most recently opened keyboard", () => {
+    const onFirstOpenChange = vi.fn();
+    const onSecondOpenChange = vi.fn();
+    const { rerender } = render(
+      <>
+        <NumberKeyboard open aria-label="第一层键盘" onOpenChange={onFirstOpenChange} />
+        <NumberKeyboard
+          open
+          aria-label="第二层键盘"
+          closeOnEscape={false}
+          onOpenChange={onSecondOpenChange}
+        />
+      </>
+    );
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onFirstOpenChange).not.toHaveBeenCalled();
+    expect(onSecondOpenChange).not.toHaveBeenCalled();
+
+    rerender(
+      <>
+        <NumberKeyboard open aria-label="第一层键盘" onOpenChange={onFirstOpenChange} />
+        <NumberKeyboard open aria-label="第二层键盘" onOpenChange={onSecondOpenChange} />
+      </>
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onFirstOpenChange).not.toHaveBeenCalled();
+    expect(onSecondOpenChange).toHaveBeenCalledWith(false, { reason: "escape" });
+
+    onSecondOpenChange.mockClear();
+    rerender(
+      <>
+        <NumberKeyboard open aria-label="第一层键盘" onOpenChange={onFirstOpenChange} />
+        <NumberKeyboard open={false} aria-label="第二层键盘" />
+      </>
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onFirstOpenChange).toHaveBeenCalledWith(false, { reason: "escape" });
+    expect(onSecondOpenChange).not.toHaveBeenCalled();
+  });
+
   it("keeps the current input focused for pointer users while buttons remain native", () => {
     const input = document.createElement("input");
     document.body.append(input);

@@ -28,6 +28,7 @@ source: packages/mobile/src/NumberKeyboard
 - 非模态底部 Portal 数字键盘，不持有业务值，不使用 Mask、滚动锁或焦点圈定。
 - number/decimal、extra key、全宽 confirm、受控/非受控 open、safe area、关闭按钮和随机数字顺序。
 - 输入、删除、确认和关闭分离；删除键可在按住 600ms 后每 120ms 连续触发。
+- 多实例同时开放时，Escape 只由最后开放的顶层实例响应；顶层关闭 Escape 时不会穿透关闭下层。
 - NumberKeyboardTrigger 提供不会唤起系统软键盘的原生 button 触发器，并合并 Field 的 label/description/error 关联。
 
 ## 何时使用
@@ -61,7 +62,7 @@ Portal layer → panel → optional header → 3×4 key grid → optional confir
 
 ## 表单集成
 
-推荐 `MeuFormNumberKeyboard` 绑定 React Hook Form；adapter 负责 dirty/touched、错误关联、校验焦点和字符拼接。核心组件不依赖表单库。
+推荐 `MeuFormNumberKeyboard` 绑定 React Hook Form。打开键盘及焦点在 trigger 与 Portal 键盘间移动不触发 touched；确认、关闭按钮、Escape 或焦点离开整个复合控件时标记 touched。输入和删除可以制造 dirty，单纯关闭不会。受控调用方拒绝 open 不触发 touched，拒绝 close 仍记录已经完成的用户交互。需要变更值或 touched 时，adapter 先更新 RHF，再调用消费方回调；核心组件不依赖表单库。
 
 ## Props
 
@@ -82,11 +83,13 @@ NumberKeyboard ref 指向 panel；Trigger ref 指向 button。组件不提供命
 
 ## 键盘操作
 
-| 按键            | 行为                       |
-| --------------- | -------------------------- |
-| Tab / Shift+Tab | 遍历原生按键，不圈定焦点   |
-| Enter / Space   | 激活聚焦按键               |
-| Escape          | `closeOnEscape` 时请求收起 |
+| 按键            | 行为                                        |
+| --------------- | ------------------------------------------- |
+| Tab / Shift+Tab | 遍历原生按键，不圈定焦点                    |
+| Enter / Space   | 激活聚焦按键                                |
+| Escape          | 仅顶层开放实例在 `closeOnEscape` 时请求收起 |
+
+开放顺序决定 Escape 层级；顶层实例设置 `closeOnEscape=false` 时会阻止事件穿透到更早开放的实例。顶层关闭或卸载后，下一层才取得响应权。
 
 ## 触摸与手势
 
@@ -129,11 +132,11 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 ## 测试证据
 
-- Unit: `NumberKeyboard.test.tsx`
+- Unit: `NumberKeyboard.test.tsx`，覆盖 SSR、输入来源、关闭原因、焦点保持、连续删除、禁用/本地化/随机顺序，以及多实例 Escape 层级
 - Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 5356 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 4769 B / 32768 B 预算，组合 Brotli 4719 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 5510 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 4926 B / 32768 B 预算，组合 Brotli 4862 B；共享样式由应用单独导入一次。
 - SSR/hydration: Unit 已覆盖服务端渲染；开放 Portal hydration 仍待专门证明
 - RTL: 待补
 - Reduced motion: 待补
@@ -153,6 +156,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 
 - V1 已采用值与显示分离、非模态 Portal、原生按键、关闭原因、连删节奏和安全边界声明。
 - Trigger 无损合并 Field 命名/说明，并移除 button 上无效的 `aria-required` API；form adapter 的值可进入原生 FormData。
+- Escape 按开放栈只交给顶层实例，关闭或卸载后自动移交下一层。
 
 ## 变更记录
 
@@ -160,3 +164,4 @@ closed 状态服务端不输出 Portal 内容；客户端打开。randomOrder �
 | ---------- | ------ | -------- | ------------------------------------------ | ----------------------------------------------------------- |
 | 2026-08-28 | 未发布 | behavior | Trigger 合并 Field 语义并移除无效 required | 不再向 Trigger 传 `aria-required`；在 Field 上声明 required |
 | 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                       | 无                                                          |
+| 2026-08-29 | 未发布 | behavior | Escape 仅由最后开放的顶层实例响应          | 无                                                          |

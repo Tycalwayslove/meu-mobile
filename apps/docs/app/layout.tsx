@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s — Meu Mobile"
   },
   description:
-    "面向 Next.js H5 的移动端 React 组件库，内置完整表单集成，并为 uni-app 预留适配边界。",
+    "面向 Next.js H5 的移动端 React 组件库，内置表单适配机制，并为 uni-app 预留适配边界。",
   keywords: ["Meu Mobile", "React", "Next.js", "H5", "组件库", "Vanilla Extract"],
   openGraph: {
     title: "Meu Mobile",

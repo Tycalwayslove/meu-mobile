@@ -85,7 +85,7 @@ export const componentCategories: readonly ComponentCategory[] = [
 const defaultHighlights: Record<ComponentCategoryId, readonly string[]> = {
   foundation: ["设计 Token 驱动", "SSR 安全", "Chrome 70 / iOS 13+"],
   "actions-feedback": ["原生交互语义", "焦点与滚动治理", "reduced-motion"],
-  "data-entry": ["受控与非受控", "键盘与读屏", "完整表单适配"],
+  "data-entry": ["受控与非受控", "键盘与读屏", "系统表单适配"],
   navigation: ["稳定状态身份", "键盘等价路径", "路由解耦"],
   information: ["内容优先", "深色主题", "可组合插槽"],
   collections: ["触摸与键盘等价", "性能边界", "降级路径"],
@@ -272,7 +272,7 @@ export const componentDocs: readonly ComponentDoc[] = [
   }),
   {
     category: "data-entry",
-    description: "React Hook Form + Zod 的完整表单作用域、错误映射和首次错误聚焦。",
+    description: "React Hook Form + Zod 的表单作用域、错误映射和首次错误聚焦。",
     highlights: ["React Hook Form", "Zod", "嵌套与数组字段"],
     name: "Form",
     packageName: "@meu/form-react",

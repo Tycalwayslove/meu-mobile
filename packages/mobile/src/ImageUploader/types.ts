@@ -131,7 +131,7 @@ export type ImageUploaderRef = {
   input: HTMLInputElement | null;
   /** Current uploader group element. */
   nativeElement: HTMLDivElement | null;
-  /** Restarts a failed task by ID unless the uploader is disabled or read-only. */
+  /** Restarts a failed task unless disabled, read-only, or external values have overfilled capacity. */
   retry: (taskId: string) => void;
 };
 
@@ -148,7 +148,7 @@ export type ImageUploaderProps = Omit<
   accept?: string;
   /** Visible and accessible label for adding an image. Defaults to localized text. */
   addLabel?: string;
-  /** Transforms or rejects each accepted file before upload; return `null` to reject it. */
+  /** Transforms each accepted file before upload; returning `null` or rejecting rejects that file. */
   beforeUpload?: (file: File, files: readonly File[]) => File | null | Promise<File | null>;
   /** Native capture hint for camera- or microphone-capable file inputs. */
   capture?: InputHTMLAttributes<HTMLInputElement>["capture"];
@@ -162,7 +162,7 @@ export type ImageUploaderProps = Omit<
   disabled?: boolean;
   /** CSS `object-fit` used for completed and pending thumbnails. @defaultValue "cover" */
   imageFit?: ImageFit;
-  /** Maximum completed-plus-active item count; non-negative values also disable the add control at the limit. */
+  /** Maximum completed-plus-queued item count, including failed tasks reserved for retry. */
   maxCount?: number;
   /** Byte limit, or predicate returning `true` when a file must be rejected. */
   maxSize?: number | ((file: File) => boolean);
@@ -180,7 +180,7 @@ export type ImageUploaderProps = Omit<
   onDelete?: (item: ImageUploaderItem) => boolean | void | Promise<boolean | void>;
   /** Called after a completed thumbnail opens the built-in viewer. */
   onPreview?: (item: ImageUploaderItem, index: number) => void;
-  /** Called for each validation stage that rejects files, with the full selection and stage results. */
+  /** Called for each validation stage, rejected preprocessing hook, or capacity-blocked retry. */
   onReject?: (details: ImageUploaderRejectDetails) => void;
   /** Called whenever pending, uploading, or failed task state changes. */
   onUploadQueueChange?: (tasks: readonly ImageUploaderTask[]) => void;

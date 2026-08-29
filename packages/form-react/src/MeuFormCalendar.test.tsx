@@ -102,6 +102,7 @@ describe("MeuFormCalendar", () => {
             label="纪元日期"
             adapter={numericDateAdapter}
             defaultMonth={0}
+            serializeValue={(value) => value}
           />
         </MeuForm>
       );
@@ -111,6 +112,7 @@ describe("MeuFormCalendar", () => {
     const calendar = screen.getByRole("group", { name: "纪元日期" });
     const selected = calendar.querySelector<HTMLButtonElement>('[aria-pressed="true"]');
     expect(selected).not.toBeNull();
+    expect(new FormData(calendar.closest("form")!).get("epochDate")).toBe("0");
   });
 
   it("writes single and complete range selections into their exact field shapes", async () => {
@@ -125,6 +127,12 @@ describe("MeuFormCalendar", () => {
     fireEvent.click(rangeStart);
     fireEvent.click(rangeEnd);
     expect(screen.getByTestId("dirty").textContent).toBe("dirty");
+    const formElement = calendars[0]!.closest("form")!;
+    expect(new FormData(formElement).getAll("deliveryDate")).toEqual(["2026-08-10"]);
+    expect(new FormData(formElement).getAll("deliveryWindow")).toEqual([
+      "2026-08-12",
+      "2026-08-15"
+    ]);
 
     fireEvent.click(screen.getByRole("button", { name: "提交订单" }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
@@ -145,5 +153,30 @@ describe("MeuFormCalendar", () => {
       const activeElement = document.activeElement;
       expect(activeElement && activeElement.getAttribute("data-date")).toBeTruthy();
     });
+  });
+
+  it("omits empty and disabled calendar selections from native FormData", () => {
+    type DisabledValues = { disabledDate: Date | null; emptyDate: Date | null };
+    function DisabledForm() {
+      const form = useMeuForm<DisabledValues>({
+        defaultValues: { disabledDate: date(10), emptyDate: null }
+      });
+      return (
+        <MeuForm form={form} onSubmit={vi.fn()}>
+          <MeuFormCalendar<DisabledValues>
+            name="disabledDate"
+            label="停用日期"
+            defaultMonth={date(1)}
+            disabled
+          />
+          <MeuFormCalendar<DisabledValues> name="emptyDate" label="空日期" defaultMonth={date(1)} />
+        </MeuForm>
+      );
+    }
+
+    render(<DisabledForm />);
+    const formElement = screen.getByRole("group", { name: "停用日期" }).closest("form")!;
+    expect(new FormData(formElement).has("disabledDate")).toBe(false);
+    expect(new FormData(formElement).has("emptyDate")).toBe(false);
   });
 });

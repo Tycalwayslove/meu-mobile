@@ -58,8 +58,21 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
   const inputRef = useRef<HTMLInputElement | null>(null);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const callerInvalid =
+    ariaInvalid === true ||
+    ariaInvalid === "true" ||
+    ariaInvalid === "grammar" ||
+    ariaInvalid === "spelling";
   const invalid =
-    Boolean(ariaInvalid) || status === "error" || Boolean(fieldContext && fieldContext.invalid);
+    callerInvalid || status === "error" || Boolean(fieldContext && fieldContext.invalid);
+  const resolvedAriaInvalid =
+    ariaInvalid === "grammar" || ariaInvalid === "spelling"
+      ? ariaInvalid
+      : invalid
+        ? true
+        : ariaInvalid === false || ariaInvalid === "false"
+          ? ariaInvalid
+          : undefined;
   const classes = input({ clearable, size, status: invalid ? "error" : status });
   const clearLabel = config.locale === "en-US" ? "Clear input" : "清除输入";
 
@@ -90,7 +103,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
         disabled={disabled}
         readOnly={readOnly}
         aria-describedby={describedBy}
-        aria-invalid={invalid || undefined}
+        aria-invalid={resolvedAriaInvalid}
         data-meu-component="text-input"
         data-size={size}
         data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}

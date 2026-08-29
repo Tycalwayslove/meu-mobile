@@ -8,6 +8,8 @@
 export type {
   MeuBooleanFieldPath,
   MeuCollectionFieldPath,
+  MeuFormDataSerialization,
+  MeuFormDataValue,
   MeuNumberFieldPath,
   MeuSelectionFieldPath,
   MeuStringFieldPath

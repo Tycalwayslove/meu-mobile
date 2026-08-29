@@ -88,6 +88,34 @@ function ServerErrorsExample() {
   );
 }
 
+function MultipleServerFormsExample() {
+  const first = useMeuForm<ServerValues>({ defaultValues: { contact: "", storeName: "" } });
+  const second = useMeuForm<ServerValues>({ defaultValues: { contact: "", storeName: "" } });
+  return (
+    <>
+      <MeuForm form={first} onSubmit={() => undefined} aria-label="第一个表单">
+        <MeuFormTextInput<ServerValues> name="contact" label="第一个联系人" />
+        <MeuFormTextInput<ServerValues> name="storeName" label="第一个店铺名称" />
+      </MeuForm>
+      <MeuForm form={second} onSubmit={() => undefined} aria-label="第二个表单">
+        <MeuFormTextInput<ServerValues> name="storeName" label="第二个店铺名称" />
+        <MeuFormTextInput<ServerValues> name="contact" label="第二个联系人" />
+        <Button
+          type="button"
+          onClick={() =>
+            applyMeuFormErrors(second, {
+              contact: "联系人不可用",
+              storeName: "店铺名称已存在"
+            })
+          }
+        >
+          校验第二个表单
+        </Button>
+      </MeuForm>
+    </>
+  );
+}
+
 type LifecycleValues = { name: string };
 
 function LifecycleExample() {
@@ -170,6 +198,16 @@ describe("MeuForm advanced integration", () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "店铺名称" }))
     );
+  });
+
+  it("orders server-error focus inside the owning form when field names are repeated", async () => {
+    render(<MultipleServerFormsExample />);
+    fireEvent.click(screen.getByRole("button", { name: "校验第二个表单" }));
+
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "第二个店铺名称" }))
+    );
+    expect(document.activeElement).not.toBe(screen.getByRole("textbox", { name: "第一个联系人" }));
   });
 
   it("exposes watch, dirty, touched, trigger and reset lifecycle", async () => {

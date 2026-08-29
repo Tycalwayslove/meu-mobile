@@ -72,6 +72,37 @@ function FocusTrapHarness({
   );
 }
 
+function FocusOrderHarness() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap({ active: true, containerRef, restoreFocus: false });
+  return (
+    <div ref={containerRef} role="dialog" aria-label="Ordered" tabIndex={-1}>
+      <button type="button" tabIndex={-1}>
+        Programmatic only
+      </button>
+      <fieldset disabled>
+        <button type="button">Disabled descendant</button>
+      </fieldset>
+      {/* Positive tab order is intentional: the test verifies browser ordering semantics. */}
+      {/* eslint-disable-next-line jsx-a11y/tabindex-no-positive */}
+      <button type="button" tabIndex={2}>
+        Second positive
+      </button>
+      {/* eslint-disable-next-line jsx-a11y/tabindex-no-positive */}
+      <button type="button" tabIndex={1}>
+        First positive
+      </button>
+      <label>
+        <input type="radio" name="choice" defaultChecked /> Checked
+      </label>
+      <button type="button">Zero</button>
+      <label>
+        <input type="radio" name="choice" /> Unchecked
+      </label>
+    </div>
+  );
+}
+
 describe("overlay hooks", () => {
   it("reference-counts body locks and compensates the RTL scrollbar edge", () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 1000 });
@@ -125,6 +156,8 @@ describe("overlay hooks", () => {
     trigger.focus();
     const { root } = render(<FocusTrapHarness label="Outer" />);
     await flushFocusTrap();
+    expect(trigger.hasAttribute("inert")).toBe(true);
+    expect(trigger.getAttribute("aria-hidden")).toBe("true");
     const hidden = Array.from(document.querySelectorAll("button")).find(
       (button) => button.textContent === "Hidden Outer"
     );
@@ -142,6 +175,28 @@ describe("overlay hooks", () => {
     act(() => root.unmount());
     roots.pop();
     expect(document.activeElement).toBe(trigger);
+    expect(trigger.hasAttribute("inert")).toBe(false);
+    expect(trigger.hasAttribute("aria-hidden")).toBe(false);
+  });
+
+  it("uses native tab order and excludes programmatic, disabled and unchecked radio targets", async () => {
+    render(<FocusOrderHarness />);
+    await flushFocusTrap();
+    expect(document.activeElement).toBe(
+      Array.from(document.querySelectorAll("button")).find(
+        (button) => button.textContent === "First positive"
+      )
+    );
+    const zero = Array.from(document.querySelectorAll("button")).find(
+      (button) => button.textContent === "Zero"
+    );
+    if (zero) zero.focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Tab" }));
+    expect(document.activeElement).toBe(
+      Array.from(document.querySelectorAll("button")).find(
+        (button) => button.textContent === "First positive"
+      )
+    );
   });
 
   it("only lets the topmost nested trap handle Escape", async () => {
@@ -151,6 +206,8 @@ describe("overlay hooks", () => {
     await flushFocusTrap();
     const inner = render(<FocusTrapHarness label="Inner" onEscape={innerEscape} />);
     await flushFocusTrap();
+    expect(outer.host.hasAttribute("inert")).toBe(true);
+    expect(outer.host.getAttribute("aria-hidden")).toBe("true");
 
     document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
     expect(innerEscape).toHaveBeenCalledTimes(1);
@@ -158,6 +215,8 @@ describe("overlay hooks", () => {
 
     act(() => inner.root.unmount());
     roots.pop();
+    expect(outer.host.hasAttribute("inert")).toBe(false);
+    expect(outer.host.hasAttribute("aria-hidden")).toBe(false);
     document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Escape" }));
     expect(outerEscape).toHaveBeenCalledTimes(1);
     expect(outer.host.isConnected).toBe(true);

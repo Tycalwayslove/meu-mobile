@@ -188,7 +188,7 @@ describe("Selector", () => {
     fireEvent.click(screen.getByRole("radio", { name: "自提" }));
     expect(screen.getByRole("radio", { name: "自提" })).toHaveProperty("checked", true);
     const form = screen.getByTestId<HTMLFormElement>("form");
-    form.reset();
+    act(() => form.reset());
     expect(screen.getByRole("radio", { name: "配送" })).toHaveProperty("checked", true);
     expect(new FormData(form).get("shipping")).toBe("delivery");
     void act(() => vi.runAllTimers());

@@ -2,11 +2,16 @@ import { Badge, Button, Cell, List, Progress, Tag } from "@meu/mobile";
 import Link from "next/link";
 
 import { componentCategories, componentDocs, getComponentsByCategory } from "./_data/components";
+import { getComponentDocument } from "./_data/component-document";
 import styles from "./page.module.css";
 
+const verificationCount = componentDocs.filter((component) => {
+  const document = getComponentDocument(component.slug);
+  return document ? document.frontmatter.status === "verification" : false;
+}).length;
 const metrics = [
   { label: "文档组件", value: String(componentDocs.length).padStart(2, "0") },
-  { label: "表单适配", value: "完整" },
+  { label: "验证中", value: `${verificationCount}/${componentDocs.length}` },
   { label: "主题模式", value: "03" }
 ] as const;
 
@@ -22,8 +27,8 @@ export default function HomePage() {
             移动端组件。
           </h1>
           <p className={styles.lead}>
-            面向 Next.js H5 的生产级组件系统。设计 Token、表单绑定、无障碍与旧 WebView
-            兼容从第一天起就是同一套契约。
+            面向 Next.js H5 的 V2 验证版组件系统。设计 Token、表单绑定、无障碍与旧 WebView
+            兼容正在按同一套契约验收。
           </p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryLink} href="/getting-started">
@@ -94,7 +99,7 @@ export default function HomePage() {
           </article>
           <article>
             <span>02</span>
-            <h3>完整表单链路</h3>
+            <h3>表单绑定契约</h3>
             <p>组件原生支持受控与非受控，并提供 React Hook Form、Zod 与错误聚焦机制。</p>
           </article>
           <article>

@@ -1,63 +1,90 @@
 {
+  "schemaVersion": 1,
+  "generatedBy": "packages/icons-core/scripts/generate-icons.mjs",
   "upstream": {
     "name": "Lucide Icons",
+    "package": "lucide-static",
     "version": "1.34.0",
     "license": "ISC",
-    "licenseFile": "licenses/lucide-isc.txt"
+    "licenseFile": "licenses/lucide-isc.txt",
+    "repository": "https://github.com/lucide-icons/lucide",
+    "gitTag": "1.34.0",
+    "gitCommit": "1a60fd28ed7111bbf6acedc0896f3d83cd73945a",
+    "commitUrl": "https://github.com/lucide-icons/lucide/tree/1a60fd28ed7111bbf6acedc0896f3d83cd73945a",
+    "archiveUrl": "https://registry.npmjs.org/lucide-static/-/lucide-static-1.34.0.tgz",
+    "archiveIntegrity": "sha512-pSUvFhfhvDnhXN1fXerZEMgKLQQ3DneKwFYlqB5ji8OEAN0iPi/qgwQvCkcL519QgMeR66IpS/pT342VyT/g4g=="
   },
   "provenanceAudit": {
-    "status": "incomplete",
-    "reviewed": "2026-08-28",
+    "status": "verified",
+    "reviewed": "2026-08-29",
     "verified": [
-      "Every exported Meu icon ID has a manifest entry.",
-      "The declared Lucide ISC and Feather MIT license texts are distributed with this package.",
-      "Every current icon entry declares modified=false and a Feather MIT license file."
+      "Every exported Meu icon ID maps to a named Lucide source and React export.",
+      "The generator verifies the checked-in upstream SVG and license SHA-256 checksums.",
+      "The optional network audit verifies the fixed npm archive SHA-512 before comparing files.",
+      "Generated TypeScript and this manifest are covered by the offline drift check."
     ],
-    "missing": [
-      "An immutable upstream source URL or commit for Lucide Icons 1.34.0.",
-      "A generation log or geometry checksum tying each local SVG path to that upstream revision."
-    ]
+    "legalReviewRequired": "Engineering verified source identity and reproduced upstream notices; counsel must approve commercial distribution obligations."
   },
   "icons": [
     {
       "id": "chevron-left",
       "upstream": "chevron-left",
+      "upstreamUrl": "https://github.com/lucide-icons/lucide/blob/1a60fd28ed7111bbf6acedc0896f3d83cd73945a/icons/chevron-left.svg",
       "react": "MeuIconChevronLeft",
+      "source": "upstream/lucide-static-1.34.0/icons/chevron-left.svg",
+      "sourceSha256": "a8cd01ec4ad145afd6009f4f0e251d5d1e7b24371ddfda0b0e2a7b64926e9fee",
+      "geometrySha256": "94794b73e9d642ed29676ec1f3e4f2b43824f1ed14be22a9c7e2cf68eb369ffc",
       "modified": false,
-      "license": "MIT",
-      "licenseFile": "licenses/feather-mit.txt"
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
     },
     {
       "id": "check",
       "upstream": "check",
+      "upstreamUrl": "https://github.com/lucide-icons/lucide/blob/1a60fd28ed7111bbf6acedc0896f3d83cd73945a/icons/check.svg",
       "react": "MeuIconCheck",
+      "source": "upstream/lucide-static-1.34.0/icons/check.svg",
+      "sourceSha256": "ebbd505dd0d572905f56834802f84fc28dec31693ab15a203970a9d2ba6c8a23",
+      "geometrySha256": "ab4347e7adf6b32287f8d623f659ef18e4686d9ef0a5d9f56b379024daf16f3e",
       "modified": false,
-      "license": "MIT",
-      "licenseFile": "licenses/feather-mit.txt"
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
     },
     {
       "id": "plus",
       "upstream": "plus",
+      "upstreamUrl": "https://github.com/lucide-icons/lucide/blob/1a60fd28ed7111bbf6acedc0896f3d83cd73945a/icons/plus.svg",
       "react": "MeuIconPlus",
+      "source": "upstream/lucide-static-1.34.0/icons/plus.svg",
+      "sourceSha256": "9604e8eb752dca9b045084f28ba963cfce16bb0d035aa023152361ec6ef54507",
+      "geometrySha256": "3ed1784e53a9252aa47f2392c529dc2078803a22e84522f68ec8165c23f05bb0",
       "modified": false,
-      "license": "MIT",
-      "licenseFile": "licenses/feather-mit.txt"
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
     },
     {
       "id": "search",
       "upstream": "search",
+      "upstreamUrl": "https://github.com/lucide-icons/lucide/blob/1a60fd28ed7111bbf6acedc0896f3d83cd73945a/icons/search.svg",
       "react": "MeuIconSearch",
+      "source": "upstream/lucide-static-1.34.0/icons/search.svg",
+      "sourceSha256": "b3361099cf1f66533154a7ce6609c95e6dfcda5883ffcf1e8dec678bf5cb30e5",
+      "geometrySha256": "7ef625bc9cd6f86bafe04b5b707937af56db855eeb74894d275f2b56b5d3c42e",
       "modified": false,
-      "license": "MIT",
-      "licenseFile": "licenses/feather-mit.txt"
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
     },
     {
       "id": "x",
       "upstream": "x",
+      "upstreamUrl": "https://github.com/lucide-icons/lucide/blob/1a60fd28ed7111bbf6acedc0896f3d83cd73945a/icons/x.svg",
       "react": "MeuIconX",
+      "source": "upstream/lucide-static-1.34.0/icons/x.svg",
+      "sourceSha256": "cac7f746fa2596dd081dfce44e061dcddb79bdb98a488f08cd8d5874fcb52332",
+      "geometrySha256": "7bf13b1e2e2ab7bb7226b828a7b6ded9a6482211bdeafc7a1e61ea450232d212",
       "modified": false,
-      "license": "MIT",
-      "licenseFile": "licenses/feather-mit.txt"
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
     }
   ]
 }

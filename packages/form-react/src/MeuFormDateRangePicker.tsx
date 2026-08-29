@@ -9,10 +9,13 @@ import type {
   DateRangePickerProps,
   PickerTriggerProps
 } from "@meu/mobile";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
+
+import type { MeuFormDataSerialization } from "./adapter-types";
+import { HiddenFormValues, serializeHiddenFormValues } from "./HiddenFormValues";
 
 /**
  * Date range picker props accepted after removing state managed by the form adapter.
@@ -85,6 +88,16 @@ export type MeuFormDateRangePickerProps<
     TFieldValues,
     MeuDateRangePickerFieldPath<TFieldValues, TDate>
   >["rules"];
+  /**
+   * Converts a complete valid range into native `FormData` values. By default the start and end
+   * are emitted as two `YYYY-MM-DD` entries with the same name, so use `FormData.getAll(name)` on
+   * the server. Return a scalar for a single-entry backend contract. This callback is synchronous;
+   * thrown errors or accidental promise results safely omit the field.
+   */
+  serializeValue?: (
+    value: CalendarRange<TDate>,
+    details: { adapter: DateAdapter<TDate> }
+  ) => MeuFormDataSerialization;
   /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
@@ -110,6 +123,7 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
   pickerTitle,
   required = false,
   rules,
+  serializeValue,
   triggerProps,
   ...pickerProps
 }: MeuFormDateRangePickerProps<TFieldValues, TDate>) {
@@ -127,20 +141,32 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
     name,
     ...(rules ? { rules } : {})
   });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
   const currentValue = (
     Array.isArray(field.value) && field.value.length === 2 ? field.value : null
   ) as CalendarRange<TDate> | null;
-  const formattedValue =
+  const currentValueIsValid =
     currentValue !== null &&
     resolvedAdapter.isValid(currentValue[0]) &&
-    resolvedAdapter.isValid(currentValue[1])
-      ? formatValue
-        ? formatValue(currentValue, { adapter: resolvedAdapter })
-        : `${resolvedAdapter.format(currentValue[0], "YYYY-MM-DD")} – ${resolvedAdapter.format(
-            currentValue[1],
-            "YYYY-MM-DD"
-          )}`
-      : undefined;
+    resolvedAdapter.isValid(currentValue[1]);
+  const formattedValue = currentValueIsValid
+    ? formatValue
+      ? formatValue(currentValue, { adapter: resolvedAdapter })
+      : `${resolvedAdapter.format(currentValue[0], "YYYY-MM-DD")} – ${resolvedAdapter.format(
+          currentValue[1],
+          "YYYY-MM-DD"
+        )}`
+    : undefined;
+  const serializedValues = currentValueIsValid
+    ? serializeHiddenFormValues(() =>
+        serializeValue
+          ? serializeValue(currentValue, { adapter: resolvedAdapter })
+          : currentValue.map((value) => resolvedAdapter.format(value, "YYYY-MM-DD"))
+      ).values
+    : [];
   const {
     disabled: triggerDisabled,
     onBlur: triggerOnBlur,
@@ -155,6 +181,12 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
     if (resolvedOpen === nextOpen) return;
     if (!controlledOpen) setUncontrolledOpen(nextOpen);
     if (onOpenChange) onOpenChange(nextOpen, details);
+  }
+
+  function markOpenCycleTouched() {
+    if (touchedOpenCycleRef.current) return;
+    touchedOpenCycleRef.current = true;
+    field.onBlur();
   }
 
   return (
@@ -175,7 +207,7 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
-          field.onBlur();
+          if (!resolvedOpen) field.onBlur();
           if (triggerOnBlur) triggerOnBlur(event);
         }}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -183,6 +215,7 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
           if (!event.defaultPrevented) requestOpenChange(true, { reason: "trigger" });
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={serializedValues} />
       <DateRangePicker<TDate>
         {...pickerProps}
         {...(hasTitle
@@ -193,9 +226,13 @@ export function MeuFormDateRangePicker<TFieldValues extends FieldValues, TDate =
         open={resolvedOpen}
         returnFocusRef={triggerRef}
         value={currentValue}
-        {...(onCancel ? { onCancel } : {})}
+        onCancel={(details) => {
+          markOpenCycleTouched();
+          if (onCancel) onCancel(details);
+        }}
         onConfirm={(nextValue) => {
           field.onChange(nextValue);
+          markOpenCycleTouched();
           if (onConfirm) onConfirm(nextValue);
         }}
         onOpenChange={(nextOpen, details) => requestOpenChange(nextOpen, details)}

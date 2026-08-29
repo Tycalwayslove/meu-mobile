@@ -9,7 +9,7 @@ import type {
   TimePickerProps,
   TimeValue
 } from "@meu/mobile";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldPathByValue, FieldValues, UseControllerProps } from "react-hook-form";
@@ -68,11 +68,11 @@ export type MeuFormTimePickerProps<TFieldValues extends FieldValues> =
     label?: ReactNode;
     /** Path of a React Hook Form field that stores a `TimeValue` or an empty value. */
     name: MeuTimePickerFieldPath<TFieldValues>;
-    /** Called when the user cancels without committing a new form value. */
+    /** Called after cancellation marks the field touched without committing the draft time. */
     onCancel?: TimePickerProps["onCancel"];
-    /** Called after the confirmed time is written to the form. */
+    /** Called after the confirmed time is written and the field is marked touched. */
     onConfirm?: TimePickerProps["onConfirm"];
-    /** Called when popup visibility is requested to change, with the next state and reason. */
+    /** Called last for a visibility request; close callbacks observe the updated touched state. */
     onOpenChange?: (open: boolean, details: TimePickerOpenChangeDetails) => void;
     /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
     open?: boolean;
@@ -122,6 +122,10 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
     name,
     ...(rules ? { rules } : {})
   });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
   const currentValue = (field.value === undefined ? null : field.value) as TimeValue | null;
   const formattedValue =
     currentValue !== null && isValidTimeValue(currentValue)
@@ -149,6 +153,12 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
     if (onOpenChange) onOpenChange(nextOpen, details);
   }
 
+  function markOpenCycleTouched() {
+    if (touchedOpenCycleRef.current) return;
+    touchedOpenCycleRef.current = true;
+    field.onBlur();
+  }
+
   return (
     <Field
       label={label}
@@ -167,7 +177,7 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
-          field.onBlur();
+          if (!resolvedOpen) field.onBlur();
           if (triggerOnBlur) triggerOnBlur(event);
         }}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -186,9 +196,13 @@ export function MeuFormTimePicker<TFieldValues extends FieldValues>({
         precision={precision}
         returnFocusRef={triggerRef}
         value={currentValue}
-        {...(onCancel ? { onCancel } : {})}
+        onCancel={(details) => {
+          markOpenCycleTouched();
+          if (onCancel) onCancel(details);
+        }}
         onConfirm={(nextValue) => {
           field.onChange(nextValue);
+          markOpenCycleTouched();
           if (onConfirm) onConfirm(nextValue);
         }}
         onOpenChange={(nextOpen, details) => requestOpenChange(nextOpen, details)}

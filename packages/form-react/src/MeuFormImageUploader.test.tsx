@@ -54,12 +54,17 @@ describe("MeuFormImageUploader", () => {
     const input = screen.getByLabelText<HTMLInputElement>(/商品图片/, {
       selector: 'input[type="file"]'
     });
+    const formElement = input.form!;
+    expect(new FormData(formElement).has("images")).toBe(false);
     fireEvent.change(input, {
       target: { files: [new File(["photo"], "product.jpg", { type: "image/jpeg" })] }
     });
 
     await waitFor(() => expect(screen.getByTestId("dirty").textContent).toBe("dirty"));
     await waitFor(() => expect(screen.getByTestId("touched").textContent).toBe("touched"));
+    await waitFor(() =>
+      expect(new FormData(formElement).getAll("images")).toEqual(["/uploads/product.jpg"])
+    );
     fireEvent.click(screen.getByRole("button", { name: "提交" }));
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith(
@@ -111,5 +116,45 @@ describe("MeuFormImageUploader", () => {
       }
     );
     await waitFor(() => expect(onChange).toHaveBeenCalledWith([item], { item, reason: "upload" }));
+  });
+
+  it("supports a custom item contract, reset, and disabled omission", () => {
+    const initialItems: ImageUploaderItem[] = [
+      { alt: "主图", url: "/main.jpg" },
+      { alt: "细节图", url: "/detail.jpg" }
+    ];
+
+    function SerializationForm({ disabled = false }: { disabled?: boolean }) {
+      const form = useMeuForm<Values>({ defaultValues: { images: initialItems } });
+      return (
+        <MeuForm form={form} onSubmit={vi.fn()}>
+          <MeuFormImageUploader<Values>
+            name="images"
+            label="图片"
+            disabled={disabled}
+            upload={() => Promise.resolve(initialItems[0]!)}
+            serializeValue={(items) => JSON.stringify(items.map((item) => item.url))}
+          />
+          <Button type="button" onClick={() => form.reset({ images: [] })}>
+            重置
+          </Button>
+        </MeuForm>
+      );
+    }
+
+    const { unmount } = render(<SerializationForm />);
+    const formElement = screen.getByLabelText<HTMLInputElement>("图片", {
+      selector: 'input[type="file"]'
+    }).form!;
+    expect(new FormData(formElement).getAll("images")).toEqual(['["/main.jpg","/detail.jpg"]']);
+    fireEvent.click(screen.getByRole("button", { name: "重置" }));
+    expect(new FormData(formElement).has("images")).toBe(false);
+    unmount();
+
+    render(<SerializationForm disabled />);
+    const disabledForm = screen.getByLabelText<HTMLInputElement>("图片", {
+      selector: 'input[type="file"]'
+    }).form!;
+    expect(new FormData(disabledForm).has("images")).toBe(false);
   });
 });

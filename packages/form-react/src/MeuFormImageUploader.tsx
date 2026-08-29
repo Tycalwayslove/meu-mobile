@@ -6,6 +6,9 @@ import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
 import type { FocusEvent, ReactNode } from "react";
 
+import type { MeuFormDataSerialization } from "./adapter-types";
+import { HiddenFormValues, serializeHiddenFormValues } from "./HiddenFormValues";
+
 import type {
   ImageUploaderChangeDetails,
   ImageUploaderItem,
@@ -36,6 +39,14 @@ export type MeuFormImageUploaderProps<TFieldValues extends FieldValues> = Omit<
   required?: boolean;
   /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  /**
+   * Converts the non-empty completed item array into native `FormData` values. By default each
+   * item contributes its `url` as a repeated same-name entry in item order; the transient native
+   * file selection is not submitted. Return JSON or another scalar for a single-entry contract.
+   * This callback must be synchronous; thrown errors or accidental promise results safely omit the
+   * field.
+   */
+  serializeValue?: (items: readonly ImageUploaderItem[]) => MeuFormDataSerialization;
 };
 
 /**
@@ -52,6 +63,7 @@ export function MeuFormImageUploader<TFieldValues extends FieldValues>({
   onChange,
   required = false,
   rules,
+  serializeValue,
   ...uploaderProps
 }: MeuFormImageUploaderProps<TFieldValues>) {
   const { control } = useFormContext<TFieldValues>();
@@ -62,6 +74,13 @@ export function MeuFormImageUploader<TFieldValues extends FieldValues>({
     ...(rules ? { rules } : {})
   });
   const items = Array.isArray(field.value) ? (field.value as ImageUploaderItem[]) : [];
+  const resolvedDisabled = Boolean(disabled || field.disabled);
+  const serializedValues =
+    items.length === 0
+      ? []
+      : serializeHiddenFormValues(() =>
+          serializeValue ? serializeValue(items) : items.map((item) => item.url)
+        ).values;
 
   return (
     <Field
@@ -70,14 +89,14 @@ export function MeuFormImageUploader<TFieldValues extends FieldValues>({
       required={required}
       error={fieldState.error ? fieldState.error.message : undefined}
     >
+      <HiddenFormValues disabled={resolvedDisabled} name={field.name} values={serializedValues} />
       <ImageUploader
         {...uploaderProps}
         ref={(handle) => {
           uploaderRef.current = handle;
           field.ref(handle ? handle.input : null);
         }}
-        name={field.name}
-        disabled={Boolean(disabled || field.disabled)}
+        disabled={resolvedDisabled}
         status={fieldState.invalid ? "error" : "default"}
         value={items}
         onChange={(nextItems, details) => {

@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { IndexList } from "./IndexList";
 import type { IndexListRef } from "./types";
 
@@ -41,6 +42,18 @@ describe("IndexList", () => {
     expect(screen.getByRole("button", { name: "A" }).getAttribute("aria-current")).toBe("location");
     const scrollBody = document.querySelector<HTMLElement>("[data-meu-index-list-body]");
     expect(scrollBody && scrollBody.tabIndex).toBe(0);
+  });
+
+  it("localizes the owned content region and default index label", () => {
+    render(
+      <ConfigProvider locale="en-US">
+        <IndexList sections={sections} />
+      </ConfigProvider>
+    );
+
+    expect(screen.getByRole("region", { name: "Indexed content" })).toBeTruthy();
+    expect(screen.getByRole("navigation", { name: "Section index" })).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "索引内容" })).toBeNull();
   });
 
   it("scrolls imperatively and reports index activation", () => {

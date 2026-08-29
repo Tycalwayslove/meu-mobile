@@ -2,6 +2,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { NumberKeyboard } from "../NumberKeyboard";
 import { Popup } from "./Popup";
 
 describe("Popup", () => {
@@ -91,6 +92,17 @@ describe("Popup", () => {
       </>
     );
     await waitFor(() => expect(document.activeElement).toBe(screen.getByText("第二层操作")));
+    const firstDialog = document.querySelector<HTMLElement>(
+      '[data-meu-component="popup"][aria-label="第一层"]'
+    );
+    const firstLayer = firstDialog
+      ? firstDialog.closest<HTMLElement>("[data-meu-overlay-layer='popup']")
+      : null;
+    const secondLayer = screen
+      .getByRole("dialog", { name: "第二层" })
+      .closest<HTMLElement>("[data-meu-overlay-layer='popup']");
+    expect(firstLayer ? firstLayer.getAttribute("data-meu-modal-isolated") : null).toBe("true");
+    expect(secondLayer ? secondLayer.hasAttribute("inert") : null).toBe(false);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onSecondChange).toHaveBeenCalledWith(false, { reason: "escape" });
     expect(onFirstChange).not.toHaveBeenCalled();
@@ -106,6 +118,8 @@ describe("Popup", () => {
       </>
     );
     expect(document.body.getAttribute("data-meu-scroll-locked")).toBe("true");
+    expect(firstLayer ? firstLayer.hasAttribute("inert") : null).toBe(false);
+    expect(firstLayer ? firstLayer.hasAttribute("aria-hidden") : null).toBe(false);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onFirstChange).toHaveBeenCalledWith(false, { reason: "escape" });
 
@@ -120,5 +134,70 @@ describe("Popup", () => {
       </>
     );
     expect(document.body.hasAttribute("data-meu-scroll-locked")).toBe(false);
+  });
+
+  it("isolates body and custom-container siblings while preserving their original state", async () => {
+    const bodyBackground = document.createElement("button");
+    bodyBackground.textContent = "页面背景";
+    bodyBackground.setAttribute("aria-hidden", "false");
+    document.body.append(bodyBackground);
+    const preInert = document.createElement("div");
+    preInert.setAttribute("inert", "");
+    document.body.append(preInert);
+    const container = document.createElement("div");
+    const containerBackground = document.createElement("button");
+    containerBackground.textContent = "容器背景";
+    container.append(containerBackground);
+    document.body.append(container);
+
+    const { rerender } = render(
+      <Popup aria-label="自定义容器弹层" container={container} open showCloseButton>
+        弹层内容
+      </Popup>
+    );
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "关闭" }))
+    );
+    const layer = container.querySelector<HTMLElement>("[data-meu-overlay-layer='popup']");
+    const mask = layer ? layer.querySelector<HTMLElement>("[data-meu-component='mask']") : null;
+    expect(bodyBackground.getAttribute("data-meu-modal-isolated")).toBe("true");
+    expect(containerBackground.getAttribute("data-meu-modal-isolated")).toBe("true");
+    expect(layer ? layer.hasAttribute("inert") : null).toBe(false);
+    expect(mask ? mask.hasAttribute("inert") : null).toBe(false);
+
+    rerender(
+      <Popup aria-label="自定义容器弹层" container={container} open={false} showCloseButton>
+        弹层内容
+      </Popup>
+    );
+    await waitFor(() => expect(bodyBackground.hasAttribute("inert")).toBe(false));
+    expect(bodyBackground.getAttribute("aria-hidden")).toBe("false");
+    expect(containerBackground.hasAttribute("aria-hidden")).toBe(false);
+    expect(preInert.hasAttribute("inert")).toBe(true);
+    bodyBackground.remove();
+    preInert.remove();
+    container.remove();
+  });
+
+  it("keeps a controlled non-modal keyboard reachable from the active modal", async () => {
+    const background = document.createElement("button");
+    background.textContent = "页面操作";
+    document.body.append(background);
+    render(
+      <>
+        <Popup aria-label="支付弹层" open>
+          <input aria-label="金额" aria-controls="payment-keyboard" />
+        </Popup>
+        <NumberKeyboard id="payment-keyboard" open aria-label="支付数字键盘" />
+      </>
+    );
+    await waitFor(() => expect(background.getAttribute("data-meu-modal-isolated")).toBe("true"));
+    const keyboardLayer = screen
+      .getByRole("group", { name: "支付数字键盘" })
+      .closest<HTMLElement>("[data-meu-overlay-layer='number-keyboard']");
+    expect(keyboardLayer ? keyboardLayer.hasAttribute("inert") : null).toBe(false);
+    expect(keyboardLayer ? keyboardLayer.hasAttribute("aria-hidden") : null).toBe(false);
+    expect(screen.getByRole("button", { name: "1" }).hasAttribute("disabled")).toBe(false);
+    background.remove();
   });
 });

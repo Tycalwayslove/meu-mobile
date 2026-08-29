@@ -50,11 +50,12 @@ source: packages/form-react/src/MeuForm
 - Zod transform 的输入值与提交值可通过三个泛型分别表达，不再把 transform 后的类型伪装成输入类型。
 - 表单级 `disabled` 会传播到本批次覆盖的文本、选择、数值与分段控件 adapter。
 - adapter 将 `required` 同步给 Field 和适用的原生控件；`MeuForm` 默认 `noValidate=true`，由 React Hook Form 负责验证与错误展示。
-- NumberKeyboard、PasscodeInput、Picker、CascadePicker、TimePicker 与 TreeSelect 提供原生 FormData 值；集合值按同名重复条目保持顺序。
-- 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按页面 DOM 顺序聚焦首个已注册错误字段。
+- NumberKeyboard、PasscodeInput、Picker、CascadePicker、DatePicker、DateRangePicker、Calendar、TimePicker、TreeSelect 与 ImageUploader 都提供明确的原生 FormData 契约；集合值按同名重复条目保持顺序。
+- 服务端错误辅助函数从 `@meu/form-react/server` 导入，并按所属 `MeuForm` 内的 DOM 顺序聚焦首个已注册错误字段；同页多表单的同名字段不会互相干扰。
 - `MeuForm` 透传原生 form 属性，`ref` 指向真实 `HTMLFormElement`。
+- 原生 reset 会先调用消费方 `onReset`；事件未被阻止时，再同步重置 RHF 的值、dirty、touched 与 error 状态。
 
-当前状态为 V2 `implementation`。复杂 Picker、日期、树与上传值的原生 FormData 序列化、全部 adapter 的触碰时点、移动 E2E 和真机证明尚未完成，因此不能标记为 commercial。
+当前状态为 V2 `verification`。复杂 Picker、日期、树与上传值的 adapter、可配置 FormData serializer、移动 E2E 和浏览器集成证据已建立；真机输入法与读屏证明尚未完成，因此不能标记为 commercial。
 
 ## 何时使用
 
@@ -64,7 +65,7 @@ source: packages/form-react/src/MeuForm
 
 - 不把请求、缓存、路由、Toast 或业务状态放入 MeuForm。
 - 不通过 `@meu/form-react` 间接导入 React Hook Form。上游 hooks 和类型应直接从 `react-hook-form` 导入。
-- 不假设 RHF 中存在的任意对象会自动进入 `new FormData(form)`；日期泛型、Calendar 与上传项仍需显式序列化。
+- 不假设 RHF 中存在的任意对象会自动进入 `new FormData(form)`；复杂 adapter 只提交文档定义的安全标量，并允许通过同步 `serializeValue` 显式改写后端契约。
 
 ## 结构与状态
 
@@ -104,7 +105,7 @@ export function StoreForm() {
 
 - 文本、textarea、search、checkbox、switch、stepper、slider 和 rate 保留原生 `name/ref/onBlur/required/disabled`。
 - CheckboxGroup、RadioGroup、Selector 与 SegmentedControl 只有在焦点离开整个复合控件后才调用 RHF `onBlur`，组内移动焦点不会提前变成 touched。
-- 非原生字符串/标量集合通过 hidden successful controls 参与 FormData；`getAll(name)` 按选择顺序返回 Picker、CascadePicker 与 TreeSelect 值。
+- 非原生字符串/标量集合通过 hidden successful controls 参与 FormData；`getAll(name)` 按选择顺序返回 Picker、CascadePicker、TreeSelect、日期范围、Calendar 集合与已完成上传 URL。
 - `rules.required` 决定 RHF 校验；视觉 `required` 同时表达字段必填并下传原生语义。二者需要由调用方保持一致。
 - 默认 `noValidate=true`，避免浏览器气泡与 React Hook Form 错误重复。显式设置 `noValidate={false}` 会启用浏览器原生约束阻断。
 
@@ -119,8 +120,8 @@ export function StoreForm() {
 - `onSubmit(values, event)`：校验通过后触发；Zod transform 存在时 values 是 transform 后类型。
 - `onInvalid(errors, event)`：RHF 校验未通过时触发。
 - adapter 的 `onChange/onBlur`：先更新 RHF value/touched，再调用消费方同名回调；业务回调读取 `getValues()` 时已得到新值。
-- 原生 `onReset/onInput/onChange` 等 form 事件继续透传，但字段状态仍由 RHF 维护。原生 reset 必须配合 `form.reset()`，否则 RHF 状态可能与 DOM 分离。
-- `applyMeuFormErrors(form, errors, options)`：先写入所有 server error，再按 DOM 顺序聚焦首个具名控件；返回实际首字段 path。
+- 原生 `onReset` 先交给消费方；未调用 `preventDefault()` 时，`MeuForm` 会同步执行 `form.reset()`。`onInput/onChange` 等其余 form 事件继续透传。
+- `applyMeuFormErrors(form, errors, options)`：先写入所有 server error，再按所属表单的 DOM 顺序聚焦首个具名控件；返回实际首字段 path。未由 `MeuForm` 承载的裸 RHF 实例保持 document fallback。
 
 ## Ref 与命令式方法
 
@@ -166,8 +167,9 @@ Form 不生成文案。Field、组件默认 label、日期格式和错误消息�
 
 ## 边界情况与已知限制
 
-- DatePicker、DateRangePicker、Calendar 与 ImageUploader 的值类型依赖 adapter、时区或上传协议，尚未提供默认 FormData 序列化，避免静默改变后端 payload。
-- 部分 overlay adapter 的 touched 时点仍需统一为完成、关闭或焦点真正离开后的稳定规则。
+- DatePicker 默认按 active adapter 与 `precision` 输出一个值；DateRangePicker 与 Calendar 默认输出同名重复 `YYYY-MM-DD`，ImageUploader 默认输出同名重复的已完成 URL，瞬态原始 File 不提交。
+- `serializeValue` 可返回一个安全标量、同名重复标量或显式 JSON；它必须同步。抛错、对象和 Promise 结果都会省略该字段，避免 `[object Object]` 与未处理拒绝。`null`、`undefined`、空集合、无效日期和 disabled 同样不进入 FormData。
+- overlay adapter 在打开并把焦点移入 Portal 时保持 untouched；确认、取消、遮罩或 Escape 关闭时才标记 touched。受控模式拒绝打开不会触碰字段，拒绝关闭仍会记录已经发生的用户交互。
 - 仅设置 `required` 不会自动生成 RHF `rules.required`；自动合成会改变校验消息和现有行为，因此当前不隐式处理。
 - 从根入口移除了 React Hook Form wildcard re-export；消费者必须直接依赖并导入 `react-hook-form`。
 
@@ -177,11 +179,11 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 
 ## 测试证据
 
-- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、DOM 顺序聚焦、全局 disabled、required、事件顺序、FormData、嵌套、数组、dirty/touched/reset
+- Unit: `MeuForm.test.tsx`、`MeuForm.integration.test.tsx`、`MeuFormAdapterContract.test.tsx` 与复杂 adapter 测试，覆盖校验、transform、ref、DOM 顺序聚焦、全局 disabled、required、事件顺序、FormData、嵌套、数组、dirty/touched，以及原生 reset 同步与取消
 - Story interaction: `check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 105390 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 37473 B / 65536 B 预算，组合 Brotli 82874 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 113403 B / 114688 B 预算；最大单值 `MeuFormImageUploader` 为 39531 B / 65536 B 预算，组合 Brotli 85360 B；共享样式由应用单独导入一次。
 - SSR/hydration: 底层输入已有部分证据，Form 专属待补
 - RTL: 待补
 - Reduced motion: Form 无自有动效，组合矩阵待补
@@ -194,7 +196,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 ### 待优化
 
 - 冻结所有 overlay/复合 adapter 的 touched、ref 与 disabled/readOnly/required 矩阵。
-- 为九类复杂值提供显式、可配置且有后端迁移说明的 FormData serializer。
+- 冻结复杂值 serializer 的后端版本迁移策略，并在真实业务接入时记录服务端解析样例。
 - 补 SSR、RTL、移动 E2E、Chromatic Light/Dark 与真机记录。
 
 ### 已完成
@@ -205,7 +207,7 @@ Form 不应在每次按键时遍历整棵 DOM。只有应用服务端错误时�
 - 公开日期范围与时间字段路径类型，API 报告不再包含 forgotten export。
 - 新增 server-safe 子路径，移除 React Hook Form wildcard 公共面，排除 Story declarations，并声明 tree-shaking side effects。
 - 服务端错误首次聚焦按 DOM 顺序执行；MeuForm 支持原生 form ref。
-- NumberKeyboard、PasscodeInput、Picker、CascadePicker、TimePicker 与 TreeSelect 已进入原生 FormData；复杂集合使用同名重复条目。
+- NumberKeyboard、PasscodeInput、Picker、CascadePicker、DatePicker、DateRangePicker、Calendar、TimePicker、TreeSelect 与 ImageUploader 已进入原生 FormData；复杂集合使用同名重复条目，调用方也可显式序列化为 JSON。
 
 ## 变更记录
 

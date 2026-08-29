@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { createDateParts, nativeDateAdapter } from "@meu/date-adapter";
 import type { DateAdapter } from "@meu/date-adapter";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
@@ -181,7 +181,7 @@ describe("Calendar", () => {
     render(<Calendar defaultMonth={date(1)} defaultValue={date(31)} aria-label="Calendar" />);
 
     const august31 = dayButton(31);
-    august31.focus();
+    act(() => august31.focus());
     fireEvent.keyDown(august31, { key: "ArrowRight" });
     expect(screen.getByText("2026年9月")).toBeTruthy();
     expect(document.activeElement).toBe(dayButton(1, 9));
@@ -198,7 +198,7 @@ describe("Calendar", () => {
       </ConfigProvider>
     );
 
-    dayButton(10).focus();
+    act(() => dayButton(10).focus());
     fireEvent.keyDown(dayButton(10), { key: "ArrowLeft" });
     expect(document.activeElement).toBe(dayButton(11));
     fireEvent.keyDown(dayButton(11), { key: "ArrowRight" });

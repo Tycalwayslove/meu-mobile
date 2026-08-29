@@ -231,7 +231,11 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
 
-  packages/icons-core: {}
+  packages/icons-core:
+    devDependencies:
+      prettier:
+        specifier: 3.9.6
+        version: 3.9.6
 
   packages/icons-react:
     dependencies:

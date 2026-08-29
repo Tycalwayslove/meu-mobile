@@ -1,7 +1,7 @@
 "use client";
 
 import { Field, NumberKeyboard, NumberKeyboardTrigger } from "@meu/mobile";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
@@ -76,7 +76,7 @@ export type MeuFormNumberKeyboardProps<TFieldValues extends FieldValues> =
     onDelete?: (details: NumberKeyboardDeleteDetails) => void;
     /** Called after handling a key, with the raw input and its source details. */
     onInput?: (value: string, details: NumberKeyboardInputDetails) => void;
-    /** Called when keyboard visibility is requested to change, with the next state and reason. */
+    /** Called after close requests mark touched; confirmation invokes `onConfirm` first. */
     onOpenChange?: (open: boolean, details: MeuFormNumberKeyboardOpenChangeDetails) => void;
     /** Controls keyboard visibility; omit to let the component manage it from `defaultOpen`. */
     open?: boolean;
@@ -145,11 +145,16 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const resolvedOpen = controlledOpen ? open : uncontrolledOpen;
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const keyboardRef = useRef<HTMLDivElement>(null);
   const { field, fieldState } = useController({
     control,
     name,
     ...(rules ? { rules } : {})
   });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
   const currentValue = typeof field.value === "string" ? field.value : "";
   const resolvedMaxLength = normalizeMaxLength(maxLength);
   const {
@@ -158,7 +163,12 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
     onClick: triggerOnClick,
     ...resolvedTriggerProps
   } = triggerProps || {};
-  const disabled = Boolean(field.disabled || triggerDisabled || keyboardProps.disabled);
+  const {
+    disabled: keyboardDisabled,
+    onBlur: keyboardOnBlur,
+    ...resolvedKeyboardProps
+  } = keyboardProps;
+  const disabled = Boolean(field.disabled || triggerDisabled || keyboardDisabled);
   const titleContent =
     keyboardTitle === undefined && typeof label === "string" ? label : keyboardTitle;
   const displayValue = formatValue ? formatValue(currentValue) : currentValue;
@@ -166,8 +176,22 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
   function requestOpenChange(nextOpen: boolean, details: MeuFormNumberKeyboardOpenChangeDetails) {
     if (resolvedOpen === nextOpen) return;
     if (!controlledOpen) setUncontrolledOpen(nextOpen);
-    if (!nextOpen) field.onBlur();
+    if (!nextOpen) markOpenCycleTouched();
     if (onOpenChange) onOpenChange(nextOpen, details);
+  }
+
+  function markOpenCycleTouched() {
+    if (touchedOpenCycleRef.current) return;
+    touchedOpenCycleRef.current = true;
+    field.onBlur();
+  }
+
+  function focusRemainsInComposite(nextTarget: EventTarget | null) {
+    if (!(nextTarget instanceof Node)) return false;
+    return Boolean(
+      (triggerRef.current && triggerRef.current.contains(nextTarget)) ||
+      (keyboardRef.current && keyboardRef.current.contains(nextTarget))
+    );
   }
 
   return (
@@ -190,7 +214,7 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
         status={fieldState.invalid ? "error" : "default"}
         value={displayValue}
         onBlur={(event) => {
-          field.onBlur();
+          if (!focusRemainsInComposite(event.relatedTarget)) field.onBlur();
           if (triggerOnBlur) triggerOnBlur(event);
         }}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -200,13 +224,18 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
       />
       <HiddenFormValues disabled={disabled} name={field.name} values={[currentValue]} />
       <NumberKeyboard
-        {...keyboardProps}
+        {...resolvedKeyboardProps}
+        ref={keyboardRef}
         {...(titleContent
           ? { title: titleContent }
           : { "aria-label": keyboardAriaLabel || "数字键盘" })}
         id={keyboardId}
         disabled={disabled}
         open={resolvedOpen}
+        onBlur={(event) => {
+          if (!focusRemainsInComposite(event.relatedTarget)) field.onBlur();
+          if (keyboardOnBlur) keyboardOnBlur(event);
+        }}
         onInput={(input, details) => {
           const transformed = transformInput(currentValue, input, details);
           const nextValue = transformed.slice(0, resolvedMaxLength);
@@ -218,7 +247,7 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
           if (onDelete) onDelete(details);
         }}
         onConfirm={() => {
-          field.onBlur();
+          markOpenCycleTouched();
           if (onConfirm) onConfirm(currentValue);
         }}
         onOpenChange={(nextOpen, details) => requestOpenChange(nextOpen, details)}

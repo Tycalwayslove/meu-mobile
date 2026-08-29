@@ -24,7 +24,7 @@ test("hydrates measurement, portal and gesture boundaries without runtime errors
     await test.step(kind, async () => {
       runtimeErrors.length = 0;
       await page.goto(`/hydration?case=${kind}`);
-      const scenario = page.getByRole("region", { name: "专项 Hydration 场景" });
+      const scenario = page.locator('section[aria-label="专项 Hydration 场景"]');
       await expect(scenario).toHaveAttribute("data-hydrated", "true");
       await expect(page.locator(selector)).toBeAttached();
       expect(runtimeErrors, `${kind} runtime errors`).toEqual([]);

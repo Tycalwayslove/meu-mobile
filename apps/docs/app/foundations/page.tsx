@@ -53,7 +53,7 @@ export default function FoundationsPage() {
           </article>
           <article className="content-card">
             <h3>@meu/form-react</h3>
-            <p>React Hook Form、Zod、错误摘要和复杂字段适配。</p>
+            <p>React Hook Form、Zod、服务端错误映射和复杂字段适配。</p>
           </article>
         </div>
       </section>

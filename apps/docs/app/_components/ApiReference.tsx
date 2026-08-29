@@ -1,5 +1,6 @@
 import type { ComponentApiProperty, ComponentApiReference } from "../_data/api-reference";
 import { CodeBlock } from "./CodeBlock";
+import { ScrollableTableRegion } from "./ScrollableTableRegion";
 
 const kindLabels = { type: "Type", value: "Value" } as const;
 
@@ -8,12 +9,7 @@ function PropertyTable({ entries, title }: { entries: ComponentApiProperty[]; ti
   return (
     <div className="api-reference__properties">
       <h3>{title}</h3>
-      <div
-        className="component-document__table-wrap"
-        role="region"
-        aria-label={`${title} 表格，可横向滚动`}
-        tabIndex={0}
-      >
+      <ScrollableTableRegion ariaLabel={`${title} 表格，可横向滚动`}>
         <table>
           <thead>
             <tr>
@@ -40,7 +36,7 @@ function PropertyTable({ entries, title }: { entries: ComponentApiProperty[]; ti
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollableTableRegion>
     </div>
   );
 }

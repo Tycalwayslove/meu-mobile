@@ -847,6 +847,7 @@ textarea:focus,
 }
 
 .component-links a,
+.component-links > span,
 .component-pager a {
   min-height: 44px;
   display: inline-flex;
@@ -855,6 +856,10 @@ textarea:focus,
   border: 1px solid var(--meu-color-border);
   border-radius: 7px;
   text-decoration: none;
+}
+
+.component-links > span {
+  color: var(--meu-color-muted);
 }
 
 .component-pager {

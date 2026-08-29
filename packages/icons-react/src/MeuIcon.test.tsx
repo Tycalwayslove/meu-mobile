@@ -2,7 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { MeuIconChevronLeft, MeuIconSearch } from "./MeuIcon";
+import { MeuIconCheck, MeuIconChevronLeft, MeuIconPlus, MeuIconSearch, MeuIconX } from "./MeuIcon";
 
 describe("MeuIcon", () => {
   it("is decorative without a title", () => {
@@ -45,5 +45,26 @@ describe("MeuIcon", () => {
     expect(icon && icon.getAttribute("height")).toBe("1.5em");
     expect(icon && icon.getAttribute("stroke-width")).toBe("2.5");
     expect(MeuIconChevronLeft.displayName).toBe("MeuIconChevronLeft");
+  });
+
+  it("keeps every Meu export mapped to its traced upstream ID", () => {
+    const mappings = [
+      [MeuIconChevronLeft, "chevron-left"],
+      [MeuIconCheck, "check"],
+      [MeuIconPlus, "plus"],
+      [MeuIconSearch, "search"],
+      [MeuIconX, "x"]
+    ] as const;
+
+    const { container } = render(
+      <>
+        {mappings.map(([Icon, name]) => (
+          <Icon key={name} />
+        ))}
+      </>
+    );
+    expect(Array.from(container.querySelectorAll("svg"), (icon) => icon.dataset.meuIcon)).toEqual(
+      mappings.map(([, name]) => name)
+    );
   });
 });

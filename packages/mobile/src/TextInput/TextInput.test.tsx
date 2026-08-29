@@ -80,4 +80,20 @@ describe("TextInput", () => {
       "readonly"
     );
   });
+
+  it.each([
+    ["false", "false", "default"],
+    [false, "false", "default"],
+    ["grammar", "grammar", "error"],
+    ["spelling", "spelling", "error"]
+  ] as const)(
+    "preserves aria-invalid=%s without collapsing its semantics",
+    (ariaInvalid, expectedAttribute, expectedState) => {
+      render(<TextInput aria-label="语义输入框" aria-invalid={ariaInvalid} />);
+      const input = screen.getByRole("textbox", { name: "语义输入框" });
+
+      expect(input.getAttribute("aria-invalid")).toBe(expectedAttribute);
+      expect(input.getAttribute("data-state")).toBe(expectedState);
+    }
+  );
 });

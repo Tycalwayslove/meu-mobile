@@ -59,7 +59,7 @@ value 存在即受控；defaultValue 只初始化。打开从 committed 建 draf
 
 ## 表单集成
 
-MeuFormTimePicker 精确绑定 TimeValue | null，确认才写字段与触发校验，取消不触发 dirty；PickerTrigger 是可聚焦错误控制。组件不创建 hidden input。
+MeuFormTimePicker 精确绑定 TimeValue | null。打开弹层和焦点转入 Portal 不触发 touched；确认先写字段再标记 touched，取消、遮罩、Escape 或焦点离开整个复合控件时标记 touched。取消不制造 dirty。受控调用方拒绝 open 不触发 touched，拒绝 close 仍记录已经完成的用户交互。PickerTrigger 是可聚焦错误控制；adapter 为原生表单提供序列化值。
 
 ## Props
 
@@ -120,7 +120,7 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 - Story interaction: `Default` 验证 Portal 打开、draft 选择、确认回调与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 13914 B / 49152 B 预算；最大单值 `TimePicker` 为 13663 B / 49152 B 预算，组合 Brotli 12340 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 15157 B / 49152 B 预算；最大单值 `TimePicker` 为 14907 B / 49152 B 预算，组合 Brotli 13449 B；共享样式由应用单独导入一次。
 - Figma：Meu/TimePicker 245:2；8 variants、48px options、12/24h Light/Dark QA。
 - 双引擎、Chromatic 视觉回归、真机滚轮/读屏：待发布门禁。
 

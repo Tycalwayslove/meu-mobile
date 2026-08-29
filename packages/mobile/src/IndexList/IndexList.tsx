@@ -33,6 +33,7 @@ export function IndexList({
   const activeKeyRef = useRef<string | null>(initialKey);
   const [activeKey, setActiveKey] = useState<string | null>(initialKey);
   const resolvedIndexLabel = indexAriaLabel || (locale === "en-US" ? "Section index" : "分组索引");
+  const contentLabel = locale === "en-US" ? "Indexed content" : "索引内容";
 
   function updateActive(key: string, details: IndexListChangeDetails) {
     if (activeKeyRef.current === key) return;
@@ -163,7 +164,7 @@ export function IndexList({
       <div
         ref={bodyRef}
         className={body}
-        aria-label="索引内容"
+        aria-label={contentLabel}
         role="region"
         tabIndex={0}
         onScroll={handleScroll}

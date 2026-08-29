@@ -8,7 +8,7 @@ import type {
   PickerTriggerProps,
   PickerValue
 } from "@meu/mobile";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
@@ -58,11 +58,11 @@ export type MeuFormPickerProps<
   label?: ReactNode;
   /** React Hook Form field path that stores one value per picker column. */
   name: Path<TFieldValues>;
-  /** Called when the user cancels without committing a new form value. */
+  /** Called after cancellation marks the field touched without committing the draft value. */
   onCancel?: PickerProps<TValue>["onCancel"];
-  /** Called after the confirmed values are written to the form, with their resolved options. */
+  /** Called after confirmed values are written and the field is marked touched. */
   onConfirm?: PickerProps<TValue>["onConfirm"];
-  /** Called when popup visibility is requested to change, with the next state and reason. */
+  /** Called last for a visibility request; close callbacks observe the updated touched state. */
   onOpenChange?: (open: boolean, details: PickerOpenChangeDetails) => void;
   /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
@@ -134,6 +134,10 @@ export function MeuFormPicker<
     name,
     ...(rules ? { rules } : {})
   });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
   const currentValue = Array.isArray(field.value) ? (field.value as Array<TValue | null>) : [];
   const selectedOptions = pickerProps.columns.map((column, index) =>
     optionForValue(column, currentValue[index])
@@ -157,6 +161,12 @@ export function MeuFormPicker<
     if (onOpenChange) onOpenChange(nextOpen, details);
   }
 
+  function markOpenCycleTouched() {
+    if (touchedOpenCycleRef.current) return;
+    touchedOpenCycleRef.current = true;
+    field.onBlur();
+  }
+
   return (
     <Field
       label={label}
@@ -175,7 +185,7 @@ export function MeuFormPicker<
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
-          field.onBlur();
+          if (!resolvedOpen) field.onBlur();
           if (triggerOnBlur) triggerOnBlur(event);
         }}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -192,9 +202,13 @@ export function MeuFormPicker<
         open={resolvedOpen}
         returnFocusRef={triggerRef}
         value={currentValue}
-        {...(onCancel ? { onCancel } : {})}
+        onCancel={(details) => {
+          markOpenCycleTouched();
+          if (onCancel) onCancel(details);
+        }}
         onConfirm={(nextValue, options) => {
           field.onChange(nextValue);
+          markOpenCycleTouched();
           if (onConfirm) onConfirm(nextValue, options);
         }}
         onOpenChange={(nextOpen, details) => {

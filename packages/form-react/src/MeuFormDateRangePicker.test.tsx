@@ -39,6 +39,9 @@ function DateRangePickerForm({ onSubmit }: { onSubmit: (values: Values) => void 
         triggerProps={{ placeholder: "请选择日期范围" }}
       />
       <output data-testid="dirty">{form.formState.isDirty ? "dirty" : "pristine"}</output>
+      <output data-testid="range-touched">
+        {form.formState.touchedFields.deliveryWindow ? "touched" : "untouched"}
+      </output>
       <Button type="submit">提交订单</Button>
     </MeuForm>
   );
@@ -50,14 +53,18 @@ describe("MeuFormDateRangePicker", () => {
     render(<DateRangePickerForm onSubmit={onSubmit} />);
 
     const trigger = screen.getByRole("button", { name: "送达区间" });
+    const formElement = trigger.closest("form")!;
     expect(trigger.textContent).toContain("请选择日期范围");
+    expect(new FormData(formElement).has("deliveryWindow")).toBe(false);
     fireEvent.click(trigger);
+    expect(screen.getByTestId("range-touched").textContent).toBe("untouched");
     fireEvent.click(dayButton(12));
     fireEvent.click(dayButton(15));
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(trigger.textContent).toContain("请选择日期范围");
     expect(screen.getByTestId("dirty").textContent).toBe("pristine");
+    expect(screen.getByTestId("range-touched").textContent).toBe("touched");
 
     fireEvent.click(trigger);
     fireEvent.click(dayButton(12));
@@ -65,6 +72,11 @@ describe("MeuFormDateRangePicker", () => {
     fireEvent.click(screen.getByRole("button", { name: "确定" }));
     await waitFor(() => expect(trigger.textContent).toContain("2026-08-12 – 2026-08-15"));
     expect(screen.getByTestId("dirty").textContent).toBe("dirty");
+    expect(screen.getByTestId("range-touched").textContent).toBe("touched");
+    expect(new FormData(formElement).getAll("deliveryWindow")).toEqual([
+      "2026-08-12",
+      "2026-08-15"
+    ]);
 
     fireEvent.click(screen.getByRole("button", { name: "提交订单" }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
@@ -84,5 +96,30 @@ describe("MeuFormDateRangePicker", () => {
     expect(trigger.getAttribute("data-invalid")).toBe("true");
     expect(trigger.getAttribute("aria-describedby")).toContain("error");
     await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
+
+  it("supports a single-entry range backend contract", () => {
+    function CustomSerializationForm() {
+      const form = useMeuForm<Values>({
+        defaultValues: { deliveryWindow: [date(12), date(15)] }
+      });
+      return (
+        <MeuForm form={form} onSubmit={vi.fn()}>
+          <MeuFormDateRangePicker<Values>
+            name="deliveryWindow"
+            label="送达区间"
+            serializeValue={(value, { adapter }) =>
+              JSON.stringify(value.map((item) => adapter.format(item, "YYYY-MM-DD")))
+            }
+          />
+        </MeuForm>
+      );
+    }
+
+    render(<CustomSerializationForm />);
+    const formElement = screen.getByRole("button", { name: "送达区间" }).closest("form")!;
+    expect(new FormData(formElement).getAll("deliveryWindow")).toEqual([
+      '["2026-08-12","2026-08-15"]'
+    ]);
   });
 });

@@ -58,15 +58,15 @@ native input 只负责选取 File，选择后会清空，所以 `name` 不代表
 
 ## Props
 
-API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函数返回 true 表示拒绝。`beforeUpload` 返回 File 可替换文件，返回 null 拒绝。maxCount 同时计算成功值与非 error 活动任务。
+API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函数返回 true 表示拒绝。`beforeUpload` 返回 File 可替换文件，返回 null 或 reject 均按 before-upload 拒绝。maxCount 同时计算成功值与全部队列任务；失败任务保留自己的容量槽，直到重试成功、删除或 clearFailed。
 
 ## Events
 
 - `onChange(items,{item,reason})`：成功 upload 或获准 remove 后触发。
 - `onReject({files,accepted,rejected,reason})`：每个校验阶段触发，不可取消。
-- `onDelete(item)`：在发布 remove 前 await；返回 false veto，期间删除按钮锁定以避免重复。
+- `onDelete(item)`：在发布 remove 前 await；返回 false 或 reject 均 veto，期间删除按钮锁定以避免重复，reject 不向全局泄漏。
 - `onUploadQueueChange(tasks)`：任务状态 effect 后通知；只读快照不含 AbortController/object URL 所有权。
-- `onCountExceed(exceed)`：maxCount 截断时触发。
+- `onCountExceed(exceed)`：maxCount 截断选择或因外部值增长而阻止重试时触发。
 
 ## Ref 与命令式方法
 
@@ -110,7 +110,8 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ## 边界情况与已知限制
 
-- `beforeUpload` 和 transport 可异步；宿主应避免同时触发多个外部选择器。
+- 并发 `beforeUpload` 完成时按最新成功值和队列原子分配剩余容量，后完成且超额的文件走 max-count 拒绝。
+- 动态降低 maxCount 或增加受控 value 可能使现有队列超额；失败任务保留但重试会被 max-count 拒绝。
 - 不内置压缩、EXIF 旋转、裁剪、分片、后台上传或离线恢复。
 - 受控调用方必须用稳定 key，且合并并发完成结果。
 - `showFailed=false` 只隐藏失败 cell，任务仍可由 ref 清理。
@@ -121,11 +122,11 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ## 测试证据
 
-- Unit: `ImageUploader.test.tsx` 覆盖 SSR、原生选择、校验、进度、受控、删除 veto/防重、预览、abort、URL 回收、Field 语义。
+- Unit: `ImageUploader.test.tsx` 覆盖 SSR、原生选择、校验、并发容量预留、失败重试、异步 hook reject/卸载、进度、受控、删除 veto/防重、预览、abort、URL 回收和 Field 语义。
 - Story interaction: `Interaction.play` 验证预览与关闭链路；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 30434 B / 49152 B 预算，组合 Brotli 26494 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31929 B / 49152 B 预算，组合 Brotli 27800 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 已覆盖；hydration 专测未执行。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。
@@ -137,14 +138,15 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ### 待优化
 
-补 picker/camera 真机、并发 beforeUpload、服务端拒绝映射与 WebKit object URL 压力测试。
+补 picker/camera 真机、服务端拒绝映射与 WebKit object URL 压力测试。
 
 ### 已完成
 
-补齐 group/Field 语义、progressbar、逻辑方向、forced-colors 与异步删除防重；固化 transport 和表单所有权边界。
+补齐 group/Field 语义、progressbar、逻辑方向、forced-colors、并发容量预留与异步 rejection 收敛；固化 transport 和表单所有权边界。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型     | 内容                         | 迁移说明         |
 | ---------- | ------ | -------- | ---------------------------- | ---------------- |
+| 2026-08-29 | 未发布 | bugfix   | 失败任务容量与异步 hook 安全 | 既有回调签名不变 |
 | 2026-08-29 | 未发布 | behavior | 上传任务语义和异步删除锁完善 | 既有回调签名不变 |

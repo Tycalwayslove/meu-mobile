@@ -99,7 +99,7 @@ Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑�
 
 ## 无障碍
 
-Portal 不提供 role 或 accessible name。`useFocusTrap` 过滤 hidden、aria-hidden、inert、display:none 与 visibility:hidden 后代，容器无可聚焦项时聚焦容器；移动 DOM 不会自动修复 aria 关系，引用 ID 必须在同一 Document 内唯一。
+Portal 不提供 role 或 accessible name。`useFocusTrap` 按原生 Tab 顺序过滤 `tabIndex<0`、disabled/disabled fieldset、非选中 radio、hidden、aria-hidden、inert、display:none 与 visibility:hidden 后代，容器无可聚焦项时聚焦容器。激活时共享管理器会把顶层模态之外的 siblings 设为 inert/aria-hidden，嵌套关闭后按引用计数恢复原属性；focus branch、由模态内 `aria-controls` 关联的非模态浮层和 Toast live region 保持可达。
 
 ## 动效
 
@@ -129,18 +129,19 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 - React 只清理 Portal children，不删除或还原调用方的目标容器。
 - 跨 Document 不会自动复制样式、方向、locale 或全局事件监听。
 - `useBodyScrollLock` 和 `useFocusTrap` 使用当前 realm 的全局 document/window，不支持跨 Document 管理。
+- modal isolation 识别 `[data-meu-overlay-layer]`、`[data-meu-focus-branch]` 和 `aria-controls` 关系；自定义第三方 Portal 若不提供这些关联，需要由宿主放在模态 DOM 分支内。
 
 ## 性能预算
 
-组件不创建 DOM wrapper、observer、timer 或全局监听。每次 render 最多执行一次容器回调和一次常数时间 `nodeType` 判断；容器回调不得包含布局扫描。
+Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。激活的 `useFocusTrap` 维护一个共享 MutationObserver，只在 body 子树增删 Portal 分支时重新计算顶层模态隔离；容器回调不得包含布局扫描。
 
 ## 测试证据
 
-- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、隐藏焦点过滤与恢复
+- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、原生 tabbable 顺序、背景 inert/aria-hidden 隔离与精确恢复
 - Story interaction: `CustomContainer` 验证内容移动到调用方提供的目标容器；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 2623 B / 32768 B 预算；最大单值 `useFocusTrap` 为 1477 B / 32768 B 预算，组合 Brotli 2225 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 3812 B / 32768 B 预算；最大单值 `useFocusTrap` 为 2695 B / 32768 B 预算，组合 Brotli 3313 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记与 hydration 后移动
 - RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
 - Reduced motion: 不适用，无动画
@@ -153,7 +154,7 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 ### 待优化
 
 - 增加真实 iframe/跨 Document 样式、焦点与事件验证。
-- 与 Popup/Dialog 批次共同验证嵌套 Portal、退出动画、焦点恢复和多锁清理。
+- 与 Popup/Dialog 批次继续验证跨 iframe Portal、退出动画和真实读屏浏览模式。
 - 补移动 Chromium/WebKit E2E 和真实 iOS/Android WebView 证据。
 
 ### 已完成
@@ -162,9 +163,11 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 - container 扩展到 Element/DocumentFragment、惰性 nullable 回调，并支持跨 realm 判断。
 - 增加目标切换、Fragment、SSR/hydration 与卸载清理单测。
 - 补齐公开 Props、容器类型 TSDoc 和 release tag。
+- focus trap 补齐正 tabindex/radio/disabled fieldset 过滤、嵌套栈顶背景隔离、自定义容器与关联非模态分支。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型     | 内容                                           | 迁移说明                                    |
-| ---------- | ----- | -------- | ---------------------------------------------- | ------------------------------------------- |
-| 2026-08-28 | 0.1.0 | behavior | SSR 改为原地输出；扩展跨文档容器类型与清理证据 | 依赖 SSR 空字符串的调用方需在业务层条件渲染 |
+| 日期       | 版本   | 类型      | 内容                                            | 迁移说明                                       |
+| ---------- | ------ | --------- | ----------------------------------------------- | ---------------------------------------------- |
+| 2026-08-28 | 0.1.0  | behavior  | SSR 改为原地输出；扩展跨文档容器类型与清理证据  | 依赖 SSR 空字符串的调用方需在业务层条件渲染    |
+| 2026-08-29 | 未发布 | hardening | 原生 tabbable 顺序与 modal background isolation | API 兼容；模态外背景从可访问树移除并可嵌套恢复 |

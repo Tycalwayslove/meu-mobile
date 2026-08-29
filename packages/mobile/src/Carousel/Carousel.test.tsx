@@ -155,6 +155,39 @@ describe("Carousel", () => {
     await waitFor(() => expect(onIndexChange).toHaveBeenLastCalledWith(0, { reason: "previous" }));
   });
 
+  it("keeps dynamically changed controls inert in an inactive slide", async () => {
+    function DynamicControl({ enabled }: { enabled: boolean }) {
+      return (
+        <button type="button" disabled={!enabled} tabIndex={enabled ? 0 : -1}>
+          动态操作
+        </button>
+      );
+    }
+    const dynamicItems = (enabled: boolean) =>
+      [
+        items[0],
+        { key: "dynamic", ariaLabel: "动态页", content: <DynamicControl enabled={enabled} /> },
+        items[2]
+      ] as const;
+    const { rerender } = render(<Carousel items={dynamicItems(false)} />);
+
+    const inactiveSlide = document.querySelector<HTMLElement>(
+      '[data-meu-carousel-slide][aria-label="动态页"]'
+    );
+    if (!inactiveSlide) throw new Error("Expected inactive dynamic slide");
+    const dynamicControl = screen.getByRole("button", { name: "动态操作", hidden: true });
+    expect(inactiveSlide.hasAttribute("inert")).toBe(true);
+    expect(dynamicControl.tabIndex).toBe(-1);
+
+    rerender(<Carousel items={dynamicItems(true)} />);
+    await waitFor(() => expect(dynamicControl).toHaveProperty("disabled", false));
+    await waitFor(() => expect(dynamicControl.tabIndex).toBe(-1));
+
+    fireEvent.click(screen.getByRole("button", { name: "下一张" }));
+    await waitFor(() => expect(inactiveSlide.hasAttribute("inert")).toBe(false));
+    expect(dynamicControl.tabIndex).toBe(0);
+  });
+
   it("requests controlled changes and restores the authoritative index when it is unchanged", () => {
     const onIndexChange = vi.fn();
     render(<Carousel index={0} items={items} onIndexChange={onIndexChange} />);

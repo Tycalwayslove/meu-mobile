@@ -2,12 +2,17 @@
 
 import { FormProvider } from "react-hook-form";
 import type {
+  DefaultValues,
   FieldValues,
   SubmitErrorHandler,
   SubmitHandler,
   UseFormReturn
 } from "react-hook-form";
-import type { FormHTMLAttributes, Ref } from "react";
+import { useCallback } from "react";
+import type { FormHTMLAttributes, Ref, RefCallback } from "react";
+import { flushSync } from "react-dom";
+
+import { registerMeuFormRoot, unregisterMeuFormRoot } from "./form-root-registry";
 
 /** @public */
 export type MeuFormProps<
@@ -42,18 +47,47 @@ export function MeuForm<
   form,
   noValidate = true,
   onInvalid,
+  onReset,
   onSubmit,
   ref,
   ...props
 }: MeuFormProps<TFieldValues, TContext, TTransformedValues>) {
+  const setFormRef = useCallback<RefCallback<HTMLFormElement>>(
+    (element) => {
+      if (!element) return undefined;
+      registerMeuFormRoot(form, element);
+
+      const consumerCleanup = typeof ref === "function" ? ref(element) : undefined;
+      if (ref && typeof ref !== "function") ref.current = element;
+
+      return () => {
+        unregisterMeuFormRoot(form, element);
+        if (typeof consumerCleanup === "function") consumerCleanup();
+        if (ref && typeof ref !== "function" && ref.current === element) ref.current = null;
+      };
+    },
+    [form, ref]
+  );
+
   return (
     <FormProvider {...form}>
       <form
         {...props}
-        ref={ref}
+        ref={setFormRef}
         noValidate={noValidate}
         onSubmit={(event) => {
           void form.handleSubmit(onSubmit, onInvalid)(event);
+        }}
+        onReset={(event) => {
+          if (onReset) onReset(event);
+          if (event.defaultPrevented) return;
+
+          const storedDefaultValues = form.formState.defaultValues;
+          const defaultValues = (
+            storedDefaultValues === undefined ? {} : storedDefaultValues
+          ) as DefaultValues<TFieldValues>;
+          // Commit RHF state before the browser applies the native reset default action.
+          flushSync(() => form.reset(defaultValues));
         }}
         data-meu-component="form"
       >

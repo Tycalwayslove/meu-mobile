@@ -92,4 +92,45 @@ describe("Ellipsis", () => {
     if (!root) throw new Error("Expected Ellipsis root");
     expect(root.getAttribute("style")).toContain("--meu-ellipsis-rows: 1");
   });
+
+  it("never splits emoji ZWJ, flags, or combining grapheme clusters", async () => {
+    mockMeasurements();
+    const family = "👨‍👩‍👧‍👦";
+    const flag = "🇨🇳";
+    const accented = "e\u0301";
+    const graphemeContent = `甲${family}乙${flag}丙${accented}丁${family}戊${flag}己${accented}庚`;
+    render(<Ellipsis content={graphemeContent} rows={1} direction="middle" />);
+
+    await screen.findByRole("button", { name: "展开" });
+    const root = document.querySelector<HTMLElement>('[data-meu-component="ellipsis"]');
+    const visual = root
+      ? root.querySelector<HTMLElement>(":scope > span[aria-hidden='true']")
+      : null;
+    if (!visual) throw new Error("Expected visual ellipsis content");
+    const Segmenter = (
+      Intl as typeof Intl & {
+        Segmenter?: new (
+          locale?: string,
+          options?: { granularity: "grapheme" }
+        ) => { segment: (value: string) => Iterable<{ segment: string }> };
+      }
+    ).Segmenter;
+    const originalSegments = new Set(
+      Segmenter
+        ? Array.from(
+            new Segmenter(undefined, { granularity: "grapheme" }).segment(graphemeContent),
+            (entry) => entry.segment
+          )
+        : [family, flag, accented]
+    );
+    const displayedSegments = Segmenter
+      ? Array.from(
+          new Segmenter(undefined, { granularity: "grapheme" }).segment(visual.textContent || ""),
+          (entry) => entry.segment
+        )
+      : [visual.textContent || ""];
+    displayedSegments
+      .filter((entry) => entry !== "…")
+      .forEach((entry) => expect(originalSegments.has(entry)).toBe(true));
+  });
 });

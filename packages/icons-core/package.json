@@ -4,7 +4,15 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "files": ["dist", "THIRD_PARTY_NOTICES.md", "licenses"],
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "icons.lock.json",
+    "licenses",
+    "upstream"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -14,7 +22,13 @@
   },
   "scripts": {
     "build": "rollup -c && tsc -p tsconfig.build.json --emitDeclarationOnly && cp src/icons.manifest.json dist/icons.manifest.json",
+    "icons:generate": "node scripts/generate-icons.mjs",
+    "icons:check": "node scripts/generate-icons.mjs --check",
+    "icons:upstream:verify": "node scripts/verify-upstream.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --maxWorkers=1"
+    "test": "pnpm icons:check && vitest run --maxWorkers=1"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
   }
 }

@@ -72,7 +72,7 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
     ? `https://www.figma.com/design/${figmaFileKey}${
         figmaNodeId ? `?node-id=${figmaNodeId.replace(":", "-")}` : ""
       }`
-    : "https://www.figma.com/design/1EjHFQkfyM4FNsfIuhFF1v";
+    : undefined;
   const importExample = `import { ${component.name} } from "${component.packageName}";\n\nexport function Example() {\n  return <${component.name} />;\n}`;
 
   return (
@@ -134,9 +134,13 @@ export default async function ComponentPage({ params }: { params: Promise<{ slug
             <a href={getComponentSourceHref(sourcePath)} target="_blank" rel="noreferrer">
               查看源码 ↗
             </a>
-            <a href={figmaUrl} target="_blank" rel="noreferrer">
-              查看 Figma ↗
-            </a>
+            {figmaUrl ? (
+              <a href={figmaUrl} target="_blank" rel="noreferrer">
+                查看 Figma ↗
+              </a>
+            ) : (
+              <span>Figma 未绑定</span>
+            )}
             {storybookUrls.length > 0 ? (
               storybookUrls.map(({ href, storyId }, index) => (
                 <a href={href} target="_blank" rel="noreferrer" key={storyId}>

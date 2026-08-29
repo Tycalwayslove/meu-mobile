@@ -126,6 +126,23 @@ describe("ImageViewer", () => {
     expect(screen.getByRole("group", { name: "商品侧面" }).getAttribute("aria-hidden")).toBeNull();
   });
 
+  it("preserves zoom when a controlled owner rejects navigation", async () => {
+    const onIndexChange = vi.fn();
+    const { rerender } = render(
+      <ImageViewer open images={images} index={0} onIndexChange={onIndexChange} />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
+    expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1.5");
+    fireEvent.click(screen.getByRole("button", { name: "下一张图片" }));
+    expect(onIndexChange).toHaveBeenCalledWith(1, { reason: "next" });
+    expect(screen.getByRole("dialog").getAttribute("data-index")).toBe("0");
+    expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1.5");
+
+    rerender(<ImageViewer open images={images} index={1} onIndexChange={onIndexChange} />);
+    await waitFor(() => expect(screen.getByRole("dialog").getAttribute("data-scale")).toBe("1"));
+  });
+
   it("supports button and keyboard zoom, reset, and disables gallery drag while zoomed", () => {
     const onScaleChange = vi.fn();
     render(<ImageViewer open images={images} maxZoom={2} onScaleChange={onScaleChange} />);

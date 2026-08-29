@@ -74,6 +74,31 @@ describe("Rate", () => {
     expect(onChange).toHaveBeenLastCalledWith(0);
   });
 
+  it("does not clear after a pointer session changes the range value", () => {
+    const onChange = vi.fn();
+    render(<Rate aria-label="拖动评分" defaultValue={2} onChange={onChange} />);
+    const rating = screen.getByRole("slider", { name: "拖动评分" });
+    vi.spyOn(rating, "getBoundingClientRect").mockReturnValue({
+      bottom: 40,
+      height: 40,
+      left: 0,
+      right: 100,
+      top: 0,
+      width: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({})
+    });
+
+    fireEvent.pointerDown(rating, { clientX: 40 });
+    fireEvent.change(rating, { target: { value: "4" } });
+    fireEvent.click(rating, { detail: 1 });
+
+    expect(rating).toHaveProperty("value", "4");
+    expect(onChange).toHaveBeenCalledWith(4);
+    expect(onChange).not.toHaveBeenCalledWith(0);
+  });
+
   it("keeps read-only values in native forms and forwards the input ref", () => {
     const ref = createRef<HTMLInputElement>();
     render(

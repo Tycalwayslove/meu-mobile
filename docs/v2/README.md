@@ -112,7 +112,7 @@ audit → design → implementation → verification → commercial
 
 每个组件完成时，同一个变更必须包含：实现、类型 JSDoc、单测、Story/交互、视觉基线、留存文档、官网页面和变更记录。不得把文档留到所有代码完成后集中补写。
 
-逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
+逐组件优化内容见 [`COMPONENT_PLAN.md`](./COMPONENT_PLAN.md)，启动基线与风险证据见 [`AUDIT.md`](./AUDIT.md)，体积方法与当前基线见 [`PERFORMANCE.md`](./PERFORMANCE.md)，真机记录使用 [`DEVICE_VERIFICATION.md`](./DEVICE_VERIFICATION.md)，所有组件使用 [`COMPONENT_DOC_TEMPLATE.md`](./COMPONENT_DOC_TEMPLATE.md) 留存。
 
 ## 发布门禁
 

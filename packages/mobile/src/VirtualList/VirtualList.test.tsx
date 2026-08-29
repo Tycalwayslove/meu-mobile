@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { createRef } from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, createRef } from "react";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 

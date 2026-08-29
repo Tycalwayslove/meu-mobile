@@ -28,6 +28,7 @@ source: packages/mobile/src/TextInput
 - 原生单行 input，支持 ref 和除原生 `size` 外的 input 属性。
 - small/medium/large、default/error、disabled 与 clearable。
 - 与 Field context 自动关联 id、description 和 error；支持显式 ARIA 覆盖。
+- 保留显式 `aria-invalid="false"`、`grammar` 和 `spelling` token；后两者同时进入 error 视觉态。
 - clear 在受控与非受控模式下均先派发原生 input/change 契约，再调用 `onClear`；支持 readOnly 和中英文清除名称。
 
 ## 何时使用
@@ -88,7 +89,7 @@ ref 指向真实 `HTMLInputElement`，可使用 focus、select、setSelectionRan
 
 ## 无障碍
 
-input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和 `aria-describedby` 关联。清除按钮从 ConfigProvider locale 获取中英文 accessible name。
+input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和 `aria-describedby` 关联。调用方的 `grammar`/`spelling` 语义不会折叠为 `true`，显式 `false` 在无 Field/status 错误时原样保留；Field/status 错误优先输出 `true`。清除按钮从 ConfigProvider locale 获取中英文 accessible name。
 
 ## 动效
 
@@ -121,11 +122,11 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 
 ## 测试证据
 
-- Unit: `TextInput.test.tsx`，覆盖 Field、受控/非受控 clear、locale 与 readOnly
+- Unit: `TextInput.test.tsx`，覆盖 Field、受控/非受控 clear、locale、readOnly，以及 `aria-invalid` false/grammar/spelling token
 - Story interaction: `Clearable` 验证清除后的值、回调状态与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3475 B / 32768 B 预算，组合 Brotli 3082 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3634 B / 32768 B 预算，组合 Brotli 3206 B；共享样式由应用单独导入一次。
 - SSR/hydration: 待补组件级证明
 - RTL: 待补
 - Reduced motion: 不适用，待静态验证
@@ -143,10 +144,11 @@ IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Saf
 ### 已完成
 
 - V1 已使用原生 input、Field 关联、ref 和错误语义。
-- V2 已冻结 clear 事件顺序，补齐受控 clear、locale、readOnly、逻辑定位和 Props TSDoc。
+- V2 已冻结 clear 事件顺序，保留 `aria-invalid` token，并补齐受控 clear、locale、readOnly、逻辑定位和 Props TSDoc。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
-| ---------- | ----- | ---- | -------------------- | -------- |
-| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |
+| 日期       | 版本   | 类型     | 内容                           | 迁移说明 |
+| ---------- | ------ | -------- | ------------------------------ | -------- |
+| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线           | 无       |
+| 2026-08-29 | 未发布 | behavior | 保留 `aria-invalid` token 语义 | 无       |

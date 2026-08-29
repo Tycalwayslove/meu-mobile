@@ -11,6 +11,12 @@ import type { RateProps } from "./types";
 
 type StarStyle = CSSProperties & { "--meu-rate-star-width": string };
 
+type PointerSession = {
+  changed: boolean;
+  startValue: number;
+  targetValue: number;
+};
+
 function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement | null) {
   if (typeof ref === "function") ref(node);
   else if (ref) ref.current = node;
@@ -61,8 +67,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   const currentValue = normalize(controlled ? value : uncontrolledValue);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const defaultValueRef = useRef(normalizedDefaultValue);
-  const pointerStartValue = useRef(currentValue);
-  const pointerTargetValue = useRef(currentValue);
+  const pointerSessionRef = useRef<PointerSession | null>(null);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
   const invalid =
@@ -93,8 +98,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
         if (event.defaultPrevented) return;
         const resetValue = defaultValueRef.current;
         setUncontrolledValue(resetValue);
-        pointerStartValue.current = resetValue;
-        pointerTargetValue.current = resetValue;
+        pointerSessionRef.current = null;
       });
     }
 
@@ -123,22 +127,33 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
 
   function handlePointerDown(event: PointerEvent<HTMLInputElement>) {
     if (onPointerDown) onPointerDown(event);
-    if (event.defaultPrevented) return;
-    pointerStartValue.current = currentValue;
-    pointerTargetValue.current = valueFromPointer(event);
+    if (event.defaultPrevented) {
+      pointerSessionRef.current = null;
+      return;
+    }
+    pointerSessionRef.current = {
+      changed: false,
+      startValue: currentValue,
+      targetValue: valueFromPointer(event)
+    };
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    if (pointerSessionRef.current) pointerSessionRef.current.changed = true;
     publish(event.target.valueAsNumber);
   }
 
   function handleClick(event: MouseEvent<HTMLInputElement>) {
+    const pointerSession = pointerSessionRef.current;
+    pointerSessionRef.current = null;
     if (onClick) onClick(event);
     if (event.defaultPrevented) return;
     if (
       event.detail > 0 &&
       allowClear &&
-      pointerStartValue.current === pointerTargetValue.current
+      pointerSession &&
+      !pointerSession.changed &&
+      pointerSession.startValue === pointerSession.targetValue
     ) {
       publish(0);
     }
@@ -190,7 +205,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
           onPointerDown={handlePointerDown}
           onPointerCancel={(event) => {
             if (onPointerCancel) onPointerCancel(event);
-            pointerTargetValue.current = Number.NaN;
+            pointerSessionRef.current = null;
           }}
           onClick={handleClick}
           aria-valuetext={ariaValueText || valueLabel}

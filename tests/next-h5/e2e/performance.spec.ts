@@ -19,7 +19,7 @@ test.afterEach(({ page }) => {
 });
 
 test("keeps ten thousand rows bounded and jumps within budget", async ({ page }) => {
-  const scenario = page.getByRole("region", { name: "运行时性能场景" });
+  const scenario = page.locator('section[aria-label="运行时性能场景"]');
   const list = page.getByRole("list", { name: "万条性能订单" });
   const initialRenderedCount = Number(await list.getAttribute("data-rendered-count"));
   expect(initialRenderedCount).toBeGreaterThan(0);
@@ -34,7 +34,7 @@ test("keeps ten thousand rows bounded and jumps within budget", async ({ page })
 });
 
 test("opens and filters fifteen hundred tree nodes within budget", async ({ page }) => {
-  const scenario = page.getByRole("region", { name: "运行时性能场景" });
+  const scenario = page.locator('section[aria-label="运行时性能场景"]');
   await page.getByRole("button", { name: "选择性能分类" }).click();
   const dialog = page.getByRole("dialog", { name: "性能分类选择" });
   await expect(dialog).toBeVisible();

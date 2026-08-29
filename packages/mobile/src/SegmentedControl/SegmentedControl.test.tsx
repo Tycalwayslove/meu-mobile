@@ -147,7 +147,7 @@ describe("SegmentedControl", () => {
     fireEvent.click(screen.getByRole("radio", { name: "卡片" }));
     expect(screen.getByRole("radio", { name: "卡片" })).toHaveProperty("checked", true);
     const form = screen.getByTestId<HTMLFormElement>("form");
-    form.reset();
+    act(() => form.reset());
     expect(screen.getByRole("radio", { name: "列表" })).toHaveProperty("checked", true);
     expect(new FormData(form).get("view")).toBe("list");
     void act(() => vi.runAllTimers());
@@ -214,7 +214,7 @@ describe("SegmentedControl", () => {
     document.body.append(form);
     fireEvent.click(screen.getByRole("radio", { name: "卡片" }));
     expect(new FormData(form).get("view")).toBe("card");
-    form.reset();
+    act(() => form.reset());
     expect(new FormData(form).get("view")).toBe("list");
     void act(() => vi.runAllTimers());
     expect(screen.getByRole("radio", { name: "列表" })).toHaveProperty("checked", true);

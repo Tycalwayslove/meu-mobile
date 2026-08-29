@@ -92,17 +92,20 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
 export type MeuFormCalendarAdapterProps<TDate> = Omit<CalendarBaseProps<TDate>, "defaultValue" | "onChange" | "ref" | "selectionMode" | "value">;
 
 // @public
-export type MeuFormCalendarCommonProps<TDate> = MeuFormCalendarAdapterProps<TDate> & {
+export type MeuFormCalendarCommonProps<TDate, TValue = TDate | ReadonlyArray<TDate>> = MeuFormCalendarAdapterProps<TDate> & {
     description?: ReactNode;
     label?: ReactNode;
     required?: boolean;
+    serializeValue?: (value: TValue, details: {
+        adapter: DateAdapter<TDate>;
+    }) => MeuFormDataSerialization;
 };
 
 // @public
 export type MeuFormCalendarMultipleFieldPath<TFieldValues extends FieldValues, TDate> = FieldPathByValue<TFieldValues, ReadonlyArray<NoInfer<TDate>>> | FieldPathByValue<TFieldValues, ReadonlyArray<NoInfer<TDate>> | undefined>;
 
 // @public
-export type MeuFormCalendarMultipleProps<TFieldValues extends FieldValues, TDate> = MeuFormCalendarCommonProps<TDate> & {
+export type MeuFormCalendarMultipleProps<TFieldValues extends FieldValues, TDate> = MeuFormCalendarCommonProps<TDate, ReadonlyArray<TDate>> & {
     name: MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>;
     onChange?: CalendarMultipleProps<TDate>["onChange"];
     rules?: UseControllerProps<TFieldValues, MeuFormCalendarMultipleFieldPath<TFieldValues, TDate>>["rules"];
@@ -116,7 +119,7 @@ export type MeuFormCalendarProps<TFieldValues extends FieldValues, TDate = Date>
 export type MeuFormCalendarRangeFieldPath<TFieldValues extends FieldValues, TDate> = FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null> | FieldPathByValue<TFieldValues, CalendarRange<NoInfer<TDate>> | null | undefined>;
 
 // @public
-export type MeuFormCalendarRangeProps<TFieldValues extends FieldValues, TDate> = MeuFormCalendarCommonProps<TDate> & {
+export type MeuFormCalendarRangeProps<TFieldValues extends FieldValues, TDate> = MeuFormCalendarCommonProps<TDate, CalendarRange<TDate>> & {
     name: MeuFormCalendarRangeFieldPath<TFieldValues, TDate>;
     onChange?: CalendarRangeProps<TDate>["onChange"];
     rules?: UseControllerProps<TFieldValues, MeuFormCalendarRangeFieldPath<TFieldValues, TDate>>["rules"];
@@ -127,7 +130,7 @@ export type MeuFormCalendarRangeProps<TFieldValues extends FieldValues, TDate> =
 export type MeuFormCalendarSingleFieldPath<TFieldValues extends FieldValues, TDate> = FieldPathByValue<TFieldValues, NoInfer<TDate> | null> | FieldPathByValue<TFieldValues, NoInfer<TDate> | null | undefined>;
 
 // @public
-export type MeuFormCalendarSingleProps<TFieldValues extends FieldValues, TDate> = MeuFormCalendarCommonProps<TDate> & {
+export type MeuFormCalendarSingleProps<TFieldValues extends FieldValues, TDate> = MeuFormCalendarCommonProps<TDate, TDate> & {
     name: MeuFormCalendarSingleFieldPath<TFieldValues, TDate>;
     onChange?: CalendarSingleProps<TDate>["onChange"];
     rules?: UseControllerProps<TFieldValues, MeuFormCalendarSingleFieldPath<TFieldValues, TDate>>["rules"];
@@ -186,6 +189,12 @@ export type MeuFormCheckboxProps<TFieldValues extends FieldValues> = Omit<Checkb
 };
 
 // @public
+export type MeuFormDataSerialization = MeuFormDataValue | ReadonlyArray<MeuFormDataValue>;
+
+// @public
+export type MeuFormDataValue = string | number | boolean | bigint | null | undefined;
+
+// @public
 export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date>(input: MeuFormDatePickerProps<TFieldValues, TDate>): JSX.Element;
 
 // @public
@@ -209,6 +218,10 @@ export type MeuFormDatePickerProps<TFieldValues extends FieldValues, TDate = Dat
     pickerTitle?: ReactNode;
     required?: boolean;
     rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+    serializeValue?: (value: TDate, details: {
+        adapter: DateAdapter<TDate>;
+        precision: DatePrecision;
+    }) => MeuFormDataSerialization;
     triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -235,6 +248,9 @@ export type MeuFormDateRangePickerProps<TFieldValues extends FieldValues, TDate 
     pickerTitle?: ReactNode;
     required?: boolean;
     rules?: UseControllerProps<TFieldValues, MeuDateRangePickerFieldPath<TFieldValues, TDate>>["rules"];
+    serializeValue?: (value: CalendarRange<TDate>, details: {
+        adapter: DateAdapter<TDate>;
+    }) => MeuFormDataSerialization;
     triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -250,6 +266,7 @@ export type MeuFormImageUploaderProps<TFieldValues extends FieldValues> = Omit<I
     onChange?: (items: ImageUploaderItem[], details: ImageUploaderChangeDetails) => void;
     required?: boolean;
     rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+    serializeValue?: (items: readonly ImageUploaderItem[]) => MeuFormDataSerialization;
 };
 
 // @public

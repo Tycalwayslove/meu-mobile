@@ -1,5 +1,7 @@
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 
+import { getMeuFormRoot } from "./form-root-registry";
+
 /** @public */
 export type MeuFormServerErrors<TFieldValues extends FieldValues> = Partial<
   Record<Path<TFieldValues>, string>
@@ -16,7 +18,8 @@ export type ApplyMeuFormErrorsOptions = {
 };
 
 /**
- * Applies server validation messages and focuses the first registered invalid field in DOM order.
+ * Applies server validation messages and focuses the first registered invalid field in the owning
+ * MeuForm's DOM order.
  *
  * Import this helper from `@meu/form-react/server` so server-safe code does not cross the client
  * component entry point.
@@ -42,7 +45,8 @@ export function applyMeuFormErrors<TFieldValues extends FieldValues>(
   let firstField = invalidFields[0];
   if (shouldFocusFirst && invalidFields.length > 0 && typeof document !== "undefined") {
     const candidates = new Set<string>(invalidFields);
-    const firstControl = Array.from(document.querySelectorAll<HTMLElement>("[name]")).find(
+    const queryRoot = getMeuFormRoot(form) || document;
+    const firstControl = Array.from(queryRoot.querySelectorAll<HTMLElement>("[name]")).find(
       (element) => candidates.has(element.getAttribute("name") || "")
     );
     const controlName = firstControl ? firstControl.getAttribute("name") : null;

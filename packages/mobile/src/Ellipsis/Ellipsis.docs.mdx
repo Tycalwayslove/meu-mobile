@@ -100,7 +100,7 @@ ref 指向根 div，可用于测量/选择；无公开 remeasure 方法，容器
 
 ## 浏览器与 WebView
 
-ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测量。Array.from 按 Unicode code point 切分，但不保证 emoji ZWJ/组合字素完整，应避免对关键 emoji 标识做 middle 截断。
+ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测量。完整支持档使用 `Intl.Segmenter` 按 Unicode grapheme 切分，旧内核 fallback 仍保持 ZWJ emoji、旗帜、肤色、variation selector 与常见组合附加符完整。
 
 ## 边界情况与已知限制
 
@@ -116,7 +116,7 @@ ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测�
 - Story interaction: `InteractiveExpansion` 验证测量后展开状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2177 B / 32768 B 预算，组合 Brotli 1891 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2619 B / 32768 B 预算，组合 Brotli 2296 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Ellipsis.ssr.test.tsx` 验证稳定 fallback；hydration 专测待补
 - RTL: NarrowRTL Story
 - Reduced motion: 无动画，不适用
@@ -128,14 +128,15 @@ ResizeObserver 缺失时监听 window resize；字体 ready 可用时再次测�
 
 ### 待优化
 
-补 grapheme segmenter 可选策略、双引擎真实测量、复制体验与字体加载 E2E。
+补双引擎真实测量、复制体验与字体加载 E2E。
 
 ### 已完成
 
-修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调；补 RTL/forced-colors/SSR 边界。
+修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调和 grapheme 安全截断；补 RTL/forced-colors/SSR 边界。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型 | 内容                              | 迁移说明                         |
 | ---------- | ------ | ---- | --------------------------------- | -------------------------------- |
 | 2026-08-29 | 未发布 | fix  | V2 测量身份、异常 rows 与兼容降级 | API 兼容；非有限 rows 现统一为 1 |
+| 2026-08-29 | 未发布 | fix  | 截断改为 grapheme 安全分段        | API 兼容；emoji/组合字符不再破碎 |

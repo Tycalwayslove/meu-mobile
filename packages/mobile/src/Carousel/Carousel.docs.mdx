@@ -89,7 +89,7 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 ## 无障碍
 
-提供 carousel/slide roledescription、每页名称、live region、暂停控制和前后按钮。非活动页 `aria-hidden` 并移除后代焦点。V2 需通过读屏和 DOM 动态变更验证 tabindex 恢复不会污染调用方。
+提供 carousel/slide roledescription、每页名称、live region、暂停控制和前后按钮。非活动页同时使用 `aria-hidden` 与 `inert`；旧内核 fallback 保存/恢复调用方 tabindex，并观察动态插入与 tabindex/disabled/href/contenteditable 变化，避免新控件进入隐藏页的 Tab 路径。
 
 ## 动效
 
@@ -115,7 +115,7 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 - items 为空或只有一项时控制按钮禁用。
 - autoplay 最短间隔归一为 1000ms，但内容可读时间仍由调用方负责。
-- MutationObserver 会扫描 slide 后代焦点，复杂动态内容需性能验证。
+- MutationObserver 仅扫描 slide 内潜在焦点节点及相关属性；复杂动态内容仍需性能验证。
 
 ## 性能预算
 
@@ -123,11 +123,11 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 ## 测试证据
 
-- Unit: `Carousel.test.tsx`
+- Unit: `Carousel.test.tsx` 覆盖语义、受控回滚、自动播放/reduced-motion、可见性、drag reason，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
 - Story interaction: `Default` 验证前进按钮、索引更新与活动 slide 的可访问状态；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 18254 B / 49152 B 预算，组合 Brotli 16099 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 18395 B / 49152 B 预算，组合 Brotli 16225 B；共享样式由应用单独导入一次。
 - SSR/hydration: 待补组件级证明
 - RTL: 待补
 - Reduced motion: 有单测覆盖，待真实浏览器证明
@@ -139,16 +139,17 @@ drag 默认开启，阈值由 Embla 控制；必须验证横向手势与纵向�
 
 ### 待优化
 
-- 完成 RTL、pointer cancel、滚动仲裁、可见性、受控回滚和读屏测试。
+- 完成 RTL、pointer cancel、滚动仲裁和读屏真机测试。
 - 补 SSR、性能与真机证据。
 - 审核 autoplay 默认、间隔下限与 WCAG 暂停要求的文档表达。
 
 ### 已完成
 
-- V1 已默认关闭 autoplay，提供暂停/播放与前后按钮、reduced-motion 降级和 reason 事件。
+- 已默认关闭 autoplay，提供暂停/播放与前后按钮、reduced-motion 降级和 reason 事件；动态非活动页使用 inert 与旧内核 tabindex fallback 隔离。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
-| ---------- | ----- | ---- | -------------------- | -------- |
-| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |
+| 日期       | 版本   | 类型 | 内容                 | 迁移说明                                             |
+| ---------- | ------ | ---- | -------------------- | ---------------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs | 建立 V2 留存文档基线 | 无                                                   |
+| 2026-08-29 | 未发布 | fix  | 动态非活动页焦点隔离 | API 兼容；隐藏 slide 的后续属性变化不再重入 Tab 路径 |

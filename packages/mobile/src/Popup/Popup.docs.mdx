@@ -78,7 +78,7 @@ Mask 点击可选关闭；面板本身不定义拖拽。关闭按钮目标至少
 
 ## 无障碍
 
-面板使用 `role="dialog"`、`aria-modal="true"` 并强制可访问名称。打开时圈定焦点，关闭后恢复。V2 必须验证嵌套 overlay、动态 focusable、background inert 与读屏浏览模式。
+面板使用 `role="dialog"`、`aria-modal="true"` 并强制可访问名称。打开时圈定焦点并通过共享引用计数管理器把背景 siblings 设为 inert/aria-hidden；嵌套模态只暴露栈顶，自定义 Portal 容器会沿祖先路径隔离背景，关闭后精确恢复原属性。Popover focus branch、由 `aria-controls` 关联的 NumberKeyboard 与 Toast live region 保持可达；真实读屏浏览模式仍需真机验证。
 
 ## 动效
 
@@ -103,7 +103,7 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 ## 边界情况与已知限制
 
 - 当前 `aria-modal` 固定为 true，不适合非模态用法。
-- overlay primitives 缺少独立完整测试，是 Popup 商用前置阻断项。
+- 背景隔离只管理同一 Document；跨 iframe/ShadowRoot 仍需宿主显式分区。
 - container 指向自定义文档或 Shadow DOM 的边界尚未声明支持。
 
 ## 性能预算
@@ -112,15 +112,15 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 
 ## 测试证据
 
-- Unit: `Popup.test.tsx`
+- Unit: `Popup.test.tsx` 覆盖关闭原因、焦点、栈顶 Escape、嵌套背景隔离、自定义容器属性恢复与关联 NumberKeyboard；`overlayHooks.test.tsx` 覆盖 tabbable 顺序与 isolation 引用计数。
 - Story interaction: `Bottom.play` 验证打开、可访问对话框、关闭和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 7029 B / 32768 B 预算，组合 Brotli 6205 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 8278 B / 32768 B 预算，组合 Brotli 7329 B；共享样式由应用单独导入一次。
 - SSR/hydration: 单元覆盖 Portal 基础；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成组合 hydration，0 `pageerror`、0 `console.error`。
 - RTL: 待补
 - Reduced motion: 待补
-- Mobile Chromium/WebKit E2E: 打开、focus trap、Escape/关闭、焦点恢复、scroll lock 与 action 链路通过；嵌套 overlay 留待发布前专项。
+- Mobile Chromium/WebKit E2E: 打开、focus trap、Escape/关闭、焦点恢复、scroll lock 与 action 链路通过；嵌套 isolation 已有 Unit，读屏浏览模式留待真机。
 - Chromatic Light/Dark: Figma 与 stories 已有基线，待显式矩阵
 - Real device: 待补
 
@@ -128,16 +128,16 @@ Portal 在客户端挂载；服务端不得访问 document。V2 需逐项证明 
 
 ### 待优化
 
-- 先加固 Portal、focus trap 与 scroll lock，再做 Popup 交互矩阵。
-- 补 inert/嵌套策略、软键盘、安全区、退出中断、SSR、RTL 和真机证明。
+- 补软键盘、安全区、退出中断、RTL 和真机证明。
 - 为尚未逐项覆盖的关闭 reason 添加更细的 Story play 与 E2E。
 
 ### 已完成
 
-- V1 已统一 Portal、Mask、受控模型、焦点、滚动锁、关闭原因与四方向样式。
+- 已统一 Portal、Mask、受控模型、焦点、滚动锁、关闭原因与四方向样式；补齐栈顶 modal background isolation、自定义容器和非模态关联分支。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型 | 内容                 | 迁移说明 |
-| ---------- | ----- | ---- | -------------------- | -------- |
-| 2026-08-28 | 0.1.0 | docs | 建立 V2 留存文档基线 | 无       |
+| 日期       | 版本   | 类型 | 内容                      | 迁移说明                                     |
+| ---------- | ------ | ---- | ------------------------- | -------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs | 建立 V2 留存文档基线      | 无                                           |
+| 2026-08-29 | 未发布 | fix  | 背景 inert 与嵌套模态隔离 | API 兼容；打开模态后页面背景不再进入可访问树 |

@@ -14,6 +14,7 @@ type FormValues = z.infer<typeof schema>;
 const transformedSchema = z.object({ quantity: z.string().transform((value) => Number(value)) });
 type TransformInput = z.input<typeof transformedSchema>;
 type TransformOutput = z.output<typeof transformedSchema>;
+type ResetValues = { disabledValue: string; name: string };
 
 afterEach(cleanup);
 
@@ -37,6 +38,27 @@ function TransformedExample({ onSubmit }: { onSubmit: (values: TransformOutput) 
     <MeuForm form={form} onSubmit={onSubmit}>
       <MeuFormTextInput<TransformInput> name="quantity" label="商品数量" inputMode="numeric" />
       <Button type="submit">保存数量</Button>
+    </MeuForm>
+  );
+}
+
+function NativeResetExample({ onReset }: { onReset?: React.FormEventHandler<HTMLFormElement> }) {
+  const form = useMeuForm<ResetValues>({
+    defaultValues: { disabledValue: "固定值", name: "" }
+  });
+  return (
+    <MeuForm form={form} onReset={onReset} onSubmit={() => undefined}>
+      <MeuFormTextInput<ResetValues> name="name" label="名称" />
+      <MeuFormTextInput<ResetValues> name="disabledValue" label="禁用值" disabled />
+      <output aria-label="重置状态">
+        {form.formState.isDirty ? "dirty" : "pristine"}/
+        {form.formState.touchedFields.name ? "touched" : "untouched"}/
+        {form.formState.errors.name ? "error" : "valid"}
+      </output>
+      <Button type="button" onClick={() => form.setError("name", { message: "名称不可用" })}>
+        设置错误
+      </Button>
+      <Button type="reset">原生重置</Button>
     </MeuForm>
   );
 }
@@ -84,5 +106,52 @@ describe("MeuForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存数量" }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledWith({ quantity: 12 }, expect.anything()));
+  });
+
+  it("synchronizes native reset with RHF value, dirty, touched and error state", async () => {
+    const onReset = vi.fn();
+    render(<NativeResetExample onReset={onReset} />);
+    const name = screen.getByRole<HTMLInputElement>("textbox", { name: "名称" });
+    const disabledValue = screen.getByRole<HTMLInputElement>("textbox", { name: "禁用值" });
+
+    fireEvent.change(name, { target: { value: "喵呜" } });
+    fireEvent.blur(name);
+    fireEvent.click(screen.getByRole("button", { name: "设置错误" }));
+    await waitFor(() =>
+      expect(screen.getByLabelText("重置状态").textContent).toBe("dirty/touched/error")
+    );
+    expect(disabledValue.disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "原生重置" }));
+
+    expect(onReset).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(name.value).toBe("");
+      expect(screen.getByLabelText("重置状态").textContent).toBe("pristine/untouched/valid");
+    });
+    expect(disabledValue.value).toBe("固定值");
+    expect(disabledValue.disabled).toBe(true);
+    expect(onReset).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves RHF state when the consumer prevents native reset", async () => {
+    const onReset = vi.fn<React.FormEventHandler<HTMLFormElement>>((event) => {
+      event.preventDefault();
+    });
+    render(<NativeResetExample onReset={onReset} />);
+    const name = screen.getByRole<HTMLInputElement>("textbox", { name: "名称" });
+
+    fireEvent.change(name, { target: { value: "保留值" } });
+    fireEvent.blur(name);
+    fireEvent.click(screen.getByRole("button", { name: "设置错误" }));
+    await waitFor(() =>
+      expect(screen.getByLabelText("重置状态").textContent).toBe("dirty/touched/error")
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "原生重置" }));
+
+    expect(name.value).toBe("保留值");
+    expect(screen.getByLabelText("重置状态").textContent).toBe("dirty/touched/error");
+    expect(onReset).toHaveBeenCalledTimes(1);
   });
 });

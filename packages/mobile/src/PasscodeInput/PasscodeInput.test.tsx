@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createRef } from "react";
 import { renderToString } from "react-dom/server";
 import type { KeyboardEvent } from "react";
@@ -181,10 +181,14 @@ describe("PasscodeInput", () => {
     expect(input.getAttribute("aria-invalid")).toBe("true");
     expect(input.getAttribute("aria-describedby")).toContain("description");
     expect(input.getAttribute("aria-describedby")).toContain("error");
-    if (ref.current) ref.current.focus();
+    act(() => {
+      if (ref.current) ref.current.focus();
+    });
     expect(document.activeElement).toBe(input);
     expect(ref.current ? ref.current.input : null).toBe(input);
-    if (ref.current) ref.current.blur();
+    act(() => {
+      if (ref.current) ref.current.blur();
+    });
     expect(document.activeElement).not.toBe(input);
   });
 

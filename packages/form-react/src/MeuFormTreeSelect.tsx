@@ -8,7 +8,7 @@ import type {
   TreeSelectProps,
   TreeSelectValue
 } from "@meu/mobile";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
@@ -58,11 +58,11 @@ export type MeuFormTreeSelectProps<
   label?: ReactNode;
   /** React Hook Form field path that stores the selected tree values. */
   name: Path<TFieldValues>;
-  /** Called when the user cancels without committing a new form value. */
+  /** Called after cancellation marks the field touched without committing the draft values. */
   onCancel?: TreeSelectProps<TValue>["onCancel"];
-  /** Called after confirmation with the selected values and options; read-only mode skips form updates. */
+  /** Called after confirmation marks the field touched; read-only mode skips form value updates. */
   onConfirm?: TreeSelectProps<TValue>["onConfirm"];
-  /** Called when popup visibility is requested to change, with the next state and reason. */
+  /** Called last for a visibility request; close callbacks observe the updated touched state. */
   onOpenChange?: (open: boolean, details: { reason: TreeSelectOpenChangeReason }) => void;
   /** Controls popup visibility; omit to let the component manage it from `defaultOpen`. */
   open?: boolean;
@@ -138,6 +138,10 @@ export function MeuFormTreeSelect<
     name,
     ...(rules ? { rules } : {})
   });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
   const currentValue = Array.isArray(field.value) ? (field.value as TValue[]) : [];
   const optionRegistry = collectOptions(treeSelectProps.options);
   const selectedOptions = currentValue
@@ -162,6 +166,12 @@ export function MeuFormTreeSelect<
     if (onOpenChange) onOpenChange(nextOpen, details);
   }
 
+  function markOpenCycleTouched() {
+    if (touchedOpenCycleRef.current) return;
+    touchedOpenCycleRef.current = true;
+    field.onBlur();
+  }
+
   return (
     <Field
       label={label}
@@ -181,7 +191,7 @@ export function MeuFormTreeSelect<
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
-          field.onBlur();
+          if (!resolvedOpen) field.onBlur();
           if (triggerOnBlur) triggerOnBlur(event);
         }}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -199,12 +209,15 @@ export function MeuFormTreeSelect<
         returnFocusRef={triggerRef}
         {...(treeAriaLabel === undefined ? {} : { treeAriaLabel })}
         value={currentValue}
-        {...(onCancel ? { onCancel } : {})}
+        onCancel={(details) => {
+          markOpenCycleTouched();
+          if (onCancel) onCancel(details);
+        }}
         onConfirm={(nextValue, options) => {
           if (!readOnly) {
             field.onChange(nextValue);
-            field.onBlur();
           }
+          markOpenCycleTouched();
           if (onConfirm) onConfirm(nextValue, options);
         }}
         onOpenChange={(nextOpen, details) => changeOpen(nextOpen, details)}

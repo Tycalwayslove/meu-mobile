@@ -89,7 +89,7 @@ API 由 `IndexListProps`/`IndexListSection` 生成。`key` 必须稳定唯一；
 
 ## 无障碍
 
-rail 是具名 navigation，section 由可见 heading 标记，active button 使用 `aria-current=location`。`brief` 为图形或数字时必须提供可理解的 `ariaLabel`。
+rail 是具名 navigation，内部滚动 region 与 rail 默认名称均随 ConfigProvider locale 使用中英文，section 由可见 heading 标记，active button 使用 `aria-current=location`。`brief` 为图形或数字时必须提供可理解的 `ariaLabel`。
 
 ## 动效
 
@@ -105,7 +105,7 @@ rail 是具名 navigation，section 由可见 heading 标记，active button 使
 
 ## RTL 与国际化
 
-rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-end 列视觉边界；内置 rail 名称支持中英文，也可用 `indexAriaLabel` 覆盖。
+rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-end 列视觉边界；内置内容 region 与 rail 名称支持中英文，rail 也可用 `indexAriaLabel` 覆盖。
 
 ## 浏览器与 WebView
 
@@ -124,11 +124,11 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 
 ## 测试证据
 
-- Unit: `IndexList.test.tsx` 覆盖语义、ref、键盘、滚动、动态删除、pointer 滑动和 ariaLabel。
+- Unit: `IndexList.test.tsx` 覆盖语义、中英文 region/rail 名称、ref、键盘、滚动、动态删除、pointer 滑动和 ariaLabel。
 - Story interaction: `Default.play` 验证键盘索引切换、焦点和活动分组输出；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3559 B / 32768 B 预算，组合 Brotli 3150 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3568 B / 32768 B 预算，组合 Brotli 3151 B；共享样式由应用单独导入一次。
 - SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构；hydration 专测待补。
 - RTL / Reduced motion / forced-colors: CSS 与契约完成，视觉矩阵待补。
 - Mobile Chromium/WebKit E2E、Chromatic Light/Dark、real device: 待发布批次统一验证。
@@ -141,10 +141,11 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 
 ### 已完成
 
-- 增加连续 pointer 索引、稳定可访问名称、RTL 逻辑边界、forced-colors、TSDoc、SSR 与动态数据测试。
+- 增加连续 pointer 索引、中英文稳定可访问名称、RTL 逻辑边界、forced-colors、TSDoc、SSR 与动态数据测试。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型      | 内容                                   | 迁移说明                                    |
 | ---------- | ------ | --------- | -------------------------------------- | ------------------------------------------- |
 | 2026-08-29 | 未发布 | hardening | 完成索引触摸、动态分组与跨平台语义加固 | 新增可选 `section.ariaLabel`，其余 API 兼容 |
+| 2026-08-29 | 未发布 | fix       | 英文 locale 的内容 region 使用英文名称 | API 兼容；读屏不再混入中文默认标签          |

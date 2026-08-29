@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "reviewed": "2026-08-29",
+  "upstream": {
+    "name": "Lucide Icons",
+    "package": "lucide-static",
+    "version": "1.34.0",
+    "repository": "https://github.com/lucide-icons/lucide",
+    "gitTag": "1.34.0",
+    "gitCommit": "1a60fd28ed7111bbf6acedc0896f3d83cd73945a",
+    "archiveUrl": "https://registry.npmjs.org/lucide-static/-/lucide-static-1.34.0.tgz",
+    "archiveIntegrity": "sha512-pSUvFhfhvDnhXN1fXerZEMgKLQQ3DneKwFYlqB5ji8OEAN0iPi/qgwQvCkcL519QgMeR66IpS/pT342VyT/g4g==",
+    "license": "ISC",
+    "licenseFile": "licenses/lucide-isc.txt",
+    "licenseSha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57",
+    "featherLicenseFile": "licenses/feather-mit.txt",
+    "featherLicenseSha256": "eea439fbcda64abe976409d46b0c2e0da56f5c7c460cb915fdfd6511df75ecd1"
+  },
+  "icons": [
+    {
+      "id": "chevron-left",
+      "upstream": "chevron-left",
+      "coreExport": "meuIconChevronLeft",
+      "reactExport": "MeuIconChevronLeft",
+      "source": "upstream/lucide-static-1.34.0/icons/chevron-left.svg",
+      "sourceSha256": "a8cd01ec4ad145afd6009f4f0e251d5d1e7b24371ddfda0b0e2a7b64926e9fee",
+      "modified": false,
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
+    },
+    {
+      "id": "check",
+      "upstream": "check",
+      "coreExport": "meuIconCheck",
+      "reactExport": "MeuIconCheck",
+      "source": "upstream/lucide-static-1.34.0/icons/check.svg",
+      "sourceSha256": "ebbd505dd0d572905f56834802f84fc28dec31693ab15a203970a9d2ba6c8a23",
+      "modified": false,
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
+    },
+    {
+      "id": "plus",
+      "upstream": "plus",
+      "coreExport": "meuIconPlus",
+      "reactExport": "MeuIconPlus",
+      "source": "upstream/lucide-static-1.34.0/icons/plus.svg",
+      "sourceSha256": "9604e8eb752dca9b045084f28ba963cfce16bb0d035aa023152361ec6ef54507",
+      "modified": false,
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
+    },
+    {
+      "id": "search",
+      "upstream": "search",
+      "coreExport": "meuIconSearch",
+      "reactExport": "MeuIconSearch",
+      "source": "upstream/lucide-static-1.34.0/icons/search.svg",
+      "sourceSha256": "b3361099cf1f66533154a7ce6609c95e6dfcda5883ffcf1e8dec678bf5cb30e5",
+      "modified": false,
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
+    },
+    {
+      "id": "x",
+      "upstream": "x",
+      "coreExport": "meuIconX",
+      "reactExport": "MeuIconX",
+      "source": "upstream/lucide-static-1.34.0/icons/x.svg",
+      "sourceSha256": "cac7f746fa2596dd081dfce44e061dcddb79bdb98a488f08cd8d5874fcb52332",
+      "modified": false,
+      "licenses": ["ISC", "MIT"],
+      "licenseFiles": ["licenses/lucide-isc.txt", "licenses/feather-mit.txt"]
+    }
+  ]
+}

@@ -63,9 +63,11 @@ function updateFocusableDescendants(slideNode: HTMLElement, active: boolean) {
       element.removeAttribute("data-meu-carousel-tabindex");
       return;
     }
-    if (stored !== null) return;
-    element.setAttribute("data-meu-carousel-tabindex", element.getAttribute("tabindex") || "");
-    element.setAttribute("tabindex", "-1");
+    const current = element.getAttribute("tabindex");
+    if (stored === null || current !== "-1") {
+      element.setAttribute("data-meu-carousel-tabindex", current || "");
+    }
+    if (current !== "-1") element.setAttribute("tabindex", "-1");
   });
 }
 
@@ -235,7 +237,12 @@ export function Carousel({
     };
     update();
     const observer = new MutationObserver(update);
-    observer.observe(node, { childList: true, subtree: true });
+    observer.observe(node, {
+      attributeFilter: ["contenteditable", "disabled", "href", "tabindex"],
+      attributes: true,
+      childList: true,
+      subtree: true
+    });
     return () => observer.disconnect();
   }, [currentIndex, items]);
 
@@ -361,6 +368,7 @@ export function Carousel({
                 className={slide}
                 role="group"
                 aria-hidden={active ? undefined : "true"}
+                inert={!active}
                 aria-label={item.ariaLabel || labels.slide(itemIndex + 1)}
                 aria-roledescription={labels.slideRole}
                 data-active={active ? "true" : "false"}

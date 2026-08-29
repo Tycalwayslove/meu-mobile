@@ -24,6 +24,62 @@ type EllipsisMeasurement = {
   rows: number;
 };
 
+type IntlSegmenter = {
+  segment: (content: string) => Iterable<{ segment: string }>;
+};
+type IntlSegmenterConstructor = new (
+  locale?: string | readonly string[],
+  options?: { granularity: "grapheme" }
+) => IntlSegmenter;
+
+function isCombiningCodePoint(value: number) {
+  return (
+    (value >= 0x0300 && value <= 0x036f) ||
+    (value >= 0x1ab0 && value <= 0x1aff) ||
+    (value >= 0x1dc0 && value <= 0x1dff) ||
+    (value >= 0x20d0 && value <= 0x20ff) ||
+    (value >= 0xfe20 && value <= 0xfe2f)
+  );
+}
+
+function splitGraphemes(content: string) {
+  const segmenterConstructor = (Intl as typeof Intl & { Segmenter?: IntlSegmenterConstructor })
+    .Segmenter;
+  if (segmenterConstructor) {
+    return Array.from(
+      new segmenterConstructor(undefined, { granularity: "grapheme" }).segment(content),
+      (entry) => entry.segment
+    );
+  }
+
+  const result: string[] = [];
+  let current = "";
+  let regionalCount = 0;
+  for (const codePoint of Array.from(content)) {
+    const value = codePoint.codePointAt(0) || 0;
+    const regional = value >= 0x1f1e6 && value <= 0x1f1ff;
+    const continuation =
+      current.length > 0 &&
+      (isCombiningCodePoint(value) ||
+        (value >= 0xfe00 && value <= 0xfe0f) ||
+        (value >= 0xe0100 && value <= 0xe01ef) ||
+        (value >= 0x1f3fb && value <= 0x1f3ff) ||
+        (value >= 0xe0020 && value <= 0xe007f) ||
+        value === 0x200d ||
+        current.endsWith("\u200d") ||
+        (regional && regionalCount % 2 === 1));
+    if (!continuation && current) {
+      result.push(current);
+      current = "";
+    }
+    current += codePoint;
+    if (regional) regionalCount += 1;
+    else if (value !== 0x200d) regionalCount = 0;
+  }
+  if (current) result.push(current);
+  return result;
+}
+
 function buildCandidate(chars: string[], count: number, direction: EllipsisDirection) {
   if (count >= chars.length) return chars.join("");
   if (direction === "start") return `…${chars.slice(chars.length - count).join("")}`;
@@ -112,7 +168,7 @@ export function Ellipsis({
       }
 
       if (mirrorAction) mirrorAction.style.display = "inline-flex";
-      const chars = Array.from(content);
+      const chars = splitGraphemes(content);
       let low = 0;
       let high = chars.length;
       while (low < high) {

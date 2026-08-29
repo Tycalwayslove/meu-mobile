@@ -9,10 +9,13 @@ import type {
   DatePrecision,
   PickerTriggerProps
 } from "@meu/mobile";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { useController, useFormContext } from "react-hook-form";
 import type { FieldValues, Path, UseControllerProps } from "react-hook-form";
+
+import type { MeuFormDataSerialization } from "./adapter-types";
+import { HiddenFormValues, serializeHiddenFormValues } from "./HiddenFormValues";
 
 /**
  * Date picker props accepted after removing state managed by the form adapter.
@@ -73,6 +76,16 @@ export type MeuFormDatePickerProps<
   required?: boolean;
   /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
+  /**
+   * Converts a valid selected date into native `FormData` values. The default uses the active
+   * adapter and picker precision (for example, `2026-08-29` at day precision). Return an array
+   * for repeated same-name entries; empty values omit the field. This callback must be synchronous;
+   * thrown errors or accidental promise results safely omit the field.
+   */
+  serializeValue?: (
+    value: TDate,
+    details: { adapter: DateAdapter<TDate>; precision: DatePrecision }
+  ) => MeuFormDataSerialization;
   /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
@@ -107,6 +120,7 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
   precision = "day",
   required = false,
   rules,
+  serializeValue,
   triggerProps,
   ...pickerProps
 }: MeuFormDatePickerProps<TFieldValues, TDate>) {
@@ -121,13 +135,24 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
     name,
     ...(rules ? { rules } : {})
   });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
   const currentValue = (field.value === undefined ? null : field.value) as TDate | null;
-  const formattedValue =
-    currentValue !== null && resolvedAdapter.isValid(currentValue)
-      ? formatValue
-        ? formatValue(currentValue, { adapter: resolvedAdapter, precision })
-        : resolvedAdapter.format(currentValue, formatPatterns[precision])
-      : undefined;
+  const currentValueIsValid = currentValue !== null && resolvedAdapter.isValid(currentValue);
+  const formattedValue = currentValueIsValid
+    ? formatValue
+      ? formatValue(currentValue, { adapter: resolvedAdapter, precision })
+      : resolvedAdapter.format(currentValue, formatPatterns[precision])
+    : undefined;
+  const serializedValues = currentValueIsValid
+    ? serializeHiddenFormValues(() =>
+        serializeValue
+          ? serializeValue(currentValue, { adapter: resolvedAdapter, precision })
+          : resolvedAdapter.format(currentValue, formatPatterns[precision])
+      ).values
+    : [];
   const {
     disabled: triggerDisabled,
     onBlur: triggerOnBlur,
@@ -142,6 +167,12 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
     if (resolvedOpen === nextOpen) return;
     if (!controlledOpen) setUncontrolledOpen(nextOpen);
     if (onOpenChange) onOpenChange(nextOpen, details);
+  }
+
+  function markOpenCycleTouched() {
+    if (touchedOpenCycleRef.current) return;
+    touchedOpenCycleRef.current = true;
+    field.onBlur();
   }
 
   return (
@@ -162,7 +193,7 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
         status={fieldState.invalid ? "error" : "default"}
         value={formattedValue}
         onBlur={(event) => {
-          field.onBlur();
+          if (!resolvedOpen) field.onBlur();
           if (triggerOnBlur) triggerOnBlur(event);
         }}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
@@ -170,6 +201,7 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
           if (!event.defaultPrevented) requestOpenChange(true, { reason: "trigger" });
         }}
       />
+      <HiddenFormValues disabled={disabled} name={field.name} values={serializedValues} />
       <DatePicker<TDate>
         {...pickerProps}
         {...(hasTitle
@@ -180,9 +212,13 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
         precision={precision}
         returnFocusRef={triggerRef}
         value={currentValue}
-        {...(onCancel ? { onCancel } : {})}
+        onCancel={(details) => {
+          markOpenCycleTouched();
+          if (onCancel) onCancel(details);
+        }}
         onConfirm={(nextValue) => {
           field.onChange(nextValue);
+          markOpenCycleTouched();
           if (onConfirm) onConfirm(nextValue);
         }}
         onOpenChange={(nextOpen, details) => requestOpenChange(nextOpen, details)}

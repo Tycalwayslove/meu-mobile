@@ -39,7 +39,7 @@ source: packages/mobile/src/Rate
 - RTL 指针位置与原生 range 方向同步；半填充使用逻辑方向；forced-colors 保留系统 Highlight/GrayText。
 - readOnly 输出为有名称和值的 meter 语义，同时保留 hidden input 的 FormData 和 input ref；disabled readOnly 不提交。
 
-当前为 V2 `implementation`，本地 axe 已通过；仍需移动浏览器视觉与真机读屏验收后才能标 commercial。
+当前为 V2 `verification`，本地 axe、移动双引擎与扩展场景矩阵已通过；仍需最终视觉审批与真机读屏验收后才能标 commercial。
 
 ## 何时使用
 
@@ -80,7 +80,7 @@ source: packages/mobile/src/Rate
 
 - count 转为至少 1 的整数；非有限 count 回退 5。
 - allowHalf=false 四舍五入到整数，true 保留一位并按浏览器 step=0.5。
-- pointer 点击当前档且 allowClear=true 时发布 0；拖到其他档或 pointer cancel 不误清除。键盘 Home 可原生到 0。
+- pointer 点击当前档且 allowClear=true 时发布 0；一次 pointer 会话只要产生过原生 change，其尾随 click 就不会清零。pointer cancel 同样取消清除。键盘 Home 可原生到 0。
 - allowClear=false 只关闭“重复点击清零”，不把 0 从值域移除；业务 required 应由 schema 明确验证 value > 0。
 
 ## 表单集成
@@ -157,12 +157,12 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 
 ## 测试证据
 
-- Unit 8 项：半值 change、readOnly meter/Field 值语义、规范化、RTL 重复清除、readOnly FormData/ref、同步原生 reset 与取消边界。
+- Unit 9 项：半值 change、readOnly meter/Field 值语义、规范化、RTL 重复清除、拖动尾随 click 不清零、readOnly FormData/ref、同步原生 reset 与取消边界。
 - SSR 1 项：interactive range 与 readOnly meter/hidden form markup。
 - Story interaction: `NativeFormReset.play` 验证原生 reset；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4433 B / 32768 B 预算，组合 Brotli 3943 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4490 B / 32768 B 预算，组合 Brotli 4001 B；共享样式由应用单独导入一次。
 - 待补：pointer drag/keyboard 移动 E2E、forced-colors/200%/Light-Dark、VoiceOver/TalkBack。
 
 ## V2 优化记录
@@ -170,7 +170,7 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 ### 已完成
 
 - 统一 count/increment/value 规范化，避免视觉、DOM 与 aria-valuetext 分叉。
-- 修复 RTL 重复点击清除映射与 pointer cancel；保留调用方 pointer/click handlers。
+- 修复 RTL 重复点击清除映射、拖动尾随 click 误清零与 pointer cancel；保留调用方 pointer/click handlers。
 - 增加非受控 reset、readOnly hidden FormData/ref、Field readOnly naming。
 - 半填充改逻辑方向，增加 forced-colors、TSDoc、SSR/单元/Story 与本事实源。
 
@@ -190,3 +190,4 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 | 2026-08-28 | 未发布 | behavior      | 值按整/半档规范化，修复 RTL 清除与 reset    | 非对齐受控值会显示规范值           |
 | 2026-08-28 | 未发布 | accessibility | readOnly Field naming、FormData/ref、高对比 | readOnly ref 现在指向 hidden input |
 | 2026-08-28 | 未发布 | docs          | 建立 Rate V2 永久事实源                     | README 改为仅指向本文件            |
+| 2026-08-29 | 未发布 | behavior      | 拖动产生 change 后忽略尾随 click 清除       | 无                                 |

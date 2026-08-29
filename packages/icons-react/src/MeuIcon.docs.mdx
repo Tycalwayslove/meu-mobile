@@ -19,12 +19,13 @@ source: packages/icons-react/src/MeuIcon
 
 ## 当前能力
 
-- `@meu/icons-core` 提供 5 个平台无关 SVG node，`@meu/icons-react` 提供通用 `MeuIcon` 与 Meu 命名组件。
+- `@meu/icons-core` 提供 5 个平台无关 SVG node，`@meu/icons-react` 提供通用 `MeuIcon` 与 Meu 命名组件；Meu 名称是稳定 API，不表示 Meu 创作了几何。
 - 所有图标使用 24 × 24 viewBox、`currentColor`、圆角端点，默认 `size=24`、`strokeWidth=2`。
 - 无 accessible name 时默认为装饰图并设置 `aria-hidden`；可用 `title`、`aria-label` 或 `aria-labelledby` 创建语义图。
-- 仓库随包保留 Lucide ISC、Feather MIT 文本和逐图标清单，但上游不可变 revision 与生成校验记录仍缺失。
+- 几何逐字生成自 `lucide-static@1.34.0` 的 5 个已锁定 SVG；lock 固定 npm SHA-512、Lucide commit、逐文件/逐几何 SHA-256、上游名称和 React 导出。
+- 仓库随包保留 Lucide 完整 LICENSE、Feather MIT 文本、上游 SVG snapshot 与逐图标 manifest；生成和漂移检查不访问网络。
 
-当前状态为 `verification`，不代表来源审计或商用发布验收已完成。
+当前工程来源链已验证；商用分发义务仍需法务复核，组件状态因此保持 `verification`。
 
 ## 何时使用
 
@@ -62,6 +63,16 @@ source: packages/icons-react/src/MeuIcon
 ## Props
 
 通用 `MeuIcon` 需要 `icon` 和稳定 kebab-case `name`；命名图标已经固化这两项。`size` 同时控制宽高，`strokeWidth` 使用 24 × 24 坐标系单位；其余属性来自原生 `SVGProps`。
+
+## 来源与再生成
+
+`@meu/icons-core/icons.lock.json` 是人工评审入口，记录 Meu ID → Lucide 名称 → React 导出的映射。`icons:generate` 从仓库内已校验的上游 SVG snapshot 生成 TypeScript 与 manifest；`icons:check` 离线比较生成结果，已接入 core package Unit。显式的 `icons:upstream:verify` 才会联网，它先验证固定 npm 归档 SHA-512，再只读比较 snapshot；网络或 checksum 失败都会退出，不会替换文件。
+
+```sh
+pnpm --filter @meu/icons-core icons:generate
+pnpm --filter @meu/icons-core icons:check
+pnpm --filter @meu/icons-core icons:upstream:verify
+```
 
 ## Events
 
@@ -108,7 +119,8 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 ## 边界情况与已知限制
 
 - 当前只有 `chevron-left`、`check`、`plus`、`search`、`x` 5 个图标。
-- 清单声明图形来自 Lucide Icons 1.34.0，当前条目源自 Feather 且 `modified=false`；仓库没有不可变上游 URL、commit、生成日志或几何 checksum，故来源链尚不能独立复现。
+- 当前 5 个 Meu 命名导出分别映射同名 Lucide/Feather 图标，`modified=false`；完整映射和 checksum 以生成 manifest 为准。
+- 工程校验只能证明当前 snapshot、生成物和上游归档一致，不能代替律师对 ISC/MIT 通知、发布载体和商业使用场景的最终意见。
 - `title` 适合简短名称，不承担长说明或动态状态公告。
 - named component 不提供自动 RTL 镜像，调用方不得仅凭图形名称猜测业务方向。
 
@@ -118,11 +130,13 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 ## 测试证据
 
-- Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`
+- Unit: `icons-core/src/icons.test.ts`、`icons-react/src/MeuIcon.test.tsx`，覆盖不可变来源、逐图标 checksum/许可映射与全部 Meu React 导出 ID
+- Generation drift: `icons:check` 验证 snapshot/license checksum，并离线比较 `icons.ts` 与 manifest；core package `test` 必须先通过该检查
+- Upstream archive: `icons:upstream:verify` 已用固定 npm SHA-512 验证 5 个 SVG 和完整 LICENSE；该显式审计命令不进入普通 `pnpm check`
 - Story interaction: `Catalog` 验证装饰图标不可聚焦且对辅助技术隐藏；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 1340 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 1316 B / 32768 B 预算，组合 Brotli 1151 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 1421 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 1397 B / 32768 B 预算，组合 Brotli 1217 B；共享样式由应用单独导入一次。
 - SSR/hydration: 实现无浏览器分支，尚无独立 hydration 测试
 - RTL: 规则已文档化，拥有方向语义的上层组件仍需逐项验证
 - Reduced motion: 不适用；没有内建动效
@@ -134,18 +148,19 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 ### 待优化
 
-- 补齐不可变上游 revision、获取/生成脚本和几何 checksum，再把 provenance 状态从 incomplete 升级。
-- 建立新图标准入检查：Meu 名称唯一、许可文件存在、修改状态准确、语义与 RTL 所有权明确。
+- 每次新增或升级图标都需重新完成人工来源和法务评审；修改过的上游几何必须走独立准入路径。
 - 记录 bundle 与 tree-shaking 证据，并补真实 VoiceOver/TalkBack 验收。
 
 ### 已完成
 
 - 补齐公开 TSDoc、Meu DevTools displayName、尺寸/描边契约及装饰/语义名称模式。
 - 允许 `title`、`aria-label`、`aria-labelledby`，并保留显式 `aria-hidden` 优先级。
-- 审计现有许可文件与清单，将缺失的可追溯证据写入 manifest，未把仓库声明冒充完整来源证明。
+- 固定 Lucide npm 归档、Git commit 与逐文件 checksum；加入上游 snapshot、离线生成/漂移检查和显式联网归档验证。
+- 逐项记录 Meu ID、上游名称、React 导出、几何 checksum 与 ISC/MIT 文件，不再用 Meu 命名遮蔽来源。
 
 ## 变更记录
 
-| 日期       | 版本  | 类型      | 内容                                     | 迁移说明 |
-| ---------- | ----- | --------- | ---------------------------------------- | -------- |
-| 2026-08-28 | 0.1.0 | hardening | 完善语义模式、命名、TSDoc 与来源审计记录 | 无       |
+| 日期       | 版本   | 类型       | 内容                                     | 迁移说明 |
+| ---------- | ------ | ---------- | ---------------------------------------- | -------- |
+| 2026-08-28 | 0.1.0  | hardening  | 完善语义模式、命名、TSDoc 与来源审计记录 | 无       |
+| 2026-08-29 | 未发布 | provenance | 固定上游并加入可复现生成、漂移与许可证据 | 无       |

@@ -31,7 +31,7 @@ source: packages/mobile/src/Result
 - 标题是真实 h1–h6，默认 h2；默认 `role=status`，关键且新发生的 error 可显式设 `role=alert`，标题作为 accessible name。
 - 支持说明、自定义/省略装饰图标与任意恢复操作；不内置路由、重试、计时或自动跳转。
 
-当前为 `implementation`；Unit、SSR、Story interaction 与本地 axe 已完成，浏览器专项、视觉基线和真机证据未完成。
+当前为 `verification`；Unit、SSR、Story interaction、本地 axe 与全库浏览器场景矩阵已完成，最终视觉审批和真机证据未完成。
 
 ## 何时使用
 
@@ -133,7 +133,7 @@ pending 点使用轻量 opacity 动画；reduced-motion 下停止并保持静态
 - Story interaction: `RecoveryActions.play` 验证恢复操作回调与业务输出；`check-storybook-links` 本地验证 play-fn 为 80/80（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3251 B / 32768 B 预算，组合 Brotli 2909 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3333 B / 32768 B 预算，组合 Brotli 2972 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；hydration 未执行。
 - RTL: 逻辑顺序契约；未做 E2E。
 - Reduced motion: CSS 分支存在；未做浏览器 E2E。

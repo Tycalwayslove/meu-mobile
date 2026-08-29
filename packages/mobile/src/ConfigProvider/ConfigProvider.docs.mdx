@@ -32,7 +32,7 @@ source: packages/mobile/src/ConfigProvider
 - `system` theme 和 motion 都通过 CSS media query 解析；渲染期间不读取 `window`、`document`、`matchMedia` 或本地存储。
 - `portalContainer` 函数仅作为惰性配置保存，ConfigProvider 渲染和 SSR 阶段不会调用它。
 
-当前为 V2 `implementation` 状态；核心 Mask/Dialog/Popup/BottomSheet/Popover 已完成跨 Portal 方向与动效传播，其余 Portal 消费者、移动端 E2E 与真机矩阵仍待全库审计，不能标记为 commercial。
+当前为 V2 `verification` 状态；跨 Portal 方向与动效传播、全库移动端 E2E 和扩展场景矩阵已完成，真机与最终视觉审批仍待统一验收，不能标记为 commercial。
 
 ## 何时使用
 

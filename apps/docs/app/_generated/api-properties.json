@@ -2230,7 +2230,7 @@
           "type": "(file: File, files: readonly File[]) => File | null | Promise<File | null>",
           "required": false,
           "event": false,
-          "description": "Transforms or rejects each accepted file before upload; return `null` to reject it."
+          "description": "Transforms each accepted file before upload; returning `null` or rejecting rejects that file."
         },
         {
           "name": "capture",
@@ -2284,7 +2284,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Maximum completed-plus-active item count; non-negative values also disable the add control at the limit."
+          "description": "Maximum completed-plus-queued item count, including failed tasks reserved for retry."
         },
         {
           "name": "maxSize",
@@ -2430,7 +2430,7 @@
           "type": "(details: ImageUploaderRejectDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called for each validation stage that rejects files, with the full selection and stage results."
+          "description": "Called for each validation stage, rejected preprocessing hook, or capacity-blocked retry."
         },
         {
           "name": "onUploadQueueChange",
@@ -2474,7 +2474,7 @@
           "type": "(taskId: string) => void",
           "required": true,
           "event": false,
-          "description": "Restarts a failed task by ID unless the uploader is disabled or read-only."
+          "description": "Restarts a failed task unless disabled, read-only, or external values have overfilled capacity."
         }
       ],
       "ImageUploaderRejectDetails": [
@@ -11584,7 +11584,7 @@
           "type": "(open: boolean, details: MeuFormNumberKeyboardOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when keyboard visibility is requested to change, with the next state and reason."
+          "description": "Called after close requests mark touched; confirmation invokes `onConfirm` first."
         }
       ],
       "MeuFormPasscodeInputProps": [
@@ -11718,7 +11718,7 @@
           "type": "(file: File, files: readonly File[]) => File | null | Promise<File | null>",
           "required": false,
           "event": false,
-          "description": "Transforms or rejects each accepted file before upload; return `null` to reject it."
+          "description": "Transforms each accepted file before upload; returning `null` or rejecting rejects that file."
         },
         {
           "name": "capture",
@@ -11778,7 +11778,7 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Maximum completed-plus-active item count; non-negative values also disable the add control at the limit."
+          "description": "Maximum completed-plus-queued item count, including failed tasks reserved for retry."
         },
         {
           "name": "maxSize",
@@ -11854,6 +11854,13 @@
           "description": "React Hook Form validation and value-processing rules registered for this field."
         },
         {
+          "name": "serializeValue",
+          "type": "(items: readonly ImageUploaderItem[]) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts the non-empty completed item array into native `FormData` values. By default each\nitem contributes its `url` as a repeated same-name entry in item order; the transient native\nfile selection is not submitted. Return JSON or another scalar for a single-entry contract.\nThis callback must be synchronous; thrown errors or accidental promise results safely omit the\nfield."
+        },
+        {
           "name": "showFailed",
           "type": "boolean",
           "required": false,
@@ -11916,7 +11923,7 @@
           "type": "(details: ImageUploaderRejectDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called for each validation stage that rejects files, with the full selection and stage results."
+          "description": "Called for each validation stage, rejected preprocessing hook, or capacity-blocked retry."
         },
         {
           "name": "onUploadQueueChange",
@@ -13567,14 +13574,14 @@
           "type": "(details: { reason: \"cancel\" | \"escape\" | \"mask\"; }) => void",
           "required": false,
           "event": true,
-          "description": "Called when the user cancels without committing a new form value."
+          "description": "Called after cancellation marks the field touched without committing the draft values."
         },
         {
           "name": "onConfirm",
           "type": "(value: readonly TValue[], options: readonly TreeSelectOption<TValue>[]) => void",
           "required": false,
           "event": true,
-          "description": "Called after confirmation with the selected values and options; read-only mode skips form updates."
+          "description": "Called after confirmation marks the field touched; read-only mode skips form value updates."
         },
         {
           "name": "onExpandedValuesChange",
@@ -13595,7 +13602,7 @@
           "type": "(open: boolean, details: { reason: TreeSelectOpenChangeReason; }) => void",
           "required": false,
           "event": true,
-          "description": "Called when popup visibility is requested to change, with the next state and reason."
+          "description": "Called last for a visibility request; close callbacks observe the updated touched state."
         },
         {
           "name": "onSearchValueChange",
@@ -13916,21 +13923,21 @@
           "type": "(details: { reason: \"cancel\" | \"escape\" | \"mask\"; }) => void",
           "required": false,
           "event": true,
-          "description": "Called when the user cancels without committing a new form value."
+          "description": "Called after cancellation marks the field touched without committing the draft value."
         },
         {
           "name": "onConfirm",
           "type": "(value: readonly TValue[], options: readonly PickerOption<TValue>[]) => void",
           "required": false,
           "event": true,
-          "description": "Called after the confirmed values are written to the form, with their resolved options."
+          "description": "Called after confirmed values are written and the field is marked touched."
         },
         {
           "name": "onOpenChange",
           "type": "(open: boolean, details: PickerOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when popup visibility is requested to change, with the next state and reason."
+          "description": "Called last for a visibility request; close callbacks observe the updated touched state."
         },
         {
           "name": "onSelect",
@@ -14244,21 +14251,21 @@
           "type": "(details: { reason: \"cancel\" | \"escape\" | \"mask\"; }) => void",
           "required": false,
           "event": true,
-          "description": "Called when the user cancels without committing a new form value."
+          "description": "Called after cancellation marks the field touched without committing the draft path."
         },
         {
           "name": "onConfirm",
           "type": "(value: readonly TValue[], options: readonly CascadePickerOption<TValue>[]) => void",
           "required": false,
           "event": true,
-          "description": "Called after the confirmed path is written to the form, with its resolved options."
+          "description": "Called after the confirmed path is written and the field is marked touched."
         },
         {
           "name": "onOpenChange",
           "type": "(open: boolean, details: PickerOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when popup visibility is requested to change, with the next state and reason."
+          "description": "Called last for a visibility request; close callbacks observe the updated touched state."
         },
         {
           "name": "onSelect",
@@ -14649,6 +14656,13 @@
           "event": false,
           "description": "Second increment, floored and clamped from 1 through 59.",
           "defaultValue": "1"
+        },
+        {
+          "name": "serializeValue",
+          "type": "(value: TDate, details: { adapter: DateAdapter<TDate>; precision: DatePrecision; }) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts a valid selected date into native `FormData` values. The default uses the active\nadapter and picker precision (for example, `2026-08-29` at day precision). Return an array\nfor repeated same-name entries; empty values omit the field. This callback must be synchronous;\nthrown errors or accidental promise results safely omit the field."
         },
         {
           "name": "triggerProps",
@@ -15153,6 +15167,13 @@
           "defaultValue": "true"
         },
         {
+          "name": "serializeValue",
+          "type": "(value: CalendarRange<TDate>, details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts a complete valid range into native `FormData` values. By default the start and end\nare emitted as two `YYYY-MM-DD` entries with the same name, so use `FormData.getAll(name)` on\nthe server. Return a scalar for a single-entry backend contract. This callback is synchronous;\nthrown errors or accidental promise results safely omit the field."
+        },
+        {
           "name": "showOutsideDays",
           "type": "boolean",
           "required": false,
@@ -15461,6 +15482,13 @@
           "description": "Shows the required affordance; enforce required validation through mode-specific `rules`."
         },
         {
+          "name": "serializeValue",
+          "type": "(value: TValue, details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts a non-empty valid selection into native `FormData` values. The default emits each\nselected date as a repeated `YYYY-MM-DD` entry in selection order. Return a scalar for a\nsingle-entry backend contract. This callback must be synchronous; thrown errors or accidental\npromise results safely omit the field."
+        },
+        {
           "name": "showOutsideDays",
           "type": "boolean",
           "required": false,
@@ -15627,6 +15655,13 @@
           "required": true,
           "event": false,
           "description": "Selects multiple-date behavior and the corresponding form value shape."
+        },
+        {
+          "name": "serializeValue",
+          "type": "(value: readonly TDate[], details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts a non-empty valid selection into native `FormData` values. The default emits each\nselected date as a repeated `YYYY-MM-DD` entry in selection order. Return a scalar for a\nsingle-entry backend contract. This callback must be synchronous; thrown errors or accidental\npromise results safely omit the field."
         },
         {
           "name": "showOutsideDays",
@@ -15804,6 +15839,13 @@
           "description": "Selects single-date behavior; omitted values also use this default mode.\nSelects multiple-date behavior and the corresponding form value shape.\nSelects date-range behavior and the corresponding form value shape."
         },
         {
+          "name": "serializeValue",
+          "type": "((value: TDate, details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization) | ((value: readonly TDate[], details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization) | ((value: CalendarRange<TDate>, details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization)",
+          "required": false,
+          "event": false,
+          "description": "Converts a non-empty valid selection into native `FormData` values. The default emits each\nselected date as a repeated `YYYY-MM-DD` entry in selection order. Return a scalar for a\nsingle-entry backend contract. This callback must be synchronous; thrown errors or accidental\npromise results safely omit the field."
+        },
+        {
           "name": "showOutsideDays",
           "type": "boolean",
           "required": false,
@@ -15979,6 +16021,13 @@
           "description": "Selects date-range behavior and the corresponding form value shape."
         },
         {
+          "name": "serializeValue",
+          "type": "(value: CalendarRange<TDate>, details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts a non-empty valid selection into native `FormData` values. The default emits each\nselected date as a repeated `YYYY-MM-DD` entry in selection order. Return a scalar for a\nsingle-entry backend contract. This callback must be synchronous; thrown errors or accidental\npromise results safely omit the field."
+        },
+        {
           "name": "showOutsideDays",
           "type": "boolean",
           "required": false,
@@ -16152,6 +16201,13 @@
           "required": false,
           "event": false,
           "description": "Selects single-date behavior; omitted values also use this default mode."
+        },
+        {
+          "name": "serializeValue",
+          "type": "(value: TDate, details: { adapter: DateAdapter<TDate>; }) => MeuFormDataSerialization",
+          "required": false,
+          "event": false,
+          "description": "Converts a non-empty valid selection into native `FormData` values. The default emits each\nselected date as a repeated `YYYY-MM-DD` entry in selection order. Return a scalar for a\nsingle-entry backend contract. This callback must be synchronous; thrown errors or accidental\npromise results safely omit the field."
         },
         {
           "name": "showOutsideDays",
@@ -16603,21 +16659,21 @@
           "type": "(details: { reason: \"cancel\" | \"escape\" | \"mask\"; }) => void",
           "required": false,
           "event": true,
-          "description": "Called when the user cancels without committing a new form value."
+          "description": "Called after cancellation marks the field touched without committing the draft time."
         },
         {
           "name": "onConfirm",
           "type": "(value: TimeValue) => void",
           "required": false,
           "event": true,
-          "description": "Called after the confirmed time is written to the form."
+          "description": "Called after the confirmed time is written and the field is marked touched."
         },
         {
           "name": "onOpenChange",
           "type": "(open: boolean, details: TimePickerOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when popup visibility is requested to change, with the next state and reason."
+          "description": "Called last for a visibility request; close callbacks observe the updated touched state."
         },
         {
           "name": "onSelect",
@@ -16848,11 +16904,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2250,
+    "documentedFields": 2258,
     "eventFields": 232,
-    "exportedTypes": 369,
+    "exportedTypes": 371,
     "exportedTypesWithFields": 222,
-    "fields": 2250,
+    "fields": 2258,
     "packages": 4
   }
 }

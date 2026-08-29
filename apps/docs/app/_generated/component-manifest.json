@@ -2161,6 +2161,16 @@
           "sourcePath": "packages/form-react/src/MeuFormCheckbox"
         },
         {
+          "kind": "type",
+          "name": "MeuFormDataSerialization",
+          "sourcePath": "packages/form-react/src/adapter-types"
+        },
+        {
+          "kind": "type",
+          "name": "MeuFormDataValue",
+          "sourcePath": "packages/form-react/src/adapter-types"
+        },
+        {
           "kind": "value",
           "name": "MeuFormDatePicker",
           "sourcePath": "packages/form-react/src/MeuFormDatePicker"
@@ -2414,8 +2424,8 @@
       "externalWildcardExports": [],
       "packageName": "@meu/form-react",
       "stats": {
-        "total": 71,
-        "types": 47,
+        "total": 73,
+        "types": 49,
         "values": 24
       }
     },
@@ -3080,7 +3090,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Checkbox",
       "packageName": "@meu/mobile",
@@ -3552,7 +3562,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Field",
       "packageName": "@meu/mobile",
@@ -3636,7 +3646,7 @@
     },
     {
       "category": "data-entry",
-      "description": "React Hook Form + Zod 的完整表单作用域、错误映射和首次错误聚焦。",
+      "description": "React Hook Form + Zod 的表单作用域、错误映射和首次错误聚焦。",
       "highlights": [
         "React Hook Form",
         "Zod",
@@ -3765,6 +3775,14 @@
         {
           "kind": "type",
           "name": "MeuFormCheckboxProps"
+        },
+        {
+          "kind": "type",
+          "name": "MeuFormDataSerialization"
+        },
+        {
+          "kind": "type",
+          "name": "MeuFormDataValue"
         },
         {
           "kind": "value",
@@ -4962,7 +4980,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "RadioGroup",
       "packageName": "@meu/mobile",
@@ -5015,7 +5033,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Rate",
       "packageName": "@meu/mobile",
@@ -5123,7 +5141,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "SearchField",
       "packageName": "@meu/mobile",
@@ -5231,7 +5249,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Selector",
       "packageName": "@meu/mobile",
@@ -5359,7 +5377,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Slider",
       "packageName": "@meu/mobile",
@@ -5439,7 +5457,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Stepper",
       "packageName": "@meu/mobile",
@@ -5579,7 +5597,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "Switch",
       "packageName": "@meu/mobile",
@@ -5743,7 +5761,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "TextArea",
       "packageName": "@meu/mobile",
@@ -5787,7 +5805,7 @@
       "highlights": [
         "受控与非受控",
         "键盘与读屏",
-        "完整表单适配"
+        "系统表单适配"
       ],
       "name": "TextInput",
       "packageName": "@meu/mobile",
@@ -6259,8 +6277,8 @@
     "packages": 4,
     "products": 68,
     "productsWithoutPublicExports": 0,
-    "publicExports": 494,
-    "publicTypes": 369,
+    "publicExports": 496,
+    "publicTypes": 371,
     "publicValues": 125,
     "undocumentedPublicExports": 0,
     "unclaimedPublicValues": 0

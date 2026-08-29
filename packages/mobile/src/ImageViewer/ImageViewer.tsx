@@ -92,6 +92,7 @@ export function ImageViewer({
     normalizeIndex(defaultIndex, images.length)
   );
   const currentIndex = normalizeIndex(controlledIndex ? index : uncontrolledIndex, images.length);
+  const previousIndexRef = useRef(currentIndex);
   const [scale, setScale] = useState(1);
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
     defaultOpen,
@@ -144,7 +145,6 @@ export function ImageViewer({
     if (loop) normalized = ((nextIndex % images.length) + images.length) % images.length;
     else normalized = normalizeIndex(nextIndex, images.length);
     if (normalized === currentIndex) return;
-    resetCurrentZoom();
     if (!controlledIndex) setUncontrolledIndex(normalized);
     if (onIndexChange) onIndexChange(normalized, { reason });
   }
@@ -182,6 +182,15 @@ export function ImageViewer({
     const normalized = normalizeIndex(uncontrolledIndex, images.length);
     if (normalized !== uncontrolledIndex) setUncontrolledIndex(normalized);
   }, [controlledIndex, images.length, uncontrolledIndex]);
+
+  useEffect(() => {
+    const previousIndex = previousIndexRef.current;
+    if (previousIndex === currentIndex) return;
+    const previousHandle = zoomRefs.current[previousIndex];
+    if (previousHandle) previousHandle.reset();
+    setScale(1);
+    previousIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   useEffect(() => {
     if (resolvedOpen) return;

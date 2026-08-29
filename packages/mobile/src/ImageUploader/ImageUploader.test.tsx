@@ -155,6 +155,54 @@ describe("ImageUploader", () => {
     expect(onCountExceed).toHaveBeenCalledWith(1);
   });
 
+  it("reserves max-count capacity across concurrent asynchronous preprocessing", async () => {
+    const preprocessing = new Map<string, (file: File) => void>();
+    const beforeUpload = vi.fn(
+      (file: File) =>
+        new Promise<File>((resolve) => {
+          preprocessing.set(file.name, resolve);
+        })
+    );
+    const upload = vi
+      .fn<(_: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>>()
+      .mockImplementation(() => new Promise(() => {}));
+    const onCountExceed = vi.fn();
+    const onReject = vi.fn();
+    render(
+      <ImageUploader
+        upload={upload}
+        beforeUpload={beforeUpload}
+        maxCount={1}
+        onCountExceed={onCountExceed}
+        onReject={onReject}
+      />
+    );
+
+    const first = new File(["a"], "first.jpg", { type: "image/jpeg" });
+    const second = new File(["b"], "second.jpg", { type: "image/jpeg" });
+    choose([first]);
+    choose([second]);
+    await waitFor(() => expect(beforeUpload).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      const finishFirst = preprocessing.get("first.jpg");
+      const finishSecond = preprocessing.get("second.jpg");
+      if (!finishFirst || !finishSecond) throw new Error("Expected preprocessing resolvers");
+      finishFirst(first);
+      finishSecond(second);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+    const uploadCall = upload.mock.calls[0];
+    if (!uploadCall) throw new Error("Expected one upload call");
+    expect(uploadCall[0]).toBe(first);
+    expect(onCountExceed).toHaveBeenCalledWith(1);
+    expect(onReject).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: "max-count", rejected: [second] })
+    );
+  });
+
   it("keeps a controlled value authoritative, supports delete veto and opens ImageViewer", async () => {
     const onChange = vi.fn();
     const onPreview = vi.fn();
@@ -196,16 +244,146 @@ describe("ImageUploader", () => {
       .mockRejectedValueOnce(new Error("network"))
       .mockResolvedValueOnce(uploaded);
     const onChange = vi.fn();
-    render(<ImageUploader ref={ref} upload={upload} onChange={onChange} />);
+    render(<ImageUploader ref={ref} upload={upload} onChange={onChange} maxCount={1} />);
 
     choose([new File(["x"], "retry.jpg", { type: "image/jpeg" })]);
     const retry = await screen.findByRole("button", { name: "重试" });
     expect(ref.current && ref.current.input).toBe(screen.getByLabelText("添加图片"));
+    expect(ref.current && ref.current.input && ref.current.input.disabled).toBe(true);
+    expect(screen.queryByRole("button", { name: "添加图片" })).toBeNull();
     fireEvent.click(retry);
     await waitFor(() => expect(upload).toHaveBeenCalledTimes(2));
     await waitFor(() =>
       expect(onChange).toHaveBeenCalledWith([uploaded], { item: uploaded, reason: "upload" })
     );
+  });
+
+  it("blocks a failed-task retry when controlled items already exceed its reserved capacity", async () => {
+    const file = new File(["x"], "retry.jpg", { type: "image/jpeg" });
+    const upload = vi
+      .fn<(_: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>>()
+      .mockRejectedValue(new Error("network"));
+    const onCountExceed = vi.fn();
+    const onReject = vi.fn();
+    const { rerender } = render(
+      <ImageUploader
+        value={[]}
+        upload={upload}
+        maxCount={1}
+        onCountExceed={onCountExceed}
+        onReject={onReject}
+      />
+    );
+
+    choose([file]);
+    const retry = await screen.findByRole("button", { name: "重试" });
+    rerender(
+      <ImageUploader
+        value={[existingItem]}
+        upload={upload}
+        maxCount={1}
+        onCountExceed={onCountExceed}
+        onReject={onReject}
+      />
+    );
+    fireEvent.click(retry);
+
+    expect(upload).toHaveBeenCalledTimes(1);
+    expect(onCountExceed).toHaveBeenCalledWith(1);
+    expect(onReject).toHaveBeenCalledWith({
+      accepted: [],
+      files: [file],
+      reason: "max-count",
+      rejected: [file]
+    });
+  });
+
+  it("reports rejected preprocessing and contains rejected deletion hooks", async () => {
+    const file = new File(["x"], "rejected.jpg", { type: "image/jpeg" });
+    const upload = vi.fn();
+    const onChange = vi.fn();
+    const onReject = vi.fn();
+    const onDelete = vi.fn().mockRejectedValue(new Error("delete failed"));
+    render(
+      <ImageUploader
+        defaultValue={[existingItem]}
+        upload={upload}
+        beforeUpload={() => Promise.reject(new Error("preprocessing failed"))}
+        onChange={onChange}
+        onDelete={onDelete}
+        onReject={onReject}
+      />
+    );
+
+    choose([file]);
+    await waitFor(() =>
+      expect(onReject).toHaveBeenCalledWith({
+        accepted: [],
+        files: [file],
+        reason: "before-upload",
+        rejected: [file]
+      })
+    );
+    expect(upload).not.toHaveBeenCalled();
+
+    const remove = screen.getByRole("button", { name: "删除 商品正面" });
+    fireEvent.click(remove);
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith(existingItem));
+    await waitFor(() => expect(remove).toHaveProperty("disabled", false));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "商品正面，预览" })).toBeTruthy();
+  });
+
+  it("does not start or publish asynchronous hook work after unmount", async () => {
+    let finishPreprocessing: ((file: File) => void) | undefined;
+    const file = new File(["x"], "pending.jpg", { type: "image/jpeg" });
+    const upload = vi.fn();
+    const onReject = vi.fn();
+    const first = render(
+      <ImageUploader
+        upload={upload}
+        beforeUpload={() =>
+          new Promise<File>((resolve) => {
+            finishPreprocessing = resolve;
+          })
+        }
+        onReject={onReject}
+      />
+    );
+    choose([file]);
+    await waitFor(() => expect(finishPreprocessing).toBeTruthy());
+    first.unmount();
+    await act(async () => {
+      if (!finishPreprocessing) throw new Error("Expected preprocessing resolver");
+      finishPreprocessing(file);
+      await Promise.resolve();
+    });
+    expect(upload).not.toHaveBeenCalled();
+    expect(onReject).not.toHaveBeenCalled();
+
+    let rejectDelete: ((error: Error) => void) | undefined;
+    const onChange = vi.fn();
+    const second = render(
+      <ImageUploader
+        defaultValue={[existingItem]}
+        upload={vi.fn()}
+        onChange={onChange}
+        onDelete={() =>
+          new Promise<void>((_resolve, reject) => {
+            rejectDelete = reject;
+          })
+        }
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "删除 商品正面" }));
+    await waitFor(() => expect(rejectDelete).toBeTruthy());
+    second.unmount();
+    await act(async () => {
+      if (!rejectDelete) throw new Error("Expected delete rejecter");
+      rejectDelete(new Error("late delete rejection"));
+      await Promise.resolve();
+    });
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("aborts an in-flight upload when its task is removed", async () => {
@@ -282,8 +460,10 @@ describe("ImageUploader", () => {
     await waitFor(() => expect(remove).toHaveProperty("disabled", true));
     fireEvent.click(remove);
     expect(onDelete).toHaveBeenCalledTimes(1);
-    act(() => {
+    await act(async () => {
       if (approveDelete) approveDelete();
+      await Promise.resolve();
     });
+    await waitFor(() => expect(screen.queryByRole("button", { name: "删除 商品正面" })).toBeNull());
   });
 });

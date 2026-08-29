@@ -39,8 +39,18 @@ type Values = { region: Array<string | null> };
 
 afterEach(cleanup);
 
-function CascadePickerForm({ onSubmit }: { onSubmit: (values: Values) => void }) {
+function CascadePickerForm({
+  events,
+  onSubmit
+}: {
+  events?: string[];
+  onSubmit: (values: Values) => void;
+}) {
   const form = useMeuForm<Values>({ defaultValues: { region: [] } });
+  const touched = () => (form.getFieldState("region").isTouched ? "touched" : "untouched");
+  const record = (event: string) => {
+    if (events) events.push(event);
+  };
 
   return (
     <MeuForm form={form} onSubmit={onSubmit}>
@@ -50,6 +60,11 @@ function CascadePickerForm({ onSubmit }: { onSubmit: (values: Values) => void })
         description="选择省市区"
         columnLabels={["省份", "城市", "区县"]}
         options={regions}
+        onCancel={(details) => record(`cancel:${details.reason}:${touched()}`)}
+        onConfirm={(value) => record(`confirm:${value.join("/")}:${touched()}`)}
+        onOpenChange={(open, details) =>
+          record(`open:${String(open)}:${details.reason}:${touched()}`)
+        }
         required
         rules={{
           validate: (value) =>
@@ -59,7 +74,36 @@ function CascadePickerForm({ onSubmit }: { onSubmit: (values: Values) => void })
         triggerProps={{ placeholder: "请选择配送地区" }}
       />
       <output data-testid="dirty">{form.formState.isDirty ? "dirty" : "pristine"}</output>
+      <output data-testid="touched">
+        {form.formState.touchedFields.region ? "touched" : "untouched"}
+      </output>
       <Button type="submit">提交订单</Button>
+    </MeuForm>
+  );
+}
+
+function ControlledCascadePickerForm({ events, open }: { events: string[]; open: boolean }) {
+  const form = useMeuForm<Values>({ defaultValues: { region: [] } });
+  const touched = () => (form.getFieldState("region").isTouched ? "touched" : "untouched");
+
+  return (
+    <MeuForm form={form} onSubmit={() => undefined}>
+      <MeuFormCascadePicker<Values, string>
+        name="region"
+        label="受控配送地区"
+        options={regions}
+        open={open}
+        onCancel={(details) => events.push(`cancel:${details.reason}:${touched()}`)}
+        onOpenChange={(nextOpen, details) =>
+          events.push(`open:${String(nextOpen)}:${details.reason}:${touched()}`)
+        }
+      />
+      <output data-testid="controlled-cascade-touched">
+        {form.formState.touchedFields.region ? "touched" : "untouched"}
+      </output>
+      <output data-testid="controlled-cascade-dirty">
+        {form.formState.isDirty ? "dirty" : "pristine"}
+      </output>
     </MeuForm>
   );
 }
@@ -67,21 +111,25 @@ function CascadePickerForm({ onSubmit }: { onSubmit: (values: Values) => void })
 describe("MeuFormCascadePicker", () => {
   it("keeps cancelled paths pristine and commits the confirmed normalized path", async () => {
     const onSubmit = vi.fn();
-    render(<CascadePickerForm onSubmit={onSubmit} />);
+    const events: string[] = [];
+    render(<CascadePickerForm events={events} onSubmit={onSubmit} />);
 
     const trigger = screen.getByRole("button", { name: "配送地区" });
     fireEvent.click(trigger);
+    expect(screen.getByTestId("touched").textContent).toBe("untouched");
     fireEvent.click(screen.getByRole("option", { name: "江苏省" }));
     fireEvent.click(screen.getByRole("button", { name: "取消" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(trigger.textContent).toContain("请选择配送地区");
     expect(screen.getByTestId("dirty").textContent).toBe("pristine");
+    expect(screen.getByTestId("touched").textContent).toBe("touched");
 
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole("option", { name: "江苏省" }));
     fireEvent.click(screen.getByRole("button", { name: "确定" }));
     await waitFor(() => expect(trigger.textContent).toContain("江苏省 / 南京市 / 玄武区"));
     expect(screen.getByTestId("dirty").textContent).toBe("dirty");
+    expect(screen.getByTestId("touched").textContent).toBe("touched");
 
     fireEvent.click(screen.getByRole("button", { name: "提交订单" }));
     await waitFor(() =>
@@ -90,6 +138,14 @@ describe("MeuFormCascadePicker", () => {
         expect.anything()
       )
     );
+    expect(events).toEqual([
+      "open:true:trigger:untouched",
+      "cancel:cancel:touched",
+      "open:false:cancel:touched",
+      "open:true:trigger:touched",
+      "confirm:jiangsu/nanjing/xuanwu:touched",
+      "open:false:confirm:touched"
+    ]);
   });
 
   it("associates validation feedback and focuses the trigger", async () => {
@@ -102,5 +158,34 @@ describe("MeuFormCascadePicker", () => {
     expect(trigger.getAttribute("data-invalid")).toBe("true");
     expect(trigger.getAttribute("aria-describedby")).toContain("error");
     await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
+
+  it("keeps controlled open rejection untouched and reports a rejected close after touch", async () => {
+    const events: string[] = [];
+    const { rerender } = render(<ControlledCascadePickerForm events={events} open={false} />);
+    const trigger = screen.getByRole("button", { name: "受控配送地区" });
+
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByTestId("controlled-cascade-touched").textContent).toBe("untouched");
+
+    rerender(<ControlledCascadePickerForm events={events} open />);
+    await waitFor(() => expect(screen.getByRole("dialog")).toBeTruthy());
+    expect(screen.getByTestId("controlled-cascade-touched").textContent).toBe("untouched");
+
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "取消" }))
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    await waitFor(() =>
+      expect(screen.getByTestId("controlled-cascade-touched").textContent).toBe("touched")
+    );
+    expect(screen.getByTestId("controlled-cascade-dirty").textContent).toBe("pristine");
+    expect(events).toEqual([
+      "open:true:trigger:untouched",
+      "cancel:escape:touched",
+      "open:false:escape:touched"
+    ]);
   });
 });

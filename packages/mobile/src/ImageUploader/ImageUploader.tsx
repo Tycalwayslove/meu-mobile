@@ -132,6 +132,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const generatedId = useId();
     const inputRef = useRef<HTMLInputElement>(null);
     const rootRef = useRef<HTMLDivElement>(null);
+    const mountedRef = useRef(true);
     const taskCounterRef = useRef(0);
     const controlled = value !== undefined;
     const [uncontrolledValue, setUncontrolledValue] = useState<ImageUploaderItem[]>(() => [
@@ -157,8 +158,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const localizedRetryLabel = retryLabel || (config.locale === "en-US" ? "Retry" : "重试");
     const localizedRemoveLabel = config.locale === "en-US" ? "Remove" : "删除";
     const resolvedColumns = normalizeColumns(columns);
-    const activeTaskCount = tasks.filter((task) => task.status !== "error").length;
-    const count = items.length + activeTaskCount;
+    const count = items.length + tasks.length;
     const atLimit = typeof maxCount === "number" && maxCount >= 0 && count >= maxCount;
     const canUpload = showUpload && !atLimit;
     const rootStyle: RootStyle = { ...style, "--meu-image-uploader-columns": resolvedColumns };
@@ -189,12 +189,13 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     }
 
     function removeTask(taskId: string, abort = true) {
+      const target = tasksRef.current.find((task) => task.id === taskId);
+      if (target) {
+        if (abort) target.controller.abort();
+        revokeTaskUrl(target);
+      }
+      tasksRef.current = tasksRef.current.filter((task) => task.id !== taskId);
       setTasks((current) => {
-        const target = current.find((task) => task.id === taskId);
-        if (target) {
-          if (abort) target.controller.abort();
-          revokeTaskUrl(target);
-        }
         return current.filter((task) => task.id !== taskId);
       });
     }
@@ -219,6 +220,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       try {
         const result = await upload(task.file, {
           onProgress: (progress) => {
+            if (!mountedRef.current || task.controller.signal.aborted) return;
             const nextProgress = normalizeProgress(progress);
             setTasks((current) =>
               current.map((entry) =>
@@ -229,12 +231,12 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           signal: task.controller.signal,
           taskId: task.id
         });
-        if (task.controller.signal.aborted) return;
+        if (!mountedRef.current || task.controller.signal.aborted) return;
         const nextItems = [...itemsRef.current, result];
         publish(nextItems, result, "upload");
         removeTask(task.id, false);
       } catch (error) {
-        if (task.controller.signal.aborted) return;
+        if (!mountedRef.current || task.controller.signal.aborted) return;
         setTasks((current) =>
           current.map((entry) =>
             entry.id === task.id ? { ...entry, error, status: "error" } : entry
@@ -257,6 +259,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         status: "pending",
         ...(objectUrl ? { objectUrl, previewUrl: objectUrl } : {})
       };
+      tasksRef.current = [...tasksRef.current, task];
       setTasks((current) => [...current, task]);
       void runUpload(task);
     }
@@ -279,11 +282,15 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
 
       if (beforeUpload && accepted.length > 0) {
         const processed = await Promise.all(
-          accepted.map(async (file) => ({
-            original: file,
-            result: await beforeUpload(file, accepted)
-          }))
+          accepted.map(async (file) => {
+            try {
+              return { original: file, result: await beforeUpload(file, accepted) };
+            } catch {
+              return { original: file, result: null };
+            }
+          })
         );
+        if (!mountedRef.current) return;
         const beforeRejected = processed
           .filter((entry) => !entry.result)
           .map((entry) => entry.original);
@@ -296,7 +303,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       }
 
       if (typeof maxCount === "number" && maxCount >= 0) {
-        const available = Math.max(0, maxCount - count);
+        const occupied = itemsRef.current.length + tasksRef.current.length;
+        const available = Math.max(0, maxCount - occupied);
         if (accepted.length > available) {
           const rejected = accepted.slice(available);
           accepted = accepted.slice(0, available);
@@ -312,6 +320,15 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     function retryTask(taskId: string) {
       const previous = tasksRef.current.find((task) => task.id === taskId);
       if (!previous || previous.status !== "error" || disabled || readOnly) return;
+      if (
+        typeof maxCount === "number" &&
+        maxCount >= 0 &&
+        itemsRef.current.length + tasksRef.current.length > maxCount
+      ) {
+        if (onCountExceed) onCountExceed(1);
+        reportReject("max-count", [previous.file], [], [previous.file]);
+        return;
+      }
       previous.controller.abort();
       const nextTask: InternalTask = {
         ...previous,
@@ -319,6 +336,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         error: undefined
       };
       setTasks((current) => current.map((task) => (task.id === taskId ? nextTask : task)));
+      tasksRef.current = tasksRef.current.map((task) => (task.id === taskId ? nextTask : task));
       void runUpload(nextTask);
     }
 
@@ -329,18 +347,23 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       setDeletingKeys((current) => new Set(current).add(deletionKey));
       try {
         const result = onDelete ? await onDelete(item) : undefined;
+        if (!mountedRef.current) return;
         if (result === false) return;
         publish(
           itemsRef.current.filter((entry) => entry !== item),
           item,
           "remove"
         );
+      } catch {
+        return;
       } finally {
-        setDeletingKeys((current) => {
-          const next = new Set(current);
-          next.delete(deletionKey);
-          return next;
-        });
+        if (mountedRef.current) {
+          setDeletingKeys((current) => {
+            const next = new Set(current);
+            next.delete(deletionKey);
+            return next;
+          });
+        }
       }
     }
 
@@ -387,15 +410,16 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       );
     }, [onUploadQueueChange, tasks]);
 
-    useEffect(
-      () => () => {
+    useEffect(() => {
+      mountedRef.current = true;
+      return () => {
+        mountedRef.current = false;
         tasksRef.current.forEach((task) => {
           task.controller.abort();
           revokeTaskUrl(task);
         });
-      },
-      []
-    );
+      };
+    }, []);
 
     const input = (
       <input

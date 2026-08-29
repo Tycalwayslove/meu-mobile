@@ -63,7 +63,7 @@ value、open、expandedValues 和 searchValue 均可独立受控；对应 defaul
 
 ## 表单集成
 
-使用 `MeuFormTreeSelect`。确认执行字段 change + blur，取消不制造 dirty/touched；Field 错误通过 PickerTrigger 关联。核心组件不输出 hidden input，也不绑定表单库。
+使用 `MeuFormTreeSelect`。打开弹层和焦点转入 Portal 不触发 touched；确认先写字段再标记 touched，取消、遮罩、Escape 或焦点离开整个复合控件时标记 touched。取消不制造 dirty；只读确认记录交互，但不改值。受控调用方拒绝 open 不触发 touched，拒绝 close 仍记录已经完成的用户交互。Field 错误通过 PickerTrigger 关联；核心组件不绑定表单库。
 
 ## Props
 
@@ -140,7 +140,7 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 - Story interaction: `Single` 验证 Portal 打开、draft 选择、确认提交与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 27728 B / 49152 B 预算，组合 Brotli 23785 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 28974 B / 49152 B 预算，组合 Brotli 24852 B；共享样式由应用单独导入一次。
 - SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
 - RTL: RightToLeft Story 与 unit
 - Reduced motion: CSS 静态规则；浏览器 computed-style 待补

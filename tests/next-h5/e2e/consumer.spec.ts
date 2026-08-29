@@ -292,11 +292,15 @@ test("binds image upload tasks to serializable form values and native input focu
 }) => {
   const section = page.getByRole("region", { name: "图片上传表单集成" });
   const uploader = section.locator('[data-meu-component="image-uploader"]');
-  const input = section.locator('input[type="file"][name="productImages"]');
+  const input = section.locator('input[type="file"]');
+  const serializedValues = section.locator('input[type="hidden"][name="productImages"]');
   const existingPreview = section.getByRole("button", { name: "已有商品主图，预览" });
   await expect(existingPreview).toBeVisible();
   await expect(input).toHaveAttribute("type", "file");
   await expect(input).toHaveAttribute("accept", "image/*");
+  expect(await input.getAttribute("name")).toBeNull();
+  await expect(serializedValues).toHaveCount(1);
+  await expect(serializedValues.first()).toHaveValue("/demo-media.svg");
 
   const addButton = section.getByRole("button", { name: "添加图片" });
   const addBox = await addButton.boundingBox();
@@ -322,6 +326,7 @@ test("binds image upload tasks to serializable form values and native input focu
 
   await deleteButton.click();
   await expect(section.getByText(/图片已删除：已有商品主图；当前 0 张/)).toBeVisible();
+  await expect(serializedValues).toHaveCount(0);
   await page.getByLabel("店铺名称").fill("喵呜体验店");
   await page.getByLabel("店铺介绍").fill("专注宠物生活方式的体验店");
   await page.getByRole("button", { name: "保存店铺" }).click();
@@ -339,6 +344,8 @@ test("binds image upload tasks to serializable form values and native input focu
   await expect(section.getByRole("button", { name: "uploaded-product.jpg，预览" })).toBeVisible();
   await expect(section.getByText(/图片上传完成：uploaded-product.jpg；当前 1 张/)).toBeVisible();
   await expect(page.getByText("请至少上传一张商品图片")).toHaveCount(0);
+  await expect(serializedValues).toHaveCount(1);
+  await expect(serializedValues.first()).toHaveValue("/demo-media.svg");
 
   await page.getByRole("button", { name: "保存店铺" }).click();
   await expect(page.getByText("已保存图片：1")).toBeVisible();
@@ -409,7 +416,7 @@ test("runs the controlled carousel with native alternatives and focus isolation"
 test("opens a modal image gallery with zoom, keyboard navigation and focus restoration", async ({
   page
 }) => {
-  const section = page.getByRole("region", { name: "图片预览" });
+  const section = page.locator('section[aria-label="图片预览"]');
   const trigger = section.getByRole("button", { name: "预览商品图片" });
   await trigger.focus();
   await trigger.click();
@@ -765,7 +772,9 @@ test("runs ActionMenu actions with danger confirmation", async ({ page }) => {
   await trigger.focus();
   await page.keyboard.press("Enter");
 
-  const menu = page.getByRole("dialog", { name: "订单操作" });
+  const menu = page.locator('[role="dialog"]').filter({
+    has: page.locator('[data-meu-component="action-menu"]')
+  });
   const copyAction = menu.getByRole("button", { name: /复制订单号/ });
   await expect(menu).toBeVisible();
   await expect(menu).toHaveAttribute("aria-modal", "true");
@@ -789,7 +798,9 @@ test("runs ActionMenu actions with danger confirmation", async ({ page }) => {
   const confirmation = page.getByRole("alertdialog", { name: "删除测试订单？" });
   await expect(confirmation).toBeVisible();
   await expect(confirmation.getByRole("button", { name: "取消" })).toBeFocused();
-  await expect(menu.getByRole("button", { name: "永久删除订单" })).toBeDisabled();
+  await expect(
+    menu.getByRole("button", { name: "永久删除订单", includeHidden: true })
+  ).toBeDisabled();
   await confirmation.getByRole("button", { name: "永久删除" }).click();
   await expect(section.getByText("ActionMenu 操作：已删除订单")).toBeVisible();
   await expect(confirmation).toBeHidden();

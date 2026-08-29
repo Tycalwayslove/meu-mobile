@@ -28,6 +28,16 @@ import type {
 const DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"] as const;
 const DELETE_REPEAT_DELAY = 600;
 const DELETE_REPEAT_INTERVAL = 120;
+const openKeyboardStack: symbol[] = [];
+
+function removeOpenKeyboard(token: symbol) {
+  const index = openKeyboardStack.indexOf(token);
+  if (index >= 0) openKeyboardStack.splice(index, 1);
+}
+
+function isTopOpenKeyboard(token: symbol) {
+  return openKeyboardStack.at(-1) === token;
+}
 
 function shuffleDigits() {
   const next = DIGITS.slice();
@@ -100,6 +110,8 @@ export function NumberKeyboard({
   const repeatIntervalRef = useRef(0);
   const repeatStartedRef = useRef(false);
   const suppressDeleteClickRef = useRef(false);
+  const escapeTokenRef = useRef<symbol | null>(null);
+  if (!escapeTokenRef.current) escapeTokenRef.current = Symbol("number-keyboard");
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
     defaultOpen,
     onOpenChange,
@@ -171,9 +183,24 @@ export function NumberKeyboard({
   }, [resolvedOpen]);
 
   useEffect(() => {
-    if (!resolvedOpen || !closeOnEscape) return undefined;
+    if (!resolvedOpen) return undefined;
+    const token = escapeTokenRef.current!;
+    removeOpenKeyboard(token);
+    openKeyboardStack.push(token);
+    return () => removeOpenKeyboard(token);
+  }, [resolvedOpen]);
+
+  useEffect(() => {
+    if (!resolvedOpen) return undefined;
+    const token = escapeTokenRef.current!;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (
+        event.key !== "Escape" ||
+        event.defaultPrevented ||
+        !closeOnEscape ||
+        !isTopOpenKeyboard(token)
+      )
+        return;
       event.preventDefault();
       requestOpenChange(false, { reason: "escape" });
     };
