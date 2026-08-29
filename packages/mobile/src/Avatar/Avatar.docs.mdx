@@ -32,7 +32,7 @@ source: packages/mobile/src/Avatar
 - loading 与 error 都保留相同 fallback，源变化由 Image 状态机重新开始；不自行重试或缓存失败。
 - RTL 无方向性布局；forced-colors 保留轮廓。图片淡入的 reduced-motion 降级由 Image 实现。
 
-状态为 `verification`；Chromatic、移动 E2E 与真机读屏尚未完成。
+状态为 `verification`；Next H5 移动 Chromium/WebKit 已覆盖图片与 initials fallback，最终 Chromatic 视觉审批和真机读屏尚未完成。
 
 ## 何时使用
 

@@ -70,6 +70,7 @@ import {
   TabBar,
   Tabs,
   Tag,
+  ThemeProvider,
   ToastProvider,
   VirtualList,
   Watermark,
@@ -399,6 +400,12 @@ export function ConsumerScenario() {
             <span data-testid="foundation-portal-content">自定义容器 Portal 内容</span>
           </Portal>
           <SafeArea data-testid="foundation-safe-area" fallback={12} position="bottom" />
+        </section>
+
+        <section aria-label="系统主题与动效">
+          <ThemeProvider theme="system" motion="system">
+            <span data-testid="system-theme-swatch">跟随系统主题</span>
+          </ThemeProvider>
         </section>
 
         <div className="integration-search">

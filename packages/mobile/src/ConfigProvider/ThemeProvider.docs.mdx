@@ -156,7 +156,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 hydration 单测覆盖 system 标记一致和零 recoverable error。
 - RTL: 单元与 Theme-only Story 验证主题覆盖不改变方向。
 - Reduced motion: Provider 不做主题动画；应用自定义过渡仍需独立验证。
-- Mobile Chromium/WebKit E2E: 由于 ThemeProvider 是 ConfigProvider 的精确 alias，Next production consumer 已在双引擎直接验证固定 `light` 初始值、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规，以及 hydration 后 0 `pageerror` / `console.error`；尚未执行 `system` media emulation、computed Token 对照或独立固定主题视觉截图。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接挂载 ThemeProvider alias 的 `theme="system"` / `motion="system"` 边界，模拟系统 Light/Dark 后分别读取 ink/canvas 的实际 computed color，并验证 reduced-motion 将 enter duration 从 180ms 解析为 0ms；外层固定主题仍覆盖 light→dark 受控切换、两种主题下 axe WCAG A/AA 0 违规和 hydration 后 0 `pageerror` / `console.error`。独立固定主题视觉截图仍待最终审批。
 - Chromatic Light/Dark: `LightAndDark` 提供双主题快照入口；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView、iOS Safari 及系统主题切换。
 
@@ -166,7 +166,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 
 - 建立应用壳层的 cookie/SSR 主题持久化参考方案，但不隐式加入组件运行时。
 - 完成其余 Overlay Portal 主题属性传播审计。
-- 补独立固定主题视觉截图、`system` media emulation、computed Token 对照与 Android/iOS 真机系统主题证据。
+- 补独立固定主题视觉截图、更多语义色 Token 对照与 Android/iOS 真机系统主题证据。
 - 评估是否需要独立 ThemeProviderProps；没有迁移收益前维持 alias 兼容。
 
 ### 已完成
@@ -175,12 +175,12 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 - 修复 theme-only 嵌套导致 locale/dir/portal 等配置被重置的问题。
 - 保持 system 纯 CSS 解析，SSR/hydration 不访问浏览器环境。
 - 增加 light/dark、system 与嵌套继承 Story。
-- Next H5 production consumer 已在 Chromium/WebKit 验证 alias 的固定 light/dark 受控路径、全页无障碍与无运行时错误；system 媒体查询仍保留为独立验收项。
+- Next H5 production consumer 已在 Chromium/WebKit 验证 alias 的 system 主题/动效媒体查询与实际 Token 计算值，并验证外层固定 light/dark 受控路径、全页无障碍与无运行时错误。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                               | 迁移说明                             |
-| ---------- | ------ | ------------ | -------------------------------------------------- | ------------------------------------ |
-| 2026-08-28 | 未发布 | behavior     | ThemeProvider 嵌套改为只覆盖显式字段               | 若依赖旧重置行为，请显式传入所有配置 |
-| 2026-08-28 | 未发布 | docs         | 明确 alias、system SSR 与持久化边界                | 无                                   |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定主题、axe 与 hydration 证据 | 无                                   |
+| 日期       | 版本   | 类型         | 内容                                                                               | 迁移说明                             |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------------- | ------------------------------------ |
+| 2026-08-28 | 未发布 | behavior     | ThemeProvider 嵌套改为只覆盖显式字段                                               | 若依赖旧重置行为，请显式传入所有配置 |
+| 2026-08-28 | 未发布 | docs         | 明确 alias、system SSR 与持久化边界                                                | 无                                   |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定/system 主题、motion、computed Token、axe 与 hydration 证据 | 无                                   |

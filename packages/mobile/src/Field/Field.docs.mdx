@@ -32,7 +32,7 @@ source: packages/mobile/src/Field
 - `required` 与 `invalid` 同时进入 Field context；native 关联收到真实 `required`，不支持 required 的 ARIA/按钮路径通过本地化隐藏说明表达，避免输出无效属性。
 - 根节点支持标准 div 属性、`style`、`className`、`id`、事件与 `HTMLDivElement` ref。
 
-这些能力仍处于 `implementation`。移动端专属 E2E、Chromatic Light/Dark 矩阵与真机读屏记录尚未完成，不能标记为 commercial。
+这些能力已进入 `verification`。Next H5 移动 Chromium/WebKit 已覆盖 TextInput/TextArea 的 Field 归属、invalid/error 与修正后提交；最终 Chromatic Light/Dark 审批和真机读屏记录尚未完成，不能标记为 commercial。
 
 ## 何时使用
 

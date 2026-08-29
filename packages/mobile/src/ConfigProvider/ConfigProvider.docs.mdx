@@ -176,7 +176,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
 - Reduced motion: 单元测试覆盖嵌套策略，CSS media/reduced class 已实现；真实浏览器 computed style 待 E2E。
-- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 Provider 初始 `theme="light"` 边界、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规，以及 hydration 后 0 `pageerror` / `console.error`；`system` media emulation、主题 Token computed style 与嵌套 Portal boundary 仍待专测。
+- Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 Provider 初始 `theme="light"` 边界、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规；独立 `theme="system"` / `motion="system"` 边界会随模拟系统 Light/Dark 切换 ink/canvas Token，并在 `prefers-reduced-motion: reduce` 下把 enter duration 从 180ms 解析为 0ms。所有路径 hydration 后保持 0 `pageerror` / `console.error`；嵌套 Portal boundary 仍待专测。
 - Chromatic Light/Dark: Story 可生成快照；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView 与 iOS Safari。
 
@@ -185,7 +185,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 ### 待优化
 
 - 完成其余 Overlay 在 body Portal 根节点复用统一 locale、dir、theme 与 motion boundary。
-- 补移动 Chromium/WebKit 的 `system` media emulation、主题 Token computed style 与嵌套 Portal boundary 专测。
+- 补移动 Chromium/WebKit 的嵌套 Portal boundary 专测，并扩展更多语义色 Token 对照。
 - 补强制色彩、高对比、200% 字号及 Android/iOS 真机证据。
 - 评估跨 Document/iframe Portal；在有真实业务需求前不扩展现有容器类型。
 
@@ -197,14 +197,14 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - 保留 `portalContainer={null}` 与惰性 resolver 语义，SSR 期间不访问 DOM。
 - 使用纯 CSS 解析 system theme/motion，验证服务端输出与 hydration 一致。
 - 为公开类型、Props、函数和 ThemeProvider alias 补充 TSDoc/release tag；新增 Context 字段在公开类型中保持 optional，以兼容已有 `MeuConfig` 对象字面量，运行时始终解析为具体值。
-- Next H5 production consumer 已在 Chromium/WebKit 验证固定 light/dark 受控切换、全页无障碍与无运行时错误；该证据不替代 `system` 媒体查询和真机验收。
+- Next H5 production consumer 已在 Chromium/WebKit 验证固定 light/dark 受控切换、system 主题/动效媒体查询、实际 Token 计算值、全页无障碍与无运行时错误；该证据不替代真机验收。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                   | 迁移说明                                   |
-| ---------- | ------ | ------------ | ------------------------------------------------------ | ------------------------------------------ |
-| 2026-08-28 | 未发布 | behavior     | 嵌套配置改为逐字段继承                                 | 依赖旧“嵌套即重置”的代码需显式传入根默认值 |
-| 2026-08-28 | 未发布 | feature      | 新增 `dir`、`motion` 与对应 DOM/Context 契约           | 不传时保持根级旧默认行为                   |
-| 2026-08-28 | 未发布 | types        | `MeuConfig` 增加必有的 `dir`、`motion`                 | 手写 MeuConfig 对象需补齐两个解析字段      |
-| 2026-08-28 | 未发布 | docs         | 建立 ConfigProvider V2 留存文档与测试基线              | 无                                         |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定主题切换、axe 与 hydration 证据 | 无                                         |
+| 日期       | 版本   | 类型         | 内容                                                                               | 迁移说明                                   |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------ |
+| 2026-08-28 | 未发布 | behavior     | 嵌套配置改为逐字段继承                                                             | 依赖旧“嵌套即重置”的代码需显式传入根默认值 |
+| 2026-08-28 | 未发布 | feature      | 新增 `dir`、`motion` 与对应 DOM/Context 契约                                       | 不传时保持根级旧默认行为                   |
+| 2026-08-28 | 未发布 | types        | `MeuConfig` 增加必有的 `dir`、`motion`                                             | 手写 MeuConfig 对象需补齐两个解析字段      |
+| 2026-08-28 | 未发布 | docs         | 建立 ConfigProvider V2 留存文档与测试基线                                          | 无                                         |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定/system 主题、motion、computed Token、axe 与 hydration 证据 | 无                                         |

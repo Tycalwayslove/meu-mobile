@@ -21,11 +21,41 @@ test.afterEach(({ page }) => {
 
 test("renders the isolated Next consumer without hydration errors", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Next H5 集成测试" })).toBeVisible();
-  await expect(page.locator('[data-meu-component="config-provider"]')).toHaveAttribute(
+  await expect(page.locator('[data-meu-component="config-provider"]').first()).toHaveAttribute(
     "data-meu-theme",
     "light"
   );
   expect(runtimeErrorsByPage.get(page)).toEqual([]);
+});
+
+test("resolves system theme and motion from media queries without React state", async ({
+  page
+}) => {
+  const boundary = page
+    .getByRole("region", { name: "系统主题与动效" })
+    .locator('[data-meu-component="config-provider"][data-meu-theme="system"]');
+
+  await page.emulateMedia({ colorScheme: "light", reducedMotion: "no-preference" });
+  await expect(boundary).toHaveCSS("color", "rgb(30, 36, 32)");
+  await expect(boundary).toHaveCSS("background-color", "rgb(248, 247, 243)");
+  expect(
+    await boundary.evaluate((node) => {
+      const value = getComputedStyle(node).getPropertyValue("--meu-motion-enter").trim();
+      return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1000;
+    })
+  ).toBeCloseTo(180);
+
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  await expect(boundary).toHaveAttribute("data-meu-theme", "system");
+  await expect(boundary).toHaveAttribute("data-meu-motion", "system");
+  await expect(boundary).toHaveCSS("color", "rgb(240, 242, 236)");
+  await expect(boundary).toHaveCSS("background-color", "rgb(22, 26, 23)");
+  expect(
+    await boundary.evaluate((node) => {
+      const value = getComputedStyle(node).getPropertyValue("--meu-motion-enter").trim();
+      return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1000;
+    })
+  ).toBe(0);
 });
 
 test("composes layout, icon action, custom portal and hidden accessible text", async ({ page }) => {
@@ -85,7 +115,7 @@ test("has no WCAG A/AA violations in light and dark themes", async ({ page }) =>
     if (theme === "dark") {
       await page.getByRole("button", { name: "切换主题" }).click();
     }
-    await expect(page.locator('[data-meu-component="config-provider"]')).toHaveAttribute(
+    await expect(page.locator('[data-meu-component="config-provider"]').first()).toHaveAttribute(
       "data-meu-theme",
       theme
     );
@@ -1210,7 +1240,7 @@ test("binds stepper, slider, rate and selector values", async ({ page }) => {
 });
 
 test("switches theme and preserves mobile touch targets", async ({ page }) => {
-  const provider = page.locator('[data-meu-component="config-provider"]');
+  const provider = page.locator('[data-meu-component="config-provider"]').first();
   await page.getByRole("button", { name: "切换主题" }).click();
   await expect(provider).toHaveAttribute("data-meu-theme", "dark");
 
