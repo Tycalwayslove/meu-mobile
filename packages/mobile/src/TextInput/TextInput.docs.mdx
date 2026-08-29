@@ -14,9 +14,18 @@ figma:
 storyIds:
   [
     forms-textinput--default,
+    forms-textinput--focus-reference,
     forms-textinput--error,
     forms-textinput--disabled,
-    forms-textinput--clearable
+    forms-textinput--read-only,
+    forms-textinput--clearable,
+    forms-textinput--small,
+    forms-textinput--large,
+    forms-textinput--password-and-autofill,
+    forms-textinput--native-form-reset,
+    forms-textinput--loading-focus-transfer,
+    forms-textinput--right-to-left,
+    forms-textinput--reduced-motion-loading
   ]
 source: packages/mobile/src/TextInput
 ---
@@ -25,133 +34,174 @@ source: packages/mobile/src/TextInput
 
 ## 当前能力
 
-- 原生单行 input，支持 ref 和除原生 `size` 外的 input 属性。
-- small/medium/large、default/error、disabled 与 clearable。
-- 与 Field context 自动关联 id、description 和 error；支持显式 ARIA 覆盖。
-- 保留显式 `aria-invalid="false"`、`grammar` 和 `spelling` token；后两者同时进入 error 视觉态。
-- clear 在受控与非受控模式下均先派发原生 input/change 契约，再调用 `onClear`；支持 readOnly 和中英文清除名称。
+- 使用真实单行 input，支持 ref、受控/非受控值，以及除原生 `size` 外的 input 属性。
+- 支持 small/medium/large、default/error、disabled、readOnly、loading 与 clearable。
+- 自动继承 Field 的 id、description、error；保留 caller 的 `false/grammar/spelling` ARIA invalid token，Field/status error 优先输出 `true`。
+- clear 只在可编辑非空值时出现；通过真实 input event 请求空值，恢复 input 焦点后再调用 `onClear`。受控调用方可接受或拒绝空值。
+- 非受控值遵循祖先或外部 `form=` 的原生 reset；受控 reset 恢复最新 `value`，取消 reset 不改变当前值。
+- loading 公布 caller-owned 异步工作并隐藏 clear，但不锁住编辑、FormData 或原生 form submit；focused clear 被替换时焦点回到 input。
+
+状态保持 `verification`。Unit、SSR、直接 hydration 和 Story interaction 已覆盖核心契约；真机 IME、系统 autofill/password manager、软键盘和读屏仍未完成。
 
 ## 何时使用
 
-用于姓名、手机号、搜索词、短文本、密码等单行输入。应根据数据类型设置 `type`、`inputMode`、`autoComplete` 和 `enterKeyHint`。
+用于姓名、手机号、邮箱、短文本和密码等原生单行输入。根据数据设置 `type`、`inputMode`、`autoComplete`、`enterKeyHint` 与 `name`。
 
 ## 何时不要使用
 
-多行内容使用 TextArea；数字加减使用 Stepper；固定选项使用 Selector/Radio；特殊数字键盘仅在系统键盘不能满足时使用。
+多行内容使用 TextArea，搜索提交使用 SearchField，数字步进使用 Stepper，固定选项使用 Selector/Radio。格式化、mask、建议列表和 password reveal 应使用明确的业务组合，而不是改变 TextInput 的 native value 契约。
 
 ## 结构与状态
 
-结构为 input 与可选清除按钮。当前状态包括 default、focus、error、disabled 与 readOnly；V2 需补齐 autofill、IME composing、password reveal 组合和异步校验状态契约。
+DOM 为 wrapper → native input + 可选 clear button/loading status。
+
+- `className/style` 与其余 native 属性作用于 input，保持历史契约。
+- wrapper 仅承担定位与 `dir` 同步，不是稳定 DOM API。
+- `data-state` 位于 input，优先级为 disabled → loading → readonly → error → default。
+- error 视觉可与 loading 同时存在；loading 不是 validation 结果。
 
 ## 基础用法
 
 ```tsx
 <Field label="手机号" error={error}>
-  <TextInput inputMode="tel" autoComplete="tel" value={value} onChange={onChange} />
+  <TextInput
+    autoComplete="tel"
+    clearable
+    inputMode="tel"
+    name="phone"
+    value={phone}
+    onChange={(event) => setPhone(event.currentTarget.value)}
+  />
 </Field>
 ```
 
 ## 受控与非受控
 
-遵循原生 `value/onChange` 与 `defaultValue`。不要在生命周期中切换受控模式。clear 使用原生 value setter 派发冒泡 input，受控调用方可在 `onChange` 中提交空值；该路径已有 React 测试。
+组件遵循原生 `value/onChange` 与 `defaultValue`，不复制文本值。不要在生命周期内切换受控模式。
+
+- 非受控：浏览器拥有值；组件只跟踪“是否为空”以决定 clear 可见性。原生 input/autofill-like event 和 form reset 会同步该布尔状态。
+- 受控：`value` 是唯一事实源。clear 请求空值；调用方不更新时旧值和 clear 都保留。
+- reset 不发布 `onInput/onChange/onClear`。非受控恢复当前 `defaultValue`，受控恢复最新 `value`。
 
 ## 表单集成
 
-透传 `name`、`required`、`disabled`、`readOnly`、`onBlur` 和 ref，可参与原生 FormData。React Hook Form 使用 `MeuFormTextInput`；V2 需覆盖 dirty、touched、服务端错误、首次错误聚焦和 reset。
+透传 `name/form/required/disabled/readOnly/onBlur` 和 ref。
+
+- disabled input 从 FormData 省略；readOnly input 保留值。
+- 祖先 form 与 `form="id"` 外部所有者均支持 reset；外部 form 可晚于 input 挂载，也可由同 ID 新节点替换。
+- 被 `onReset.preventDefault()` 取消时保持当前值。
+- loading 不改变 FormData，也不阻止 Enter submit；是否禁止提交由 form/button 所有者决定。
+- React Hook Form 使用 `MeuFormTextInput`；dirty/touched/server error 属于 form-react adapter 契约。
 
 ## Props
 
-专有 Props 为 `clearable`、`onClear`、`size`、`status`，其余来自原生 input。API 表由 API Extractor 生成。
+- `clearable`：非空、可编辑且非 loading 时显示 44×44 clear；默认 false。
+- `clearLabel`：clear accessible name；默认跟随 ConfigProvider 中英文 locale。
+- `loading/loadingLabel`：显示 polite status、设置 input `aria-busy` 并隐藏 clear；不禁用输入。
+- `onClear`：值请求、input/change 通知及 focus 恢复之后调用。
+- `size`：small/medium/large 控制高度和 padding。
+- `status`：default/error 视觉状态；error 会设置 `aria-invalid=true`。
+- `dir`：同时设置 wrapper 与 input，保证组件级 RTL 的文本和尾部操作一致。
+
+其余 Props 来自 native input；API 表由 `TextInputProps` 生成。
 
 ## Events
 
-- `onChange`：原生 React change 语义，由输入产生。
-- `onClear`：input change 派发后调用；当前无 details，也不区分 pointer/keyboard 来源。
-- 原生 `onInput/onBlur/onFocus/onComposition*` 均透传。
+- `onInput`：真实输入、autofill-like input 和 clear 派发的冒泡 input event。
+- `onChange`：React 对 native input 的 change 契约；clear 通过同一 input event 进入该回调。
+- `onClear`：上述事件处理和 input focus 恢复后调用；当前无 details，不区分 pointer/keyboard 来源。
+- `onBlur/onFocus/onComposition*/onKeyDown`：原样透传；组件不拦截 IME 或 Enter。
 
-clear 顺序固定为值置空 → 冒泡 input/change → 恢复 input 焦点 → `onClear`。
+clear 顺序固定为 DOM value 置空 → 冒泡 input → React `onInput/onChange` → focus input → `onClear`。它不会额外派发浏览器原生 `change` event。
 
 ## Ref 与命令式方法
 
-ref 指向真实 `HTMLInputElement`，可使用 focus、select、setSelectionRange 等原生能力。
+ref 指向真实 `HTMLInputElement`，可使用 `focus/select/setSelectionRange` 并读取 selection/form。clear 后空值 selection 位于 0；loading 替换已聚焦 clear 时把焦点还给 input。password、number 等类型对 selection API 的原生限制保持不变。
 
 ## 键盘操作
 
-| 按键            | 行为                                            |
-| --------------- | ----------------------------------------------- |
-| Tab / Shift+Tab | 在 input、清除按钮和相邻控件间移动              |
-| 输入法组合键    | 由原生 input 处理，组合期间不得错误提交或格式化 |
-| Enter           | 由表单和 `enterKeyHint` 场景决定                |
+| 操作            | 行为                                                   |
+| --------------- | ------------------------------------------------------ |
+| Tab / Shift+Tab | 在 input、非空时的 clear 和相邻控件间移动              |
+| 输入法组合键    | 完全由 native input 处理；组件不格式化或提交           |
+| Enter           | 完全由 input/form 和 `enterKeyHint` 场景决定           |
+| clear click     | 请求空值，保持 input focus，并让虚拟键盘继续由输入拥有 |
+
+IME 完全由 native input 处理；组件不拦截 composition 事件，也不在 Enter 时自行提交或格式化。
 
 ## 触摸与手势
 
-无自有手势。清除按钮必须达到 44×44 CSS px，且不能遮挡文本、选择手柄或浏览器密码管理 UI。
+无自有手势。clear 为 44×44 CSS px；mouse down 不抢走 input 焦点。clear click 请求空值后保持 input focus，使虚拟键盘继续由输入拥有。尾部 padding 为 clear/loading 保留空间，第三方密码管理器注入的按钮仍需宿主真机检查。
+
+## Autofill 与 password
+
+`type/autoComplete/name` 直接落在 native input，组件不读取密码、不提供 reveal，也不关闭浏览器密码管理器。浏览器派发 input 时 clear 可见性会同步；不派发 input 的第三方直接 DOM 注入可能延迟到下一次用户输入或 rerender。
+
+不要从服务端以 `value/defaultValue` 预填真实密码：这会把秘密写入 HTML/DOM，与组件是否遮蔽显示无关。密码输入应初始为空，并交由浏览器或受信任密码管理器填充。
 
 ## 无障碍
 
-input 必须有 label；推荐由 Field 生成。error 通过 `aria-invalid` 和 `aria-describedby` 关联。调用方的 `grammar`/`spelling` 语义不会折叠为 `true`，显式 `false` 在无 Field/status 错误时原样保留；Field/status 错误优先输出 `true`。清除按钮从 ConfigProvider locale 获取中英文 accessible name。
+input 必须有 label，推荐由 Field 生成。error 通过 `aria-invalid` 与 `aria-describedby` 关联；通过嵌套布局消费 Field context 时，显式 `aria-describedby`（包括空字符串 opt-out）优先于 context，直接子控件仍遵循 Field 的 ID 合并契约。grammar/spelling token 不会无故折叠。clear 是有名称的 native button，可用 `clearLabel` 为密码等场景具体化。loading 使用 atomic polite status，并在 input 设置 `aria-busy`；它不是 disabled/readOnly 的替代。
 
 ## 动效
 
-仅使用状态过渡，无业务动效。reduced-motion 下不应影响输入反馈。
+唯一持续动效是 loading spinner；`ConfigProvider motion="reduced"` 或 `prefers-reduced-motion: reduce` 均会停止旋转，status 与 `aria-busy` 继续表达状态。loading 只覆盖 `data-state`，不会移除 `status="error"` 的 error border 或 `aria-invalid=true`；单元和 ReducedMotionLoading Story 直接覆盖该组合。
 
 ## 主题与定制
 
-稳定入口为 size、status、原生属性、Field 组合和全局 Token。内部 wrapper/class 不作为 API。
+input border、clear 和 spinner 在 forced-colors 下使用系统颜色。颜色、尺寸、圆角来自 Meu tokens；稳定定制入口是原生 input 的 `className/style`、公开 Props 与全局 tokens，wrapper 与内部 class 不是公开 API。
 
 ## SSR 与 Next.js
 
-初始 value/defaultValue 必须在服务端和客户端一致。autoFocus 可能影响 hydration 后体验，不应用作默认生产行为。
+SSR 输出真实 input、value/type/autoComplete/disabled/error 与 loading status，不读取 window/document。`TextInput.hydration.test.tsx` 以相同 props 调用 `hydrateRoot`，覆盖无 mismatch 以及 hydration 后 clear/change/focus。首次服务端与客户端 `value/defaultValue/loading` 不一致仍是调用方 mismatch；`autoFocus` 不应用作默认生产策略。
 
 ## RTL 与国际化
 
-文本方向遵循 DOM；图标、内边距与清除按钮定位使用逻辑方向。清除 label 跟随 ConfigProvider locale。
+组件级 `dir` 同时设置 wrapper/input，使 clear/loading 尾部位置与文本方向一致。padding 使用 logical properties；RTL 有单元与 Story 入口。clear/loading label 跟随 ConfigProvider locale，也可显式覆盖。mixed bidi、阿拉伯语 IME 和系统字体放大仍需真机。
 
 ## 浏览器与 WebView
 
-IME、autofill、密码管理、selection 和虚拟键盘行为必须在 iOS Safari/WKWebView 与 Android Chrome/WebView 真机验证。
+运行时代码使用 native input/button、value descriptor、基础 Event、setTimeout 和 React state/effect，没有引入超出 Chrome/WebView 70 或 iOS 13 的强制 JS API。logical padding 在目标基线可用；旧宿主可安全忽略不识别的 forced-colors/reduced-motion media query。静态兼容与 jsdom 不代表真机通过。
 
 ## 边界情况与已知限制
 
-- 当前 `onClear` 没有 source/reason details；是否扩展需经过 V2 API 评审。
-- 未内建格式化、mask、debounce 或请求逻辑。
+- `onClear` 尚无 source/reason details；扩展需经过 API 评审。
+- loading 是调用方状态，不创建、去重或取消请求，也不阻止 form submit。
+- 组件不内建格式化、mask、debounce、请求或 password reveal。
+- 极少数不派发 input 的密码管理器注入可能使 clear 可见性暂时滞后。
+- 受控/非受控切换不受支持，遵循 React native input 约束。
 
 ## 性能预算
 
-单次输入不应引入额外 layout measurement 或全局监听；格式化和远程校验由调用层节流。
+每个实例仅维护 clear 可见性布尔值和少量 refs，不测量布局。组件在 input 的 `ownerDocument` 注册一个 reset 委托 listener，并在每次事件时核对 `event.target === input.form`，因此不会响应无关 form，且卸载时会清理；这是支持外部 owner 晚挂载/替换所需的常数级监听。loading spinner 仅使用 CSS。格式化和远程校验由调用层节流、取消。
 
 ## 测试证据
 
-- Unit: `TextInput.test.tsx`，覆盖 Field 对 caller token 的优先级、受控/非受控 clear、locale、readOnly，以及 `aria-invalid` false/grammar/spelling token
-- Story interaction: `Clearable` 验证清除后的值、回调状态与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3653 B / 32768 B 预算，组合 Brotli 3227 B；共享样式由应用单独导入一次。
-- SSR/hydration: `TextInput.ssr.test.tsx` 覆盖原生 input 的 token 输出；隔离 Next 16 App Router 首屏渲染 Field-aware input，hydration 后 clear、错误修正与提交成功且 0 hydration/runtime error
-- RTL: 待补
-- Reduced motion: 不适用，待静态验证
-- Mobile Chromium/WebKit E2E: 两种引擎断言 Zod invalid、Field 归属、受控 fill、clear 后值与焦点恢复、修正后提交；IME/autofill/password 仍待专项与真机
-- Chromatic Light/Dark: 有视觉快照，待矩阵化
-- Real device: 待补
+- Unit：Field/ARIA token、受控接受/拒绝 clear、非受控 input/autofill-like 更新、password clear、IME 事件透传、selection/focus、祖先/外部/晚挂载/替换/cancel/controlled reset、disabled/readOnly FormData、loading 编辑和 form submit、loading+error、provider reduced motion、RTL、locale。
+- SSR：native token、password/autoComplete、loading 与 disabled。
+- Hydration：真实 `hydrateRoot` 无 mismatch，hydration 后 clear/change/focus。
+- Story interaction：Clearable 覆盖值/回调/focus；NativeFormReset 覆盖 default/FormData；LoadingFocusTransfer 覆盖 loading 焦点移交；ReducedMotionLoading 覆盖 provider motion 与 loading/error 语义。Password/autofill 与 RTL Story 提供人工入口。
+- 官网 Next 运行时：既有本地 production 双引擎证据覆盖 Field invalid、受控 fill、clear/focus、修正与提交；本轮未重新执行或扩大共享 E2E，loading、外部 form/reset 与受控拒绝仍待后续定向浏览器验证。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4512 B / 32768 B 预算，组合 Brotli 3976 B；共享样式由应用单独导入一次。
 
 ## V2 优化记录
 
-### 待优化
-
-- 继续验证 IME、autofill、password、selection 与 native form reset。
-- 继续补 RTL、IME、autofill/password 与真机证据；Form adapter、SSR/hydration 和基础移动双引擎路径已完成。
-
 ### 已完成
 
-- V1 已使用原生 input、Field 关联、ref 和错误语义。
-- V2 已冻结 clear 事件顺序，保留 `aria-invalid` token，并补齐受控 clear、locale、readOnly、逻辑定位和 Props TSDoc。
-- 在隔离 Next H5 中补 Field invalid、clear/focus、提交与 hydration 双引擎证据。
+- 冻结 native value/event/Field/ARIA 契约。
+- 修复 clear 可见性、受控/外部/取消 form reset、loading/focus 与组件级 RTL。
+- 补 password/autofill-like、FormData、IME、SSR/hydration 和 Story 证据。
+
+### 待验证
+
+- iOS 13/WKWebView 与 Chrome 70 的中文/日文 IME、系统 autofill/password manager、selection handle 和软键盘。
+- VoiceOver/TalkBack、mixed bidi、200% 字号、真机 reduced-motion/forced-colors。
+- 移动双浏览器的 loading、外部 form/reset 与受控拒绝专项。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                    | 迁移说明 |
-| ---------- | ------ | ------------- | ------------------------------------------------------- | -------- |
-| 2026-08-28 | 0.1.0  | docs          | 建立 V2 留存文档基线                                    | 无       |
-| 2026-08-29 | 未发布 | behavior      | 保留 `aria-invalid` token 语义                          | 无       |
-| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 clear/invalid/submit/hydration 证据 | 无       |
-| 2026-08-29 | 未发布 | accessibility | 统一 Field/status error 覆盖 caller token 的优先级      | 无       |
+| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                                    |
+| ---------- | ------ | ------------- | ---------------------------------------------------------- | ------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs          | 建立 V2 留存文档基线                                       | 无                                          |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA token，并统一 Field/status error 优先级          | 无                                          |
+| 2026-08-29 | 未发布 | hardening     | 补 clear、form reset、loading/focus、RTL 与 hydration 契约 | 新增可选 loading/labels；空值不再显示 clear |

@@ -2237,7 +2237,10 @@ export type TextAreaStatus = "default" | "error";
 
 // @public
 export const TextInput: ForwardRefExoticComponent<Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
+clearLabel?: string;
 clearable?: boolean;
+loading?: boolean;
+loadingLabel?: string;
 onClear?: () => void;
 size?: "small" | "medium" | "large";
 status?: "default" | "error";
@@ -2245,7 +2248,10 @@ status?: "default" | "error";
 
 // @public
 export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
+    clearLabel?: string;
     clearable?: boolean;
+    loading?: boolean;
+    loadingLabel?: string;
     onClear?: () => void;
     size?: "small" | "medium" | "large";
     status?: "default" | "error";
@@ -2340,6 +2346,8 @@ export type ToastCloseDetails = ToastOpenChangeDetails | {
     reason: "programmatic";
 } | {
     reason: "clear";
+} | {
+    reason: "overflow";
 };
 
 // @public
@@ -2382,6 +2390,7 @@ export function ToastProvider(input: ToastProviderProps): JSX.Element;
 // @public
 export type ToastProviderProps = {
     children: ReactNode;
+    maxToasts?: number;
 };
 
 // Warning: (ae-forgotten-export) The symbol "WithoutOpenState_3" needs to be exported by the entry point index.d.ts
@@ -2399,7 +2408,9 @@ export type ToastTone = "neutral" | "success" | "warning" | "danger";
 export type ToastToneOptions = Omit<ToastShowOptions, "tone">;
 
 // @public
-export type ToastUpdateOptions = Partial<Omit<ToastShowOptions, "id">>;
+export type ToastUpdateOptions = {
+    [Key in keyof Omit<ToastShowOptions, "id">]?: Exclude<Omit<ToastShowOptions, "id">[Key], undefined> | undefined;
+};
 
 // @public
 export function TreeSelect<TValue extends TreeSelectValue = TreeSelectValue>(input: TreeSelectProps<TValue>): JSX.Element;

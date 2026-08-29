@@ -43,14 +43,17 @@ export const panel = recipe({
     transitionDuration: "var(--meu-motion-enter)",
     transitionTimingFunction: "var(--meu-motion-ease-standard)",
     selectors: {
-      "&[data-dragging='true']": { transitionDuration: "0ms", userSelect: "none" }
+      "&[data-dragging='true']": { transitionDuration: "0ms", userSelect: "none" },
+      '[data-meu-motion="reduced"] &': { transitionDuration: "0ms" }
     },
     "@media": {
       "(prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
       "(forced-colors: active)": {
         color: "CanvasText",
         background: "Canvas",
-        boxShadow: "none"
+        borderTop: "1px solid CanvasText",
+        boxShadow: "none",
+        forcedColorAdjust: "auto"
       }
     }
   },
@@ -94,7 +97,16 @@ export const dragHandle = style({
       transform: "translateX(-50%)"
     },
     "&:focus": { outline: "2px solid var(--meu-color-accent)", outlineOffset: -4 },
-    "&:active": { cursor: "grabbing" }
+    "&:active": { cursor: "grabbing" },
+    "&:disabled": { cursor: "default" }
+  },
+  "@media": {
+    "(forced-colors: active)": {
+      selectors: {
+        "&::before": { background: "ButtonText" },
+        "&:focus": { outlineColor: "Highlight" }
+      }
+    }
   }
 });
 
@@ -138,6 +150,10 @@ export const closeButton = style({
   "@media": {
     "(hover: hover)": {
       selectors: { "&:hover": { background: "var(--meu-color-subtle)" } }
+    },
+    "(forced-colors: active)": {
+      color: "ButtonText",
+      selectors: { "&:focus": { outlineColor: "Highlight" } }
     }
   }
 });

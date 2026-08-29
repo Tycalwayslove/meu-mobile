@@ -1,8 +1,8 @@
 "use client";
 
 import { Portal, useBodyScrollLock, useFocusTrap } from "@meu/primitives-react";
-import { useId, useRef, useState } from "react";
-import type { Ref } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { Ref, RefObject } from "react";
 
 import { Button } from "../Button";
 import { useMeuConfig } from "../ConfigProvider";
@@ -21,6 +21,8 @@ import {
   title as titleStyle
 } from "./Dialog.css";
 import type { DialogAction, DialogActionLayout, DialogProps } from "./types";
+
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
   if (typeof ref === "function") {
@@ -75,6 +77,8 @@ export function Dialog({
   const panelRef = useRef<HTMLDivElement>(null);
   const initialActionRef = useRef<HTMLButtonElement>(null);
   const actionTokenRef = useRef(0);
+  const actionPendingRef = useRef(false);
+  const mountedRef = useRef(false);
   const openStateRef = useRef(false);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [resolvedOpen, requestOpenChange] = useControllableOpen({
@@ -88,19 +92,40 @@ export function Dialog({
   const preferredActionKey = getPreferredActionKey(actions);
   const resolvedLayout = resolveActionLayout(actionLayout, actions.length);
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const focusTrapRef = useMemo<RefObject<HTMLElement | null>>(() => {
+    // Moving the Portal must also replace the container captured by the focus-trap effect.
+    void portalContainer;
+    return {
+      get current() {
+        return panelRef.current;
+      }
+    };
+  }, [portalContainer]);
   const configBoundary = getConfigBoundaryProps(config);
   const dismissBlocked = pendingKey !== null;
 
-  if (openStateRef.current !== resolvedOpen) {
+  useIsomorphicLayoutEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      openStateRef.current = false;
+      actionPendingRef.current = false;
+      actionTokenRef.current += 1;
+    };
+  }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    if (openStateRef.current === resolvedOpen) return;
     openStateRef.current = resolvedOpen;
     actionTokenRef.current += 1;
-    if (!resolvedOpen && pendingKey !== null) setPendingKey(null);
-  }
+    actionPendingRef.current = false;
+    if (!resolvedOpen) setPendingKey(null);
+  }, [resolvedOpen]);
 
   useBodyScrollLock(resolvedOpen && lockScroll);
   useFocusTrap({
     active: resolvedOpen,
-    containerRef: panelRef,
+    containerRef: focusTrapRef,
     initialFocusRef: initialActionRef,
     onEscape:
       closeOnEscape && !dismissBlocked
@@ -113,9 +138,11 @@ export function Dialog({
   if (!shouldRender) return null;
 
   const runAction = async (action: DialogAction) => {
-    if (pendingKey !== null || action.disabled) return;
+    if (actionPendingRef.current || pendingKey !== null || action.disabled) return;
+    actionPendingRef.current = true;
     const actionToken = ++actionTokenRef.current;
-    const isCurrentAction = () => actionTokenRef.current === actionToken && openStateRef.current;
+    const isCurrentAction = () =>
+      mountedRef.current && actionTokenRef.current === actionToken && openStateRef.current;
     setPendingKey(action.key);
     let result: boolean | void;
     try {
@@ -124,13 +151,19 @@ export function Dialog({
     } catch (error) {
       if (!isCurrentAction()) return;
       if (onActionError) {
-        onActionError(error, action);
-        return;
+        try {
+          onActionError(error, action);
+        } catch {
+          // Error observers must not turn a contained action failure into an unhandled rejection.
+        }
       }
-      throw error;
+      return;
     } finally {
       if (actionTokenRef.current === actionToken) {
-        setPendingKey((currentKey) => (currentKey === action.key ? null : currentKey));
+        actionPendingRef.current = false;
+        if (mountedRef.current) {
+          setPendingKey((currentKey) => (currentKey === action.key ? null : currentKey));
+        }
       }
     }
     if (isCurrentAction() && result !== false && action.closeOnPress !== false) {

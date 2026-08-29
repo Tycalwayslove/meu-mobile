@@ -20446,7 +20446,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"size\"> & {\n    clearable?: boolean;\n    onClear?: () => void;\n    size?: \"small\" | \"medium\" | \"large\";\n    status?: \"default\" | \"error\";\n} & import(\"react\")."
+              "text": ">, \"size\"> & {\n    clearLabel?: string;\n    clearable?: boolean;\n    loading?: boolean;\n    loadingLabel?: string;\n    onClear?: () => void;\n    size?: \"small\" | \"medium\" | \"large\";\n    status?: \"default\" | \"error\";\n} & import(\"react\")."
             },
             {
               "kind": "Reference",
@@ -20510,7 +20510,7 @@
             },
             {
               "kind": "Content",
-              "text": ">, \"size\"> & {\n    clearable?: boolean;\n    onClear?: () => void;\n    size?: \"small\" | \"medium\" | \"large\";\n    status?: \"default\" | \"error\";\n}"
+              "text": ">, \"size\"> & {\n    clearLabel?: string;\n    clearable?: boolean;\n    loading?: boolean;\n    loadingLabel?: string;\n    onClear?: () => void;\n    size?: \"small\" | \"medium\" | \"large\";\n    status?: \"default\" | \"error\";\n}"
             },
             {
               "kind": "Content",
@@ -21407,7 +21407,7 @@
             },
             {
               "kind": "Content",
-              "text": " | {\n    reason: \"programmatic\";\n} | {\n    reason: \"clear\";\n}"
+              "text": " | {\n    reason: \"programmatic\";\n} | {\n    reason: \"clear\";\n} | {\n    reason: \"overflow\";\n}"
             },
             {
               "kind": "Content",
@@ -21680,7 +21680,7 @@
           "overloadIndex": 1,
           "parameters": [
             {
-              "parameterName": "{ children }",
+              "parameterName": "{ children, maxToasts }",
               "parameterTypeTokenRange": {
                 "startIndex": 0,
                 "endIndex": 0
@@ -21718,7 +21718,7 @@
             },
             {
               "kind": "Content",
-              "text": ";\n}"
+              "text": ";\n    maxToasts?: number;\n}"
             },
             {
               "kind": "Content",
@@ -21858,9 +21858,31 @@
               "text": "export type ToastUpdateOptions = "
             },
             {
+              "kind": "Content",
+              "text": "{\n    [Key in keyof "
+            },
+            {
               "kind": "Reference",
-              "text": "Partial",
-              "canonicalReference": "!Partial:type"
+              "text": "Omit",
+              "canonicalReference": "!Omit:type"
+            },
+            {
+              "kind": "Content",
+              "text": "<"
+            },
+            {
+              "kind": "Reference",
+              "text": "ToastShowOptions",
+              "canonicalReference": "@meu/mobile!ToastShowOptions:type"
+            },
+            {
+              "kind": "Content",
+              "text": ", \"id\">]?: "
+            },
+            {
+              "kind": "Reference",
+              "text": "Exclude",
+              "canonicalReference": "!Exclude:type"
             },
             {
               "kind": "Content",
@@ -21882,7 +21904,7 @@
             },
             {
               "kind": "Content",
-              "text": ", \"id\">>"
+              "text": ", \"id\">[Key], undefined> | undefined;\n}"
             },
             {
               "kind": "Content",
@@ -21894,7 +21916,7 @@
           "name": "ToastUpdateOptions",
           "typeTokenRange": {
             "startIndex": 1,
-            "endIndex": 7
+            "endIndex": 12
           }
         },
         {

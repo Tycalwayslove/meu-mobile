@@ -16,7 +16,9 @@ storyIds:
     feedback-bottomsheet--default,
     feedback-bottomsheet--multiple-snap-points,
     feedback-bottomsheet--controlled-snap-point,
-    feedback-bottomsheet--without-visible-title
+    feedback-bottomsheet--without-visible-title,
+    feedback-bottomsheet--long-scrollable-content,
+    feedback-bottomsheet--rtl-reduced-motion
   ]
 source: packages/mobile/src/BottomSheet
 ---
@@ -25,7 +27,7 @@ source: packages/mobile/src/BottomSheet
 
 ## 当前能力
 
-底部模态任务面板，支持受控/非受控可见性与 snap point、内容高度、手柄拖拽/点击/键盘、速度吸附、拖拽关闭、Mask/Escape/关闭按钮、Portal、焦点圈定恢复、滚动锁、安全区和动态视口/内容测量。
+底部模态任务面板，支持受控/非受控可见性与 snap point、内容高度、手柄拖拽/点击/键盘、速度吸附、拖拽关闭、Mask/Escape/关闭按钮、Portal、焦点圈定恢复、滚动锁、安全区和动态视口/内容测量。关闭和卸载会清理未完成的指针会话；退出动画中的控件立即 disabled，不再发布业务事件。
 
 ## 何时使用
 
@@ -49,7 +51,7 @@ source: packages/mobile/src/BottomSheet
 
 ## 受控与非受控
 
-open 与 snapPoint 分别独立受控；未传时使用 defaultOpen/defaultSnapPoint。无效或被动态移除的非受控 snap 会永久归一到最近有效点，重新加入旧值不会意外跳回。
+open 与 snapPoint 分别独立受控；未传时使用 defaultOpen/defaultSnapPoint。无效或被动态移除的非受控 snap 会永久归一到最近有效点，重新加入旧值不会意外跳回。受控 owner 拒绝 `onSnapPointChange` 时，视觉位置保持传入值，不做乐观提交。
 
 ## 表单集成
 
@@ -57,11 +59,11 @@ open 与 snapPoint 分别独立受控；未传时使用 defaultOpen/defaultSnapP
 
 ## Props
 
-数字 snap 必须 `(0,1]`，`content` 使用固有内容高度；归一后按实际高度升序去重并限制为视觉视口 90%。dragHandle/dragToDismiss/safeArea/lockScroll/restoreFocus 默认 true；Mask 点击默认 false，Escape 默认 true；无 title 时必须提供 aria-label 或 aria-labelledby。
+数字 snap 必须 `(0,1]`，`content` 使用固有内容高度；归一后按实际高度升序去重并限制为视觉视口 90%。dragHandle/dragToDismiss/safeArea/lockScroll/restoreFocus 默认 true；Mask 点击默认 false，Escape 默认 true；无 title 时必须提供 aria-label 或 aria-labelledby。`role/aria-modal/hidden/inert/tabIndex/aria-hidden` 是内部固定模态契约，不接受调用方覆盖。
 
 ## Events
 
-`onOpenChange` 原因是 escape、mask、close-button、drag。`onSnapPointChange(point,{index,reason})` 区分 drag/handle；受控模式只发布意图。
+`onOpenChange(false,{reason})` 原因是 escape、mask、close-button、drag；仅用户关闭意图触发，prop 驱动的显示变化不触发。`onSnapPointChange(point,{index,reason})` 区分 drag/handle；只有目标点不同才发布，受控模式只发布意图。
 
 ## Ref 与命令式方法
 
@@ -73,11 +75,11 @@ Tab 在模态内循环；Escape 可关闭。手柄 Enter/Space 循环位置，Ar
 
 ## 触摸与手势
 
-拖拽只从 44px handle 开始，`touch-action:none` 避免与内容滚动竞争；只接受主指针，cancel/lost capture 不提交。内容区保持原生纵向滚动与 overscroll contain。
+拖拽只从 44px handle 开始，`touch-action:none` 避免与内容滚动竞争；只接受主按钮和主指针，cancel/lost capture 不提交，也不会吞掉下一次有意的 click。关闭、外部受控切换和卸载都会释放 pointer capture 并清除临时高度。内容区保持原生纵向滚动与 overscroll contain。
 
 ## 无障碍
 
-panel 为有名称的 `role=dialog aria-modal=true`；标题自动关联。handle 为原生 button，并通过隐藏说明公布本地化实际位置；关闭按钮有本地化名称。
+panel 为有名称的 `role=dialog aria-modal=true`；标题自动关联。handle 为原生 button，并通过隐藏说明公布本地化实际位置；关闭按钮有本地化名称。退出阶段 layer 为 inert/aria-hidden，handle 与关闭按钮同时 disabled，避免程序化点击穿透发布事件。
 
 ## 动效
 
@@ -89,7 +91,7 @@ panel 为有名称的 `role=dialog aria-modal=true`；标题自动关联。handl
 
 ## SSR 与 Next.js
 
-SSR 以 50vh 确定性壳输出，hydration 后根据 visualViewport 与内容重新计算；首屏 open/items 必须一致。Portal 可跟随 ConfigProvider 容器。
+SSR 以 50vh 确定性壳输出，hydration 后根据 visualViewport 与内容重新计算；首屏 open/items 必须一致。Portal 可跟随 ConfigProvider 容器；打开时切换容器会让焦点圈定重新绑定到新面板。lazy resolver 的目标变化必须伴随新的函数 identity。当前仅支持同一 Document 内 HTMLElement，跨 Document/ShadowRoot 未声明支持。
 
 ## RTL 与国际化
 
@@ -97,7 +99,7 @@ SSR 以 50vh 确定性壳输出，hydration 后根据 visualViewport 与内容�
 
 ## 浏览器与 WebView
 
-兼容 Chrome/WebView 70+、iOS 13+；长标题提供 `word-break: break-word` 旧内核回退与现代 `overflow-wrap: anywhere`，visualViewport/ResizeObserver 缺失时分别回退 innerHeight/首帧测量。软键盘与旋转需最终真机验证。
+核心渲染、点击手柄和键盘路径兼容 Chrome/WebView 70+、iOS 13+；连续拖拽依赖 Pointer Events，iOS 13.0–13.3 应使用手柄点击完成高度切换，iOS 13.4+ 才进入拖拽支持范围。长标题提供 `word-break: break-word` 旧内核回退与现代 `overflow-wrap: anywhere`，visualViewport/ResizeObserver 缺失时分别回退 innerHeight/首帧测量。软键盘与旋转需最终真机验证。
 
 ## 边界情况与已知限制
 
@@ -109,13 +111,13 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 
 ## 测试证据
 
-- Unit: 模态名称/关闭原因、滚动锁、受控/非受控 snap、键盘、拖拽关闭、forceMount、动态 identity、本地化/数字标题
+- Unit: 模态名称/关闭原因、滚动锁、受控/非受控 snap、键盘、拖拽关闭、pointercancel、混合 pointerType 单会话、关闭中断拖拽、退出期事件隔离、forceMount、动态 snap identity、Portal 容器迁移、本地化/数字标题
 - Story interaction: `Default` 验证打开、handle 聚焦、关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，最终冻结候选仍需统一刷新。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 10735 B / 32768 B 预算，组合 Brotli 9485 B；共享样式由应用单独导入一次。
-- SSR/hydration: `BottomSheet.ssr.test.tsx` 覆盖服务端结构；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal/测量 hydration，0 `pageerror`、0 `console.error`。
-- Mobile Chromium/WebKit E2E: handle 键盘 snap、pointer drag-dismiss、关闭原因、焦点恢复与 body scroll lock 清理通过；Chromatic 与真机软键盘/读屏延后到最终统一门禁。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 11198 B / 32768 B 预算，组合 Brotli 9903 B；共享样式由应用单独导入一次。
+- SSR/hydration: `BottomSheet.ssr.test.tsx` 覆盖服务端结构；`BottomSheet.hydration.test.tsx` 使用真实 `hydrateRoot` 验证初始打开的 body Portal 无 recoverable error；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal/测量 hydration，0 `pageerror`、0 `console.error`。
+- Mobile Chromium/WebKit E2E: 重新构建本地 production 站后，双引擎验证 handle 键盘 snap、pointer drag-dismiss、关闭原因、焦点恢复、body scroll lock 清理、动态 Portal 容器、RTL、`motion="reduced"`，以及模态期间可操作 Toast 进入 Tab 循环；同批 Light/Dark 全页 axe WCAG A/AA 通过。Chromatic 与真机软键盘/读屏延后到全部组件完成后的统一门禁。
 
 ## V2 优化记录
 
@@ -125,11 +127,15 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 
 ### 已完成
 
-修复动态 snap 身份、数字标题、位置本地化、监听生命周期和主指针边界；补 forced-colors、RTL、SSR、隔离 Next H5 键盘 snap/drag-dismiss 与永久文档。
+修复动态 snap 身份、数字标题、位置本地化、监听生命周期和主指针边界；补 forced-colors、RTL、SSR、隔离 Next H5 键盘 snap/drag-dismiss 与永久文档。继续补齐 Portal 迁移后的焦点重绑、pointercancel 后续操作、关闭中断拖拽清理、退出期事件隔离、混合 pointerType 单会话和真实 hydration。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                           | 迁移说明    |
-| ---------- | ------ | ------------ | -------------------------------------------------------------- | ----------- |
-| 2026-08-29 | 未发布 | behavior     | snap、手势、a11y 与生命周期加固                                | 无 API 破坏 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 snap/drag/focus/scroll-lock/hydration 证据 | 无          |
+| 日期       | 版本   | 类型          | 内容                                                           | 迁移说明    |
+| ---------- | ------ | ------------- | -------------------------------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior      | snap、手势、a11y 与生命周期加固                                | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 snap/drag/focus/scroll-lock/hydration 证据 | 无          |
+| 2026-08-29 | 未发布 | behavior      | Portal 焦点重绑、拖拽中断清理与退出阶段事件隔离                | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification  | 本地 production 双引擎复验 Portal、RTL、reduced-motion 与 axe  | 无          |
+| 2026-08-29 | 未发布 | behavior      | 拒绝第二个 primary pointer 覆盖进行中的拖拽会话                | 无 API 破坏 |
+| 2026-08-29 | 未发布 | accessibility | 可操作 Toast 纳入 BottomSheet 的键盘焦点循环                   | 无 API 破坏 |

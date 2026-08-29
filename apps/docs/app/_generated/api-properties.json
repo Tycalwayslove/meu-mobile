@@ -372,8 +372,29 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Shows a native button that clears the current value.",
+          "description": "Shows a native button while the editable value is non-empty.",
           "defaultValue": "false"
+        },
+        {
+          "name": "clearLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible name for the built-in clear button."
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Marks caller-owned asynchronous work without making the native input read-only."
+        },
+        {
+          "name": "loadingLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible status name announced while `loading` is true."
         },
         {
           "name": "size",
@@ -6374,7 +6395,7 @@
           "type": "OverlayContainer",
           "required": false,
           "event": false,
-          "description": "Portal host, or a resolver that returns it. Defaults to the configured overlay container or `document.body`."
+          "description": "Portal host, or a resolver that returns it. Defaults to the configured overlay container or\n`document.body`. When a resolver's destination changes, pass a new resolver identity so focus\ntrapping rebinds to the remounted panel."
         },
         {
           "name": "defaultOpen",
@@ -6517,14 +6538,14 @@
           "type": "(open: boolean, details: BottomSheetOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called when user interaction requests an open-state change; controlled consumers must update `open`."
+          "description": "Reports user dismissal requests and their cause; prop-driven visibility changes emit nothing."
         },
         {
           "name": "onSnapPointChange",
           "type": "(snapPoint: BottomSheetSnapPoint, details: BottomSheetSnapChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called after dragging or activating the handle selects a valid snap point."
+          "description": "Reports a drag or handle request for a different valid point; controlled owners may reject it."
         }
       ],
       "BottomSheetSnapChangeDetails": [
@@ -6888,14 +6909,14 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Prefers this enabled action as the initial focus target."
+          "description": "Prefers this enabled action for initial focus; the first preferred action wins."
         },
         {
           "name": "closeOnPress",
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Set false to keep the dialog open after success.",
+          "description": "Keeps the dialog open after a successful action when set to `false`.",
           "defaultValue": "true"
         },
         {
@@ -6903,14 +6924,14 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Disables activation."
+          "description": "Disables activation and excludes the action from initial-focus selection."
         },
         {
           "name": "key",
           "type": "string",
           "required": true,
           "event": false,
-          "description": "Stable action identity used in events and rendering."
+          "description": "Unique, stable identity used for rendering, pending state, and close details."
         },
         {
           "name": "label",
@@ -6932,7 +6953,7 @@
           "type": "() => boolean | void | Promise<boolean | void>",
           "required": false,
           "event": true,
-          "description": "Runs once; false or rejection keeps the dialog open."
+          "description": "Runs at most once while any action is pending. Returning `false` or rejecting keeps the\ndialog open; rejection is reported through `onActionError` when supplied."
         }
       ],
       "DialogAlertOptions": [
@@ -6979,7 +7000,7 @@
           "type": "OverlayContainer",
           "required": false,
           "event": false,
-          "description": "Portal target; `null` renders in place."
+          "description": "Portal target; `null` renders in place. When a resolver starts returning another target,\npass a new resolver identity so focus trapping rebinds to the moved panel."
         },
         {
           "name": "description",
@@ -7032,7 +7053,7 @@
           "type": "RefObject<HTMLElement>",
           "required": false,
           "event": false,
-          "description": "Explicit focus restoration target."
+          "description": "Explicit focus restoration target; disconnected targets are ignored."
         },
         {
           "name": "title",
@@ -7046,7 +7067,7 @@
           "type": "(error: unknown, action: DialogAction) => void",
           "required": false,
           "event": true,
-          "description": "Receives rejected action errors."
+          "description": "Receives a current action's rejection while the dialog stays open. Without this callback,\nthe component contains the rejection instead of creating an unhandled promise."
         },
         {
           "name": "onConfirm",
@@ -7062,7 +7083,7 @@
           "type": "(options: DialogAlertOptions) => Promise<void>",
           "required": true,
           "event": false,
-          "description": "Opens a one-action alert and resolves after confirmation or dismissal."
+          "description": "Opens a one-action alert. A mounted provider resolves it after committing the closed state;\nprovider unmount resolves it during cleanup. Exit DOM removal may finish later."
         },
         {
           "name": "clear",
@@ -7076,7 +7097,7 @@
           "type": "(options: DialogConfirmOptions) => Promise<boolean>",
           "required": true,
           "event": false,
-          "description": "Opens a confirmation dialog and resolves `true` only after a successful confirm action."
+          "description": "Opens a confirmation dialog. It resolves `true` only after confirmation; cancellation,\ndismissal, clearing, and provider unmount resolve `false`. A mounted provider commits the\nclosed state before resolving; exit DOM removal may finish later."
         },
         {
           "name": "show",
@@ -7145,7 +7166,7 @@
           "type": "OverlayContainer",
           "required": false,
           "event": false,
-          "description": "Portal target; `null` renders in place."
+          "description": "Portal target; `null` renders in place. When a resolver starts returning another target,\npass a new resolver identity so focus trapping rebinds to the moved panel."
         },
         {
           "name": "description",
@@ -7198,7 +7219,7 @@
           "type": "RefObject<HTMLElement>",
           "required": false,
           "event": false,
-          "description": "Explicit focus restoration target."
+          "description": "Explicit focus restoration target; disconnected targets are ignored."
         },
         {
           "name": "title",
@@ -7212,7 +7233,7 @@
           "type": "(error: unknown, action: DialogAction) => void",
           "required": false,
           "event": true,
-          "description": "Receives rejected action errors."
+          "description": "Receives a current action's rejection while the dialog stays open. Without this callback,\nthe component contains the rejection instead of creating an unhandled promise."
         },
         {
           "name": "onCancel",
@@ -7235,7 +7256,7 @@
           "type": "() => void",
           "required": true,
           "event": false,
-          "description": "Closes this imperative dialog."
+          "description": "Idempotently closes this imperative dialog."
         }
       ],
       "DialogOpenChangeDetails": [
@@ -7291,7 +7312,7 @@
           "type": "OverlayContainer",
           "required": false,
           "event": false,
-          "description": "Portal target; `null` renders in place."
+          "description": "Portal target; `null` renders in place. When a resolver starts returning another target,\npass a new resolver identity so focus trapping rebinds to the moved panel."
         },
         {
           "name": "defaultOpen",
@@ -7337,7 +7358,7 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Controlled visibility."
+          "description": "Controlled visibility; close interactions only call `onOpenChange`."
         },
         {
           "name": "ref",
@@ -7359,7 +7380,7 @@
           "type": "RefObject<HTMLElement>",
           "required": false,
           "event": false,
-          "description": "Explicit focus restoration target."
+          "description": "Explicit focus restoration target; disconnected targets are ignored."
         },
         {
           "name": "role",
@@ -7381,14 +7402,14 @@
           "type": "(error: unknown, action: DialogAction) => void",
           "required": false,
           "event": true,
-          "description": "Receives rejected action errors."
+          "description": "Receives a current action's rejection while the dialog stays open. Without this callback,\nthe component contains the rejection instead of creating an unhandled promise."
         },
         {
           "name": "onOpenChange",
           "type": "(open: boolean, details: DialogOpenChangeDetails) => void",
           "required": false,
           "event": true,
-          "description": "Reports dismissal and successful action requests."
+          "description": "Reports user-originated close requests with their exact source."
         }
       ],
       "DialogProviderProps": [
@@ -7444,7 +7465,7 @@
           "type": "OverlayContainer",
           "required": false,
           "event": false,
-          "description": "Portal target; `null` renders in place."
+          "description": "Portal target; `null` renders in place. When a resolver starts returning another target,\npass a new resolver identity so focus trapping rebinds to the moved panel."
         },
         {
           "name": "description",
@@ -7497,7 +7518,7 @@
           "type": "RefObject<HTMLElement>",
           "required": false,
           "event": false,
-          "description": "Explicit focus restoration target."
+          "description": "Explicit focus restoration target; disconnected targets are ignored."
         },
         {
           "name": "role",
@@ -7519,7 +7540,7 @@
           "type": "(error: unknown, action: DialogAction) => void",
           "required": false,
           "event": true,
-          "description": "Receives rejected action errors."
+          "description": "Receives a current action's rejection while the dialog stays open. Without this callback,\nthe component contains the rejection instead of creating an unhandled promise."
         }
       ],
       "ActionMenuAction": [
@@ -10715,7 +10736,8 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Keeps the Toast open after a successful action when false."
+          "description": "Whether a successful action requests closure; returning `false` from `onPress` still vetoes it.",
+          "defaultValue": "true"
         },
         {
           "name": "label",
@@ -10729,7 +10751,7 @@
           "type": "() => boolean | void | Promise<boolean | void>",
           "required": false,
           "event": true,
-          "description": "Action handler. Returning false vetoes close; rejection is reported through `onActionError`."
+          "description": "Runs after the action button is pressed. While its promise is pending, the button and timeout are paused; `false` vetoes closure."
         }
       ],
       "ToastApi": [
@@ -10772,10 +10794,10 @@
       "ToastCloseDetails": [
         {
           "name": "reason",
-          "type": "\"clear\" | \"action\" | \"programmatic\" | \"timeout\"",
+          "type": "\"clear\" | \"action\" | \"programmatic\" | \"timeout\" | \"overflow\"",
           "required": true,
           "event": false,
-          "description": "Automatic duration expiry requested closure.\nA successful action requested closure.\nA controller explicitly closed the record.\n{@link ToastApi.clear} closed the record."
+          "description": "Automatic duration expiry requested closure.\nA successful action requested closure.\nA controller closed the record or its owning provider unmounted.\n{@link ToastApi.clear} closed the record.\nThe provider rejected a new record or evicted a queued record after its capacity decreased."
         }
       ],
       "ToastController": [
@@ -10798,7 +10820,7 @@
           "type": "(options: ToastUpdateOptions) => void",
           "required": true,
           "event": false,
-          "description": "Updates an active record without changing its queue position."
+          "description": "Partially updates an active or queued record without changing its queue position; explicit `undefined` clears an optional field, and an active update restarts the countdown."
         }
       ],
       "ToastOpenChangeDetails": [
@@ -10816,7 +10838,7 @@
           "type": "ToastAction",
           "required": false,
           "event": false,
-          "description": "Optional action; actionable Toasts remain visible for at least five seconds."
+          "description": "Optional action rendered outside the live region; actionable Toasts remain visible for at least five seconds."
         },
         {
           "name": "container",
@@ -10837,7 +10859,8 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Visible duration in milliseconds; zero disables timeout closing."
+          "description": "Visible duration in milliseconds. `0` and negative values disable timeout closure, non-finite values use 3000, and larger finite values are capped at the browser timer limit.",
+          "defaultValue": "3000"
         },
         {
           "name": "forceMount",
@@ -10893,7 +10916,7 @@
           "type": "(error: unknown) => void",
           "required": false,
           "event": true,
-          "description": "Receives action rejection values; rejected actions stay open and expose `data-action-error`."
+          "description": "Receives a current action's rejection value; rejected actions stay open and expose `data-action-error`. Obsolete runs are ignored after close, replacement, or unmount, and observer failures are contained."
         },
         {
           "name": "onOpenChange",
@@ -10910,6 +10933,14 @@
           "required": true,
           "event": false,
           "description": "React subtree that can call {@link useToast }."
+        },
+        {
+          "name": "maxToasts",
+          "type": "number",
+          "required": false,
+          "event": false,
+          "description": "Maximum provider-owned records, including the visible item, queued items, and a closing item awaiting removal. New unique records are rejected at the limit while same-id replacements remain accepted. Lowering the limit preserves the FIFO head, evicts newest queued records with reason `overflow`, and converges after their exit period. Finite values are truncated and clamped to 1–100.",
+          "defaultValue": "20"
         }
       ],
       "ToastShowOptions": [
@@ -10918,7 +10949,7 @@
           "type": "ToastAction",
           "required": false,
           "event": false,
-          "description": "Optional action; actionable Toasts remain visible for at least five seconds."
+          "description": "Optional action rendered outside the live region; actionable Toasts remain visible for at least five seconds."
         },
         {
           "name": "container",
@@ -10932,7 +10963,8 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Visible duration in milliseconds; zero disables timeout closing."
+          "description": "Visible duration in milliseconds. `0` and negative values disable timeout closure, non-finite values use 3000, and larger finite values are capped at the browser timer limit.",
+          "defaultValue": "3000"
         },
         {
           "name": "forceMount",
@@ -10953,7 +10985,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Stable queue identity; showing the same active id updates instead of enqueueing."
+          "description": "Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action."
         },
         {
           "name": "message",
@@ -10988,14 +11020,14 @@
           "type": "(error: unknown) => void",
           "required": false,
           "event": true,
-          "description": "Receives action rejection values; rejected actions stay open and expose `data-action-error`."
+          "description": "Receives a current action's rejection value; rejected actions stay open and expose `data-action-error`. Obsolete runs are ignored after close, replacement, or unmount, and observer failures are contained."
         },
         {
           "name": "onClose",
           "type": "(details: ToastCloseDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called exactly once when the provider record closes."
+          "description": "Called exactly once when the provider record closes or a new record is rejected at capacity."
         }
       ],
       "ToastToneOptions": [
@@ -11004,7 +11036,7 @@
           "type": "ToastAction",
           "required": false,
           "event": false,
-          "description": "Optional action; actionable Toasts remain visible for at least five seconds."
+          "description": "Optional action rendered outside the live region; actionable Toasts remain visible for at least five seconds."
         },
         {
           "name": "container",
@@ -11018,7 +11050,8 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Visible duration in milliseconds; zero disables timeout closing."
+          "description": "Visible duration in milliseconds. `0` and negative values disable timeout closure, non-finite values use 3000, and larger finite values are capped at the browser timer limit.",
+          "defaultValue": "3000"
         },
         {
           "name": "forceMount",
@@ -11039,7 +11072,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Stable queue identity; showing the same active id updates instead of enqueueing."
+          "description": "Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action."
         },
         {
           "name": "message",
@@ -11067,14 +11100,14 @@
           "type": "(error: unknown) => void",
           "required": false,
           "event": true,
-          "description": "Receives action rejection values; rejected actions stay open and expose `data-action-error`."
+          "description": "Receives a current action's rejection value; rejected actions stay open and expose `data-action-error`. Obsolete runs are ignored after close, replacement, or unmount, and observer failures are contained."
         },
         {
           "name": "onClose",
           "type": "(details: ToastCloseDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called exactly once when the provider record closes."
+          "description": "Called exactly once when the provider record closes or a new record is rejected at capacity."
         }
       ],
       "ToastUpdateOptions": [
@@ -11083,7 +11116,7 @@
           "type": "ToastAction",
           "required": false,
           "event": false,
-          "description": "Optional action; actionable Toasts remain visible for at least five seconds."
+          "description": "Optional action rendered outside the live region; actionable Toasts remain visible for at least five seconds."
         },
         {
           "name": "container",
@@ -11097,7 +11130,8 @@
           "type": "number",
           "required": false,
           "event": false,
-          "description": "Visible duration in milliseconds; zero disables timeout closing."
+          "description": "Visible duration in milliseconds. `0` and negative values disable timeout closure, non-finite values use 3000, and larger finite values are capped at the browser timer limit.",
+          "defaultValue": "3000"
         },
         {
           "name": "forceMount",
@@ -11146,14 +11180,14 @@
           "type": "(error: unknown) => void",
           "required": false,
           "event": true,
-          "description": "Receives action rejection values; rejected actions stay open and expose `data-action-error`."
+          "description": "Receives a current action's rejection value; rejected actions stay open and expose `data-action-error`. Obsolete runs are ignored after close, replacement, or unmount, and observer failures are contained."
         },
         {
           "name": "onClose",
           "type": "(details: ToastCloseDetails) => void",
           "required": false,
           "event": true,
-          "description": "Called exactly once when the provider record closes."
+          "description": "Called exactly once when the provider record closes or a new record is rejected at capacity."
         }
       ]
     },
@@ -11194,8 +11228,15 @@
           "type": "boolean",
           "required": false,
           "event": false,
-          "description": "Shows a native button that clears the current value.",
+          "description": "Shows a native button while the editable value is non-empty.",
           "defaultValue": "false"
+        },
+        {
+          "name": "clearLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible name for the built-in clear button."
         },
         {
           "name": "description",
@@ -11210,6 +11251,20 @@
           "required": false,
           "event": false,
           "description": "Visible field label rendered by the surrounding `Field`."
+        },
+        {
+          "name": "loading",
+          "type": "boolean",
+          "required": false,
+          "event": false,
+          "description": "Marks caller-owned asynchronous work without making the native input read-only."
+        },
+        {
+          "name": "loadingLabel",
+          "type": "string",
+          "required": false,
+          "event": false,
+          "description": "Accessible status name announced while `loading` is true."
         },
         {
           "name": "name",
@@ -17040,11 +17095,11 @@
     }
   },
   "summary": {
-    "documentedFields": 2276,
+    "documentedFields": 2283,
     "eventFields": 237,
     "exportedTypes": 371,
     "exportedTypesWithFields": 222,
-    "fields": 2276,
+    "fields": 2283,
     "packages": 4
   }
 }

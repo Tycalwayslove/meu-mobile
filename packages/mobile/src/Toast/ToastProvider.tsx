@@ -22,24 +22,47 @@ import type {
   ToastToneOptions,
   ToastUpdateOptions
 } from "./types";
+import { ToastTimerResetContext } from "./ToastTimerContext";
 
 type ToastRecord = {
   key: number;
   open: boolean;
   options: ToastShowOptions;
+  revision: number;
 };
 
 const exitDuration = 160;
+const defaultMaxToasts = 20;
+const maximumMaxToasts = 100;
 const ToastContext = createContext<ToastApi | null>(null);
+
+function normalizeMaxToasts(value: number) {
+  return Number.isFinite(value)
+    ? Math.min(Math.max(1, Math.trunc(value)), maximumMaxToasts)
+    : defaultMaxToasts;
+}
+
+function mergeToastOptions(current: ToastShowOptions, updates: ToastUpdateOptions) {
+  const next: Partial<ToastShowOptions> = { ...current };
+  (Object.keys(updates) as Array<keyof ToastUpdateOptions>).forEach((key) => {
+    const value: unknown = updates[key];
+    if (value === undefined) Reflect.deleteProperty(next, key);
+    else Reflect.set(next, key, value);
+  });
+  return next as ToastShowOptions;
+}
 
 /**
  * Provides a scoped FIFO queue for command-driven Toast feedback.
  *
  * @public
  */
-export function ToastProvider({ children }: ToastProviderProps) {
+export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastProviderProps) {
   const config = useMeuConfig();
+  const resolvedMaxToasts = normalizeMaxToasts(maxToasts);
   const [records, setRecords] = useState<ToastRecord[]>([]);
+  const allocatedKeysRef = useRef(new Set<number>());
+  const mountedRef = useRef(true);
   const activeKeysRef = useRef(new Set<number>());
   const idToKeyRef = useRef(new Map<string, number>());
   const keyToIdRef = useRef(new Map<number, string>());
@@ -53,6 +76,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
       const timer = window.setTimeout(
         () => {
           removeTimersRef.current.delete(key);
+          allocatedKeysRef.current.delete(key);
           setRecords((currentRecords) => currentRecords.filter((record) => record.key !== key));
         },
         config.motion === "reduced" ? 0 : exitDuration
@@ -82,18 +106,24 @@ export function ToastProvider({ children }: ToastProviderProps) {
     [removeRecordLater]
   );
 
-  const updateRecord = useCallback((key: number, options: ToastUpdateOptions) => {
+  const replaceRecord = useCallback((key: number, options: ToastShowOptions) => {
     if (!activeKeysRef.current.has(key)) return;
-    const currentOptions = optionsRef.current.get(key);
-    if (!currentOptions) return;
-    const nextOptions = { ...currentOptions, ...options };
-    optionsRef.current.set(key, nextOptions);
+    optionsRef.current.set(key, options);
     setRecords((currentRecords) =>
       currentRecords.map((record) =>
-        record.key === key ? { ...record, options: nextOptions } : record
+        record.key === key ? { ...record, options, revision: record.revision + 1 } : record
       )
     );
   }, []);
+
+  const updateRecord = useCallback(
+    (key: number, updates: ToastUpdateOptions) => {
+      const currentOptions = optionsRef.current.get(key);
+      if (!currentOptions) return;
+      replaceRecord(key, mergeToastOptions(currentOptions, updates));
+    },
+    [replaceRecord]
+  );
 
   const createController = useCallback(
     (id: string, key: number): ToastController => ({
@@ -110,7 +140,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
       if (requestedId !== undefined) {
         const existingKey = idToKeyRef.current.get(requestedId);
         if (existingKey !== undefined && activeKeysRef.current.has(existingKey)) {
-          updateRecord(existingKey, options);
+          replaceRecord(existingKey, options);
           return createController(requestedId, existingKey);
         }
       }
@@ -118,14 +148,37 @@ export function ToastProvider({ children }: ToastProviderProps) {
       nextKeyRef.current += 1;
       const key = nextKeyRef.current;
       const id = requestedId === undefined ? `meu-toast-${key}` : requestedId;
+      if (!mountedRef.current) return createController(id, key);
+      if (allocatedKeysRef.current.size >= resolvedMaxToasts) {
+        const replaceableKey = Array.from(allocatedKeysRef.current).find(
+          (allocatedKey) => !activeKeysRef.current.has(allocatedKey)
+        );
+        if (replaceableKey !== undefined) {
+          const removeTimer = removeTimersRef.current.get(replaceableKey);
+          if (removeTimer !== undefined) window.clearTimeout(removeTimer);
+          removeTimersRef.current.delete(replaceableKey);
+          allocatedKeysRef.current.delete(replaceableKey);
+          setRecords((currentRecords) =>
+            currentRecords.filter((record) => record.key !== replaceableKey)
+          );
+        }
+      }
+      if (allocatedKeysRef.current.size >= resolvedMaxToasts) {
+        if (options.onClose) options.onClose({ reason: "overflow" });
+        return createController(id, key);
+      }
+      allocatedKeysRef.current.add(key);
       activeKeysRef.current.add(key);
       idToKeyRef.current.set(id, key);
       keyToIdRef.current.set(key, id);
       optionsRef.current.set(key, options);
-      setRecords((currentRecords) => [...currentRecords, { key, open: true, options }]);
+      setRecords((currentRecords) => [
+        ...currentRecords,
+        { key, open: true, options, revision: 0 }
+      ]);
       return createController(id, key);
     },
-    [createController, updateRecord]
+    [createController, replaceRecord, resolvedMaxToasts]
   );
 
   const showTone = useCallback(
@@ -150,22 +203,63 @@ export function ToastProvider({ children }: ToastProviderProps) {
     Array.from(activeKeysRef.current).forEach((key) => closeRecord(key, { reason: "clear" }));
   }, [closeRecord]);
 
-  useEffect(
-    () => () => {
-      removeTimersRef.current.forEach((timer) => window.clearTimeout(timer));
-      removeTimersRef.current.clear();
-      activeKeysRef.current.forEach((key) => {
-        const currentOptions = optionsRef.current.get(key);
-        const onClose = currentOptions ? currentOptions.onClose : undefined;
+  useEffect(() => {
+    if (allocatedKeysRef.current.size <= resolvedMaxToasts) return;
+    const capacityTimer = window.setTimeout(() => {
+      let excess = allocatedKeysRef.current.size - resolvedMaxToasts;
+      if (excess <= 0) return;
+      const removedExitingKeys = new Set<number>();
+      for (const key of allocatedKeysRef.current) {
+        if (excess <= 0) break;
+        if (activeKeysRef.current.has(key)) continue;
+        const timer = removeTimersRef.current.get(key);
+        if (timer !== undefined) window.clearTimeout(timer);
+        removeTimersRef.current.delete(key);
+        allocatedKeysRef.current.delete(key);
+        removedExitingKeys.add(key);
+        excess -= 1;
+      }
+      if (removedExitingKeys.size > 0) {
+        setRecords((currentRecords) =>
+          currentRecords.filter((record) => !removedExitingKeys.has(record.key))
+        );
+      }
+
+      if (excess <= 0) return;
+      const activeKeys = Array.from(activeKeysRef.current);
+      activeKeys.slice(Math.max(0, activeKeys.length - excess)).forEach((key) => {
+        closeRecord(key, { reason: "overflow" });
+      });
+    }, 0);
+    return () => window.clearTimeout(capacityTimer);
+  }, [closeRecord, resolvedMaxToasts]);
+
+  useEffect(() => {
+    const activeKeys = activeKeysRef.current;
+    const allocatedKeys = allocatedKeysRef.current;
+    const idToKey = idToKeyRef.current;
+    const keyToId = keyToIdRef.current;
+    const options = optionsRef.current;
+    const removeTimers = removeTimersRef.current;
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      removeTimers.forEach((timer) => window.clearTimeout(timer));
+      removeTimers.clear();
+      const remainingCallbacks = Array.from(activeKeys).map((key) => {
+        const currentOptions = options.get(key);
+        return currentOptions ? currentOptions.onClose : undefined;
+      });
+      activeKeys.clear();
+      allocatedKeys.clear();
+      idToKey.clear();
+      keyToId.clear();
+      options.clear();
+      remainingCallbacks.forEach((onClose) => {
         if (onClose) onClose({ reason: "programmatic" });
       });
-      activeKeysRef.current.clear();
-      idToKeyRef.current.clear();
-      keyToIdRef.current.clear();
-      optionsRef.current.clear();
-    },
-    []
-  );
+    };
+  }, []);
 
   const api = useMemo<ToastApi>(
     () => ({ clear, danger, show, success, warning }),
@@ -179,14 +273,16 @@ export function ToastProvider({ children }: ToastProviderProps) {
     delete toastOptions.id;
     delete toastOptions.onClose;
     renderedToast = (
-      <Toast
-        {...toastOptions}
-        key={current.key}
-        open={current.open}
-        onOpenChange={(nextOpen, details) => {
-          if (!nextOpen) closeRecord(current.key, details);
-        }}
-      />
+      <ToastTimerResetContext.Provider value={current.revision}>
+        <Toast
+          {...toastOptions}
+          key={current.key}
+          open={current.open}
+          onOpenChange={(nextOpen, details) => {
+            if (!nextOpen) closeRecord(current.key, details);
+          }}
+        />
+      </ToastTimerResetContext.Provider>
     );
   }
 

@@ -1,5 +1,7 @@
-import { style } from "@vanilla-extract/css";
+import { keyframes, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
+
+const spin = keyframes({ to: { transform: "rotate(360deg)" } });
 
 export const wrapper = style({ position: "relative", display: "flex", alignItems: "center" });
 
@@ -27,6 +29,9 @@ export const input = recipe({
       "&:read-only:not(:disabled)": {
         background: "var(--meu-color-subtle)"
       }
+    },
+    "@media": {
+      "(forced-colors: active)": { borderColor: "ButtonText" }
     }
   },
   variants: {
@@ -75,5 +80,37 @@ export const clearButton = style({
       outline: "2px solid var(--meu-color-accent)",
       outlineOffset: -2
     }
+  },
+  "@media": {
+    "(forced-colors: active)": { color: "ButtonText", forcedColorAdjust: "auto" }
+  }
+});
+
+export const loadingIndicator = style({
+  position: "absolute",
+  right: 0,
+  display: "grid",
+  placeItems: "center",
+  width: 44,
+  height: 44,
+  selectors: {
+    '[dir="rtl"] &': { right: "auto", left: 0 }
+  }
+});
+
+export const spinner = style({
+  width: 16,
+  height: 16,
+  boxSizing: "border-box",
+  border: "2px solid currentColor",
+  borderRightColor: "transparent",
+  borderRadius: "50%",
+  animation: `${spin} 700ms linear infinite`,
+  selectors: {
+    '[data-meu-motion="reduced"] &': { animation: "none" }
+  },
+  "@media": {
+    "(forced-colors: active)": { borderColor: "ButtonText", borderRightColor: "transparent" },
+    "(prefers-reduced-motion: reduce)": { animation: "none" }
   }
 });

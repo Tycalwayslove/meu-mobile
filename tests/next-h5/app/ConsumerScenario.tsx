@@ -255,18 +255,63 @@ function ToastCommandDemo({ onResult }: { onResult: (message: string) => void })
               onPress: () => onResult("Toast 操作：已撤销")
             },
             duration: 0,
+            id: "inventory-adjustment",
             message: "库存不足，已调整购买数量",
             position: "bottom"
           });
-          toast.success({ duration: 0, message: "队列中的第二条消息", position: "top" });
+          toast.success({
+            duration: 0,
+            id: "inventory-success",
+            message: "队列中的第二条消息",
+            position: "top"
+          });
         }}
       >
         显示 Toast 队列
+      </Button>
+      <Button
+        variant="outline"
+        tone="neutral"
+        onClick={() => {
+          toast.show({
+            duration: 0,
+            id: "overflow-message",
+            message: "不应进入队列的消息",
+            onClose: (details) => {
+              if (details.reason === "overflow") onResult("Toast 容量：已拒绝溢出消息");
+            }
+          });
+        }}
+      >
+        显示溢出 Toast
       </Button>
       <Button variant="outline" tone="neutral" onClick={toast.clear}>
         清空 Toast
       </Button>
     </>
+  );
+}
+
+function BottomSheetToastDemo({ onResult }: { onResult: (message: string) => void }) {
+  const toast = useToast();
+  return (
+    <Button
+      tone="neutral"
+      variant="outline"
+      onClick={() => {
+        toast.warning({
+          action: {
+            label: "撤销筛选",
+            onPress: () => onResult("BottomSheet Toast：已撤销")
+          },
+          duration: 0,
+          id: "bottom-sheet-feedback",
+          message: "库存筛选已保存"
+        });
+      }}
+    >
+      在面板中显示 Toast
+    </Button>
   );
 }
 
@@ -1042,7 +1087,7 @@ export function ConsumerScenario() {
           <output aria-live="polite">{feedbackMessage}</output>
         </section>
 
-        <ToastProvider>
+        <ToastProvider maxToasts={2}>
           <DialogProvider>
             <section className="integration-overlays" aria-label="浮层基础组件">
               <div className="integration-mask-preview">
@@ -1139,29 +1184,32 @@ export function ConsumerScenario() {
                   </div>
                 </Popup>
               </ConfigProvider>
-              <BottomSheet
-                open={sheetOpen}
-                title="订单筛选"
-                showCloseButton
-                snapPoints={[0.35, 0.6, 0.9]}
-                returnFocusRef={sheetTriggerRef}
-                onOpenChange={(nextOpen, details) => {
-                  setSheetOpen(nextOpen);
-                  if (!nextOpen) setOverlayMessage(`BottomSheet 已关闭：${details.reason}`);
-                }}
-              >
-                <div className="integration-popup-content">
-                  <p>拖动手柄或使用键盘调整可见高度。</p>
-                  <Button
-                    onClick={() => {
-                      setSheetOpen(false);
-                      setOverlayMessage("BottomSheet 操作：已应用筛选");
-                    }}
-                  >
-                    应用库存筛选
-                  </Button>
-                </div>
-              </BottomSheet>
+              <ConfigProvider dir="rtl" motion="reduced">
+                <BottomSheet
+                  open={sheetOpen}
+                  title="订单筛选"
+                  showCloseButton
+                  snapPoints={[0.35, 0.6, 0.9]}
+                  returnFocusRef={sheetTriggerRef}
+                  onOpenChange={(nextOpen, details) => {
+                    setSheetOpen(nextOpen);
+                    if (!nextOpen) setOverlayMessage(`BottomSheet 已关闭：${details.reason}`);
+                  }}
+                >
+                  <div className="integration-popup-content">
+                    <p>拖动手柄或使用键盘调整可见高度。</p>
+                    <Button
+                      onClick={() => {
+                        setSheetOpen(false);
+                        setOverlayMessage("BottomSheet 操作：已应用筛选");
+                      }}
+                    >
+                      应用库存筛选
+                    </Button>
+                    <BottomSheetToastDemo onResult={setOverlayMessage} />
+                  </div>
+                </BottomSheet>
+              </ConfigProvider>
               <ActionMenu
                 open={actionMenuOpen}
                 title="订单操作"

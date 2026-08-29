@@ -144,6 +144,151 @@ describe("BottomSheet", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false, { reason: "drag" });
   });
 
+  it("cancels an interrupted drag without swallowing the next deliberate handle action", async () => {
+    setViewportHeight(800);
+    const onOpenChange = vi.fn();
+    const onSnapPointChange = vi.fn();
+    render(
+      <BottomSheet
+        open
+        title="取消拖拽"
+        defaultSnapPoint={0.75}
+        snapPoints={[0.25, 0.75]}
+        onOpenChange={onOpenChange}
+        onSnapPointChange={onSnapPointChange}
+      >
+        内容
+      </BottomSheet>
+    );
+    const handle = screen.getByRole("button", { name: "调整面板高度" });
+    Object.defineProperties(handle, {
+      hasPointerCapture: { configurable: true, value: () => true },
+      releasePointerCapture: { configurable: true, value: vi.fn() },
+      setPointerCapture: { configurable: true, value: vi.fn() }
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("dialog", { name: "取消拖拽" }).getAttribute("data-snap-point")).toBe(
+        "0.75"
+      )
+    );
+
+    fireEvent.pointerDown(handle, { button: 0, clientY: 100, pointerId: 2 });
+    fireEvent.pointerMove(handle, { clientY: 180, pointerId: 2 });
+    fireEvent.pointerCancel(handle, { clientY: 180, pointerId: 2 });
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onSnapPointChange).not.toHaveBeenCalled();
+
+    fireEvent.click(handle);
+    expect(onSnapPointChange).toHaveBeenCalledWith(0.25, { index: 0, reason: "handle" });
+  });
+
+  it("keeps the first primary pointer as the only active drag session", async () => {
+    setViewportHeight(800);
+    const onSnapPointChange = vi.fn();
+    render(
+      <BottomSheet
+        open
+        title="混合指针"
+        defaultSnapPoint={0.75}
+        snapPoints={[0.25, 0.75]}
+        onSnapPointChange={onSnapPointChange}
+      >
+        内容
+      </BottomSheet>
+    );
+    const handle = screen.getByRole("button", { name: "调整面板高度" });
+    const setPointerCapture = vi.fn();
+    const releasePointerCapture = vi.fn();
+    Object.defineProperties(handle, {
+      hasPointerCapture: { configurable: true, value: () => true },
+      releasePointerCapture: { configurable: true, value: releasePointerCapture },
+      setPointerCapture: { configurable: true, value: setPointerCapture }
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("dialog", { name: "混合指针" }).getAttribute("data-snap-point")).toBe(
+        "0.75"
+      )
+    );
+
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientY: 100,
+      isPrimary: true,
+      pointerId: 4,
+      pointerType: "touch"
+    });
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientY: 200,
+      isPrimary: true,
+      pointerId: 5,
+      pointerType: "pen"
+    });
+    fireEvent.pointerMove(handle, { clientY: 300, pointerId: 5 });
+    fireEvent.pointerMove(handle, { clientY: 350, pointerId: 4 });
+    fireEvent.pointerUp(handle, { clientY: 350, pointerId: 4 });
+
+    expect(setPointerCapture).toHaveBeenCalledTimes(1);
+    expect(setPointerCapture).toHaveBeenCalledWith(4);
+    expect(releasePointerCapture).toHaveBeenCalledWith(4);
+    expect(onSnapPointChange).toHaveBeenCalledWith(0.25, { index: 0, reason: "drag" });
+  });
+
+  it("clears pointer capture and disables controls when a controlled sheet closes mid-drag", async () => {
+    setViewportHeight(800);
+    const onOpenChange = vi.fn();
+    const onSnapPointChange = vi.fn();
+    const { rerender } = render(
+      <BottomSheet
+        forceMount
+        open
+        title="中断面板"
+        defaultSnapPoint={0.75}
+        snapPoints={[0.25, 0.75]}
+        showCloseButton
+        onOpenChange={onOpenChange}
+        onSnapPointChange={onSnapPointChange}
+      >
+        内容
+      </BottomSheet>
+    );
+    const handle = screen.getByRole("button", { name: "调整面板高度" });
+    const releasePointerCapture = vi.fn();
+    Object.defineProperties(handle, {
+      hasPointerCapture: { configurable: true, value: () => true },
+      releasePointerCapture: { configurable: true, value: releasePointerCapture },
+      setPointerCapture: { configurable: true, value: vi.fn() }
+    });
+    fireEvent.pointerDown(handle, { button: 0, clientY: 100, pointerId: 3 });
+    fireEvent.pointerMove(handle, { clientY: 140, pointerId: 3 });
+
+    rerender(
+      <BottomSheet
+        forceMount
+        open={false}
+        title="中断面板"
+        defaultSnapPoint={0.75}
+        snapPoints={[0.25, 0.75]}
+        showCloseButton
+        onOpenChange={onOpenChange}
+        onSnapPointChange={onSnapPointChange}
+      >
+        内容
+      </BottomSheet>
+    );
+    const panel = document.body.querySelector<HTMLElement>('[data-meu-component="bottom-sheet"]');
+    if (!panel) throw new Error("Expected force-mounted BottomSheet panel");
+    await waitFor(() => {
+      expect(releasePointerCapture).toHaveBeenCalledWith(3);
+      expect(panel.getAttribute("data-dragging")).toBeNull();
+    });
+    const controls = panel.querySelectorAll<HTMLButtonElement>("button");
+    expect(Array.from(controls).every((control) => control.disabled)).toBe(true);
+    controls.forEach((control) => fireEvent.click(control));
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(onSnapPointChange).not.toHaveBeenCalled();
+  });
+
   it("keeps a force-mounted closed sheet outside layout and the accessibility tree", () => {
     render(
       <BottomSheet aria-label="保活面板" open={false} forceMount dragHandle={false}>
@@ -214,5 +359,53 @@ describe("BottomSheet", () => {
     expect(layer.lang).toBe("en-US");
     expect(layer.getAttribute("data-meu-motion")).toBe("reduced");
     expect(layer.getAttribute("data-meu-theme")).toBe("dark");
+  });
+
+  it("rebinds focus trapping when an open sheet moves between portal containers", async () => {
+    const firstContainer = document.createElement("div");
+    const secondContainer = document.createElement("div");
+    const outside = document.createElement("button");
+    outside.textContent = "页面操作";
+    document.body.append(firstContainer, secondContainer, outside);
+
+    const { rerender } = render(
+      <BottomSheet aria-label="移动面板" container={firstContainer} dragHandle={false} open>
+        <button type="button">面板操作</button>
+      </BottomSheet>
+    );
+    await waitFor(() =>
+      expect(firstContainer.querySelector('[data-meu-component="bottom-sheet"]')).toBeTruthy()
+    );
+
+    rerender(
+      <BottomSheet aria-label="移动面板" container={secondContainer} dragHandle={false} open>
+        <button type="button">面板操作</button>
+      </BottomSheet>
+    );
+    await waitFor(() => {
+      expect(firstContainer.querySelector('[data-meu-component="bottom-sheet"]')).toBeNull();
+      expect(secondContainer.querySelector('[data-meu-component="bottom-sheet"]')).toBeTruthy();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "面板操作" }));
+    });
+
+    outside.focus();
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "面板操作" }))
+    );
+
+    rerender(
+      <BottomSheet
+        aria-label="移动面板"
+        container={secondContainer}
+        dragHandle={false}
+        open={false}
+      >
+        <button type="button">面板操作</button>
+      </BottomSheet>
+    );
+    await waitFor(() => expect(outside.hasAttribute("inert")).toBe(false));
+    firstContainer.remove();
+    secondContainer.remove();
+    outside.remove();
   });
 });

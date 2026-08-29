@@ -3,7 +3,7 @@
 import { MeuIconX } from "@meu/icons-react";
 import { Portal, useBodyScrollLock, useFocusTrap } from "@meu/primitives-react";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent, Ref } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, Ref, RefObject } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { VisuallyHidden } from "../internal/VisuallyHidden";
@@ -34,6 +34,7 @@ type DragSession = {
   startHeight: number;
   startTime: number;
   startY: number;
+  target: HTMLButtonElement;
 };
 
 function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
@@ -181,9 +182,6 @@ export function BottomSheet({
     contentHeight
   );
   const activePoint = resolvedSnapPoints[activeIndex];
-  if (!controlledSnap && activePoint && uncontrolledSnapPoint !== activePoint.value) {
-    setUncontrolledSnapPoint(activePoint.value);
-  }
   const minimumHeight = resolvedSnapPoints[0] ? resolvedSnapPoints[0].height : 0;
   const maximumHeight = resolvedSnapPoints[resolvedSnapPoints.length - 1]
     ? resolvedSnapPoints[resolvedSnapPoints.length - 1]!.height
@@ -198,17 +196,55 @@ export function BottomSheet({
   const hasTitle = title !== undefined && title !== null;
   const resolvedLabelledby = ariaLabelledby || (!ariaLabel && hasTitle ? titleId : undefined);
   const portalContainer = container === undefined ? config.portalContainer : container;
+  const focusTrapRef = useMemo<RefObject<HTMLElement | null>>(() => {
+    // A changed Portal destination remounts the panel. Rebinding the trap prevents it from
+    // retaining the detached panel that belonged to the previous container.
+    void portalContainer;
+    return {
+      get current() {
+        return panelRef.current;
+      }
+    };
+  }, [portalContainer]);
   const configBoundary = getConfigBoundaryProps(config);
 
   useBodyScrollLock(resolvedOpen && lockScroll);
   useFocusTrap({
     active: resolvedOpen,
-    containerRef: panelRef,
+    containerRef: focusTrapRef,
     initialFocusRef,
     onEscape: closeOnEscape ? () => requestOpenChange(false, { reason: "escape" }) : undefined,
     restoreFocus,
     returnFocusRef
   });
+
+  useEffect(() => {
+    if (controlledSnap || !activePoint || uncontrolledSnapPoint === activePoint.value) return;
+    setUncontrolledSnapPoint(activePoint.value);
+  }, [activePoint, controlledSnap, uncontrolledSnapPoint]);
+
+  useEffect(() => {
+    if (resolvedOpen) return;
+    const session = dragSessionRef.current;
+    dragSessionRef.current = null;
+    if (session && session.target.hasPointerCapture(session.pointerId)) {
+      session.target.releasePointerCapture(session.pointerId);
+    }
+    suppressHandleClickRef.current = false;
+    if (dragHeight !== null) setDragHeight(null);
+  }, [dragHeight, resolvedOpen]);
+
+  useEffect(
+    () => () => {
+      const session = dragSessionRef.current;
+      dragSessionRef.current = null;
+      if (session && session.target.hasPointerCapture(session.pointerId)) {
+        session.target.releasePointerCapture(session.pointerId);
+      }
+      suppressHandleClickRef.current = false;
+    },
+    []
+  );
 
   useEffect(() => {
     if (!shouldRender) return undefined;
@@ -276,8 +312,8 @@ export function BottomSheet({
         Math.min(maximumHeight, session.startHeight - (event.clientY - session.startY))
       );
       setDragHeight(null);
-      suppressHandleClickRef.current = session.moved;
-      if (session.moved) {
+      suppressHandleClickRef.current = cancelled ? false : session.moved;
+      if (!cancelled && session.moved) {
         window.setTimeout(() => {
           suppressHandleClickRef.current = false;
         }, 0);
@@ -377,6 +413,7 @@ export function BottomSheet({
             <button
               className={dragHandleClass}
               type="button"
+              disabled={!resolvedOpen}
               aria-describedby={statusId}
               aria-label={localizedHandleLabel}
               onClick={() => {
@@ -408,8 +445,10 @@ export function BottomSheet({
               }}
               onPointerDown={(event) => {
                 if (
+                  !resolvedOpen ||
                   event.button !== 0 ||
                   (Boolean(event.pointerType) && event.isPrimary === false) ||
+                  dragSessionRef.current !== null ||
                   maximumHeight <= 0 ||
                   !activePoint
                 )
@@ -420,7 +459,8 @@ export function BottomSheet({
                   pointerId: event.pointerId,
                   startHeight: activePoint.height,
                   startTime: event.timeStamp,
-                  startY: event.clientY
+                  startY: event.clientY,
+                  target: event.currentTarget
                 };
                 setDragHeight(activePoint.height);
               }}
@@ -448,6 +488,7 @@ export function BottomSheet({
                 <button
                   className={closeButton}
                   type="button"
+                  disabled={!resolvedOpen}
                   aria-label={localizedCloseLabel}
                   onClick={() => requestOpenChange(false, { reason: "close-button" })}
                 >

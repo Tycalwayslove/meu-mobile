@@ -1050,16 +1050,44 @@ test("snaps and drag-dismisses an accessible modal BottomSheet", async ({ page }
 
   const sheet = page.getByRole("dialog", { name: "订单筛选" });
   const handle = page.getByRole("button", { name: "调整面板高度" });
+  const close = page.getByRole("button", { name: "关闭" });
+  const layer = page.locator('[data-meu-overlay-layer="bottom-sheet"]');
   await expect(sheet).toBeVisible();
   await expect(sheet).toHaveAttribute("aria-modal", "true");
   await expect(sheet).toHaveAttribute("data-snap-point", "0.9");
+  await expect(layer).toHaveAttribute("dir", "rtl");
+  await expect(layer).toHaveAttribute("data-meu-motion", "reduced");
+  await expect(sheet).toHaveCSS("transition-duration", "0s");
   await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
   await expect(handle).toBeFocused();
+
+  const [initialSheetBox, closeBox] = await Promise.all([sheet.boundingBox(), close.boundingBox()]);
+  expect(initialSheetBox).not.toBeNull();
+  expect(closeBox).not.toBeNull();
+  expect(
+    initialSheetBox && closeBox
+      ? closeBox.x + closeBox.width / 2 < initialSheetBox.x + initialSheetBox.width / 2
+      : false
+  ).toBe(true);
 
   await page.keyboard.press("Home");
   await expect(sheet).toHaveAttribute("data-snap-point", "0.35");
   await page.keyboard.press("End");
   await expect(sheet).toHaveAttribute("data-snap-point", "0.9");
+  await page.keyboard.press("Home");
+  await expect(sheet).toHaveAttribute("data-snap-point", "0.35");
+  await page.keyboard.press("ArrowUp");
+  await expect(sheet).toHaveAttribute("data-snap-point", "0.6");
+  const showToast = sheet.getByRole("button", { name: "在面板中显示 Toast" });
+  await showToast.focus();
+  await expect(showToast).toBeFocused();
+  await page.keyboard.press("Enter");
+  const toastAction = page.getByRole("button", { name: "撤销筛选" });
+  await expect(toastAction).toBeVisible();
+  await page.keyboard.press("Tab");
+  await expect(toastAction).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(handle).toBeFocused();
   await page.keyboard.press("Home");
   await expect(sheet).toHaveAttribute("data-snap-point", "0.35");
   await page.waitForTimeout(250);
@@ -1087,6 +1115,9 @@ test("snaps and drag-dismisses an accessible modal BottomSheet", async ({ page }
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
   await expect(trigger).toBeFocused();
   await expect(section.getByText("BottomSheet 已关闭：drag")).toBeVisible();
+  await toastAction.click();
+  await expect(section.getByText("BottomSheet Toast：已撤销")).toBeVisible();
+  await expect(page.locator('[data-meu-component="toast"]')).toBeHidden();
 });
 
 test("runs ActionMenu actions with danger confirmation", async ({ page }) => {
@@ -1424,6 +1455,10 @@ test("queues accessible Toast messages without trapping focus or scroll", async 
   await expect(trigger).toBeFocused();
   await expect(page.locator("body")).not.toHaveAttribute("data-meu-scroll-locked", "true");
   await expect(page.getByText("队列中的第二条消息")).toHaveCount(0);
+
+  await section.getByRole("button", { name: "显示溢出 Toast" }).click();
+  await expect(section.getByText("Toast 容量：已拒绝溢出消息")).toBeVisible();
+  await expect(page.getByText("不应进入队列的消息")).toHaveCount(0);
 
   const undo = firstToast.getByRole("button", { name: "撤销调整" });
   const undoBox = await undo.boundingBox();

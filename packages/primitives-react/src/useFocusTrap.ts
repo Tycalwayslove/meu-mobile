@@ -187,6 +187,20 @@ function isFocusBranchForContainer(container: HTMLElement, target: EventTarget |
   return reference ? container.contains(reference) : false;
 }
 
+function getToastFocusableElements(container: HTMLElement) {
+  const elements: HTMLElement[] = [];
+  container.ownerDocument
+    .querySelectorAll<HTMLElement>("[data-meu-overlay-layer='toast']:not([hidden])")
+    .forEach((toast) => elements.push(...getFocusableElements(toast)));
+  return elements;
+}
+
+function isToastFocusTarget(container: HTMLElement, target: EventTarget | null) {
+  if (!(target instanceof Element)) return false;
+  const toast = target.closest<HTMLElement>("[data-meu-overlay-layer='toast']:not([hidden])");
+  return toast !== null && toast.ownerDocument === container.ownerDocument;
+}
+
 function isTopTrap(token: symbol) {
   const top = trapStack[trapStack.length - 1];
   return top !== undefined && top.token === token;
@@ -244,7 +258,9 @@ export function useFocusTrap({
       }
       if (event.key !== "Tab") return;
 
-      const focusable = getFocusableElements(container);
+      const containerFocusable = getFocusableElements(container);
+      const toastFocusable = getToastFocusableElements(container);
+      const focusable = [...containerFocusable, ...toastFocusable];
       if (focusable.length === 0) {
         event.preventDefault();
         container.focus({ preventScroll: true });
@@ -252,13 +268,39 @@ export function useFocusTrap({
       }
       const first = focusable[0]!;
       const last = focusable[focusable.length - 1]!;
+      const activeElement = document.activeElement;
+      const activeIndex = focusable.findIndex((element) => element === activeElement);
       if (
-        event.shiftKey &&
-        (document.activeElement === first || document.activeElement === container)
+        activeIndex < 0 &&
+        activeElement !== container &&
+        (!activeElement ||
+          !container.contains(activeElement) ||
+          isToastFocusTarget(container, activeElement))
       ) {
         event.preventDefault();
+        (event.shiftKey ? last : first).focus({ preventScroll: true });
+        return;
+      }
+      if (toastFocusable.length > 0 && activeIndex >= 0) {
+        const nextIndex = event.shiftKey
+          ? (activeIndex - 1 + focusable.length) % focusable.length
+          : (activeIndex + 1) % focusable.length;
+        const nextElement = focusable[nextIndex]!;
+        const crossingToastBoundary =
+          isToastFocusTarget(container, activeElement) ||
+          isToastFocusTarget(container, nextElement) ||
+          nextIndex === 0 ||
+          nextIndex === focusable.length - 1;
+        if (crossingToastBoundary) {
+          event.preventDefault();
+          nextElement.focus({ preventScroll: true });
+          return;
+        }
+      }
+      if (event.shiftKey && (activeElement === first || activeElement === container)) {
+        event.preventDefault();
         last.focus({ preventScroll: true });
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && activeElement === last) {
         event.preventDefault();
         first.focus({ preventScroll: true });
       }
@@ -269,7 +311,8 @@ export function useFocusTrap({
         !container ||
         !isTopTrap(token) ||
         container.contains(event.target as Node) ||
-        isFocusBranchForContainer(container, event.target)
+        isFocusBranchForContainer(container, event.target) ||
+        isToastFocusTarget(container, event.target)
       )
         return;
       focusFirst();

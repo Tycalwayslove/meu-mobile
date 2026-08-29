@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import { Button } from "../Button";
+import { ConfigProvider } from "../ConfigProvider";
 import { Space } from "../Space";
 import { waitForStory } from "../storyTestUtils";
 import { BottomSheet } from "./BottomSheet";
@@ -119,4 +120,34 @@ export const WithoutVisibleTitle: Story = {
     dragHandle: false,
     title: undefined
   }
+};
+
+export const LongScrollableContent: Story = {
+  args: {
+    children: (
+      <div style={{ display: "grid", gap: 12, padding: 20 }}>
+        {Array.from({ length: 16 }, (_, index) => (
+          <div key={index} style={{ minHeight: 44 }}>
+            筛选项 {index + 1}：用于验证长内容、内部滚动和安全区边界
+          </div>
+        ))}
+      </div>
+    ),
+    defaultOpen: true,
+    snapPoints: [0.5, 0.9]
+  },
+  render: (args) => <BottomSheet {...args} />
+};
+
+export const RtlReducedMotion: Story = {
+  args: {
+    defaultOpen: true,
+    snapPoints: [0.4, 0.8],
+    title: "خيارات الطلب"
+  },
+  render: (args) => (
+    <ConfigProvider dir="rtl" locale="en-US" motion="reduced">
+      <BottomSheet {...args} />
+    </ConfigProvider>
+  )
 };

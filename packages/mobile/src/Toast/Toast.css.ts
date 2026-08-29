@@ -150,7 +150,10 @@ export const action = style({
     "(forced-colors: active)": {
       border: "1px solid ButtonText",
       color: "ButtonText",
-      forcedColorAdjust: "auto"
+      forcedColorAdjust: "auto",
+      selectors: {
+        "&:disabled": { borderColor: "GrayText", color: "GrayText", opacity: 1 }
+      }
     }
   }
 });

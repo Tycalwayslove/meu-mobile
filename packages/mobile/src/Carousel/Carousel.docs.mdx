@@ -28,7 +28,7 @@ source: packages/mobile/src/Carousel
 ## 当前能力
 
 - Embla 驱动的单页轮播，支持受控/非受控 index、drag、loop、gap、indicator 和可选 autoplay。
-- 固定提供前后原生按钮；autoplay 时提供暂停/播放按钮。hover 和页面隐藏只暂时挂起计时，focus、drag 和前后按钮会持续暂停，直到用户显式播放。
+- 固定提供前后原生按钮；autoplay 时在顶部居中提供暂停/播放按钮，与两侧导航保持独立的 44×44 触控区。hover 和页面隐藏只暂时挂起计时，focus、drag 和前后按钮会持续暂停，直到用户显式播放。
 - 独立 live status 始终组合自定义页名、可见页和总页数；自动轮播时关闭公告，静止后的换页使用 polite 公告。
 - `onIndexChange` 区分 `autoplay | drag | next | previous`；非活动页从焦点顺序移除。
 
@@ -123,7 +123,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 - items 为空或只有一项时控制按钮禁用。
 - autoplay 最短间隔归一为 1000ms，但内容可读时间仍由调用方负责。
 - MutationObserver 仅扫描 slide 内潜在焦点节点及相关属性；复杂动态内容仍需性能验证。
-- 前后按钮和 indicator 覆盖在内容上方。文本型 slide 应像 Story 一样预留两侧至少 64px，并在 200% 字体下检查换行；组件无法替业务内容自动腾出安全区。
+- 前后按钮、顶部居中的 autoplay 控制和 indicator 覆盖在内容上方。紧凑 slide 的播放控制不会再与两侧导航重叠，但业务内容仍应预留顶部 56px、两侧至少 64px，并在 200% 字体下检查换行；组件无法替业务内容自动腾出安全区。
 
 ## 性能预算
 
@@ -133,7 +133,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 
 - Unit: `Carousel.test.tsx` 覆盖默认静止、位置公告、原生按钮键盘路径、受控回滚、动态 items、autoplay focus/hover/visibility/reduced-motion、drag reason、RTL、资源清理，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
 - SSR: `Carousel.ssr.test.tsx` 在无 window/document 环境验证静态按钮、默认关闭 autoplay、活动索引、inactive/inert 和页名/页数 status。
-- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status。最新 Storybook build/link 检查通过 386 stories、354 个共置 storyIds 和 80 个带 play 的 title。
+- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status。最新本地 Storybook 链接检查通过 394 stories、365 个共置 storyIds 和 80 个带 play 的 title。
 - Carousel 定向浏览器扫描：6 个 Story × Light/Dark 两个场景全部通过；play 返回 success，axe WCAG A/AA 为 0 违规，且无 `pageerror`。
 - Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增 Story，不能替代本轮 RTL/200%/forced-colors 最终视觉审批。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
@@ -141,7 +141,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 - SSR/hydration: 隔离 Next 16 App Router hydration 后受控索引、活动/非活动 slide 及原生替代操作保持一致，0 hydration/runtime error
 - RTL: Unit 与 Story 已覆盖配置、逻辑方向和长文本；手势与双向文本真机待补
 - Reduced motion: Unit 覆盖自动播放门控和即时切换；真实浏览器动画待补
-- Mobile Chromium/WebKit E2E: `runs the controlled carousel with native alternatives and focus isolation` 在两种引擎断言前后按钮、受控索引、slide 名称、非活动控件 `tabindex=-1` 与活动 link 可聚焦；drag/滚动竞争仍待专项
+- Mobile Chromium/WebKit E2E: `runs the controlled carousel with native alternatives and focus isolation` 在两种引擎断言前后按钮、受控索引、slide 名称、非活动控件 `tabindex=-1` 与活动 link 可聚焦；本轮重新构建本地 production 站后，紧凑 RTL/reduced-motion autoplay 场景的 Light/Dark 全页 axe WCAG A/AA 通过，播放控制不再产生 target-size 重叠违规；drag/滚动竞争仍待专项
 - Chromatic Light/Dark: Figma 与 stories 已有基线，待矩阵化
 - Real device: 待补
 
@@ -158,6 +158,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 - 已默认关闭 autoplay，提供暂停/播放与前后按钮、reduced-motion 降级和 reason 事件。
 - 修复暂停按钮 focus→click 反向重启，增加页名/可见页/总页数 status，并冻结动态 items 与 `reInit` 事件边界。
 - 动态非活动页使用 inert 与旧内核 tabindex fallback 隔离；补隔离 Next H5 焦点隔离证据。
+- 将 autoplay 控制固定到顶部居中，避免在 44px 紧凑内容中与逻辑方向的下一张按钮形成重叠触控目标。
 
 ## 变更记录
 
@@ -167,3 +168,5 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 | 2026-08-29 | 未发布 | fix          | 动态非活动页焦点隔离                                      | API 兼容；隐藏 slide 的后续属性变化不再重入 Tab 路径 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/focus-isolation/hydration 证据    | 无                                                   |
 | 2026-08-29 | 未发布 | fix          | 修复 autoplay focus 动作、位置公告、动态 items 和资源清理 | API 兼容；新增 status DOM，不改变受控事件签名        |
+| 2026-08-29 | 未发布 | fix          | 隔离紧凑轮播的 autoplay 与两侧导航触控区                  | 仅调整控件位置；API、键盘顺序和可访问名称不变        |
+| 2026-08-29 | 未发布 | verification | 本地 production 双引擎复验紧凑触控区与 Light/Dark axe     | 无                                                   |

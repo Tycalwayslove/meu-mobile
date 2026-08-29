@@ -72,7 +72,16 @@ type BottomSheetAccessibleName =
 
 type BottomSheetBaseProps = Omit<
   HTMLAttributes<HTMLDivElement>,
-  "aria-label" | "aria-labelledby" | "children" | "title"
+  | "aria-hidden"
+  | "aria-label"
+  | "aria-labelledby"
+  | "aria-modal"
+  | "children"
+  | "hidden"
+  | "inert"
+  | "role"
+  | "tabIndex"
+  | "title"
 > & {
   /** Sheet body rendered inside the focus-trapped dialog. */
   children: ReactNode;
@@ -82,7 +91,11 @@ type BottomSheetBaseProps = Omit<
   closeOnEscape?: boolean;
   /** Whether pressing the backdrop requests dismissal. @defaultValue false */
   closeOnMaskClick?: boolean;
-  /** Portal host, or a resolver that returns it. Defaults to the configured overlay container or `document.body`. */
+  /**
+   * Portal host, or a resolver that returns it. Defaults to the configured overlay container or
+   * `document.body`. When a resolver's destination changes, pass a new resolver identity so focus
+   * trapping rebinds to the remounted panel.
+   */
   container?: OverlayContainer;
   /** Initial open state when `open` is uncontrolled. @defaultValue false */
   defaultOpen?: boolean;
@@ -102,9 +115,9 @@ type BottomSheetBaseProps = Omit<
   lockScroll?: boolean;
   /** Backdrop opacity preset or numeric opacity. @defaultValue "default" */
   maskOpacity?: MaskOpacity;
-  /** Called when user interaction requests an open-state change; controlled consumers must update `open`. */
+  /** Reports user dismissal requests and their cause; prop-driven visibility changes emit nothing. */
   onOpenChange?: (open: boolean, details: BottomSheetOpenChangeDetails) => void;
-  /** Called after dragging or activating the handle selects a valid snap point. */
+  /** Reports a drag or handle request for a different valid point; controlled owners may reject it. */
   onSnapPointChange?: (
     snapPoint: BottomSheetSnapPoint,
     details: BottomSheetSnapChangeDetails

@@ -22,17 +22,20 @@ export type DialogActionLayout = "auto" | "horizontal" | "vertical";
  * @public
  */
 export type DialogAction = {
-  /** Prefers this enabled action as the initial focus target. */
+  /** Prefers this enabled action for initial focus; the first preferred action wins. */
   autoFocus?: boolean;
-  /** Set false to keep the dialog open after success. @defaultValue true */
+  /** Keeps the dialog open after a successful action when set to `false`. @defaultValue true */
   closeOnPress?: boolean;
-  /** Disables activation. */
+  /** Disables activation and excludes the action from initial-focus selection. */
   disabled?: boolean;
-  /** Stable action identity used in events and rendering. */
+  /** Unique, stable identity used for rendering, pending state, and close details. */
   key: string;
   /** Visible action label. */
   label: ReactNode;
-  /** Runs once; false or rejection keeps the dialog open. */
+  /**
+   * Runs at most once while any action is pending. Returning `false` or rejecting keeps the
+   * dialog open; rejection is reported through `onActionError` when supplied.
+   */
   onPress?: () => boolean | void | Promise<boolean | void>;
   /** Action tone. @defaultValue "neutral" */
   tone?: DialogActionTone;
@@ -93,7 +96,10 @@ type DialogBaseProps = Omit<
   closeOnEscape?: boolean;
   /** Enables backdrop dismissal. @defaultValue false */
   closeOnMaskClick?: boolean;
-  /** Portal target; `null` renders in place. */
+  /**
+   * Portal target; `null` renders in place. When a resolver starts returning another target,
+   * pass a new resolver identity so focus trapping rebinds to the moved panel.
+   */
   container?: OverlayContainer;
   /** Initial uncontrolled visibility. @defaultValue false */
   defaultOpen?: boolean;
@@ -103,17 +109,20 @@ type DialogBaseProps = Omit<
   lockScroll?: boolean;
   /** Backdrop opacity. @defaultValue "default" */
   maskOpacity?: MaskOpacity;
-  /** Receives rejected action errors. */
+  /**
+   * Receives a current action's rejection while the dialog stays open. Without this callback,
+   * the component contains the rejection instead of creating an unhandled promise.
+   */
   onActionError?: (error: unknown, action: DialogAction) => void;
-  /** Reports dismissal and successful action requests. */
+  /** Reports user-originated close requests with their exact source. */
   onOpenChange?: (open: boolean, details: DialogOpenChangeDetails) => void;
-  /** Controlled visibility. */
+  /** Controlled visibility; close interactions only call `onOpenChange`. */
   open?: boolean;
   /** Ref to the dialog panel. */
   ref?: Ref<HTMLDivElement>;
   /** Restores focus after closing. @defaultValue true */
   restoreFocus?: boolean;
-  /** Explicit focus restoration target. */
+  /** Explicit focus restoration target; disconnected targets are ignored. */
   returnFocusRef?: RefObject<HTMLElement | null>;
   /** Required visible title and accessible name. */
   title: ReactNode;
@@ -143,7 +152,7 @@ export type DialogShowOptions = WithoutOpenState<DialogProps>;
  * @public
  */
 export type DialogController = {
-  /** Closes this imperative dialog. */
+  /** Idempotently closes this imperative dialog. */
   close: () => void;
 };
 
@@ -188,11 +197,18 @@ export type DialogConfirmOptions = DialogPromptBase & {
  * @public
  */
 export type DialogApi = {
-  /** Opens a one-action alert and resolves after confirmation or dismissal. */
+  /**
+   * Opens a one-action alert. A mounted provider resolves it after committing the closed state;
+   * provider unmount resolves it during cleanup. Exit DOM removal may finish later.
+   */
   alert: (options: DialogAlertOptions) => Promise<void>;
   /** Closes every imperative dialog owned by this provider. */
   clear: () => void;
-  /** Opens a confirmation dialog and resolves `true` only after a successful confirm action. */
+  /**
+   * Opens a confirmation dialog. It resolves `true` only after confirmation; cancellation,
+   * dismissal, clearing, and provider unmount resolve `false`. A mounted provider commits the
+   * closed state before resolving; exit DOM removal may finish later.
+   */
   confirm: (options: DialogConfirmOptions) => Promise<boolean>;
   /** Opens an imperative dialog and returns a controller for that instance. */
   show: (options: DialogShowOptions) => DialogController;

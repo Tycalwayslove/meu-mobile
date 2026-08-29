@@ -19,7 +19,7 @@ source: packages/mobile/src/Dialog
 
 ## 当前能力
 
-模态告知、确认和短交互容器，支持 alertdialog/dialog 语义、异步操作、操作失败留场、自动布局、Mask、Escape、焦点圈定/恢复、滚动锁、Portal 与 Provider 作用域命令式 API。
+模态告知、确认和短交互容器，支持 alertdialog/dialog 语义、异步操作、操作失败留场、自动布局、Mask、Escape、焦点圈定/恢复、滚动锁、Portal 与 Provider 作用域命令式 API。打开期间切换 Portal 目标时，焦点圈定会随面板迁移。
 
 ## 何时使用
 
@@ -50,7 +50,7 @@ source: packages/mobile/src/Dialog
 
 ## 受控与非受控
 
-`open` 存在时受控，组件只发布意图；否则使用 `defaultOpen`。命令式 `alert/confirm/show` 必须放在 DialogProvider 内，保留当前 locale/theme/Portal 上下文。
+`open` 存在时受控，组件只发布关闭意图，父级必须回写 `open=false`；否则使用 `defaultOpen` 并在发布意图时同步内部状态。父级直接改变 `open` 不触发 `onOpenChange`。命令式 `alert/confirm/show` 必须放在 DialogProvider 内，并保留当前 locale、theme 与 Portal 上下文。
 
 ## 表单集成
 
@@ -58,15 +58,15 @@ Dialog 不是字段 adapter；可在 `role="dialog"` body 中放短表单，但�
 
 ## Props
 
-默认 `role=alertdialog` 且必须有 description；普通交互显式使用 `role=dialog`。`actionLayout=auto` 在 1–2 项横排、3+ 项纵排。actions key 必须唯一；`autoFocus` 优先，否则首个 enabled action。关闭 Mask 默认 false，Escape/scroll lock/focus restore 默认 true。
+默认 `role=alertdialog` 且必须有 description；普通交互显式使用 `role=dialog`。`actionLayout=auto` 在 1–2 项横排、3+ 项纵排。actions key 必须唯一；第一个 enabled `autoFocus` action 优先，否则聚焦第一个 enabled action。关闭 Mask 默认 false，Escape、scroll lock 与 focus restore 默认 true。`container=null` 原地渲染；resolver 改变返回目标时必须同时提供新的函数 identity，使焦点圈定重新绑定。
 
 ## Events
 
-`onOpenChange` 原因是 escape、mask 或 `{reason:"action",actionKey}`。action.onPress 返回 false 或 reject 保持打开；reject 交给 onActionError，成功且 `closeOnPress!==false` 才发布关闭。
+`onOpenChange` 只报告用户关闭意图，原因是 escape、mask 或 `{reason:"action",actionKey}`。任一 action pending 时，重复 action、Escape 和 Mask 关闭全部冻结；成功且 `closeOnPress!==false` 才发布关闭。`action.onPress` 返回 false 或 reject 保持打开；当前会话的 reject 交给 `onActionError`，未提供回调时也会被组件收口，不产生未处理 Promise。只有已经提交的关闭、重开或卸载会废弃旧 action；React 放弃的并发 render 不会改变当前会话。
 
 ## Ref 与命令式方法
 
-声明式 ref 指向 panel。`useDialog()` 提供 `alert():Promise<void>`、`confirm():Promise<boolean>`、`show():controller` 与 `clear()`；Provider 卸载会结算未完成 Promise。
+声明式 ref 指向 panel。`useDialog()` 提供 `alert():Promise<void>`、`confirm():Promise<boolean>`、`show():controller` 与 `clear()`。confirm 仅在确认 action 成功时得到 true；取消、Escape、Mask、clear 或 Provider 卸载得到 false。action 返回 false 或 reject 时弹窗和 Promise 都保持待决，允许用户重试。Provider 正常关闭时先提交 `open=false`，使模态层退出可访问树并释放滚动锁，再结算 alert/confirm Promise；退出动画对应的 DOM 移除可以在 `await` 恢复后完成。Provider 卸载则在 cleanup 中结算。controller.close 幂等。
 
 ## 键盘操作
 
@@ -78,7 +78,7 @@ Tab/Shift+Tab 在最上层 Dialog 内循环；Escape 在允许且无异步 pendi
 
 ## 无障碍
 
-标题生成 aria-labelledby；alertdialog description 生成 aria-describedby；panel `aria-modal=true`。异步期间 `aria-busy=true` 并禁用其他入口；外部关闭会立即废弃 pending token，旧 Promise 不会污染或关闭重开的新会话。
+标题生成 aria-labelledby；alertdialog description 生成 aria-describedby；panel `aria-modal=true`。异步期间 `aria-busy=true` 并禁用其他入口；背景内容由共享 modal manager 设置 inert/aria-hidden。嵌套时只有顶层接收 Escape 和焦点，body scroll lock 按层计数；上层关闭后仍打开的下层继续持有锁。外部关闭、Portal 迁移、重开与卸载均有自动化回归。
 
 ## 动效
 
@@ -90,11 +90,11 @@ layer opacity + panel opacity/transform；reduced-motion 取消 transform 并缩
 
 ## SSR 与 Next.js
 
-Portal SSR 原地输出稳定关联，useId 保证标题/说明 ID；hydration 后迁移到目标容器。Provider 不使用模块级 createRoot。
+Portal SSR 原地输出稳定关联，useId 保证标题/说明 ID；服务端不求值 lazy container，hydration 后无 recoverable error 地迁移到目标容器。关闭态不输出；`forceMount` 关闭态输出 hidden + inert + aria-hidden。Provider 不使用模块级 createRoot。
 
 ## RTL 与国际化
 
-操作顺序保持业务数组顺序，不按方向猜测取消/确认；内置 alert/confirm 文案支持 zh-CN/en-US。
+DOM 中的操作顺序保持业务数组顺序，不猜测取消/确认；横排视觉方向遵循 RTL 的逻辑行方向。内置 alert/confirm 文案支持 zh-CN/en-US。Portal layer 复制 ConfigProvider 的 dir、lang、theme 与 motion 边界。
 
 ## 浏览器与 WebView
 
@@ -102,7 +102,7 @@ Portal SSR 原地输出稳定关联，useId 保证标题/说明 ID；hydration �
 
 ## 边界情况与已知限制
 
-Dialog 不校验重复 action key；调用方必须保证唯一。无 onActionError 的 reject 会保留 rejected promise 暴露错误。多个 Provider Dialog 的顶层焦点顺序由共享 focus-trap 栈控制。
+Dialog 不校验重复 action key；调用方必须保证唯一。不要把 Dialog 作为 Popup 内的普通内容嵌套；若业务确需模态叠层，应让两层都保持独立 Portal，由共享 focus-trap 栈决定顶层。若多个 Dialog 在同一次 React 提交中同时挂载，上层关闭会恢复各自打开时捕获的目标，不额外猜测并聚焦下层 action；优先串行打开。组件不提供拖拽、手势关闭或软键盘避让。
 
 ## 性能预算
 
@@ -110,27 +110,30 @@ O(actions)，无布局测量；关闭记录仅为退出动画短暂保留。
 
 ## 测试证据
 
-- Unit: 模态关系、焦点、Escape/Mask、pending 跨关闭重开隔离、Portal RTL/motion、false/reject、自动布局、Provider Promise/controller/clear
-- Story interaction: `Confirm` 验证 alertdialog 语义、初始焦点、确认关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 80/80 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: 模态关系、焦点、Escape/Mask/pointercancel、pending 重入锁、跨关闭重开与卸载隔离、放弃并发 close render、Portal 迁移、嵌套顶层 Escape/scroll lock、RTL/motion、false/reject 收口、自动布局、Provider Promise 关闭提交顺序/controller/clear/unmount
+- Story interaction source: `Confirm` 包含 alertdialog 语义、初始焦点、Shift+Tab 圈定、scroll lock、确认关闭与触发器焦点恢复断言；静态链接校验覆盖 story ID、title 与 play 入口。本轮新增断言尚未重新执行浏览器扫描。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮新增交互证据，最终冻结候选仍需统一刷新。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 9552 B / 32768 B 预算；最大单值 `DialogProvider` 为 9471 B / 32768 B 预算，组合 Brotli 8474 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Dialog.ssr.test.tsx`；隔离 Next 16 hydration 后 declarative/Provider 触发器稳定，打开 Portal 无 hydration/runtime error
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 10138 B / 32768 B 预算；最大单值 `DialogProvider` 为 10057 B / 32768 B 预算，组合 Brotli 8988 B；共享样式由应用单独导入一次。
+- SSR/hydration: `Dialog.ssr.test.tsx` 覆盖 open/closed/forceMount/lazy container；jsdom `hydrateRoot` 断言打开 Portal 无 recoverable error；隔离 Next 16 hydration 后 declarative/Provider 触发器稳定，打开 Portal 无 hydration/runtime error
 - Mobile Chromium/WebKit E2E: `runs accessible declarative and provider-scoped Dialog flows` 在两种引擎断言 alertdialog、初始安全焦点、异步 busy/禁用、scroll lock、业务结果与焦点恢复。Chromatic / 真机读屏仍属最终门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-补软键盘、200% 字号、嵌套模态和 VoiceOver/TalkBack；declarative/Provider 双引擎路径已完成。
+补软键盘、200% 字号、同时挂载多层后的读屏焦点体验和 VoiceOver/TalkBack；declarative/Provider 双引擎路径已完成。
 
 ### 已完成
 
-冻结语义分支与异步生命周期，补长内容、小视口、forced-colors、TSDoc、SSR、Provider、隔离 Next H5 与永久文档。
+冻结语义分支与异步生命周期，收口无 observer 的 action reject、卸载竞态与放弃并发 render；Provider 在 close commit 后结算命令式 Promise；补 Portal 迁移、嵌套顶层关闭、pointercancel、hydration、长内容、小视口、forced-colors、TSDoc、隔离 Next H5 与永久文档。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                      | 迁移说明    |
-| ---------- | ------ | ------------ | --------------------------------------------------------- | ----------- |
-| 2026-08-29 | 未发布 | behavior     | 商用模态、异步与文档证据加固                              | 无 API 破坏 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎异步、Provider、focus/scroll-lock 证据 | 无          |
+| 日期       | 版本   | 类型         | 内容                                                       | 迁移说明    |
+| ---------- | ------ | ------------ | ---------------------------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | behavior     | 商用模态、异步与文档证据加固                               | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎异步、Provider、focus/scroll-lock 证据  | 无          |
+| 2026-08-29 | 未发布 | fix          | 收口 action reject/卸载竞态并随 Portal 迁移重绑焦点        | 无 API 破坏 |
+| 2026-08-29 | 未发布 | verification | 增加 pointercancel、嵌套顶层、SSR/hydration 与 Story 圈定  | 无          |
+| 2026-08-29 | 未发布 | fix          | 会话切换移至 commit phase；Provider 关闭提交后结算 Promise | 无 API 破坏 |

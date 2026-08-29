@@ -135,6 +135,45 @@ describe("Toast", () => {
     expect(onChange).toHaveBeenCalledWith({ reason: "timeout" });
   });
 
+  it("preserves the remaining duration while the page is hidden", () => {
+    vi.useFakeTimers();
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    const onChange = vi.fn();
+    render(<ControlledToast duration={3000} onChange={onChange} />);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+    fireEvent(document, new Event("visibilitychange"));
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    fireEvent(document, new Event("visibilitychange"));
+    act(() => {
+      vi.advanceTimersByTime(1999);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(onChange).toHaveBeenCalledWith({ reason: "timeout" });
+  });
+
+  it("cleans the visibility listener and timeout on unmount", () => {
+    vi.useFakeTimers();
+    const removeListener = vi.spyOn(document, "removeEventListener");
+    const { unmount } = render(<Toast open message="保存成功" />);
+
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    unmount();
+    expect(removeListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it("pauses the actionable timeout while keyboard focus stays inside", () => {
     vi.useFakeTimers();
     const onChange = vi.fn();
@@ -164,6 +203,99 @@ describe("Toast", () => {
       vi.advanceTimersByTime(1);
     });
     expect(onChange).toHaveBeenCalledWith({ reason: "timeout" });
+  });
+
+  it("resumes with a fresh non-action duration when the focused action is removed", () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <Toast
+        action={{ label: "撤销" }}
+        duration={1000}
+        message="订单已更新"
+        open
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    const action = screen.getByRole("button", { name: "撤销" });
+    fireEvent.focus(action);
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(
+      <Toast
+        duration={1000}
+        message="订单已更新"
+        open
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    expect(screen.queryByRole("button", { name: "撤销" })).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(999);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(onChange).toHaveBeenCalledWith({ reason: "timeout" });
+  });
+
+  it("clears pointer pause when the Portal destination changes", () => {
+    vi.useFakeTimers();
+    const firstContainer = document.createElement("div");
+    const secondContainer = document.createElement("div");
+    document.body.append(firstContainer, secondContainer);
+    const onChange = vi.fn();
+    const { rerender, unmount } = render(
+      <Toast
+        container={firstContainer}
+        duration={1000}
+        message="迁移消息"
+        open
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    const firstRoot = firstContainer.querySelector<HTMLElement>('[data-meu-component="toast"]');
+    if (!firstRoot) throw new Error("Expected first Toast root");
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    fireEvent.mouseEnter(firstRoot);
+
+    rerender(
+      <Toast
+        container={secondContainer}
+        duration={1000}
+        message="迁移消息"
+        open
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    expect(firstContainer.querySelector('[data-meu-component="toast"]')).toBeNull();
+    expect(secondContainer.querySelector('[data-meu-component="toast"]')).toBeTruthy();
+    act(() => {
+      vi.advanceTimersByTime(799);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(onChange).toHaveBeenCalledWith({ reason: "timeout" });
+
+    unmount();
+    firstContainer.remove();
+    secondContainer.remove();
   });
 
   it("keeps the toast open when an action returns false", async () => {
@@ -227,6 +359,27 @@ describe("Toast", () => {
     expect(toast && toast.getAttribute("data-action-error")).toBe("true");
   });
 
+  it("contains an action error observer failure", async () => {
+    render(
+      <Toast
+        open
+        duration={0}
+        message="保存失败"
+        onActionError={() => {
+          throw new Error("observer failed");
+        }}
+        action={{ label: "重试", onPress: () => Promise.reject(new Error("offline")) }}
+      />
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "重试" }));
+      await Promise.resolve();
+    });
+    expect(screen.getByRole("status")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "重试" }).hasAttribute("disabled")).toBe(false);
+  });
+
   it("does not let an obsolete async action close a newly reopened toast", async () => {
     let resolveAction!: () => void;
     const onChange = vi.fn();
@@ -272,5 +425,99 @@ describe("Toast", () => {
 
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("status").textContent).toBe("正在保存");
+  });
+
+  it("does not report an obsolete action rejection after close and reopen", async () => {
+    let rejectAction!: (error: Error) => void;
+    const onActionError = vi.fn();
+
+    function ReopenHarness() {
+      const [open, setOpen] = useState(true);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(false)}>
+            外部关闭
+          </button>
+          <button type="button" onClick={() => setOpen(true)}>
+            重新打开
+          </button>
+          <Toast
+            open={open}
+            duration={0}
+            message="正在保存"
+            onActionError={onActionError}
+            action={{
+              label: "保存",
+              onPress: () =>
+                new Promise<void>((_resolve, reject) => {
+                  rejectAction = reject;
+                })
+            }}
+          />
+        </>
+      );
+    }
+
+    render(<ReopenHarness />);
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "外部关闭" }));
+    fireEvent.click(screen.getByRole("button", { name: "重新打开" }));
+    await act(async () => {
+      rejectAction(new Error("obsolete"));
+      await Promise.resolve();
+    });
+
+    expect(onActionError).not.toHaveBeenCalled();
+    expect(screen.getByRole("status").textContent).toBe("正在保存");
+  });
+
+  it("normalizes invalid, negative, and oversized durations safely", () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <Toast
+        open
+        duration={Number.NaN}
+        message="默认时长"
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(onChange).toHaveBeenCalledWith({ reason: "timeout" });
+
+    onChange.mockClear();
+    rerender(
+      <Toast
+        open
+        duration={-1}
+        message="常驻"
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    act(() => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(
+      <Toast
+        open
+        duration={Number.MAX_SAFE_INTEGER}
+        message="超长"
+        onOpenChange={(_open, details) => {
+          onChange(details);
+        }}
+      />
+    );
+    act(() => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

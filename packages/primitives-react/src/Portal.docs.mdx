@@ -87,11 +87,11 @@ Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑�
 
 ## 键盘操作
 
-| 按键            | 行为                                                 |
-| --------------- | ---------------------------------------------------- |
-| Tab / Shift+Tab | Portal 本身不处理；`useFocusTrap` 在栈顶容器首尾循环 |
-| Escape          | Portal 本身不处理；栈顶 trap 调用最新 `onEscape`     |
-| 其他            | 交由 children                                        |
+| 按键            | 行为                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| Tab / Shift+Tab | Portal 本身不处理；`useFocusTrap` 在栈顶容器与可操作 Toast 间循环；显式 focus branch 保留自身键盘路径 |
+| Escape          | Portal 本身不处理；栈顶 trap 调用最新 `onEscape`                                                      |
+| 其他            | 交由 children                                                                                         |
 
 ## 触摸与手势
 
@@ -99,7 +99,7 @@ Portal 不改变 React 树关系，因此 context 与 React 事件仍沿逻辑�
 
 ## 无障碍
 
-Portal 不提供 role 或 accessible name。`useFocusTrap` 按原生 Tab 顺序过滤 `tabIndex<0`、disabled/disabled fieldset、非选中 radio、hidden、aria-hidden、inert、display:none 与 visibility:hidden 后代，容器无可聚焦项时聚焦容器。激活时共享管理器会把顶层模态之外的 siblings 设为 inert/aria-hidden，嵌套关闭后按引用计数恢复原属性；focus branch、由模态内 `aria-controls` 关联的非模态浮层和 Toast live region 保持可达。
+Portal 不提供 role 或 accessible name。`useFocusTrap` 按原生 Tab 顺序过滤 `tabIndex<0`、disabled/disabled fieldset、非选中 radio、hidden、aria-hidden、inert、display:none 与 visibility:hidden 后代，容器无可聚焦项时聚焦容器。激活时共享管理器会把顶层模态之外的 siblings 设为 inert/aria-hidden，嵌套关闭后按引用计数恢复原属性；focus branch、由模态内 `aria-controls` 关联的非模态浮层和 Toast live region 保持可达。可操作 Toast 会加入栈顶模态的键盘循环，因此模态期间出现的撤销/重试按钮不会成为视觉可见但键盘不可达的孤岛。
 
 ## 动效
 
@@ -137,11 +137,11 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。激活�
 
 ## 测试证据
 
-- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、原生 tabbable 顺序、背景 inert/aria-hidden 隔离与精确恢复
+- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、目标切换与卸载清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、原生 tabbable 顺序、可操作 Toast 键盘分支、背景 inert/aria-hidden 隔离与精确恢复
 - Story interaction: `CustomContainer` 验证内容移动到调用方提供的目标容器；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 3812 B / 32768 B 预算；最大单值 `useFocusTrap` 为 2695 B / 32768 B 预算，组合 Brotli 3313 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 4126 B / 32768 B 预算；最大单值 `useFocusTrap` 为 3012 B / 32768 B 预算，组合 Brotli 3598 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记与 hydration 后移动
 - RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
 - Reduced motion: 不适用，无动画
@@ -164,12 +164,14 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。激活�
 - 增加目标切换、Fragment、SSR/hydration 与卸载清理单测。
 - 补齐公开 Props、容器类型 TSDoc 和 release tag。
 - focus trap 补齐正 tabindex/radio/disabled fieldset 过滤、嵌套栈顶背景隔离、自定义容器与关联非模态分支。
+- 可操作 Toast 纳入栈顶模态键盘循环，与既有 inert 例外保持同一可达性契约。
 - 在隔离 Next H5 中补 custom container 目标迁移与 hydration 双引擎证据。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                | 迁移说明                                       |
-| ---------- | ------ | ------------ | --------------------------------------------------- | ---------------------------------------------- |
-| 2026-08-28 | 0.1.0  | behavior     | SSR 改为原地输出；扩展跨文档容器类型与清理证据      | 依赖 SSR 空字符串的调用方需在业务层条件渲染    |
-| 2026-08-29 | 未发布 | hardening    | 原生 tabbable 顺序与 modal background isolation     | API 兼容；模态外背景从可访问树移除并可嵌套恢复 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 custom-container/hydration 证据 | 无                                             |
+| 日期       | 版本   | 类型          | 内容                                                | 迁移说明                                       |
+| ---------- | ------ | ------------- | --------------------------------------------------- | ---------------------------------------------- |
+| 2026-08-28 | 0.1.0  | behavior      | SSR 改为原地输出；扩展跨文档容器类型与清理证据      | 依赖 SSR 空字符串的调用方需在业务层条件渲染    |
+| 2026-08-29 | 未发布 | hardening     | 原生 tabbable 顺序与 modal background isolation     | API 兼容；模态外背景从可访问树移除并可嵌套恢复 |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 custom-container/hydration 证据 | 无                                             |
+| 2026-08-29 | 未发布 | accessibility | 模态键盘循环纳入可操作 Toast 分支                   | API 兼容；Toast action 不再被焦点圈定排除      |

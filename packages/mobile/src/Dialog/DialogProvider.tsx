@@ -50,6 +50,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
   const dismissCallbacksRef = useRef(
     new Map<number, ((details: InternalDismissDetails) => void) | undefined>()
   );
+  const dismissDetailsRef = useRef(new Map<number, InternalDismissDetails>());
   const nextIdRef = useRef(0);
   const removeTimersRef = useRef(new Map<number, number>());
   const unmountCallbacksRef = useRef(new Map<number, (() => void) | undefined>());
@@ -57,15 +58,22 @@ export function DialogProvider({ children }: DialogProviderProps) {
   const closeRecord = useCallback((id: number, details: InternalDismissDetails) => {
     if (!activeIdsRef.current.has(id)) return;
     activeIdsRef.current.delete(id);
+    dismissDetailsRef.current.set(id, details);
 
+    setRecords((currentRecords) =>
+      currentRecords.map((record) => (record.id === id ? { ...record, open: false } : record))
+    );
+  }, []);
+
+  const settleClosedRecord = useCallback((id: number) => {
+    const details = dismissDetailsRef.current.get(id);
+    if (details === undefined) return;
+    dismissDetailsRef.current.delete(id);
     const onDismiss = dismissCallbacksRef.current.get(id);
     dismissCallbacksRef.current.delete(id);
     unmountCallbacksRef.current.delete(id);
     if (onDismiss) onDismiss(details);
 
-    setRecords((currentRecords) =>
-      currentRecords.map((record) => (record.id === id ? { ...record, open: false } : record))
-    );
     if (!removeTimersRef.current.has(id)) {
       const timer = window.setTimeout(() => {
         removeTimersRef.current.delete(id);
@@ -109,15 +117,16 @@ export function DialogProvider({ children }: DialogProviderProps) {
                 key: "confirm",
                 label: confirmText || (config.locale === "en-US" ? "OK" : "我知道了"),
                 onPress: async () => {
-                  const result = onConfirm ? await onConfirm() : undefined;
-                  if (result !== false) settle();
-                  return result;
+                  return onConfirm ? await onConfirm() : undefined;
                 },
                 tone: "accent"
               }
             ]
           },
-          { onDismiss: settle, onProviderUnmount: settle }
+          {
+            onDismiss: settle,
+            onProviderUnmount: settle
+          }
         );
       }),
     [config.locale, showInternal]
@@ -149,9 +158,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
                 key: "cancel",
                 label: cancelText || (config.locale === "en-US" ? "Cancel" : "取消"),
                 onPress: async () => {
-                  const result = onCancel ? await onCancel() : undefined;
-                  if (result !== false) settle(false);
-                  return result;
+                  return onCancel ? await onCancel() : undefined;
                 },
                 tone: "neutral"
               },
@@ -159,9 +166,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
                 key: "confirm",
                 label: confirmText || (config.locale === "en-US" ? "Confirm" : "确认"),
                 onPress: async () => {
-                  const result = onConfirm ? await onConfirm() : undefined;
-                  if (result !== false) settle(true);
-                  return result;
+                  return onConfirm ? await onConfirm() : undefined;
                 },
                 tone: confirmTone
               }
@@ -169,7 +174,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
           },
           {
             onDismiss: (details) => {
-              if (details.reason !== "action") settle(false);
+              settle(details.reason === "action" && details.actionKey === "confirm");
             },
             onProviderUnmount: () => settle(false)
           }
@@ -182,6 +187,12 @@ export function DialogProvider({ children }: DialogProviderProps) {
     Array.from(activeIdsRef.current).forEach((id) => closeRecord(id, { reason: "programmatic" }));
   }, [closeRecord]);
 
+  useEffect(() => {
+    records.forEach((record) => {
+      if (!record.open) settleClosedRecord(record.id);
+    });
+  }, [records, settleClosedRecord]);
+
   useEffect(
     () => () => {
       removeTimersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -191,6 +202,7 @@ export function DialogProvider({ children }: DialogProviderProps) {
       });
       unmountCallbacksRef.current.clear();
       dismissCallbacksRef.current.clear();
+      dismissDetailsRef.current.clear();
       activeIdsRef.current.clear();
     },
     []

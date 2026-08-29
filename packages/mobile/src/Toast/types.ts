@@ -21,11 +21,15 @@ export type ToastPosition = "top" | "center" | "bottom";
  * @public
  */
 export type ToastAction = {
-  /** Keeps the Toast open after a successful action when false. */
+  /**
+   * Whether a successful action requests closure; returning `false` from `onPress` still vetoes it.
+   *
+   * @defaultValue true
+   */
   closeOnPress?: boolean;
   /** Visible native button label. */
   label: ReactNode;
-  /** Action handler. Returning false vetoes close; rejection is reported through `onActionError`. */
+  /** Runs after the action button is pressed. While its promise is pending, the button and timeout are paused; `false` vetoes closure. */
   onPress?: () => boolean | void | Promise<boolean | void>;
 };
 
@@ -51,12 +55,16 @@ export type ToastOpenChangeDetails =
 export type ToastCloseDetails =
   | ToastOpenChangeDetails
   | {
-      /** A controller explicitly closed the record. */
+      /** A controller closed the record or its owning provider unmounted. */
       reason: "programmatic";
     }
   | {
       /** {@link ToastApi.clear} closed the record. */
       reason: "clear";
+    }
+  | {
+      /** The provider rejected a new record or evicted a queued record after its capacity decreased. */
+      reason: "overflow";
     };
 
 /**
@@ -68,13 +76,17 @@ export type ToastProps = Omit<
   HTMLAttributes<HTMLDivElement>,
   "aria-atomic" | "aria-live" | "children" | "dangerouslySetInnerHTML" | "role"
 > & {
-  /** Optional action; actionable Toasts remain visible for at least five seconds. */
+  /** Optional action rendered outside the live region; actionable Toasts remain visible for at least five seconds. */
   action?: ToastAction;
   /** Portal target override. `null` renders in place. */
   container?: OverlayContainer;
   /** Initial state for uncontrolled usage. */
   defaultOpen?: boolean;
-  /** Visible duration in milliseconds; zero disables timeout closing. */
+  /**
+   * Visible duration in milliseconds. `0` and negative values disable timeout closure, non-finite values use 3000, and larger finite values are capped at the browser timer limit.
+   *
+   * @defaultValue 3000
+   */
   duration?: number;
   /** Keeps closed DOM mounted and hidden for integration or measurement. */
   forceMount?: boolean;
@@ -82,7 +94,7 @@ export type ToastProps = Omit<
   icon?: ReactNode | null;
   /** Short feedback message announced by the live region. */
   message: ReactNode;
-  /** Receives action rejection values; rejected actions stay open and expose `data-action-error`. */
+  /** Receives a current action's rejection value; rejected actions stay open and expose `data-action-error`. Obsolete runs are ignored after close, replacement, or unmount, and observer failures are contained. */
   onActionError?: (error: unknown) => void;
   /** Receives declarative close intent. */
   onOpenChange?: (open: boolean, details: ToastOpenChangeDetails) => void;
@@ -104,9 +116,9 @@ type WithoutOpenState<T> = Omit<T, "defaultOpen" | "onOpenChange" | "open">;
  * @public
  */
 export type ToastShowOptions = WithoutOpenState<ToastProps> & {
-  /** Stable queue identity; showing the same active id updates instead of enqueueing. */
+  /** Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action. */
   id?: string;
-  /** Called exactly once when the provider record closes. */
+  /** Called exactly once when the provider record closes or a new record is rejected at capacity. */
   onClose?: (details: ToastCloseDetails) => void;
 };
 
@@ -115,7 +127,14 @@ export type ToastShowOptions = WithoutOpenState<ToastProps> & {
  *
  * @public
  */
-export type ToastUpdateOptions = Partial<Omit<ToastShowOptions, "id">>;
+export type ToastUpdateOptions = {
+  /**
+   * Each supplied field replaces the current value. Explicit `undefined` removes an optional field,
+   * such as `action`, `onActionError`, or `onClose`.
+   */
+  [Key in keyof Omit<ToastShowOptions, "id">]?:
+    Exclude<Omit<ToastShowOptions, "id">[Key], undefined> | undefined;
+};
 
 /**
  * Controller for one provider-owned Toast record.
@@ -127,7 +146,7 @@ export type ToastController = {
   close: () => void;
   /** Stable record id. */
   id: string;
-  /** Updates an active record without changing its queue position. */
+  /** Partially updates an active or queued record without changing its queue position; explicit `undefined` clears an optional field, and an active update restarts the countdown. */
   update: (options: ToastUpdateOptions) => void;
 };
 
@@ -164,4 +183,10 @@ export type ToastApi = {
 export type ToastProviderProps = {
   /** React subtree that can call {@link useToast}. */
   children: ReactNode;
+  /**
+   * Maximum provider-owned records, including the visible item, queued items, and a closing item awaiting removal. New unique records are rejected at the limit while same-id replacements remain accepted. Lowering the limit preserves the FIFO head, evicts newest queued records with reason `overflow`, and converges after their exit period. Finite values are truncated and clamped to 1–100.
+   *
+   * @defaultValue 20
+   */
+  maxToasts?: number;
 };

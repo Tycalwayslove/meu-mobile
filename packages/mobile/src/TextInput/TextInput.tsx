@@ -1,12 +1,25 @@
 "use client";
 
 import { MeuIconX } from "@meu/icons-react";
-import { forwardRef, useRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import type { ForwardedRef, InputHTMLAttributes } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
-import { clearButton, input, wrapper } from "./TextInput.css";
+import { clearButton, input, loadingIndicator, spinner, wrapper } from "./TextInput.css";
+
+type TextInputValue = InputHTMLAttributes<HTMLInputElement>["value"];
+type TextInputInputEvent = Parameters<
+  NonNullable<InputHTMLAttributes<HTMLInputElement>["onInput"]>
+>[0];
+
+function valueHasText(value: TextInputValue) {
+  return value !== undefined && String(value).length > 0;
+}
+
+function valueToString(value: TextInputValue) {
+  return value === undefined ? "" : String(value);
+}
 
 /**
  * Props for a Field-aware native text input with an optional clear action.
@@ -14,8 +27,14 @@ import { clearButton, input, wrapper } from "./TextInput.css";
  * @public
  */
 export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size"> & {
-  /** Shows a native button that clears the current value. @defaultValue false */
+  /** Accessible name for the built-in clear button. */
+  clearLabel?: string;
+  /** Shows a native button while the editable value is non-empty. @defaultValue false */
   clearable?: boolean;
+  /** Marks caller-owned asynchronous work without making the native input read-only. */
+  loading?: boolean;
+  /** Accessible status name announced while `loading` is true. */
+  loadingLabel?: string;
   /** Called after the clear action dispatches the input change. */
   onClear?: () => void;
   /** Controls the input height and horizontal padding. @defaultValue "medium" */
@@ -39,16 +58,26 @@ function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
  */
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function TextInput(
   {
+    "aria-busy": ariaBusy,
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
     className,
+    clearLabel: clearLabelProp,
     clearable = false,
+    defaultValue,
+    dir,
     disabled = false,
+    form,
     id,
+    loading = false,
+    loadingLabel: loadingLabelProp,
+    onChange,
     onClear,
+    onInput,
     readOnly = false,
     size = "medium",
     status = "default",
+    value,
     ...props
   },
   forwardedRef
@@ -56,8 +85,20 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
   const config = useMeuConfig();
   const fieldContext = useFieldContext();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const clearFocusedRef = useRef(false);
+  const resetTimerRef = useRef<number | null>(null);
+  const controlled = value !== undefined;
+  const [uncontrolledHasValue, setUncontrolledHasValue] = useState(() =>
+    valueHasText(defaultValue)
+  );
+  const hasValue = controlled ? valueHasText(value) : uncontrolledHasValue;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
+  const describedBy =
+    ariaDescribedBy !== undefined
+      ? ariaDescribedBy
+      : fieldContext
+        ? fieldContext.describedBy
+        : undefined;
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -74,10 +115,62 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
         : ariaInvalid === false || ariaInvalid === "false"
           ? ariaInvalid
           : undefined;
-  const classes = input({ clearable, size, status: invalid ? "error" : status });
-  const clearLabel = config.locale === "en-US" ? "Clear input" : "清除输入";
+  const hasTrailingAction = loading || (clearable && hasValue && !disabled && !readOnly);
+  const classes = input({ clearable: hasTrailingAction, size, status: invalid ? "error" : status });
+  const clearLabel =
+    clearLabelProp !== undefined
+      ? clearLabelProp
+      : config.locale === "en-US"
+        ? "Clear input"
+        : "清除输入";
+  const loadingLabel =
+    loadingLabelProp !== undefined
+      ? loadingLabelProp
+      : config.locale === "en-US"
+        ? "Loading"
+        : "正在加载";
+
+  useEffect(() => {
+    const element = inputRef.current;
+    const ownerDocument = element ? element.ownerDocument : null;
+    if (!element || !ownerDocument) return undefined;
+
+    const handleReset = (event: Event) => {
+      const currentElement = inputRef.current;
+      if (!currentElement || event.target !== currentElement.form) return;
+      if (controlled) currentElement.defaultValue = valueToString(value);
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = window.setTimeout(() => {
+        resetTimerRef.current = null;
+        const resetElement = inputRef.current;
+        if (!resetElement || event.defaultPrevented) return;
+        if (controlled) resetElement.value = valueToString(value);
+        else setUncontrolledHasValue(resetElement.value.length > 0);
+      }, 0);
+    };
+
+    ownerDocument.addEventListener("reset", handleReset);
+    return () => {
+      ownerDocument.removeEventListener("reset", handleReset);
+      if (resetTimerRef.current !== null) window.clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    };
+  }, [controlled, defaultValue, form, value]);
+
+  useEffect(() => {
+    if (!loading || !clearFocusedRef.current) return;
+    clearFocusedRef.current = false;
+    const element = inputRef.current;
+    if (element && !element.disabled) element.focus();
+  }, [loading]);
+
+  function handleInput(event: TextInputInputEvent) {
+    if (!controlled) setUncontrolledHasValue(event.currentTarget.value.length > 0);
+    if (onInput) onInput(event);
+  }
 
   function clear() {
+    if (disabled || readOnly || loading) return;
     const element = inputRef.current;
     if (element) {
       const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
@@ -92,7 +185,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
   }
 
   return (
-    <span className={wrapper}>
+    <span className={wrapper} dir={dir}>
       <input
         {...props}
         ref={(element) => {
@@ -101,16 +194,55 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
         }}
         id={resolvedId}
         className={className ? `${classes} ${className}` : classes}
+        defaultValue={controlled ? undefined : defaultValue}
+        dir={dir}
         disabled={disabled}
+        form={form}
         readOnly={readOnly}
+        value={value}
+        onChange={onChange}
+        onInput={handleInput}
+        aria-busy={loading ? true : ariaBusy}
         aria-describedby={describedBy}
         aria-invalid={resolvedAriaInvalid}
         data-meu-component="text-input"
         data-size={size}
-        data-state={disabled ? "disabled" : readOnly ? "readonly" : invalid ? "error" : "default"}
+        data-state={
+          disabled
+            ? "disabled"
+            : loading
+              ? "loading"
+              : readOnly
+                ? "readonly"
+                : invalid
+                  ? "error"
+                  : "default"
+        }
       />
-      {clearable && !disabled && !readOnly ? (
-        <button type="button" className={clearButton} aria-label={clearLabel} onClick={clear}>
+      {loading ? (
+        <span
+          className={loadingIndicator}
+          role="status"
+          aria-atomic="true"
+          aria-live="polite"
+          aria-label={loadingLabel}
+        >
+          <span className={spinner} aria-hidden="true" />
+        </span>
+      ) : clearable && hasValue && !disabled && !readOnly ? (
+        <button
+          type="button"
+          className={clearButton}
+          aria-label={clearLabel}
+          onBlur={() => {
+            clearFocusedRef.current = false;
+          }}
+          onClick={clear}
+          onFocus={() => {
+            clearFocusedRef.current = true;
+          }}
+          onMouseDown={(event) => event.preventDefault()}
+        >
           <MeuIconX size={18} />
         </button>
       ) : null}

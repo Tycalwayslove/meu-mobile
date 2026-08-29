@@ -1,8 +1,8 @@
 "use client";
 
 import { Portal } from "@meu/primitives-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { FocusEvent, MouseEvent } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import type { FocusEvent, MouseEvent, Ref } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { getConfigBoundaryProps } from "../internal/configBoundary";
@@ -16,12 +16,21 @@ import {
   viewport
 } from "./Toast.css";
 import type { ToastOpenChangeDetails, ToastProps } from "./types";
+import { ToastTimerResetContext } from "./ToastTimerContext";
 
 const defaultDuration = 3000;
 const minimumActionDuration = 5000;
+const maximumDuration = 2_147_483_647;
+
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
+  if (typeof ref === "function") ref(value);
+  else if (ref) ref.current = value;
+}
 
 function getEffectiveDuration(duration: number, hasAction: boolean) {
-  const normalizedDuration = Number.isFinite(duration) ? Math.max(0, duration) : defaultDuration;
+  const normalizedDuration = Number.isFinite(duration)
+    ? Math.min(Math.max(0, duration), maximumDuration)
+    : defaultDuration;
   if (!hasAction || normalizedDuration === 0) return normalizedDuration;
   return Math.max(normalizedDuration, minimumActionDuration);
 }
@@ -29,11 +38,13 @@ function getEffectiveDuration(duration: number, hasAction: boolean) {
 function usePausableTimer({
   duration,
   onTimeout,
-  open
+  open,
+  resetKey
 }: {
   duration: number;
   onTimeout: () => void;
   open: boolean;
+  resetKey: number;
 }) {
   const onTimeoutRef = useRef(onTimeout);
   const pausedReasonsRef = useRef(new Set<string>());
@@ -70,7 +81,7 @@ function usePausableTimer({
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [duration, open, schedule]);
+  }, [duration, open, resetKey, schedule]);
 
   const pause = useCallback((reason: string) => {
     if (pausedReasonsRef.current.has(reason)) return;
@@ -123,9 +134,12 @@ export function Toast({
   ...props
 }: ToastProps) {
   const config = useMeuConfig();
+  const timerResetKey = useContext(ToastTimerResetContext);
   const configBoundary = getConfigBoundaryProps(config);
   const [pending, setPending] = useState(false);
   const [actionFailed, setActionFailed] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const forwardedRefRef = useRef(ref);
   const mountedRef = useRef(true);
   const actionRunRef = useRef(0);
   const [resolvedOpen, requestOpenChange] = useControllableOpen<ToastOpenChangeDetails>({
@@ -141,8 +155,51 @@ export function Toast({
   const { pause, resume } = usePausableTimer({
     duration: effectiveDuration,
     onTimeout: () => requestOpenChange(false, { reason: "timeout" }),
-    open: resolvedOpen
+    open: resolvedOpen,
+    resetKey: timerResetKey
   });
+  const resumeRef = useRef(resume);
+  resumeRef.current = resume;
+  const setRootNode = useCallback((node: HTMLDivElement | null) => {
+    const previousNode = rootRef.current;
+    if (previousNode && previousNode !== node) {
+      resumeRef.current("focus");
+      resumeRef.current("pointer");
+    }
+    rootRef.current = node;
+    assignRef(forwardedRefRef.current, node);
+  }, []);
+
+  useEffect(() => {
+    const previousRef = forwardedRefRef.current;
+    if (previousRef === ref) return;
+    assignRef(previousRef, null);
+    forwardedRefRef.current = ref;
+    assignRef(ref, rootRef.current);
+  }, [ref]);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !root.contains(document.activeElement)) resume("focus");
+  }, [action, resume]);
+
+  useEffect(() => {
+    actionRunRef.current += 1;
+    setPending(false);
+    setActionFailed(false);
+    resume("action");
+  }, [resume, timerResetKey]);
+
+  useEffect(() => {
+    if (!resolvedOpen) return undefined;
+    const update = () => {
+      if (document.visibilityState === "hidden") pause("visibility");
+      else resume("visibility");
+    };
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, [pause, resolvedOpen, resume]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -173,8 +230,16 @@ export function Toast({
     try {
       result = action.onPress ? await action.onPress() : undefined;
     } catch (error) {
-      if (mountedRef.current && actionRunRef.current === actionRun) setActionFailed(true);
-      if (onActionError) onActionError(error);
+      if (mountedRef.current && actionRunRef.current === actionRun) {
+        setActionFailed(true);
+        if (onActionError) {
+          try {
+            onActionError(error);
+          } catch {
+            // Error observers must not turn a contained action failure into an unhandled rejection.
+          }
+        }
+      }
       return;
     } finally {
       if (mountedRef.current && actionRunRef.current === actionRun) {
@@ -205,7 +270,7 @@ export function Toast({
       >
         <div
           {...props}
-          ref={ref}
+          ref={setRootNode}
           className={
             className
               ? `${toastStyle({ state: visualState, tone })} ${className}`

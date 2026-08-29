@@ -80,6 +80,16 @@ export const Confirm: Story = {
       () => canvasElement.ownerDocument.activeElement === cancel,
       "Dialog did not focus its preferred action"
     );
+    if (body.getAttribute("data-meu-scroll-locked") !== "true") {
+      throw new window.Error("Dialog did not lock body scrolling");
+    }
+    cancel.dispatchEvent(
+      new window.KeyboardEvent("keydown", { bubbles: true, key: "Tab", shiftKey: true })
+    );
+    await waitForStory(
+      () => canvasElement.ownerDocument.activeElement === confirm,
+      "Dialog did not wrap backward focus"
+    );
 
     confirm.click();
     await waitForStory(
@@ -90,6 +100,9 @@ export const Confirm: Story = {
       () => canvasElement.ownerDocument.activeElement === trigger,
       "Dialog did not restore focus to its trigger"
     );
+    if (body.hasAttribute("data-meu-scroll-locked")) {
+      throw new window.Error("Dialog did not release body scrolling");
+    }
   }
 };
 export const Danger: Story = {

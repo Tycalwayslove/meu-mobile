@@ -14,4 +14,29 @@ describe("TextInput SSR", () => {
     expect(markup).toContain('aria-invalid="spelling"');
     expect(markup.match(/aria-invalid=/g)).toHaveLength(1);
   });
+
+  it("renders deterministic password, loading and disabled states", () => {
+    const password = renderToString(
+      <TextInput
+        aria-label="Password"
+        autoComplete="current-password"
+        clearable
+        defaultValue="secret"
+        loading
+        name="password"
+        type="password"
+      />
+    );
+    const disabled = renderToString(
+      <TextInput aria-label="Disabled name" defaultValue="Meu" disabled name="name" />
+    );
+
+    expect(password).toContain('type="password"');
+    expect(password).toContain('autoComplete="current-password"');
+    expect(password).toContain('aria-busy="true"');
+    expect(password).toContain('role="status"');
+    expect(password).not.toContain('type="button"');
+    expect(disabled).toContain("disabled");
+    expect(disabled).toContain('data-state="disabled"');
+  });
 });

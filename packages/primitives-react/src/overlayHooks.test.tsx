@@ -199,6 +199,37 @@ describe("overlay hooks", () => {
     );
   });
 
+  it("includes actionable Toast branches in the modal keyboard loop", async () => {
+    render(<FocusTrapHarness label="Checkout" restoreFocus={false} />);
+    await flushFocusTrap();
+    const dialogButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[role='dialog'] > button")
+    );
+    const toast = document.createElement("div");
+    toast.setAttribute("data-meu-overlay-layer", "toast");
+    const toastAction = document.createElement("button");
+    toastAction.textContent = "Undo";
+    toast.append(toastAction);
+    document.body.append(toast);
+    await act(async () => Promise.resolve());
+
+    dialogButtons[1]!.focus();
+    document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Tab" }));
+    expect(document.activeElement).toBe(toastAction);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Tab" }));
+    expect(document.activeElement).toBe(dialogButtons[0]);
+
+    document.dispatchEvent(
+      new KeyboardEvent("keydown", { bubbles: true, key: "Tab", shiftKey: true })
+    );
+    expect(document.activeElement).toBe(toastAction);
+
+    toastAction.disabled = true;
+    document.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Tab" }));
+    expect(document.activeElement).toBe(dialogButtons[0]);
+  });
+
   it("only lets the topmost nested trap handle Escape", async () => {
     const outerEscape = vi.fn();
     const innerEscape = vi.fn();

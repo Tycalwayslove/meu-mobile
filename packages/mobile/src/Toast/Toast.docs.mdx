@@ -26,11 +26,11 @@ source: packages/mobile/src/Toast
 
 ## 当前能力
 
-- 声明式受控/非受控 Toast 与 scoped `ToastProvider/useToast` FIFO 队列，同一 id 原位更新。
+- 声明式受控/非受控 Toast 与 scoped `ToastProvider/useToast` FIFO 队列；同一 id 原位完整替换配置。
 - neutral/success polite status，warning/danger assertive alert；action 在 live region 外且不会移动焦点。
-- 默认 3s、action 至少 5s、duration=0 常驻；hover/focus/async action 暂停，false/reject 保持打开。
+- 默认 3s、action 至少 5s、duration=0 常驻；hover、focus、页面隐藏和 async action 暂停，false/reject 保持打开。
 - Portal 继承 ConfigProvider container、locale、dir、theme、motion；支持 safe area、RTL、reduced-motion、forced-colors。
-- provider/controller 支持 show/success/warning/danger/update/close/clear，关闭原因完整且卸载回收 timer。
+- provider/controller 支持 show/success/warning/danger/update/close/clear；默认最多保留 20 条记录，关闭原因完整且卸载回收 timer。
 
 ## 何时使用
 
@@ -42,7 +42,7 @@ source: packages/mobile/src/Toast
 
 ## 结构与状态
 
-Portal viewport 不接管 pointer；内部 toast 包含 tone marker、icon、live message 和可选原生 action。Provider 只挂载队首，队首 exit 后先进先出。
+Portal viewport 不接管 pointer；内部 toast 包含 tone marker、icon、live message 和可选原生 action。Provider 只渲染队首，队首 exit 后先进先出。visible、queued 和尚在退场的记录总数受 `maxToasts` 限制。
 
 ## 基础用法
 
@@ -67,15 +67,15 @@ function Checkout() {
 
 ## Props
 
-API 由 `ToastProps`、`ToastShowOptions` 与相关类型生成。message 应简短；duration 非有限回退 3000、负值夹为 0；action 有效时长最少 5000。
+API 由 `ToastProps`、`ToastShowOptions` 与相关类型生成。message 应简短；duration 非有限值回退 3000，负值夹为 0，超大有限值夹到浏览器 timer 上限；action 有效时长最少 5000。`maxToasts` 默认 20，有限值截断为整数后夹到 1–100。
 
 ## Events
 
-`onOpenChange` reason 为 timeout/action。Provider `onClose` 另含 programmatic/clear，且每条 active record 只调用一次。action reject 调用 `onActionError`（若提供）并保持展示；根同时输出 `data-action-error=true`，因此未提供回调时错误仍可观察且不产生未处理 Promise rejection。
+`onOpenChange` reason 为 timeout/action。Provider `onClose` 另含 programmatic/clear/overflow：controller close 和 Provider 卸载使用 programmatic；超出容量的新 unique record 不入队并立即报告 overflow；动态缩容以 overflow 淘汰最新 queued record。正常接纳的记录只回调一次。action reject 调用 `onActionError`（若提供）并保持展示；根同时输出 `data-action-error=true`，因此未提供回调时错误仍可观察且不产生未处理 Promise rejection。错误观察器自身抛出的异常也会被隔离。关闭、同 id 替换或 Provider 卸载后才完成的旧 action 不再关闭新状态，也不再报告旧错误。
 
 ## Ref 与命令式方法
 
-声明式 ref 指向 toast root。provider controller 的 `update` 不改变队列位置，`close` 关闭自己的 active/queued record；stale controller 不会影响同 id 后续新记录。
+声明式 ref 指向 toast root。同 id `show` 是完整替换，省略 action/onActionError/onClose 等可选字段会清除旧值；controller `update` 是局部更新，可显式传 `undefined` 清除任一可选字段。两者均不改变队列位置；active 变更会重新开始完整 duration，queued 变更会在到达队首后获得完整 duration。`close` 关闭自己的 active/queued record；stale 或 overflow controller 不会影响同 id 后续新记录。Provider 卸载后保留的 API/controller 为空操作。
 
 ## 键盘操作
 
@@ -96,7 +96,7 @@ Toast 不捕获 Escape、不创建 focus trap，也不恢复/移动焦点。
 
 ## 动效
 
-open/closed 使用 opacity+小幅 transform Token。ConfigProvider `motion=reduced` 将 Portal 时长归零，系统 reduced-motion 取消 transition；provider reduced 模式不等待 exit 队列间隔。
+open/closed 使用 opacity+小幅 transform Token。ConfigProvider `motion=reduced` 将 Portal 时长归零，系统 reduced-motion 取消 transition；provider reduced 模式不等待 exit 队列间隔。文档页进入后台时暂停 countdown，恢复可见后继续剩余时长；hover、focus、visibility 与 action pause 可叠加，必须全部解除才继续。动态移除聚焦 action 或迁移 Portal 时会清理已失效的 focus/pointer pause，避免倒计时永久冻结。
 
 ## 主题与定制
 
@@ -104,7 +104,7 @@ tone、position、icon、action、container、class/style 是稳定入口。Port
 
 ## SSR 与 Next.js
 
-组件为 client component，但 closed Toast 与空 Provider 可安全 SSR。open Portal 在服务端不应依赖 body；首屏反馈应在 hydration 后由应用状态发出，避免重复公告。
+组件为 client component。closed Toast、空 Provider 和 open Toast 均可安全 SSR；open Portal 服务端及 hydration 首帧原位输出，hydration 后再迁移到配置的容器，并保留 locale、dir、theme 与 motion boundary。首屏是否公告仍由业务状态决定；不要在 server 与 hydration effect 各发一次相同反馈。
 
 ## RTL 与国际化
 
@@ -116,41 +116,47 @@ Portal 显式复制 `dir/lang`；icon/action 间距为 logical margin，safe-are
 
 ## 边界情况与已知限制
 
-- FIFO 一次只显示一条，队列不设硬上限；高频事件应使用稳定 id 合并。
+- FIFO 一次只显示一条；Provider 默认容纳 20 条、最高 100 条。达到上限时拒绝最新 unique record，但同 id 替换仍可用；运行时降低上限会保留 FIFO 头部，以 overflow 淘汰最新 queued record，并在 160ms 退场期后收敛。高频事件应使用稳定 id 合并。
 - 异步 action 不注入 AbortSignal；关闭/卸载会让 run 失效并禁止跨生命周期回写。
 - 不支持 swipe dismiss、堆叠、多 action、手动 close icon 或全局模块级 singleton。
 - message 为 ReactNode，但长交互内容不应放入 Toast。
 
 ## 性能预算
 
-Provider 只挂载一个 toast；每个 active/queued record 为小对象和至多一个 exit timer，消息 timeout 仅为当前项。用 id 聚合进度更新，避免无界队列。
+Provider 只渲染一个 toast；visible、queued 与 exiting 记录合计由 `maxToasts` 限制，消息 timeout 仅属于队首，退场项各有一个短 timer。用 id 聚合进度更新；容量不足时应在 `onClose({ reason: "overflow" })` 中记录或降级，而不是重试风暴。
 
 ## 测试证据
 
-- Unit: `Toast.test.tsx` 覆盖 live role、focus、timeout/pause、action minimum/false/reject、Portal locale/dir/theme/motion。
-- Provider unit: `ToastProvider.test.tsx` 覆盖 FIFO、stable id/controller update、close reason、clear 与 provider guard。
-- Story interaction: `WarningWithAction` 验证 Portal 公告、action 焦点与关闭回调；仓库门禁 `check-storybook-links` 本地验证 `play-fn 80/80`（80 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `Toast.test.tsx` 覆盖 live role、focus、hover/focus/visibility pause、action 动态移除、Portal 迁移、duration normalization、action minimum/false/reject、错误观察器隔离、陈旧 action 失效、卸载清理与 config boundary。
+- Provider unit: `ToastProvider.test.tsx` 覆盖 FIFO、同 id 完整替换、controller 显式清除字段、更新重置倒计时、pending action 替换、容量拒绝/动态缩容、close reason、clear、卸载重入与 provider guard。
+- Story interaction: `WarningWithAction` 验证 Portal 公告、action 焦点与关闭回调；`ProviderQueue` 验证同 id 替换、单队首和 clear 精确回调。最新本地 `check-storybook-links` 已验证 394 stories、365 个共置 storyIds 与 80/80 个带 play 的 title。
+- Storybook 全量矩阵历史基线：390×844 视口曾验证 374 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 2,618 个组合。该基线早于本轮队列与计时增强；本轮仅补 Toast 定向 Light/Dark 扫描，最终冻结候选仍需统一刷新全量矩阵。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 5440 B / 32768 B 预算；最大单值 `ToastProvider` 为 5348 B / 32768 B 预算，组合 Brotli 4817 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Toast.ssr.test.tsx` 覆盖 closed/provider；隔离 Next 16 hydration 后命令式 open Portal、队列切换与清理无 hydration/runtime error。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 6598 B / 32768 B 预算；最大单值 `ToastProvider` 为 6505 B / 32768 B 预算，组合 Brotli 5855 B；共享样式由应用单独导入一次。
+- SSR/hydration: `Toast.ssr.test.tsx` 覆盖无浏览器全局时 closed/provider 与 open/config/live/action 输出；`Toast.hydration.test.tsx` 断言 open 首帧原位 hydration 后迁移到 body、配置边界保留且无 React hydration error。隔离 Next 16 的历史证据另覆盖 hydration 后命令式 open Portal、队列切换与清理。
 - RTL/reduced-motion/forced-colors: config 与 CSS 完成，视觉证据待补。
-- Mobile Chromium/WebKit E2E: `queues accessible Toast messages without trapping focus or scroll` 在两种引擎断言 alert/status、上下位置、FIFO、44px action、业务输出、trigger 焦点保留、无 scroll lock 与 clear。Chromatic/real device 待最终批次。
+- Mobile Chromium/WebKit E2E: 重新构建本地 production 站后，`queues accessible Toast messages without trapping focus or scroll` 在两种引擎断言 alert/status、上下位置、FIFO、`maxToasts=2` 的 overflow 拒绝、44px action、业务输出、trigger 焦点保留、无 scroll lock 与 clear；同批 Light/Dark 全页 axe WCAG A/AA 通过。Chromatic/real device 延后到全部组件完成后的统一门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补连续公告节流策略评审、screen reader、系统 reduced-motion 队列和真实 safe-area；Portal 队列双引擎路径已完成。
+- 补连续公告节流策略评审、真实 screen reader、系统 reduced-motion 退场观感和真实 safe-area；Portal 队列双引擎路径已完成。
 
 ### 已完成
 
 - 完成 Portal config boundary、RTL logical CSS、reduced-motion/forced-colors、异步 action 生命周期、FIFO 清理、TSDoc、SSR 与完整契约文档。
 - 在隔离 Next H5 中补双 tone 队列、action、焦点/滚动边界与 hydration 双引擎证据。
+- 增加 visibility pause、替换 revision、陈旧 Promise 隔离、Provider 卸载重入保护与有界队列。
+- 明确同 id 完整替换与 controller partial update，修复可选 handler 残留、失效 pause reason 和动态缩容收敛。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                    | 迁移说明 |
-| ---------- | ------ | ------------ | ------------------------------------------------------- | -------- |
-| 2026-08-29 | 未发布 | hardening    | 完成队列、Portal 配置、异步 action 与跨平台可访问性加固 | API 兼容 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 queue/action/focus/hydration 证据   | 无       |
+| 日期       | 版本   | 类型         | 内容                                                     | 迁移说明 |
+| ---------- | ------ | ------------ | -------------------------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | hardening    | 完成队列、Portal 配置、异步 action 与跨平台可访问性加固  | API 兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 queue/action/focus/hydration 证据    | 无       |
+| 2026-08-29 | 未发布 | hardening    | 增加后台暂停、同 ID 计时重置、陈旧异步隔离和队列容量保护 | API 兼容 |
+| 2026-08-29 | 未发布 | verification | 增加 open SSR/hydration、卸载清理和 Provider 交互证据    | 无       |
+| 2026-08-29 | 未发布 | verification | 本地 production 双引擎复验容量上限、焦点、滚动与 axe     | 无       |
+| 2026-08-29 | 未发布 | hardening    | 修复配置清除、Portal/action 暂停清理与动态容量收敛       | API 兼容 |

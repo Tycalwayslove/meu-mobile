@@ -107,10 +107,15 @@ export const nextIcon = style({ transform: "rotate(180deg)" });
 export const rotationButton = style({
   ...controlBase,
   top: "var(--meu-space-3)",
-  insetInlineEnd: "var(--meu-space-3)",
+  left: "50%",
   fontSize: 13,
   fontWeight: 700,
-  lineHeight: 1
+  lineHeight: 1,
+  transform: "translateX(-50%)",
+  selectors: {
+    ...controlBase.selectors,
+    "&:active:not(:disabled)": { transform: "translateX(-50%) scale(0.96)" }
+  }
 });
 
 export const indicator = style({
