@@ -53,6 +53,7 @@ export function MeuFormSearchField<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(searchFieldProps.disabled !== undefined ? { disabled: searchFieldProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

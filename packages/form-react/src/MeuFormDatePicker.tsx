@@ -86,7 +86,10 @@ export type MeuFormDatePickerProps<
     value: TDate,
     details: { adapter: DateAdapter<TDate>; precision: DatePrecision }
   ) => MeuFormDataSerialization;
-  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
+  /**
+   * Props forwarded to the trigger except managed state. Disabling the trigger also omits the
+   * field from React Hook Form and native submissions.
+   */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -130,8 +133,16 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
   const resolvedOpen = controlledOpen ? open : uncontrolledOpen;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const resolvedAdapter = (adapter || nativeDateAdapter) as DateAdapter<TDate>;
+  const {
+    disabled: triggerDisabled,
+    onBlur: triggerOnBlur,
+    onClick: triggerOnClick,
+    ...resolvedTriggerProps
+  } = triggerProps || {};
+  const localDisabled = Boolean(triggerDisabled);
   const { field, fieldState } = useController({
     control,
+    disabled: localDisabled,
     name,
     ...(rules ? { rules } : {})
   });
@@ -153,13 +164,7 @@ export function MeuFormDatePicker<TFieldValues extends FieldValues, TDate = Date
           : resolvedAdapter.format(currentValue, formatPatterns[precision])
       ).values
     : [];
-  const {
-    disabled: triggerDisabled,
-    onBlur: triggerOnBlur,
-    onClick: triggerOnClick,
-    ...resolvedTriggerProps
-  } = triggerProps || {};
-  const disabled = Boolean(field.disabled || triggerDisabled);
+  const disabled = Boolean(field.disabled || localDisabled);
   const titleContent = pickerTitle === undefined ? label : pickerTitle;
   const hasTitle = titleContent !== undefined && titleContent !== null && titleContent !== "";
 

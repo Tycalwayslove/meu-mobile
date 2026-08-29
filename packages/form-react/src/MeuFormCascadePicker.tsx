@@ -74,7 +74,10 @@ export type MeuFormCascadePickerProps<
   required?: boolean;
   /** React Hook Form validation and value-processing rules registered for this field. */
   rules?: UseControllerProps<TFieldValues, Path<TFieldValues>>["rules"];
-  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
+  /**
+   * Props forwarded to the trigger except managed state. Disabling the trigger also omits the
+   * field from React Hook Form and native submissions.
+   */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -142,8 +145,16 @@ export function MeuFormCascadePicker<
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const resolvedOpen = controlledOpen ? open : uncontrolledOpen;
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const {
+    disabled: triggerDisabled,
+    onBlur: triggerOnBlur,
+    onClick: triggerOnClick,
+    ...resolvedTriggerProps
+  } = triggerProps || {};
+  const localDisabled = Boolean(triggerDisabled);
   const { field, fieldState } = useController({
     control,
+    disabled: localDisabled,
     name,
     ...(rules ? { rules } : {})
   });
@@ -156,13 +167,7 @@ export function MeuFormCascadePicker<
   const formattedValue = formatValue
     ? formatValue(currentValue, selectedOptions)
     : defaultFormattedValue(selectedOptions);
-  const {
-    disabled: triggerDisabled,
-    onBlur: triggerOnBlur,
-    onClick: triggerOnClick,
-    ...resolvedTriggerProps
-  } = triggerProps || {};
-  const disabled = Boolean(field.disabled || triggerDisabled);
+  const disabled = Boolean(field.disabled || localDisabled);
   const titleContent = pickerTitle === undefined ? label : pickerTitle;
   const hasTitle = titleContent !== undefined && titleContent !== null && titleContent !== "";
 

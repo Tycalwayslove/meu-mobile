@@ -54,6 +54,7 @@ export function MeuFormSelector<
   return (
     <Controller
       control={control}
+      {...(selectorProps.disabled !== undefined ? { disabled: selectorProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

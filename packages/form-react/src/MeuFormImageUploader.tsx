@@ -70,6 +70,7 @@ export function MeuFormImageUploader<TFieldValues extends FieldValues>({
   const uploaderRef = useRef<ImageUploaderRef | null>(null);
   const { field, fieldState } = useController({
     control,
+    ...(disabled !== undefined ? { disabled } : {}),
     name,
     ...(rules ? { rules } : {})
   });

@@ -54,6 +54,9 @@ export function MeuFormSegmentedControl<
   return (
     <Controller
       control={control}
+      {...(segmentedControlProps.disabled !== undefined
+        ? { disabled: segmentedControlProps.disabled }
+        : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

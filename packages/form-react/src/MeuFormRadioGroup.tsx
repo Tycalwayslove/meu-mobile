@@ -54,6 +54,7 @@ export function MeuFormRadioGroup<
   return (
     <Controller
       control={control}
+      {...(groupProps.disabled !== undefined ? { disabled: groupProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => {

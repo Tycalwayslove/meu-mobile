@@ -53,6 +53,7 @@ export function MeuFormTextInput<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(inputProps.disabled !== undefined ? { disabled: inputProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

@@ -53,6 +53,7 @@ export function MeuFormCheckbox<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(checkboxProps.disabled !== undefined ? { disabled: checkboxProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

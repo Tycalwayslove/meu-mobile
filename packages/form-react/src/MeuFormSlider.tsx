@@ -53,6 +53,7 @@ export function MeuFormSlider<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(sliderProps.disabled !== undefined ? { disabled: sliderProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => {

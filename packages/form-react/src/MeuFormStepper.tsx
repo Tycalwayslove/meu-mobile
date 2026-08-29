@@ -53,6 +53,7 @@ export function MeuFormStepper<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(stepperProps.disabled !== undefined ? { disabled: stepperProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => {

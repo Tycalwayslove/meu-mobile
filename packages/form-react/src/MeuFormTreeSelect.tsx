@@ -74,7 +74,10 @@ export type MeuFormTreeSelectProps<
   treeAriaLabel?: string;
   /** Popup heading; defaults to `label`, with `treeAriaLabel` used when no heading is present. */
   treeTitle?: ReactNode;
-  /** Props forwarded to the trigger except state, value, status, and ref managed by this adapter. */
+  /**
+   * Props forwarded to the trigger except managed state. Disabling either the tree or trigger
+   * also omits the field from React Hook Form and native submissions.
+   */
   triggerProps?: Omit<PickerTriggerProps, "open" | "ref" | "status" | "value">;
 };
 
@@ -133,8 +136,16 @@ export function MeuFormTreeSelect<
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const resolvedOpen = controlledOpen ? open : uncontrolledOpen;
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const {
+    disabled: triggerDisabled,
+    onBlur: triggerOnBlur,
+    onClick: triggerOnClick,
+    ...resolvedTriggerProps
+  } = triggerProps || {};
+  const localDisabled = Boolean(triggerDisabled || treeSelectProps.disabled);
   const { field, fieldState } = useController({
     control,
+    disabled: localDisabled,
     name,
     ...(rules ? { rules } : {})
   });
@@ -150,13 +161,7 @@ export function MeuFormTreeSelect<
   const formattedValue = formatValue
     ? formatValue(currentValue, selectedOptions)
     : defaultFormattedValue(selectedOptions);
-  const {
-    disabled: triggerDisabled,
-    onBlur: triggerOnBlur,
-    onClick: triggerOnClick,
-    ...resolvedTriggerProps
-  } = triggerProps || {};
-  const disabled = Boolean(field.disabled || triggerDisabled || treeSelectProps.disabled);
+  const disabled = Boolean(field.disabled || localDisabled);
   const titleContent = treeTitle === undefined ? label : treeTitle;
   const hasTitle = titleContent !== undefined && titleContent !== null && titleContent !== "";
 

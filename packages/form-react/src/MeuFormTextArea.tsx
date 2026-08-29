@@ -53,6 +53,7 @@ export function MeuFormTextArea<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(textAreaProps.disabled !== undefined ? { disabled: textAreaProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

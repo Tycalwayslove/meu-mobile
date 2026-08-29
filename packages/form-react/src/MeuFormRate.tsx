@@ -53,6 +53,7 @@ export function MeuFormRate<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(rateProps.disabled !== undefined ? { disabled: rateProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

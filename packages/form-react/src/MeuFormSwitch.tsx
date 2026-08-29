@@ -53,6 +53,7 @@ export function MeuFormSwitch<TFieldValues extends FieldValues>({
   return (
     <Controller
       control={control}
+      {...(switchProps.disabled !== undefined ? { disabled: switchProps.disabled } : {})}
       name={name}
       {...(rules ? { rules } : {})}
       render={({ field, fieldState }) => (

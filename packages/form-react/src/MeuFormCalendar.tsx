@@ -192,14 +192,16 @@ export function MeuFormCalendar<TFieldValues extends FieldValues, TDate = Date>(
     TFieldValues,
     CalendarFieldPath<TFieldValues, TDate>
   >["rules"];
+  const localDisabled = Boolean(calendarProps.disabled);
   const { field, fieldState } = useController<TFieldValues, CalendarFieldPath<TFieldValues, TDate>>(
     {
       control,
+      disabled: localDisabled,
       name,
       ...(controllerRules ? { rules: controllerRules } : {})
     }
   );
-  const resolvedDisabled = Boolean(field.disabled || calendarProps.disabled);
+  const resolvedDisabled = Boolean(field.disabled || localDisabled);
   let serializedValues: ReadonlyArray<MeuFormDataValue> = [];
 
   if (selectionMode === "multiple") {

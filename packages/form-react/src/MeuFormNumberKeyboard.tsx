@@ -92,7 +92,10 @@ export type MeuFormNumberKeyboardProps<TFieldValues extends FieldValues> =
       input: string,
       details: NumberKeyboardInputDetails
     ) => string;
-    /** Props forwarded to the trigger except state, value, status, ref, and ARIA wiring managed here. */
+    /**
+     * Props forwarded to the trigger except managed state and ARIA wiring. Disabling either the
+     * keyboard or trigger also omits the field from React Hook Form and native submissions.
+     */
     triggerProps?: Omit<
       NumberKeyboardTriggerProps,
       "aria-controls" | "open" | "ref" | "status" | "value"
@@ -146,17 +149,6 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
   const resolvedOpen = controlledOpen ? open : uncontrolledOpen;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const keyboardRef = useRef<HTMLDivElement>(null);
-  const { field, fieldState } = useController({
-    control,
-    name,
-    ...(rules ? { rules } : {})
-  });
-  const touchedOpenCycleRef = useRef(false);
-  useEffect(() => {
-    if (resolvedOpen) touchedOpenCycleRef.current = false;
-  }, [resolvedOpen]);
-  const currentValue = typeof field.value === "string" ? field.value : "";
-  const resolvedMaxLength = normalizeMaxLength(maxLength);
   const {
     disabled: triggerDisabled,
     onBlur: triggerOnBlur,
@@ -168,7 +160,20 @@ export function MeuFormNumberKeyboard<TFieldValues extends FieldValues>({
     onBlur: keyboardOnBlur,
     ...resolvedKeyboardProps
   } = keyboardProps;
-  const disabled = Boolean(field.disabled || triggerDisabled || keyboardDisabled);
+  const localDisabled = Boolean(triggerDisabled || keyboardDisabled);
+  const { field, fieldState } = useController({
+    control,
+    disabled: localDisabled,
+    name,
+    ...(rules ? { rules } : {})
+  });
+  const touchedOpenCycleRef = useRef(false);
+  useEffect(() => {
+    if (resolvedOpen) touchedOpenCycleRef.current = false;
+  }, [resolvedOpen]);
+  const currentValue = typeof field.value === "string" ? field.value : "";
+  const resolvedMaxLength = normalizeMaxLength(maxLength);
+  const disabled = Boolean(field.disabled || localDisabled);
   const titleContent =
     keyboardTitle === undefined && typeof label === "string" ? label : keyboardTitle;
   const displayValue = formatValue ? formatValue(currentValue) : currentValue;
