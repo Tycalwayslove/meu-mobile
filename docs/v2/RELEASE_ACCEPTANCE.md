@@ -29,7 +29,7 @@
 | API          | 226 个结构化类型、2361/2361 个字段有说明、242 个事件；API Extractor 公开契约已同步                                                                                                               |
 | Storybook    | 当前本地构建含 444 个 Story，文档引用 415 个 Story ID 且无失配；81/81 个标题含关键交互或语义断言；完整矩阵 444 × 7、共 3,108 个组合通过，0 axe 违规、0 `pageerror`                               |
 | 官网         | 68 个组件页与 8 个公共页面 × Light/Dark、共 152 个场景为最近全量浏览器基线；本批 Next 16 production build 与 82 个静态页面生成通过                                                               |
-| 单元与集成   | 当前工作树 `pnpm check` 全链路通过：测试任务 19/19；mobile 156 个文件、1049/1049 tests；form-react 20 个文件、153/153 tests；Next H5 production build 与移动双引擎 138/138 通过 |
+| 单元与集成   | 当前工作树 `pnpm check` 全链路通过：测试任务 19/19；mobile 156 个文件、1049/1049 tests；form-react 20 个文件、153/153 tests；Next H5 production build 与移动双引擎 140/140 通过 |
 | 兼容静态扫描 | 199 个 production 构建文件通过 Chrome 70 / iOS 13 基线                                                                                                                                           |
 | 体积         | 68/68 产品与 125/125 公开值在预算内；共享 CSS 25,021 B gzip / 32 KiB                                                                                                                             |
 | 运行时基准   | 性能/恢复专页 14/14、三轮重复 42/42：VirtualList 10,000 行与 40 次往返、TreeSelect 1,500 节点、SwipeActions/FloatingPanel 取消恢复，以及 Image/InfiniteList/ImageUploader 确定性失败、重试与取消 |

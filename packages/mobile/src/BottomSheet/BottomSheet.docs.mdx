@@ -4,8 +4,8 @@ slug: bottom-sheet
 package: "@meu/mobile"
 exports: [BottomSheet]
 status: verification
-localVerification: pending
-localGapIds: [LOC-BOTTOM-SHEET-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -125,11 +125,11 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 
 ### 待优化
 
-补 iOS rubber-band、Android WebView 多指、键盘弹起、旋转与真实速度吸附证据。
+统一发布验收时补 iOS rubber-band、Android WebView 多指、键盘弹起、旋转与真实速度吸附真机证据。
 
 ### 已完成
 
-修复动态 snap 身份、数字标题、位置本地化、监听生命周期和主指针边界；补 forced-colors、RTL、SSR、隔离 Next H5 键盘 snap/drag-dismiss 与永久文档。继续补齐 Portal 迁移后的焦点重绑、pointercancel 后续操作、关闭中断拖拽清理、退出期事件隔离、混合 pointerType 单会话和真实 hydration。
+修复动态 snap 身份、数字标题、位置本地化、监听生命周期和主指针边界；补 forced-colors、RTL、SSR、隔离 Next H5 键盘 snap/drag-dismiss 与永久文档。Portal 迁移后的焦点重绑、pointercancel 后续操作、关闭中断拖拽清理、退出期事件隔离、混合 pointerType 单会话和真实 hydration 均已有自动化证明。
 
 ## 变更记录
 

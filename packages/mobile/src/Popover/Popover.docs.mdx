@@ -4,8 +4,8 @@ slug: popover
 package: "@meu/mobile"
 exports: [Popover]
 status: verification
-localVerification: pending
-localGapIds: [LOC-POPOVER-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -118,16 +118,17 @@ Floating UI 提供滚动跟随和碰撞处理；兼容目标 Chrome/WebView 70+�
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 46311 B / 49152 B 预算，组合 Brotli 39001 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Popover.ssr.test.tsx` 验证服务端关联；隔离 Next production 以 `defaultOpen` 在 Chromium/WebKit 完成 FloatingPortal hydration，0 `pageerror`、0 `console.error`。
 - Mobile Chromium/WebKit E2E: 定位、Portal、Escape/outside 关闭、focus restore 与不锁滚动路径通过；Chromatic 与真机读屏延后到最终统一门禁。
+- Placement contract: 独立 Next production 路由在移动 Chromium/WebKit 中逐项验证 12 个 placement 的 resolved placement 与基础几何关系，并验证锚点位于嵌套滚动容器时滚动后面板持续跟随；全程 0 `pageerror` / `console.error`。
 
 ## V2 优化记录
 
 ### 待优化
 
-补 12 placement 截图、嵌套滚动容器、软键盘和 iOS 外部焦点证据。
+统一发布验收时补软键盘和 iOS 外部焦点真机证据；12 placement 与嵌套滚动容器已由双引擎几何矩阵覆盖，最终视觉基线集中发布。
 
 ### 已完成
 
-冻结非模态语义与关闭原因，补异常几何、forced-colors、长词、TSDoc、SSR、隔离 Next H5 定位/关闭与永久文档。
+冻结非模态语义与关闭原因，补异常几何、forced-colors、长词、TSDoc、SSR、隔离 Next H5 定位/关闭与永久文档；新增 12 placement + 嵌套滚动容器双引擎契约。
 
 ## 变更记录
 

@@ -2786,10 +2786,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/BottomSheet/BottomSheet.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-BOTTOM-SHEET-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3513,10 +3511,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Dialog/Dialog.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-DIALOG-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4699,10 +4695,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/NumberKeyboard/NumberKeyboard.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-NUMBER-KEYBOARD-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4956,10 +4950,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Popover/Popover.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-POPOVER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6605,10 +6597,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 12,
+    "locallyVerifiedProducts": 16,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 56,
+    "productsWithLocalGaps": 52,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

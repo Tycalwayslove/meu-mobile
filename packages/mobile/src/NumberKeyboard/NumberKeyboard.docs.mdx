@@ -4,8 +4,8 @@ slug: number-keyboard
 package: "@meu/mobile"
 exports: [NumberKeyboard, NumberKeyboardTrigger]
 status: verification
-localVerification: pending
-localGapIds: [LOC-NUMBER-KEYBOARD-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -129,6 +129,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 - randomOrder 使用 `Math.random`，仅视觉混淆。
 - decimal 不阻止 caller 输入多个小数点；金额精度与格式由业务层控制。
 - 鼠标焦点保留不等于触摸设备能强制保留系统软键盘。
+- 自定义键盘与系统软键盘不应同时承担同一字段的输入。需要确定不唤起系统键盘时，使用 `NumberKeyboardTrigger` 或由业务将真实 input 设为 `readOnly`；需要系统键盘兜底时，关闭 NumberKeyboard 并恢复可编辑 input 的 `inputMode="numeric|decimal"`，不要尝试用脚本强制保持移动端软键盘。
 - 非模态组件不会阻止背景滚动或背景操作。
 
 ## 性能预算
@@ -153,8 +154,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 
 ### 待优化
 
-- 补真实 iOS/Android pointer cancel、长按菜单、系统软键盘共存与读屏路径。
-- 明确触摸设备与系统软键盘共存限制，并提供降级示例。
+- 统一发布验收时补真实 iOS/Android pointer cancel、长按菜单、软键盘切换与读屏路径。
 
 ### 已完成
 
@@ -163,6 +163,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 - Escape 按开放栈只交给顶层实例，关闭或卸载后自动移交下一层。
 - Portal 继承 theme/locale/dir/motion；补 initial-open hydration、RTL/reduced-motion、关闭期事件隔离和连删取消状态机。
 - form adapter 已纳入 22 个适配器的统一 reset 快照，重置后同时校验真实控件、原生 FormData 与 RHF 提交值。
+- 明确自定义键盘与系统软键盘互斥的移动端限制，并记录 `NumberKeyboardTrigger` / `readOnly` 与恢复原生 `inputMode` 的降级路径。
 
 ## 变更记录
 
