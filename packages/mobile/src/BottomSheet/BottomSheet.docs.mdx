@@ -117,7 +117,7 @@ O(snapPoints) 归一和吸附；仅渲染期间监听 viewport/ResizeObserver，
 - Story interaction: `Default` 验证打开、handle 聚焦、关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 11718 B / 32768 B 预算，组合 Brotli 10330 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 7469 B / 32768 B 预算，组合 Brotli 6722 B；共享样式由应用单独导入一次。
 - SSR/hydration: `BottomSheet.ssr.test.tsx` 覆盖服务端结构；`BottomSheet.hydration.test.tsx` 使用真实 `hydrateRoot` 验证初始打开的 body Portal 无 recoverable error；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal/测量 hydration，0 `pageerror`、0 `console.error`。
 - Mobile Chromium/WebKit E2E: 重新构建本地 production 站后，双引擎验证 handle 键盘 snap、pointer drag-dismiss、关闭原因、焦点恢复、body scroll lock 清理、动态 Portal 容器、RTL、`motion="reduced"`，以及模态期间可操作 Toast 进入 Tab 循环；同批 Light/Dark 全页 axe WCAG A/AA 通过。Chromatic 与真机软键盘/读屏延后到全部组件完成后的统一门禁。
 

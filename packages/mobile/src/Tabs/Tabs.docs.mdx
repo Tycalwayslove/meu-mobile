@@ -137,7 +137,7 @@ item.key 必须唯一稳定。内部 ref 使用 Map，因此 `__proto__` 等任�
 - SSR/hydration (`Tabs.ssr.test.tsx`)：SSR role/选择/lazy 结构；真实 `hydrateRoot` 验证 useId 关联、ref、键盘交互与 0 recoverable error。
 - Story interaction：`KeyboardInteraction` 验证 End 后的焦点、automatic selection 与可见 panel；`OverflowAndDisabled` 在真实窄容器验证右侧初始溢出、disabled 跳过、roving automatic activation、滚动入视后的左侧物理溢出；`ManualActivation` 验证移动焦点不选中及 Space 激活；`ControlledActivation` 验证调用方提交后 panel/selection 同步。
 - Storybook Chromium extended：目标构建后扫描 10 Stories × 7 场景（Light、Dark、RTL、en-US、reduced-motion、200% 字号、forced-colors），70/70 play/axe 通过，0 违规与 0 render error。`AdaptiveModes` 在匹配媒体环境中读取真实 computed style，断言 reduced-motion transition ≤1ms、forced-colors 取消 mask/恢复边界；`Zoom200PercentEquivalent` 以 195 CSS px 验证 390px 视口在 200% 缩放等效布局下仍横向可操作并保持 48px 高度。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4867 B / 32768 B 预算，组合 Brotli 4300 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3378 B / 32768 B 预算，组合 Brotli 3003 B；共享样式由应用单独导入一次。
 - 历史隔离 Next 运行时：`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖外部受控切换、panel 关联与溢出状态；本次按目录约束未改动或重跑共享 Next H5 场景。
 - 本轮未执行/不可声称：Chromatic、真机读屏、真实 iOS/Android WebView、触摸横向滑动、全量 E2E。
 

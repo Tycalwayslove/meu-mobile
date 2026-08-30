@@ -191,7 +191,7 @@ panel 使用 CSS Grid `0fr → 1fr` 和 opacity 过渡，不读取 `scrollHeight
 
 默认所有 panel 持续挂载，DOM 规模为 `O(items + content)`，这是表单状态保留和流畅退出动画的明确取舍。对大量或昂贵内容，应由业务分页、虚拟化或延迟获取数据；不要把数百个富内容 panel 同时放入一个 Collapse。公共 bundle 数值由全库最终批次统一重新生成，本批不触发发布构建、Chromatic 或 Vercel。
 
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5939 B / 32768 B 预算，组合 Brotli 5264 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3601 B / 32768 B 预算，组合 Brotli 3247 B；共享样式由应用单独导入一次。
 
 ## 测试证据
 

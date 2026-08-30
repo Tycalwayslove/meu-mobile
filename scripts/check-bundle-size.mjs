@@ -2,6 +2,7 @@
 
 import commonjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
+import terser from "@rollup/plugin-terser";
 import { Buffer } from "node:buffer";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { brotliCompressSync, gzipSync } from "node:zlib";
@@ -88,13 +89,14 @@ async function measureBundle(product, values) {
         }
       },
       nodeResolve({ extensions: [".mjs", ".js", ".json"] }),
-      commonjs()
+      commonjs(),
+      terser({ format: { comments: false } })
     ],
     treeshake: { moduleSideEffects: false }
   });
 
   try {
-    const generated = await bundle.generate({ format: "esm" });
+    const generated = await bundle.generate({ compact: true, format: "esm" });
     const code = generated.output
       .filter((output) => output.type === "chunk")
       .map((output) => output.code)
@@ -184,9 +186,11 @@ const overBudgetValues = products.flatMap((product) =>
 const output = {
   schemaVersion: 1,
   assumptions: {
+    compression:
+      "Committed gzip and Brotli figures use the generating Node zlib; checks compare deterministic raw output and independently enforce the current runtime gzip budget so zlib-version drift cannot stale otherwise identical evidence.",
     css: "Required token, primitive and mobile styles imported once per application.",
     javascript:
-      "Rollup tree-shaken ESM production bundle for each documented product; package peer dependencies remain external."
+      "Rollup tree-shaken compact ESM production bundle for each documented product; package peer dependencies remain external."
   },
   css: {
     budgetBytes: cssBudgetBytes,
@@ -206,6 +210,40 @@ const output = {
 const serialized = `${JSON.stringify(output, null, 2)}\n`;
 const staleDocs = [];
 
+function stableEvidence(bundleOutput) {
+  return {
+    schemaVersion: bundleOutput.schemaVersion,
+    assumptions: bundleOutput.assumptions,
+    css: {
+      budgetBytes: bundleOutput.css.budgetBytes,
+      files: bundleOutput.css.files,
+      rawBytes: bundleOutput.css.rawBytes
+    },
+    products: bundleOutput.products.map((product) => ({
+      budgetBytes: product.budgetBytes,
+      docsPath: product.docsPath,
+      name: product.name,
+      packageName: product.packageName,
+      rawBytes: product.rawBytes,
+      slug: product.slug,
+      valueBundles: product.valueBundles.map((value) => ({
+        budgetBytes: value.budgetBytes,
+        name: value.name,
+        rawBytes: value.rawBytes
+      }))
+    })),
+    summary: {
+      documentedProducts: bundleOutput.summary.documentedProducts,
+      publicValues: bundleOutput.summary.publicValues
+    }
+  };
+}
+
+let baseline;
+if (check && existsSync(baselinePath)) {
+  baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+}
+
 function bundleEvidence(product) {
   const largestValue = [...product.valueBundles].sort(
     (left, right) => right.gzipBytes - left.gzipBytes
@@ -219,7 +257,13 @@ function bundleEvidence(product) {
 
 for (const product of products) {
   const docsPath = path.join(workspaceRoot, product.docsPath);
-  const expected = bundleEvidence(product);
+  const baselineProduct = baseline
+    ? baseline.products.find(
+        (candidate) =>
+          candidate.name === product.name && candidate.packageName === product.packageName
+      )
+    : undefined;
+  const expected = bundleEvidence(baselineProduct || product);
   const source = readFileSync(docsPath, "utf8");
   if (check) {
     if (!source.includes(expected)) staleDocs.push(product.docsPath);
@@ -235,7 +279,10 @@ for (const product of products) {
 }
 
 if (check) {
-  if (!existsSync(baselinePath) || readFileSync(baselinePath, "utf8") !== serialized) {
+  if (
+    !baseline ||
+    JSON.stringify(stableEvidence(baseline)) !== JSON.stringify(stableEvidence(output))
+  ) {
     console.error(
       "Bundle-size evidence is stale. Run `pnpm bundle:size:update` and review the diff."
     );

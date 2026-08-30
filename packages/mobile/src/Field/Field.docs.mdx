@@ -180,7 +180,7 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 - Story interaction: `Default` 验证原生 label、required 与说明 IDREF；`NestedLayout` 验证嵌套关联与唯一 id。对应 Story 已纳入中央生成的链接、关键 play 和浏览器矩阵门禁，组件文档不复制易漂移的全局计数。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2120 B / 32768 B 预算，组合 Brotli 1857 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1330 B / 32768 B 预算，组合 Brotli 1210 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Field.ssr.test.tsx` 覆盖稳定原生关联；隔离 Next 16 表单 hydration 后 description/error IDREF、invalid 与首次错误路径无运行时异常
 - RTL: 使用逻辑属性，并已进入全库 RTL、200% 字号和 forced-colors 浏览器矩阵
 - Reduced motion: 不适用，无动效

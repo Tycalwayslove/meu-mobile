@@ -133,7 +133,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 - Story interaction: `Solid` 验证按钮激活、焦点保持与状态更新；`AsyncFailureLifecycle` 在真实布局环境测量 loading 前后宽度、重复激活、失败恢复和再次操作；本批 `Actions/Button` 6/6 stories × Light/Dark 共 12/12 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2036 B / 32768 B 预算，组合 Brotli 1809 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1533 B / 32768 B 预算，组合 Brotli 1368 B；共享样式由应用单独导入一次。
 - Figma：canonical `Meu/Button/Solid` 为 `27:74`，同页 sibling sets `27:75` / `27:76` / `27:77` 覆盖 outline/ghost/text；共 108 variants，Light `450:75`、Dark `450:99`、QA `450:123`。可见 fills 195/195、strokes 105/105、radii 122/122 全绑定，最小高度 44px，未命名节点 0。
 - SSR/hydration: Next 16 隔离消费者完成 production SSR/hydration；hydration 后 Button 可切换主题并提交表单，且全程无 `pageerror` / `console.error`
 - RTL: 已改用 flex gap，待浏览器视觉证明

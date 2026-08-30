@@ -142,7 +142,7 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 - Story interaction: `Single` 验证 Portal 打开、draft 选择、确认提交与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 TreeSelect 8 个 Story × 7 场景定向复验 56/56 通过，覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 30548 B / 49152 B 预算，组合 Brotli 26027 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 19596 B / 49152 B 预算，组合 Brotli 17502 B；共享样式由应用单独导入一次。
 - SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏和 tree 单一 token 归属；`TreeSelect.hydration.test.tsx` 证明服务端 62 个完整节点在真实 hydration 后才收敛为虚拟窗口。隔离 Next production 从响应 HTML 验证 122 个 open TreeSelect treeitem 和第二层语义，随后在 Chromium/WebKit 完成 Portal hydration、窗口化与交互，0 hydration/runtime error。
 - RTL: RightToLeft Story 与 unit
 - Reduced motion: CSS 静态规则与隔离 Next 双引擎 computed style 均通过；异步 spinner 为 `animation-name: none`，chevron 为 `transition-duration: 0s`。

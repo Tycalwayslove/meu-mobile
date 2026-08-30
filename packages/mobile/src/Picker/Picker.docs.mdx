@@ -138,7 +138,7 @@ Popup 为具名模态 dialog；每列是具名单选 listbox，通过 aria-activ
 - Story interaction: `SingleColumn.play` 验证选择、确认、表单显示和焦点恢复；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
 - Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 `Picker` 匹配集 20 个 Story × 7 场景共 140/140 通过，其中 `Data Entry/Picker` 当前 5 个 Story 为 35/35。新增 open 长标题与 `Keep current choice` / `Confirm selection` 场景会在 200% 字号下断言无横向溢出、两个操作目标高度均不低于 44px；全程 0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 13905 B / 49152 B 预算；最大单值 `Picker` 为 13008 B / 49152 B 预算，组合 Brotli 12225 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 9120 B / 49152 B 预算；最大单值 `Picker` 为 8578 B / 49152 B 预算，组合 Brotli 8190 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Picker.ssr.test.tsx` 与 `Picker.hydration.test.tsx` 提供直接证据；隔离 Next production 还从响应 HTML 验证 dialog/listbox/selected 语义，再在 hydration 后执行滚轮 settle。
 - RTL: LongLabelsRTL Story 与 Portal unit
 - Reduced motion: ConfigProvider Portal unit 与七环境 Storybook 矩阵通过。

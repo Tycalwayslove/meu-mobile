@@ -113,7 +113,7 @@ O(1) DOM，无测量、Observer 或持续监听；仅 open 且 lockScroll 时参
 - Story interaction: `WithDecorativeContent.play` 验证装饰内容与 accessibility tree 隔离；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4254 B / 32768 B 预算，组合 Brotli 3736 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2594 B / 32768 B 预算，组合 Brotli 2326 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Mask.ssr.test.tsx`；隔离 Next 16 hydration 后 inline 装饰 Mask 与 Popup Portal Mask 均保持稳定，0 hydration/runtime error
 - Mobile Chromium/WebKit E2E: Popup 场景在两种引擎断言 inline Mask 的 `aria-hidden`/absolute、自身不锁滚动；Portal Mask 点击产生 `reason=mask` 并清理 scroll lock。Chromatic / 真机读屏仍属最终门禁。
 - Overlay boundary gate: 独立 closed/forceMount Mask 在移动 Chromium/WebKit 中验证 Portal 后仍继承 en-US、RTL、dark、reduced-motion、`color-scheme` 和主题/动效 Token；静态扫描会阻止直接 Portal 消费者遗漏统一 boundary。

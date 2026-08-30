@@ -190,7 +190,7 @@ ref 指向 `HTMLOListElement`。没有命令式跳步 API；滚动、聚焦或�
 - SSR：`Steps.ssr.test.tsx` 2 项覆盖有序列表/current 语义，以及交互 button、disabled 与 dot 的确定性输出。
 - Hydration：`Steps.hydration.test.tsx` 分别覆盖只读 div 与交互 button，要求 0 recoverable error / console.error。
 - Story：`Horizontal` 检查只读滚动焦点和状态；`Interactive` 检查受控切换；另有 Vertical、Error、CompactDots、长文案和嵌套 RTL 场景。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4529 B / 32768 B 预算，组合 Brotli 3984 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3035 B / 32768 B 预算，组合 Brotli 2690 B；共享样式由应用单独导入一次。
 - 本批本地命令：Steps 3 files / 15 tests、定向 ESLint/格式化、`@meu/mobile` typecheck/build、API strict 均通过。隔离 Next H5 production build 后，mobile Chromium/WebKit 均验证 Enter 激活、LTR/RTL 水平根 `←/→` 溢出滚动、current/disabled 状态与 0 runtime console/page error。
 - Chromatic/Vercel：遵循开发阶段降频策略，本批不运行；全部组件完成后统一建立最终 Light/Dark/RTL/字号/高对比视觉证据并部署。
 - Real device：待最终发布前在 iOS WebView 与 Android WebView 补触摸、横向滚动、VoiceOver/TalkBack 验收。

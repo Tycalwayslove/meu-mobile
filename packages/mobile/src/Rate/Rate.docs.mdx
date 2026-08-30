@@ -174,7 +174,7 @@ WKWebView 与 Android 低版本的功能真机矩阵，因此不能把语法兼�
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormRate` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `rating:4`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer 清零或拖动。
 - Next-H5 pointer E2E：`drags slider and rate with browser pointer events and resets cancelled sessions` 在两种移动引擎、390×844 视口中通过 `page.mouse` 产生 `isTrusted=true` 的 pointerdown，将评分拖至 4，并在同一坐标再次点击验证 `allowClear` 清零；随后在可信 pointerdown 会话中派发 `isTrusted=false` 的 pointercancel，验证取消回调收敛。该证据不等同于物理触摸或系统级取消。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4795 B / 32768 B 预算，组合 Brotli 4266 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3088 B / 32768 B 预算，组合 Brotli 2770 B；共享样式由应用单独导入一次。
 - Figma：`Meu/Rate` set `57:197`，15 variants；Light `451:104`、Dark `451:154`、QA `451:179`。Stepper/Slider/Rate/Selector 合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：iOS/Android 物理触摸 drag、系统 pointercancel 与滚动竞争；forced-colors 聚焦与半星截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 

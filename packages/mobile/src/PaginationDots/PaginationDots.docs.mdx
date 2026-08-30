@@ -123,7 +123,7 @@ DOM 数量压缩为 O(maxVisible)，不随巨大 count 线性增长。
 - Story：受控 `Interactive.play` 验证页码写回和 roving tabIndex；另有 disabled、compressed、vertical、RTL、dot/line 场景，均已构建进本地静态索引并进入全库链接、axe 与视觉矩阵。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：当前 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。只读与 interactive 受控消费路径另在 Chromium/WebKit 定点通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3954 B / 32768 B 预算，组合 Brotli 3491 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2704 B / 32768 B 预算，组合 Brotli 2402 B；共享样式由应用单独导入一次。
 - RTL / reduced-motion / forced-colors：Unit、Story、CSS 静态契约与本地全库浏览器矩阵均已完成。
 - Mobile Chromium/WebKit E2E: `uses native navigation actions, radio and tab segments, and controlled page dots` 在两种引擎断言只读 `img` 语义、interactive roving tab stop、ArrowRight 焦点、Enter 激活、`aria-current=page` 和外部翻页后的 accessible name
 - Chromatic Light/Dark: 发布后建立

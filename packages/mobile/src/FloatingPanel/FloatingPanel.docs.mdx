@@ -127,7 +127,7 @@ handle 是具名原生 button，关联 body 与实时高度说明；body 是带�
 - Story interaction: 5 个 Story 中 `Bottom` 验证 handle 点击与受控锚点更新；`DynamicControlledAnchors` 验证容器宽度与 anchors 同步变化后的 360→320 重归一及受控 handle 请求；`LongLocalizedAdaptiveContent` 验证 RTL/英文/reduced-motion 配置边界、长内容、44px handle、200% 字体无横向溢出、最高 anchor 键盘/原生滚动移交和 forced-colors 边界。新增 Story 源码通过 TypeScript 与定向 ESLint，随批次重建后统一执行浏览器矩阵。
 - Storybook 浏览器矩阵：最近一次静态基线覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，执行 play 后再运行 axe WCAG A/AA 并检查 `pageerror`；本轮不单独重建或部署，新增 Story 随批次总门禁复验。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5857 B / 32768 B 预算，组合 Brotli 5186 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4033 B / 32768 B 预算，组合 Brotli 3604 B；共享样式由应用单独导入一次。
 - SSR/hydration: `FloatingPanel.ssr.test.tsx` 在 Node 覆盖确定 modeless shell、ARIA 关系和完整配置边界；`FloatingPanel.hydration.test.tsx` 捕获服务端根节点并证明 hydration 后复用同一节点、`data-measured=true`、初始 anchor/index 为 300px/1、最大壳 440px 与 translate 140px、RTL/locale/theme/motion 属性、键盘调整可用，且 0 recoverable/console error。隔离 `layout-contract.spec.ts` 在真实移动浏览器中断言测量完成后的 300px 可见高度。
 - RTL: 垂直方向不反转；Unit/hydration 与 LongLocalizedAdaptiveContent Story 固化根配置边界和长内容排版。
 - Reduced motion: 组件根复制 ConfigProvider 的 theme/motion boundary，避免自身 `data-meu-theme` 重置显式 reduced Token；独立 Next H5 双引擎验证进入时长为 0ms 且 300px 初始 anchor 无过渡漂移。

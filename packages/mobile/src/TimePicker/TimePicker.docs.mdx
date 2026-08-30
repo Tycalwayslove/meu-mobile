@@ -123,7 +123,7 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 - Story interaction：`Default` 验证 Portal 打开、draft 选择、确认回调与焦点恢复；新增 `ConstrainedTwelveHourSeconds.play` 验证 12h 四列语义顺序、秒步长/filter 与 active-descendant 完整性，`LongLocalizedActionsRtl.play` 验证 RTL 不反转语义列、reduced-motion 上下文、无横向溢出和操作目标不低于 44px。当前 5 个 Story 将随主批统一重建后进入七环境门禁。
 - Storybook 浏览器矩阵：本轮 `TimePicker` 匹配集 6 个 Story × 7 场景共 42/42 通过，其中 `Data Entry/TimePicker` 当前 5 个 Story 为 35/35。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，play 后 axe WCAG A/AA 为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 16445 B / 49152 B 预算；最大单值 `TimePicker` 为 16201 B / 49152 B 预算，组合 Brotli 14600 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 10873 B / 49152 B 预算；最大单值 `TimePicker` 为 10701 B / 49152 B 预算，组合 Brotli 9798 B；共享样式由应用单独导入一次。
 - Figma：Meu/TimePicker 245:2；8 variants、48px options、12/24h Light/Dark QA。
 - 双引擎、Chromatic 视觉回归、真机滚轮/读屏：待发布门禁。
 

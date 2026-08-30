@@ -114,7 +114,7 @@ O(1) DOM，无测量、Observer 或监听；大量行应结合 VirtualList。
 - Story interaction: `List.stories.tsx` 的 `Card.play` 验证 action Cell 到业务输出的事件链；当前 `check-storybook-links` 已验证 81/81 个 Storybook title 均至少包含一项关键 play，Loading Story 已纳入全量矩阵。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；Chromium/WebKit 共 8 个批次定向场景通过，其中 Cell 用例验证原生 button/link、disabled/loading、status、ready 后动作恢复与业务事件，批次整页 Light/Dark axe WCAG A/AA 也通过。loading link 的 href 恢复由共置 hydration 测试证明；当前 68 页 × Light/Dark、共 136 场景全量通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4490 B / 32768 B 预算，组合 Brotli 3972 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2847 B / 32768 B 预算，组合 Brotli 2549 B；共享样式由应用单独导入一次。
 - SSR/hydration: `List.ssr.test.tsx` 覆盖 Cell 原生节点；`List.hydration.test.tsx` 覆盖 loading 到 ready 的节点稳定与 0 mismatch；隔离 Next 16 hydration 后 button/link/static/disabled 节点保持一致，0 hydration/runtime error
 - Reduced motion: 系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 已覆盖显式策略，真实浏览器视觉留到最终矩阵。
 - Mobile Chromium/WebKit E2E: `keeps Cell actions, links and List semantics native` 在两种引擎断言 action button、原生 href、disabled/loading、status 与业务输出。Chromatic / 真机读屏仍属最终门禁。

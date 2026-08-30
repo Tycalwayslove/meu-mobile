@@ -158,7 +158,7 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 - 历史 Story interaction：`InteractiveExpansion` 验证测量后展开状态；`check-storybook-links` 已验证全库 title 具备关键 play，本 title 的 play 在历史本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 Ellipsis 11 个 Story × 7 场景定向复验 77/77 通过，覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3166 B / 32768 B 预算，组合 Brotli 2779 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2171 B / 32768 B 预算，组合 Brotli 1938 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Ellipsis.ssr.test.tsx` 与 `Ellipsis.hydration.test.tsx` 提供组件内直接证据；隔离 Next 16 的历史证据保留
 - RTL: NarrowRTL Story 在 190px 混合 Arabic/Latin 内容下真实进入 collapsed，使用 middle 截断并保留可操作按钮
 - Reduced motion: 无动画，不适用

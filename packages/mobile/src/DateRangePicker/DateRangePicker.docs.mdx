@@ -120,7 +120,7 @@ dialog 必须由 title、aria-label 或 aria-labelledby 命名；Calendar 和 pr
 - Story interaction：4 个 Story 中 `Default` 验证打开、preset、确认与焦点恢复；`CrossMonthAndDisabledIntermediate` 验证 8 月 30 日到 9 月 2 日跨月选择、边界与中间禁用日契约；`LongLocalizedAdaptiveContent` 验证 RTL Portal、超长标题/摘要/操作文案无横向溢出、44px 操作目标、reduced-motion 与 forced-colors。新增 Story 源码已通过 TypeScript 与定向 ESLint；集成批次重建静态站后统一执行七环境矩阵。
 - Storybook 浏览器矩阵：本轮 `DateRangePicker` 匹配集 5 个 Story × 7 场景共 35/35 通过，其中 `Data Entry/DateRangePicker` 当前 4 个 Story 为 28/28。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，play 后 axe WCAG A/AA 为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）4 个公开值组合 gzip 20759 B / 49152 B 预算；最大单值 `DateRangePicker` 为 20748 B / 49152 B 预算，组合 Brotli 18063 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）4 个公开值组合 gzip 13477 B / 49152 B 预算；最大单值 `DateRangePicker` 为 13444 B / 49152 B 预算，组合 Brotli 12101 B；共享样式由应用单独导入一次。
 - SSR/hydration：`DateRangePicker.ssr.test.tsx` 与 `DateRangePicker.hydration.test.tsx` 提供直接证据，并显式固定首屏月份和值，避免依赖跨午夜 `now()`。
 - Figma：Meu/DateRangePicker 270:676；Empty/Start/Complete/Disabled、44px targets、Light/Dark QA。
 - Chromium/WebKit、Chromatic、真机焦点/滚动：最终统一门禁。

@@ -181,7 +181,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - 本次定向 Storybook 扫描：ConfigProvider 4 个 Story × Light/Dark，共 8 个场景，play 与 axe WCAG A/AA 均通过。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 769 B / 32768 B 预算；最大单值 `ConfigProvider` 为 720 B / 32768 B 预算，组合 Brotli 668 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 478 B / 32768 B 预算；最大单值 `ConfigProvider` 为 459 B / 32768 B 预算，组合 Brotli 420 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
 - Reduced motion: 单元测试覆盖嵌套策略；Next H5 双引擎验证 system media query 与显式 reduced class 的 computed duration。FloatingPanel 专项同时证明带自身 theme 属性的非 Portal 固定层也必须复制 motion boundary，进入时长为 0ms。

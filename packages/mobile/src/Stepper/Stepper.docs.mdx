@@ -182,7 +182,7 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 - Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本批新增长文案 RTL、显式 reduced-motion 和 Light/Dark 并列预览；定向扫描在 390×844 视口验证 18 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 126 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5867 B / 32768 B 预算，组合 Brotli 5173 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3872 B / 32768 B 预算，组合 Brotli 3465 B；共享样式由应用单独导入一次。
 - Figma：canonical `Meu/Stepper` set `54:74`，Min `54:147`、Max `54:220`；36 variants。Light `451:79`、Dark `451:129`、QA `451:179`；合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：软键盘/IME/粘贴与物理长按移动 E2E、系统 pointercancel/滚动竞争、forced-colors 聚焦截图、Light/Dark 视觉基线、VoiceOver/TalkBack。
 

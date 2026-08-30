@@ -210,7 +210,7 @@ render 为 O(options)，预期 2–5 项。indicator 每次更新只读取 root 
 - Story interaction: `ControlledInteraction` 验证受控选择状态与回调；`TabsMode` 和 `ReducedMotion` 补充语义与动效场景，均已进入本地静态 Storybook 索引与全库矩阵。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 隔离 Next H5：production build 后，radiogroup 受控切换、tabs 方向键/焦点/panel 关联及表单 adapter 路径在移动 Chromium/WebKit 通过；indicator 精确几何由组件 Unit 覆盖，最终视觉基线待统一建立。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 6279 B / 32768 B 预算，组合 Brotli 5566 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4124 B / 32768 B 预算，组合 Brotli 3718 B；共享样式由应用单独导入一次。
 - Figma：`Meu/SegmentedControl` set `114:112`，12 variants；Light `451:3453`、Dark `451:3467`、QA `451:3481`。可见 fills 84/84、strokes 6/6、radii 57/57 全绑定，最小高度 48px，未命名节点与 variant overlap 均为 0。
 - RTL / reduced motion / forced colors: 实现、Story 与全库浏览器矩阵均已完成；最终 Chromatic 签字留到统一发布批次。
 - 移动 Chromium/WebKit E2E：`uses native navigation actions, radio and tab segments, and controlled page dots` 验证原生 radio 选择、tabs ArrowRight 自动激活、焦点与 caller-owned tabpanel；表单场景验证固定 radiogroup adapter。indicator 视觉基线与 VoiceOver/TalkBack 真机待补。

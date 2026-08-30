@@ -240,7 +240,7 @@ rail 边界、padding 与 sticky offset 使用逻辑属性，DOM `dir="rtl"` 时
 
 选择、去重和渲染均为 O(items)。默认 Tabs 会保留全部 panel DOM；`destroyInactive` 可降低 DOM 成本，但以丢失 inactive 状态为代价。推荐几十项以内；大集合先缩小数据，而不是把业务虚拟化隐藏在导航组件中。
 
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4923 B / 32768 B 预算，组合 Brotli 4349 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3285 B / 32768 B 预算，组合 Brotli 2919 B；共享样式由应用单独导入一次。
 
 ## 测试证据
 

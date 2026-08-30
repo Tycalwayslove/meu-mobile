@@ -13,14 +13,14 @@ pnpm bundle:size:update
 pnpm bundle:size:check
 ```
 
-脚本对组件 manifest 中 68 个产品族和 125 个公开运行时值逐项创建 Rollup ESM 消费入口，并使用生产 tree-shaking 生成独立 bundle：
+脚本对组件 manifest 中 68 个产品族和 125 个公开运行时值逐项创建 Rollup ESM 消费入口，使用生产 tree-shaking 与官方 Terser 插件生成独立压缩 bundle：
 
 - React、React DOM 与被测包的 peer dependencies 保持 external；
 - 被测包的普通 dependencies 和 Meu workspace 运行时依赖计入结果；
-- 同时记录 raw、gzip level 9 与 Brotli 字节数；
+- 同时记录 minified raw、gzip level 9 与 Brotli 字节数；
 - Token、Primitive 与 Mobile CSS 合并后单独计算，按每个应用只导入一次处理；
 - 精确结果写入 [`bundle-size.json`](./bundle-size.json)，并同步到每一份组件留存文档；
-- `--check` 同时校验构建结果、JSON 基线、组件文档证据与预算，任何漂移都会失败。
+- `--check` 以跨平台确定的 minified raw 输出校验 JSON 身份和组件文档证据，并在当前 Node/zlib 环境重新执行 gzip 预算；因此 zlib 版本造成的少量压缩差异不会误报“证据过期”，真实源码漂移或任一环境超预算仍会失败。
 
 ## 预算
 
@@ -38,9 +38,9 @@ pnpm bundle:size:check
 
 - 68/68 个产品族和 125/125 个公开运行时值均在预算内；
 - 共享 CSS：25,329 B gzip / 32,768 B 预算，20,874 B Brotli；
-- 最大组合是 `@meu/form-react` 全部 adapters：115,540 B gzip / 115,712 B 预算；
-- 最大单值是 `Popover`：46,311 B gzip / 49,152 B 预算，主要成本包含定位运行时；
-- 较大的高级单值包括 `MeuFormImageUploader` 38,888 B、`ImageUploader` 36,589 B、`MeuFormTreeSelect` 33,961 B、`ImageViewer` 31,553 B 和 `TreeSelect` 30,548 B（均为 gzip）。
+- 最大组合是 `@meu/form-react` 全部 adapters：76,539 B gzip / 115,712 B 预算；
+- 最大单值是 `MeuFormImageUploader`：25,097 B gzip / 65,536 B 预算；
+- 较大的高级单值包括 `ImageUploader` 23,686 B、`MeuFormTreeSelect` 21,708 B、`Popover` 20,802 B、`ImageViewer` 20,312 B 和 `TreeSelect` 19,596 B（均为 gzip）。
 
 ## 运行时预算
 

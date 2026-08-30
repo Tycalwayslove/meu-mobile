@@ -129,7 +129,7 @@ IntersectionObserver 缺失、构造或 observe 失败时功能降级为按钮�
 - Story interaction: `ErrorAndRetry.play` 验证失败、焦点恢复、重试、成功公告和恢复状态；`EmptyListAndLongContent.play` 固化空列表尾部与超长错误/重试文案；`RtlDarkReducedMotion.play` 固化 RTL + Dark + 显式减弱动效 loading。
 - Storybook 浏览器矩阵：本批在 390×844 视口定向验证本组件 6 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 42 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3162 B / 32768 B 预算，组合 Brotli 2695 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2022 B / 32768 B 预算，组合 Brotli 1775 B；共享样式由应用单独导入一次。
 - SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖默认 auto 的首屏手动降级与 complete；`InfiniteList.hydration.test.tsx` 覆盖无 mismatch、挂载后安装 Observer，以及 Observer 缺失时按钮仍可请求。
 - Reduced motion/forced-colors/RTL: CSS 中 reduced-motion 停止旋转、forced-colors 使用系统按钮色；布局使用居中/无物理方向属性。自动 Storybook 矩阵覆盖继续适用，真机视觉仍见下方边界。
 - Mobile Chromium/WebKit: 隔离 Next H5 在两种引擎验证同步去重、手动加载后的焦点恢复与自定义成功公告、到达 complete，以及外部完成时 signal 协作取消且不进入 error；性能专页再以确定性业务失败验证首次请求进入 error、显式 retry 恢复、只发出 2 次请求且不重复页，两种引擎各重复 3 轮通过。

@@ -120,7 +120,7 @@ useId 只用于 header 关联且 SSR/hydration 稳定；无 effect/browser API�
 - Story interaction: `Card.play` 验证 action Cell 到业务 output 的事件链；当前 `check-storybook-links` 已验证 81/81 个 Storybook title 均至少包含一项关键 play，Loading Story 已纳入全量矩阵。
 - Storybook 浏览器矩阵：本轮定向扫描覆盖 `List` 匹配集 17 个 Story × 7 场景；其中 `Information/Cell & List` 的 5 个 Story 为 35/35 组合通过。play、axe WCAG A/AA 与运行时检查结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；Chromium/WebKit 共 8 个批次定向场景通过，其中 List/Cell 用例验证命名 list、原生 button/link、disabled/loading、status、ready 后动作恢复与业务事件，批次整页 Light/Dark axe WCAG A/AA 也通过。loading link 的 href 恢复由共置 hydration 测试证明；当前 68 页 × Light/Dark、共 136 场景全量通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3114 B / 32768 B 预算，组合 Brotli 2764 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2309 B / 32768 B 预算，组合 Brotli 2056 B；共享样式由应用单独导入一次。
 - SSR/hydration: `List.ssr.test.tsx` 覆盖具名空列表、原生结构与 loading；`List.hydration.test.tsx` 覆盖 useId 命名稳定、具名 empty SSR → hydrate → populated、loading 到 ready、list/anchor 节点身份和 hydration 0 mismatch；隔离 Next 16 hydration 后 list/listitem 与 Cell 原生节点保持一致，0 hydration/runtime error
 - RTL: LongContentAndRTL Story；自动视觉回归待补
 - Reduced motion: 系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 已覆盖显式策略，真实浏览器视觉留到最终矩阵。

@@ -142,7 +142,7 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 - Story interaction: `Catalog` 验证装饰图标不可聚焦且对辅助技术隐藏；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 1531 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 1507 B / 32768 B 预算，组合 Brotli 1335 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）6 个公开值组合 gzip 800 B / 32768 B 预算；最大单值 `MeuIconCheck` 为 772 B / 32768 B 预算，组合 Brotli 724 B；共享样式由应用单独导入一次。
 - SSR/hydration: Unit 已验证 SSR title/labelledby 关联、角色、Meu ID、currentColor 与尺寸；独立真实 hydration 仍由 Next H5 证据覆盖
 - RTL: 规则已文档化，拥有方向语义的上层组件仍需逐项验证
 - Reduced motion: 不适用；没有内建动效

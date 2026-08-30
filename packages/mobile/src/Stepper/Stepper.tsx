@@ -15,6 +15,10 @@ function valuesEqual(first: number | null, second: number | null) {
   return first === second || (Number.isNaN(first) && Number.isNaN(second));
 }
 
+function actionLabel(value: string | undefined, fallback: string) {
+  return (value && value.trim()) || fallback;
+}
+
 /**
  * Renders a numeric text field with accessible decrement and increment controls.
  *
@@ -402,13 +406,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         type="button"
         disabled={inert || atMin}
         aria-controls={resolvedId}
-        aria-label={
-          decrementAriaLabel && decrementAriaLabel.trim()
-            ? decrementAriaLabel.trim()
-            : locale === "zh-CN"
-              ? "减少"
-              : "Decrease"
-        }
+        aria-label={actionLabel(decrementAriaLabel, locale === "zh-CN" ? "减少" : "Decrease")}
         onPointerDown={(event) => handleStepButtonPointerDown(event, -1)}
         onPointerUp={handleStepButtonPointerUp}
         onPointerCancel={handleStepButtonPointerCancel}
@@ -456,13 +454,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         type="button"
         disabled={inert || atMax}
         aria-controls={resolvedId}
-        aria-label={
-          incrementAriaLabel && incrementAriaLabel.trim()
-            ? incrementAriaLabel.trim()
-            : locale === "zh-CN"
-              ? "增加"
-              : "Increase"
-        }
+        aria-label={actionLabel(incrementAriaLabel, locale === "zh-CN" ? "增加" : "Increase")}
         onPointerDown={(event) => handleStepButtonPointerDown(event, 1)}
         onPointerUp={handleStepButtonPointerUp}
         onPointerCancel={handleStepButtonPointerCancel}

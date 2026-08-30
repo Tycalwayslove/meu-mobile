@@ -209,7 +209,7 @@ loading → loaded 仅使用 opacity 淡入；`prefers-reduced-motion` 或 `Conf
 - SSR: `Image.ssr.test.tsx` 覆盖确定性 loading markup、原生 width/height/srcSet/sizes、srcSet-only、无源 informative/decorative fallback，以及 SSR 直接 fallbackSrc。
 - Hydration: `Image.hydration.test.tsx` 覆盖 primary、直接 fallback source、informative/decorative 无源首帧节点复用、原生属性保持和 0 hydration console error。
 - Story interaction: `PlaceholderToLoaded`、`Fallback`、`FallbackSource` 分别覆盖加载完成、最终错误与来源回退；`ResponsiveCrop`、`Lazy`、`LightAndDark`、`RtlLongFallback`、`ReducedMotion` 提供响应式、主题、RTL、长内容和动效降级场景。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3276 B / 32768 B 预算，组合 Brotli 2938 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2305 B / 32768 B 预算，组合 Brotli 2067 B；共享样式由应用单独导入一次。
 - 隔离 Next H5 production build 与 `renders atomic display components with native actions and fallbacks` 已在 mobile Chromium/WebKit 通过，覆盖 srcSet/sizes/position、primary→fallback source、200 响应但不可解码资源和 0 runtime console/page error；性能专页进一步验证不可解码响应进入 error、调用方更换 source 后恢复 loaded，两种引擎各重复 3 轮通过。独立 hydration 场景同样在两种引擎通过。
 - 组件级 Story 已提供 Light/Dark、RTL 长文案和 provider reduced-motion 自动检查入口；本批在 390×844 视口定向验证 9 个 Story × 7 场景，共 63 个组合，play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - Chromatic、真实 iOS/Android、VoiceOver/TalkBack、旧 WebView 弱网/离线：未在本次组件级优化中执行，不写成通过。

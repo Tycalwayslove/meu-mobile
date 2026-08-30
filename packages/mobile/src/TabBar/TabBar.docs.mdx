@@ -146,7 +146,7 @@ flex 与逻辑 Badge 偏移继承最近的 `dir`；Safe Area 使用物理 left/r
 - Story/play：`RouteInteraction`、`ControlledRouter`、`DisabledDestination` 覆盖原生与受控路由、禁用目的地；`NarrowLongLabels` 和 `Zoom200PercentEquivalent` 分别在 320px 与 195px 容器对每个目的地断言至少 44×44 CSS px；`WithSafeArea`、`RTL`、旋转 viewport 的 `Landscape` 覆盖表现面。
 - Storybook Chromium extended：目标构建后扫描 10 Stories × 7 场景（Light、Dark、RTL、en-US、reduced-motion、200% 字号、forced-colors），70/70 play/axe 通过，0 违规与 0 render error。`AdaptiveModes` 在匹配媒体环境中读取真实 computed style，断言 reduced-motion transition ≤1ms 与 forced-colors 边界；195 CSS px 场景提供 390px 视口在 200% 缩放下的等效布局证据。
 - 包级 typecheck：`pnpm --filter @meu/mobile typecheck` 最终重跑通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4913 B / 32768 B 预算，组合 Brotli 4359 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3219 B / 32768 B 预算，组合 Brotli 2909 B；共享样式由应用单独导入一次。
 - 历史隔离 Next 运行时：`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖 current、原生目标与动态切换；本次按目录约束未改动或重跑共享 Next H5 场景。
 - Reduced motion / forced-colors / RTL / 200% / Safe Area：均进入上述真实 Chromium extended 场景；真机平台差异仍保留为发布项。
 - Chromatic Light/Dark：本轮按统一部署策略不运行；全部组件冻结后集中验证。
