@@ -1,16 +1,11 @@
 "use client";
 
 import { forwardRef, useEffect, useRef, useState } from "react";
-import type {
-  CSSProperties,
-  ChangeEvent,
-  FocusEvent,
-  ForwardedRef,
-  KeyboardEvent,
-  PointerEvent
-} from "react";
+import type { CSSProperties, ChangeEvent, FocusEvent, KeyboardEvent, PointerEvent } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { normalizeSteppedNumber } from "../internal/numbers";
 import {
   controlRow,
@@ -37,17 +32,6 @@ const valueChangingKeys = new Set([
   "PageDown",
   "PageUp"
 ]);
-
-function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement | null) {
-  if (typeof ref === "function") ref(node);
-  else if (ref) ref.current = node;
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
-}
 
 /**
  * Renders a native single-value range control with pointer, keyboard, and form semantics.
@@ -343,21 +327,22 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
         <div className={marksClass} aria-hidden="true">
           {marks
             .filter((mark) => mark.value >= lower && mark.value <= effectiveUpper)
-            .map((mark, index) => (
-              <span
-                className={markClass}
-                key={`${mark.value}-${index}`}
-                style={{
-                  insetInlineStart: `${
-                    effectiveUpper === lower
-                      ? 0
-                      : ((mark.value - lower) / (effectiveUpper - lower)) * 100
-                  }%`
-                }}
-              >
-                {mark.label}
-              </span>
-            ))}
+            .map((mark, index) => {
+              const position =
+                effectiveUpper === lower
+                  ? 0
+                  : ((mark.value - lower) / (effectiveUpper - lower)) * 100;
+              return (
+                <span
+                  className={markClass}
+                  data-edge={position === 0 ? "start" : position === 100 ? "end" : undefined}
+                  key={`${mark.value}-${index}`}
+                  style={{ insetInlineStart: `${position}%` }}
+                >
+                  {mark.label}
+                </span>
+              );
+            })}
         </div>
       ) : null}
     </div>

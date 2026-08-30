@@ -9,19 +9,12 @@ import {
   useRef,
   useState
 } from "react";
-import type { ChangeEvent, CSSProperties, ForwardedRef } from "react";
+import type { ChangeEvent, CSSProperties } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
 import { counter, root, textarea } from "./TextArea.css";
 import type { TextAreaAutoSize, TextAreaProps } from "./types";
-
-function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
-  if (typeof ref === "function") {
-    ref(value);
-  } else if (ref) {
-    ref.current = value;
-  }
-}
 
 function normalizeValue(value: TextAreaProps["value"]): string {
   if (value === undefined || value === null) return "";

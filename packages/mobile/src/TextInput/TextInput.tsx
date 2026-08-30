@@ -2,10 +2,12 @@
 
 import { MeuIconX } from "@meu/icons-react";
 import { forwardRef, useEffect, useRef, useState } from "react";
-import type { ForwardedRef, InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { clearButton, input, loadingIndicator, spinner, wrapper } from "./TextInput.css";
 
 type TextInputValue = InputHTMLAttributes<HTMLInputElement>["value"];
@@ -19,12 +21,6 @@ function valueHasText(value: TextInputValue) {
 
 function valueToString(value: TextInputValue) {
   return value === undefined ? "" : String(value);
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
 /**
@@ -48,14 +44,6 @@ export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size">
   /** Applies validation styling and `aria-invalid="true"`; caller grammar/spelling tokens are otherwise preserved. @defaultValue "default" */
   status?: "default" | "error";
 };
-
-function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
-  if (typeof ref === "function") {
-    ref(value);
-  } else if (ref) {
-    ref.current = value;
-  }
-}
 
 /**
  * Renders a Field-aware native text input with an optional clear action.

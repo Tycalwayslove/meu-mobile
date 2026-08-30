@@ -30,7 +30,7 @@ export const sizer = style({
 export const item = style({
   position: "absolute",
   top: 0,
-  left: 0,
+  insetInlineStart: 0,
   width: "100%",
   minWidth: 0,
   boxSizing: "border-box",

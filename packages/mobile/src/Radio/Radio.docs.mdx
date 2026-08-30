@@ -157,7 +157,7 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 - Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`ReadOnlyKeyboardRollback` 模拟浏览器方向键先改变 native name group 后的完整恢复；本批 `Forms/Radio` 11/11 stories × Light/Dark 共 22/22 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 4343 B / 32768 B 预算；最大单值 `Radio` 为 3750 B / 32768 B 预算，组合 Brotli 3856 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 4317 B / 32768 B 预算；最大单值 `Radio` 为 3753 B / 32768 B 预算，组合 Brotli 3834 B；共享样式由应用单独导入一次。
 - Figma：canonical Medium set `50:263`，Small `50:224`、Large `50:302`；24 variants。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；Checkbox/Radio/Switch 合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: CSS `minWidth/minHeight: 44`
 - RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补

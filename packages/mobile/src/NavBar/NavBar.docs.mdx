@@ -177,7 +177,7 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 ## 测试证据
 
 - 本轮 Unit/SSR/hydration：3 files / 13 tests 通过；覆盖原生 link/button、取消导航、disabled/loading、不可用 link 阻止冒泡、稳定 anchor 身份、localized name、heading、sticky/scrolled、React 19 ref、ConfigProvider RTL/嵌套 LTR/原生 dir=auto、显式 reduced motion、SSR 与 `onRecoverableError=[]` 的真实 hydrateRoot。
-- Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play；当前静态门禁验证 468 个 Story、439 个文档 Story ID 无失配，81/81 个标题含关键 play。
+- Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play；当前静态门禁验证 490 个 Story、461 个文档 Story ID 无失配，81/81 个标题含关键 play。
 - Storybook 浏览器矩阵：NavBar 当前 10 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors）定向扫描 70/70 通过；play 先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 通过；`uses native navigation actions, radio segments and read-only page dots` 在 Chromium/WebKit 均通过，批次整页 Light/Dark axe WCAG A/AA 也通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4009 B / 32768 B 预算，组合 Brotli 3537 B；共享样式由应用单独导入一次。

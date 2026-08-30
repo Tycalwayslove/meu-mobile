@@ -1,10 +1,12 @@
 "use client";
 
 import { forwardRef, useEffect, useRef, useState } from "react";
-import type { CSSProperties, ChangeEvent, ForwardedRef, MouseEvent, PointerEvent } from "react";
+import type { CSSProperties, ChangeEvent, MouseEvent, PointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { clampNumber, normalizeSteppedNumber } from "../internal/numbers";
 import { activeCharacter, activeStar, input, root, star, stars } from "./Rate.css";
 import type { RateProps } from "./types";
@@ -16,17 +18,6 @@ type PointerSession = {
   startValue: number;
   targetValue: number;
 };
-
-function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement | null) {
-  if (typeof ref === "function") ref(node);
-  else if (ref) ref.current = node;
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
-}
 
 /**
  * Renders a touch-friendly rating control backed by native range semantics.

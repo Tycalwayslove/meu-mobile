@@ -16,6 +16,7 @@ import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
 import { Image } from "../Image";
 import { ImageViewer } from "../ImageViewer";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import {
   actionButton,
   cell,
@@ -43,12 +44,6 @@ import type {
 type InternalTask = ImageUploaderTask & { controller: AbortController; objectUrl?: string };
 type RootStyle = CSSProperties & { "--meu-image-uploader-columns"?: number };
 type ProgressStyle = CSSProperties & { "--meu-image-uploader-progress"?: number };
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
-}
 
 function normalizeColumns(columns: number | undefined) {
   if (!columns || !Number.isFinite(columns)) return 4;
@@ -83,6 +78,30 @@ function fileMatchesAccept(file: File, accept: string) {
 function isOversize(file: File, maxSize: ImageUploaderProps["maxSize"]) {
   if (typeof maxSize === "function") return maxSize(file);
   return typeof maxSize === "number" && Number.isFinite(maxSize) && file.size > maxSize;
+}
+
+function normalizeUploadedItem(result: ImageUploaderItem): ImageUploaderItem {
+  const optionalStrings = ["name", "thumbnailUrl"] as const;
+  const keyType = result && typeof result === "object" ? typeof result.key : "undefined";
+  if (
+    !result ||
+    typeof result !== "object" ||
+    typeof result.url !== "string" ||
+    !result.url.trim() ||
+    typeof result.alt !== "string" ||
+    optionalStrings.some(
+      (field) => result[field] !== undefined && typeof result[field] !== "string"
+    ) ||
+    (result.key !== undefined && !["string", "number", "bigint"].includes(keyType))
+  ) {
+    throw new TypeError("Invalid ImageUploader upload result");
+  }
+  const item: ImageUploaderItem = { alt: result.alt, url: result.url };
+  if (result.key !== undefined) item.key = result.key;
+  for (const field of optionalStrings) {
+    if (result[field] !== undefined) item[field] = result[field];
+  }
+  return item;
 }
 
 function itemKey(item: ImageUploaderItem, index: number) {
@@ -166,6 +185,9 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const rootRef = useRef<HTMLDivElement>(null);
     const mountedRef = useRef(true);
     const interactionRef = useRef({ disabled, readOnly, showFailed });
+    const latestRef = useRef<
+      [number | undefined, typeof onChange, typeof onCountExceed, typeof onReject]
+    >([undefined, onChange, onCountExceed, onReject]);
     const taskCounterRef = useRef(0);
     const controlled = value !== undefined;
     const [uncontrolledValue, setUncontrolledValue] = useState<ImageUploaderItem[]>(() => [
@@ -219,6 +241,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     itemsRef.current = items;
     tasksRef.current = tasks;
     interactionRef.current = { disabled, readOnly, showFailed };
+    latestRef.current = [resolvedMaxCount, onChange, onCountExceed, onReject];
 
     const viewerImages = items.map((item) => ({
       alt: item.alt,
@@ -233,7 +256,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     ) {
       itemsRef.current = nextItems;
       if (!controlled) setUncontrolledValue(nextItems);
-      if (onChange) onChange(nextItems, { item, reason });
+      const latestOnChange = latestRef.current[1];
+      if (latestOnChange) latestOnChange(nextItems, { item, reason });
     }
 
     function revokeTaskUrl(task: InternalTask) {
@@ -260,7 +284,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       accepted: readonly File[],
       rejected: readonly File[]
     ) {
-      if (onReject) onReject({ accepted, files, reason, rejected });
+      const latestOnReject = latestRef.current[3];
+      if (latestOnReject) latestOnReject({ accepted, files, reason, rejected });
     }
 
     async function runUpload(task: InternalTask) {
@@ -272,7 +297,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         )
       );
       try {
-        const result = await upload(task.file, {
+        const uploadResult = await upload(task.file, {
           onProgress: (progress) => {
             if (!mountedRef.current || task.controller.signal.aborted) return;
             const nextProgress = normalizeProgress(progress);
@@ -286,6 +311,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
           taskId: task.id
         });
         if (!mountedRef.current || task.controller.signal.aborted) return;
+        const result = normalizeUploadedItem(uploadResult);
         const nextItems = [...itemsRef.current, result];
         publish(nextItems, result, "upload");
         removeTask(task.id, false);
@@ -307,7 +333,13 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       const idValue = `${generatedId}-${taskCounterRef.current++}`;
       const controller = new AbortController();
       let objectUrl: string | undefined;
-      if (typeof URL !== "undefined" && URL.createObjectURL) objectUrl = URL.createObjectURL(file);
+      if (typeof URL !== "undefined" && URL.createObjectURL) {
+        try {
+          objectUrl = URL.createObjectURL(file);
+        } catch {
+          objectUrl = undefined;
+        }
+      }
       const task: InternalTask = {
         controller,
         file,
@@ -332,7 +364,13 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
       let accepted = selected.filter((file) => fileMatchesAccept(file, accept));
       if (acceptRejected.length > 0) reportReject("accept", selected, accepted, acceptRejected);
 
-      const sizeRejected = accepted.filter((file) => isOversize(file, maxSize));
+      const sizeRejected = accepted.filter((file) => {
+        try {
+          return isOversize(file, maxSize);
+        } catch {
+          return true;
+        }
+      });
       if (sizeRejected.length > 0) {
         accepted = accepted.filter((file) => !sizeRejected.includes(file));
         reportReject("max-size", selected, accepted, sizeRejected);
@@ -363,14 +401,16 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
 
       if (interactionRef.current.disabled || interactionRef.current.readOnly) return;
 
-      if (resolvedMaxCount !== undefined) {
+      const latestMaxCount = latestRef.current[0];
+      if (latestMaxCount !== undefined) {
         const occupied = itemsRef.current.length + tasksRef.current.length;
-        const available = Math.max(0, resolvedMaxCount - occupied);
+        const available = Math.max(0, latestMaxCount - occupied);
         if (accepted.length > available) {
           const rejected = accepted.slice(available);
           accepted = accepted.slice(0, available);
           const exceed = rejected.length;
-          if (onCountExceed) onCountExceed(exceed);
+          const latestOnCountExceed = latestRef.current[2];
+          if (latestOnCountExceed) latestOnCountExceed(exceed);
           reportReject("max-count", selected, accepted, rejected);
         }
       }
@@ -385,7 +425,8 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
         resolvedMaxCount !== undefined &&
         itemsRef.current.length + tasksRef.current.length > resolvedMaxCount
       ) {
-        if (onCountExceed) onCountExceed(1);
+        const latestOnCountExceed = latestRef.current[2];
+        if (latestOnCountExceed) latestOnCountExceed(1);
         reportReject("max-count", [previous.file], [], [previous.file]);
         return;
       }
@@ -643,6 +684,7 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
                         <button
                           type="button"
                           className={retryButton}
+                          aria-label={`${localizedRetryLabel} ${task.name}`}
                           disabled={disabled || readOnly}
                           onClick={() => retryTask(task.id)}
                         >

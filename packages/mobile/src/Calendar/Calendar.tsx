@@ -8,6 +8,7 @@ import type { KeyboardEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import {
   dayButton,
   dayCell,
@@ -67,12 +68,6 @@ const monthNames = [
   "November",
   "December"
 ] as const;
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
-}
 
 function modeOf<TDate>(props: CalendarProps<TDate>): CalendarSelectionMode {
   return props.selectionMode || "single";

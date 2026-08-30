@@ -65,7 +65,9 @@ export const stateLayer = recipe({
     color: "var(--meu-color-muted)",
     fontSize: 12,
     lineHeight: 1.4,
-    textAlign: "center"
+    textAlign: "center",
+    wordBreak: "break-word",
+    overflowWrap: "anywhere"
   },
   variants: {
     overlay: {

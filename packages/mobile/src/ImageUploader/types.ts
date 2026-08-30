@@ -207,7 +207,7 @@ export type ImageUploaderProps = Omit<
    * @defaultValue "default"
    */
   status?: ImageUploaderStatus;
-  /** Uploads one validated file; resolve with the completed item or reject to retain a failed task. */
+  /** Uploads one validated file; public item fields are runtime-validated and copied, while rejection or a malformed item retains a failed task. */
   upload: (file: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>;
   /** Controlled completed items; pair with `onChange` to accept uploads and removals. */
   value?: readonly ImageUploaderItem[];

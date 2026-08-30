@@ -3,6 +3,8 @@
 import { MeuIconCheck, MeuIconX } from "@meu/icons-react";
 import { Children, createElement, useId } from "react";
 
+import { mergeIdReferences } from "../internal/mergeIdReferences";
+
 import {
   actions as actionsStyle,
   description as descriptionStyle,
@@ -13,12 +15,6 @@ import {
   waitingDots
 } from "./Result.css";
 import type { ResultProps, ResultStatus } from "./types";
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const ids = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueIds = [...new Set(ids.filter(Boolean))];
-  return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
-}
 
 function getDefaultIcon(status: ResultStatus) {
   if (status === "success") return <MeuIconCheck size={28} strokeWidth={2.25} />;

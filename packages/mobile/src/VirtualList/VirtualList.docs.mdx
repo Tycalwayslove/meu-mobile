@@ -4,8 +4,8 @@ slug: virtual-list
 package: "@meu/mobile"
 exports: [VirtualList]
 status: verification
-localVerification: pending
-localGapIds: [LOC-VIRTUAL-LIST-01]
+localVerification: complete
+localGapIds: []
 priority: P2
 since: 0.1.0
 implementedVersion: null
@@ -17,6 +17,9 @@ storyIds:
   [
     collections-virtuallist--ten-thousand-rows,
     collections-virtuallist--initial-middle,
+    collections-virtuallist--imperative-jump,
+    collections-virtuallist--editable-rows,
+    collections-virtuallist--rtl-long-localized-content,
     collections-virtuallist--empty
   ]
 source: packages/mobile/src/VirtualList
@@ -126,12 +129,12 @@ DOM 数量约为可见行加双侧 overscan；默认 overscan=3，最大归一�
 
 ## 测试证据
 
-- Unit: `VirtualList.test.tsx` 覆盖窗口、完整 ARIA、动态测量、远距焦点、定位、空态和 stable-key 排序保留。
+- Unit: 3 个测试文件共 11 个用例，覆盖窗口、完整 ARIA、动态测量、远距焦点、定位、空态、stable-key 排序/删除、可编辑行外置状态、异常输入归一和直接 hydration。
 - Story interaction: `TenThousandRows` 验证有限渲染窗口、完整集合 ARIA 与键盘焦点；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本批在 390×844 视口定向验证本组件 6 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 42 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 13701 B / 32768 B 预算，组合 Brotli 12049 B；共享样式由应用单独导入一次。
-- SSR/hydration: `VirtualList.ssr.test.tsx` 覆盖确定性初始子集；隔离 Next production `/hydration?case=virtual-list` 在 Chromium/WebKit 中完成真实 hydration，0 `pageerror`、0 `console.error`。
+- SSR/hydration: `VirtualList.ssr.test.tsx` 覆盖确定性初始子集；`VirtualList.hydration.test.tsx` 直接验证 RTL/Dark/reduced-motion 中段窗口无 recoverable error；隔离 Next production `/hydration?case=virtual-list` 在 Chromium/WebKit 中完成真实 hydration，0 `pageerror`、0 `console.error`。
 - RTL/forced-colors/reduced-motion: 逻辑 CSS或无动画契约完成，视觉证据待补。
 - Mobile Chromium/WebKit E2E: 10,000 条动态行的远距跳转与焦点保留通过；性能专页要求 DOM ≤20、跳至第 9,001 行并完成两帧提交 ≤500ms。新增 40 次首尾双向加速滚动，要求全过程 DOM ≤20 且总耗时 ≤5,000ms；两种引擎各重复 3 轮通过。Chromatic、真实 60 秒滚动、峰值内存与 real device 延后到发布批次。
 
@@ -139,14 +142,16 @@ DOM 数量约为可见行加双侧 overscan；默认 overscan=3，最大归一�
 
 ### 待优化
 
-- 补真实 ResizeObserver、字体切换、含输入控件行、60 秒持续滚动、峰值内存和真机证据；40 次双向加速滚动已覆盖自动化回收边界。
+- 发布候选阶段补真实字体切换、60 秒持续滚动、峰值内存和真机读屏证据；自动化已覆盖 ResizeObserver 测量、含输入控件行与 40 次双向加速回收边界。
 
 ### 已完成
 
 - 将焦点保留从 mutable index 改为 stable key，补异常归一、RTL/forced-colors、TSDoc、SSR 与重排测试。
+- 增加直接 hydration、stable-key 删除、外置表单状态、远距命令跳转与 RTL 长文案 Story，关闭 `LOC-VIRTUAL-LIST-01`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                        | 迁移说明                              |
-| ---------- | ------ | --------- | ------------------------------------------- | ------------------------------------- |
-| 2026-08-29 | 未发布 | hardening | 稳定 identity、动态测量与跨平台虚拟窗口加固 | API 兼容；调用方必须保证 key 稳定唯一 |
+| 日期       | 版本   | 类型         | 内容                                        | 迁移说明                              |
+| ---------- | ------ | ------------ | ------------------------------------------- | ------------------------------------- |
+| 2026-08-29 | 未发布 | hardening    | 稳定 identity、动态测量与跨平台虚拟窗口加固 | API 兼容；调用方必须保证 key 稳定唯一 |
+| 2026-08-30 | 未发布 | verification | 补水合、编辑行、远距跳转与 RTL 长文案证据   | 无                                    |

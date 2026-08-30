@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createRef } from "react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
+import { ConfigProvider } from "../ConfigProvider";
 import { Stepper } from "./Stepper";
 
 afterEach(() => {
@@ -27,6 +29,29 @@ describe("Stepper", () => {
 
     fireEvent.keyDown(screen.getByRole("spinbutton", { name: "数量" }), { key: "ArrowDown" });
     expect(onChange).toHaveBeenLastCalledWith(0);
+  });
+
+  it("generates a stable input relationship and forwards the native input ref", () => {
+    const inputRef = createRef<HTMLInputElement>();
+    render(<Stepper ref={inputRef} aria-label="数量" />);
+
+    const input = screen.getByRole("spinbutton", { name: "数量" });
+    expect(input.id).not.toBe("");
+    expect(inputRef.current).toBe(input);
+    for (const button of screen.getAllByRole("button")) {
+      expect(button.getAttribute("aria-controls")).toBe(input.id);
+    }
+  });
+
+  it("localizes button names and rejects blank accessible-label overrides", () => {
+    render(
+      <ConfigProvider locale="en-US">
+        <Stepper aria-label="Quantity" decrementAriaLabel="   " incrementAriaLabel="Add one" />
+      </ConfigProvider>
+    );
+
+    expect(screen.getByRole("button", { name: "Decrease" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Add one" })).toBeTruthy();
   });
 
   it("commits decimal input to the configured step and allows empty values", () => {
@@ -523,7 +548,7 @@ describe("Stepper", () => {
     expect(new FormData(form).get("quantity")).toBe("3");
   });
 
-  it("hydrates deterministic RTL markup without recoverable errors", async () => {
+  it("hydrates deterministic RTL markup and remains interactive without recoverable errors", async () => {
     const ui = (
       <Stepper aria-label="数量" defaultValue={2} min={0} max={8} dir="rtl" inputMode="numeric" />
     );
@@ -545,6 +570,15 @@ describe("Stepper", () => {
     expect(input.dir).toBe("rtl");
     expect(input.inputMode).toBe("numeric");
     expect(recoverableErrors).toEqual([]);
+
+    const increment = container.querySelector<HTMLButtonElement>('button[aria-label="增加"]');
+    if (!increment) throw new Error("Expected the increment button");
+    await act(async () => {
+      increment.click();
+      await Promise.resolve();
+    });
+    expect(input.value).toBe("3");
+    expect(increment.getAttribute("aria-controls")).toBe(input.id);
 
     act(() => {
       if (root !== undefined) root.unmount();

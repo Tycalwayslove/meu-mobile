@@ -2,6 +2,8 @@
 
 import { Children, useId } from "react";
 
+import { mergeIdReferences } from "../internal/mergeIdReferences";
+
 import {
   action as actionStyle,
   defaultIllustration,
@@ -11,12 +13,6 @@ import {
   title as titleStyle
 } from "./Empty.css";
 import type { EmptyProps } from "./types";
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const ids = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueIds = [...new Set(ids.filter(Boolean))];
-  return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
-}
 
 function hasRenderableContent(value: EmptyProps["action"]): boolean {
   return value !== "" && Children.toArray(value).length > 0;

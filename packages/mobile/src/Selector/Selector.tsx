@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, FocusEvent, ForwardedRef, KeyboardEvent, MouseEvent } from "react";
+import type { CSSProperties, FocusEvent, KeyboardEvent, MouseEvent } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import {
   checkMark,
   description,
@@ -17,22 +19,6 @@ import {
 import type { SelectorChangeDetails, SelectorOption, SelectorProps, SelectorValue } from "./types";
 
 type SelectorStyle = CSSProperties & { "--meu-selector-columns": string };
-
-function assignRef<T>(ref: ForwardedRef<T> | undefined, value: T | null) {
-  if (typeof ref === "function") ref(value);
-  else if (ref) ref.current = value;
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const ids: string[] = [];
-  values.forEach((value) => {
-    if (!value) return;
-    value.split(/\s+/).forEach((id) => {
-      if (id && ids.indexOf(id) === -1) ids.push(id);
-    });
-  });
-  return ids.length > 0 ? ids.join(" ") : undefined;
-}
 
 function valueIdentity(value: SelectorValue): string {
   return `${typeof value}:${String(value)}`;

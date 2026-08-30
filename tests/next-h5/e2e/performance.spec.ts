@@ -250,7 +250,7 @@ test("retries a failed upload and aborts a pending upload without stale completi
     name: "retry.png"
   });
   await expect(page.getByText("上传队列 1 error")).toBeVisible();
-  await page.getByRole("button", { name: "重试", exact: true }).click();
+  await page.getByRole("button", { name: "重试 retry.png", exact: true }).click();
   await expect(page.getByText("上传请求成功 retry.png")).toBeVisible();
   await expect(page.getByText("上传队列 0", { exact: true })).toBeVisible();
   expect(retryAttempts).toBe(2);

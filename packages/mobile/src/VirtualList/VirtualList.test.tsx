@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { act, createRef } from "react";
+import { act, createRef, useState } from "react";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -234,5 +234,116 @@ describe("VirtualList", () => {
     });
     expect(screen.getByRole("button", { name: "订单 1" })).toBe(focused);
     expect(document.activeElement).toBe(focused);
+  });
+
+  it("releases a focused row safely when its stable key is removed", async () => {
+    const original = items.slice(0, 30);
+    const { container, rerender } = render(
+      <VirtualList
+        aria-label="会删除订单的列表"
+        estimateSize={50}
+        getItemKey={(entry) => entry.id}
+        height={200}
+        items={original}
+        renderItem={(entry) => <button type="button">订单 {entry.index}</button>}
+      />
+    );
+    await act(() => Promise.resolve());
+    const focused = screen.getByRole("button", { name: "订单 1" });
+    act(() => focused.focus());
+
+    rerender(
+      <VirtualList
+        aria-label="会删除订单的列表"
+        estimateSize={50}
+        getItemKey={(entry) => entry.id}
+        height={200}
+        items={original.filter((entry) => entry.id !== "item-1")}
+        renderItem={(entry) => <button type="button">订单 {entry.index}</button>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-meu-virtual-index="1"]')).not.toBeNull();
+    });
+    expect(screen.queryByRole("button", { name: "订单 1" })).toBeNull();
+    expect(container.querySelectorAll('[data-meu-virtual-index="29"]')).toHaveLength(0);
+  });
+
+  it("keeps editable row values in caller-owned state across recycling", async () => {
+    const ref = createRef<VirtualListRef>();
+
+    function EditableList() {
+      const [values, setValues] = useState<Record<string, string>>({});
+      return (
+        <VirtualList
+          ref={ref}
+          aria-label="可编辑订单"
+          estimateSize={50}
+          getItemKey={(entry) => entry.id}
+          height={200}
+          items={items}
+          renderItem={(entry) => (
+            <label>
+              订单 {entry.index}
+              <input
+                aria-label={`订单 ${entry.index} 备注`}
+                value={values[entry.id] || ""}
+                onChange={(event) =>
+                  setValues((current) => ({ ...current, [entry.id]: event.currentTarget.value }))
+                }
+              />
+            </label>
+          )}
+        />
+      );
+    }
+
+    render(<EditableList />);
+    const input = screen.getByRole("textbox", { name: "订单 1 备注" });
+    fireEvent.change(input, { target: { value: "请放前台" } });
+    expect((input as HTMLInputElement).value).toBe("请放前台");
+
+    act(() => ref.current!.scrollToOffset(4_000));
+    fireEvent.scroll(ref.current!.nativeElement!);
+    await waitFor(() => expect(screen.queryByRole("textbox", { name: "订单 1 备注" })).toBeNull());
+
+    act(() => ref.current!.scrollToOffset(0));
+    fireEvent.scroll(ref.current!.nativeElement!);
+    await waitFor(() => {
+      const restored = screen.getByRole("textbox", { name: "订单 1 备注" });
+      expect((restored as HTMLInputElement).value).toBe("请放前台");
+    });
+  });
+
+  it("normalizes non-finite layout inputs and ignores non-finite commands", async () => {
+    const ref = createRef<VirtualListRef>();
+    const onRangeChange = vi.fn();
+    render(
+      <VirtualList
+        ref={ref}
+        aria-labelledby="virtual-heading"
+        estimateSize={Number.NaN}
+        gap={Number.POSITIVE_INFINITY}
+        height={Number.NaN}
+        initialOffset={Number.POSITIVE_INFINITY}
+        items={items.slice(0, 10)}
+        getItemKey={(entry) => entry.id}
+        onRangeChange={onRangeChange}
+        overscan={Number.POSITIVE_INFINITY}
+        renderItem={(entry) => <span>订单 {entry.index}</span>}
+      />
+    );
+    await waitFor(() => expect(onRangeChange).toHaveBeenCalled());
+
+    const list = screen.getByRole("list");
+    expect(list.style.height).toBe("320px");
+    expect(list.getAttribute("aria-labelledby")).toBe("virtual-heading");
+    scrollToMock.mockClear();
+    act(() => {
+      ref.current!.scrollToIndex(Number.NaN);
+      ref.current!.scrollToOffset(Number.POSITIVE_INFINITY);
+    });
+    expect(scrollToMock).not.toHaveBeenCalled();
   });
 });

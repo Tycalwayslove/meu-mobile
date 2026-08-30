@@ -23,8 +23,10 @@ export const content = style({
   flexWrap: "wrap",
   alignItems: "center",
   justifyContent: "center",
+  maxWidth: "100%",
   minWidth: 0,
-  gap: "var(--meu-space-2)"
+  gap: "var(--meu-space-2)",
+  overflowWrap: "anywhere"
 });
 
 export const spinner = style({
@@ -41,8 +43,11 @@ export const spinner = style({
   }
 });
 
+export const spinnerReduced = style({ animation: "none" });
+
 export const action = style({
   minWidth: 120,
+  maxWidth: "100%",
   minHeight: 44,
   padding: "var(--meu-space-2) var(--meu-space-4)",
   color: "var(--meu-color-accent)",
@@ -51,7 +56,10 @@ export const action = style({
   borderRadius: "var(--meu-radius-control)",
   font: "inherit",
   fontWeight: 600,
+  overflowWrap: "anywhere",
   cursor: "pointer",
+  touchAction: "manipulation",
+  WebkitTapHighlightColor: "transparent",
   selectors: {
     "&:focus": {
       outline: "2px solid var(--meu-color-accent)",

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { KeyboardEvent, PointerEvent } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
@@ -134,6 +135,40 @@ describe("Slider", () => {
     expect(slider).toHaveProperty("value", "10");
   });
 
+  it("uses finite defaults for non-finite numeric props and decimal step precision", () => {
+    const { rerender } = render(
+      <Slider
+        aria-label="安全数值"
+        min={Number.NaN}
+        max={Number.POSITIVE_INFINITY}
+        step={Number.NEGATIVE_INFINITY}
+        value={Number.NaN}
+      />
+    );
+    const slider = screen.getByRole("slider", { name: "安全数值" });
+    expect(slider).toHaveProperty("min", "0");
+    expect(slider).toHaveProperty("max", "100");
+    expect(slider).toHaveProperty("step", "1");
+    expect(slider).toHaveProperty("value", "0");
+
+    rerender(<Slider aria-label="安全数值" min={0.1} max={0.5} step={0.1} value={0.3} />);
+    expect(slider).toHaveProperty("value", "0.3");
+    expect(Number.parseFloat(slider.style.getPropertyValue("--meu-slider-progress"))).toBeCloseTo(
+      50
+    );
+  });
+
+  it("keeps controlled rendering owned by the caller while reporting the attempted value", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<Slider aria-label="受控预算" value={20} onChange={onChange} />);
+    const slider = screen.getByRole("slider", { name: "受控预算" });
+
+    fireEvent.change(slider, { target: { value: "70" } });
+    expect(onChange).toHaveBeenCalledWith(70, expect.anything());
+    rerender(<Slider aria-label="受控预算" value={20} onChange={onChange} />);
+    expect(slider).toHaveProperty("value", "20");
+  });
+
   it("completes each changed pointer or keyboard interaction once", () => {
     const onChangeComplete = vi.fn();
     render(<Slider aria-label="音量" defaultValue={2} onChangeComplete={onChangeComplete} />);
@@ -154,6 +189,69 @@ describe("Slider", () => {
     fireEvent.change(slider, { target: { value: "4" } });
     fireEvent.keyUp(slider, { key: "ArrowUp" });
     expect(onChangeComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it("cancels a pointer session without publishing completion", () => {
+    const onPointerCancel = vi.fn();
+    const onChangeComplete = vi.fn();
+    render(
+      <Slider
+        aria-label="亮度"
+        defaultValue={20}
+        onPointerCancel={onPointerCancel}
+        onChangeComplete={onChangeComplete}
+      />
+    );
+    const slider = screen.getByRole("slider", { name: "亮度" });
+
+    fireEvent.pointerDown(slider);
+    fireEvent.change(slider, { target: { value: "40" } });
+    fireEvent.pointerCancel(slider);
+    fireEvent.pointerUp(slider);
+    expect(onPointerCancel).toHaveBeenCalledTimes(1);
+    expect(onChangeComplete).not.toHaveBeenCalled();
+  });
+
+  it("completes an active keyboard change on blur and respects cancelled starts", () => {
+    const onChangeComplete = vi.fn();
+    const onPointerDown = vi.fn((event: PointerEvent<HTMLInputElement>) => event.preventDefault());
+    const onKeyDown = vi.fn((event: KeyboardEvent<HTMLInputElement>) => event.preventDefault());
+    const { rerender } = render(
+      <Slider
+        aria-label="键盘音量"
+        defaultValue={20}
+        onKeyDown={onKeyDown}
+        onChangeComplete={onChangeComplete}
+      />
+    );
+    const slider = screen.getByRole("slider", { name: "键盘音量" });
+
+    fireEvent.keyDown(slider, { key: "ArrowUp" });
+    fireEvent.change(slider, { target: { value: "21" } });
+    fireEvent.blur(slider);
+    expect(onChangeComplete).not.toHaveBeenCalled();
+
+    rerender(
+      <Slider
+        aria-label="键盘音量"
+        defaultValue={21}
+        onPointerDown={onPointerDown}
+        onChangeComplete={onChangeComplete}
+      />
+    );
+    fireEvent.pointerDown(slider);
+    fireEvent.change(slider, { target: { value: "22" } });
+    fireEvent.pointerUp(slider);
+    expect(onChangeComplete).not.toHaveBeenCalled();
+
+    rerender(
+      <Slider aria-label="键盘音量" defaultValue={22} onChangeComplete={onChangeComplete} />
+    );
+    fireEvent.keyDown(slider, { key: "ArrowUp" });
+    fireEvent.change(slider, { target: { value: "23" } });
+    fireEvent.blur(slider);
+    expect(onChangeComplete).toHaveBeenCalledTimes(1);
+    expect(onChangeComplete).toHaveBeenCalledWith(23, expect.anything());
   });
 
   it("restores the uncontrolled default on native form reset without publishing", async () => {
@@ -192,9 +290,55 @@ describe("Slider", () => {
     expect(new FormData(form as HTMLFormElement).get("price")).toBe("60");
   });
 
+  it("uses the latest defaultValue when an externally associated form resets", async () => {
+    const { rerender } = render(
+      <>
+        <form id="external-slider-form" aria-label="外部价格表单" />
+        <Slider aria-label="外部价格" form="external-slider-form" name="price" defaultValue={20} />
+      </>
+    );
+    const form = screen.getByRole<HTMLFormElement>("form", { name: "外部价格表单" });
+    const slider = screen.getByRole("slider", { name: "外部价格" });
+    fireEvent.change(slider, { target: { value: "60" } });
+
+    rerender(
+      <>
+        <form id="external-slider-form" aria-label="外部价格表单" />
+        <Slider aria-label="外部价格" form="external-slider-form" name="price" defaultValue={30} />
+      </>
+    );
+    expect(slider).toHaveProperty("value", "60");
+    form.reset();
+    await waitFor(() => expect(slider).toHaveProperty("value", "30"));
+    expect(new FormData(form).get("price")).toBe("30");
+  });
+
+  it("inherits required from Field without exposing aria-required on slider semantics", () => {
+    render(
+      <Field label="目标进度" required>
+        <Slider />
+      </Field>
+    );
+    const slider = screen.getByRole("slider", { name: "目标进度" });
+    expect(slider).toHaveProperty("required", true);
+    expect(slider.hasAttribute("aria-required")).toBe(false);
+  });
+
   it("uses logical mark positions for RTL layouts", () => {
-    render(<Slider aria-label="RTL" dir="rtl" marks={[{ value: 25, label: "ربع" }]} />);
+    render(
+      <Slider
+        aria-label="RTL"
+        dir="rtl"
+        marks={[
+          { value: 0, label: "قريب" },
+          { value: 25, label: "ربع" },
+          { value: 100, label: "بعيد" }
+        ]}
+      />
+    );
     expect(screen.getByText("ربع").style.insetInlineStart).toBe("25%");
+    expect(screen.getByText("قريب").getAttribute("data-edge")).toBe("start");
+    expect(screen.getByText("بعيد").getAttribute("data-edge")).toBe("end");
     expect(screen.getByRole("slider", { name: "RTL" }).getAttribute("dir")).toBe("rtl");
   });
 });

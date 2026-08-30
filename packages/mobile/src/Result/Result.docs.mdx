@@ -136,7 +136,7 @@ pending 点使用轻量 opacity 动画；系统偏好或 `ConfigProvider motion=
 - Story interaction: `RecoveryActions.play` 验证恢复操作回调与业务输出；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3561 B / 32768 B 预算，组合 Brotli 3193 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3555 B / 32768 B 预算，组合 Brotli 3187 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后 status、heading、description 与 actions 保持一致，0 hydration/runtime error。
 - RTL: 逻辑顺序契约已进入全库 RTL 浏览器矩阵；恢复 action 路径由移动双引擎定点覆盖。
 - Reduced motion: 系统媒体查询与 ConfigProvider 分支均存在；隔离 Next H5 在 Chromium/WebKit 中验证 pending 点 animation-name=none。

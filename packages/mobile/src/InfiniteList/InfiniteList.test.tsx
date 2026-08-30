@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
 import { InfiniteList } from "./InfiniteList";
+import { spinnerReduced } from "./InfiniteList.css";
 import type { InfiniteListLoadContext } from "./types";
 
 type ObserverRecord = {
@@ -46,7 +47,7 @@ function intersect(record: ObserverRecord) {
 }
 
 describe("InfiniteList", () => {
-  it("preloads from the nearest scroll root and locks concurrent requests", async () => {
+  it("preloads from the nearest scroll root before overflow and locks concurrent requests", async () => {
     let resolveLoad!: () => void;
     const loadMore = vi.fn((context: InfiniteListLoadContext) => {
       void context;
@@ -61,7 +62,7 @@ describe("InfiniteList", () => {
         ref={(node) => {
           if (!node) return;
           Object.defineProperty(node, "clientHeight", { configurable: true, value: 200 });
-          Object.defineProperty(node, "scrollHeight", { configurable: true, value: 500 });
+          Object.defineProperty(node, "scrollHeight", { configurable: true, value: 200 });
         }}
         style={{ height: 200, overflowY: "auto" }}
       >
@@ -204,6 +205,68 @@ describe("InfiniteList", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Load more" }));
     await waitFor(() => expect(loadMore).toHaveBeenCalledTimes(1));
+  });
+
+  it("falls back to the manual action when observer setup fails", async () => {
+    const disconnect = vi.fn();
+    class BrokenIntersectionObserver {
+      disconnect = disconnect;
+      observe() {
+        throw new Error("Embedded observer is unavailable");
+      }
+    }
+    vi.stubGlobal("IntersectionObserver", BrokenIntersectionObserver);
+    const loadMore = vi.fn((context: InfiniteListLoadContext) => {
+      void context;
+      return Promise.resolve();
+    });
+
+    render(<InfiniteList hasMore loadMore={loadMore} />);
+
+    expect(disconnect).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "加载更多" }));
+    await waitFor(() => expect(loadMore).toHaveBeenCalledTimes(1));
+    expect(loadMore.mock.calls[0]![0]).toMatchObject({ trigger: "manual" });
+  });
+
+  it("normalizes threshold changes and disconnects obsolete observers", async () => {
+    const loadMore = vi.fn(() => Promise.resolve());
+    const { rerender, unmount } = render(
+      <InfiniteList hasMore loadMore={loadMore} threshold={Number.POSITIVE_INFINITY} />
+    );
+    await waitFor(() => expect(observers).toHaveLength(1));
+    expect(observers[0]!.options && observers[0]!.options.rootMargin).toBe("0px 0px 250px 0px");
+
+    rerender(<InfiniteList hasMore loadMore={loadMore} threshold={-40} />);
+    await waitFor(() => expect(observers).toHaveLength(2));
+    expect(observers[0]!.disconnect).toHaveBeenCalledTimes(1);
+    expect(observers[1]!.options && observers[1]!.options.rootMargin).toBe("0px 0px 0px 0px");
+
+    unmount();
+    expect(observers[1]!.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("inherits locale, RTL, dark theme, and explicit reduced motion", () => {
+    render(
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <InfiniteList
+          autoLoad={false}
+          hasMore
+          loadMore={() => new Promise<void>(() => undefined)}
+          loadingContent="Loading an unusually long localized pagination status without clipping"
+        />
+      </ConfigProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+    const root = document.querySelector<HTMLElement>('[data-meu-component="infinite-list"]')!;
+    const boundary = root.closest<HTMLElement>('[data-meu-component="config-provider"]')!;
+    const loadingIndicator = root.querySelector<HTMLElement>('[aria-hidden="true"]')!;
+    expect(boundary.getAttribute("dir")).toBe("rtl");
+    expect(boundary.getAttribute("data-meu-theme")).toBe("dark");
+    expect(boundary.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(loadingIndicator.classList.contains(spinnerReduced)).toBe(true);
+    expect(root.textContent).toContain("unusually long localized pagination status");
   });
 
   it("disables the manual path and exposes custom render actions", async () => {

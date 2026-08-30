@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 import { createRef } from "react";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Field } from "../Field";
 import { Rate } from "./Rate";
 
@@ -97,6 +99,60 @@ describe("Rate", () => {
     expect(rating).toHaveProperty("value", "2.5");
   });
 
+  it("normalizes non-finite values, fractional counts, and dynamic increments", () => {
+    const { rerender } = render(
+      <Rate aria-label="边界评分" count={4.9} defaultValue={Number.NaN} />
+    );
+    const rating = screen.getByRole("slider", { name: "边界评分" });
+    expect(rating).toHaveProperty("max", "4");
+    expect(rating).toHaveProperty("value", "0");
+    expect(rating.getAttribute("aria-valuetext")).toBe("0 / 4 星");
+
+    rerender(<Rate aria-label="边界评分" count={Number.POSITIVE_INFINITY} value={3.7} allowHalf />);
+    expect(rating).toHaveProperty("max", "5");
+    expect(rating).toHaveProperty("step", "0.5");
+    expect(rating).toHaveProperty("value", "3.5");
+
+    rerender(<Rate aria-label="边界评分" count={0} value={3.7} />);
+    expect(rating).toHaveProperty("max", "1");
+    expect(rating).toHaveProperty("value", "1");
+  });
+
+  it("localizes the default value text and lets a formatter override it", () => {
+    const { rerender } = render(
+      <ConfigProvider locale="en-US">
+        <Rate aria-label="Rating" value={2.5} allowHalf />
+      </ConfigProvider>
+    );
+    expect(screen.getByRole("slider", { name: "Rating" }).getAttribute("aria-valuetext")).toBe(
+      "2.5 of 5 stars"
+    );
+
+    rerender(
+      <ConfigProvider locale="en-US">
+        <Rate
+          aria-label="Rating"
+          value={2.5}
+          allowHalf
+          getValueLabel={(value, count) => `${value} points out of ${count}`}
+        />
+      </ConfigProvider>
+    );
+    expect(screen.getByRole("slider", { name: "Rating" }).getAttribute("aria-valuetext")).toBe(
+      "2.5 points out of 5"
+    );
+  });
+
+  it("gives an explicit aria-label precedence over Field and caller labelledby tokens", () => {
+    render(
+      <Field label="Field 评分">
+        <Rate aria-label="显式评分" aria-labelledby="external-label" />
+      </Field>
+    );
+    const rating = screen.getByRole("slider", { name: "显式评分" });
+    expect(rating.getAttribute("aria-labelledby")).toBeNull();
+  });
+
   it("maps repeated pointer selection correctly in RTL", () => {
     const onChange = vi.fn();
     render(<Rate aria-label="RTL 评分" dir="rtl" defaultValue={4} onChange={onChange} />);
@@ -143,6 +199,55 @@ describe("Rate", () => {
     expect(onChange).not.toHaveBeenCalledWith(0);
   });
 
+  it("cancels repeated-click clearing after pointer cancellation", () => {
+    const onChange = vi.fn();
+    render(<Rate aria-label="取消评分" defaultValue={2} onChange={onChange} />);
+    const rating = screen.getByRole("slider", { name: "取消评分" });
+    vi.spyOn(rating, "getBoundingClientRect").mockReturnValue({
+      bottom: 40,
+      height: 40,
+      left: 0,
+      right: 100,
+      top: 0,
+      width: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({})
+    });
+
+    fireEvent.pointerDown(rating, { clientX: 40 });
+    fireEvent.pointerCancel(rating);
+    fireEvent.click(rating, { detail: 1 });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(rating).toHaveProperty("value", "2");
+  });
+
+  it("honors cancelled caller pointer and click handlers", () => {
+    const onChange = vi.fn();
+    const onPointerDown = vi.fn((event: ReactPointerEvent<HTMLInputElement>) => {
+      event.preventDefault();
+    });
+    const onClick = vi.fn((event: ReactMouseEvent<HTMLInputElement>) => {
+      event.preventDefault();
+    });
+    render(
+      <Rate
+        aria-label="受保护评分"
+        defaultValue={2}
+        onChange={onChange}
+        onPointerDown={onPointerDown}
+        onClick={onClick}
+      />
+    );
+    const rating = screen.getByRole("slider", { name: "受保护评分" });
+    fireEvent.pointerDown(rating, { clientX: 40 });
+    fireEvent.click(rating, { detail: 1 });
+    expect(onPointerDown).toHaveBeenCalledTimes(1);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(rating).toHaveProperty("value", "2");
+  });
+
   it("keeps read-only values in native forms and forwards the input ref", () => {
     const ref = createRef<HTMLInputElement>();
     render(
@@ -158,6 +263,18 @@ describe("Rate", () => {
     expect(rating.getAttribute("aria-valuetext")).toBe("4.5 / 5 星");
     expect(new FormData(form).get("rating")).toBe("4.5");
     expect(ref.current && ref.current.type).toBe("hidden");
+  });
+
+  it("excludes disabled interactive and read-only values from FormData", () => {
+    render(
+      <form aria-label="禁用评分表单">
+        <Rate aria-label="禁用交互评分" name="interactive" value={2} disabled />
+        <Rate aria-label="禁用只读评分" name="readonly" value={4} disabled readOnly />
+      </form>
+    );
+    const form = screen.getByRole("form", { name: "禁用评分表单" });
+    if (!(form instanceof HTMLFormElement)) throw new Error("Expected a form element");
+    expect([...new FormData(form).entries()]).toEqual([]);
   });
 
   it("restores an uncontrolled form value without calling onChange", async () => {
@@ -195,5 +312,26 @@ describe("Rate", () => {
     await Promise.resolve();
     expect(rating).toHaveProperty("value", "4");
     expect(new FormData(form).get("rating")).toBe("4");
+  });
+
+  it("uses the latest defaultValue when an uncontrolled form is reset", async () => {
+    const { rerender } = render(
+      <form aria-label="动态评分表单">
+        <Rate aria-label="动态评分" name="rating" defaultValue={2} />
+      </form>
+    );
+    const rating = screen.getByRole("slider", { name: "动态评分" });
+    fireEvent.change(rating, { target: { value: "4" } });
+
+    rerender(
+      <form aria-label="动态评分表单">
+        <Rate aria-label="动态评分" name="rating" defaultValue={3} />
+      </form>
+    );
+    const form = screen.getByRole("form", { name: "动态评分表单" });
+    if (!(form instanceof HTMLFormElement)) throw new Error("Expected a form element");
+    form.reset();
+    await waitFor(() => expect(rating).toHaveProperty("value", "3"));
+    expect(new FormData(form).get("rating")).toBe("3");
   });
 });

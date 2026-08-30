@@ -149,6 +149,8 @@ export const uploadButton = style({
   font: "inherit",
   fontSize: 12,
   lineHeight: 1.25,
+  overflowWrap: "anywhere",
+  textAlign: "center",
   cursor: "pointer",
   WebkitTapHighlightColor: "transparent",
   selectors: {
@@ -190,6 +192,7 @@ export const taskMask = style({
   background: "rgba(0, 0, 0, 0.72)",
   fontSize: 12,
   lineHeight: 1.3,
+  overflowWrap: "anywhere",
   textAlign: "center"
 });
 
@@ -214,6 +217,7 @@ export const progressFill = style({
 });
 
 export const retryButton = style({
+  maxWidth: "100%",
   minWidth: 44,
   minHeight: 44,
   margin: 0,
@@ -225,6 +229,7 @@ export const retryButton = style({
   font: "inherit",
   fontSize: 12,
   fontWeight: 650,
+  overflowWrap: "anywhere",
   cursor: "pointer",
   selectors: { "&:focus": { outline: "2px solid #FFFFFF", outlineOffset: 2 } },
   "@media": {

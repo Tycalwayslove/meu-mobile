@@ -206,6 +206,60 @@ describe("Image", () => {
     expect(onLoad).not.toHaveBeenCalled();
   });
 
+  it("recovers a cached primary failure through fallbackSrc without synthesizing events", () => {
+    const onError = vi.fn();
+    vi.spyOn(HTMLImageElement.prototype, "complete", "get")
+      .mockReturnValueOnce(true)
+      .mockReturnValue(false);
+    vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(0);
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+
+    render(
+      <Image
+        src="/cached-broken.jpg"
+        fallbackSrc="/backup.jpg"
+        alt="缓存失败图片"
+        onError={onError}
+      />
+    );
+
+    const backup = screen.getByRole("img", { name: "缓存失败图片" });
+    expect(backup.getAttribute("src")).toBe("/backup.jpg");
+    expect(backup.closest('[data-source="fallback"][data-state="loading"]')).toBeTruthy();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it("treats srcSet as a requestable primary source and keeps fallback request controls", () => {
+    render(
+      <Image
+        srcSet=" /product.webp 1x, /product-2x.webp 2x "
+        sizes="50vw"
+        fallbackSrc=" /backup.webp "
+        alt="响应式图片"
+        crossOrigin="use-credentials"
+        loading="lazy"
+        referrerPolicy="same-origin"
+      />
+    );
+
+    const primary = screen.getByRole("img", { name: "响应式图片" });
+    expect(primary.hasAttribute("src")).toBe(false);
+    expect(primary.getAttribute("srcset")).toBe("/product.webp 1x, /product-2x.webp 2x");
+    expect(primary.getAttribute("sizes")).toBe("50vw");
+
+    fireEvent.error(primary);
+    const backup = screen.getByRole("img", { name: "响应式图片" });
+    expect(backup.getAttribute("src")).toBe("/backup.webp");
+    expect(backup.hasAttribute("srcset")).toBe(false);
+    expect(backup.hasAttribute("sizes")).toBe(false);
+    expect(backup.getAttribute("crossorigin")).toBe("use-credentials");
+    expect(backup.getAttribute("loading")).toBe("lazy");
+    expect(backup.getAttribute("referrerpolicy")).toBe("same-origin");
+  });
+
   it("guards the informative and decorative naming contract from unsafe imageProps", () => {
     const { rerender } = render(
       <Image
@@ -264,6 +318,45 @@ describe("Image", () => {
     expect(screen.getByTestId("root").style.height).toBe("12rem");
     expect(image.hasAttribute("width")).toBe(false);
     expect(image.hasAttribute("height")).toBe(false);
+  });
+
+  it("lets explicit empty CSS dimensions override root style dimensions", () => {
+    render(
+      <Image
+        src="/size.jpg"
+        alt="空尺寸"
+        width=""
+        height=""
+        style={{ width: 320, height: 180 }}
+        data-testid="root"
+      />
+    );
+
+    const root = screen.getByTestId("root");
+    expect(root.style.width).toBe("");
+    expect(root.style.height).toBe("");
+  });
+
+  it("preserves localized long fallback content and direction without adding interaction", () => {
+    const longFallback =
+      "تعذر تحميل صورة المنتج MEU-2026-SUPER-LONG-UNBROKEN-IDENTIFIER، يرجى المحاولة لاحقًا";
+    render(
+      <Image
+        src=""
+        alt="صورة المنتج"
+        fallback={longFallback}
+        dir="rtl"
+        lang="ar"
+        data-testid="root"
+      />
+    );
+
+    const root = screen.getByTestId("root");
+    expect(root.getAttribute("dir")).toBe("rtl");
+    expect(root.getAttribute("lang")).toBe("ar");
+    expect(root.getAttribute("tabindex")).toBeNull();
+    expect(screen.getByRole("img", { name: "صورة المنتج" })).toBe(root);
+    expect(screen.getByText(longFallback)).toBeTruthy();
   });
 
   it("keeps root and native image refs separate and clears imageRef after failure", () => {

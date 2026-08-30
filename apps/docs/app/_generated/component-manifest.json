@@ -4222,10 +4222,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Image/Image.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-IMAGE-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4278,10 +4276,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ImageUploader/ImageUploader.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-IMAGE-UPLOADER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4478,10 +4474,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/InfiniteList/InfiniteList.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-INFINITE-LIST-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5210,10 +5204,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Rate/Rate.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-RATE-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5596,10 +5588,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Slider/Slider.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-SLIDER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5682,10 +5672,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Stepper/Stepper.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-STEPPER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6391,10 +6379,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/VirtualList/VirtualList.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-VIRTUAL-LIST-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6507,10 +6493,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 61,
+    "locallyVerifiedProducts": 68,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 7,
+    "productsWithLocalGaps": 0,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

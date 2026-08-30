@@ -53,4 +53,37 @@ describe("Rate hydration", () => {
     expect(consoleError).not.toHaveBeenCalled();
     container.remove();
   });
+
+  it("keeps the native slider node when controlled bounds and increments change after hydration", async () => {
+    const initial = <Rate aria-label="Dynamic rating" count={5} value={2} />;
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(initial);
+    document.body.append(container);
+    const serverSlider = container.querySelector<HTMLInputElement>('input[type="range"]');
+    const recoverableErrors: unknown[] = [];
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    let root: ReturnType<typeof hydrateRoot>;
+
+    await act(async () => {
+      root = hydrateRoot(container, initial, {
+        onRecoverableError: (error) => recoverableErrors.push(error)
+      });
+      roots.push(root);
+      await Promise.resolve();
+    });
+    await act(async () => {
+      root!.render(<Rate aria-label="Dynamic rating" count={3} value={2.7} allowHalf />);
+      await Promise.resolve();
+    });
+
+    const slider = container.querySelector<HTMLInputElement>('input[type="range"]');
+    expect(slider).toBe(serverSlider);
+    expect(slider).toHaveProperty("max", "3");
+    expect(slider).toHaveProperty("step", "0.5");
+    expect(slider).toHaveProperty("value", "2.5");
+    expect(slider && slider.getAttribute("aria-valuetext")).toBe("2.5 / 3 星");
+    expect(recoverableErrors).toEqual([]);
+    expect(consoleError).not.toHaveBeenCalled();
+    container.remove();
+  });
 });

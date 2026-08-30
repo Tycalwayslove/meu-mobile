@@ -6,7 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Field } from "../Field";
 import { ImageUploader } from "./ImageUploader";
-import type { ImageUploaderItem, ImageUploaderRef, ImageUploaderUploadContext } from "./types";
+import type {
+  ImageUploaderItem,
+  ImageUploaderRef,
+  ImageUploaderTask,
+  ImageUploaderUploadContext
+} from "./types";
 
 const existingItem: ImageUploaderItem = {
   alt: "商品正面",
@@ -117,7 +122,7 @@ describe("ImageUploader", () => {
         })
     );
     const onChange = vi.fn();
-    const onUploadQueueChange = vi.fn();
+    const onUploadQueueChange = vi.fn<(tasks: readonly ImageUploaderTask[]) => void>();
     render(
       <ImageUploader
         upload={upload}
@@ -387,7 +392,7 @@ describe("ImageUploader", () => {
     render(<ImageUploader ref={ref} upload={upload} onChange={onChange} maxCount={1} />);
 
     choose([new File(["x"], "retry.jpg", { type: "image/jpeg" })]);
-    const retry = await screen.findByRole("button", { name: "重试" });
+    const retry = await screen.findByRole("button", { name: "重试 retry.jpg" });
     expect(ref.current && ref.current.input).toBe(screen.getByLabelText("添加图片"));
     expect(ref.current && ref.current.input && ref.current.input.disabled).toBe(true);
     expect(screen.queryByRole("button", { name: "添加图片" })).toBeNull();
@@ -417,7 +422,7 @@ describe("ImageUploader", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "添加图片" })).toHaveProperty("disabled", false)
     );
-    expect(screen.queryByRole("button", { name: "重试" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /重试/ })).toBeNull();
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:hidden-error.jpg");
     expect(onUploadQueueChange).toHaveBeenLastCalledWith([]);
   });
@@ -440,7 +445,7 @@ describe("ImageUploader", () => {
     );
 
     choose([file]);
-    const retry = await screen.findByRole("button", { name: "重试" });
+    const retry = await screen.findByRole("button", { name: "重试 retry.jpg" });
     rerender(
       <ImageUploader
         value={[existingItem]}
@@ -496,6 +501,240 @@ describe("ImageUploader", () => {
     await waitFor(() => expect(remove).toHaveProperty("disabled", false));
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "商品正面，预览" })).toBeTruthy();
+  });
+
+  it("uses current capacity and rejection callbacks after asynchronous preprocessing", async () => {
+    let finishPreprocessing: ((file: File) => void) | undefined;
+    const file = new File(["x"], "capacity.jpg", { type: "image/jpeg" });
+    const upload = vi.fn();
+    const firstOnReject = vi.fn();
+    const firstOnCountExceed = vi.fn();
+    const nextOnReject = vi.fn();
+    const nextOnCountExceed = vi.fn();
+    const beforeUpload = vi.fn(
+      () =>
+        new Promise<File>((resolve) => {
+          finishPreprocessing = resolve;
+        })
+    );
+    const { rerender } = render(
+      <ImageUploader
+        upload={upload}
+        beforeUpload={beforeUpload}
+        maxCount={2}
+        onReject={firstOnReject}
+        onCountExceed={firstOnCountExceed}
+      />
+    );
+
+    choose([file]);
+    await waitFor(() => expect(beforeUpload).toHaveBeenCalledTimes(1));
+    rerender(
+      <ImageUploader
+        upload={upload}
+        beforeUpload={beforeUpload}
+        maxCount={0}
+        onReject={nextOnReject}
+        onCountExceed={nextOnCountExceed}
+      />
+    );
+    await act(async () => {
+      if (!finishPreprocessing) throw new Error("Expected preprocessing resolver");
+      finishPreprocessing(file);
+      await Promise.resolve();
+    });
+
+    expect(upload).not.toHaveBeenCalled();
+    expect(firstOnReject).not.toHaveBeenCalled();
+    expect(firstOnCountExceed).not.toHaveBeenCalled();
+    expect(nextOnCountExceed).toHaveBeenCalledWith(1);
+    expect(nextOnReject).toHaveBeenCalledWith({
+      accepted: [],
+      files: [file],
+      reason: "max-count",
+      rejected: [file]
+    });
+  });
+
+  it("publishes an asynchronous upload through the latest change callback", async () => {
+    let finishUpload: ((item: ImageUploaderItem) => void) | undefined;
+    const uploaded = { alt: "最新回调", url: "/latest-callback.jpg" };
+    const upload = vi.fn(
+      () =>
+        new Promise<ImageUploaderItem>((resolve) => {
+          finishUpload = resolve;
+        })
+    );
+    const firstOnChange = vi.fn();
+    const nextOnChange = vi.fn();
+    const { rerender } = render(<ImageUploader upload={upload} onChange={firstOnChange} />);
+
+    choose([new File(["x"], "latest-callback.jpg", { type: "image/jpeg" })]);
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+    rerender(<ImageUploader upload={upload} onChange={nextOnChange} />);
+    await act(async () => {
+      if (!finishUpload) throw new Error("Expected upload resolver");
+      finishUpload(uploaded);
+      await Promise.resolve();
+    });
+
+    expect(firstOnChange).not.toHaveBeenCalled();
+    expect(nextOnChange).toHaveBeenCalledWith([uploaded], { item: uploaded, reason: "upload" });
+  });
+
+  it("normalizes successful values and contains malformed upload results", async () => {
+    const sourceFile = new File(["source"], "source.jpg", { type: "image/jpeg" });
+    const processedFile = new File(["processed"], "processed.jpg", { type: "image/jpeg" });
+    const onChange = vi.fn();
+    const onUploadQueueChange = vi.fn<(tasks: readonly ImageUploaderTask[]) => void>();
+    const upload = vi
+      .fn<(_: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>>()
+      .mockResolvedValueOnce({
+        alt: "持久化图片",
+        key: "durable",
+        name: "durable.jpg",
+        thumbnailUrl: "/durable-thumb.jpg",
+        url: "/durable.jpg",
+        file: processedFile
+      } as ImageUploaderItem)
+      .mockResolvedValueOnce({ alt: "无效图片", url: "" });
+    render(
+      <ImageUploader
+        upload={upload}
+        beforeUpload={(file) => (file === sourceFile ? processedFile : file)}
+        onChange={onChange}
+        onUploadQueueChange={onUploadQueueChange}
+      />
+    );
+
+    choose([sourceFile]);
+    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+    const firstUploadCall = upload.mock.calls[0];
+    if (!firstUploadCall) throw new Error("Expected upload call");
+    expect(firstUploadCall[0]).toBe(processedFile);
+    expect(onChange).toHaveBeenLastCalledWith(
+      [
+        {
+          alt: "持久化图片",
+          key: "durable",
+          name: "durable.jpg",
+          thumbnailUrl: "/durable-thumb.jpg",
+          url: "/durable.jpg"
+        }
+      ],
+      {
+        item: {
+          alt: "持久化图片",
+          key: "durable",
+          name: "durable.jpg",
+          thumbnailUrl: "/durable-thumb.jpg",
+          url: "/durable.jpg"
+        },
+        reason: "upload"
+      }
+    );
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:processed.jpg");
+
+    choose([new File(["bad"], "invalid.jpg", { type: "image/jpeg" })]);
+    expect(await screen.findByRole("button", { name: "重试 invalid.jpg" })).toBeTruthy();
+    expect(onChange).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      const calls = onUploadQueueChange.mock.calls;
+      const lastCall = calls[calls.length - 1];
+      const queue = lastCall ? lastCall[0] : [];
+      const failedTask = queue[0];
+      expect(failedTask && failedTask.error).toBeInstanceOf(TypeError);
+      expect(failedTask && failedTask.name).toBe("invalid.jpg");
+      expect(failedTask && failedTask.status).toBe("error");
+    });
+  });
+
+  it("contains max-size predicates and unavailable object URL previews", async () => {
+    const file = new File(["x"], "guarded.jpg", { type: "image/jpeg" });
+    const upload = vi.fn().mockResolvedValue({ alt: "图片", url: "/image.jpg" });
+    const onReject = vi.fn();
+    const { rerender } = render(
+      <ImageUploader
+        upload={upload}
+        maxSize={() => {
+          throw new Error("predicate failed");
+        }}
+        onReject={onReject}
+      />
+    );
+    choose([file]);
+    await waitFor(() =>
+      expect(onReject).toHaveBeenCalledWith({
+        accepted: [],
+        files: [file],
+        reason: "max-size",
+        rejected: [file]
+      })
+    );
+    expect(upload).not.toHaveBeenCalled();
+
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn(() => {
+        throw new Error("object URLs unavailable");
+      }),
+      revokeObjectURL
+    });
+    rerender(<ImageUploader upload={upload} />);
+    choose([file]);
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByRole("button", { name: "图片，预览" })).toBeTruthy());
+  });
+
+  it("keeps native form attributes while separating selected files from completed URLs", async () => {
+    const onBlur = vi.fn();
+    const upload = vi.fn().mockResolvedValue({ alt: "表单图片", url: "/form.jpg" });
+    const { container } = render(
+      <form>
+        <ImageUploader
+          aria-label="商品图片"
+          upload={upload}
+          name="gallery"
+          accept=".jpg,image/png"
+          capture="environment"
+          multiple
+          onBlur={onBlur}
+        />
+      </form>
+    );
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error("Expected native file input");
+    expect(input.name).toBe("gallery");
+    expect(input.accept).toBe(".jpg,image/png");
+    expect(input.getAttribute("capture")).toBe("environment");
+    expect(input.multiple).toBe(true);
+
+    fireEvent.change(input, {
+      target: { files: [new File(["x"], "form.jpg", { type: "image/jpeg" })] }
+    });
+    expect(input.value).toBe("");
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
+    fireEvent.blur(input);
+    expect(onBlur).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "表单图片，预览" })).toBeTruthy();
+  });
+
+  it("gives each failed task a filename-specific retry name and clears failures through ref", async () => {
+    const ref = createRef<ImageUploaderRef>();
+    const upload = vi.fn().mockRejectedValue(new Error("network"));
+    render(<ImageUploader ref={ref} upload={upload} multiple />);
+    choose([
+      new File(["a"], "first-failure.jpg", { type: "image/jpeg" }),
+      new File(["b"], "second-failure.jpg", { type: "image/jpeg" })
+    ]);
+
+    expect(await screen.findByRole("button", { name: "重试 first-failure.jpg" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "重试 second-failure.jpg" })).toBeTruthy();
+    act(() => {
+      if (ref.current) ref.current.clearFailed();
+    });
+    await waitFor(() => expect(screen.queryByRole("button", { name: /重试/ })).toBeNull());
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:first-failure.jpg");
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:second-failure.jpg");
   });
 
   it("does not start or publish asynchronous hook work after unmount", async () => {

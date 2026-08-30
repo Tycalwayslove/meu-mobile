@@ -107,8 +107,12 @@ export function Image({
   const inferredAspectRatio = hasNumericRatio ? `${width} / ${height}` : undefined;
   const resolvedStyle: CSSProperties = {
     ...baseStyle,
-    width: toCssLength(width) || baseStyle.width,
-    height: hasNumericRatio ? undefined : toCssLength(height) || baseStyle.height,
+    width: width !== undefined ? toCssLength(width) : baseStyle.width,
+    height: hasNumericRatio
+      ? undefined
+      : height !== undefined
+        ? toCssLength(height)
+        : baseStyle.height,
     aspectRatio:
       aspectRatio !== undefined
         ? aspectRatio

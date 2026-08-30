@@ -4,8 +4,8 @@ slug: stepper
 package: "@meu/mobile"
 exports: [Stepper]
 status: verification
-localVerification: pending
-localGapIds: [LOC-STEPPER-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -29,7 +29,10 @@ storyIds:
     data-entry-stepper--disabled,
     data-entry-stepper--right-to-left,
     data-entry-stepper--small,
-    data-entry-stepper--large
+    data-entry-stepper--large,
+    data-entry-stepper--long-content-rtl,
+    data-entry-stepper--reduced-motion,
+    data-entry-stepper--light-and-dark
   ]
 source: packages/mobile/src/Stepper
 ---
@@ -45,7 +48,7 @@ source: packages/mobile/src/Stepper
 - Field 与调用方的 `aria-labelledby` / `aria-describedby` 按 token 合并去重；中间有布局 wrapper 时仍保留可访问名称和说明。
 - 44px 按钮、三档高度、RTL 逻辑边框、reduced-motion 和 forced-colors 降级。
 
-当前为 V2 `verification`；单元、SSR、Story、本地 axe 与全库移动浏览器门禁已建立，尚缺最终视觉与真机验收，不能标记为 commercial。
+当前为 V2 `verification`；代码、文档、Unit/SSR/hydration 与定向 Storybook 场景已完成本地验证。发布候选阶段仍需统一执行全库视觉基线和真机验收。
 
 ## 何时使用
 
@@ -133,7 +136,7 @@ ref 指向中央真实 input，可使用原生 `focus()`、`blur()`、`select()`
 ## 无障碍
 
 - input role=spinbutton 暴露 value now/min/max/required/invalid；有效编辑草稿会同步 value now，不完整或非法草稿不沿用旧值；必须有 Field label 或 ARIA name。嵌套 Field context 与调用方 idref 会合并去重。
-- 增减按钮有 ConfigProvider 本地化名称（中：增加/减少，英：Increase/Decrease）和 aria-controls。
+- 增减按钮有 ConfigProvider 本地化名称（中：增加/减少，英：Increase/Decrease）和 aria-controls；独立使用时也生成 SSR 稳定的 input id，空白自定义按钮名称会回退到内置文案。
 - 边界、readOnly/disabled 会禁用相应按钮；错误由 Field describedby + aria-invalid 公布。
 - 无 Field/status error 时保留 spinbutton 上显式 `false/grammar/spelling` token；grammar/spelling 触发错误视觉。Field/status error 优先输出 `true`，token 不复制到增减按钮。
 - 状态不只靠颜色；按钮 disabled、input readonly/disabled 和 ARIA 提供语义。
@@ -174,12 +177,12 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 
 ## 测试证据
 
-- Unit：覆盖按钮/键盘/bounds、小数与空值、Field 与嵌套 Field idref、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、粗 precision 连续步进、草稿单次发布与 ARIA 同步、decimal-comma paste/IME、严格十进制拒绝、取消键盘处理、readOnly/disabled、长按重复及 pointerup/pointercancel/卸载清理、FormData、required/controls、reset/取消和 RTL hydration。
+- Unit：覆盖按钮/键盘/bounds、小数与空值、Field 与嵌套 Field idref、ARIA invalid token/优先级、反向 bounds/受控、非整步有效上限、粗 precision 连续步进、草稿单次发布与 ARIA 同步、decimal-comma paste/IME、严格十进制拒绝、取消键盘处理、readOnly/disabled、长按重复及 pointerup/pointercancel/卸载清理、FormData、required、独立生成 id/controls、ref、中英文按钮名称、reset/取消和可交互 RTL hydration。
 - SSR：覆盖确定 spinbutton、name/value、dir/inputMode、ARIA invalid token 与两个原生按钮。
 - Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本批新增长文案 RTL、显式 reduced-motion 和 Light/Dark 并列预览；定向扫描在 390×844 视口验证 18 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 126 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5820 B / 32768 B 预算，组合 Brotli 5135 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5867 B / 32768 B 预算，组合 Brotli 5173 B；共享样式由应用单独导入一次。
 - Figma：canonical `Meu/Stepper` set `54:74`，Min `54:147`、Max `54:220`；36 variants。Light `451:79`、Dark `451:129`、QA `451:179`；合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：软键盘/IME/粘贴与物理长按移动 E2E、系统 pointercancel/滚动竞争、forced-colors 聚焦截图、Light/Dark 视觉基线、VoiceOver/TalkBack。
 
@@ -217,3 +220,5 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 | 2026-08-29 | 未发布 | verification  | 增加 paste/IME、长按取消/卸载、disabled 与 RTL hydration 自动化 | 无                               |
 | 2026-08-29 | 未发布 | accessibility | 嵌套 Field 合并 label/description idref，adapter 保留显式错误态 | 无                               |
 | 2026-08-30 | 未发布 | accessibility | 显式 accessible name 抑制冲突 labelledby 的参数化门禁           | 无                               |
+| 2026-08-30 | 未发布 | accessibility | 独立 Stepper 生成稳定 control id，空白按钮名称回退本地化默认值  | 无                               |
+| 2026-08-30 | 未发布 | verification  | 补齐 ref、本地化、可交互 hydration 与主题/长文案定向场景        | 无                               |

@@ -4,12 +4,12 @@ slug: infinite-list
 package: "@meu/mobile"
 exports: [InfiniteList]
 status: verification
-localVerification: pending
-localGapIds: [LOC-INFINITE-LIST-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "295:46"
@@ -18,7 +18,9 @@ storyIds:
     collections-infinitelist--default,
     collections-infinitelist--manual,
     collections-infinitelist--complete,
-    collections-infinitelist--error-and-retry
+    collections-infinitelist--error-and-retry,
+    collections-infinitelist--empty-list-and-long-content,
+    collections-infinitelist--rtl-dark-reduced-motion
   ]
 source: packages/mobile/src/InfiniteList
 ---
@@ -27,11 +29,11 @@ source: packages/mobile/src/InfiniteList
 
 ## 当前能力
 
-- 最近滚动祖先的 IntersectionObserver 预加载、始终可用的手动入口、失败重试和完成状态。
+- 最近 overflow 滚动祖先的 IntersectionObserver 预加载（即使首屏尚未溢出）、始终可用的手动入口、失败重试和完成状态。
 - 同步并发锁保证 observer/按钮不会重复请求；`hasMore=false` 或卸载会中止本次 signal、使结果失效且不再回写状态。
-- error 不自动重试，disabled 同时关闭 auto/manual/retry；无 Observer 时原生按钮降级仍可用。
+- error 不自动重试，disabled 同时关闭 auto/manual/retry；Observer 缺失或宿主实现初始化失败时原生按钮降级仍可用。
 - 手动加载/重试完成后焦点回到对应操作，自动加载不抢焦点；成功追加有可定制的 polite live announcement。
-- 中英文状态、`aria-busy`、reduced-motion spinner 与 forced-colors 按钮边界已覆盖。
+- 中英文状态、`aria-busy`、系统/ConfigProvider reduced-motion spinner、RTL、Dark、长文案换行与 forced-colors 按钮边界已覆盖。
 
 ## 何时使用
 
@@ -91,7 +93,7 @@ loading 期间根使用 `aria-busy`，状态通过 atomic polite live region 公
 
 ## 动效
 
-仅 loading spinner 旋转；`prefers-reduced-motion` 下静止，状态变化无自定义过场。
+仅 loading spinner 旋转；`prefers-reduced-motion` 或 `ConfigProvider motion="reduced"` 下静止，状态变化无自定义过场。
 
 ## 主题与定制
 
@@ -107,7 +109,7 @@ SSR 在默认 `autoLoad=true` 时也先输出可用的 idle 手动按钮，或�
 
 ## 浏览器与 WebView
 
-IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrome/WebView 70 与 iOS 13 基线支持 Promise、Observer 和 CSS；真实宿主滚动容器仍需复验。
+IntersectionObserver 缺失、构造或 observe 失败时功能降级为按钮，不要求 polyfill。自动发现最近声明 `overflow-y:auto/scroll` 的祖先，不依赖首屏已经产生溢出；Chrome/WebView 70 与 iOS 13 基线支持 Promise、Observer 和 CSS，真实宿主滚动时序仍需复验。
 
 ## 边界情况与已知限制
 
@@ -123,11 +125,11 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 
 ## 测试证据
 
-- Unit: `InfiniteList.test.tsx` 覆盖 root discovery、并发锁与 trigger、失败/重试、完成、Observer 降级、disabled、自定义视觉、完成/卸载取消、陈旧 rejection、焦点恢复、自动加载不抢焦点和成功公告。
-- Story interaction: `ErrorAndRetry.play` 验证失败、焦点恢复、重试、成功公告和恢复状态。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `InfiniteList.test.tsx` 覆盖未溢出 root discovery、并发锁与 trigger、失败/重试、完成、Observer 缺失/初始化失败降级、阈值归一与清理、disabled、自定义视觉、完成/卸载取消、陈旧 rejection、焦点恢复、自动加载不抢焦点、成功公告，以及 RTL/Dark/显式 reduced-motion/长状态文案。
+- Story interaction: `ErrorAndRetry.play` 验证失败、焦点恢复、重试、成功公告和恢复状态；`EmptyListAndLongContent.play` 固化空列表尾部与超长错误/重试文案；`RtlDarkReducedMotion.play` 固化 RTL + Dark + 显式减弱动效 loading。
+- Storybook 浏览器矩阵：本批在 390×844 视口定向验证本组件 6 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 42 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2905 B / 32768 B 预算，组合 Brotli 2524 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3162 B / 32768 B 预算，组合 Brotli 2695 B；共享样式由应用单独导入一次。
 - SSR/hydration: `InfiniteList.ssr.test.tsx` 覆盖默认 auto 的首屏手动降级与 complete；`InfiniteList.hydration.test.tsx` 覆盖无 mismatch、挂载后安装 Observer，以及 Observer 缺失时按钮仍可请求。
 - Reduced motion/forced-colors/RTL: CSS 中 reduced-motion 停止旋转、forced-colors 使用系统按钮色；布局使用居中/无物理方向属性。自动 Storybook 矩阵覆盖继续适用，真机视觉仍见下方边界。
 - Mobile Chromium/WebKit: 隔离 Next H5 在两种引擎验证同步去重、手动加载后的焦点恢复与自定义成功公告、到达 complete，以及外部完成时 signal 协作取消且不进入 error；性能专页再以确定性业务失败验证首次请求进入 error、显式 retry 恢复、只发出 2 次请求且不重复页，两种引擎各重复 3 轮通过。
@@ -143,10 +145,12 @@ IntersectionObserver 缺失时功能降级为按钮，不要求 polyfill。Chrom
 
 - 固化并发、在途完成竞态、协作取消、卸载安全、disabled retry、Observer hydration/降级、焦点恢复、追加公告、i18n、SSR、reduced-motion 与 forced-colors。
 - 在隔离 Next H5 双移动引擎补手动触发、焦点/公告、完成与在途 abort 的真实浏览器路径。
+- 修复未溢出容器误绑定 viewport、Observer 初始化异常导致挂载失败，以及 Manual/Complete Story 被元级 render 覆盖的问题；补长内容与显式 motion 契约。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型      | 内容                                      | 迁移说明                    |
 | ---------- | ------ | --------- | ----------------------------------------- | --------------------------- |
+| 2026-08-30 | 未发布 | hardening | 滚动根、Observer 降级、Story 与长内容加固 | API 兼容                    |
 | 2026-08-29 | 未发布 | hardening | 补取消、hydration、焦点保持与追加公告证据 | `loadMore` 可选消费 context |
 | 2026-08-29 | 未发布 | hardening | 完成请求竞态、完成事实源与降级入口加固    | API 兼容                    |

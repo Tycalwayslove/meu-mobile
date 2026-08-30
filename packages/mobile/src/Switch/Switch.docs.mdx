@@ -156,7 +156,7 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 - Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset；`OptimisticFailureLifecycle` 覆盖 loading 去重、失败回滚与再次操作；本批 `Forms/Switch` 12/12 stories × Light/Dark 共 24/24 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3214 B / 32768 B 预算，组合 Brotli 2847 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3210 B / 32768 B 预算，组合 Brotli 2842 B；共享样式由应用单独导入一次。
 - Figma：canonical Medium set `50:414`，Small `50:359`、Large `50:469`；30 variants，含 loading。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: 三尺寸 root 最小 44×44
 - RTL/reduced-motion/forced-colors：CSS 和 Story 已建；浏览器视觉证据待补

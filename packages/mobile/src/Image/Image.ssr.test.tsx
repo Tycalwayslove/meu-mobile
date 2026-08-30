@@ -48,4 +48,16 @@ describe("Image SSR", () => {
     expect(html).toContain('src="/backup.jpg"');
     expect(html).toContain('alt="服务端备份图片"');
   });
+
+  it("renders a srcSet-only primary source without inventing a src", () => {
+    const html = renderToString(
+      <Image srcSet="/hero.webp 1x, /hero-2x.webp 2x" sizes="50vw" alt="响应式主图" />
+    );
+
+    expect(html).toContain('data-source="primary"');
+    expect(html).toContain('data-state="loading"');
+    expect(html).toContain('srcSet="/hero.webp 1x, /hero-2x.webp 2x"');
+    expect(html).toContain('sizes="50vw"');
+    expect(html).not.toMatch(/<img[^>]*\ssrc=/);
+  });
 });

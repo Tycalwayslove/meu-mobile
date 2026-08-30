@@ -75,4 +75,41 @@ describe("Image hydration", () => {
     expect(container.querySelector("img")).toBeNull();
     expect(consoleError).not.toHaveBeenCalled();
   });
+
+  it("hydrates a direct fallback source without changing its source phase", async () => {
+    const element = (
+      <Image src=" " fallbackSrc="/hydrated-backup.jpg" alt="水合备用图片" loading="lazy" />
+    );
+    const container = serverContainer(element);
+    const serverImage = container.querySelector("img");
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await act(async () => {
+      roots.push(hydrateRoot(container, element));
+      await Promise.resolve();
+    });
+
+    expect(container.querySelector("img")).toBe(serverImage);
+    expect(container.querySelector('[data-source="fallback"][data-state="loading"]')).toBeTruthy();
+    expect(serverImage!.getAttribute("src")).toBe("/hydrated-backup.jpg");
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  it("hydrates a decorative fallback outside the accessibility tree", async () => {
+    const element = <Image alt="" fallback="装饰占位" dir="rtl" />;
+    const container = serverContainer(element);
+    const serverRoot = container.querySelector('[data-meu-component="image"]');
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await act(async () => {
+      roots.push(hydrateRoot(container, element));
+      await Promise.resolve();
+    });
+
+    expect(container.querySelector('[data-meu-component="image"]')).toBe(serverRoot);
+    expect(serverRoot!.getAttribute("aria-hidden")).toBe("true");
+    expect(serverRoot!.getAttribute("dir")).toBe("rtl");
+    expect(container.querySelector('[role="img"]')).toBeNull();
+    expect(consoleError).not.toHaveBeenCalled();
+  });
 });

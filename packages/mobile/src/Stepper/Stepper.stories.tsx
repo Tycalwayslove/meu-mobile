@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ConfigProvider, ThemeProvider } from "../ConfigProvider";
 import { Field } from "../Field";
 import { Stepper } from "./Stepper";
 
@@ -93,3 +94,62 @@ export const Disabled: Story = { args: { defaultValue: 4, disabled: true } };
 export const RightToLeft: Story = { args: { defaultValue: 4, dir: "rtl" } };
 export const Small: Story = { args: { size: "small" } };
 export const Large: Story = { args: { size: "large" } };
+
+export const LongContentRtl: Story = {
+  render: () => (
+    <ConfigProvider dir="rtl" locale="en-US">
+      <div style={{ width: "min(100%, 360px)" }}>
+        <Field
+          label="كمية المنتج المطلوبة للطلب"
+          description="يمكنك اختيار الكمية المتاحة من المخزون قبل إضافة المنتج إلى السلة."
+          error="هذه الكمية تتجاوز المخزون المتاح لهذا المنتج."
+        >
+          <Stepper
+            defaultValue={8}
+            min={1}
+            max={8}
+            decrementAriaLabel="تقليل كمية المنتج"
+            incrementAriaLabel="زيادة كمية المنتج"
+            style={{ width: "100%" }}
+          />
+        </Field>
+      </div>
+    </ConfigProvider>
+  )
+};
+
+export const ReducedMotion: Story = {
+  render: () => (
+    <ConfigProvider motion="reduced">
+      <Stepper
+        aria-label="减少动效下的商品数量"
+        defaultValue={2}
+        min={0}
+        max={8}
+        repeatOnLongPress
+      />
+    </ConfigProvider>
+  )
+};
+
+export const LightAndDark: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {(["light", "dark"] as const).map((theme) => (
+        <ThemeProvider
+          key={theme}
+          theme={theme}
+          style={{
+            padding: 16,
+            color: "var(--meu-color-ink)",
+            background: "var(--meu-color-surface)"
+          }}
+        >
+          <Field label={`${theme === "light" ? "浅色" : "深色"}商品数量`}>
+            <Stepper defaultValue={2} min={0} max={8} />
+          </Field>
+        </ThemeProvider>
+      ))}
+    </div>
+  )
+};

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { ThemeProvider } from "../ConfigProvider";
+import { ConfigProvider, ThemeProvider } from "../ConfigProvider";
 import { waitForStory } from "../storyTestUtils";
 import { Image } from "./Image";
 
@@ -106,10 +106,74 @@ export const LightAndDark: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12 }}>
       {(["light", "dark"] as const).map((theme) => (
-        <ThemeProvider key={theme} theme={theme} style={{ padding: 16 }}>
+        <ThemeProvider
+          key={theme}
+          theme={theme}
+          style={{ background: "var(--meu-color-surface)", padding: 16 }}
+        >
           <Image src="" alt={`${theme} 图片不可用`} width={280} height={160} radius="surface" />
         </ThemeProvider>
       ))}
     </div>
   )
+};
+export const RtlLongFallback: Story = {
+  render: () => (
+    <div dir="rtl" lang="ar" style={{ width: 220 }}>
+      <Image
+        src=""
+        alt="صورة المنتج غير متاحة"
+        fallback="تعذر تحميل صورة المنتج MEU-2026-SUPER-LONG-UNBROKEN-IDENTIFIER، يرجى المحاولة لاحقًا"
+        width="100%"
+        height={120}
+        radius="surface"
+      />
+    </div>
+  ),
+  play: ({ canvasElement }) => {
+    const boundary = canvasElement.querySelector<HTMLElement>('[dir="rtl"]');
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+    if (
+      !boundary ||
+      boundary.lang !== "ar" ||
+      !root ||
+      root.getAttribute("data-state") !== "error" ||
+      !root.textContent ||
+      !root.textContent.includes("MEU-2026-SUPER-LONG-UNBROKEN-IDENTIFIER")
+    ) {
+      throw new window.Error("Expected the localized RTL long fallback");
+    }
+  }
+};
+export const ReducedMotion: Story = {
+  render: () => (
+    <ConfigProvider motion="reduced">
+      <Image
+        src={landscape}
+        alt="关闭淡入动画的山谷插画"
+        width={280}
+        height={160}
+        placeholder="图片加载中…"
+        radius="surface"
+      />
+    </ConfigProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const provider = canvasElement.querySelector<HTMLElement>('[data-meu-motion="reduced"]');
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="image"]');
+    const image = canvasElement.querySelector<HTMLImageElement>("img");
+    if (!provider || !root || !image) {
+      throw new window.Error("Expected reduced-motion Image markup");
+    }
+    if (root.getAttribute("data-state") === "loading") {
+      image.dispatchEvent(new window.Event("load", { bubbles: true }));
+    }
+    await waitForStory(
+      () => root.getAttribute("data-state") === "loaded",
+      "Reduced-motion Image did not enter loaded state"
+    );
+    if (window.getComputedStyle(image).transitionDuration !== "0s") {
+      throw new window.Error("Reduced-motion Image retained an opacity transition");
+    }
+  }
 };

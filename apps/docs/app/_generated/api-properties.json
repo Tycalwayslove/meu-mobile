@@ -2528,7 +2528,7 @@
           "type": "(file: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>",
           "required": true,
           "event": false,
-          "description": "Uploads one validated file; resolve with the completed item or reject to retain a failed task."
+          "description": "Uploads one validated file; public item fields are runtime-validated and copied, while rejection or a malformed item retains a failed task."
         },
         {
           "name": "value",
@@ -12554,7 +12554,7 @@
           "type": "(file: File, context: ImageUploaderUploadContext) => Promise<ImageUploaderItem>",
           "required": true,
           "event": false,
-          "description": "Uploads one validated file; resolve with the completed item or reject to retain a failed task."
+          "description": "Uploads one validated file; public item fields are runtime-validated and copied, while rejection or a malformed item retains a failed task."
         },
         {
           "name": "onBlur",

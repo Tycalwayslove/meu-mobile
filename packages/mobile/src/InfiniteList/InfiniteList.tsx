@@ -5,7 +5,7 @@ import type { Ref } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { VisuallyHidden } from "../internal/VisuallyHidden";
-import { action, content, errorText, root, spinner } from "./InfiniteList.css";
+import { action, content, errorText, root, spinner, spinnerReduced } from "./InfiniteList.css";
 import type {
   InfiniteListProps,
   InfiniteListStatus,
@@ -25,15 +25,17 @@ function normalizedThreshold(value: number) {
   return Number.isFinite(value) ? Math.max(0, value) : 250;
 }
 
-function isScrollable(node: HTMLElement) {
+function isScrollContainer(node: HTMLElement) {
   const style = window.getComputedStyle(node);
-  return /(auto|scroll)/.test(style.overflowY) && node.scrollHeight > node.clientHeight;
+  // An overflow container is the correct observer root even before its first page is tall enough
+  // to scroll. Requiring current overflow incorrectly binds short/empty lists to the viewport.
+  return /(auto|scroll)/.test(style.overflowY);
 }
 
 function findScrollRoot(node: HTMLElement) {
   let current = node.parentElement;
   while (current && current !== document.body && current !== document.documentElement) {
-    if (isScrollable(current)) return current;
+    if (isScrollContainer(current)) return current;
     current = current.parentElement;
   }
   return null;
@@ -63,7 +65,7 @@ export function InfiniteList({
   threshold = 250,
   ...props
 }: InfiniteListProps) {
-  const { locale } = useMeuConfig();
+  const { locale, motion } = useMeuConfig();
   const rootRef = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLButtonElement>(null);
   const mountedRef = useRef(true);
@@ -226,18 +228,28 @@ export function InfiniteList({
     ) {
       return undefined;
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) void requestLoad("auto");
-      },
-      {
-        root: findScrollRoot(node),
-        rootMargin: `0px 0px ${resolvedThreshold}px 0px`,
-        threshold: 0
-      }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
+    let observer: IntersectionObserver | null = null;
+    try {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) void requestLoad("auto");
+        },
+        {
+          root: findScrollRoot(node),
+          rootMargin: `0px 0px ${resolvedThreshold}px 0px`,
+          threshold: 0
+        }
+      );
+      observer.observe(node);
+    } catch {
+      // Some embedded WebViews expose an incomplete observer implementation. The persistent
+      // native action is the functional fallback, so observer setup failure must not break mount.
+      if (observer) observer.disconnect();
+      return undefined;
+    }
+    return () => {
+      if (observer) observer.disconnect();
+    };
   }, [autoLoad, disabled, hasMore, requestLoad, resolvedThreshold, status]);
 
   const manualLoad = useCallback(() => requestLoad("manual"), [requestLoad]);
@@ -245,7 +257,10 @@ export function InfiniteList({
   const defaultStatusContent =
     resolvedStatus === "loading" ? (
       <>
-        <span className={spinner} aria-hidden="true" />
+        <span
+          className={motion === "reduced" ? `${spinner} ${spinnerReduced}` : spinner}
+          aria-hidden="true"
+        />
         <div>{loadingContent === undefined ? labels.loading : loadingContent}</div>
       </>
     ) : resolvedStatus === "complete" ? (

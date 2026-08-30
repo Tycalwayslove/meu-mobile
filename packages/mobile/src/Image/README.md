@@ -38,7 +38,7 @@ import { Image } from "@meu/mobile";
 | 原生扩展     | `imageProps`（非冲突 img 属性，className/style 会合并）                              |
 | 事件与引用   | `onLoad`, `onError`, root `ref`, native `imageRef`                                   |
 
-`alt` 必填；纯装饰图片传空字符串。数字 width/height 归一为非负 root CSS 尺寸；两者均为正数时自动转成可随 `max-width:100%` 收缩的比例盒，同时继续作为默认原生尺寸。`intrinsicWidth/intrinsicHeight` 可单独覆盖 img 固有尺寸，推荐与 `width="100%" + aspectRatio` 配合，彻底分离布局与资源比例。
+`alt` 必填；纯装饰图片传空字符串。数字 width/height 归一为非负 root CSS 尺寸；两者均为正数时自动转成可随 `max-width:100%` 收缩的比例盒，同时继续作为默认原生尺寸。包括空字符串在内，显式 width/height 都优先于 `style.width/height`。`intrinsicWidth/intrinsicHeight` 可单独覆盖 img 固有尺寸，推荐与 `width="100%" + aspectRatio` 配合，彻底分离布局与资源比例。
 
 `onLoad/onError` 只透传 React 实际观察到的原生事件；正常的 primary 与备用来源双失败会各触发一次 error。若 SSR 图片在 hydration 前已经从缓存完成，组件会用 `complete/naturalWidth` 恢复状态，但不会伪造已经错过的 SyntheticEvent。业务重试应改变来源 prop，不通过 DOM 命令绕过状态机。
 
@@ -46,6 +46,7 @@ import { Image } from "@meu/mobile";
 
 - alt 描述图片传达的信息；相邻文字已完整表达且图片无额外信息时使用 `alt=""`。
 - placeholder/fallback 仅是视觉槽位，不放按钮、链接、另一张带 alt 的图片或 live region。
+- 状态层会安全换行无自然断点的长标识符；固定高度图片仍应提供能在可用空间内读清的短文案。
 - Image 本身不交互；需要点击时放入语义正确且满足触控尺寸的 Button/Link。
 - `imageProps` 可向 native img 添加 `aria-describedby`、`title`、`data-*` 等属性，不能覆盖由顶层 props 管理的来源、alt、名称、隐藏、role、事件和请求字段；运行时也会防御经 `any` 注入的冲突无障碍属性。
 
@@ -61,10 +62,10 @@ import { Image } from "@meu/mobile";
 
 组件目录永久保留以下证据：
 
-- `Image.test.tsx`：原生属性、三态、缓存完成检测、备用来源链、来源重置、布局/裁切、装饰语义、双 refs 与 React 19 callback-ref cleanup。
-- `Image.ssr.test.tsx`：服务端原生 markup、响应式提示、无源和备用来源。
-- `Image.hydration.test.tsx`：有源/无源节点复用与 hydration 零报错。
-- `Image.stories.tsx`：loading、loaded、error、fallbackSrc、lazy、响应式裁切和 Light/Dark。
+- `Image.test.tsx`：原生属性、三态、缓存成功/失败检测、备用来源链、srcSet-only、来源重置、布局/裁切、RTL 长文案、装饰语义、双 refs 与 React 19 callback-ref cleanup。
+- `Image.ssr.test.tsx`：服务端原生 markup、响应式/srcSet-only 提示、无源和备用来源。
+- `Image.hydration.test.tsx`：primary、直接备用来源、informative/decorative 无源节点复用与 hydration 零报错。
+- `Image.stories.tsx`：loading、loaded、error、fallbackSrc、lazy、响应式裁切、Light/Dark、RTL 长内容和 reduced-motion。
 
 未来变更必须保持 alt 必填、既有默认值、三态、有限来源链和双 ref 兼容；新增 native 属性需明确覆盖顺序并补 Unit + SSR/hydration；错误语义变更必须覆盖 informative/decorative alt 和事件次数。浏览器支持声明只有在独立消费者与真实设备证据完成后才能扩大。
 

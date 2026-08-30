@@ -1,23 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ForwardedRef } from "react";
 
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { group } from "./Checkbox.css";
 import { CheckboxGroupContext } from "./CheckboxGroupContext";
 import type { CheckboxGroupProps, CheckboxValue } from "./types";
-
-function assignRef<T>(ref: ForwardedRef<T> | undefined, value: T | null) {
-  if (typeof ref === "function") ref(value);
-  else if (ref) ref.current = value;
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
-}
 
 /**
  * Coordinates checkbox values and shared accessibility state for a group.

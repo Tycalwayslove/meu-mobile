@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Field } from "../Field";
 import { Slider } from "./Slider";
 
@@ -17,6 +18,13 @@ const meta = {
   title: "Data Entry/Slider",
   component: Slider,
   args: { "aria-label": "完成度", defaultValue: 35, showValue: true },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "min(100%, 390px)" }}>
+        <Story />
+      </div>
+    )
+  ],
   parameters: { layout: "padded" }
 } satisfies Meta<typeof Slider>;
 
@@ -102,3 +110,110 @@ export const Error: Story = {
 export const Disabled: Story = { args: { defaultValue: 60, disabled: true } };
 export const Small: Story = { args: { size: "small" } };
 export const Large: Story = { args: { size: "large" } };
+
+export const DecimalPrecision: Story = {
+  args: {
+    "aria-label": "服务费率",
+    defaultValue: 0.7,
+    formatValue: (value) => `${Math.round(value * 100)}%`,
+    marks: [
+      { value: 0.1, label: "10%" },
+      { value: 0.5, label: "50%" },
+      { value: 0.9, label: "90%" }
+    ],
+    min: 0.1,
+    max: 1,
+    step: 0.2
+  }
+};
+
+export const ThemeAndStateMatrix: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16 }}>
+      <ConfigProvider theme="light" style={{ background: "var(--meu-color-surface)", padding: 16 }}>
+        <Field label="Light · 配送距离" description="当前主题下的默认交互态">
+          <Slider defaultValue={35} showValue formatValue={(value) => `${value} km`} />
+        </Field>
+      </ConfigProvider>
+      <ConfigProvider theme="dark" style={{ background: "var(--meu-color-surface)", padding: 16 }}>
+        <Field label="Dark · 配送距离" error="距离超出本次服务范围">
+          <Slider defaultValue={85} showValue status="error" />
+        </Field>
+      </ConfigProvider>
+    </div>
+  )
+};
+
+export const RtlLongContentAt200Percent: Story = {
+  render: () => (
+    <div dir="rtl" lang="ar" style={{ fontSize: "2rem" }}>
+      <Field
+        label="المسافة القصوى المتاحة لتوصيل الطلب إلى العنوان المحدد"
+        description="يمكن تعديل النطاق باستخدام لوحة المفاتيح أو السحب على المسار"
+      >
+        <Slider
+          defaultValue={70}
+          marks={[
+            { value: 0, label: "قريب" },
+            { value: 100, label: "بعيد جداً" }
+          ]}
+          showValue
+          formatValue={(value) => `${value} كيلومتراً كحد أقصى`}
+        />
+      </Field>
+    </div>
+  )
+};
+
+export const ReducedMotion: Story = {
+  args: {
+    "aria-label": "减少动态效果时的完成度",
+    defaultValue: 45,
+    marks: [
+      { value: 0, label: "开始" },
+      { value: 100, label: "完成" }
+    ]
+  },
+  globals: { motion: "reduced" }
+};
+
+function InteractionCompletionSlider() {
+  const [value, setValue] = useState(20);
+  const [completedValue, setCompletedValue] = useState<number | null>(null);
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <Slider
+        aria-label="交互结束值"
+        value={value}
+        onChange={setValue}
+        onChangeComplete={setCompletedValue}
+        showValue
+      />
+      <output data-completed-value>
+        {completedValue === null ? "尚未完成交互" : `已完成：${completedValue}`}
+      </output>
+    </div>
+  );
+}
+
+export const InteractionCompletion: Story = {
+  render: () => <InteractionCompletionSlider />,
+  play: async ({ canvasElement }) => {
+    const slider = canvasElement.querySelector<HTMLInputElement>('input[type="range"]');
+    const result = canvasElement.querySelector<HTMLOutputElement>("[data-completed-value]");
+    if (!slider || !result)
+      throw new globalThis.Error("Slider interaction controls were not rendered");
+    const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+    if (!valueDescriptor || !valueDescriptor.set)
+      throw new globalThis.Error("Native input value setter is unavailable");
+
+    slider.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    valueDescriptor.set.call(slider, "65");
+    slider.dispatchEvent(new Event("input", { bubbles: true }));
+    slider.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 0));
+    if (result.textContent !== "已完成：65") {
+      throw new globalThis.Error(`Slider completion was not published: ${result.textContent}`);
+    }
+  }
+};

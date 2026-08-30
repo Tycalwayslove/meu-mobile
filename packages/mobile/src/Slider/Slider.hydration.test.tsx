@@ -57,4 +57,41 @@ describe("Slider hydration", () => {
     expect(consoleError).not.toHaveBeenCalled();
     container.remove();
   });
+
+  it("keeps normalized controlled markup stable and completes interaction after hydration", async () => {
+    const onChangeComplete = vi.fn();
+    const element = (
+      <Slider
+        aria-label="比例"
+        min={0.1}
+        max={1}
+        step={0.2}
+        defaultValue={0.7}
+        onChangeComplete={onChangeComplete}
+      />
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(element);
+    document.body.append(container);
+    const serverSlider = container.querySelector<HTMLInputElement>('input[type="range"]');
+    const recoverableErrors: unknown[] = [];
+
+    await act(async () => {
+      roots.push(
+        hydrateRoot(container, element, {
+          onRecoverableError: (error) => recoverableErrors.push(error)
+        })
+      );
+      await Promise.resolve();
+    });
+
+    const slider = container.querySelector<HTMLInputElement>('input[type="range"]');
+    expect(slider).toBe(serverSlider);
+    fireEvent.pointerDown(slider!);
+    fireEvent.change(slider!, { target: { value: "0.9" } });
+    fireEvent.pointerUp(slider!);
+    expect(onChangeComplete).toHaveBeenCalledWith(0.9, expect.anything());
+    expect(recoverableErrors).toEqual([]);
+    container.remove();
+  });
 });

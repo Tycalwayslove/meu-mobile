@@ -31,4 +31,15 @@ describe("Slider SSR", () => {
     expect(html).toContain('name="budget"');
     expect(html.match(/aria-label="已核预算"/g)).toHaveLength(1);
   });
+
+  it("normalizes decimal bounds identically during server rendering", () => {
+    const html = renderToString(
+      <Slider aria-label="比例" min={0.1} max={1} step={0.2} value={0.8} showValue />
+    );
+    expect(html).toContain('min="0.1"');
+    expect(html).toContain('max="0.9"');
+    expect(html).toContain('step="0.2"');
+    expect(html).toContain('value="0.9"');
+    expect(html).toContain(">0.9</output>");
+  });
 });

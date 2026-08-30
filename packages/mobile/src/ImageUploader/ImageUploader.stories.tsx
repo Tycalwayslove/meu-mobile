@@ -15,7 +15,10 @@ const initialItems: ImageUploaderItem[] = [
   { alt: "商品侧面", key: "side", name: "side.jpg", url: demoImage("Side", "#A45C13") }
 ];
 
-async function simulateUpload(file: File, context: ImageUploaderUploadContext) {
+async function simulateUpload(
+  file: File,
+  context: ImageUploaderUploadContext
+): Promise<ImageUploaderItem> {
   context.onProgress(32);
   await new Promise<void>((resolve, reject) => {
     const timer = window.setTimeout(resolve, 600);
@@ -33,6 +36,22 @@ async function simulateUpload(file: File, context: ImageUploaderUploadContext) {
     name: file.name,
     url: demoImage(file.name, "#287A52")
   };
+}
+
+function selectStoryFiles(canvasElement: HTMLElement, files: File[]) {
+  const input = canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+  if (!input) throw new window.Error("Expected ImageUploader native input");
+  Object.defineProperty(input, "files", { configurable: true, value: files });
+  input.dispatchEvent(new window.Event("change", { bubbles: true }));
+}
+
+async function waitForStoryElement(canvasElement: HTMLElement, selector: string) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const element = canvasElement.querySelector(selector);
+    if (element) return element;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 25));
+  }
+  throw new window.Error(`Expected story element: ${selector}`);
 }
 
 function ControlledPreview({ readOnly = false }: { readOnly?: boolean }) {
@@ -92,6 +111,62 @@ export const ValidationError: Story = {
     value: initialItems,
     status: "error"
   }
+};
+
+export const Uploading: Story = {
+  args: {
+    "aria-label": "上传中的商品图片",
+    upload: (_file, context) => {
+      context.onProgress(47);
+      return new Promise<ImageUploaderItem>(() => undefined);
+    }
+  },
+  play: async ({ canvasElement }) => {
+    selectStoryFiles(canvasElement, [
+      new File(["preview"], "超长商品图片文件名-用于验证进度状态换行.jpg", {
+        type: "image/jpeg"
+      })
+    ]);
+    await waitForStoryElement(canvasElement, '[role="progressbar"][aria-valuenow="47"]');
+  }
+};
+
+export const UploadFailure: Story = {
+  args: {
+    "aria-label": "上传失败的商品图片",
+    upload: () => Promise.reject(new window.Error("Deterministic story failure"))
+  },
+  play: async ({ canvasElement }) => {
+    selectStoryFiles(canvasElement, [
+      new File(["failure"], "receipt-upload-failure.jpg", { type: "image/jpeg" })
+    ]);
+    await waitForStoryElement(
+      canvasElement,
+      'button[aria-label="重试 receipt-upload-failure.jpg"]'
+    );
+  }
+};
+
+export const LongContentRtl: Story = {
+  render: () => (
+    <div dir="rtl" style={{ width: "min(100%, 360px)" }}>
+      <ImageUploader
+        aria-label="صور المنتج"
+        value={[
+          {
+            alt: "صورة تفصيلية للمنتج مع وصف طويل لاختبار التفاف النص واتجاه الواجهة",
+            key: "rtl-long",
+            name: "اسم-ملف-طويل-جداً-لصورة-المنتج.jpg",
+            url: demoImage("RTL", "#5C3B85")
+          }
+        ]}
+        upload={simulateUpload}
+        addLabel="إضافة صورة جديدة للمنتج من الجهاز"
+        columns={2}
+        maxCount={3}
+      />
+    </div>
+  )
 };
 
 export const Interaction: Story = {

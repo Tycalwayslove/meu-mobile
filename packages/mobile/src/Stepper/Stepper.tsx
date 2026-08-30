@@ -1,27 +1,18 @@
 "use client";
 
-import { forwardRef, useEffect, useRef, useState } from "react";
-import type { FocusEvent, ForwardedRef, KeyboardEvent, PointerEvent } from "react";
+import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import type { FocusEvent, KeyboardEvent, PointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
 import { decimalPlaces, normalizeSteppedNumber } from "../internal/numbers";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { button, input, root } from "./Stepper.css";
 import type { StepperProps } from "./types";
 
 function valuesEqual(first: number | null, second: number | null) {
   return first === second || (Number.isNaN(first) && Number.isNaN(second));
-}
-
-function assignRef(ref: ForwardedRef<HTMLInputElement>, node: HTMLInputElement | null) {
-  if (typeof ref === "function") ref(node);
-  else if (ref) ref.current = node;
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
 /**
@@ -99,6 +90,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   const currentValue = normalizeNullable(controlled ? value : uncontrolledValue);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(currentValue === null ? "" : String(currentValue));
+  const generatedId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const defaultValueRef = useRef(normalizedDefaultValue);
   const stepButtonPointerRef = useRef(false);
@@ -111,7 +103,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   const mountedRef = useRef(true);
   const repeatValueRef = useRef<number | null>(currentValue);
   const repeatPublishedValueRef = useRef<number | null>(currentValue);
-  const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
+  const resolvedId = id || (fieldContext ? fieldContext.controlId : generatedId);
   const describedBy = mergeIdReferences(
     ariaDescribedBy,
     fieldContext ? fieldContext.describedBy : undefined
@@ -410,7 +402,13 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         type="button"
         disabled={inert || atMin}
         aria-controls={resolvedId}
-        aria-label={decrementAriaLabel || (locale === "zh-CN" ? "减少" : "Decrease")}
+        aria-label={
+          decrementAriaLabel && decrementAriaLabel.trim()
+            ? decrementAriaLabel.trim()
+            : locale === "zh-CN"
+              ? "减少"
+              : "Decrease"
+        }
         onPointerDown={(event) => handleStepButtonPointerDown(event, -1)}
         onPointerUp={handleStepButtonPointerUp}
         onPointerCancel={handleStepButtonPointerCancel}
@@ -458,7 +456,13 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
         type="button"
         disabled={inert || atMax}
         aria-controls={resolvedId}
-        aria-label={incrementAriaLabel || (locale === "zh-CN" ? "增加" : "Increase")}
+        aria-label={
+          incrementAriaLabel && incrementAriaLabel.trim()
+            ? incrementAriaLabel.trim()
+            : locale === "zh-CN"
+              ? "增加"
+              : "Increase"
+        }
         onPointerDown={(event) => handleStepButtonPointerDown(event, 1)}
         onPointerUp={handleStepButtonPointerUp}
         onPointerCancel={handleStepButtonPointerCancel}

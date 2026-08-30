@@ -18,9 +18,9 @@
 ## 当前可复查状态
 
 - 移动 Chromium/WebKit 隔离 Next H5：180/180 通过，逐用例断言 0 `pageerror`、0 `console.error`；本批新增 CascadePicker 空分支 SSR → Portal hydration → 不可变异步选项更新 2/2。既有 Picker 服务端语义与原生滚轮 settle、性能/恢复专页 14/14，并完成 3 轮重复共 42/42；输入生命周期 8/8、嵌套浮层生命周期与全直接浮层边界矩阵 8/8、Popover placement/嵌套滚动容器 2/2、ImageViewer RTL/取消恢复 4/4、Avatar 慢网/lazy/换源 4/4、Portal 真实 iframe 跨 Document 4/4、SafeArea viewport/旋转/键盘边界 6/6、布局测量/hydration/CLS/系统低动态/RTL 几何/Result 路由焦点 16/16、真机验收工作台自检 2/2。
-- Storybook：最近完整基线为 444 个 Story × 7 场景，共 3,108 个组合通过；本批 Carousel、FloatingPanel、PullToRefresh、SwipeActions 的 22 个直属 Story × 7 场景，共 154 个组合定向通过。
+- Storybook：当前完整基线为 490 个 Story × 7 场景，共 3,430 个组合通过，覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors。
 - 官网：68 个组件页和 8 个公共页面 × Light/Dark，共 152 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
-- 客户端静态兼容扫描：200 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。
+- 客户端静态兼容扫描：202 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。
 - 当前开发机安装了 iOS 18.3 与 18.6 Simulator；尚未把模拟器目视结果登记为真机证据。
 - Android SDK/ADB 可用，但尚无已配置 AVD；Android 真机与 Emulator 均未登记。
 - VoiceOver、TalkBack、WKWebView 宿主、旧 WebView 和真实慢 3G/离线/丢包与内存记录：待补；本地确定性失败/重试/取消模型不计作真机或真实网络通过。

@@ -4,13 +4,14 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import type {
   ChangeEvent as ReactChangeEvent,
   FocusEvent,
-  ForwardedRef,
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent
 } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { icon, indicator, input, item, label, option, root } from "./SegmentedControl.css";
 import type { SegmentedControlOption, SegmentedControlProps, SegmentedControlValue } from "./types";
 
@@ -20,28 +21,12 @@ type SegmentedIndicatorVariables = {
   "--meu-segmented-indicator-x": string;
 };
 
-function assignRef<T>(ref: ForwardedRef<T> | undefined, value: T | null) {
-  if (typeof ref === "function") ref(value);
-  else if (ref) ref.current = value;
-}
-
 function setIndicatorVariable(
   element: HTMLElement,
   property: keyof SegmentedIndicatorVariables,
   value: string
 ) {
   element.style.setProperty(property, value);
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const ids: string[] = [];
-  values.forEach((value) => {
-    if (!value) return;
-    value.split(/\s+/).forEach((id) => {
-      if (id && ids.indexOf(id) === -1) ids.push(id);
-    });
-  });
-  return ids.length > 0 ? ids.join(" ") : undefined;
 }
 
 function valueIdentity(value: SegmentedControlValue): string {

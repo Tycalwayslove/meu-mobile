@@ -5,6 +5,7 @@ import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { VisuallyHidden } from "../internal/VisuallyHidden";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import {
   description as descriptionClass,
   error as errorClass,
@@ -89,12 +90,6 @@ function hasRenderableContent(content: ReactNode): boolean {
     if (!isValidElement<{ children?: ReactNode }>(child) || child.type !== Fragment) return true;
     return hasRenderableContent(child.props.children);
   });
-}
-
-function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
-  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
 function getAssociableChild(children: ReactNode): ReactElement<AssociableChildProps> | null {

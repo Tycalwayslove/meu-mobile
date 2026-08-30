@@ -146,18 +146,20 @@ export const inputSize = recipe({
 
 export const valueText = style({
   minWidth: 36,
+  maxWidth: "48%",
   color: "var(--meu-color-muted)",
-  fontSize: 14,
+  fontSize: "0.875rem",
   fontVariantNumeric: "tabular-nums",
+  overflowWrap: "anywhere",
   textAlign: "end"
 });
 
 export const marks = style({
   position: "relative",
-  height: 28,
+  height: "2.5rem",
   marginInline: 10,
   color: "var(--meu-color-muted)",
-  fontSize: 12
+  fontSize: "0.75rem"
 });
 
 export const mark = style({
@@ -166,8 +168,22 @@ export const mark = style({
   display: "grid",
   justifyItems: "center",
   minWidth: 20,
+  width: "max-content",
+  maxWidth: "min(8rem, 40vw)",
+  overflowWrap: "anywhere",
+  textAlign: "center",
   transform: "translateX(-50%)",
   selectors: {
+    '&[data-edge="start"]': {
+      justifyItems: "start",
+      textAlign: "start",
+      transform: "none"
+    },
+    '&[data-edge="end"]': {
+      justifyItems: "end",
+      textAlign: "end",
+      transform: "translateX(-100%)"
+    },
     "&::before": {
       content: '""',
       width: 4,
@@ -180,6 +196,14 @@ export const mark = style({
 
 globalStyle(`[dir="rtl"] ${mark}`, {
   transform: "translateX(50%)"
+});
+
+globalStyle(`[dir="rtl"] ${mark}[data-edge="start"]`, {
+  transform: "none"
+});
+
+globalStyle(`[dir="rtl"] ${mark}[data-edge="end"]`, {
+  transform: "translateX(100%)"
 });
 
 globalStyle(`${input}:focus::-webkit-slider-thumb`, {

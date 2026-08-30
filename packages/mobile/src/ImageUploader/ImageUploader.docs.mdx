@@ -4,12 +4,12 @@ slug: image-uploader
 package: "@meu/mobile"
 exports: [ImageUploader]
 status: verification
-localVerification: pending
-localGapIds: [LOC-IMAGE-UPLOADER-01]
+localVerification: complete
+localGapIds: []
 priority: P2
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "388:72"
@@ -20,6 +20,9 @@ storyIds:
     data-entry-imageuploader--full,
     data-entry-imageuploader--read-only,
     data-entry-imageuploader--validation-error,
+    data-entry-imageuploader--uploading,
+    data-entry-imageuploader--upload-failure,
+    data-entry-imageuploader--long-content-rtl,
     data-entry-imageuploader--interaction,
     data-entry-imageuploader--light-and-dark
   ]
@@ -52,7 +55,7 @@ source: packages/mobile/src/ImageUploader
 
 ## 受控与非受控
 
-`value` 存在即受控，调用方必须在 `onChange` 后提交新数组；否则 UI 保持原值。非受控使用 `defaultValue`。任务队列始终由组件内部管理，不进入成功值。异步删除以稳定 `key` 重新定位最新受控项；无 key 的列表若在等待期间重排，组件不会猜测并删除可能错误的项目。
+`value` 存在即受控，调用方必须在 `onChange` 后提交新数组；否则 UI 保持原值。非受控使用 `defaultValue`。任务队列始终由组件内部管理，不进入成功值。upload 成功结果会在运行时校验必需的非空字符串 `url` 与字符串 `alt`，并只拷贝 `key/name/thumbnailUrl/url/alt` 公共字段；畸形结果进入 error 任务，额外的 File、响应体或 SDK 对象不会进入成功数组。相对 URL、HTTP(S)、data URL 与业务选择的 blob URL 都按字符串透传，生命周期由调用方负责。异步删除以稳定 `key` 重新定位最新受控项；无 key 的列表若在等待期间重排，组件不会猜测并删除可能错误的项目。
 
 ## 表单集成
 
@@ -60,7 +63,7 @@ native input 只负责选取 File，选择后会清空，所以 `name` 不代表
 
 ## Props
 
-API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函数返回 true 表示拒绝。`beforeUpload` 返回 File 可替换文件，返回 null 或 reject 均按 before-upload 拒绝；若等待期间切为 disabled/readOnly，结果被丢弃且不会启动 transport。maxCount 仅接受有限非负语义并向下取整，同时计算成功值与全部队列任务；默认失败任务保留自己的容量槽，直到重试成功、删除或 clearFailed。`showFailed=false` 则丢弃失败任务、回收 object URL 并立即释放容量，不提供重试。
+API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函数返回 true 表示拒绝，抛错也会被组件收敛为 max-size 拒绝而不会产生未处理异常。`beforeUpload` 返回 File 可替换文件，返回 null 或 reject 均按 before-upload 拒绝；若等待期间切为 disabled/readOnly，结果被丢弃且不会启动 transport。maxCount 仅接受有限非负语义并向下取整，同时计算成功值与全部队列任务；异步预处理完成时读取最新容量和最新 reject/count 回调。默认失败任务保留自己的容量槽，直到重试成功、删除或 clearFailed。`showFailed=false` 则丢弃失败任务、回收 object URL 并立即释放容量，不提供重试。
 
 ## Events
 
@@ -88,7 +91,7 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ## 无障碍
 
-根 group 接受 Field/显式名称、描述和 invalid 语义，native file input 只保留选择文件所需的名称与描述；input 被表单校验或代码聚焦时，group 输出可见焦点环。调用方的 `aria-invalid=false/grammar/spelling` 原样留在 group，grammar/spelling 同时启用错误视觉；`status="error"` 或 Field 错误优先输出 `true`，input 与任务子节点不重复 token。每张成功图有独立预览/删除名称，空 alt 时回退到文件名或本地化位置名称。上传任务使用 progressbar 数值语义，失败保留原生重试按钮。disabled 禁止全部预览与变更；readOnly 允许预览但禁止添加/删除/重试。
+根 group 接受 Field/显式名称、描述和 invalid 语义，native file input 只保留选择文件所需的名称与描述；input 被表单校验或代码聚焦时，group 输出可见焦点环。调用方的 `aria-invalid=false/grammar/spelling` 原样留在 group，grammar/spelling 同时启用错误视觉；`status="error"` 或 Field 错误优先输出 `true`，input 与任务子节点不重复 token。每张成功图有独立预览/删除名称，空 alt 时回退到文件名或本地化位置名称。上传任务使用 progressbar 数值语义，每个失败任务的原生重试按钮都把文件名纳入可访问名称。disabled 禁止全部预览与变更；readOnly 允许预览但禁止添加/删除/重试。
 
 ## 动效
 
@@ -108,13 +111,13 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ## 浏览器与 WebView
 
-依赖 file input、File、AbortController、URL.createObjectURL。accept/capture 行为受 Android/iOS WebView 权限和系统 picker 决定；服务端仍必须重新验证 MIME、大小和内容。
+依赖 file input、File、AbortController；URL.createObjectURL 不可用或抛错时仍会上传，仅省略本地任务缩略图。accept/capture 行为受 Android/iOS WebView 权限和系统 picker 决定；服务端仍必须重新验证 MIME、大小和内容。
 
 ## 边界情况与已知限制
 
 - 并发 `beforeUpload` 完成时按最新成功值和队列原子分配剩余容量，后完成且超额的文件走 max-count 拒绝。
 - `beforeUpload` 等待期间切换 disabled/readOnly 会取消该批结果；已经启动的 transport 不会因只读状态变化而自动中止。
-- 动态降低 maxCount 或增加受控 value 可能使现有队列超额；失败任务保留但重试会被 max-count 拒绝。
+- 动态降低 maxCount 或增加受控 value 可能使已启动队列超额；仍在 beforeUpload 的文件按最新容量分配，失败任务保留但重试会被 max-count 拒绝。
 - 异步删除期间允许受控列表重建对象；若列表会插入或重排，项目必须提供稳定 key。无 key 且位置改变时删除安全失败，不发布错误数组。
 - 不内置压缩、EXIF 旋转、裁剪、分片、后台上传或离线恢复。
 - 受控调用方必须用稳定 key，且合并并发完成结果。
@@ -126,11 +129,11 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 ## 测试证据
 
-- Unit: `ImageUploader.test.tsx` 覆盖 SSR、原生选择、校验、并发容量预留、失败重试、异步 hook reject/卸载、进度、受控、删除 veto/防重、预览、abort、URL 回收和 Field 语义。
+- Unit: `ImageUploader.test.tsx` 24 项覆盖 SSR、原生选择/表单属性、校验与 hook 抛错收敛、并发/动态容量预留、异步最新回调、成功值运行时净化、畸形结果失败态、失败重试/区分命名、异步 hook reject/卸载、进度、受控、删除 veto/防重、预览、abort、object URL 降级/回收和 Field 语义；独立 hydration 1 项覆盖 DOM 复用与零 transport 副作用。
 - Story interaction: `Interaction.play` 验证预览与关闭链路；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本批在 390×844 视口定向验证本组件 10 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 70 个组合；play、axe WCAG A/AA 与 `pageerror` 均通过。全库矩阵留到统一发布候选执行。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 36184 B / 49152 B 预算，组合 Brotli 31520 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 36589 B / 49152 B 预算，组合 Brotli 31863 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 与独立 hydrateRoot 已覆盖成功项、原生 input DOM 复用和零 transport 副作用；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 上传场景中保持 0 `pageerror` / `console.error`。
 - RTL: 逻辑 CSS 已实现，浏览器截图待补。
 - Reduced motion: CSS 降级已实现。
@@ -148,6 +151,8 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 
 补齐 group/Field 语义、隐藏 input 可见焦点、空 alt 操作名称、progressbar、逻辑方向、forced-colors、并发容量预留、disabled/readOnly 异步门禁与稳定 key 删除；固化 transport 和表单所有权边界；增加 Next H5 双引擎本地文件上传、校验聚焦、成功值序列化与提交证据。
 
+补齐上传结果净化、动态配置/回调、object URL 异常降级、文件名级重试名称与上传中/失败/RTL 长内容 Story，关闭 `LOC-IMAGE-UPLOADER-01`。
+
 ## 变更记录
 
 | 日期       | 版本   | 类型         | 内容                                                  | 迁移说明                 |
@@ -159,3 +164,5 @@ API 由 `ImageUploaderProps` 生成。`maxSize` number 表示字节上限；函�
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎本地上传、校验聚焦与表单序列化证据 | 无                       |
 | 2026-08-29 | 未发布 | a11y         | invalid token 迁移到唯一 uploader group 语义根        | 无                       |
 | 2026-08-30 | 未发布 | a11y         | caller/Field IDREF 合并去重并固定显式名称优先级       | 无                       |
+| 2026-08-30 | 未发布 | reliability  | 净化 upload 结果、动态容量与 object URL 异常降级      | 畸形成功结果改为失败任务 |
+| 2026-08-30 | 未发布 | a11y         | 重试名称加入文件名并补长文案 RTL 状态 Story           | 无                       |

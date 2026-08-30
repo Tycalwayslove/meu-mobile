@@ -3,38 +3,14 @@
 import { MeuIconSearch, MeuIconX } from "@meu/icons-react";
 import { VisuallyHidden } from "@meu/primitives-react";
 import { forwardRef, useEffect, useRef, useState } from "react";
-import type {
-  ChangeEvent,
-  CompositionEvent,
-  FocusEvent,
-  ForwardedRef,
-  KeyboardEvent,
-  MouseEvent
-} from "react";
+import type { ChangeEvent, CompositionEvent, FocusEvent, KeyboardEvent, MouseEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { useFieldContext } from "../Field/FieldContext";
+import { assignRef } from "../internal/assignRef";
+import { mergeIdReferences } from "../internal/mergeIdReferences";
 import { clearButton, input, loadingIndicator, root, searchIcon, spinner } from "./SearchField.css";
 import type { SearchFieldChangeDetails, SearchFieldClearDetails, SearchFieldProps } from "./types";
-
-function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
-  if (typeof ref === "function") {
-    ref(value);
-  } else if (ref) {
-    ref.current = value;
-  }
-}
-
-function mergeDescriptionIds(...values: Array<string | undefined>): string | undefined {
-  const ids: string[] = [];
-  values.forEach((value) => {
-    if (!value) return;
-    value.split(/\s+/).forEach((descriptionId) => {
-      if (descriptionId && ids.indexOf(descriptionId) === -1) ids.push(descriptionId);
-    });
-  });
-  return ids.length > 0 ? ids.join(" ") : undefined;
-}
 
 /**
  * A native mobile search input with clear, loading, IME, and single-owner Enter semantics.
@@ -86,13 +62,13 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
   const controlled = value !== undefined;
   const currentValue = controlled ? value : uncontrolledValue;
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = mergeDescriptionIds(
+  const describedBy = mergeIdReferences(
     ariaDescribedBy,
     fieldContext ? fieldContext.describedBy : undefined
   );
   const labelledBy = ariaLabel
     ? undefined
-    : mergeDescriptionIds(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const callerInvalid =
     ariaInvalid === true ||
