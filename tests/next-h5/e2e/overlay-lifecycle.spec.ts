@@ -27,6 +27,42 @@ async function openPopup(page: Page) {
   return { popup, trigger };
 }
 
+async function expectInheritedBoundary(page: Page, selector: string) {
+  const boundary = page.locator(selector);
+  await expect(boundary).toHaveCount(1);
+  await expect(boundary).toHaveAttribute("dir", "rtl");
+  await expect(boundary).toHaveAttribute("lang", "en-US");
+  await expect(boundary).toHaveAttribute("data-meu-theme", "dark");
+  await expect(boundary).toHaveAttribute("data-meu-motion", "reduced");
+  await expect(boundary).toHaveCSS("color-scheme", "dark");
+  expect(
+    await boundary.evaluate((node) =>
+      getComputedStyle(node).getPropertyValue("--meu-color-ink").trim().toLowerCase()
+    )
+  ).toBe("#f0f2ec");
+  expect(
+    await boundary.evaluate((node) =>
+      Number.parseFloat(getComputedStyle(node).getPropertyValue("--meu-motion-enter"))
+    )
+  ).toBe(0);
+}
+
+test("preserves the nearest Provider boundary across every direct overlay Portal", async ({
+  page
+}) => {
+  const selectors = [
+    '[data-meu-overlay-layer="bottom-sheet"]',
+    '[data-meu-overlay-layer="dialog"]',
+    '[data-meu-overlay-layer="image-viewer"]',
+    '[data-testid="boundary-mask"]',
+    '[data-meu-overlay-layer="number-keyboard"]',
+    '[data-meu-component="popover"]',
+    '[data-meu-overlay-layer="toast"]'
+  ];
+
+  for (const selector of selectors) await expectInheritedBoundary(page, selector);
+});
+
 test("inherits the nested Provider boundary and moves one open Popup between containers", async ({
   page
 }) => {

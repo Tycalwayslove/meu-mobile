@@ -3313,10 +3313,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ConfigProvider/ConfigProvider.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-CONFIG-PROVIDER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4622,10 +4620,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Mask/Mask.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-MASK-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5019,10 +5015,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Popup/Popup.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-POPUP-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "type",
@@ -6187,10 +6181,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ConfigProvider/ThemeProvider.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-THEME-PROVIDER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6613,10 +6605,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 8,
+    "locallyVerifiedProducts": 12,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 60,
+    "productsWithLocalGaps": 56,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

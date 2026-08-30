@@ -4,8 +4,8 @@ slug: config-provider
 package: "@meu/mobile"
 exports: [ConfigProvider, useMeuConfig]
 status: verification
-localVerification: pending
-localGapIds: [LOC-CONFIG-PROVIDER-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -37,7 +37,7 @@ source: packages/mobile/src/ConfigProvider
 - light/dark/system 边界同步声明 `color-scheme`，原生表单控件可与 Meu 主题匹配；旧 WebView 不支持时安全忽略。
 - React 19 `ref` 直接指向真实 `div` 边界，并保留 callback ref 的卸载清理语义。
 
-当前为 V2 `verification` 状态；跨 Portal 方向与动效传播、全库移动端 E2E 和扩展场景矩阵已完成，真机与最终视觉审批仍待统一验收，不能标记为 commercial。
+当前为 V2 `verification` 状态；规划内的本地自动化已完成，真机与最终视觉审批仍待统一验收，因此尚不标记为 commercial。
 
 ## 何时使用
 
@@ -164,7 +164,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 
 ## 边界情况与已知限制
 
-- Mask/Dialog/Popup/BottomSheet/Popover 已覆盖 body Portal；ImageViewer、Picker、Toast 等其余 Portal 消费者仍需在对应批次核对并迁移统一 boundary。
+- 所有直接 Portal 消费者都由静态门禁强制复用统一 boundary；新增消费者漏接 locale、dir、theme、motion 或主题 class 时会阻断 `pnpm check`。
 - `system` theme 不包含用户选择持久化；若产品允许手动选择，应用需保存值并在服务端提供相同初始值。
 - Context value 在配置值变化时更新；高频创建新 portal resolver 函数会使消费者重渲染，应保持函数引用稳定。
 - `className` 与 `style` 作用于新增的真实 `div`，Provider 不是无 DOM 包装器。
@@ -186,6 +186,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
 - Reduced motion: 单元测试覆盖嵌套策略；Next H5 双引擎验证 system media query 与显式 reduced class 的 computed duration。FloatingPanel 专项同时证明带自身 theme 属性的非 Portal 固定层也必须复制 motion boundary，进入时长为 0ms。
 - Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 Provider 初始 `theme="light"` 边界、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规；独立 `theme="system"` / `motion="system"` 边界会随模拟系统 Light/Dark 切换 ink/canvas Token，并在 `prefers-reduced-motion: reduce` 下把 enter duration 从 180ms 解析为 0ms。隔离的 `overlay-lifecycle.spec.ts` 进一步覆盖嵌套 ConfigProvider/ThemeProvider 下 Popup Portal 的 locale、dir、theme、motion、颜色与时长 Token 及 `color-scheme`；所有路径 hydration 后保持 0 `pageerror` / `console.error`。
+- Overlay boundary gate: `check-overlay-config-boundaries.mjs` 自动发现并验证 8 个直接 Portal 消费者；隔离 Next 双引擎运行时逐一验证 BottomSheet、Dialog、ImageViewer、Mask、NumberKeyboard、Popover、Toast，并通过动态 Popup 验证同一配置边界和容器迁移。
 - Chromatic Light/Dark: Story 可生成快照；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView 与 iOS Safari。
 

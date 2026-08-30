@@ -4,8 +4,8 @@ slug: popup
 package: "@meu/mobile"
 exports: [Popup]
 status: verification
-localVerification: pending
-localGapIds: [LOC-POPUP-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -134,6 +134,7 @@ Chrome 70 与 iOS 13 可解析实现；不依赖 dvh、CSS logical inset 或 tra
 - RTL: RightToLeft Story 覆盖 close button 布局与物理 left position；浏览器矩阵截图仍待重跑。
 - Reduced motion: CSS 1ms 降级已实现；新增 Stories 尚未进入扩展浏览器矩阵。
 - Mobile Chromium/WebKit E2E: 打开、focus trap、Escape/关闭、焦点恢复、scroll lock 与 action 链路通过；隔离的 `overlay-lifecycle.spec.ts` 覆盖嵌套 Provider Portal 配置/Token、开态迁移容器、mask pointercancel、退出中重开，以及迁移/中断前后仅一个 Popup layer、焦点圈定和 scroll lock；读屏浏览模式留待真机。
+- Overlay boundary gate: Popup 与其余 7 个直接 Portal 消费者受静态扫描约束；双移动引擎验证 locale、RTL、dark、reduced-motion、`color-scheme` 与语义色 Token 在 Portal 目标中完整保留。
 - Chromatic Light/Dark: Figma 与 stories 已有基线，待显式矩阵
 - Real device: 待补
 

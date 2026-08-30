@@ -1,6 +1,17 @@
 "use client";
 
-import { ConfigProvider, Popup, ThemeProvider } from "@meu/mobile";
+import {
+  BottomSheet,
+  ConfigProvider,
+  Dialog,
+  ImageViewer,
+  Mask,
+  NumberKeyboard,
+  Popover,
+  Popup,
+  ThemeProvider,
+  Toast
+} from "@meu/mobile";
 import { useCallback, useRef, useState } from "react";
 
 type PortalTarget = "first" | "second";
@@ -77,6 +88,37 @@ export function OverlayLifecycleScenario() {
           data-testid="portal-target-second"
           style={{ position: "relative" }}
         />
+
+        <section aria-label="Closed overlay boundary fixtures">
+          <BottomSheet aria-label="Boundary sheet" forceMount lockScroll={false} open={false}>
+            Boundary sheet
+          </BottomSheet>
+          <Dialog
+            actions={[]}
+            forceMount
+            lockScroll={false}
+            open={false}
+            role="dialog"
+            title="Boundary dialog"
+          />
+          <ImageViewer forceMount images={[]} lockScroll={false} open={false} />
+          <Mask
+            data-testid="boundary-mask"
+            forceMount
+            lockScroll={false}
+            open={false}
+          />
+          <NumberKeyboard forceMount open={false} />
+          <Popover
+            aria-label="Boundary popover"
+            content={<span>Boundary popover content</span>}
+            forceMount
+            open={false}
+          >
+            <button type="button">Boundary popover trigger</button>
+          </Popover>
+          <Toast duration={0} forceMount message="Boundary toast" open={false} />
+        </section>
 
         <ThemeProvider>
           <Popup

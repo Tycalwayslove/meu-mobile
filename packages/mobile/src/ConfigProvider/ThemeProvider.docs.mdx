@@ -4,8 +4,8 @@ slug: theme-provider
 package: "@meu/mobile"
 exports: [ThemeProvider]
 status: verification
-localVerification: pending
-localGapIds: [LOC-THEME-PROVIDER-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -144,7 +144,7 @@ ThemeProvider 自身不执行主题过渡，避免大面积颜色动画、首屏
 
 - 不内置 localStorage/cookie 持久化、跨标签页同步或系统主题 JavaScript 事件。
 - system 在不支持 `prefers-color-scheme` 的环境中降级为浅色。
-- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；统一 Overlay boundary 会复制 `data-meu-theme` 与主题 class，使 Token 和 `color-scheme` 一并生效；其余 Overlay 仍按对应批次继续审计。
+- 渲染到 `document.body` 的 Portal 不是主题 DOM 边界后代；全部直接 Overlay Portal 已由静态门禁和双移动引擎矩阵证明会复制 `data-meu-theme` 与主题 class，使 Token 和 `color-scheme` 一并生效。
 - 主题切换没有 transition；这是当前明确行为，不是缺失动画。
 - ThemeProvider 接受完整 ConfigProvider Props，因为它是兼容 alias；当前不通过收窄 Props 制造破坏性变化。
 
@@ -164,6 +164,7 @@ ThemeProvider 与 ConfigProvider 共用实现，没有额外 effect、matchMedia
 - RTL: 单元与 Theme-only Story 验证主题覆盖不改变方向。
 - Reduced motion: Provider 不做主题动画；应用自定义过渡仍需独立验证。
 - Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接挂载 ThemeProvider alias 的 `theme="system"` / `motion="system"` 边界，模拟系统 Light/Dark 后分别读取 ink/canvas 的实际 computed color，并验证 reduced-motion 将 enter duration 从 180ms 解析为 0ms；隔离的 Overlay 生命周期场景还验证内层 ThemeProvider 省略所有配置时，Portal 继续继承外层固定 dark、en-US、RTL 与 reduced motion，并保留原生 `color-scheme`。独立固定主题视觉截图仍待最终审批。
+- Overlay boundary gate: 8 个直接 Portal 消费者受静态门禁约束；BottomSheet、Dialog、ImageViewer、Mask、NumberKeyboard、Popover、Toast 与动态 Popup 已在移动 Chromium/WebKit 中逐一读取 dark `color-scheme`、暗色 ink Token 和 0ms enter Token。
 - Chromatic Light/Dark: `LightAndDark` 提供双主题快照入口；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView、iOS Safari 及系统主题切换。
 
