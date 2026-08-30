@@ -123,18 +123,18 @@ V2 采用以下事实源：
 
 已由当前仓库命令重新生成或执行的证据：
 
-- `docs:manifest:report`：68 个产品条目、125 个公开值、384 个公开类型、68 份共置文档，57/68 已完成本地验证、11 个仍有本地缺口，未认领值与覆盖问题均为 0。
+- `docs:manifest:report`：68 个产品条目、125 个公开值、384 个公开类型、68 份共置文档，61/68 已完成本地验证、7 个仍有本地缺口，未认领值与覆盖问题均为 0。
 - 68/68 个产品条目状态为 `verification`；尚无条目提前标记为 `commercial`。
 - Figma 覆盖已达到 68/68；最后 9 个基础交互控件完成 component sets、Light/Dark previews、设计契约与 Token/触控目标 QA，Code Connect 仍按席位边界未尝试。
 - `api:properties:strict`：226 个结构化类型、2361 个字段、2361 个已描述字段、242 个事件，公开字段文档覆盖率 100%。
 - `api:extract:strict`：mobile、form-react、icons-react、primitives-react 四包均为 0 warning；公开声明全部具有明确 release tag。
-- `storybook:validate-links`：当前本地 Storybook 构建含 463 个 Story，组件文档引用 434 个 Story ID 且无缺失；81/81 个标题至少包含一项关键交互或语义断言。开发阶段只保留本地构建证据，不上传 Chromatic。
-- `check-storybook-a11y.mjs`：最近完整矩阵基线在 390×844 视口运行 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），3,108 个组合通过，0 axe 违规、0 `pageerror`；本批 CascadePicker、DatePicker、DateRangePicker、TimePicker 的 16 个直属 Story 共 112 个组合定向通过，匹配扫描共覆盖 20 个 Story、140 个组合。
+- `storybook:validate-links`：当前本地 Storybook 构建含 468 个 Story，组件文档引用 439 个 Story ID 且无缺失；81/81 个标题至少包含一项关键交互或语义断言。开发阶段只保留本地构建证据，不上传 Chromatic。
+- `check-storybook-a11y.mjs`：最近完整矩阵基线在 390×844 视口运行 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），3,108 个组合通过，0 axe 违规、0 `pageerror`；本批 Carousel、FloatingPanel、PullToRefresh、SwipeActions 的 22 个直属 Story 共 154 个组合定向通过。
 - 官网的共享分类 Demo 已按 slug 拆成组件专属焦点预览，Props / Events 读取完整生成 API 模型。
 - 官网生产构建通过 68 个组件页和首页、入门、基础、组件索引、实验室、许可、隐私、使用说明 8 个公共页面的 Light/Dark 本地浏览器门禁，覆盖主题恢复、页面结构、组件预览/API/状态、React 页面与控制台异常（含 hydration mismatch）及 axe WCAG A/AA，共 152 个场景，0 违规、0 `pageerror`、0 `console.error`。
-- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 25,136 B / 32 KiB，逐组件结果已同步到留存文档。
+- `bundle:size:check`：68 个产品族与 125 个公开运行时值均在分级 gzip 预算内；共享 CSS 为 25,180 B / 32 KiB，逐组件结果已同步到留存文档。
 - 隔离 Next H5：Next 16 production build 通过；完整套件在移动 Chromium/WebKit 中 180/180 通过，本批新增 CascadePicker 空分支 SSR → Portal hydration → 不可变异步选项更新 2/2；既有 Picker 完整服务端语义与原生滚轮 settle、Ellipsis 字体替换/后加载、NavBar 真实 Next Router/sticky/不可用状态、TreeSelect 完整 SSR → 虚拟窗口与异步取消/重试、loading 点击阻断、standalone Radio 同步、Slider readOnly meter/FormData、输入生命周期、8 个直接浮层 Portal 配置边界、Popover 12-placement/嵌套滚动容器、ImageViewer RTL/取消恢复、Avatar 慢网/lazy/换源、Portal 真实 iframe 跨 Document、SafeArea viewport/旋转/键盘边界、精确布局测量/hydration/CLS/系统低动态/RTL 几何/Result 路由焦点、手势、加速耐久、确定性网络恢复和真机留证工作台导出链路继续通过。
-- 本批全量 `pnpm test` 为 19/19 个任务通过，其中 mobile 为 164 files / 1094 tests，form-react 为 20 files / 153 tests；API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle、类型与兼容性检查均已本地验证。Storybook 历史全量矩阵与本批变更的定向扩展矩阵均已本地复验；官网浏览器全量矩阵保留最近基线。
+- 本批全量 `pnpm test` 为 19/19 个任务通过，其中 mobile 为 166 files / 1110 tests，form-react 为 20 files / 153 tests；API、Next H5、API Extractor、生成式 Props、组件 manifest、bundle、类型与兼容性检查均已本地验证。Storybook 历史全量矩阵与本批变更的定向扩展矩阵均已本地复验；官网浏览器全量矩阵保留最近基线。
 - 运行时性能：10,000 行 VirtualList、1,500 节点 TreeSelect、SwipeActions 240 次 pointermove、VirtualList 40 次首尾往返，以及 SwipeActions/FloatingPanel 各 40 轮取消恢复均在仓库预算内；Image、InfiniteList、ImageUploader 的确定性失败/重试/取消也在双引擎通过，详见 `PERFORMANCE.md`。
 - 客户端兼容静态扫描通过 200 个构建文件；它仍只证明旧语法/选择器基线，不构成旧 WebView 完整支持承诺。
 

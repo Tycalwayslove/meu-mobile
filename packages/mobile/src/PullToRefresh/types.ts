@@ -30,7 +30,7 @@ export type PullToRefreshProps = Omit<
 > & {
   /** Accessible label for the focus-visible native refresh button. */
   actionLabel?: string;
-  /** Overrides nearest-scroll-container boundary detection. */
+  /** Overrides nearest-scroll-container boundary detection and is rechecked before direction lock. */
   canPull?: () => boolean;
   /** Content translated while pulling. */
   children: ReactNode;
@@ -40,7 +40,7 @@ export type PullToRefreshProps = Omit<
   disabled?: boolean;
   /** Maximum resisted pull distance in pixels. @defaultValue 120 */
   maxPullDistance?: number;
-  /** Refresh operation. Concurrent attempts are ignored. */
+  /** Refresh operation. A returned Promise keeps the component refreshing; concurrent attempts are ignored. */
   onRefresh: () => Promise<void> | void;
   /** Receives a rejected or synchronously thrown refresh error. */
   onRefreshError?: (error: unknown) => void;

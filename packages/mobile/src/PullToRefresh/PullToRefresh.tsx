@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import type { CSSProperties, Ref } from "react";
+import { useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { content, indicator, keyboardAction, motion, root } from "./PullToRefresh.css";
@@ -13,11 +13,6 @@ import type {
 } from "./types";
 
 type PullSession = { active: boolean; startX: number; startY: number };
-
-function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
-  if (typeof ref === "function") ref(value);
-  else if (ref) ref.current = value;
-}
 
 function positiveNumber(value: number, fallback: number) {
   return Number.isFinite(value) && value > 0 ? value : fallback;
@@ -68,6 +63,7 @@ export function PullToRefresh({
   const config = useMeuConfig();
   const generatedId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);
   const sessionRef = useRef<PullSession | null>(null);
   const completeTimerRef = useRef<number | null>(null);
   const disabledResetFrameRef = useRef<number | null>(null);
@@ -211,6 +207,10 @@ export function PullToRefresh({
         finish(true);
         return;
       }
+      if (!session.active && !(canPull ? canPull() : defaultCanPull(node))) {
+        sessionRef.current = null;
+        return;
+      }
       session.active = true;
       event.preventDefault();
       const nextDistance = Math.min(resolvedMaximum, deltaY * resolvedResistance);
@@ -224,11 +224,13 @@ export function PullToRefresh({
     node.addEventListener("touchmove", handleTouchMove, { passive: false });
     node.addEventListener("touchend", handleTouchEnd);
     node.addEventListener("touchcancel", handleTouchCancel);
+    node.addEventListener("pointercancel", handleTouchCancel);
     return () => {
       node.removeEventListener("touchstart", handleTouchStart);
       node.removeEventListener("touchmove", handleTouchMove);
       node.removeEventListener("touchend", handleTouchEnd);
       node.removeEventListener("touchcancel", handleTouchCancel);
+      node.removeEventListener("pointercancel", handleTouchCancel);
     };
   }, [
     beginRefresh,
@@ -241,20 +243,21 @@ export function PullToRefresh({
     resolvedThreshold
   ]);
 
+  const english = config.locale === "en-US";
   const defaultIndicator =
     status === "ready"
-      ? config.locale === "en-US"
+      ? english
         ? "Release to refresh"
         : "松开刷新"
       : status === "refreshing"
-        ? config.locale === "en-US"
+        ? english
           ? "Refreshing…"
           : "刷新中…"
         : status === "complete"
-          ? config.locale === "en-US"
+          ? english
             ? "Refresh complete"
             : "刷新完成"
-          : config.locale === "en-US"
+          : english
             ? "Pull to refresh"
             : "下拉刷新";
   const indicatorContent = renderIndicator
@@ -270,10 +273,7 @@ export function PullToRefresh({
   return (
     <div
       {...props}
-      ref={(node) => {
-        rootRef.current = node;
-        assignRef(ref, node);
-      }}
+      ref={rootRef}
       className={className ? `${root} ${className}` : root}
       style={rootStyle}
       aria-busy={status === "refreshing" ? "true" : undefined}

@@ -133,7 +133,7 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 - Story interaction: `KeyboardInteraction.play` 验证打开、键盘缩放与关闭；当前本地链接清单验证 450 个 Story、421 个永久文档 storyId，按 Storybook title 计的 play-fn 为 81/81。
 - Storybook 浏览器矩阵：已有全量快照在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；本轮重新构建后又定向验证 ImageViewer 8 个 Story × 同一 7 场景共 56 个组合。有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA；定向结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31547 B / 49152 B 预算，组合 Brotli 27446 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31545 B / 49152 B 预算，组合 Brotli 27463 B；共享样式由应用单独导入一次。
 - SSR/hydration: closed Node SSR 已验证；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
 - RTL: 键盘方向单测；隔离 Next production 在移动 Chromium/WebKit 中用可信 mouse pointer 从左向右拖动真实 Embla 轨道，均从 index 1 进入视觉下一张 index 2，并发布 `drag`。
 - Reduced motion: 系统媒体查询与显式 ConfigProvider motion 均已接入 Portal boundary；属性/类 Unit 已覆盖，浏览器截图待补。

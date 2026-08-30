@@ -21,6 +21,8 @@
 - 轮播容器与每张内容采用 carousel / slide roledescription；独立 status 组合页名、可见页和总页数，自动播放时为 off，静止时为 polite。
 - 非活动页设置 `aria-hidden`，并保存/移除其可聚焦后代的 tabindex，避免读屏或键盘进入屏外内容。
 - items 缩短时，受控与非受控索引都会收敛；非受控 items 再扩容不会复活旧索引，初始空列表仍会在首批内容到达时应用 `defaultIndex`。
+- `ref` 指向根节点；React 19 callback ref cleanup 与传统 null 清理均受支持，普通重渲染不会反复换绑。
 - track 保留纵向滚动和 pinch zoom；Embla 负责横向 drag、多指退出和 touch cancel，目标 WebView 与真机仍须验证。
 - 组件不读取路由、请求或业务埋点；未来 uni-app 复用索引、循环、自动播放与暂停契约，Embla 仅属于 React Web 适配层。
 - 控件覆盖在 slide 上方；业务内容需要为顶部播放控制预留 56px、为两侧导航预留至少 64px，并在 200% 字体下复核换行。
+- SSR 可输出完整 slides、status 与 inert 语义；hydration 前必须保持 items key、数量和初始 index 稳定。共置测试覆盖受控第二页、reduced-motion autoplay 和 inactive 焦点隔离。

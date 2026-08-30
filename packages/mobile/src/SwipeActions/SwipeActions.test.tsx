@@ -133,6 +133,32 @@ describe("SwipeActions", () => {
     );
   });
 
+  it("keeps action controls out of a parent form submission and exposes rich labels", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault());
+    render(
+      <form onSubmit={onSubmit}>
+        <SwipeActions
+          defaultOpenSide="right"
+          rightActions={[
+            {
+              "aria-label": "Archive order MEU-0828",
+              key: "archive-rich",
+              label: <span aria-hidden="true">归档</span>
+            }
+          ]}
+        >
+          <span>订单</span>
+        </SwipeActions>
+      </form>
+    );
+
+    const action = screen.getByRole("button", { name: "Archive order MEU-0828" });
+    expect(action.getAttribute("type")).toBe("button");
+    await user.click(action);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("opens from the keyboard control, focuses the first action and closes after pressing it", async () => {
     const user = userEvent.setup();
     const onAction = vi.fn();

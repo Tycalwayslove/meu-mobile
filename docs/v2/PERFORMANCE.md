@@ -37,7 +37,7 @@ pnpm bundle:size:check
 ## 当前结果
 
 - 68/68 个产品族和 125/125 个公开运行时值均在预算内；
-- 共享 CSS：25,136 B gzip / 32,768 B 预算，20,715 B Brotli；
+- 共享 CSS：25,180 B gzip / 32,768 B 预算，20,742 B Brotli；
 - 最大组合是 `@meu/form-react` 全部 adapters：115,674 B gzip / 115,712 B 预算；
 - 最大单值是 `Popover`：46,311 B gzip / 49,152 B 预算，主要成本包含定位运行时；
 - 较大的高级单值包括 `MeuFormImageUploader` 38,288 B、`ImageUploader` 35,893 B、`MeuFormTreeSelect` 33,885 B、`ImageViewer` 31,362 B 和 `TreeSelect` 30,373 B（均为 gzip）。

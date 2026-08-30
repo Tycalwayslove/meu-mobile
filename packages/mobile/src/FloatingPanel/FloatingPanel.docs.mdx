@@ -4,8 +4,8 @@ slug: floating-panel
 package: "@meu/mobile"
 exports: [FloatingPanel]
 status: verification
-localVerification: pending
-localGapIds: [LOC-FLOATING-PANEL-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -14,7 +14,13 @@ figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "335:215"
 storyIds:
-  [gesture-floatingpanel--bottom, gesture-floatingpanel--top, gesture-floatingpanel--disabled]
+  [
+    gesture-floatingpanel--bottom,
+    gesture-floatingpanel--top,
+    gesture-floatingpanel--disabled,
+    gesture-floatingpanel--dynamic-controlled-anchors,
+    gesture-floatingpanel--long-localized-adaptive-content
+  ]
 source: packages/mobile/src/FloatingPanel
 ---
 
@@ -103,7 +109,7 @@ handle 是具名原生 button，关联 body 与实时高度说明；body 是带�
 
 ## 浏览器与 WebView
 
-完整运行时支持档与仓库总矩阵一致：Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chromium/WebView 79–88 与 iOS 13–14 仅属观察档，Chrome 70 只做构建产物静态语法扫描，不构成运行时承诺。visualViewport 缺失时退回 innerHeight，pointer capture 缺失或抛错可降级；尚无目标 App 真机证明。
+完整运行时支持档与仓库总矩阵一致：Android Chrome/WebView 89+、iOS Safari/WKWebView 15+。Chromium/WebView 79–88 与 iOS 13–14 仅属观察档，Chrome 70 只做构建产物静态语法扫描，不构成运行时承诺。visualViewport 缺失时退回 innerHeight，pointer capture 缺失或抛错可降级；尚无目标 App 真机证明。组件不依赖 ResizeObserver：高度事实源是显式 anchors 与 visual viewport，容器宽度/children 变化由 CSS 原生重排；宿主容器可用高度变化时应同步更新 anchors。
 
 ## 边界情况与已知限制
 
@@ -113,17 +119,17 @@ handle 是具名原生 button，关联 body 与实时高度说明；body 是带�
 
 ## 性能预算
 
-拖拽只更新一个 transform 状态；anchors 应保持小数组。复杂 body 的渲染和列表虚拟化归调用方。
+拖拽只更新一个 transform 状态；anchors 应保持小数组。组件不安装 ResizeObserver，每实例仅监听 window resize 与可用时的 visualViewport resize。复杂 body 的渲染和列表虚拟化归调用方。
 
 ## 测试证据
 
-- Unit/SSR/hydration: 3 个文件共 22 tests，覆盖归一化、单 anchor 禁用、受控、速度/方向锁、capture fallback、配置与 visual viewport 变化取消、交互内容边界、原生根事件、键盘、ref、确定 SSR shell，以及真实 `hydrateRoot` 根节点复用。
-- Story interaction: `Bottom` 验证 handle 点击与锚点状态变化；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit/SSR/hydration: 3 个文件共 28 tests，覆盖 anchor 过滤/去重/视口夹紧、单 anchor 禁用、受控拒绝与动态 anchors/visual viewport 重归一、速度/方向锁、pointercancel/lost capture 后恢复、capture fallback、配置变化取消、次要指针忽略、交互内容边界、最高 anchor 原生 `scrollTop` 移交、原生根事件、全键盘路径、ref、确定 SSR shell，以及真实 `hydrateRoot` 根节点复用与 hydration 后键盘调整。
+- Story interaction: 5 个 Story 中 `Bottom` 验证 handle 点击与受控锚点更新；`DynamicControlledAnchors` 验证容器宽度与 anchors 同步变化后的 360→320 重归一及受控 handle 请求；`LongLocalizedAdaptiveContent` 验证 RTL/英文/reduced-motion 配置边界、长内容、44px handle、200% 字体无横向溢出、最高 anchor 键盘/原生滚动移交和 forced-colors 边界。新增 Story 源码通过 TypeScript 与定向 ESLint，随批次重建后统一执行浏览器矩阵。
+- Storybook 浏览器矩阵：最近一次静态基线覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，执行 play 后再运行 axe WCAG A/AA 并检查 `pageerror`；本轮不单独重建或部署，新增 Story 随批次总门禁复验。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5857 B / 32768 B 预算，组合 Brotli 5186 B；共享样式由应用单独导入一次。
-- SSR/hydration: `FloatingPanel.ssr.test.tsx` 在 Node 覆盖确定 shell；`FloatingPanel.hydration.test.tsx` 捕获服务端根节点并证明 hydration 后复用同一节点、`data-measured=true`、初始 anchor/index 为 300px/1、最大壳 440px 与 translate 140px，且 0 recoverable error。隔离 `layout-contract.spec.ts` 在真实移动浏览器中断言测量完成后的 300px 可见高度。
-- RTL: 垂直方向不适用；排版矩阵待补。
+- SSR/hydration: `FloatingPanel.ssr.test.tsx` 在 Node 覆盖确定 modeless shell、ARIA 关系和完整配置边界；`FloatingPanel.hydration.test.tsx` 捕获服务端根节点并证明 hydration 后复用同一节点、`data-measured=true`、初始 anchor/index 为 300px/1、最大壳 440px 与 translate 140px、RTL/locale/theme/motion 属性、键盘调整可用，且 0 recoverable/console error。隔离 `layout-contract.spec.ts` 在真实移动浏览器中断言测量完成后的 300px 可见高度。
+- RTL: 垂直方向不反转；Unit/hydration 与 LongLocalizedAdaptiveContent Story 固化根配置边界和长内容排版。
 - Reduced motion: 组件根复制 ConfigProvider 的 theme/motion boundary，避免自身 `data-meu-theme` 重置显式 reduced Token；独立 Next H5 双引擎验证进入时长为 0ms 且 300px 初始 anchor 无过渡漂移。
 - Mobile Chromium/WebKit E2E: 键盘 snap、合成 pointer 拖动、最高点的内容拖拽标记移交和受控高度输出均通过；另与 SwipeActions 组合执行 40 轮 pointercancel 后再次完成有效拖拽，确认无残留 dragging 状态，组合同步成本 ≤1,000ms，两种引擎各重复 3 轮通过。尚未用真实 touch、60 秒帧率或 `scrollTop` 断言原生滚动恢复。
 - Chromatic Light/Dark: stories 可采集，正式基线待确认。
@@ -141,6 +147,7 @@ handle 是具名原生 button，关联 body 与实时高度说明；body 是带�
 - 固化受控状态、异常 anchor、有限速度、原生 handle、可键盘进入的滚动 body、内容展开边界、配置变化取消、capture fallback/卸载清理、reduced-motion、forced-colors、SSR shell 与隔离 Next H5 聚合证据。
 - 增加真实 hydrateRoot 根节点复用、测量标记、初始 300px anchor 和移动浏览器可见高度的精确证据。
 - 根边界同步 Provider 的 theme、locale、dir 与 motion class，修复显式 reduced-motion 被主题属性覆盖的问题。
+- 补齐 pointercancel 后恢复、动态受控 anchors/visual viewport、最高 anchor 原生滚动、次要指针、长文本/RTL/200%/forced-colors 的本地证据，并明确无需 ResizeObserver 的尺寸契约。
 
 ## 变更记录
 
@@ -150,4 +157,5 @@ handle 是具名原生 button，关联 body 与实时高度说明；body 是带�
 | 2026-08-29 | 未发布 | hardening     | 修复配置竞态、capture fallback 与交互内容边界，并校准 E2E/hydration 证据口径 | 无                                |
 | 2026-08-29 | 未发布 | accessibility | body 增加具名 scrollable region 与键盘焦点入口                               | 新增一个 Tab stop；不影响指针手势 |
 | 2026-08-30 | 未发布 | verification  | 增加根节点复用、`data-measured` 与初始 300px 高度的精确 hydration 证据       | 无                                |
-| 2026-08-30 | 未发布 | bugfix        | 复制完整配置边界，确保显式 reduced-motion 的高度定位立即生效                 | 无公开 API 变化                    |
+| 2026-08-30 | 未发布 | bugfix        | 复制完整配置边界，确保显式 reduced-motion 的高度定位立即生效                 | 无公开 API 变化                   |
+| 2026-08-30 | 未发布 | verification  | 完成动态 anchors、取消恢复、滚动仲裁与自适应模式本地闭环                     | 无                                |

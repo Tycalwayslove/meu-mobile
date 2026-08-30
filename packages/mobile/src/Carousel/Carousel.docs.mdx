@@ -4,8 +4,8 @@ slug: carousel
 package: "@meu/mobile"
 exports: [Carousel]
 status: verification
-localVerification: pending
-localGapIds: [LOC-CAROUSEL-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -79,7 +79,7 @@ API 表由 `CarouselProps` 生成。核心为 items、index/defaultIndex、onInd
 
 ## Ref 与命令式方法
 
-ref 指向根 `HTMLDivElement`。不公开 Embla instance；程序化切换通过受控 index 完成。
+ref 指向根 `HTMLDivElement`。React 19 回调 ref 的 cleanup 会原样执行，传统回调 ref 在卸载时收到 null，且普通重渲染不会反复解绑/重绑。不公开 Embla instance；程序化切换通过受控 index 完成。
 
 ## 键盘操作
 
@@ -110,7 +110,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 
 ## SSR 与 Next.js
 
-服务端输出静态 slides、原生按钮、活动/非活动语义和位置 status，不访问 window/document。交互在客户端初始化。items 的 key、数量和初始 index 在 hydration 前必须稳定；SSR Unit 不等于 Next 浏览器 hydration 证据。
+服务端输出静态 slides、原生按钮、活动/非活动语义和位置 status，不访问 window/document。交互在客户端初始化。items 的 key、数量和初始 index 在 hydration 前必须稳定。共置 hydration 测试验证受控第二页、reduced-motion autoplay、三页 inert/焦点隔离和 status 在接管前后保持一致，0 recoverable/console error。
 
 ## RTL 与国际化
 
@@ -133,14 +133,15 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 
 ## 测试证据
 
-- Unit: `Carousel.test.tsx` 覆盖默认静止、位置公告、原生按钮键盘路径、受控回滚、动态 items、autoplay focus/hover/visibility/reduced-motion、drag reason、RTL、资源清理，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
+- Unit/SSR/hydration: Carousel 目录 3 个测试文件共 23 项通过。覆盖默认静止、位置公告、原生按钮键盘路径、受控回滚与 slides 缩短、空→加载→缩短→扩容、loop、关闭 drag、gap 归一、autoplay focus/hover/visibility/reduced-motion、drag reason、RTL、React 19/传统 callback ref、资源清理，以及非活动页动态控件的 inert/tabindex 隔离与恢复。
 - SSR: `Carousel.ssr.test.tsx` 在无 window/document 环境验证静态按钮、默认关闭 autoplay、活动索引、inactive/inert 和页名/页数 status。
-- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status。对应 Story 已纳入中央生成的链接、关键 play 和浏览器矩阵门禁，组件文档不复制易漂移的全局计数。
+- Hydration: `Carousel.hydration.test.tsx` 验证 controlled index=1、reduced-motion autoplay 首屏、三页 slide/status 语义、inactive link `tabIndex=-1` 与 active button 可聚焦，React recoverable error 与 console error 均为 0。
+- Story interaction: `Default` 验证前进按钮、索引更新与活动 slide；`AccessibleAutoplayPause` 验证暂停按钮的 focus→click 路径和静止 live status；`RtlAndLongContent` 新增 RTL、长文案无横向溢出、44×44 原生按钮、不重叠和活动页换行断言。当前 6 个 Story；新增 play 随主流程统一重建后复验。
 - Carousel 定向浏览器扫描：6 个 Story × Light/Dark 两个场景全部通过；play 返回 success，axe WCAG A/AA 为 0 违规，且无 `pageerror`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 20055 B / 49152 B 预算，组合 Brotli 17684 B；共享样式由应用单独导入一次。
-- SSR/hydration: 隔离 Next 16 App Router hydration 后受控索引、活动/非活动 slide 及原生替代操作保持一致，0 hydration/runtime error
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 20065 B / 49152 B 预算，组合 Brotli 17703 B；共享样式由应用单独导入一次。
+- SSR/hydration: 共置测试与隔离 Next 16 App Router 均验证受控索引、活动/非活动 slide 及原生替代操作保持一致，0 hydration/runtime error
 - RTL: Unit 与 Story 已覆盖配置、逻辑方向和长文本；手势与双向文本真机待补
 - Reduced motion: Unit 覆盖自动播放门控和即时切换；真实浏览器动画待补
 - Mobile Chromium/WebKit E2E: `runs the controlled carousel with native alternatives and focus isolation` 在两种引擎断言前后按钮、受控索引、slide 名称、非活动控件 `tabindex=-1` 与活动 link 可聚焦；本轮重新构建本地 production 站后，紧凑 RTL/reduced-motion autoplay 场景的 Light/Dark 全页 axe WCAG A/AA 通过，播放控制不再产生 target-size 重叠违规；drag/滚动竞争仍待专项
@@ -151,7 +152,7 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 
 ### 待优化
 
-- 完成 RTL、touch/pointer cancel、斜向滚动仲裁、200% 字体和读屏真机测试。
+- 完成 RTL touch/pointer cancel、斜向滚动仲裁和读屏真机测试；RTL 长文案、44px、控件不重叠及 200% 字体场景已纳入本地 Story 自动化。
 - 补 drag 性能、滚动竞争与真机证据；SSR/hydration 和按钮导航双引擎路径已完成。
 - 在复杂 slide 上记录 50 项 MutationObserver/Embla 主线程基准和增量 bundle 结果。
 
@@ -161,14 +162,16 @@ Unit 只能验证事件订阅和清理，不能模拟 WebView 的手势仲裁。
 - 修复暂停按钮 focus→click 反向重启，增加页名/可见页/总页数 status，并冻结动态 items 与 `reInit` 事件边界。
 - 动态非活动页使用 inert 与旧内核 tabindex fallback 隔离；补隔离 Next H5 焦点隔离证据。
 - 将 autoplay 控制固定到顶部居中，避免在 44px 紧凑内容中与逻辑方向的下一张按钮形成重叠触控目标。
+- 修复 React 19 callback ref cleanup 丢失及重渲染反复换绑，补受控动态 slides、loop/no-drag、直接 hydration 与 RTL 长文案证据，关闭 `LOC-CAROUSEL-01`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                      | 迁移说明                                             |
-| ---------- | ------ | ------------ | --------------------------------------------------------- | ---------------------------------------------------- |
-| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                      | 无                                                   |
-| 2026-08-29 | 未发布 | fix          | 动态非活动页焦点隔离                                      | API 兼容；隐藏 slide 的后续属性变化不再重入 Tab 路径 |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/focus-isolation/hydration 证据    | 无                                                   |
-| 2026-08-29 | 未发布 | fix          | 修复 autoplay focus 动作、位置公告、动态 items 和资源清理 | API 兼容；新增 status DOM，不改变受控事件签名        |
-| 2026-08-29 | 未发布 | fix          | 隔离紧凑轮播的 autoplay 与两侧导航触控区                  | 仅调整控件位置；API、键盘顺序和可访问名称不变        |
-| 2026-08-29 | 未发布 | verification | 本地 production 双引擎复验紧凑触控区与 Light/Dark axe     | 无                                                   |
+| 日期       | 版本   | 类型         | 内容                                                       | 迁移说明                                             |
+| ---------- | ------ | ------------ | ---------------------------------------------------------- | ---------------------------------------------------- |
+| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                       | 无                                                   |
+| 2026-08-29 | 未发布 | fix          | 动态非活动页焦点隔离                                       | API 兼容；隐藏 slide 的后续属性变化不再重入 Tab 路径 |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/focus-isolation/hydration 证据     | 无                                                   |
+| 2026-08-29 | 未发布 | fix          | 修复 autoplay focus 动作、位置公告、动态 items 和资源清理  | API 兼容；新增 status DOM，不改变受控事件签名        |
+| 2026-08-29 | 未发布 | fix          | 隔离紧凑轮播的 autoplay 与两侧导航触控区                   | 仅调整控件位置；API、键盘顺序和可访问名称不变        |
+| 2026-08-29 | 未发布 | verification | 本地 production 双引擎复验紧凑触控区与 Light/Dark axe      | 无                                                   |
+| 2026-08-30 | 未发布 | fix          | 修复 callback ref cleanup，补动态索引与 hydration 本地证据 | API 兼容；React 19 cleanup 现在正确执行              |

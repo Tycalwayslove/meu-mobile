@@ -315,6 +315,33 @@ describe("FloatingPanel", () => {
     expect(onHeightChange).not.toHaveBeenCalled();
   });
 
+  it("rolls back pointer cancellation and accepts the next complete gesture", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel anchors={[200, 400, 600]} defaultHeight={400} onHeightChange={onHeightChange}>
+        内容
+      </FloatingPanel>
+    );
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+    preparePointerCapture(handle);
+    beginDrag(handle, 300, 160);
+    expect(root(container).getAttribute("data-dragging")).toBe("true");
+
+    fireEvent.pointerCancel(handle, {
+      clientX: 30,
+      clientY: 160,
+      isPrimary: true,
+      pointerId: 1,
+      timeStamp: 220
+    });
+    expect(root(container).getAttribute("data-dragging")).toBeNull();
+    expect(root(container).getAttribute("data-current-height")).toBe("400");
+    expect(onHeightChange).not.toHaveBeenCalled();
+
+    drag(handle, 300, 80);
+    expect(onHeightChange).toHaveBeenLastCalledWith(600, { index: 2, reason: "drag" });
+  });
+
   it("falls back to window pointer events when pointer capture acquisition throws", () => {
     const onHeightChange = vi.fn();
     const { container } = render(
@@ -429,6 +456,105 @@ describe("FloatingPanel", () => {
     unmount();
     if (originalViewport) Object.defineProperty(window, "visualViewport", originalViewport);
     else Reflect.deleteProperty(window, "visualViewport");
+  });
+
+  it("renormalizes controlled height when anchors and the visual viewport change", async () => {
+    const originalViewport = Object.getOwnPropertyDescriptor(window, "visualViewport");
+    const visualViewport = new EventTarget() as VisualViewport;
+    Object.defineProperty(visualViewport, "height", { configurable: true, value: 800 });
+    Object.defineProperty(window, "visualViewport", {
+      configurable: true,
+      value: visualViewport
+    });
+    const onHeightChange = vi.fn();
+    const { container, rerender, unmount } = render(
+      <FloatingPanel anchors={[180, 360, 620]} height={620} onHeightChange={onHeightChange}>
+        动态受控内容
+      </FloatingPanel>
+    );
+    expect(root(container).getAttribute("data-current-height")).toBe("620");
+
+    rerender(
+      <FloatingPanel anchors={[160, 320, 480]} height={620} onHeightChange={onHeightChange}>
+        动态受控内容
+      </FloatingPanel>
+    );
+    expect(root(container).getAttribute("data-current-height")).toBe("480");
+    expect(root(container).style.height).toBe("480px");
+    expect(onHeightChange).not.toHaveBeenCalled();
+
+    Object.defineProperty(visualViewport, "height", { configurable: true, value: 300 });
+    await act(() => visualViewport.dispatchEvent(new Event("resize")));
+    expect(root(container).getAttribute("data-current-height")).toBe("300");
+    expect(root(container).style.height).toBe("300px");
+    expect(onHeightChange).not.toHaveBeenCalled();
+
+    unmount();
+    if (originalViewport) Object.defineProperty(window, "visualViewport", originalViewport);
+    else Reflect.deleteProperty(window, "visualViewport");
+  });
+
+  it("leaves content pointer and scroll interaction native at the highest anchor", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel anchors={[200, 400, 600]} defaultHeight={600} onHeightChange={onHeightChange}>
+        <div style={{ height: 1200 }}>长内容</div>
+      </FloatingPanel>
+    );
+    const body = screen.getByRole("region", { name: "浮动面板内容" });
+    expect(body.getAttribute("data-content-drag")).toBeNull();
+    body.scrollTop = 240;
+    fireEvent.scroll(body);
+    beginDrag(body, 300, 80);
+    fireEvent.pointerUp(body, {
+      clientX: 30,
+      clientY: 80,
+      isPrimary: true,
+      pointerId: 1,
+      timeStamp: 240
+    });
+    expect(body.scrollTop).toBe(240);
+    expect(root(container).getAttribute("data-dragging")).toBeNull();
+    expect(onHeightChange).not.toHaveBeenCalled();
+  });
+
+  it("ignores secondary and non-primary pointer starts", () => {
+    const onHeightChange = vi.fn();
+    const { container } = render(
+      <FloatingPanel anchors={[200, 400]} onHeightChange={onHeightChange}>
+        内容
+      </FloatingPanel>
+    );
+    const handle = screen.getByRole("button", { name: "调整浮动面板高度" });
+    preparePointerCapture(handle);
+    fireEvent.pointerDown(handle, {
+      button: 2,
+      clientX: 20,
+      clientY: 300,
+      isPrimary: true,
+      pointerId: 2
+    });
+    fireEvent.pointerMove(handle, {
+      clientX: 20,
+      clientY: 80,
+      isPrimary: true,
+      pointerId: 2
+    });
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      clientX: 20,
+      clientY: 300,
+      isPrimary: false,
+      pointerId: 3
+    });
+    fireEvent.pointerMove(handle, {
+      clientX: 20,
+      clientY: 80,
+      isPrimary: false,
+      pointerId: 3
+    });
+    expect(root(container).getAttribute("data-dragging")).toBeNull();
+    expect(onHeightChange).not.toHaveBeenCalled();
   });
 
   it("cancels a queued drag reset when the panel becomes draggable again", async () => {

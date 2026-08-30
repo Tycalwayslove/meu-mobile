@@ -126,6 +126,30 @@ afterEach(() => {
 });
 
 describe("Carousel", () => {
+  it("runs React 19 callback-ref cleanup without synthesizing a legacy null call", () => {
+    const cleanupRef = vi.fn();
+    const callbackRef = vi.fn(() => cleanupRef);
+    const { rerender, unmount } = render(<Carousel ref={callbackRef} items={items} />);
+
+    expect(callbackRef).toHaveBeenCalledOnce();
+    rerender(<Carousel ref={callbackRef} items={items} gap={12} />);
+    expect(callbackRef).toHaveBeenCalledOnce();
+    expect(cleanupRef).not.toHaveBeenCalled();
+
+    unmount();
+    expect(cleanupRef).toHaveBeenCalledOnce();
+    expect(callbackRef).not.toHaveBeenCalledWith(null);
+  });
+
+  it("clears a legacy callback ref with null on unmount", () => {
+    const callbackRef = vi.fn();
+    const { unmount } = render(<Carousel ref={callbackRef} items={items} />);
+
+    expect(callbackRef).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+    unmount();
+    expect(callbackRef).toHaveBeenLastCalledWith(null);
+  });
+
   it("renders localized carousel semantics and removes inactive descendants from tab order", async () => {
     const { container } = render(<Carousel aria-label="营销内容" items={items} />);
     const carousel = screen.getByRole("group", { name: "营销内容" });
@@ -223,6 +247,30 @@ describe("Carousel", () => {
     previous.focus();
     await user.keyboard(" ");
     expect(onIndexChange).toHaveBeenLastCalledWith(0, { reason: "previous" });
+  });
+
+  it("keeps loop controls available when dragging is disabled and normalizes gap", () => {
+    const onIndexChange = vi.fn();
+    render(
+      <Carousel
+        allowDrag={false}
+        defaultIndex={2}
+        gap={-12}
+        items={items}
+        loop
+        onIndexChange={onIndexChange}
+      />
+    );
+
+    const carousel = screen.getByRole("group", { name: "推荐内容" });
+    expect(carousel.getAttribute("data-drag-enabled")).toBe("false");
+    expect(carousel.getAttribute("data-loop")).toBe("true");
+    expect(carousel.style.getPropertyValue("--meu-carousel-gap")).toBe("0px");
+    expect(screen.getByRole("button", { name: "上一张" }).hasAttribute("disabled")).toBe(false);
+    expect(screen.getByRole("button", { name: "下一张" }).hasAttribute("disabled")).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "下一张" }));
+    expect(onIndexChange).toHaveBeenCalledWith(0, { reason: "next" });
   });
 
   it("autoplays, permanently pauses on focus and can be explicitly restarted", () => {
@@ -384,6 +432,19 @@ describe("Carousel", () => {
     embla.setSlideCount(3);
     rerender(<Carousel defaultIndex={2} items={items} />);
     expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("0");
+  });
+
+  it("normalizes a controlled index after slides shrink without emitting a change event", () => {
+    const onIndexChange = vi.fn();
+    const { rerender } = render(<Carousel index={2} items={items} onIndexChange={onIndexChange} />);
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("2");
+
+    embla.setSlideCount(2);
+    rerender(<Carousel index={2} items={items.slice(0, 2)} onIndexChange={onIndexChange} />);
+
+    expect(screen.getByRole("group", { name: "推荐内容" }).getAttribute("data-index")).toBe("1");
+    expect(screen.getByRole("group", { name: "会员礼遇" }).hasAttribute("aria-hidden")).toBe(false);
+    expect(onIndexChange).not.toHaveBeenCalled();
   });
 
   it("pauses in a hidden page and resumes only after the page becomes visible", () => {

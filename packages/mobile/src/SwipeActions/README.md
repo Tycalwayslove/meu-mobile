@@ -32,6 +32,8 @@
 - pointer capture 不可用时临时监听窗口级 move/up/cancel；拖动后的兼容 click 抑制会自动过期。
 - 滑动不得成为唯一入口。列表场景还应在 `Cell` 的“更多操作”菜单中提供同一组动作，尤其是破坏性操作。
 - 每个动作目标高度不小于 44px；`tone` 只表达 Meu 的语义颜色，不接受任意品牌色。
+- 动作按钮固定为 `type=button`，不会提交父表单；富 ReactNode 标签必须通过 `aria-label` 提供稳定名称。
+- 直接 hydration 会先保持默认打开轨隐藏，客户端测宽后再显现权威物理侧，避免服务端暴露被遮挡的焦点目标。
 
 未来 uni-app 适配复用 `side`、阈值、方向锁、动作结果和关闭原因契约；Pointer Events、ResizeObserver 与
 CSS transform 留在 React Web 适配层。

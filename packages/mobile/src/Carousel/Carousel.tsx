@@ -2,8 +2,8 @@
 
 import { MeuIconChevronLeft } from "@meu/icons-react";
 import useEmblaCarousel from "embla-carousel-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { CSSProperties, Ref } from "react";
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
 import { VisuallyHidden } from "../internal/VisuallyHidden";
@@ -23,11 +23,6 @@ import {
 import type { CarouselIndexChangeReason, CarouselProps } from "./types";
 
 type CarouselStyle = CSSProperties & { "--meu-carousel-gap"?: string };
-
-function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
-  if (typeof ref === "function") ref(value);
-  else if (ref) ref.current = value;
-}
 
 function normalizeIndex(value: number | undefined, count: number) {
   if (count <= 0) return 0;
@@ -132,6 +127,7 @@ export function Carousel({
   const [reducedMotionOverride, setReducedMotionOverride] = useState(false);
   const [rotationFocusAction, setRotationFocusAction] = useState<"pause" | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => rootRef.current as HTMLDivElement, []);
   const changeReasonRef = useRef<CarouselIndexChangeReason | null>(null);
   const rollbackFrameRef = useRef<number | null>(null);
   const suppressSelectionRef = useRef(false);
@@ -333,10 +329,7 @@ export function Carousel({
   return (
     <div
       {...props}
-      ref={(node) => {
-        rootRef.current = node;
-        assignRef(ref, node);
-      }}
+      ref={rootRef}
       className={className ? `${root} ${className}` : root}
       style={resolvedStyle}
       role={role}

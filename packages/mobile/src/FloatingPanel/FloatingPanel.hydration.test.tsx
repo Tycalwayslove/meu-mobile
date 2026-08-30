@@ -1,18 +1,37 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { FloatingPanel } from "./FloatingPanel";
+
+const mountedRoots: Array<ReturnType<typeof hydrateRoot>> = [];
+
+afterEach(async () => {
+  await act(async () => {
+    for (const root of mountedRoots.splice(0)) root.unmount();
+    await Promise.resolve();
+  });
+  document.body.replaceChildren();
+  vi.restoreAllMocks();
+});
 
 describe("FloatingPanel hydration", () => {
   it("reuses the server root before exposing the measured 300px anchor", async () => {
     Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    const onHeightChange = vi.fn();
     const ui = (
-      <FloatingPanel anchors={[160, 300, 440]} defaultHeight={300}>
-        Hydrated panel content
-      </FloatingPanel>
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <FloatingPanel
+          anchors={[160, 300, 440]}
+          defaultHeight={300}
+          onHeightChange={onHeightChange}
+        >
+          Hydrated panel content
+        </FloatingPanel>
+      </ConfigProvider>
     );
     const container = document.createElement("div");
     container.innerHTML = renderToString(ui);
@@ -24,12 +43,14 @@ describe("FloatingPanel hydration", () => {
     expect(serverRoot.getAttribute("data-measured")).toBe("false");
     expect(serverRoot.getAttribute("data-current-height")).toBe("0");
     const recoverableErrors: unknown[] = [];
-    let root: ReturnType<typeof hydrateRoot> | undefined;
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     await act(async () => {
-      root = hydrateRoot(container, ui, {
-        onRecoverableError: (error) => recoverableErrors.push(error)
-      });
+      mountedRoots.push(
+        hydrateRoot(container, ui, {
+          onRecoverableError: (error) => recoverableErrors.push(error)
+        })
+      );
       await Promise.resolve();
     });
 
@@ -43,11 +64,16 @@ describe("FloatingPanel hydration", () => {
     expect(hydratedRoot.getAttribute("data-anchor-index")).toBe("1");
     expect(hydratedRoot.style.height).toBe("440px");
     expect(hydratedRoot.style.getPropertyValue("--meu-floating-panel-translate")).toBe("140px");
+    expect(hydratedRoot.getAttribute("dir")).toBe("rtl");
+    expect(hydratedRoot.getAttribute("lang")).toBe("en-US");
+    expect(hydratedRoot.getAttribute("data-meu-motion")).toBe("reduced");
+    expect(hydratedRoot.getAttribute("data-meu-theme")).toBe("dark");
+    fireEvent.keyDown(screen.getByRole("button", { name: "Adjust floating panel height" }), {
+      key: "End"
+    });
+    expect(hydratedRoot.getAttribute("data-current-height")).toBe("440");
+    expect(onHeightChange).toHaveBeenCalledWith(440, { index: 2, reason: "keyboard" });
     expect(recoverableErrors).toEqual([]);
-
-    const hydratedReactRoot = root;
-    if (!hydratedReactRoot) throw new Error("Expected hydrated React root");
-    act(() => hydratedReactRoot.unmount());
-    container.remove();
+    expect(consoleError).not.toHaveBeenCalled();
   });
 });

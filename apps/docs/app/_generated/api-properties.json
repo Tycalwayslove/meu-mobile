@@ -4392,7 +4392,7 @@
           "type": "() => boolean",
           "required": false,
           "event": false,
-          "description": "Overrides nearest-scroll-container boundary detection."
+          "description": "Overrides nearest-scroll-container boundary detection and is rechecked before direction lock."
         },
         {
           "name": "children",
@@ -4460,7 +4460,7 @@
           "type": "() => Promise<void> | void",
           "required": true,
           "event": true,
-          "description": "Refresh operation. Concurrent attempts are ignored."
+          "description": "Refresh operation. A returned Promise keeps the component refreshing; concurrent attempts are ignored."
         },
         {
           "name": "onRefreshError",

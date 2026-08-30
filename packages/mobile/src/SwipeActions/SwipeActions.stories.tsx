@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { ActionMenu } from "../ActionMenu";
 import { Button } from "../Button";
+import { ConfigProvider } from "../ConfigProvider";
 import { Cell } from "../List";
 import { SwipeActions } from "./SwipeActions";
 import type { SwipeActionsAction, SwipeActionsSide } from "./types";
@@ -151,4 +152,61 @@ export const RTLPhysicalSides: Story = {
       </SwipeActions>
     </div>
   )
+};
+
+export const LongLocalizedActions: Story = {
+  render: () => (
+    <ConfigProvider dir="rtl" locale="en-US" motion="reduced">
+      <div style={{ width: "min(100%, 390px)" }}>
+        <SwipeActions
+          defaultOpenSide="right"
+          leftActions={[{ key: "pin", label: "Pin for later", tone: "accent" }]}
+          rightActions={[
+            { key: "archive", label: "Archive order" },
+            {
+              "aria-label": "Delete order permanently",
+              key: "delete",
+              label: <span aria-hidden="true">Delete permanently</span>,
+              tone: "danger"
+            }
+          ]}
+          leftActionsLabel="Actions on the physical left"
+          rightActionsLabel="Actions on the physical right"
+          revealLeftLabel="Show actions on the physical left"
+          revealRightLabel="Show actions on the physical right"
+        >
+          <Cell
+            title="Order MEU-0828 with a localized delivery description"
+            description="Physical left and right do not change meaning in right-to-left layouts"
+          />
+        </SwipeActions>
+      </div>
+    </ConfigProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const root = canvasElement.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]');
+    if (!root) throw new window.Error("Expected SwipeActions root");
+    await new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    if (root.getAttribute("dir") !== "rtl") {
+      throw new window.Error("Expected the configured RTL direction");
+    }
+    if (root.getAttribute("data-open-side") !== "right") {
+      throw new window.Error("Expected the physical-right action rail to be open");
+    }
+    const group = root.querySelector<HTMLElement>('[data-meu-swipe-actions-group="right"]');
+    if (!group || group.getAttribute("aria-label") !== "Actions on the physical right") {
+      throw new window.Error("Expected the localized right-rail name");
+    }
+    const buttons = Array.from(group.querySelectorAll<HTMLButtonElement>("button"));
+    if (
+      buttons.length !== 2 ||
+      buttons.some((button) => button.getBoundingClientRect().height < 44)
+    ) {
+      throw new window.Error("Expected two action targets of at least 44px");
+    }
+    const danger = buttons[1];
+    if (!danger || danger.getAttribute("aria-label") !== "Delete order permanently") {
+      throw new window.Error("Expected the rich danger label to retain an accessible name");
+    }
+  }
 };

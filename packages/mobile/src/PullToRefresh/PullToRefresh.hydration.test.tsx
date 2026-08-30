@@ -11,8 +11,13 @@ describe("PullToRefresh hydration", () => {
   it("reuses its deterministic idle root and preserves the localized native action", async () => {
     const onRefresh = vi.fn(() => new Promise<void>(() => undefined));
     const ui = (
-      <ConfigProvider locale="en-US">
-        <PullToRefresh onRefresh={onRefresh}>Hydrated refresh content</PullToRefresh>
+      <ConfigProvider dir="rtl" locale="en-US" motion="reduced" theme="dark">
+        <PullToRefresh
+          actionLabel="Refresh the complete international order history"
+          onRefresh={onRefresh}
+        >
+          Hydrated refresh content
+        </PullToRefresh>
       </ConfigProvider>
     );
     const container = document.createElement("div");
@@ -26,6 +31,7 @@ describe("PullToRefresh hydration", () => {
     if (!serverContent) throw new Error("Expected server PullToRefresh content id");
     const serverContentId = serverContent.id;
     const recoverableErrors: unknown[] = [];
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
     let root: ReturnType<typeof hydrateRoot> | undefined;
 
     await act(async () => {
@@ -44,9 +50,14 @@ describe("PullToRefresh hydration", () => {
     expect(hydratedRoot.getAttribute("data-pull-distance")).toBe("0");
     const action = hydratedRoot.querySelector<HTMLButtonElement>("button");
     if (!action) throw new Error("Expected hydrated PullToRefresh action");
-    expect(action.textContent).toBe("Refresh content");
+    expect(action.textContent).toBe("Refresh the complete international order history");
     expect(action.getAttribute("aria-controls")).toBe(serverContentId);
+    const provider = hydratedRoot.closest<HTMLElement>('[data-meu-component="config-provider"]');
+    expect(provider ? provider.getAttribute("dir") : null).toBe("rtl");
+    expect(provider ? provider.getAttribute("data-meu-motion") : null).toBe("reduced");
+    expect(provider ? provider.getAttribute("data-meu-theme") : null).toBe("dark");
     expect(recoverableErrors).toEqual([]);
+    expect(consoleError).not.toHaveBeenCalled();
 
     act(() => action.click());
     expect(onRefresh).toHaveBeenCalledTimes(1);

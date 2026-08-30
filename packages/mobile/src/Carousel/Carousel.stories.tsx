@@ -176,5 +176,42 @@ export const RtlAndLongContent: Story = {
         />
       </div>
     </ConfigProvider>
-  )
+  ),
+  play: ({ canvasElement }) => {
+    const carousel = canvasElement.querySelector<HTMLElement>('[data-meu-component="carousel"]');
+    if (!carousel) throw new window.Error("Expected RTL Carousel");
+    if (getComputedStyle(carousel).direction !== "rtl") {
+      throw new window.Error("Carousel did not inherit RTL direction");
+    }
+    if (carousel.scrollWidth > carousel.clientWidth + 1) {
+      throw new window.Error("Carousel overflowed horizontally with long RTL content");
+    }
+
+    const controls = Array.from(carousel.querySelectorAll<HTMLButtonElement>("button"));
+    if (controls.length !== 2) throw new window.Error("Expected previous and next controls");
+    for (const control of controls) {
+      const rect = control.getBoundingClientRect();
+      if (rect.width < 44 || rect.height < 44) {
+        throw new window.Error("Carousel navigation control is below the 44px touch target");
+      }
+    }
+    const [firstControl, secondControl] = controls;
+    if (firstControl && secondControl) {
+      const firstRect = firstControl.getBoundingClientRect();
+      const secondRect = secondControl.getBoundingClientRect();
+      const overlaps =
+        firstRect.left < secondRect.right &&
+        firstRect.right > secondRect.left &&
+        firstRect.top < secondRect.bottom &&
+        firstRect.bottom > secondRect.top;
+      if (overlaps) throw new window.Error("Carousel navigation controls overlap");
+    }
+
+    const activeSlide = carousel.querySelector<HTMLElement>(
+      '[data-meu-carousel-slide][data-active="true"]'
+    );
+    if (!activeSlide || activeSlide.scrollWidth > activeSlide.clientWidth + 1) {
+      throw new window.Error("Carousel active RTL slide did not wrap within its viewport");
+    }
+  }
 };

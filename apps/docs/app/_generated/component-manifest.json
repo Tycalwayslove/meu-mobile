@@ -3052,10 +3052,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Carousel/Carousel.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-CAROUSEL-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3717,10 +3715,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/FloatingPanel/FloatingPanel.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-FLOATING-PANEL-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5109,10 +5105,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PullToRefresh/PullToRefresh.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-PULL-TO-REFRESH-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5786,10 +5780,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SwipeActions/SwipeActions.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-SWIPE-ACTIONS-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6515,10 +6507,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 57,
+    "locallyVerifiedProducts": 61,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 11,
+    "productsWithLocalGaps": 7,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,
