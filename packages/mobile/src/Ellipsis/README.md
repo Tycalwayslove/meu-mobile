@@ -50,6 +50,12 @@ const [expanded, setExpanded] = useState(false);
 - 操作内容只放简短文本或装饰图标；不要放交互控件、全局 id 或有副作用的组件，因为 `expandText` 也会渲染到隐藏测量镜像。
 - 组件默认文案为中文；业务负责本地化正文、可见操作和无障碍名称。
 
+## 选择与复制
+
+视觉隐藏的完整正文保证辅助技术能获取一次完整内容，但不等于根节点“全选/复制”的剪贴板序列化保证。视觉候选、按钮和隐藏镜像是内部 DOM，不同浏览器可能把它们以不同方式纳入 selection/copy 文本。
+
+组件因此不提供 copy API，也不承诺从根节点复制得到精确正文。需要精确复制时，业务应直接使用自己的 `content` 来源并在组件外提供复制操作；原生 `onCopy` 可以作为 `div` 属性透传，但组件不会替业务生成或改写剪贴板内容。
+
 ## 测量、SSR 与兼容
 
 服务端只输出完整辅助文本和稳定 CSS clamp fallback，不输出未经测量的按钮；客户端 effect 后生成精确候选，因此相同首屏 props 可稳定 hydration。测量直接读取同字体镜像的单行高度、扣除根左右 padding，并让隐藏 action 与真实按钮共享 footprint。
@@ -64,11 +70,12 @@ const [expanded, setExpanded] = useState(false);
 
 ## 测试证据
 
-- `Ellipsis.test.tsx`：方向、展开、受控/非受控、键盘、回调、测量和全部回退、字体、ref、RTL 属性、rows、grapheme。
+- `Ellipsis.test.tsx`：方向、展开、受控/非受控、键盘、回调、测量和全部回退、字体、ref、RTL 属性、辅助正文单一来源、原生 copy 事件透传、rows、grapheme。
 - `Ellipsis.ssr.test.tsx`：服务端完整内容与稳定 clamp fallback。
 - `Ellipsis.hydration.test.tsx`：真实 SSR→hydrateRoot，根 DOM 复用、0 hydration error、测量后按钮和交互。
 - `Ellipsis.stories.tsx`：单/多行、三方向、受控交互、图标操作、纯截断、窄宽 RTL。
-- 本轮目标命令为 `pnpm --filter @meu/mobile exec vitest run src/Ellipsis --maxWorkers=1`；Storybook 静态构建、Chromatic、Vercel 和真机读屏留给发布批次。
+- Next H5 共置专项在 mobile Chromium/WebKit 验证组件字体族替换与首轮 fallback 后动态 Web Font 加载完成都会重新计算真实候选。
+- 本轮 `pnpm --filter @meu/mobile exec vitest run src/Ellipsis --maxWorkers=1` 为 3 files / 28 tests，字体专项为 4/4；Storybook 扩展矩阵、Chromatic、Vercel 和真机读屏留给发布批次。
 
 ## 未来变更规则
 

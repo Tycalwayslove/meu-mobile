@@ -4,12 +4,12 @@ slug: nav-bar
 package: "@meu/mobile"
 exports: [NavBar]
 status: verification
-localVerification: pending
-localGapIds: [LOC-NAV-BAR-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "111:673"
@@ -38,6 +38,8 @@ source: packages/mobile/src/NavBar
 - `safeArea` 叠加 top/left/right device inset，覆盖竖屏顶部与横屏刘海边缘。
 - `position="sticky"` 与 `scrolled` 提供无监听的受控滚动表现，默认保持普通文档流。
 - 不读取 `window`、history 或路由上下文；支持 SSR、直接 hydration、RTL、forced colors、reduced motion 与 React 19 ref。
+
+本地可自动化的实现、Next Router adapter、嵌套 sticky 布局、SSR/hydration、双引擎和七环境 Story 矩阵已完成；状态仍为 `verification`，等待 Chromatic 基线与真机 Safe Area/读屏验收。
 
 ## 何时使用
 
@@ -175,14 +177,14 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 ## 测试证据
 
 - 本轮 Unit/SSR/hydration：3 files / 13 tests 通过；覆盖原生 link/button、取消导航、disabled/loading、不可用 link 阻止冒泡、稳定 anchor 身份、localized name、heading、sticky/scrolled、React 19 ref、ConfigProvider RTL/嵌套 LTR/原生 dir=auto、显式 reduced motion、SSR 与 `onRecoverableError=[]` 的真实 hydrateRoot。
-- Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play 并纳入当前 Storybook 链接、交互与 axe 总门禁。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
-- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`uses native navigation actions, radio segments and read-only page dots` 在 Chromium/WebKit 均通过，批次整页 Light/Dark axe WCAG A/AA 也通过。新增 loading/sticky 视觉仍留待最终 Storybook 矩阵。
+- Story interaction：BackAction、RouterAdapter、DisabledBack 已提供 play；当前静态门禁验证 451 个 Story、422 个文档 Story ID 无失配，81/81 个标题含关键 play。
+- Storybook 浏览器矩阵：NavBar 当前 10 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors）定向扫描 70/70 通过；play 先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：Next 16 production build 与 typecheck 通过；`uses native navigation actions, radio segments and read-only page dots` 在 Chromium/WebKit 均通过，批次整页 Light/Dark axe WCAG A/AA 也通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4009 B / 32768 B 预算，组合 Brotli 3537 B；共享样式由应用单独导入一次。
 - SSR/hydration：共置 SSR 与 direct hydration 测试本轮通过。
 - RTL：unit 覆盖 config RTL 与 nested LTR override；LongTitleRTL Story 待视觉审批。
 - Reduced motion：系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 覆盖显式策略，真实浏览器视觉留到最终矩阵。
-- Mobile Chromium/WebKit E2E：本轮 NavBar 原生返回动作在两种引擎均通过；disabled/loading 与 sticky 的精细表现由共置测试和最终视觉矩阵分别负责。
+- Mobile Chromium/WebKit E2E：原生返回动作在两种引擎通过；新增 `nav-bar-contract.spec.ts` 共 4/4 通过，直接验证 server HTML 保留真实 href、`preventDefault + router.push` 到真实 Next 目的地、页面拥有嵌套滚动状态、sticky 几何、safe-area 标记及 disabled/loading anchor 的稳定语义。
 - Chromatic Light/Dark：未执行，本轮禁止。
 - Real device：待补 iOS Safari/VoiceOver、Android Chrome/TalkBack、横屏刘海与 200% 字号。
 
@@ -190,9 +192,9 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 
 ### 待优化
 
-- 新增 Story 的 Light/Dark、RTL、forced colors、reduced motion、200% 字号视觉审批与 axe 矩阵。
-- iOS/Android 真机 Safe Area、loading/disabled announcement 和嵌套滚动 sticky 层级。
-- 实际 Next/React Router adapter；共享 Storybook index、component manifest、API 与 bundle-size 清单由整合流程刷新。
+- 发布批次执行 Chromatic 视觉审批；本地 Light/Dark、RTL、forced colors、reduced motion、200% 字号与 axe 矩阵已完成。
+- iOS/Android 真机 Safe Area、loading/disabled announcement、嵌套滚动 sticky 层级和 VoiceOver/TalkBack。
+- React Router 项目接入时复用同一 `backHref + preventDefault` 契约做宿主级验收；Next Router 实际 adapter 已完成本地双引擎验证。
 
 ### 已完成
 
@@ -200,6 +202,7 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 - [P2] Safe Area 从 top 扩展到 left/right；增加无监听的 position/scrolled API。
 - [P2] 增加 direct hydration、SSR、ref、路由取消和稳定 DOM 身份测试。
 - [P3] RTL 从祖先 selector 改为 ConfigProvider/显式 dir 驱动，覆盖 nested LTR override。
+- 增加真实 Next Router 目的地、嵌套滚动容器 sticky/scrolled 所有权、disabled/loading anchor 双引擎合同测试，并完成 NavBar 当前 10 Story 的七环境扫描。
 - 保留原有等宽侧轨、44px target、route-agnostic handler、原生 landmark 与 Token 主题。
 
 ## 变更记录
@@ -210,3 +213,4 @@ back press 只使用 1px transform 和 Token 时长；边框滚动态使用同�
 | 2026-08-29 | 未发布 | accessibility  | 增加 forced colors、reduced motion 与 config/prop 驱动 RTL。       | nested dir 现在按最近显式配置解析。                     |
 | 2026-08-29 | 未发布 | verification   | 增加 ref、状态、路由取消、SSR 与 direct hydration 共置证据。       | 已纳入当前 Storybook 与官网全量矩阵。                   |
 | 2026-08-29 | 未发布 | feature        | 初版 safeArea、原生返回语义与 route-agnostic API。                 | 默认普通文档流。                                        |
+| 2026-08-30 | 未发布 | verification   | 增加 Next Router、嵌套 sticky 与七环境 Story 证据。                | 无。                                                    |

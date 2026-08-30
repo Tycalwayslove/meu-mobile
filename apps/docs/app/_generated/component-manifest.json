@@ -2890,10 +2890,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Calendar/Calendar.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-CALENDAR-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3617,10 +3615,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Ellipsis/Ellipsis.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-ELLIPSIS-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4630,10 +4626,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/NavBar/NavBar.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-NAV-BAR-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6345,10 +6339,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TreeSelect/TreeSelect.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-TREE-SELECT-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6541,10 +6533,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 44,
+    "locallyVerifiedProducts": 48,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 24,
+    "productsWithLocalGaps": 20,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

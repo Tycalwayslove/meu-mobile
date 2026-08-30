@@ -4,12 +4,12 @@ slug: tree-select
 package: "@meu/mobile"
 exports: [TreeSelect]
 status: verification
-localVerification: pending
-localGapIds: [LOC-TREE-SELECT-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "394:49"
@@ -114,7 +114,7 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 ## SSR 与 Next.js
 
-服务端和首次客户端先渲染完整可见树，mount 后才启用 virtual window，避免空 SSR tree 与 hydration mismatch。useId 保证 dialog/treeitem 关系稳定；Next 首屏 options/value/search/expanded 必须确定。
+服务端和首次客户端先渲染完整可见树，mount 后才启用 virtual window，避免空 SSR tree 与 hydration mismatch。useId 保证 dialog/treeitem 关系稳定；Next 首屏 options/value/search/expanded 必须确定。`TreeSelect.hydration.test.tsx` 直接验证 62 个服务端 treeitem 无 recoverable error 地切换为受界虚拟窗口；隔离 Next production 还会从响应 HTML 断言 122 个完整节点，再在 hydration 后验证窗口化、异步分支和焦点。
 
 ## RTL 与国际化
 
@@ -138,15 +138,15 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 ## 测试证据
 
-- Unit: single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window，以及 ARIA invalid token/归属/优先级
+- Unit/SSR/hydration: TreeSelect 目录 4 个测试文件共 22 项通过，覆盖 single/multiple、maxCount、draft 回滚、搜索祖先、APG 键盘、RTL、dynamic options、async pending/abort/error/retry、disabled、virtual window、ARIA invalid token/归属/优先级，以及完整服务端树到受界虚拟窗口的真实 hydrateRoot 切换；0 recoverable/console error。
 - Story interaction: `Single` 验证 Portal 打开、draft 选择、确认提交与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 TreeSelect 8 个 Story × 7 场景定向复验 56/56 通过，覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 30556 B / 49152 B 预算，组合 Brotli 26046 B；共享样式由应用单独导入一次。
-- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏和 tree 单一 token 归属；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
+- SSR/hydration: `TreeSelect.ssr.test.tsx` 证明完整首屏和 tree 单一 token 归属；`TreeSelect.hydration.test.tsx` 证明服务端 62 个完整节点在真实 hydration 后才收敛为虚拟窗口。隔离 Next production 从响应 HTML 验证 122 个 open TreeSelect treeitem 和第二层语义，随后在 Chromium/WebKit 完成 Portal hydration、窗口化与交互，0 hydration/runtime error。
 - RTL: RightToLeft Story 与 unit
-- Reduced motion: CSS 静态规则；浏览器 computed-style 待补
-- Mobile Chromium/WebKit E2E: 搜索、虚拟焦点、draft 确认/回滚与焦点恢复通过；1,500 节点性能门禁要求打开 ≤750ms、搜索 ≤500ms、DOM treeitem ≤30，两种引擎均通过。async cancel 由 unit 覆盖。
+- Reduced motion: CSS 静态规则与隔离 Next 双引擎 computed style 均通过；异步 spinner 为 `animation-name: none`，chevron 为 `transition-duration: 0s`。
+- Mobile Chromium/WebKit E2E: 搜索、虚拟焦点、draft 确认/回滚与焦点恢复通过；1,500 节点性能门禁要求打开 ≤750ms、搜索 ≤500ms、DOM treeitem ≤30，本轮复跑 2/2 通过。TreeSelect hydration 专项另以两种引擎 2/2 验证 SSR 完整树到虚拟窗口、异步 pending → collapse abort → retry、焦点保持、远端 child 的 level/posinset/setsize，以及 End 跳转虚拟末项后单一 roving tab stop；全程 0 `pageerror`、0 `console.error`。
 - Chromatic Light/Dark: Figma 已验收，统一发布批次再运行
 - Real device: 待补 VoiceOver/TalkBack 虚拟树可用性
 
@@ -154,11 +154,13 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 
 ### 待优化
 
-补双引擎 hydration、读屏虚拟树、超大数据性能基准和真机异步中断；评估未来 server-search adapter，不扩展核心 filter 契约。
+补 VoiceOver/TalkBack 真机虚拟树与异步分支验收；评估未来 server-search adapter，不扩展核心 filter 契约。
 
 ### 已完成
 
 修复 disabled 分支仍可展开、RTL 键位、异步 collapse/节点移除/disabled 取消、旧请求清理与错误无状态；新增 loading/error i18n、SSR 首屏虚拟化延迟、forced-colors、长文案和永久文档。
+
+完成直接 hydrateRoot 与隔离 Next Chromium/WebKit 专项，冻结完整 SSR → 虚拟窗口、异步 abort/retry、焦点、虚拟树位置语义和 reduced-motion 计算样式；复跑 1,500 节点性能预算，关闭 `LOC-TREE-SELECT-01`。这些自动化不替代 VoiceOver/TalkBack 真机验收。
 
 ## 变更记录
 
@@ -167,3 +169,4 @@ Chevron 只解释展开状态，使用短 transform；loading 使用可取消 sp
 | 2026-08-29 | 未发布 | behavior      | 异步取消/错误、RTL、disabled 与 SSR 加固               | 新增可选 loadingText/loadErrorText |
 | 2026-08-29 | 未发布 | docs          | 建立 TreeSelect 共置永久文档                           | 无                                 |
 | 2026-08-29 | 未发布 | accessibility | 将 ARIA invalid token 收敛到 tree 并统一 status 优先级 | 无                                 |
+| 2026-08-30 | 未发布 | verification  | 增加 hydration、异步中断/焦点和虚拟树双引擎专项        | 无                                 |

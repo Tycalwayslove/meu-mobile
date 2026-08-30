@@ -280,6 +280,50 @@ textarea {
   font-weight: 700;
 }
 
+.nav-bar-contract-shell {
+  max-width: 720px;
+}
+
+.nav-bar-contract-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.nav-bar-contract-card + .nav-bar-contract-card {
+  margin-top: 20px;
+}
+
+.nav-bar-contract-card > output {
+  min-height: 20px;
+  color: var(--meu-color-muted);
+  font-size: 14px;
+}
+
+.nav-bar-contract-scroller {
+  position: relative;
+  height: 280px;
+  overflow-y: auto;
+  background: var(--meu-color-canvas);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-control);
+  overscroll-behavior: contain;
+}
+
+.nav-bar-contract-content {
+  display: grid;
+  gap: 16px;
+  min-height: 760px;
+  padding: 20px;
+}
+
+.nav-bar-contract-content p {
+  margin: 0;
+}
+
 .input-contract-grid,
 .input-contract-card {
   display: grid;

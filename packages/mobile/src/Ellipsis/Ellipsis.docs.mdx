@@ -4,12 +4,12 @@ slug: ellipsis
 package: "@meu/mobile"
 exports: [Ellipsis]
 status: verification
-localVerification: pending
-localGapIds: [LOC-ELLIPSIS-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "87:74"
@@ -103,7 +103,13 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 
 ## 触摸与手势
 
-操作按钮至少 44×44px，不拦截滚动、长按选择或复制。
+操作按钮至少 44×44px，不拦截滚动或原生选择事件。
+
+## 选择与复制契约
+
+`Ellipsis` 不提供 copy API，也不承诺对组件根节点执行“全选/复制”时的剪贴板序列化结果。视觉隐藏的完整正文用于辅助技术，视觉候选、操作按钮和测量镜像仍属于内部 DOM；不同浏览器如何把这些节点纳入 selection/copy 文本不属于组件兼容契约。
+
+需要精确复制正文的业务必须直接使用自己的 `content` 来源，在组件外提供复制操作；不要从视觉候选或内部 DOM 反推正文。根节点仍按原生 `div` 属性透传 `onCopy` 等事件，但这只是原生事件入口，不是组件生成剪贴板内容的 API。
 
 ## 无障碍
 
@@ -133,7 +139,7 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 
 ## 边界情况与已知限制
 
-宽度为 0 或镜像无法得到有效单行高度时保持 pending，直到后续 resize/font 通知。可用宽度会扣除根元素左右 padding；单行高度从同字体的镜像直接测得，不猜测 `line-height: normal`。全选复制可能包含辅助隐藏文本与视觉文本，单独复制建议从业务原始 content 提供复制按钮。
+宽度为 0 或镜像无法得到有效单行高度时保持 pending，直到后续 resize/font 通知。可用宽度会扣除根元素左右 padding；单行高度从同字体的镜像直接测得，不猜测 `line-height: normal`。根节点全选可能包含辅助隐藏文本、视觉候选或操作文案，精确复制必须使用业务原始 `content`。
 
 容器窄于 44px 操作按钮最小触控宽度，或“省略号 + action”本身无法放入允许行数时，操作可能额外占一行；此时应增加容器宽度、隐藏 `expandText` 使用纯截断，或在组件外提供查看全文操作。组件不会为了满足行数而把触控目标缩小到不可用。
 
@@ -145,18 +151,19 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 
 ## 测试证据
 
-- Unit：目标测试覆盖单/多行、纯截断、三向候选、受控/非受控、键盘激活、短文本、回调去重、内容更新 pending/focus、padding 宽度、ResizeObserver、resize/orientation/RAF fallback、零宽 pending、字体 ready/loadingdone、React 19 callback-ref cleanup、`remeasureKey`、原生属性/自定义 accessible name、rows 归一、Intl.Segmenter 与 grapheme fallback。
+- Unit：目标测试覆盖单/多行、纯截断、三向候选、受控/非受控、键盘激活、短文本、回调去重、内容更新 pending/focus、padding 宽度、ResizeObserver、resize/orientation/RAF fallback、零宽 pending、字体 ready/loadingdone、React 19 callback-ref cleanup、`remeasureKey`、原生属性/自定义 accessible name、完整辅助文本单一来源与原生 `onCopy` 透传、rows 归一、Intl.Segmenter 与 grapheme fallback。
 - SSR/Hydration：服务端完整辅助文本与稳定 clamp fallback；真实 `renderToString → hydrateRoot` 复用根 DOM，0 recoverable/console error，测量后才增加操作按钮并可展开。
-- 本次直接执行：`pnpm --filter @meu/mobile exec vitest run src/Ellipsis --maxWorkers=1`，3 files / 27 tests 通过；包 typecheck、build 与目标 ESLint 均通过。
-- Story：SingleLine、MultiLine、三方向、ControlledExpanded、ControlledToggle play、InteractiveExpansion play、IconAction、TruncationOnly、NarrowRTL。按任务约束，本次未运行 Storybook 静态构建、Chromatic 或 Vercel。
+- 本次直接执行：`pnpm --filter @meu/mobile exec vitest run src/Ellipsis --maxWorkers=1`，3 files / 28 tests 通过；mobile 与 Next H5 typecheck、mobile build、Next 16 production build、目标 ESLint 和 Prettier check 均通过。
+- Story：SingleLine、MultiLine、三方向、ControlledExpanded、ControlledToggle play、InteractiveExpansion play、IconAction、TruncationOnly、NarrowRTL。本轮完成 Storybook 静态构建与本地矩阵，不运行 Chromatic 或 Vercel。
 - 历史 Story interaction：`InteractiveExpansion` 验证测量后展开状态；`check-storybook-links` 已验证全库 title 具备关键 play，本 title 的 play 在历史本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 Ellipsis 11 个 Story × 7 场景定向复验 77/77 通过，覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3166 B / 32768 B 预算，组合 Brotli 2779 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Ellipsis.ssr.test.tsx` 与 `Ellipsis.hydration.test.tsx` 提供组件内直接证据；隔离 Next 16 的历史证据保留
 - RTL: NarrowRTL Story 在 190px 混合 Arabic/Latin 内容下真实进入 collapsed，使用 middle 截断并保留可操作按钮
 - Reduced motion: 无动画，不适用
 - Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎以 390px 视口完成真实排版测量，激活展开并断言按钮变为“收起”且 `aria-expanded=true`
+- Font replacement/load E2E: Next 16 共置专项在 mobile Chromium 与 mobile WebKit 验证组件自身 `font-family` 替换后候选重新计算，并验证首轮 fallback 测量完成后动态 Web Font 加载完成仍再次产生真实字体候选；4/4 通过，且 0 `pageerror` / `console.error`
 - Chromatic Light/Dark: 待建立
 - Real device: 待补
 
@@ -164,11 +171,11 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 
 ### 待优化
 
-补全选/复制产品方案与字体替换专项 E2E；发布批次统一补 Storybook 扩展矩阵、Chromatic 和 VoiceOver/TalkBack 真机记录。基础双引擎真实测量/展开路径已有历史证据。
+发布批次统一补 Chromatic 和 VoiceOver/TalkBack 真机记录；本地 Storybook 扩展矩阵已经完成，不阻塞本地自动化完成态。
 
 ### 已完成
 
-修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调和 grapheme 安全截断；测量改为真实单行高度并扣除 padding，镜像操作与真实按钮同 footprint，并把 44px 操作按钮的行盒增量纳入行数预算，避免单行截断退化为纯省略号；增加 orientation/font loadingdone/RAF fallback、React 19 cleanup ref、`remeasureKey`、actionRef 与独立 accessible name；补真实 collapsed RTL/forced-colors/SSR/hydration 与隔离 Next H5 测量边界。
+修复 prop 更新陈旧视觉、非有限 rows、卸载后字体回调和 grapheme 安全截断；测量改为真实单行高度并扣除 padding，镜像操作与真实按钮同 footprint，并把 44px 操作按钮的行盒增量纳入行数预算，避免单行截断退化为纯省略号；增加 orientation/font loadingdone/RAF fallback、React 19 cleanup ref、`remeasureKey`、actionRef 与独立 accessible name；补真实 collapsed RTL/forced-colors/SSR/hydration、隔离 Next H5 测量边界和字体替换/后加载双引擎专项。LOC-ELLIPSIS-01 已明确收口：完整辅助文本不等于剪贴板序列化保证，组件不新增 copy API，精确复制由业务使用原始 `content` 提供。
 
 ## 未来变更规则
 
@@ -190,3 +197,4 @@ expanded 存在即受控；否则 defaultExpanded 初始化。测量状态按 co
 | 2026-08-29 | 未发布 | feature      | 增加 `remeasureKey` 与 React 19 ref cleanup  | 新属性可选，现有调用无需迁移     |
 | 2026-08-29 | 未发布 | verification | 扩充 Unit/SSR/hydration 与真实截断 RTL Story | 无                               |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎测量/展开/hydration 证据  | 无                               |
+| 2026-08-30 | 未发布 | verification | 收口复制契约并补字体替换/加载双引擎专项      | 无 API 变化                      |

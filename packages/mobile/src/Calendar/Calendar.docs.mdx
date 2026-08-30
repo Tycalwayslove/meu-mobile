@@ -15,12 +15,12 @@ exports:
     sameCalendarMonth
   ]
 status: verification
-localVerification: pending
-localGapIds: [LOC-CALENDAR-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "257:722"
@@ -101,7 +101,7 @@ CalendarRef 提供 focus、goToMonth 和 goToToday。goToToday 聚焦今天；�
 
 ## SSR 与 Next.js
 
-组件声明 use client，但可 renderToString；useId 保证标题关系可 hydration。adapter.now 会参与初始 today，SSR 与客户端必须使用相同民用日期语义，关键首屏建议显式 defaultMonth/value。
+组件声明 use client，但可 renderToString；useId 保证标题关系可 hydration。adapter.now 会参与初始 today，SSR 与客户端必须使用相同民用日期语义，关键首屏建议显式 defaultMonth/value。共置测试固定 2026-03-08 美东 DST 切换边界，双向验证 UTC SSR → America/New_York hydration 与 America/New_York SSR → UTC hydration，确认相同民用年月日输入不会产生 recoverable hydration error。
 
 ## RTL 与国际化
 
@@ -123,22 +123,22 @@ min 大于 max 时没有可选日；disabledDate 可能被一个月内多次调�
 
 - Unit：三种选择、清除、排序、边界、动态月份、受控月份、goToToday 同月/跨月/拒绝更新/相邻格禁用/最近可用日聚焦、RTL 键盘、42 格和 Field/grid 命名。
 - Story interaction：`Single` 验证受控日期选择、`aria-pressed` 与 gridcell 选择语义；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 Calendar 4 个 Story × 7 场景定向复验 28/28 通过，覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）9 个公开值组合 gzip 11319 B / 49152 B 预算；最大单值 `Calendar` 为 11289 B / 49152 B 预算，组合 Brotli 9992 B；共享样式由应用单独导入一次。
-- SSR：Calendar.ssr.test.tsx 覆盖稳定网格与 label 关系。
+- SSR/Hydration：Calendar.ssr.test.tsx 覆盖稳定网格与 label 关系；Calendar.hydration.test.tsx 固定 2026-03-08 DST 边界，验证 UTC 与 America/New_York 双向跨时区 hydration、offset 切换（300 → 240）、42 格及 selected/today 语义，React recoverable error 为 0。
 - Figma：Meu/Calendar 257:722；42 个 DayCell、44×44 DayButton、Light/Dark 对比通过。
-- Chromium/WebKit E2E、Chromatic、真机读屏：最终统一门禁。
+- Chromium/WebKit 的既有 Calendar 选择/键盘 E2E 继续通过；Chromatic、移动 WebKit 键盘与真机读屏留给最终统一门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-补跨时区 hydration、VoiceOver/TalkBack、移动 WebKit 键盘与视觉回归证据。
+补 VoiceOver/TalkBack、移动 WebKit 键盘与视觉回归最终门禁证据；这些不能由本地单元测试代替。
 
 ### 已完成
 
-固化 DateAdapter、值模式、范围完成、受控月份、动态边界持久归一、稳定 grid label、RTL 导航/键盘/圆角、reduced-motion、forced-colors 与永久文档。
+固化 DateAdapter、值模式、范围完成、受控月份、动态边界持久归一、稳定 grid label、RTL 导航/键盘/圆角、reduced-motion、forced-colors、UTC ↔ America/New_York DST hydration 与永久文档。
 
 ## 变更记录
 
@@ -148,3 +148,4 @@ min 大于 max 时没有可选日；disabledDate 可能被一个月内多次调�
 | 2026-08-29 | 未发布 | bugfix    | goToToday 完成同月/跨月聚焦并收敛禁用边界           | 无          |
 | 2026-08-29 | 未发布 | a11y      | invalid token 固定在 group，并由 Field 错误优先覆盖 | 无          |
 | 2026-08-30 | 未发布 | a11y      | caller/Field IDREF 合并去重并固定显式名称优先级     | 无          |
+| 2026-08-30 | 未发布 | test      | 固化 UTC 与美东 DST 双向 SSR/hydration 自动化证据   | 无          |

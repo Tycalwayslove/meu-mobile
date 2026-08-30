@@ -13,17 +13,25 @@ import {
   TreeSelect,
   VirtualList
 } from "@meu/mobile";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
+import type { TreeSelectOption } from "@meu/mobile";
 
 const hydrationItems = Array.from({ length: 250 }, (_, index) => ({
   id: `hydration-${index + 1}`,
   label: `Hydration row ${index + 1}`
 }));
 
-const hydrationTree = Array.from({ length: 120 }, (_, index) => ({
-  label: `Hydration option ${index + 1}`,
-  value: `hydration-option-${index + 1}`
-}));
+const initialHydrationTree: ReadonlyArray<TreeSelectOption<string>> = [
+  {
+    children: [{ isLeaf: false, label: "Hydration remote branch", value: "hydration-remote" }],
+    label: "Hydration loaded branch",
+    value: "hydration-loaded"
+  },
+  ...Array.from({ length: 120 }, (_, index) => ({
+    label: `Hydration option ${index + 1}`,
+    value: `hydration-option-${index + 1}`
+  }))
+];
 
 const subscribeToHydration = () => () => undefined;
 const getClientHydrationSnapshot = () => true;
@@ -55,6 +63,8 @@ export function HydrationScenario({
     getClientHydrationSnapshot,
     getServerHydrationSnapshot
   );
+  const [hydrationTree, setHydrationTree] = useState(initialHydrationTree);
+  const [treeAsyncStatus, setTreeAsyncStatus] = useState("idle");
 
   let content;
   switch (kind) {
@@ -97,10 +107,52 @@ export function HydrationScenario({
       content = (
         <TreeSelect
           aria-label="Hydration tree select"
+          defaultExpandedValues={["hydration-loaded"]}
           lockScroll={false}
           open
           options={hydrationTree}
+          overscan={1}
           treeAriaLabel="Hydration tree"
+          treeHeight={208}
+          loadChildren={(_option, { signal }) =>
+            new Promise<void>((resolve, reject) => {
+              setTreeAsyncStatus("loading");
+              const timeout = window.setTimeout(() => {
+                setHydrationTree((current) =>
+                  current.map((option) =>
+                    option.value === "hydration-loaded"
+                      ? {
+                          ...option,
+                          children: [
+                            {
+                              children: [
+                                {
+                                  label: "Hydration remote child",
+                                  value: "hydration-remote-child"
+                                }
+                              ],
+                              label: "Hydration remote branch",
+                              value: "hydration-remote"
+                            }
+                          ]
+                        }
+                      : option
+                  )
+                );
+                setTreeAsyncStatus("loaded");
+                resolve();
+              }, 300);
+              signal.addEventListener(
+                "abort",
+                () => {
+                  window.clearTimeout(timeout);
+                  setTreeAsyncStatus("aborted");
+                  reject(new Error("Hydration tree load aborted"));
+                },
+                { once: true }
+              );
+            })
+          }
         />
       );
       break;
@@ -147,6 +199,9 @@ export function HydrationScenario({
         data-hydrated={hydrated || undefined}
       >
         {content}
+        {kind === "tree-select" ? (
+          <output aria-label="Hydration tree async status">{treeAsyncStatus}</output>
+        ) : null}
       </section>
     </ConfigProvider>
   );

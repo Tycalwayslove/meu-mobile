@@ -17,7 +17,7 @@
 
 ## 当前可复查状态
 
-- 移动 Chromium/WebKit 隔离 Next H5：166/166 通过，逐用例断言 0 `pageerror`、0 `console.error`；其中性能/恢复专页 14/14，并完成 3 轮重复共 42/42；输入生命周期 8/8、嵌套浮层生命周期与全直接浮层边界矩阵 8/8、Popover placement/嵌套滚动容器 2/2、ImageViewer RTL/取消恢复 4/4、Avatar 慢网/lazy/换源 4/4、Portal 真实 iframe 跨 Document 4/4、SafeArea viewport/旋转/键盘边界 6/6、布局测量/hydration/CLS/系统低动态/RTL 几何/Result 路由焦点 16/16、真机验收工作台自检 2/2。
+- 移动 Chromium/WebKit 隔离 Next H5：176/176 通过，逐用例断言 0 `pageerror`、0 `console.error`；本批新增 Ellipsis 字体替换/后加载 4/4、NavBar 真实 Next Router/sticky/不可用状态 4/4、TreeSelect 完整 SSR → 虚拟窗口与异步取消/重试 2/2。既有性能/恢复专页 14/14，并完成 3 轮重复共 42/42；输入生命周期 8/8、嵌套浮层生命周期与全直接浮层边界矩阵 8/8、Popover placement/嵌套滚动容器 2/2、ImageViewer RTL/取消恢复 4/4、Avatar 慢网/lazy/换源 4/4、Portal 真实 iframe 跨 Document 4/4、SafeArea viewport/旋转/键盘边界 6/6、布局测量/hydration/CLS/系统低动态/RTL 几何/Result 路由焦点 16/16、真机验收工作台自检 2/2。
 - Storybook：最近完整基线为 444 个 Story × 7 场景，共 3,108 个组合通过；本批新增 Portal 与 SideNav 场景已定向复验。
 - 官网：68 个组件页和 8 个公共页面 × Light/Dark，共 152 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
 - 客户端静态兼容扫描：200 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。

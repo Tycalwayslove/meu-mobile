@@ -91,6 +91,23 @@ describe("Ellipsis", () => {
     expect(getRoot().getAttribute("data-state")).toBe("expanded");
   });
 
+  it("keeps one exact accessible text source and leaves native copy events untouched", async () => {
+    mockMeasurements();
+    const onCopy = vi.fn();
+    render(<Ellipsis content={content} rows={1} onCopy={onCopy} />);
+
+    await screen.findByRole("button", { name: "展开" });
+    const root = getRoot();
+    const accessibleTextSources = root.querySelectorAll(":scope > span:not([aria-hidden])");
+    const visual = root.querySelector(":scope > span[aria-hidden='true']");
+    expect(accessibleTextSources).toHaveLength(1);
+    expect(accessibleTextSources[0] && accessibleTextSources[0].textContent).toBe(content);
+    expect(visual && visual.getAttribute("aria-hidden")).toBe("true");
+
+    fireEvent.copy(root);
+    expect(onCopy).toHaveBeenCalledOnce();
+  });
+
   it("builds grapheme-safe start, middle, and end candidates", async () => {
     mockMeasurements(90);
     const value = "甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉";
