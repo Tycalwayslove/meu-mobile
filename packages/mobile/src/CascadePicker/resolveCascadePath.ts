@@ -34,15 +34,16 @@ export function resolveCascadePath<TValue extends PickerValue>(
   let columnIndex = 0;
 
   while (true) {
-    columns.push(currentOptions);
     const selected =
       optionForValue(currentOptions, source ? source[columnIndex] : undefined) ||
       currentOptions.find((option) => !option.disabled) ||
       null;
+    if (selected && visitedOptions.has(selected)) break;
+    columns.push(currentOptions);
     options.push(selected);
     values.push(selected ? selected.value : null);
 
-    if (!selected || selected.children === undefined || visitedOptions.has(selected)) break;
+    if (!selected || selected.children === undefined) break;
     visitedOptions.add(selected);
     currentOptions = selected.children;
     columnIndex += 1;

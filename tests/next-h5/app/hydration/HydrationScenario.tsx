@@ -4,6 +4,7 @@ import { MeuForm, MeuFormTextInput, useMeuForm } from "@meu/form-react";
 import {
   BottomSheet,
   Button,
+  CascadePicker,
   ConfigProvider,
   FloatingPanel,
   ImageViewer,
@@ -14,8 +15,8 @@ import {
   TreeSelect,
   VirtualList
 } from "@meu/mobile";
-import { useState, useSyncExternalStore } from "react";
-import type { TreeSelectOption } from "@meu/mobile";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import type { CascadePickerOption, TreeSelectOption } from "@meu/mobile";
 
 const hydrationItems = Array.from({ length: 250 }, (_, index) => ({
   id: `hydration-${index + 1}`,
@@ -67,6 +68,26 @@ export function HydrationScenario({
   const [hydrationTree, setHydrationTree] = useState(initialHydrationTree);
   const [treeAsyncStatus, setTreeAsyncStatus] = useState("idle");
   const [pickerSelection, setPickerSelection] = useState("today:idle");
+  const [cascadeOptions, setCascadeOptions] = useState<ReadonlyArray<CascadePickerOption<string>>>([
+    { label: "Delivery region", value: "region", children: [] }
+  ]);
+
+  useEffect(() => {
+    if (!hydrated || kind !== "cascade-picker") return;
+    const timeout = window.setTimeout(() => {
+      setCascadeOptions([
+        {
+          label: "Delivery region",
+          value: "region",
+          children: [
+            { disabled: true, label: "Unavailable city", value: "unavailable" },
+            { label: "Hangzhou", value: "hangzhou" }
+          ]
+        }
+      ]);
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [hydrated, kind]);
 
   let content;
   switch (kind) {
@@ -177,6 +198,20 @@ export function HydrationScenario({
           onSelect={(value, _options, details) =>
             setPickerSelection(`${String(value[0])}:${details.reason}`)
           }
+        />
+      );
+      break;
+    case "cascade-picker":
+      content = (
+        <CascadePicker
+          cancelText="Cancel"
+          confirmText="Confirm"
+          lockScroll={false}
+          open
+          title="Hydration delivery region"
+          columnLabels={["Region", "City"]}
+          options={cascadeOptions}
+          value={["region", null]}
         />
       );
       break;

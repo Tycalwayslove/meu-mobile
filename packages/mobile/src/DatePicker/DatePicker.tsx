@@ -105,18 +105,20 @@ export function DatePicker<TDate = Date>({
     onOpenChange,
     open
   });
-  const label = (
-    currentPrecision: DatePrecision,
-    nextValue: number,
-    details: { date: TDate | null; parts: DateParts }
-  ) =>
-    renderLabel
-      ? renderLabel(currentPrecision, nextValue, {
+  const textLabel = (currentPrecision: DatePrecision, nextValue: number) =>
+    defaultLabel(currentPrecision, nextValue, config.locale);
+  const label = renderLabel
+    ? (
+        currentPrecision: DatePrecision,
+        nextValue: number,
+        details: { date: TDate | null; parts: DateParts }
+      ) =>
+        renderLabel(currentPrecision, nextValue, {
           ...details,
           locale: config.locale,
           precision: currentPrecision
         })
-      : defaultLabel(currentPrecision, nextValue, config.locale);
+    : textLabel;
   const resolve = (source: TDate | null | undefined) =>
     resolveDatePicker({
       adapter: resolvedAdapter,
@@ -124,6 +126,7 @@ export function DatePicker<TDate = Date>({
       label,
       precision,
       source,
+      textLabel,
       ...(filter ? { filter } : {}),
       ...(minuteStep === undefined ? {} : { minuteStep }),
       ...(secondStep === undefined ? {} : { secondStep })

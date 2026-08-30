@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { CascadePicker } from "./CascadePicker";
+import { resolveCascadePath } from "./resolveCascadePath";
 import type { CascadePickerOption } from "./types";
 
 const regions = [
@@ -231,5 +232,87 @@ describe("CascadePicker", () => {
     );
     expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(false);
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("silently normalizes each immutable options update and keeps only the latest branch", () => {
+    const onSelect = vi.fn();
+    const initial = [
+      {
+        label: "地区",
+        value: "region",
+        children: [{ label: "旧城市", value: "old-city" }]
+      }
+    ] as const;
+    const { rerender } = render(
+      <CascadePicker
+        open
+        aria-label="异步地区"
+        options={initial}
+        defaultValue={["region", "old-city"]}
+        onSelect={onSelect}
+      />
+    );
+
+    const pending = [{ label: "地区", value: "region", children: [] }] as const;
+    rerender(<CascadePicker open aria-label="异步地区" options={pending} onSelect={onSelect} />);
+    expect(screen.getAllByRole("listbox")).toHaveLength(2);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(true);
+
+    const latest = [
+      {
+        label: "地区",
+        value: "region",
+        children: [
+          { disabled: true, label: "仍不可用", value: "disabled" },
+          { label: "最新城市", value: "latest-city" }
+        ]
+      }
+    ] as const;
+    rerender(<CascadePicker open aria-label="异步地区" options={latest} onSelect={onSelect} />);
+
+    expect(screen.queryByRole("option", { name: "旧城市" })).toBeNull();
+    expect(screen.getByRole("option", { name: "最新城市" }).getAttribute("aria-selected")).toBe(
+      "true"
+    );
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(false);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("follows controlled path replacement without publishing a synthetic selection", () => {
+    const onSelect = vi.fn();
+    const { rerender } = render(
+      <CascadePicker
+        open
+        aria-label="受控地区"
+        options={regions}
+        value={["zhejiang", "hangzhou", "xihu"]}
+        onSelect={onSelect}
+      />
+    );
+
+    rerender(
+      <CascadePicker
+        open
+        aria-label="受控地区"
+        options={regions}
+        value={["other"]}
+        onSelect={onSelect}
+      />
+    );
+    expect(screen.getAllByRole("listbox")).toHaveLength(1);
+    expect(screen.getByRole("option", { name: "港澳台及海外" }).getAttribute("aria-selected")).toBe(
+      "true"
+    );
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("truncates cyclic object references before repeating a selected level", () => {
+    const cyclic: CascadePickerOption<string> = { label: "循环节点", value: "cycle" };
+    cyclic.children = [cyclic];
+
+    const path = resolveCascadePath([cyclic], ["cycle", "cycle"]);
+    expect(path.columns).toHaveLength(1);
+    expect(path.values).toEqual(["cycle"]);
+    expect(path.options).toEqual([cyclic]);
   });
 });

@@ -4,16 +4,21 @@ slug: cascade-picker
 package: "@meu/mobile"
 exports: [CascadePicker]
 status: verification
-localVerification: pending
-localGapIds: [LOC-CASCADE-PICKER-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "212:100"
-storyIds: [data-entry-cascadepicker--region-path, data-entry-cascadepicker--explicit-empty-child]
+storyIds:
+  [
+    data-entry-cascadepicker--region-path,
+    data-entry-cascadepicker--explicit-empty-child,
+    data-entry-cascadepicker--five-level-localized-path
+  ]
 source: packages/mobile/src/CascadePicker
 ---
 
@@ -107,7 +112,7 @@ ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路�
 
 - 选中父级后旧后缀全部丢弃，新分支逐级采用首个 enabled 节点。
 - `children: []` 会产生空列并禁用确认；不要伪造“加载中” option。
-- 循环对象引用会被截断；业务仍应提供无环树和稳定 sibling value。
+- 循环对象引用会在重复节点进入下一列前截断；业务仍应提供无环树和稳定 sibling value。异步请求的取消、排序与 stale-response 丢弃由调用方负责，组件只按最新传入的不可变 `options` 静默归一。
 - 视觉建议不超过五级；深树在窄屏会使每列过窄。
 
 ## 性能预算
@@ -116,14 +121,14 @@ ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路�
 
 ## 测试证据
 
-- Unit: 路径归一、换支丢弃后缀、叶子缩短、取消回滚、受控确认、显式空子级与动态加载
+- Unit/SSR/hydration：CascadePicker 目录 3 个测试文件共 11 项通过，覆盖路径归一、换支丢弃后缀、叶子缩短、取消回滚、受控确认/外部替换、显式空子级、连续不可变 options 更新、disabled fallback、循环引用截断、Node SSR 与真实 hydrateRoot。
 - Story interaction: `RegionPath` 验证换支、确认、触发器值与焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 `CascadePicker` 匹配集 4 个 Story × 7 场景共 28/28 通过，其中 `Data Entry/CascadePicker` 当前 3 个 Story 为 21/21。新增 `FiveLevelLocalizedPath` 以五级长路径、长标题和长操作文案断言无横向溢出、每列存在有效 active descendant、操作目标高度不少于 44px；0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 13644 B / 49152 B 预算，组合 Brotli 12059 B；共享样式由应用单独导入一次。
-- SSR/hydration: `CascadePicker.ssr.test.tsx`
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 13647 B / 49152 B 预算，组合 Brotli 12062 B；共享样式由应用单独导入一次。
+- SSR/hydration: `CascadePicker.ssr.test.tsx` 验证确定性路径；`CascadePicker.hydration.test.tsx` 验证 open 空子级 SSR → body Portal hydration → 后续不可变分支加载，0 recoverable/console error，所有 active descendant 均有真实 option。
 - RTL/Reduced motion: 继承 Picker 单元与 Story 证据
-- Mobile Chromium/WebKit E2E: next-h5 已覆盖换支、确认和回滚
+- Mobile Chromium/WebKit E2E: 既有业务页覆盖换支、确认和回滚；新增 hydration 专项 4/4 覆盖空子级服务端结构、Portal hydration、客户端异步分支写回、disabled 跳过和确认恢复。
 - Chromatic Light/Dark: Figma 已验收，统一发布批次再运行
 - Real device: 待补多列惯性滚动和读屏路径
 
@@ -131,14 +136,15 @@ ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路�
 
 ### 待优化
 
-补五级窄屏、异步快速换支、hydration 和真机滚轮组合验证。
+补 iOS/Android 真机五列惯性滚动与 VoiceOver/TalkBack 路径公告，并在发布批次完成 Chromatic；本地五级窄屏、异步分支、hydration 与双引擎验证已完成。
 
 ### 已完成
 
-冻结 leaf/explicit-empty 语义、动态 options 静默归一、循环保护、确认式提交、Picker 商用兼容继承和 SSR 留存证据。
+冻结 leaf/explicit-empty 语义、动态 options 静默归一、循环保护、确认式提交、Picker 商用兼容继承和 SSR 留存证据；修复循环引用重复生成末级，补五级长本地化 Story、真实 hydration 与隔离 Next 双引擎异步分支证据，关闭 `LOC-CASCADE-PICKER-01`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型 | 内容                               | 迁移说明 |
-| ---------- | ------ | ---- | ---------------------------------- | -------- |
-| 2026-08-29 | 未发布 | V2   | 动态路径、兼容、SSR 与永久文档加固 | API 兼容 |
+| 日期       | 版本   | 类型 | 内容                                    | 迁移说明 |
+| ---------- | ------ | ---- | --------------------------------------- | -------- |
+| 2026-08-29 | 未发布 | V2   | 动态路径、兼容、SSR 与永久文档加固      | API 兼容 |
+| 2026-08-30 | 未发布 | fix  | 循环路径截断、五级布局与 hydration 证据 | API 兼容 |

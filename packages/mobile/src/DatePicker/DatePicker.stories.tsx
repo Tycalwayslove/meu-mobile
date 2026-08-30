@@ -2,6 +2,7 @@ import { nativeDateAdapter } from "@meu/date-adapter";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
+import { ConfigProvider } from "../ConfigProvider";
 import { Field } from "../Field";
 import { PickerTrigger } from "../Picker";
 import { waitForStory } from "../storyTestUtils";
@@ -155,4 +156,69 @@ export const BoundedAndFiltered: Story = {
     value: undefined
   },
   render: (args) => <DatePicker {...args} />
+};
+
+export const LongLocalizedRTL: Story = {
+  args: {
+    cancelText: "Keep the currently selected delivery date",
+    confirmText: "Confirm this delivery date",
+    defaultValue: initial,
+    open: true,
+    precision: "minute",
+    minuteStep: 15,
+    title: "Choose the preferred delivery date and arrival window for this order",
+    renderLabel: (type, value) => (
+      <span>{type === "month" ? `Month ${value} — seasonal delivery schedule` : value}</span>
+    ),
+    value: undefined
+  },
+  render: (args) => (
+    <ConfigProvider dir="rtl" locale="en-US">
+      <DatePicker {...args} lockScroll={false} restoreFocus={false} />
+    </ConfigProvider>
+  ),
+  play: ({ canvasElement }) => {
+    const picker = canvasElement.ownerDocument.body.querySelector<HTMLElement>(
+      '[data-meu-component="date-picker"]'
+    );
+    const dialog = picker ? picker.closest<HTMLElement>('[role="dialog"]') : null;
+    if (!picker || !dialog) throw new window.Error("Expected open DatePicker dialog");
+    if (dialog.getAttribute("dir") !== "rtl" && getComputedStyle(dialog).direction !== "rtl") {
+      throw new window.Error("DatePicker did not inherit RTL direction");
+    }
+    if (picker.scrollWidth > picker.clientWidth + 1) {
+      throw new window.Error("DatePicker overflowed horizontally with localized content");
+    }
+
+    const buttons = Array.from(picker.querySelectorAll<HTMLButtonElement>("button"));
+    if (buttons.length !== 2) throw new window.Error("Expected DatePicker header actions");
+    for (const button of buttons) {
+      if (button.getBoundingClientRect().height < 44) {
+        throw new window.Error("DatePicker header action is below the 44px touch target");
+      }
+    }
+
+    const wheels = Array.from(picker.querySelectorAll<HTMLElement>('[role="listbox"]'));
+    const labels = wheels.map((wheel) => wheel.getAttribute("aria-label"));
+    if (labels.join(",") !== "Year,Month,Day,Hour,Minute") {
+      throw new window.Error("DatePicker changed its semantic precision order in RTL");
+    }
+    for (const wheel of wheels) {
+      const activeId = wheel.getAttribute("aria-activedescendant");
+      if (!activeId || !canvasElement.ownerDocument.getElementById(activeId)) {
+        throw new window.Error("DatePicker wheel lost its active option relationship");
+      }
+    }
+
+    const august = picker.querySelector<HTMLElement>(
+      '[role="listbox"][aria-label="Month"] [role="option"][aria-label="08"]'
+    );
+    if (
+      !august ||
+      !august.textContent ||
+      !august.textContent.includes("seasonal delivery schedule")
+    ) {
+      throw new window.Error("Rich DatePicker label lost its localized accessible fallback");
+    }
+  }
 };

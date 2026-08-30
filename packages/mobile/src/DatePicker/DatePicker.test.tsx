@@ -270,6 +270,68 @@ describe("DatePicker", () => {
     );
   });
 
+  it("keeps localized accessible names for rich custom labels", () => {
+    render(
+      <ConfigProvider locale="en-US">
+        <DatePicker
+          open
+          aria-label="Delivery date"
+          precision="month"
+          min={date({ year: 2026 })}
+          max={date({ day: 31, month: 12, year: 2026 })}
+          defaultValue={date({ month: 8, year: 2026 })}
+          renderLabel={(type, nextValue) => (
+            <span>{type === "month" ? `Month ${nextValue}` : nextValue}</span>
+          )}
+        />
+      </ConfigProvider>
+    );
+
+    const monthWheel = screen.getByRole("listbox", { name: "Month" });
+    const august = within(monthWheel).getByRole("option", { name: "08" });
+    expect(august.textContent).toBe("Month 8");
+    expect(august.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("disables civil times rejected by a DST-aware custom adapter", () => {
+    const adapter: DateAdapter<Date> = {
+      ...nativeDateAdapter,
+      fromParts: (parts) => {
+        if (parts.year === 2026 && parts.month === 3 && parts.day === 8 && parts.hour === 2) {
+          return null;
+        }
+        return nativeDateAdapter.fromParts(parts);
+      }
+    };
+    const onConfirm = vi.fn();
+
+    render(
+      <DatePicker
+        adapter={adapter}
+        open
+        aria-label="DST delivery time"
+        precision="hour"
+        min={date({ day: 8, hour: 0, month: 3, year: 2026 })}
+        max={date({ day: 8, hour: 5, month: 3, year: 2026 })}
+        defaultValue={date({ day: 8, hour: 1, month: 3, year: 2026 })}
+        onConfirm={onConfirm}
+      />
+    );
+
+    const hourWheel = screen.getByRole("listbox", { name: "时" });
+    expect(
+      within(hourWheel).getByRole("option", { name: "02时" }).getAttribute("aria-disabled")
+    ).toBe("true");
+    fireEvent.click(within(hourWheel).getByRole("option", { name: "03时" }));
+    fireEvent.click(screen.getByRole("button", { name: "确定" }));
+    expectParts(onConfirm.mock.calls[0]![0] as Date, {
+      day: 8,
+      hour: 3,
+      month: 3,
+      year: 2026
+    });
+  });
+
   it("discards cancelled drafts and commits only on confirm", async () => {
     const onConfirm = vi.fn();
 

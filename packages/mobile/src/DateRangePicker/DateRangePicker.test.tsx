@@ -186,4 +186,139 @@ describe("DateRangePicker", () => {
     expect(dayButton(10).getAttribute("data-range-start")).toBe("true");
     expect(dayButton(16).getAttribute("data-range-end")).toBe("true");
   });
+
+  it("rebuilds a controlled draft from the caller value after confirmation and reopening", () => {
+    const onConfirm = vi.fn();
+    const initial = [date(5), date(6)] as const;
+    const requested = [date(10), date(16)] as const;
+    const { rerender } = render(
+      <DateRangePicker
+        open
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        value={initial}
+        onConfirm={onConfirm}
+      />
+    );
+
+    fireEvent.click(dayButton(10));
+    fireEvent.click(dayButton(16));
+    fireEvent.click(screen.getByRole("button", { name: "确定" }));
+
+    expect(rangeDays(onConfirm.mock.calls[0]![0] as readonly [Date, Date])).toEqual([10, 16]);
+    rerender(
+      <DateRangePicker
+        open={false}
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        value={initial}
+        onConfirm={onConfirm}
+      />
+    );
+    rerender(
+      <DateRangePicker
+        open
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        value={initial}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(dayButton(5).getAttribute("data-range-start")).toBe("true");
+    expect(dayButton(6).getAttribute("data-range-end")).toBe("true");
+
+    rerender(
+      <DateRangePicker
+        open
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        value={requested}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(dayButton(10).getAttribute("data-range-start")).toBe("true");
+    expect(dayButton(16).getAttribute("data-range-end")).toBe("true");
+  });
+
+  it("revalidates a complete draft when bounds or disabled-date rules change", () => {
+    const selected = [date(10), date(16)] as const;
+    const baseProps = {
+      "aria-label": "日期范围",
+      defaultMonth: date(1),
+      open: true,
+      value: selected
+    } as const;
+    const { rerender } = render(<DateRangePicker {...baseProps} max={date(31)} />);
+    const confirm = screen.getByRole("button", { name: "确定" });
+    expect(confirm.hasAttribute("disabled")).toBe(false);
+
+    rerender(<DateRangePicker {...baseProps} max={date(15)} />);
+    expect(confirm.hasAttribute("disabled")).toBe(true);
+
+    rerender(
+      <DateRangePicker
+        {...baseProps}
+        max={date(31)}
+        disabledDate={(candidate) => nativeDateAdapter.getParts(candidate).day === 10}
+      />
+    );
+    expect(confirm.hasAttribute("disabled")).toBe(true);
+
+    rerender(<DateRangePicker {...baseProps} max={date(31)} />);
+    expect(confirm.hasAttribute("disabled")).toBe(false);
+  });
+
+  it("allows a range to cross disabled intermediate days while rejecting disabled endpoints", () => {
+    const onConfirm = vi.fn();
+    render(
+      <DateRangePicker
+        open
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        disabledDate={(candidate) => nativeDateAdapter.getParts(candidate).day === 11}
+        onConfirm={onConfirm}
+      />
+    );
+
+    expect(dayButton(11).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(dayButton(10));
+    fireEvent.click(dayButton(12));
+    const confirm = screen.getByRole("button", { name: "确定" });
+    expect(confirm.hasAttribute("disabled")).toBe(false);
+    fireEvent.click(confirm);
+    expect(rangeDays(onConfirm.mock.calls[0]![0] as readonly [Date, Date])).toEqual([10, 12]);
+  });
+
+  it("keeps the draft anchor while navigating to a second month", () => {
+    const onConfirm = vi.fn();
+    render(
+      <DateRangePicker
+        open
+        aria-label="日期范围"
+        defaultMonth={date(1)}
+        min={date(28)}
+        max={date(5, 9)}
+        onConfirm={onConfirm}
+      />
+    );
+
+    fireEvent.click(dayButton(30));
+    expect(screen.getByRole("button", { name: "确定" }).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "下个月" }));
+    fireEvent.click(dayButton(2, 9));
+
+    const confirm = screen.getByRole("button", { name: "确定" });
+    expect(confirm.hasAttribute("disabled")).toBe(false);
+    fireEvent.click(confirm);
+    const confirmed = onConfirm.mock.calls[0]![0] as readonly [Date, Date];
+    expect(
+      confirmed.map((candidate) => {
+        const parts = nativeDateAdapter.getParts(candidate);
+        return [parts.month, parts.day];
+      })
+    ).toEqual([
+      [8, 30],
+      [9, 2]
+    ]);
+  });
 });

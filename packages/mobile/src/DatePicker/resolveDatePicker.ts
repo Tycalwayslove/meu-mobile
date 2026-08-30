@@ -43,6 +43,7 @@ type ResolveDatePickerOptions<TDate> = {
   precision: DatePrecision;
   secondStep?: number;
   source: TDate | null | undefined;
+  textLabel: (precision: DatePrecision, value: number) => string;
 };
 
 function precisionIndex(precision: DatePrecision) {
@@ -221,7 +222,8 @@ export function resolveDatePicker<TDate>({
   minuteStep,
   precision,
   secondStep,
-  source
+  source,
+  textLabel
 }: ResolveDatePickerOptions<TDate>): ResolvedDatePicker<TDate> {
   const resolvedMinuteStep = normalizedStep(minuteStep);
   const resolvedSecondStep = normalizedStep(secondStep);
@@ -279,7 +281,7 @@ export function resolveDatePicker<TDate>({
         textValue:
           typeof renderedLabel === "string" || typeof renderedLabel === "number"
             ? String(renderedLabel)
-            : String(value),
+            : textLabel(currentPrecision, value),
         value
       };
     });

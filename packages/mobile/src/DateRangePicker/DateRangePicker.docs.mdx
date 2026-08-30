@@ -4,16 +4,22 @@ slug: date-range-picker
 package: "@meu/mobile"
 exports: [DateRangePicker, dateRangeIsSelectable, normalizeDateRange, sameDateRange]
 status: verification
-localVerification: pending
-localGapIds: [LOC-DATE-RANGE-PICKER-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "270:676"
-storyIds: [data-entry-daterangepicker--default, data-entry-daterangepicker--open-with-presets]
+storyIds:
+  [
+    data-entry-daterangepicker--default,
+    data-entry-daterangepicker--open-with-presets,
+    data-entry-daterangepicker--cross-month-and-disabled-intermediate,
+    data-entry-daterangepicker--long-localized-adaptive-content
+  ]
 source: packages/mobile/src/DateRangePicker
 ---
 
@@ -110,12 +116,12 @@ dialog 必须由 title、aria-label 或 aria-labelledby 命名；Calendar 和 pr
 
 ## 测试证据
 
-- Unit：范围排序、falsy adapter、首次/同日二次选择、取消回滚、preset、escape、受控显示、最新受控值迁移。
-- Story interaction：`Default` 验证打开、preset 生成完整范围、确认与焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit/SSR/hydration：DateRangePicker 目录 3 个测试文件共 14 项通过。Unit 覆盖范围排序、falsy adapter、首次/同日二次选择、取消回滚、preset、escape、受控 open/value、动态 min/max/disabledDate 重验、跨越中间禁用日与跨月草稿锚点；SSR 覆盖 dialog/grid、命名、preset 与越界禁用；initially-open hydration 覆盖 `renderToString → hydrateRoot → body Portal`、RTL/英文/暗色/reduced-motion 配置边界、确认交互以及 0 recoverable/console error。
+- Story interaction：4 个 Story 中 `Default` 验证打开、preset、确认与焦点恢复；`CrossMonthAndDisabledIntermediate` 验证 8 月 30 日到 9 月 2 日跨月选择、边界与中间禁用日契约；`LongLocalizedAdaptiveContent` 验证 RTL Portal、超长标题/摘要/操作文案无横向溢出、44px 操作目标、reduced-motion 与 forced-colors。新增 Story 源码已通过 TypeScript 与定向 ESLint；集成批次重建静态站后统一执行七环境矩阵。
+- Storybook 浏览器矩阵：本轮 `DateRangePicker` 匹配集 5 个 Story × 7 场景共 35/35 通过，其中 `Data Entry/DateRangePicker` 当前 4 个 Story 为 28/28。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，play 后 axe WCAG A/AA 为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）4 个公开值组合 gzip 20751 B / 49152 B 预算；最大单值 `DateRangePicker` 为 20740 B / 49152 B 预算，组合 Brotli 18050 B；共享样式由应用单独导入一次。
-- SSR：DateRangePicker.ssr.test.tsx 覆盖 dialog、摘要、Calendar grid。
+- SSR/hydration：`DateRangePicker.ssr.test.tsx` 与 `DateRangePicker.hydration.test.tsx` 提供直接证据，并显式固定首屏月份和值，避免依赖跨午夜 `now()`。
 - Figma：Meu/DateRangePicker 270:676；Empty/Start/Complete/Disabled、44px targets、Light/Dark QA。
 - Chromium/WebKit、Chromatic、真机焦点/滚动：最终统一门禁。
 
@@ -123,14 +129,15 @@ dialog 必须由 title、aria-label 或 aria-labelledby 命名；Calendar 和 pr
 
 ### 待优化
 
-补跨月超长内容、业务中间禁用日示例、移动 WebKit 焦点/滚动和读屏证据。
+补移动 WebKit 焦点/滚动与 iOS VoiceOver、Android TalkBack 真机证据。
 
 ### 已完成
 
-固化确认式范围、同日二次选择、preset、动态受控值迁移、长文本、RTL/i18n、SSR 与永久文档。
+固化确认式范围、同日二次选择、preset、动态受控值迁移、动态边界/禁用重验、跨月与中间禁用日契约、长文本、RTL/i18n、200%/forced-colors/reduced-motion、SSR/hydration 与永久文档。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                               | 迁移说明    |
-| ---------- | ------ | --------- | ---------------------------------- | ----------- |
-| 2026-08-29 | 未发布 | hardening | 范围状态、生命周期、兼容与文档加固 | 无 API 破坏 |
+| 日期       | 版本   | 类型      | 内容                                | 迁移说明    |
+| ---------- | ------ | --------- | ----------------------------------- | ----------- |
+| 2026-08-30 | 未发布 | hardening | 跨月、动态约束与 hydration 本地闭环 | 无 API 破坏 |
+| 2026-08-29 | 未发布 | hardening | 范围状态、生命周期、兼容与文档加固  | 无 API 破坏 |

@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 115712,
-      "brotliBytes": 90576,
-      "gzipBytes": 115674,
-      "rawBytes": 614407,
+      "brotliBytes": 90587,
+      "gzipBytes": 115711,
+      "rawBytes": 614565,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -175,17 +175,17 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 15129,
+          "brotliBytes": 15133,
           "gzipBytes": 17260,
-          "rawBytes": 75281,
+          "rawBytes": 75322,
           "name": "MeuFormCascadePicker",
           "passesBudget": true
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 19124,
-          "gzipBytes": 21805,
-          "rawBytes": 96547,
+          "brotliBytes": 19152,
+          "gzipBytes": 21830,
+          "rawBytes": 96664,
           "name": "MeuFormDatePicker",
           "passesBudget": true
         },
@@ -542,9 +542,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 12059,
-      "gzipBytes": 13644,
-      "rawBytes": 59823,
+      "brotliBytes": 12062,
+      "gzipBytes": 13647,
+      "rawBytes": 59864,
       "docsPath": "packages/mobile/src/CascadePicker/CascadePicker.docs.mdx",
       "name": "CascadePicker",
       "packageName": "@meu/mobile",
@@ -553,9 +553,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 12059,
-          "gzipBytes": 13644,
-          "rawBytes": 59823,
+          "brotliBytes": 12062,
+          "gzipBytes": 13647,
+          "rawBytes": 59864,
           "name": "CascadePicker",
           "passesBudget": true
         }
@@ -663,9 +663,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 15863,
-      "gzipBytes": 17898,
-      "rawBytes": 80147,
+      "brotliBytes": 15892,
+      "gzipBytes": 17922,
+      "rawBytes": 80264,
       "docsPath": "packages/mobile/src/DatePicker/DatePicker.docs.mdx",
       "name": "DatePicker",
       "packageName": "@meu/mobile",
@@ -674,9 +674,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 15891,
-          "gzipBytes": 17894,
-          "rawBytes": 80125,
+          "brotliBytes": 15920,
+          "gzipBytes": 17918,
+          "rawBytes": 80242,
           "name": "DatePicker",
           "passesBudget": true
         },

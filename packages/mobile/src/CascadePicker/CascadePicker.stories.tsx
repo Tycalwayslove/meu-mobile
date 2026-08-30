@@ -56,6 +56,42 @@ const regions = [
   { label: "港澳台及海外", value: "other" }
 ] satisfies ReadonlyArray<CascadePickerOption>;
 
+const fiveLevelPath = [
+  {
+    label: "East China commercial distribution region",
+    textValue: "East China",
+    value: "east-china",
+    children: [
+      {
+        label: "Zhejiang Province fulfillment network",
+        textValue: "Zhejiang Province",
+        value: "zhejiang-network",
+        children: [
+          {
+            label: "Hangzhou metropolitan delivery zone",
+            textValue: "Hangzhou",
+            value: "hangzhou-zone",
+            children: [
+              {
+                label: "Xihu district neighborhood cluster",
+                textValue: "Xihu district",
+                value: "xihu-cluster",
+                children: [
+                  {
+                    label: "Gudang subdistrict pickup location",
+                    textValue: "Gudang pickup",
+                    value: "gudang-pickup"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+] satisfies ReadonlyArray<CascadePickerOption>;
+
 function labelsForPath(value: ReadonlyArray<string | number | null>) {
   const labels: Array<string> = [];
   let options: ReadonlyArray<CascadePickerOption> = regions;
@@ -168,4 +204,43 @@ export const ExplicitEmptyChild: Story = {
     options: [{ label: "浙江省", value: "zhejiang", children: [] }]
   },
   render: (args) => <CascadePicker {...args} />
+};
+
+export const FiveLevelLocalizedPath: Story = {
+  args: {
+    cancelText: "Keep current path",
+    columnLabels: ["Region", "Province", "City", "District", "Pickup location"],
+    confirmText: "Confirm delivery path",
+    open: true,
+    options: fiveLevelPath,
+    title: "Choose a five-level commercial delivery destination"
+  },
+  render: (args) => <CascadePicker {...args} style={{ maxWidth: 390 }} />,
+  play: ({ canvasElement }) => {
+    const picker = canvasElement.ownerDocument.body.querySelector<HTMLElement>(
+      '[data-meu-component="cascade-picker"]'
+    );
+    if (!picker) throw new window.Error("Expected the five-level CascadePicker");
+    const wheels = Array.from(picker.querySelectorAll<HTMLElement>('[role="listbox"]'));
+    if (wheels.length !== 5) throw new window.Error("Expected five cascade columns");
+    if (picker.scrollWidth > picker.clientWidth + 1) {
+      throw new window.Error("Five-level CascadePicker overflowed horizontally");
+    }
+    for (const wheel of wheels) {
+      const activeId = wheel.getAttribute("aria-activedescendant");
+      if (!activeId || !picker.ownerDocument.getElementById(activeId)) {
+        throw new window.Error("Expected each cascade column to own an active option");
+      }
+      if (wheel.getBoundingClientRect().height < 48) {
+        throw new window.Error("Expected each cascade wheel to remain operable");
+      }
+    }
+    const actions = Array.from(picker.querySelectorAll<HTMLButtonElement>("button"));
+    if (
+      actions.length !== 2 ||
+      actions.some((action) => action.getBoundingClientRect().height < 44)
+    ) {
+      throw new window.Error("Expected both localized actions to remain at least 44px tall");
+    }
+  }
 };

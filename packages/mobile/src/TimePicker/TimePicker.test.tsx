@@ -177,6 +177,37 @@ describe("TimePicker", () => {
     expect(onConfirm).toHaveBeenCalledWith({ hour: 1, minute: 20, second: 0 });
   });
 
+  it("maps midnight and noon across the twelve-hour period boundary", () => {
+    const onSelect = vi.fn();
+    const onConfirm = vi.fn();
+    render(
+      <ConfigProvider locale="en-US">
+        <TimePicker
+          open
+          aria-label="Boundary time"
+          hourCycle="h12"
+          defaultValue={{ hour: 0, minute: 0, second: 0 }}
+          onConfirm={onConfirm}
+          onSelect={onSelect}
+        />
+      </ConfigProvider>
+    );
+
+    const periodWheel = screen.getByRole("listbox", { name: "Period" });
+    expect(
+      within(screen.getByRole("listbox", { name: "Hour" }))
+        .getByRole("option", { name: "12" })
+        .getAttribute("aria-selected")
+    ).toBe("true");
+    fireEvent.click(within(periodWheel).getByRole("option", { name: "PM" }));
+    expect(onSelect).toHaveBeenLastCalledWith(
+      { hour: 12, minute: 0, second: 0 },
+      expect.objectContaining({ column: "period", columnIndex: 2, reason: "pointer" })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(onConfirm).toHaveBeenCalledWith({ hour: 12, minute: 0, second: 0 });
+  });
+
   it("supports second precision and custom labels", () => {
     render(
       <TimePicker
@@ -191,6 +222,49 @@ describe("TimePicker", () => {
 
     expect(screen.getAllByRole("listbox")).toHaveLength(3);
     expect(screen.getByRole("option", { name: "S20" }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("normalizes non-finite, fractional and out-of-range steps", () => {
+    render(
+      <TimePicker
+        open
+        aria-label="Normalized steps"
+        precision="second"
+        hourStep={99}
+        minuteStep={2.9}
+        secondStep={Number.POSITIVE_INFINITY}
+        defaultValue={{ hour: 23, minute: 58, second: 59 }}
+      />
+    );
+
+    expect(within(screen.getByRole("listbox", { name: "时" })).getAllByRole("option")).toHaveLength(
+      2
+    );
+    expect(within(screen.getByRole("listbox", { name: "分" })).getAllByRole("option")).toHaveLength(
+      30
+    );
+    expect(within(screen.getByRole("listbox", { name: "秒" })).getAllByRole("option")).toHaveLength(
+      60
+    );
+  });
+
+  it("disables confirmation when an extreme filter removes every complete path", () => {
+    render(
+      <TimePicker
+        open
+        aria-label="Unavailable time"
+        precision="second"
+        defaultValue={{ hour: 10, minute: 30, second: 0 }}
+        filter={{ second: () => false }}
+      />
+    );
+
+    expect(
+      within(screen.getByRole("listbox", { name: "秒" }))
+        .getAllByRole("option")
+        .every((option) => option.getAttribute("aria-disabled") === "true")
+    ).toBe(true);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "确定" }).disabled).toBe(true);
   });
 
   it("normalizes hidden minute and second fields at hour precision", () => {
@@ -266,6 +340,34 @@ describe("TimePicker", () => {
     expect(onConfirm).toHaveBeenCalledWith({ hour: 10, minute: 45, second: 0 });
     expect(onOpenChange).toHaveBeenLastCalledWith(false, { reason: "confirm" });
     expect(screen.getByRole("dialog", { name: "时间" })).toBeTruthy();
+  });
+
+  it("replaces an open controlled draft when the external value changes", () => {
+    const onConfirm = vi.fn();
+    const { rerender } = render(
+      <TimePicker
+        open
+        aria-label="Controlled time"
+        minuteStep={15}
+        value={{ hour: 10, minute: 30, second: 0 }}
+        onConfirm={onConfirm}
+      />
+    );
+    fireEvent.click(screen.getByRole("option", { name: "45分" }));
+
+    rerender(
+      <TimePicker
+        open
+        aria-label="Controlled time"
+        minuteStep={15}
+        value={{ hour: 11, minute: 0, second: 0 }}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(screen.getByRole("option", { name: "11时" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("option", { name: "00分" }).getAttribute("aria-selected")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "确定" }));
+    expect(onConfirm).toHaveBeenCalledWith({ hour: 11, minute: 0, second: 0 });
   });
 
   it("seeds uncontrolled state from the latest controlled value", () => {

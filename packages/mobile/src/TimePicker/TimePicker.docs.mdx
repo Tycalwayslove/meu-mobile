@@ -4,12 +4,12 @@ slug: time-picker
 package: "@meu/mobile"
 exports: [TimePicker, formatTimeValue, isValidTimeValue, timePickerColumns, timePickerPrecisions]
 status: verification
-localVerification: pending
-localGapIds: [LOC-TIME-PICKER-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "245:2"
@@ -17,7 +17,9 @@ storyIds:
   [
     data-entry-timepicker--default,
     data-entry-timepicker--twelve-hour,
-    data-entry-timepicker--seconds-and-filter
+    data-entry-timepicker--seconds-and-filter,
+    data-entry-timepicker--constrained-twelve-hour-seconds,
+    data-entry-timepicker--long-localized-actions-rtl
   ]
 source: packages/mobile/src/TimePicker
 ---
@@ -117,10 +119,9 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 
 ## 测试证据
 
-- Unit：隐藏位归零、bounds 上下取整、step 网格与空网格、filter、12h/period、seconds、自定义 label、取消/确认、受控、动态受控模式、矛盾边界、格式化。
-- SSR：TimePicker.ssr.test.tsx 覆盖稳定 dialog/listbox 与 AM/PM。
-- Story interaction: `Default` 验证 Portal 打开、draft 选择、确认回调与焦点恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit/SSR/hydration：TimePicker 目录 3 个测试文件共 19 项通过，覆盖隐藏位归零、bounds 上下取整、非法/小数/越界 step 规范化、空网格与全禁用 filter、12h 午夜/正午和 canonical period 回写、seconds、自定义 label、取消/确认、受控外部值覆盖 open draft、受控切换、矛盾边界与格式化；open 的 RTL + en-US + reduced-motion + Dark `renderToString → hydrateRoot → body Portal` 为 0 recoverable/console error，四列顺序、长 action 与确认交互保持有效。
+- Story interaction：`Default` 验证 Portal 打开、draft 选择、确认回调与焦点恢复；新增 `ConstrainedTwelveHourSeconds.play` 验证 12h 四列语义顺序、秒步长/filter 与 active-descendant 完整性，`LongLocalizedActionsRtl.play` 验证 RTL 不反转语义列、reduced-motion 上下文、无横向溢出和操作目标不低于 44px。当前 5 个 Story 将随主批统一重建后进入七环境门禁。
+- Storybook 浏览器矩阵：本轮 `TimePicker` 匹配集 6 个 Story × 7 场景共 42/42 通过，其中 `Data Entry/TimePicker` 当前 5 个 Story 为 35/35。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，play 后 axe WCAG A/AA 为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）5 个公开值组合 gzip 16445 B / 49152 B 预算；最大单值 `TimePicker` 为 16201 B / 49152 B 预算，组合 Brotli 14600 B；共享样式由应用单独导入一次。
 - Figma：Meu/TimePicker 245:2；8 variants、48px options、12/24h Light/Dark QA。
@@ -130,14 +131,15 @@ dialog 有 title 或 aria 名称，每列有本地化 listbox label，option 暴
 
 ### 待优化
 
-补移动 WebKit 滚动、TalkBack/VoiceOver period 列、极端 filter 及视觉回归证据。
+补 iOS/Android 真机惯性滚动、TalkBack/VoiceOver period 列公告，以及统一发布批次的 Chromatic 视觉基线。
 
 ### 已完成
 
-固化平台无关 TimeValue、12/24h、步长/边界、确认式 draft、最新受控值迁移、SSR 与永久文档。
+固化平台无关 TimeValue、12/24h、秒/步长/边界/极端 filter、确认式 draft、最新受控值迁移、SSR/hydration、RTL、200%/forced-colors/reduced-motion Story 门禁与永久文档，关闭 `LOC-TIME-PICKER-01`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                              | 迁移说明    |
-| ---------- | ------ | --------- | --------------------------------- | ----------- |
-| 2026-08-29 | 未发布 | hardening | 时间状态、12h、兼容与文档完整加固 | 无 API 破坏 |
+| 日期       | 版本   | 类型         | 内容                                               | 迁移说明    |
+| ---------- | ------ | ------------ | -------------------------------------------------- | ----------- |
+| 2026-08-29 | 未发布 | hardening    | 时间状态、12h、兼容与文档完整加固                  | 无 API 破坏 |
+| 2026-08-30 | 未发布 | verification | 补 open hydration、边界单测与本地化 RTL Story 门禁 | 无          |

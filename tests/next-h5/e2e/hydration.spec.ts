@@ -4,6 +4,7 @@ const cases = [
   ["virtual-list", '[data-meu-component="virtual-list"]'],
   ["tree-select", '[data-meu-component="tree-select"]'],
   ["picker", '[data-meu-component="picker"]'],
+  ["cascade-picker", '[data-meu-component="cascade-picker"]'],
   ["popup", '[data-meu-overlay-layer="popup"]'],
   ["bottom-sheet", '[data-meu-overlay-layer="bottom-sheet"]'],
   ["popover", '[data-meu-component="popover"]'],
@@ -88,6 +89,42 @@ test("hydrates Picker server semantics and settles native wheel scrolling", asyn
   await expect(page.locator('output[aria-label="Hydration picker selection"]')).toHaveText(
     "tomorrow:scroll"
   );
+  expect(runtimeErrors).toEqual([]);
+});
+
+test("hydrates an empty cascade branch and applies the latest immutable options", async ({
+  page,
+  request
+}) => {
+  const response = await request.get("/hydration?case=cascade-picker");
+  expect(response.ok()).toBe(true);
+  const serverHtml = await response.text();
+  expect(serverHtml).toContain('role="dialog"');
+  expect(serverHtml.match(/role="listbox"/g)).toHaveLength(2);
+  expect(serverHtml).toContain("Hydration delivery region");
+  expect(serverHtml).toContain("Delivery region");
+
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") runtimeErrors.push(message.text());
+  });
+  await page.goto("/hydration?case=cascade-picker");
+  await expect(page.locator('[data-case="cascade-picker"]')).toHaveAttribute(
+    "data-hydrated",
+    "true"
+  );
+  const dialog = page.getByRole("dialog", { name: "Hydration delivery region" });
+  await expect(dialog.getByRole("listbox")).toHaveCount(2);
+  await expect(dialog.getByRole("option", { name: "Hangzhou" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await expect(dialog.getByRole("option", { name: "Unavailable city" })).toHaveAttribute(
+    "aria-disabled",
+    "true"
+  );
+  await expect(dialog.getByRole("button", { name: "Confirm" })).toBeEnabled();
   expect(runtimeErrors).toEqual([]);
 });
 

@@ -4,8 +4,8 @@ slug: date-picker
 package: "@meu/mobile"
 exports: [DatePicker, datePickerPrecisions]
 status: verification
-localVerification: pending
-localGapIds: [LOC-DATE-PICKER-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -17,7 +17,8 @@ storyIds:
   [
     data-entry-datepicker--default-date,
     data-entry-datepicker--date-and-time,
-    data-entry-datepicker--bounded-and-filtered
+    data-entry-datepicker--bounded-and-filtered,
+    data-entry-datepicker--long-localized-rtl
   ]
 source: packages/mobile/src/DatePicker
 ---
@@ -66,7 +67,7 @@ value 存在时受控，否则 defaultValue 只初始化 committed value。打�
 
 ## Props
 
-precision 支持 year/month/day/hour/minute/second，默认 day；低位归零，年/月变化夹紧日。min/max 是原始闭区间：实际下界上取整到第一个可表示的 precision/step 网格点，实际上界下取整到最后一个可表示网格点。分钟和秒 step 网格从 0 对齐。未传边界时以首次渲染 anchor 前后十年构造范围。minuteStep/secondStep 夹紧到 1–59。columnLabels、renderLabel 只改展示，filter 决定 option disabled。datePickerPrecisions 是公开稳定顺序。
+precision 支持 year/month/day/hour/minute/second，默认 day；低位归零，年/月变化夹紧日。min/max 是原始闭区间：实际下界上取整到第一个可表示的 precision/step 网格点，实际上界下取整到最后一个可表示网格点。分钟和秒 step 网格从 0 对齐。未传边界时以首次渲染 anchor 前后十年构造范围。minuteStep/secondStep 夹紧到 1–59。columnLabels、renderLabel 只改展示，filter 决定 option disabled；renderLabel 返回非文本节点时，option 仍使用当前 locale 的默认标签作为读屏与 type-ahead 文本。datePickerPrecisions 是公开稳定顺序。
 
 ## Events
 
@@ -86,7 +87,7 @@ Tab 在 modal 内循环；各 listbox 支持方向键、Home/End、PageUp/PageDo
 
 ## 无障碍
 
-Popup 为有名称的 modal dialog，每列为有名称 listbox，option 暴露 selected/disabled；自定义非文本 renderLabel 会使用默认 label 作为 textValue，避免失去读屏名称。
+Popup 为有名称的 modal dialog，每列为有名称 listbox，option 暴露 selected/disabled；自定义非文本 renderLabel 使用当前 locale 的默认 label 作为 textValue，避免读屏名称退化为无单位裸数字。
 
 ## 动效
 
@@ -98,7 +99,7 @@ Popup 为有名称的 modal dialog，每列为有名称 listbox，option 暴露 
 
 ## SSR 与 Next.js
 
-声明 use client；open=true 可 SSR 输出 dialog/listbox，未打开时无 Portal 内容。默认十年范围锚定 adapter.now，关键首屏要提供稳定 min/max/defaultValue 以避免跨午夜 hydration 差异。
+声明 use client；open=true 可 SSR 输出 dialog/listbox，未打开时无 Portal 内容。默认十年范围锚定 adapter.now，关键首屏要提供稳定 min/max/defaultValue 以避免跨午夜 hydration 差异。共置测试让 server/client 的 adapter.now 跨越午夜，在显式边界和值不变时验证 0 recoverable/console error，随后确认 Portal 迁移后的五列 active-descendant 仍指向真实 option。
 
 ## RTL 与国际化
 
@@ -118,12 +119,12 @@ min 大于 max、边界之间没有可表示网格点、所有 option 被 filter
 
 ## 测试证据
 
-- Unit：精度、月末、bounds 上下取整、step 网格与空网格、filter、DST null、locales、取消/确认、受控、动态 adapter、动态受控模式、矛盾边界、falsy adapter 值。
-- Story interaction：`DefaultDate` 验证打开、日期选项与 dialog 命名关系；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit/SSR/hydration：DatePicker 目录 3 个测试文件共 17 项通过，覆盖精度、月末、bounds 上下取整、step 网格与空网格、filter、自定义 DST adapter 的无效小时、locales、富标签读屏名称、取消/确认、受控、动态 adapter、动态受控模式、矛盾边界、falsy adapter 值，以及跨午夜 initially-open hydration 与 Portal 语义。
+- Story interaction：`DefaultDate` 验证打开、日期选择、确认提交、关闭与触发器焦点恢复；`LongLocalizedRTL` 验证 RTL 下 year→minute 顺序、长标题/操作文案无横向溢出、44px 操作目标、active-descendant 完整性与富标签的本地化读屏名称。
+- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 `DatePicker` 匹配集 5 个 Story × 7 场景共 35/35 通过，其中 `Data Entry/DatePicker` 当前 4 个 Story 为 28/28。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 17898 B / 49152 B 预算；最大单值 `DatePicker` 为 17894 B / 49152 B 预算，组合 Brotli 15863 B；共享样式由应用单独导入一次。
-- SSR：DatePicker.ssr.test.tsx 覆盖 dialog、列名与选中值。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 17922 B / 49152 B 预算；最大单值 `DatePicker` 为 17918 B / 49152 B 预算，组合 Brotli 15892 B；共享样式由应用单独导入一次。
+- SSR/hydration：DatePicker.ssr.test.tsx 覆盖 dialog、列名与选中值；DatePicker.hydration.test.tsx 覆盖显式边界下 server/client anchor 跨午夜、initially-open Portal 迁移、五列命名与 active-descendant 完整性。
 - Figma：Meu/DatePicker 231:1047；6 variants、48px options、Light/Dark token QA。
 - 双引擎、Chromatic、真机滚轮/读屏：最终统一门禁。
 
@@ -131,14 +132,15 @@ min 大于 max、边界之间没有可表示网格点、所有 option 被 filter
 
 ### 待优化
 
-补 DST 自定义 adapter E2E、跨午夜 hydration、TalkBack/VoiceOver 滚轮和视觉基线。
+补 iOS/Android 真机 DST 时区、惯性滚轮、TalkBack/VoiceOver 公告体验和统一 Chromatic 视觉基线；本地自定义 DST adapter、跨午夜 hydration 与七环境视觉语义扫描已经完成。
 
 ### 已完成
 
-固化日期类型中立、确认式 draft、动态输入、最新受控值迁移、falsy date 边界、列语义、SSR 与永久文档。
+固化日期类型中立、确认式 draft、动态输入、最新受控值迁移、falsy date 边界、列语义、SSR 与永久文档；修复富 ReactNode 标签的本地化读屏名称，完成 DST 无效小时、跨午夜 hydration、RTL 长文本与七环境本地验证，关闭 `LOC-DATE-PICKER-01`。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型      | 内容                                   | 迁移说明    |
-| ---------- | ------ | --------- | -------------------------------------- | ----------- |
-| 2026-08-29 | 未发布 | hardening | 日期状态、adapter 边界、兼容与文档加固 | 无 API 破坏 |
+| 日期       | 版本   | 类型         | 内容                                             | 迁移说明    |
+| ---------- | ------ | ------------ | ------------------------------------------------ | ----------- |
+| 2026-08-29 | 未发布 | hardening    | 日期状态、adapter 边界、兼容与文档加固           | 无 API 破坏 |
+| 2026-08-30 | 未发布 | verification | 补富标签读屏、DST、跨午夜 hydration 与七环境证据 | 无 API 破坏 |

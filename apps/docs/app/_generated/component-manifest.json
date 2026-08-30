@@ -3100,10 +3100,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/CascadePicker/CascadePicker.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-CASCADE-PICKER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3348,10 +3346,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/DatePicker/DatePicker.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-DATE-PICKER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "type",
@@ -3423,10 +3419,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/DateRangePicker/DateRangePicker.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-DATE-RANGE-PICKER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6141,10 +6135,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TimePicker/TimePicker.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-TIME-PICKER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6523,10 +6515,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 53,
+    "locallyVerifiedProducts": 57,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 15,
+    "productsWithLocalGaps": 11,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,
