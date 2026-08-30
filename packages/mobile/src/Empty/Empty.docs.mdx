@@ -4,8 +4,8 @@ slug: empty
 package: "@meu/mobile"
 exports: [Empty]
 status: verification
-localVerification: pending
-localGapIds: [LOC-EMPTY-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -129,7 +129,7 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 884 B / 32768 B 预算，组合 Brotli 769 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后 group 名称、说明和 action 保持一致，0 hydration/runtime error。
-- RTL: 逻辑顺序契约；未做 E2E。
+- RTL: 逻辑顺序契约已进入全库 RTL 浏览器矩阵；业务 action 路径由移动双引擎定点覆盖。
 - Reduced motion: 不适用，无动画。
 - Mobile Chromium/WebKit E2E: 反馈场景在两种引擎断言命名 group、说明内容与“清除筛选”原生 action 的业务输出。
 - Chromatic Light/Dark: 未执行。
@@ -139,7 +139,7 @@ Empty 无手势。传入操作必须满足自身触控尺寸；窄屏时主次�
 
 ### 待优化
 
-- 补移动窄屏、200% 字号、Chromatic 与真机读屏；基础双引擎 group/action 路径已完成。
+- 统一发布批次建立 Chromatic 基线并补真机读屏；移动窄屏、200% 字号和双引擎 group/action 路径已完成。
 
 ### 已完成
 

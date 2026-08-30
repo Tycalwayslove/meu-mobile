@@ -87,6 +87,45 @@ function ProviderPreview() {
   );
 }
 
+function AnnouncementThrottlePreview() {
+  const toast = useToast();
+  return (
+    <Space wrap gap={2}>
+      <Button onClick={() => toast.show({ duration: 0, id: "upload", message: "上传 0%" })}>
+        开始上传
+      </Button>
+      <Button
+        tone="neutral"
+        variant="outline"
+        onClick={() => toast.show({ duration: 0, id: "upload", message: "上传 25%" })}
+      >
+        更新 25%
+      </Button>
+      <Button
+        tone="neutral"
+        variant="outline"
+        onClick={() => toast.show({ duration: 0, id: "upload", message: "上传 75%" })}
+      >
+        更新 75%
+      </Button>
+      <Button
+        tone="danger"
+        variant="outline"
+        onClick={() => toast.danger({ duration: 0, id: "upload", message: "上传失败，请检查网络" })}
+      >
+        升级错误
+      </Button>
+      <Button
+        tone="neutral"
+        variant="outline"
+        onClick={() => toast.warning({ duration: 0, id: "upload", message: "正在重新连接" })}
+      >
+        更新警告
+      </Button>
+    </Space>
+  );
+}
+
 const meta = {
   title: "Feedback/Toast",
   component: Toast,
@@ -190,6 +229,75 @@ export const ProviderQueue: Story = {
         reasons !== null &&
         reasons.textContent === "sync:clear,stock:clear",
       "Expected clear to close active and queued Toasts exactly once"
+    );
+  }
+};
+
+export const ProviderAnnouncementThrottle: Story = {
+  render: () => (
+    <ToastProvider>
+      <AnnouncementThrottlePreview />
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const buttons = Array.from(canvasElement.querySelectorAll<HTMLButtonElement>("button"));
+    const start = buttons.find((button) => button.textContent === "开始上传");
+    const update25 = buttons.find((button) => button.textContent === "更新 25%");
+    const update75 = buttons.find((button) => button.textContent === "更新 75%");
+    const danger = buttons.find((button) => button.textContent === "升级错误");
+    const warning = buttons.find((button) => button.textContent === "更新警告");
+    if (!start || !update25 || !update75 || !danger || !warning) {
+      throw new window.Error("Expected Toast announcement controls");
+    }
+    const body = canvasElement.ownerDocument.body;
+    const hasText = (selector: string, expected: string) => {
+      const element = body.querySelector(selector);
+      return element !== null && element.textContent === expected;
+    };
+
+    start.click();
+    await waitForStory(
+      () => hasText('[role="status"]', "上传 0%"),
+      "Expected initial polite announcement"
+    );
+
+    update25.click();
+    update75.click();
+    const visibleMessage = body.querySelector<HTMLElement>("[data-meu-toast-message]");
+    const pendingStatus = body.querySelector<HTMLElement>('[role="status"]');
+    if (
+      visibleMessage === null ||
+      visibleMessage.textContent !== "上传 75%" ||
+      pendingStatus === null ||
+      pendingStatus.textContent !== ""
+    ) {
+      throw new window.Error("Rapid replacements did not update visually and prime the announcer");
+    }
+    await waitForStory(
+      () => hasText('[role="status"]', "上传 75%"),
+      "Expected coalesced latest progress announcement"
+    );
+
+    danger.click();
+    await waitForStory(
+      () => hasText('[role="alert"]', "上传失败，请检查网络"),
+      "Expected urgent escalation to announce immediately"
+    );
+
+    warning.click();
+    const pendingAlert = body.querySelector<HTMLElement>('[role="alert"]');
+    const latestVisibleMessage = body.querySelector<HTMLElement>("[data-meu-toast-message]");
+    if (
+      latestVisibleMessage === null ||
+      latestVisibleMessage.textContent !== "正在重新连接" ||
+      pendingAlert === null ||
+      pendingAlert.textContent !== ""
+    ) {
+      throw new window.Error("Assertive replacement did not enter the coalescing window");
+    }
+    await waitForStory(
+      () => hasText('[role="alert"]', "正在重新连接"),
+      "Expected the latest assertive replacement after the coalescing window"
     );
   }
 };

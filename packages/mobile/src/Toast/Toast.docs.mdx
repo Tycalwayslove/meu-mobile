@@ -4,12 +4,12 @@ slug: toast
 package: "@meu/mobile"
 exports: [Toast, ToastProvider, useToast]
 status: verification
-localVerification: pending
-localGapIds: [LOC-TOAST-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "165:812"
@@ -19,7 +19,8 @@ storyIds:
     feedback-toast--success,
     feedback-toast--warning-with-action,
     feedback-toast--danger,
-    feedback-toast--provider-queue
+    feedback-toast--provider-queue,
+    feedback-toast--provider-announcement-throttle
   ]
 source: packages/mobile/src/Toast
 ---
@@ -33,6 +34,7 @@ source: packages/mobile/src/Toast
 - 默认 3s、action 至少 5s、duration=0 常驻；hover、focus、页面隐藏和 async action 暂停，false/reject 保持打开。
 - Portal 继承 ConfigProvider container、locale、dir、theme、motion；支持 safe area、RTL、reduced-motion、forced-colors。
 - provider/controller 支持 show/success/warning/danger/update/close/clear；默认最多保留 20 条记录，关闭原因完整且卸载回收 timer。
+- Provider 将视觉消息与 live announcer 分离：画面始终即时更新，连续公告每 500ms 最多发布一次最新值；polite 升级为 assertive 时立即公告。
 
 ## 何时使用
 
@@ -94,7 +96,11 @@ Toast 不捕获 Escape、不创建 focus trap，也不恢复/移动焦点。
 
 ## 无障碍
 
-普通/成功使用 polite status，警告/危险使用 assertive alert。action 不嵌入 live region以免重复播报；action pending 使用 `aria-busy`。不要连续发大量 danger toast。
+普通/成功使用 polite status，警告/危险使用 assertive alert，且始终显式 `aria-atomic=true`。action 不嵌入 live region 以免重复播报；action pending 使用 `aria-busy`。
+
+声明式单个 Toast 在内容出现时直接公告。Provider 管理的 Toast 使用独立、视觉隐藏的 live announcer：首条队首立即公告；同 id 或当前队首的 message/tone 连续变化时，视觉内容立即变化，announcer 先清空，并在距上次公告满 500ms 时仅发布最新值；从 polite `status` 升级为 assertive `alert` 会绕过等待。message 与 tone 均未变化的展示/计时配置更新不会重播；待公告记录若先关闭则取消。该策略把进度流限制为最多每秒两次播报，又不延迟真正紧急的错误。
+
+依据 [WAI-ARIA `status`](https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA22.html) 与 [WCAG 4.1.3 说明](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html)：状态消息应在不移动焦点的情况下可被辅助技术识别，完整消息应为 atomic；非紧急内容不应使用 assertive，且需避免应用过度“健谈”。真实 VoiceOver/TalkBack/NVDA 的打断、队列与重复文本行为仍属于发布前人工矩阵，不能由 DOM 测试代替。
 
 ## 动效
 
@@ -131,10 +137,11 @@ Provider 只渲染一个 toast；visible、queued 与 exiting 记录合计由 `m
 
 - Unit: `Toast.test.tsx` 覆盖 live role、focus、hover/focus/visibility pause、action 动态移除、Portal 迁移、duration normalization、action minimum/false/reject、错误观察器隔离、陈旧 action 失效、卸载清理与 config boundary。
 - Provider unit: `ToastProvider.test.tsx` 覆盖 FIFO、同 id 完整替换、controller 显式清除字段、更新重置倒计时、pending action 替换、容量拒绝/动态缩容、close reason、clear、卸载重入与 provider guard。
-- Story interaction: `WarningWithAction` 验证 Portal 公告、action 焦点与关闭回调；`ProviderQueue` 验证同 id 替换、单队首和 clear 精确回调。最新本地 `check-storybook-links` 已验证 444 stories、415 个共置 storyIds 与 81/81 个带 play 的 title。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Announcement unit: 覆盖首条即时公告、500ms latest-value 合并、视觉即时更新、polite→assertive 紧急升级、连续 assertive 合并、无语义变化不重播及离场取消 timer。
+- Story interaction: `WarningWithAction` 验证 Portal 公告、action 焦点与关闭回调；`ProviderQueue` 验证同 id 替换、单队首和 clear 精确回调；`ProviderAnnouncementThrottle` 验证视觉即时更新、进度 latest-value 合并以及紧急升级。Story 总数由仓库校验器生成，不在本文手写快照。
+- Storybook 浏览器矩阵：全量 390×844 的 Light/Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors 组合由仓库扫描器统一复验；本批新增交互 Story 已纳入链接与 play 门禁，浏览器全量扫描留到全部组件完成后的统一测试阶段。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 6919 B / 32768 B 预算；最大单值 `ToastProvider` 为 6825 B / 32768 B 预算，组合 Brotli 6119 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 7899 B / 32768 B 预算；最大单值 `ToastProvider` 为 7800 B / 32768 B 预算，组合 Brotli 6978 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Toast.ssr.test.tsx` 覆盖无浏览器全局时 closed/provider 与 open/config/live/action 输出；`Toast.hydration.test.tsx` 断言 open 首帧原位 hydration 后迁移到 body、配置边界保留且无 React hydration error。隔离 Next 16 的历史证据另覆盖 hydration 后命令式 open Portal、队列切换与清理。
 - RTL/reduced-motion/forced-colors: config 与 CSS 完成，视觉证据待补。
 - Mobile Chromium/WebKit E2E: 重新构建本地 production 站后，`queues accessible Toast messages without trapping focus or scroll` 在两种引擎断言 alert/status、上下位置、FIFO、`maxToasts=2` 的 overflow 拒绝、44px action、业务输出、trigger 焦点保留、无 scroll lock 与 clear；同批 Light/Dark 全页 axe WCAG A/AA 通过。Chromatic/real device 延后到全部组件完成后的统一门禁。
@@ -143,7 +150,7 @@ Provider 只渲染一个 toast；visible、queued 与 exiting 记录合计由 `m
 
 ### 待优化
 
-- 补连续公告节流策略评审、真实 screen reader、系统 reduced-motion 退场观感和真实 safe-area；Portal 队列双引擎路径已完成。
+- 发布前补 VoiceOver/TalkBack/NVDA 真实公告矩阵、系统 reduced-motion 退场观感和刘海/横屏真实 safe-area；这些人工/真机项不阻塞本地验证完成状态。
 
 ### 已完成
 
@@ -151,6 +158,7 @@ Provider 只渲染一个 toast；visible、queued 与 exiting 记录合计由 `m
 - 在隔离 Next H5 中补双 tone 队列、action、焦点/滚动边界与 hydration 双引擎证据。
 - 增加 visibility pause、替换 revision、陈旧 Promise 隔离、Provider 卸载重入保护与有界队列。
 - 明确同 id 完整替换与 controller partial update，修复可选 handler 残留、失效 pause reason 和动态缩容收敛。
+- 完成连续公告策略：Provider 视觉即时更新、500ms latest-value 合并、紧急 assertive 升级直达，并补 unit 与交互 Story。
 
 ## 变更记录
 
@@ -162,3 +170,4 @@ Provider 只渲染一个 toast；visible、queued 与 exiting 记录合计由 `m
 | 2026-08-29 | 未发布 | verification | 增加 open SSR/hydration、卸载清理和 Provider 交互证据    | 无       |
 | 2026-08-29 | 未发布 | verification | 本地 production 双引擎复验容量上限、焦点、滚动与 axe     | 无       |
 | 2026-08-29 | 未发布 | hardening    | 修复配置清除、Portal/action 暂停清理与动态容量收敛       | API 兼容 |
+| 2026-08-30 | 未发布 | hardening    | 增加连续公告合并与紧急升级契约，视觉更新保持即时         | API 兼容 |

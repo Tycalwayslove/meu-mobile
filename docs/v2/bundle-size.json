@@ -6,8 +6,8 @@
   },
   "css": {
     "budgetBytes": 32768,
-    "brotliBytes": 20703,
-    "gzipBytes": 25102,
+    "brotliBytes": 20715,
+    "gzipBytes": 25136,
     "rawBytes": 196637,
     "files": [
       {
@@ -28,9 +28,9 @@
   "products": [
     {
       "budgetBytes": 115712,
-      "brotliBytes": 90452,
-      "gzipBytes": 115534,
-      "rawBytes": 613012,
+      "brotliBytes": 90576,
+      "gzipBytes": 115674,
+      "rawBytes": 614407,
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "name": "Form",
       "packageName": "@meu/form-react",
@@ -71,9 +71,9 @@
         },
         {
           "budgetBytes": 65536,
-          "brotliBytes": 33322,
-          "gzipBytes": 38415,
-          "rawBytes": 171162,
+          "brotliBytes": 33466,
+          "gzipBytes": 38557,
+          "rawBytes": 172557,
           "name": "MeuFormImageUploader",
           "passesBudget": true
         },
@@ -921,9 +921,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 31279,
-      "gzipBytes": 36039,
-      "rawBytes": 161379,
+      "brotliBytes": 31484,
+      "gzipBytes": 36182,
+      "rawBytes": 162774,
       "docsPath": "packages/mobile/src/ImageUploader/ImageUploader.docs.mdx",
       "name": "ImageUploader",
       "packageName": "@meu/mobile",
@@ -932,9 +932,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 31279,
-          "gzipBytes": 36039,
-          "rawBytes": 161379,
+          "brotliBytes": 31484,
+          "gzipBytes": 36182,
+          "rawBytes": 162774,
           "name": "ImageUploader",
           "passesBudget": true
         }
@@ -942,9 +942,9 @@
     },
     {
       "budgetBytes": 49152,
-      "brotliBytes": 27306,
-      "gzipBytes": 31397,
-      "rawBytes": 138768,
+      "brotliBytes": 27446,
+      "gzipBytes": 31547,
+      "rawBytes": 140163,
       "docsPath": "packages/mobile/src/ImageViewer/ImageViewer.docs.mdx",
       "name": "ImageViewer",
       "packageName": "@meu/mobile",
@@ -953,9 +953,9 @@
       "valueBundles": [
         {
           "budgetBytes": 49152,
-          "brotliBytes": 27306,
-          "gzipBytes": 31397,
-          "rawBytes": 138768,
+          "brotliBytes": 27446,
+          "gzipBytes": 31547,
+          "rawBytes": 140163,
           "name": "ImageViewer",
           "passesBudget": true
         }
@@ -1754,9 +1754,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 6119,
-      "gzipBytes": 6919,
-      "rawBytes": 28258,
+      "brotliBytes": 6978,
+      "gzipBytes": 7899,
+      "rawBytes": 33462,
       "docsPath": "packages/mobile/src/Toast/Toast.docs.mdx",
       "name": "Toast",
       "packageName": "@meu/mobile",
@@ -1765,17 +1765,17 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4526,
-          "gzipBytes": 5147,
-          "rawBytes": 18756,
+          "brotliBytes": 4826,
+          "gzipBytes": 5485,
+          "rawBytes": 20083,
           "name": "Toast",
           "passesBudget": true
         },
         {
           "budgetBytes": 32768,
-          "brotliBytes": 6036,
-          "gzipBytes": 6825,
-          "rawBytes": 27966,
+          "brotliBytes": 6903,
+          "gzipBytes": 7800,
+          "rawBytes": 33170,
           "name": "ToastProvider",
           "passesBudget": true
         },

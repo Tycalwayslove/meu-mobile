@@ -34,6 +34,10 @@ pending.update({ action: undefined, message: "同步完成", duration: 3000, ton
 同 id `show` 会完整替换旧配置，省略旧 action/handler 即会清除；controller `update` 是局部更新，显式
 传 `undefined` 可清除任一可选字段。
 
+Provider 对同一条消息的视觉更新立即生效；读屏 live announcer 会把连续更新合并为每 500ms 最多一次的
+最新消息。普通状态升级为 warning/danger 时会立即使用 assertive alert 公告。若 message 与 tone 都没有
+变化，仅调整 duration、position 或 action 不会重复播报。独立声明式 `<Toast>` 不经过该 Provider 节流。
+
 悬停、焦点停留、页面隐藏和异步 action 期间计时暂停。action 返回 `false` 或失败时不关闭；失败通过
 `onActionError` 交给调用方处理，并在根输出 `data-action-error=true`。关闭、替换或卸载后的旧 Promise
 结果会被忽略。Toast 不使用遮罩、焦点捕获或滚动锁。

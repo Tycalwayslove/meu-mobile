@@ -4,8 +4,8 @@ slug: result
 package: "@meu/mobile"
 exports: [Result]
 status: verification
-localVerification: pending
-localGapIds: [LOC-RESULT-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -138,7 +138,7 @@ pending 点使用轻量 opacity 动画；系统偏好或 `ConfigProvider motion=
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3561 B / 32768 B 预算，组合 Brotli 3193 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后 status、heading、description 与 actions 保持一致，0 hydration/runtime error。
-- RTL: 逻辑顺序契约；未做 E2E。
+- RTL: 逻辑顺序契约已进入全库 RTL 浏览器矩阵；恢复 action 路径由移动双引擎定点覆盖。
 - Reduced motion: 系统媒体查询与 ConfigProvider 分支均存在；隔离 Next H5 在 Chromium/WebKit 中验证 pending 点 animation-name=none。
 - Mobile Chromium/WebKit E2E: 反馈场景在两种引擎断言命名 status、订单结果内容和“查看订单”恢复 action 的业务输出。
 - Chromatic Light/Dark: 未执行。
@@ -148,7 +148,7 @@ pending 点使用轻量 opacity 动画；系统偏好或 `ConfigProvider motion=
 
 ### 待优化
 
-- 补路由后焦点、pending/error 专项、Chromatic 与 VoiceOver/TalkBack；success/action 双引擎路径已完成。
+- 统一发布批次建立 Chromatic 基线并补 VoiceOver/TalkBack；路由后焦点、pending/error 与 success/action 双引擎路径已完成。
 
 ### 已完成
 
@@ -156,6 +156,7 @@ pending 点使用轻量 opacity 动画；系统偏好或 `ConfigProvider motion=
 - 新增 pending，保留 waiting 兼容；补 reduced-motion、forced-colors 与 SSR 证据。
 - 在隔离 Next H5 中补 status、heading、action 与 hydration 双引擎证据。
 - 补齐 ConfigProvider 低动态分支，归一空槽位和越界运行时 headingLevel。
+- 增加调用方路由焦点模板，在 Chromium/WebKit 中验证 pending → error 时标题聚焦、公告角色与低动态表现。
 
 ## 变更记录
 
@@ -164,3 +165,4 @@ pending 点使用轻量 opacity 动画；系统偏好或 `ConfigProvider motion=
 | 2026-08-29 | 未发布 | 兼容增强     | 新增 `pending`、`headingLevel`，保留 waiting 的 DOM 兼容 | 新代码将 `waiting` 改为 `pending`；关键动态错误可显式传 `role="alert"` |
 | 2026-08-29 | 未发布 | hardening    | 同步 Provider 低动态并归一空槽位与运行时 heading         | API 兼容                                                               |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 success/action/hydration 证据        | 无                                                                     |
+| 2026-08-30 | 未发布 | verification | 增加 pending/error 路由焦点与公告双引擎证据              | 无                                                                     |

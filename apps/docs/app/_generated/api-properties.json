@@ -11354,7 +11354,7 @@
           "type": "(options: ToastUpdateOptions) => void",
           "required": true,
           "event": false,
-          "description": "Partially updates an active or queued record without changing its queue position; explicit `undefined` clears an optional field, and an active update restarts the countdown."
+          "description": "Partially updates an active or queued record without changing its queue position; explicit `undefined` clears an optional field, and an active update restarts the countdown. Changing a visible message or its urgency follows the provider's 500 ms latest-value announcement contract."
         }
       ],
       "ToastOpenChangeDetails": [
@@ -11466,7 +11466,7 @@
           "type": "ReactNode",
           "required": true,
           "event": false,
-          "description": "React subtree that can call {@link useToast }."
+          "description": "React subtree that can call {@link useToast }. The provider renders visual updates immediately but rate-limits its managed live announcer to the latest message every 500 ms, except when escalating from polite status to assertive alert."
         },
         {
           "name": "maxToasts",
@@ -11519,7 +11519,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action."
+          "description": "Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action. Visible content updates immediately, while provider-owned live announcements coalesce to the latest message at most once per 500 ms; escalation from polite status to assertive alert bypasses that interval."
         },
         {
           "name": "message",
@@ -11606,7 +11606,7 @@
           "type": "string",
           "required": false,
           "event": false,
-          "description": "Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action."
+          "description": "Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action. Visible content updates immediately, while provider-owned live announcements coalesce to the latest message at most once per 500 ms; escalation from polite status to assertive alert bypasses that interval."
         },
         {
           "name": "message",

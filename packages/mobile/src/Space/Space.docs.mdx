@@ -4,8 +4,8 @@ slug: space
 package: "@meu/mobile"
 exports: [Space]
 status: verification
-localVerification: pending
-localGapIds: [LOC-SPACE-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -131,7 +131,7 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 - 官网 Next 运行时：当前 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1724 B / 32768 B 预算，组合 Brotli 1538 B；共享样式由应用单独导入一次。
 - SSR/hydration: 共置测试直接验证 `gap=3`、wrap、子项顺序以及容器/按钮节点复用；既有隔离 Next 16 场景存在，本轮未重复执行该全局场景
-- RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
+- RTL: `RightToLeft` Story 进入全库 RTL 矩阵；独立 layout contract 在 Chromium/WebKit 中断言 RTL 视觉顺序、12px token gap、换行和 baseline 对齐
 - Reduced motion: 不适用；没有内建动效
 - Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 token gap、wrap 与内部按钮键盘操作
 - Chromatic Light/Dark: 5 组 Story 可构建，显式 Light/Dark 快照矩阵待补
@@ -141,9 +141,7 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 
 ### 待优化
 
-- 继续补 RTL、baseline 与长内容尺寸断言；基础 wrap/token gap 已进入双引擎门禁。
-- 决定观察档旧 WebView 是明确不支持 gap，还是引入经过验证且不改变外部尺寸的 fallback。
-- 记录真机和 200% 字号重排结果。
+- 统一发布批次记录观察档旧 WebView、真机和 200% 字号重排结果；观察档明确不承诺 flex gap，不为非支持档引入会改变外部尺寸的 fallback。
 
 ### 已完成
 
@@ -152,6 +150,7 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 - 保留现有 Props 与 DOM 结构，未新增无场景证据的布局 API。
 - 在隔离 Next H5 中补 token gap、wrap、键盘交互与 hydration 证据。
 - 增加共置 SSR/hydration 回归，确保布局根和原生子控件不因水合被替换。
+- 增加 Chromium/WebKit RTL 视觉顺序、token gap、wrap、长内容边界与 baseline 几何证据。
 
 ## 变更记录
 
@@ -160,3 +159,4 @@ V2 完整支持档 iOS/WKWebView 15+、Android WebView/Chrome 89+ 均支持 flex
 | 2026-08-28 | 0.1.0  | hardening    | 完善 TSDoc、RTL/wrap/兼容边界和测试证据     | 无       |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 wrap/gap/hydration 证据 | 无       |
 | 2026-08-29 | 未发布 | verification | 增加共置 SSR/hydration 节点复用证据         | 无       |
+| 2026-08-30 | 未发布 | verification | 增加 RTL/wrap/baseline 双引擎几何证据       | 无       |

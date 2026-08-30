@@ -4,12 +4,12 @@ slug: image-viewer
 package: "@meu/mobile"
 exports: [ImageViewer]
 status: verification
-localVerification: pending
-localGapIds: [LOC-IMAGE-VIEWER-01]
+localVerification: complete
+localGapIds: []
 priority: P2
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "379:2919"
@@ -21,6 +21,7 @@ storyIds:
     feedback-imageviewer--empty,
     feedback-imageviewer--error,
     feedback-imageviewer--keyboard-interaction,
+    feedback-imageviewer--rtl-gesture-contract,
     feedback-imageviewer--dark-theme
   ]
 source: packages/mobile/src/ImageViewer
@@ -88,7 +89,7 @@ API 由 `ImageViewerProps` 生成。maxZoom 最小 1、非有限回退 3；doubl
 
 ## 触摸与手势
 
-双指缩放、双击切换缩放、放大后单指/鼠标平移；scale>1 时暂停 Carousel 横向拖动。鼠标 pointer up/cancel、lost pointer capture 与窗口失焦都会清理平移；无法取得 pointer capture 时不启动鼠标平移，按钮与键盘缩放继续可用。touch cancel 不参与双击判定。控制按钮均为 44×44。实际 iOS 边缘返回、页面滚动和多指取消仍需真机验证。
+双指缩放、双击切换缩放、放大后单指/鼠标平移；scale>1 时暂停 Carousel 横向拖动。放大图片的平移始终按物理坐标跟手，RTL 不反转图片在手指下的移动方向；1× 画廊则由 Carousel/Embla 按 RTL 视觉顺序解释拖拽。鼠标会话绑定唯一 pointerId，pointer up/cancel、匹配的 lost pointer capture、窗口失焦、reset、图片失败与卸载都会清理平移并尽力释放 capture；迟到的其他 pointer 终止事件不会误清新会话，取消后下一次独立拖拽可立即恢复。无法取得 pointer capture 时不启动鼠标平移，按钮与键盘缩放继续可用。touch cancel 不参与双击判定。控制按钮均为 44×44。实际 iOS 边缘返回、页面滚动和多指取消仍需真机验证。
 
 ## 无障碍
 
@@ -108,7 +109,7 @@ Mask、surface、ink、border、shadow 与 focus 来自 Token；Portal 根同步
 
 ## RTL 与国际化
 
-ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；键盘左右方向在 RTL 中翻转，Carousel 自身负责轨道方向。
+ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；键盘左右方向在 RTL 中翻转，Carousel 自身负责轨道方向。RTL 中从左向右拖动画廊会进入视觉上的下一张；放大后的图片平移仍保持物理跟手，不因文字方向反转。
 
 ## 浏览器与 WebView
 
@@ -128,15 +129,15 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 
 ## 测试证据
 
-- Unit: `ImageViewer.test.tsx` 覆盖 SSR、模态/焦点/滚动、受控导航拒绝与缩放保留、A → B → A 身份/响应式换源原子重置、键盘/按钮/手势缩放、最终错误重置与宣告、mouse lost capture、Portal motion boundary、figure/figcaption、ref、空状态和 RTL。
-- Story interaction: `KeyboardInteraction.play` 验证打开、键盘缩放与关闭；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Unit: `ImageViewer.test.tsx` 16 项覆盖 SSR、模态/焦点/滚动、受控导航拒绝与缩放保留、A → B → A 身份/响应式换源原子重置、键盘/按钮/手势缩放、最终错误重置与宣告、RTL 物理跟手平移、pointercancel / lost capture 的 pointerId 隔离及后续会话恢复、Portal motion boundary、figure/figcaption、ref 与空状态。
+- Story interaction: `KeyboardInteraction.play` 验证打开、键盘缩放与关闭；当前本地链接清单验证 450 个 Story、421 个永久文档 storyId，按 Storybook title 计的 play-fn 为 81/81。
+- Storybook 浏览器矩阵：已有全量快照在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；本轮重新构建后又定向验证 ImageViewer 8 个 Story × 同一 7 场景共 56 个组合。有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA；定向结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31397 B / 49152 B 预算，组合 Brotli 27306 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 31547 B / 49152 B 预算，组合 Brotli 27446 B；共享样式由应用单独导入一次。
 - SSR/hydration: closed Node SSR 已验证；隔离 Next production 以服务端 open 状态在 Chromium/WebKit 完成 Portal hydration，0 `pageerror`、0 `console.error`。
-- RTL: 键盘方向单测，视觉/drag 待 E2E。
+- RTL: 键盘方向单测；隔离 Next production 在移动 Chromium/WebKit 中用可信 mouse pointer 从左向右拖动真实 Embla 轨道，均从 index 1 进入视觉下一张 index 2，并发布 `drag`。
 - Reduced motion: 系统媒体查询与显式 ConfigProvider motion 均已接入 Portal boundary；属性/类 Unit 已覆盖，浏览器截图待补。
-- Mobile Chromium/WebKit E2E: 打开、按钮/键盘缩放、图片切换、关闭、焦点恢复与 body scroll lock 清理均通过；持续 pinch/pan 帧率仍留待真机。
+- Mobile Chromium/WebKit E2E: 打开、按钮/键盘缩放、图片切换、关闭、焦点恢复与 body scroll lock 清理均通过；新增隔离契约 4/4 通过，覆盖真实 RTL mouse drag，以及合成 pointercancel / lostpointercapture 后下一次可信 mouse pan 恢复。合成终止事件不等同于操作系统级取消；持续 pinch/pan 帧率仍留待真机。
 - Chromatic Light/Dark: 状态 Story 已有，基线待执行。
 - Real device: 未执行。
 
@@ -144,18 +145,19 @@ ConfigProvider 提供中英文文案与 dir。控制位置使用逻辑属性；�
 
 ### 待优化
 
-补 iOS 边缘手势、Android 多指取消、RTL drag 与真机读屏；open hydration 已完成。
+补 iOS 边缘手势、Android 多指系统取消与真机读屏；open hydration、RTL drag 和本地取消恢复契约已完成。
 
 ### 已完成
 
-修正极端 pinch 的平移边界、受控 owner 拒绝导航时的缩放丢失，以及 active item 换源与最终 error 的 scale/drag 双状态失配；补 RTL 键盘、capture 清理、Portal motion boundary 和 figure/error 语义；固化 modal/gesture/SSR 与隔离 Next H5 契约。
+修正极端 pinch 的平移边界、受控 owner 拒绝导航时的缩放丢失，以及 active item 换源与最终 error 的 scale/drag 双状态失配；补 RTL 键盘/真实轨道拖拽、按 pointerId 隔离的 capture 清理与取消后恢复、Portal motion boundary 和 figure/error 语义；固化 modal/gesture/SSR 与隔离 Next H5 契约。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                     | 迁移说明                          |
-| ---------- | ------ | ------------ | -------------------------------------------------------- | --------------------------------- |
-| 2026-08-29 | 未发布 | behavior     | RTL 键盘与极端缩放边界完善                               | LTR 与既有 API 不变               |
-| 2026-08-29 | 未发布 | fix          | 受控拒绝导航保留当前缩放                                 | API 兼容；仅权威 index 改变后重置 |
-| 2026-08-29 | 未发布 | fix          | active item 换源与最终 error 原子重置 scale/drag         | API 不变                          |
-| 2026-08-29 | 未发布 | a11y         | Portal motion、capture 清理、figcaption 与错误宣告       | API 不变                          |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 modal/zoom/navigation/hydration 证据 | 无                                |
+| 日期       | 版本   | 类型         | 内容                                                     | 迁移说明                           |
+| ---------- | ------ | ------------ | -------------------------------------------------------- | ---------------------------------- |
+| 2026-08-29 | 未发布 | behavior     | RTL 键盘与极端缩放边界完善                               | LTR 与既有 API 不变                |
+| 2026-08-29 | 未发布 | fix          | 受控拒绝导航保留当前缩放                                 | API 兼容；仅权威 index 改变后重置  |
+| 2026-08-29 | 未发布 | fix          | active item 换源与最终 error 原子重置 scale/drag         | API 不变                           |
+| 2026-08-29 | 未发布 | a11y         | Portal motion、capture 清理、figcaption 与错误宣告       | API 不变                           |
+| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 modal/zoom/navigation/hydration 证据 | 无                                 |
+| 2026-08-30 | 未发布 | fix          | RTL 真实拖拽与 pointer cancel/lost capture 会话恢复      | API 不变；取消后的下一次拖拽更可靠 |

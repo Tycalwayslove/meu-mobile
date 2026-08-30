@@ -12,6 +12,7 @@ import {
 
 import { useMeuConfig } from "../ConfigProvider";
 import { Toast } from "./Toast";
+import { ToastAnnouncementContext, type ToastAnnouncement } from "./ToastAnnouncementContext";
 import type {
   ToastApi,
   ToastCloseDetails,
@@ -32,6 +33,7 @@ type ToastRecord = {
 };
 
 const exitDuration = 160;
+const announcementInterval = 500;
 const defaultMaxToasts = 20;
 const maximumMaxToasts = 100;
 const ToastContext = createContext<ToastApi | null>(null);
@@ -61,6 +63,11 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
   const config = useMeuConfig();
   const resolvedMaxToasts = normalizeMaxToasts(maxToasts);
   const [records, setRecords] = useState<ToastRecord[]>([]);
+  const [announcement, setAnnouncement] = useState<ToastAnnouncement | null>(null);
+  const announcementSequenceRef = useRef(0);
+  const announcementTimerRef = useRef<number | null>(null);
+  const lastAnnouncementAtRef = useRef<number | null>(null);
+  const lastAnnouncementToneRef = useRef<ToastTone | null>(null);
   const allocatedKeysRef = useRef(new Set<number>());
   const mountedRef = useRef(true);
   const activeKeysRef = useRef(new Set<number>());
@@ -69,6 +76,21 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
   const nextKeyRef = useRef(0);
   const optionsRef = useRef(new Map<number, ToastShowOptions>());
   const removeTimersRef = useRef(new Map<number, number>());
+
+  const publishAnnouncement = useCallback(
+    (key: number, message: ToastShowOptions["message"], tone: ToastTone) => {
+      announcementSequenceRef.current += 1;
+      lastAnnouncementAtRef.current = Date.now();
+      lastAnnouncementToneRef.current = tone;
+      setAnnouncement({
+        key,
+        message,
+        sequence: announcementSequenceRef.current,
+        tone
+      });
+    },
+    []
+  );
 
   const removeRecordLater = useCallback(
     (key: number) => {
@@ -106,15 +128,32 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
     [removeRecordLater]
   );
 
-  const replaceRecord = useCallback((key: number, options: ToastShowOptions) => {
-    if (!activeKeysRef.current.has(key)) return;
-    optionsRef.current.set(key, options);
-    setRecords((currentRecords) =>
-      currentRecords.map((record) =>
-        record.key === key ? { ...record, options, revision: record.revision + 1 } : record
-      )
-    );
-  }, []);
+  const replaceRecord = useCallback(
+    (key: number, options: ToastShowOptions) => {
+      if (!activeKeysRef.current.has(key)) return;
+      const previousOptions = optionsRef.current.get(key);
+      const previousTone =
+        previousOptions === undefined || previousOptions.tone === undefined
+          ? "neutral"
+          : previousOptions.tone;
+      const nextTone = options.tone === undefined ? "neutral" : options.tone;
+      const escalatesToAlert =
+        (nextTone === "warning" || nextTone === "danger") &&
+        previousTone !== "warning" &&
+        previousTone !== "danger";
+      const firstAllocatedKey = allocatedKeysRef.current.values().next();
+      optionsRef.current.set(key, options);
+      setRecords((currentRecords) =>
+        currentRecords.map((record) =>
+          record.key === key ? { ...record, options, revision: record.revision + 1 } : record
+        )
+      );
+      if (!firstAllocatedKey.done && firstAllocatedKey.value === key && escalatesToAlert) {
+        publishAnnouncement(key, options.message, nextTone);
+      }
+    },
+    [publishAnnouncement]
+  );
 
   const updateRecord = useCallback(
     (key: number, updates: ToastUpdateOptions) => {
@@ -167,6 +206,7 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
         if (options.onClose) options.onClose({ reason: "overflow" });
         return createController(id, key);
       }
+      const isOnlyRecord = allocatedKeysRef.current.size === 0;
       allocatedKeysRef.current.add(key);
       activeKeysRef.current.add(key);
       idToKeyRef.current.set(id, key);
@@ -176,9 +216,10 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
         ...currentRecords,
         { key, open: true, options, revision: 0 }
       ]);
+      if (isOnlyRecord) publishAnnouncement(key, options.message, options.tone || "neutral");
       return createController(id, key);
     },
-    [createController, replaceRecord, resolvedMaxToasts]
+    [createController, publishAnnouncement, replaceRecord, resolvedMaxToasts]
   );
 
   const showTone = useCallback(
@@ -266,6 +307,61 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
     [clear, danger, show, success, warning]
   );
   const current = records[0];
+  const currentKey = current === undefined ? undefined : current.key;
+  const currentMessage = current === undefined ? undefined : current.options.message;
+  const currentOpen = current === undefined ? false : current.open;
+  const currentTone =
+    current === undefined || current.options.tone === undefined ? "neutral" : current.options.tone;
+  const renderedAnnouncement =
+    currentOpen &&
+    announcement !== null &&
+    announcement.key === currentKey &&
+    announcement.message === currentMessage &&
+    announcement.tone === currentTone
+      ? announcement
+      : null;
+
+  useEffect(() => {
+    if (announcementTimerRef.current !== null) {
+      window.clearTimeout(announcementTimerRef.current);
+      announcementTimerRef.current = null;
+    }
+    if (currentKey === undefined || !currentOpen || currentMessage === undefined) return undefined;
+    if (
+      announcement !== null &&
+      announcement.key === currentKey &&
+      announcement.message === currentMessage &&
+      announcement.tone === currentTone
+    ) {
+      return undefined;
+    }
+
+    const now = Date.now();
+    const lastAnnouncementAt = lastAnnouncementAtRef.current;
+    const lastTone = lastAnnouncementToneRef.current;
+    const escalatesToAlert =
+      (currentTone === "warning" || currentTone === "danger") &&
+      lastTone !== "warning" &&
+      lastTone !== "danger";
+    const delay =
+      lastAnnouncementAt === null || escalatesToAlert
+        ? 0
+        : Math.max(0, announcementInterval - (now - lastAnnouncementAt));
+
+    const publish = () => {
+      announcementTimerRef.current = null;
+      publishAnnouncement(currentKey, currentMessage, currentTone);
+    };
+
+    announcementTimerRef.current = window.setTimeout(publish, delay);
+
+    return () => {
+      if (announcementTimerRef.current !== null) {
+        window.clearTimeout(announcementTimerRef.current);
+        announcementTimerRef.current = null;
+      }
+    };
+  }, [announcement, currentKey, currentMessage, currentOpen, currentTone, publishAnnouncement]);
 
   let renderedToast = null;
   if (current) {
@@ -273,16 +369,18 @@ export function ToastProvider({ children, maxToasts = defaultMaxToasts }: ToastP
     delete toastOptions.id;
     delete toastOptions.onClose;
     renderedToast = (
-      <ToastTimerResetContext.Provider value={current.revision}>
-        <Toast
-          {...toastOptions}
-          key={current.key}
-          open={current.open}
-          onOpenChange={(nextOpen, details) => {
-            if (!nextOpen) closeRecord(current.key, details);
-          }}
-        />
-      </ToastTimerResetContext.Provider>
+      <ToastAnnouncementContext.Provider value={renderedAnnouncement}>
+        <ToastTimerResetContext.Provider value={current.revision}>
+          <Toast
+            {...toastOptions}
+            key={current.key}
+            open={current.open}
+            onOpenChange={(nextOpen, details) => {
+              if (!nextOpen) closeRecord(current.key, details);
+            }}
+          />
+        </ToastTimerResetContext.Provider>
+      </ToastAnnouncementContext.Provider>
     );
   }
 

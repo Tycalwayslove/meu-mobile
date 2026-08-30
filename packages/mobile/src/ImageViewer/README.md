@@ -38,8 +38,10 @@ const [index, setIndex] = useState(0);
 - Web 实现使用 Portal、厚 Mask、页面滚动锁、焦点圈定与返回焦点。图片单击和遮罩单击不会关闭，避免与
   双击缩放冲突。
 - Portal 边界同步 locale、dir、theme 与 motion；系统和显式 reduced motion 都会把过渡降为 0–1ms。鼠标平移
-  在 pointer up、pointer cancel、lost pointer capture 或窗口失焦时结束；无法取得 pointer capture 时不启动平移，
+  会按 pointerId 隔离，并在 pointer up、pointer cancel、匹配的 lost pointer capture、窗口失焦、reset 或卸载时结束；
+  迟到的其他 pointer 事件不会清除新会话，取消后下一次拖拽可立即恢复。无法取得 pointer capture 时不启动平移，
   仍保留按钮和键盘缩放。
+- RTL 的 1× 画廊拖拽按视觉顺序切图；放大图片的平移按物理坐标跟手，不随文字方向反转。
 - `ImageViewerRef` 只暴露平台中立的 goTo / previous / next / resetZoom 与 nativeElement。
 
 完整运行时支持范围为 iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+。iOS 13–14、Chromium /

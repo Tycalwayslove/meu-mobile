@@ -4,8 +4,8 @@ slug: badge
 package: "@meu/mobile"
 exports: [Badge]
 status: verification
-localVerification: pending
-localGapIds: [LOC-BADGE-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -34,7 +34,7 @@ source: packages/mobile/src/Badge
 - 无 label 的 dot 装饰性隐藏；label 为 dot 提供状态含义，也可替换计数的可访问名称。
 - RTL 定位与 forced-colors 已处理；组件无动画。
 
-状态为 `verification`；动态公告、视觉基线和真机证据待补。
+状态为 `verification`；本地结构、视觉场景与双引擎消费路径已完成，最终 Chromatic 基线和真机状态朗读仍是发布门禁。
 
 ## 何时使用
 
@@ -128,7 +128,7 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2127 B / 32768 B 预算，组合 Brotli 1897 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Badge.ssr.test.tsx` 覆盖 overflow 与 dot label；隔离 Next 16 hydration 后 99+ 与 dot accessible label 保持一致，0 hydration/runtime error。
-- RTL: Unit 覆盖 offset 数据归一化；逻辑定位由 CSS 实现，视觉截图待补。
+- RTL: Unit 覆盖 offset 数据归一化；逻辑定位由 CSS 实现，并已进入全库 RTL 与 forced-colors 浏览器矩阵。
 - Reduced motion: 无动画，不适用。
 - Mobile Chromium/WebKit E2E: 原子展示场景在两种引擎断言 `128 → 99+` 与 dot 的“店铺在线”名称，并与 Avatar 组合。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
@@ -138,7 +138,7 @@ marker 使用 inset-inline-end；RTL 时翻转位移方向。`max+` 未本地化
 
 ### 待优化
 
-- 完成 RTL/forced-colors/Light-Dark 视觉与真机状态朗读验证；基础 count/dot 双引擎路径已完成。
+- 统一发布批次建立 Chromatic 基线，并补真机状态朗读证据；本地 RTL、forced-colors、Light/Dark 与 count/dot 双引擎路径已完成。
 
 ### 已完成
 

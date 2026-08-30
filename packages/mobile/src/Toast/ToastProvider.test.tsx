@@ -10,6 +10,12 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+function getVisualMessage() {
+  const message = document.querySelector<HTMLElement>("[data-meu-toast-message]");
+  if (!message) throw new Error("Expected a visible provider Toast message");
+  return message;
+}
+
 function QueueConsumer() {
   const toast = useToast();
   const firstRef = useRef<ToastController | null>(null);
@@ -105,6 +111,11 @@ describe("ToastProvider", () => {
     act(() => {
       vi.advanceTimersByTime(160);
     });
+    expect(getVisualMessage().textContent).toBe("第二条消息");
+    expect(screen.getByRole("status").textContent).toBe("");
+    act(() => {
+      vi.advanceTimersByTime(340);
+    });
     expect(screen.getByRole("status").textContent).toBe("第二条消息");
   });
 
@@ -118,15 +129,183 @@ describe("ToastProvider", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "显示同步" }));
     fireEvent.click(screen.getByRole("button", { name: "更新同步" }));
-    expect(screen.getByRole("status").textContent).toBe("同步完成");
-    expect(screen.getByRole("status").closest("[data-tone='success']")).toBeTruthy();
+    expect(getVisualMessage().textContent).toBe("同步完成");
+    expect(getVisualMessage().closest("[data-tone='success']")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "同 ID 更新" }));
     expect(screen.getByRole("alert").textContent).toBe("同步结果已刷新");
-    expect(screen.getAllByText("同步结果已刷新")).toHaveLength(1);
+    expect(screen.getAllByText("同步结果已刷新")).toHaveLength(2);
 
     fireEvent.click(screen.getByRole("button", { name: "关闭同步" }));
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("rate-limits rapid same-id announcements while rendering the latest message immediately", () => {
+    vi.useFakeTimers();
+
+    function ProgressConsumer() {
+      const toast = useToast();
+      return (
+        <button
+          type="button"
+          onClick={() => {
+            toast.show({ duration: 0, id: "upload", message: "上传 0%" });
+            window.setTimeout(
+              () => toast.show({ duration: 0, id: "upload", message: "上传 25%" }),
+              100
+            );
+            window.setTimeout(
+              () => toast.show({ duration: 0, id: "upload", message: "上传 75%" }),
+              200
+            );
+          }}
+        >
+          开始上传
+        </button>
+      );
+    }
+
+    render(
+      <ToastProvider>
+        <ProgressConsumer />
+      </ToastProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "开始上传" }));
+
+    const announcer = screen.getByRole("status");
+    expect(announcer.textContent).toBe("上传 0%");
+    expect(announcer.getAttribute("data-announcement-sequence")).toBe("1");
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(getVisualMessage().textContent).toBe("上传 25%");
+    expect(screen.getByRole("status").textContent).toBe("");
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(getVisualMessage().textContent).toBe("上传 75%");
+    expect(screen.getByRole("status").textContent).toBe("");
+
+    act(() => {
+      vi.advanceTimersByTime(299);
+    });
+    expect(screen.getByRole("status").textContent).toBe("");
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByRole("status").textContent).toBe("上传 75%");
+    expect(screen.getByRole("status").getAttribute("data-announcement-sequence")).toBe("2");
+  });
+
+  it("announces an urgent escalation immediately, then coalesces further assertive replacements", () => {
+    vi.useFakeTimers();
+
+    function EscalationConsumer() {
+      const toast = useToast();
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => toast.show({ duration: 0, id: "payment", message: "正在支付" })}
+          >
+            开始支付
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              toast.danger({ duration: 0, id: "payment", message: "支付失败，请重试" })
+            }
+          >
+            支付失败
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              toast.warning({ duration: 0, id: "payment", message: "仍在重试，请稍候" })
+            }
+          >
+            更新警告
+          </button>
+        </>
+      );
+    }
+
+    render(
+      <ToastProvider>
+        <EscalationConsumer />
+      </ToastProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "开始支付" }));
+    expect(screen.getByRole("status").textContent).toBe("正在支付");
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "支付失败" }));
+    expect(screen.getByRole("alert").textContent).toBe("支付失败，请重试");
+    expect(screen.getByRole("alert").getAttribute("data-announcement-sequence")).toBe("2");
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "更新警告" }));
+    expect(getVisualMessage().textContent).toBe("仍在重试，请稍候");
+    expect(screen.getByRole("alert").textContent).toBe("");
+
+    act(() => {
+      vi.advanceTimersByTime(399);
+    });
+    expect(screen.getByRole("alert").textContent).toBe("");
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByRole("alert").textContent).toBe("仍在重试，请稍候");
+    expect(screen.getByRole("alert").getAttribute("data-announcement-sequence")).toBe("3");
+  });
+
+  it("does not reannounce updates that leave the message and urgency unchanged", () => {
+    function StableAnnouncementConsumer() {
+      const toast = useToast();
+      const controllerRef = useRef<ToastController | null>(null);
+      return (
+        <>
+          <button
+            type="button"
+            onClick={() => {
+              controllerRef.current = toast.show({ duration: 0, message: "已保存" });
+            }}
+          >
+            显示保存结果
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (controllerRef.current) {
+                controllerRef.current.update({ duration: 4000, position: "top" });
+              }
+            }}
+          >
+            更新展示配置
+          </button>
+        </>
+      );
+    }
+
+    render(
+      <ToastProvider>
+        <StableAnnouncementConsumer />
+      </ToastProvider>
+    );
+    fireEvent.click(screen.getByRole("button", { name: "显示保存结果" }));
+    const announcer = screen.getByRole("status");
+    expect(announcer.textContent).toBe("已保存");
+    expect(announcer.getAttribute("data-announcement-sequence")).toBe("1");
+
+    fireEvent.click(screen.getByRole("button", { name: "更新展示配置" }));
+    expect(screen.getByRole("status").textContent).toBe("已保存");
+    expect(screen.getByRole("status").getAttribute("data-announcement-sequence")).toBe("1");
   });
 
   it("restarts the active duration when the same id is shown again", () => {
@@ -170,7 +349,7 @@ describe("ToastProvider", () => {
       vi.advanceTimersByTime(999);
     });
     fireEvent.click(screen.getByRole("button", { name: "刷新同步" }));
-    expect(screen.getByRole("status").textContent).toBe("同步仍在进行");
+    expect(getVisualMessage().textContent).toBe("同步仍在进行");
     act(() => {
       vi.advanceTimersByTime(999);
     });
@@ -228,7 +407,7 @@ describe("ToastProvider", () => {
     fireEvent.click(screen.getByRole("button", { name: "重试" }));
     expect(screen.getByRole("button", { name: "重试" }).hasAttribute("disabled")).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "替换结果" }));
-    expect(screen.getByRole("status").textContent).toBe("后台同步已恢复");
+    expect(getVisualMessage().textContent).toBe("后台同步已恢复");
     expect(screen.queryByRole("button", { name: "重试" })).toBeNull();
 
     await act(async () => {
@@ -236,7 +415,7 @@ describe("ToastProvider", () => {
       await Promise.resolve();
     });
     expect(onActionError).not.toHaveBeenCalled();
-    expect(screen.getByRole("status").textContent).toBe("后台同步已恢复");
+    expect(getVisualMessage().textContent).toBe("后台同步已恢复");
   });
 
   it("lets controller updates explicitly clear optional actions and handlers", () => {
@@ -298,7 +477,7 @@ describe("ToastProvider", () => {
     expect(screen.getByRole("button", { name: "撤销" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "清除可选配置" }));
     expect(screen.queryByRole("button", { name: "撤销" })).toBeNull();
-    expect(screen.getByRole("status").textContent).toBe("删除已确认");
+    expect(getVisualMessage().textContent).toBe("删除已确认");
     fireEvent.click(screen.getByRole("button", { name: "关闭消息" }));
     expect(onClose).not.toHaveBeenCalled();
     expect(onActionError).not.toHaveBeenCalled();
@@ -344,7 +523,7 @@ describe("ToastProvider", () => {
     expect(screen.queryByText("超过上限")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "替换首条" }));
-    expect(screen.getByRole("status").textContent).toBe("处理完成");
+    expect(getVisualMessage().textContent).toBe("处理完成");
     expect(onOverflow).toHaveBeenCalledTimes(1);
   });
 

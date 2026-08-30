@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useRef, useState } from "react";
 
 import { Button } from "../Button";
-import { ThemeProvider } from "../ConfigProvider";
+import { ConfigProvider, ThemeProvider } from "../ConfigProvider";
 import { nextStoryFrame, waitForStory } from "../storyTestUtils";
 import { ImageViewer } from "./ImageViewer";
 
@@ -46,6 +46,22 @@ function Preview({ minimal = false, single = false }: { minimal?: boolean; singl
         onOpenChange={setOpen}
       />
     </>
+  );
+}
+
+function RtlGesturePreview() {
+  const [index, setIndex] = useState(1);
+
+  return (
+    <ConfigProvider dir="rtl">
+      <ImageViewer
+        open
+        images={images}
+        index={index}
+        renderFooter={(item) => item.alt}
+        onIndexChange={setIndex}
+      />
+    </ConfigProvider>
   );
 }
 
@@ -97,6 +113,11 @@ export const KeyboardInteraction: Story = {
     const close = document.querySelector<HTMLButtonElement>("button[aria-label='关闭图片预览']");
     if (close) close.click();
   }
+};
+
+export const RtlGestureContract: Story = {
+  args: { images },
+  render: () => <RtlGesturePreview />
 };
 
 export const DarkTheme: Story = {

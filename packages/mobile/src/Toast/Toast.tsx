@@ -8,6 +8,7 @@ import { useMeuConfig } from "../ConfigProvider";
 import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { useControllableOpen } from "../internal/useControllableOpen";
 import { useOverlayPresence } from "../internal/useOverlayPresence";
+import { VisuallyHidden } from "../internal/VisuallyHidden";
 import {
   action as actionStyle,
   icon as iconStyle,
@@ -16,6 +17,7 @@ import {
   viewport
 } from "./Toast.css";
 import type { ToastOpenChangeDetails, ToastProps } from "./types";
+import { ToastAnnouncementContext } from "./ToastAnnouncementContext";
 import { ToastTimerResetContext } from "./ToastTimerContext";
 
 const defaultDuration = 3000;
@@ -134,6 +136,8 @@ export function Toast({
   ...props
 }: ToastProps) {
   const config = useMeuConfig();
+  const managedAnnouncement = useContext(ToastAnnouncementContext);
+  const providerManagesAnnouncement = managedAnnouncement !== undefined;
   const timerResetKey = useContext(ToastTimerResetContext);
   const configBoundary = getConfigBoundaryProps(config);
   const [pending, setPending] = useState(false);
@@ -151,7 +155,9 @@ export function Toast({
   const effectiveDuration = getEffectiveDuration(duration, action !== undefined);
   const portalContainer = container === undefined ? config.portalContainer : container;
   const resolvedIcon = icon === undefined ? null : icon;
-  const liveRole = tone === "warning" || tone === "danger" ? "alert" : "status";
+  const announcementTone = managedAnnouncement ? managedAnnouncement.tone : tone;
+  const liveRole =
+    announcementTone === "warning" || announcementTone === "danger" ? "alert" : "status";
   const { pause, resume } = usePausableTimer({
     duration: effectiveDuration,
     onTimeout: () => requestOpenChange(false, { reason: "timeout" }),
@@ -303,14 +309,35 @@ export function Toast({
               {resolvedIcon}
             </span>
           ) : null}
-          <div
-            className={messageStyle}
-            role={liveRole}
-            aria-atomic="true"
-            aria-live={liveRole === "alert" ? "assertive" : "polite"}
-          >
-            {message}
-          </div>
+          {providerManagesAnnouncement ? (
+            <>
+              <div className={messageStyle} data-meu-toast-message>
+                {message}
+              </div>
+              <VisuallyHidden
+                role={liveRole}
+                aria-atomic="true"
+                aria-live={liveRole === "alert" ? "assertive" : "polite"}
+                data-announcement-sequence={
+                  managedAnnouncement === null ? undefined : managedAnnouncement.sequence
+                }
+                data-meu-toast-announcer
+              >
+                {managedAnnouncement ? (
+                  <span key={managedAnnouncement.sequence}>{managedAnnouncement.message}</span>
+                ) : null}
+              </VisuallyHidden>
+            </>
+          ) : (
+            <div
+              className={messageStyle}
+              role={liveRole}
+              aria-atomic="true"
+              aria-live={liveRole === "alert" ? "assertive" : "polite"}
+            >
+              {message}
+            </div>
+          )}
           {action ? (
             <button
               className={actionStyle}

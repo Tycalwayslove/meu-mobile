@@ -14,7 +14,10 @@ import type { ImageViewerItem, ImageViewerScaleChangeReason } from "./types";
 type Transform = { scale: number; x: number; y: number };
 type PanGesture = {
   mode: "pan";
+  captureTarget: HTMLDivElement | null;
   moved: boolean;
+  pointerId: number | null;
+  source: "mouse" | "touch";
   startOffsetX: number;
   startOffsetY: number;
   startX: number;
@@ -53,6 +56,29 @@ const initialTransform: Transform = { scale: 1, x: 0, y: 0 };
 
 function distance(first: React.Touch, second: React.Touch) {
   return Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY);
+}
+
+function releaseMouseCapture(gesture: Gesture | null) {
+  if (
+    !gesture ||
+    gesture.mode !== "pan" ||
+    gesture.source !== "mouse" ||
+    gesture.pointerId === null ||
+    !gesture.captureTarget
+  ) {
+    return;
+  }
+  try {
+    if (
+      typeof gesture.captureTarget.hasPointerCapture === "function" &&
+      typeof gesture.captureTarget.releasePointerCapture === "function" &&
+      gesture.captureTarget.hasPointerCapture(gesture.pointerId)
+    ) {
+      gesture.captureTarget.releasePointerCapture(gesture.pointerId);
+    }
+  } catch {
+    return;
+  }
 }
 
 export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
@@ -94,7 +120,16 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
       publish({ ...transformRef.current, scale }, reason);
     }
 
+    function clearGesture({ releaseCapture = false } = {}) {
+      const gesture = gestureRef.current;
+      gestureRef.current = null;
+      setInteracting(false);
+      if (releaseCapture) releaseMouseCapture(gesture);
+      return gesture;
+    }
+
     function reset(reason: ImageViewerScaleChangeReason = "reset") {
+      clearGesture({ releaseCapture: true });
       publish(initialTransform, reason);
     }
 
@@ -109,10 +144,19 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
       zoomOut: () => setScale(transformRef.current.scale - 0.5, "zoom-out")
     }));
 
-    function startPan(clientX: number, clientY: number) {
+    function startPan(
+      clientX: number,
+      clientY: number,
+      source: PanGesture["source"] = "touch",
+      pointerId: number | null = null,
+      captureTarget: HTMLDivElement | null = null
+    ) {
       gestureRef.current = {
         mode: "pan",
+        captureTarget,
         moved: false,
+        pointerId,
+        source,
         startOffsetX: transformRef.current.x,
         startOffsetY: transformRef.current.y,
         startX: clientX,
@@ -121,9 +165,10 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
       setInteracting(true);
     }
 
-    function movePan(clientX: number, clientY: number) {
+    function movePan(clientX: number, clientY: number, pointerId: number | null = null) {
       const gesture = gestureRef.current;
       if (!gesture || gesture.mode !== "pan") return;
+      if (gesture.source === "mouse" && gesture.pointerId !== pointerId) return;
       const deltaX = clientX - gesture.startX;
       const deltaY = clientY - gesture.startY;
       if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) gesture.moved = true;
@@ -134,20 +179,26 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
       });
     }
 
-    function finishGesture() {
+    function finishGesture(releaseCapture = false) {
       if (!gestureRef.current && !interacting) return;
-      gestureRef.current = null;
-      setInteracting(false);
+      clearGesture({ releaseCapture });
       publish(transformRef.current);
     }
 
     useEffect(() => {
       const cancelGesture = () => {
+        const gesture = gestureRef.current;
         gestureRef.current = null;
         setInteracting(false);
+        releaseMouseCapture(gesture);
       };
       window.addEventListener("blur", cancelGesture);
-      return () => window.removeEventListener("blur", cancelGesture);
+      return () => {
+        window.removeEventListener("blur", cancelGesture);
+        const gesture = gestureRef.current;
+        gestureRef.current = null;
+        releaseMouseCapture(gesture);
+      };
     }, []);
 
     function handleTouchStart(event: ReactTouchEvent<HTMLDivElement>) {
@@ -206,38 +257,52 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
     }
 
     function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-      if (event.pointerType !== "mouse" || event.button !== 0 || transform.scale <= 1) return;
+      if (
+        event.pointerType !== "mouse" ||
+        event.button !== 0 ||
+        transformRef.current.scale <= 1 ||
+        gestureRef.current
+      ) {
+        return;
+      }
       try {
         if (!event.currentTarget.setPointerCapture) return;
         event.currentTarget.setPointerCapture(event.pointerId);
       } catch {
-        // Keep button and keyboard zoom available instead of starting a pan that cannot terminate.
         return;
       }
-      startPan(event.clientX, event.clientY);
+      startPan(event.clientX, event.clientY, "mouse", event.pointerId, event.currentTarget);
     }
 
     function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-      if (event.pointerType !== "mouse" || !gestureRef.current) return;
-      movePan(event.clientX, event.clientY);
+      if (event.pointerType !== "mouse") return;
+      movePan(event.clientX, event.clientY, event.pointerId);
     }
 
     function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
-      if (event.pointerType !== "mouse" || !gestureRef.current) return;
-      finishGesture();
-      try {
-        if (
-          event.currentTarget.hasPointerCapture &&
-          event.currentTarget.hasPointerCapture(event.pointerId)
-        ) {
-          event.currentTarget.releasePointerCapture(event.pointerId);
-        }
-      } catch {
-        // The browser may already have released capture during cancellation.
+      const gesture = gestureRef.current;
+      if (
+        event.pointerType !== "mouse" ||
+        !gesture ||
+        gesture.mode !== "pan" ||
+        gesture.source !== "mouse" ||
+        gesture.pointerId !== event.pointerId
+      ) {
+        return;
       }
+      finishGesture(true);
     }
 
-    function handleLostPointerCapture() {
+    function handleLostPointerCapture(event: ReactPointerEvent<HTMLDivElement>) {
+      const gesture = gestureRef.current;
+      if (
+        !gesture ||
+        gesture.mode !== "pan" ||
+        gesture.source !== "mouse" ||
+        gesture.pointerId !== event.pointerId
+      ) {
+        return;
+      }
       finishGesture();
     }
 
@@ -292,8 +357,6 @@ export const ZoomableImage = forwardRef<ZoomableImageRef, ZoomableImageProps>(
             onError={() => {
               setFailed(true);
               lastTapRef.current = null;
-              gestureRef.current = null;
-              setInteracting(false);
               reset();
             }}
           />

@@ -238,27 +238,74 @@ describe("ImageViewer", () => {
     expect(onScaleChange).toHaveBeenLastCalledWith(2, { index: 0, reason: "pinch" });
   });
 
-  it("cleans up mouse pan state when pointer capture is lost", () => {
-    render(<ImageViewer open images={images.slice(0, 1)} />);
+  it("keeps RTL pan physically follow the pointer and recovers after cancel and lost capture", () => {
+    render(
+      <ConfigProvider dir="rtl">
+        <ImageViewer open images={images.slice(0, 1)} />
+      </ConfigProvider>
+    );
     fireEvent.click(screen.getByRole("button", { name: "放大图片" }));
     const stage = document.querySelector<HTMLElement>('[data-meu-image-viewer-stage="true"]');
     const media = document.querySelector<HTMLElement>('[data-meu-image-viewer-media="true"]');
     if (!stage || !media) throw new Error("Expected image gesture elements");
+    const releasePointerCapture = vi.fn();
     Object.defineProperties(stage, {
+      clientHeight: { configurable: true, value: 400 },
+      clientWidth: { configurable: true, value: 320 },
       hasPointerCapture: { configurable: true, value: vi.fn(() => true) },
-      releasePointerCapture: { configurable: true, value: vi.fn() },
+      releasePointerCapture: { configurable: true, value: releasePointerCapture },
       setPointerCapture: { configurable: true, value: vi.fn() }
     });
 
     fireEvent.pointerDown(stage, {
       button: 0,
-      clientX: 20,
-      clientY: 20,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 7,
+      pointerType: "mouse"
+    });
+    fireEvent.pointerMove(stage, {
+      clientX: 140,
+      clientY: 100,
       pointerId: 7,
       pointerType: "mouse"
     });
     expect(media.getAttribute("data-interacting")).toBe("true");
-    fireEvent.lostPointerCapture(stage, { pointerId: 7, pointerType: "mouse" });
+    expect(media.style.getPropertyValue("--meu-image-viewer-x")).toBe("40px");
+
+    fireEvent.lostPointerCapture(stage, { pointerId: 6, pointerType: "mouse" });
+    expect(media.getAttribute("data-interacting")).toBe("true");
+    fireEvent.pointerCancel(stage, { pointerId: 7, pointerType: "mouse" });
+    expect(media.getAttribute("data-interacting")).toBe("false");
+    expect(releasePointerCapture).toHaveBeenCalledWith(7);
+
+    fireEvent.pointerDown(stage, {
+      button: 0,
+      clientX: 140,
+      clientY: 100,
+      pointerId: 8,
+      pointerType: "mouse"
+    });
+    fireEvent.pointerMove(stage, {
+      clientX: 100,
+      clientY: 100,
+      pointerId: 8,
+      pointerType: "mouse"
+    });
+    expect(media.getAttribute("data-interacting")).toBe("true");
+    expect(media.style.getPropertyValue("--meu-image-viewer-x")).toBe("0px");
+    fireEvent.lostPointerCapture(stage, { pointerId: 8, pointerType: "mouse" });
+    expect(media.getAttribute("data-interacting")).toBe("false");
+
+    fireEvent.pointerDown(stage, {
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      pointerId: 9,
+      pointerType: "mouse"
+    });
+    expect(media.getAttribute("data-interacting")).toBe("true");
+    fireEvent.pointerUp(stage, { pointerId: 9, pointerType: "mouse" });
     expect(media.getAttribute("data-interacting")).toBe("false");
   });
 

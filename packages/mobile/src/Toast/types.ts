@@ -116,7 +116,7 @@ type WithoutOpenState<T> = Omit<T, "defaultOpen" | "onOpenChange" | "open">;
  * @public
  */
 export type ToastShowOptions = WithoutOpenState<ToastProps> & {
-  /** Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action. */
+  /** Stable queue identity. Showing the same id fully replaces its options without changing queue position; an active replacement restarts its countdown and invalidates any pending prior action. Visible content updates immediately, while provider-owned live announcements coalesce to the latest message at most once per 500 ms; escalation from polite status to assertive alert bypasses that interval. */
   id?: string;
   /** Called exactly once when the provider record closes or a new record is rejected at capacity. */
   onClose?: (details: ToastCloseDetails) => void;
@@ -146,7 +146,7 @@ export type ToastController = {
   close: () => void;
   /** Stable record id. */
   id: string;
-  /** Partially updates an active or queued record without changing its queue position; explicit `undefined` clears an optional field, and an active update restarts the countdown. */
+  /** Partially updates an active or queued record without changing its queue position; explicit `undefined` clears an optional field, and an active update restarts the countdown. Changing a visible message or its urgency follows the provider's 500 ms latest-value announcement contract. */
   update: (options: ToastUpdateOptions) => void;
 };
 
@@ -181,7 +181,7 @@ export type ToastApi = {
  * @public
  */
 export type ToastProviderProps = {
-  /** React subtree that can call {@link useToast}. */
+  /** React subtree that can call {@link useToast}. The provider renders visual updates immediately but rate-limits its managed live announcer to the latest message every 500 ms, except when escalating from polite status to assertive alert. */
   children: ReactNode;
   /**
    * Maximum provider-owned records, including the visible item, queued items, and a closing item awaiting removal. New unique records are rejected at the limit while same-id replacements remain accepted. Lowering the limit preserves the FIFO head, evicts newest queued records with reason `overflow`, and converges after their exit period. Finite values are truncated and clamped to 1–100.

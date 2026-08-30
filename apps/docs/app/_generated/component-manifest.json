@@ -2746,10 +2746,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Badge/Badge.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-BADGE-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3018,10 +3016,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Card/Card.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-CARD-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3250,10 +3246,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Collapse/Collapse.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-COLLAPSE-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3593,10 +3587,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Divider/Divider.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-DIVIDER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3669,10 +3661,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Empty/Empty.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-EMPTY-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4390,10 +4380,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ImageViewer/ImageViewer.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-IMAGE-VIEWER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4769,10 +4757,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PaginationDots/PaginationDots.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-PAGINATION-DOTS-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4813,10 +4799,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PasscodeInput/PasscodeInput.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-PASSCODE-INPUT-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5115,10 +5099,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Progress/Progress.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-PROGRESS-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5310,10 +5292,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Result/Result.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-RESULT-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5624,10 +5604,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Skeleton/Skeleton.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-SKELETON-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5712,10 +5690,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Space/Space.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-SPACE-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5796,10 +5772,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Steps/Steps.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-STEPS-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "type",
@@ -6309,10 +6283,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Toast/Toast.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-TOAST-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6597,10 +6569,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 16,
+    "locallyVerifiedProducts": 30,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 52,
+    "productsWithLocalGaps": 38,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

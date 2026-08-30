@@ -4,8 +4,8 @@ slug: card
 package: "@meu/mobile"
 exports: [Card]
 status: verification
-localVerification: pending
-localGapIds: [LOC-CARD-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -35,7 +35,7 @@ source: packages/mobile/src/Card
 - 保留 0/空字符串等有意内容；null/undefined/boolean/空数组/空 Fragment 不创建空 section。不把 Card 自动变成 button/link，避免嵌套交互冲突。
 - RTL 使用逻辑 margin；forced-colors 保留边框。无动画。
 
-状态为 `verification`；共置 Unit、SSR/hydration 与 Story 已覆盖核心结构，Chromium/WebKit 业务集成、Chromatic 和真机仍需以实际执行记录签字。
+状态为 `verification`；共置 Unit、SSR/hydration、Story 和全库移动浏览器矩阵已覆盖本地契约，Chromatic 和真机仍需在统一发布批次签字。
 
 ## 何时使用
 
@@ -129,14 +129,16 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 - Unit: `Card.test.tsx` 覆盖静态根、0/空字符串与空 ReactNode、media、任意 footer 和独立 action。
 - SSR/hydration: `Card.ssr.test.tsx` 直接断言服务端 slots，并在 jsdom hydrate 后检查 0 recoverable error、div 根和独立 button。
 - Story: `Outlined` 有结构 play；`NarrowRtlContent` 提供 RTL、长词、窄宽、长 extra 和换行 actions 的人工/视觉检查场景。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、hydration/runtime error 和 axe WCAG A/AA 均通过。
 - Reduced motion: Card 本身无动画。
-- 尚无本目录可复核的 Chromatic 基线、真机读屏或 iOS 13/Chrome 70 运行时通过记录；不能从仓库级静态扫描推导这些结论。
+- 尚无 Chromatic 基线和真机读屏记录；iOS 13/Chrome 70 仍只是观察档，不从静态兼容扫描推导运行时支持结论。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补 forced-colors/Light-Dark 的签字截图和支持下限真机记录。
+- 统一发布批次建立 Chromatic 签字基线，并补支持下限真机记录；本地 forced-colors/Light-Dark/RTL/窄宽矩阵已完成。
 
 ### 已完成
 

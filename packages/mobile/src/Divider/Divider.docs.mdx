@@ -4,8 +4,8 @@ slug: divider
 package: "@meu/mobile"
 exports: [Divider]
 status: verification
-localVerification: pending
-localGapIds: [LOC-DIVIDER-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -138,7 +138,7 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 - 官网 Next 运行时：当前 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1853 B / 32768 B 预算，组合 Brotli 1637 B；共享样式由应用单独导入一次。
 - SSR/hydration: 共置测试直接验证 horizontal/vertical 语义与根节点复用；既有隔离 Next 16 场景存在，本轮未重复执行该全局场景
-- RTL: `RightToLeft` Story 提供视觉快照，待真实浏览器断言
+- RTL: `RightToLeft` Story 进入全库 RTL 矩阵；独立 layout contract 在 Chromium/WebKit 中断言 start 短线位于 RTL 视觉起点、长文案不溢出
 - Reduced motion: 不适用；没有内建动效
 - Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 horizontal separator、内容名称与 `align=start`
 - Chromatic Light/Dark: 默认、文案、对齐、vertical、长文本与 RTL Story 可构建，显式 Light/Dark 快照矩阵待补
@@ -148,8 +148,7 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 
 ### 待优化
 
-- 继续补 long content、RTL 和 vertical stretch 的浏览器几何断言；基础 horizontal/start 已进入双引擎门禁。
-- 完成 Windows High Contrast、VoiceOver 与 TalkBack 真机/系统验收记录。
+- 统一发布批次完成 Windows High Contrast、VoiceOver 与 TalkBack 真机/系统验收记录；long content、RTL 与 vertical stretch 已有双引擎几何断言。
 - 根据真实产品案例决定是否需要 thickness 或 tone；当前不新增推测 API。
 
 ### 已完成
@@ -159,6 +158,7 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 - 增加 forced-colors 系统色降级以及 vertical、长文案、RTL Story。
 - 在隔离 Next H5 中补 separator 名称、方向、对齐与 hydration 断言。
 - 空 ReactNode 不再产生伪文案结构；meta 排版去除硬编码并增加共置 SSR/hydration 回归。
+- 增加 Chromium/WebKit 长文案不溢出、RTL start 位置和 1px vertical stretch 等高几何证据。
 
 ## 变更记录
 
@@ -167,3 +167,4 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 | 2026-08-28 | 0.1.0  | hardening    | 完善语义、长文案、高对比、RTL 与测试证据             | 无                                  |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 separator/hydration 证据         | 无                                  |
 | 2026-08-29 | 未发布 | hardening    | 空节点归一化、meta typography token 与共置 hydration | 空数组/空 Fragment 不再生成文案结构 |
+| 2026-08-30 | 未发布 | verification | 增加 RTL、长文案与 vertical stretch 双引擎几何证据   | 无                                  |

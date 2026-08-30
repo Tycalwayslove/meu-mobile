@@ -117,3 +117,102 @@ test("replaces Skeleton with identical geometry and no non-input layout shift", 
     ).toBe(0);
   }
 });
+
+test("honors the system reduced-motion media query for Skeleton shimmer", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  const skeleton = page.getByTestId("system-motion-skeleton");
+  await expect(skeleton).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Skeleton system motion" }).locator("xpath=..")
+  ).toHaveAttribute("data-meu-motion", "system");
+  expect(
+    await skeleton.evaluate((element) => getComputedStyle(element, "::after").animationName)
+  ).toBe("none");
+
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.reload();
+  await expect(skeleton).toBeVisible();
+  expect(
+    await skeleton.evaluate((element) => getComputedStyle(element, "::after").animationName)
+  ).not.toBe("none");
+});
+
+test("keeps long RTL Divider content bounded and stretches vertical separators", async ({
+  page
+}) => {
+  const divider = page.getByTestId("long-rtl-divider");
+  const dividerBox = await divider.boundingBox();
+  expect(dividerBox).not.toBeNull();
+  expect(dividerBox!.width).toBeLessThanOrEqual(240);
+  expect(await divider.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+    true
+  );
+
+  const lines = divider.locator("span[aria-hidden='true']");
+  await expect(lines).toHaveCount(2);
+  const firstLine = await lines.nth(0).boundingBox();
+  const lastLine = await lines.nth(1).boundingBox();
+  expect(firstLine).not.toBeNull();
+  expect(lastLine).not.toBeNull();
+  expect(firstLine!.x).toBeGreaterThan(lastLine!.x);
+  await expect(lines.nth(0)).toHaveCSS("flex-grow", "0");
+  await expect(lines.nth(1)).toHaveCSS("flex-grow", "1");
+
+  const hostBox = await page.getByTestId("vertical-divider-host").boundingBox();
+  const verticalBox = await page.getByTestId("stretch-vertical-divider").boundingBox();
+  expect(hostBox).not.toBeNull();
+  expect(verticalBox).not.toBeNull();
+  expect(verticalBox!.height).toBeCloseTo(hostBox!.height, 1);
+  expect(verticalBox!.width).toBeCloseTo(1, 1);
+});
+
+test("uses token gap while wrapping Space in RTL and preserves baseline alignment", async ({
+  page
+}) => {
+  const space = page.getByTestId("rtl-wrapped-space");
+  await expect(space).toHaveCSS("column-gap", "12px");
+  await expect(space).toHaveCSS("row-gap", "12px");
+
+  const first = await page.getByTestId("space-item-one").boundingBox();
+  const second = await page.getByTestId("space-item-two").boundingBox();
+  const third = await page.getByTestId("space-item-three").boundingBox();
+  expect(first).not.toBeNull();
+  expect(second).not.toBeNull();
+  expect(third).not.toBeNull();
+  expect(first!.x).toBeGreaterThan(second!.x);
+  expect(third!.y).toBeGreaterThan(first!.y);
+  expect(await space.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+  const baseline = page.getByTestId("baseline-space");
+  await expect(baseline).toHaveCSS("align-items", "baseline");
+  const small = await page.getByTestId("baseline-small").boundingBox();
+  const large = await page.getByTestId("baseline-large").boundingBox();
+  expect(small).not.toBeNull();
+  expect(large).not.toBeNull();
+  expect(small!.y).toBeGreaterThan(large!.y);
+  expect(Math.abs(small!.y + small!.height - (large!.y + large!.height))).toBeLessThan(6);
+});
+
+test("moves route focus to Result headings across pending and error states", async ({ page }) => {
+  const section = page.getByRole("region", { name: "Result route focus" });
+  await section
+    .getByRole("button", { name: "Show route result" })
+    .evaluate((element) => (element as HTMLButtonElement).click());
+
+  const pending = section.getByRole("status", { name: "Request pending" });
+  const pendingHeading = section.getByRole("heading", { name: "Request pending" });
+  await expect(pending).toHaveAttribute("data-status", "pending");
+  await expect(pendingHeading).toBeFocused();
+  const pendingDot = pending.locator('[aria-hidden="true"] span span').first();
+  await expect(pendingDot).toHaveCSS("animation-name", "none");
+
+  await section
+    .getByRole("button", { name: "Fail request" })
+    .evaluate((element) => (element as HTMLButtonElement).click());
+  const error = section.getByRole("alert", { name: "Request failed" });
+  const errorHeading = section.getByRole("heading", { name: "Request failed" });
+  await expect(error).toHaveAttribute("aria-live", "assertive");
+  await expect(error).toHaveAttribute("aria-atomic", "true");
+  await expect(errorHeading).toBeFocused();
+});
