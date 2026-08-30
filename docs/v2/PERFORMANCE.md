@@ -37,9 +37,9 @@ pnpm bundle:size:check
 ## 当前结果
 
 - 68/68 个产品族和 125/125 个公开运行时值均在预算内；
-- 共享 CSS：25,021 B gzip / 32,768 B 预算，20,657 B Brotli；
-- 最大组合是 `@meu/form-react` 全部 adapters：115,288 B gzip / 115,712 B 预算；
-- 最大单值是 `Popover`：46,274 B gzip / 49,152 B 预算，主要成本包含定位运行时；
+- 共享 CSS：25,136 B gzip / 32,768 B 预算，20,715 B Brotli；
+- 最大组合是 `@meu/form-react` 全部 adapters：115,674 B gzip / 115,712 B 预算；
+- 最大单值是 `Popover`：46,311 B gzip / 49,152 B 预算，主要成本包含定位运行时；
 - 较大的高级单值包括 `MeuFormImageUploader` 38,288 B、`ImageUploader` 35,893 B、`MeuFormTreeSelect` 33,885 B、`ImageViewer` 31,362 B 和 `TreeSelect` 30,373 B（均为 gzip）。
 
 ## 运行时预算
@@ -57,7 +57,7 @@ pnpm bundle:size:check
 
 同一路由还包含确定性网络恢复模型：Image 的不可解码响应→换源恢复、InfiniteList 的首次业务失败→显式重试→恰好两次请求，以及 ImageUploader 的失败任务重试与 pending task 主动取消。模型使用可控本地响应，不冒充慢 3G、离线或丢包实测。
 
-`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 14/14 通过，并完成 3 轮重复共 42/42。完整隔离 Next H5 套件共 152/152 通过，其中 ImageViewer RTL/取消恢复专项 4/4；布局专项 16/16 固定 FloatingPanel 初始高度、SwipeActions ResizeObserver、PullToRefresh hydration、Skeleton 等几何/非输入 CLS、系统 reduced-motion 媒体查询、Divider/Space 的 RTL/换行/拉伸/baseline 几何，以及 Result 路由焦点；每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
+`tests/next-h5/e2e/performance.spec.ts` 当前在两种移动引擎上 14/14 通过，并完成 3 轮重复共 42/42。完整隔离 Next H5 套件共 166/166 通过，其中 ImageViewer RTL/取消恢复专项 4/4，Avatar 慢网/lazy/换源 4/4，Portal 真实 iframe 跨 Document 4/4，SafeArea viewport/旋转/键盘边界 6/6；布局专项 16/16 固定 FloatingPanel 初始高度、SwipeActions ResizeObserver、PullToRefresh hydration、Skeleton 等几何/非输入 CLS、系统 reduced-motion 媒体查询、Divider/Space 的 RTL/换行/拉伸/baseline 几何，以及 Result 路由焦点；每条用例结束后都会断言 0 `pageerror`、0 `console.error`，因此运行时预算不是脱离真实组件集成的微基准。
 
 `/verification` 提供正式候选的 60 秒真机采样与 JSON 导出，记录估算 FPS、P95/最大帧耗时、慢帧、Long Tasks、可用时的 JS heap 及网络成功/失败/取消事件。两种移动引擎的 5 秒工具自检 2/2 通过，只证明采集与导出链路可运行；未在真实设备执行的结果不得填写 PERF-01。
 

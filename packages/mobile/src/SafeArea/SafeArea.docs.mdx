@@ -4,12 +4,12 @@ slug: safe-area
 package: "@meu/mobile"
 exports: [SafeArea]
 status: verification
-localVerification: pending
-localGapIds: [LOC-SAFE-AREA-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "434:3071"
@@ -27,7 +27,7 @@ source: packages/mobile/src/SafeArea
 - 横竖屏变化由浏览器重新计算 env，left/right 可覆盖横屏刘海边缘。
 - SSR 不读取浏览器全局，默认 `aria-hidden="true"`，并透传 className、style、ref 和 div 原生属性。
 
-当前状态为 `verification`；共置 SSR/hydration 已覆盖稳定根节点，但尚未完成真实刘海设备、键盘场景和组合布局的验收，不能标记为 commercial。
+当前状态为 `verification`；本地已完成生产 Next H5 的 viewport meta、打包 CSS、横竖屏重排和 visualViewport 所有权边界验证。真实刘海设备与系统软键盘仍属于发布前真机验收，不能据此标记为 commercial。
 
 ## 何时使用
 
@@ -110,7 +110,7 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 
 ## 浏览器与 WebView
 
-双 CSS 声明使不支持 env 的浏览器使用 fallback；Chrome 70 兼容语法门禁通过后仍需运行时验证。iOS 需要 viewport-fit=cover；部分 Android WebView 即使支持 env 也可能始终返回 0。constant() 不在目标 iOS 13+ 支持范围内。
+双 CSS 声明使不支持 env 的浏览器使用 fallback；生产 Next H5 已验证实际输出 `viewport-fit=cover`，且 Chromium/WebKit 均能解析四边 `env()`。无刘海的自动化浏览器返回 0，因此这组证据验证声明、物理边映射和旋转重排，不冒充真实刘海尺寸。部分 Android WebView 即使支持 env 也可能始终返回 0；`constant()` 不在目标 iOS 13+ 支持范围内。
 
 ## 边界情况与已知限制
 
@@ -135,7 +135,7 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 - SSR/hydration: 共置测试直接验证 right/left 物理边、inline fallback 与 hydrateRoot；既有隔离 Next 16 场景覆盖 bottom，但本轮未重复执行该全局场景
 - RTL: 文档明确物理边语义，浏览器视觉证明待补
 - Reduced motion: 不适用，无动画
-- Mobile Chromium/WebKit E2E: 基础消费场景在两种引擎断言 bottom 物理边与隐藏 spacer；真实 `env()`、viewport-fit、旋转和软键盘仍待设备级验证
+- Mobile Chromium/WebKit E2E（本轮 6/6）: 隔离 production Next H5 在两种引擎各运行 3 个场景，验证 `viewport-fit=cover`、打包 CSS 的 fallback-first 四边 `env()` 声明、横竖屏切换后的四边主/交叉轴几何和 DOM 复用，以及输入聚焦与模拟 visualViewport 缩短时页面监听生效而 SafeArea class/style/节点不变；0 `pageerror` / `console.error`
 - Chromatic Light/Dark: Bottom/Top/Landscape Stories 更新基线待 CI 发布
 - Real device: 刘海 iPhone/iPad、Android 打孔屏、旋转和键盘场景待补
 
@@ -143,9 +143,8 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 
 ### 待优化
 
-- 在隔离 H5 测试页加入 viewport-fit=cover、旋转和软键盘用例。
 - 用真实 iOS 13+ 与 Android WebView 记录 top/right/bottom/left 实际尺寸。
-- 验证 fixed footer、横屏全屏媒体、嵌套 provider 和浏览器工具栏收缩场景。
+- 在真机验证 fixed footer、横屏全屏媒体、系统软键盘和浏览器工具栏收缩场景；键盘避让仍由页面布局负责。
 
 ### 已完成
 
@@ -155,6 +154,7 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 - 补 Props/release tag、SSR 与 targeted unit evidence。
 - 在隔离 Next H5 中补 bottom spacer、隐藏语义与 hydration 双引擎证据。
 - 增加共置 hydrateRoot 节点复用与 recoverable error 回归测试，不再只依赖外部集成页证明 SSR 稳定性。
+- 增加独立 production Next H5 契约页，在 Chromium/WebKit 中验证 viewport-fit、生产 CSS 双声明、旋转几何与 visualViewport/软键盘所有权边界。
 
 ## 变更记录
 
@@ -163,3 +163,4 @@ left/right 表示物理屏幕边缘，不随 RTL 交换，因为刘海与系统 
 | 2026-08-28 | 0.1.0  | feature      | 新增左右安全区与 fallback，建立 V2 留存文档 | 原有 top/bottom 用法保持兼容；重复消费由调用方排查 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 bottom/hydration 证据   | 无                                                 |
 | 2026-08-29 | 未发布 | verification | 增加共置 SSR/hydration 节点复用证据         | 无                                                 |
+| 2026-08-30 | 未发布 | verification | 完成 viewport-fit、旋转和键盘边界本地自动化 | 无；键盘避让继续由页面布局负责                     |

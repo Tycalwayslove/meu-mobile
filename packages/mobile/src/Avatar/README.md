@@ -85,13 +85,15 @@ SSR 首帧只由 props 决定：空源输出 fallback，有源输出 loading pla
 - `Avatar.ssr.test.tsx`：2 项 SSR，覆盖可访问 fallback、响应式输出与无效尺寸归一化。
 - `Avatar.hydration.test.tsx`：1 项真实 renderToString → hydrateRoot，断言 0 recoverable/console error、ref 恢复和 error fallback。
 - `Avatar.stories.tsx`：图片、initials、自定义 fallback、三种 shape/预设与数值 size、响应式焦点、失败、RTL/装饰、Light/Dark。
-- 仓库既有 Storybook 390×844 七场景矩阵与 Next H5 Chromium/WebKit 场景已经覆盖 Avatar 基础路径；Chromatic 与 VoiceOver/TalkBack 真机仍是待验证项。
+- `tests/next-h5/e2e/avatar-contract.spec.ts`：受控网络闸门在 mobile Chromium/WebKit 各验证视口外 lazy 延迟请求、慢响应 fallback/`aria-busy`、native decode、不可解码失败与换源恢复，共 4 次引擎执行通过。
+- 仓库既有 Storybook 390×844 七场景矩阵与 Next H5 Chromium/WebKit 场景已经覆盖 Avatar 基础和异步请求边界；Chromatic 与 VoiceOver/TalkBack 真机仍是待验证项。
 
 本目录的快速验证命令：
 
 ```bash
 pnpm --filter @meu/mobile exec vitest run src/Avatar --maxWorkers=1
 pnpm --filter @meu/mobile typecheck
+pnpm --filter @meu/next-h5-integration exec playwright test e2e/avatar-contract.spec.ts
 ```
 
 ## 未来变更规则

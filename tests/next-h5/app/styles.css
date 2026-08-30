@@ -226,6 +226,60 @@ textarea {
   max-width: 720px;
 }
 
+.portal-contract-shell {
+  max-width: 720px;
+}
+
+.portal-contract-card {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  background: var(--meu-color-surface);
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-surface);
+}
+
+.portal-contract-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.portal-contract-actions button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.portal-contract-card iframe {
+  width: 100%;
+  min-height: 152px;
+  border: 1px solid var(--meu-color-border);
+  border-radius: var(--meu-radius-control);
+}
+
+.portal-contract-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.portal-contract-results div {
+  padding: 10px;
+  background: var(--meu-color-canvas);
+  border-radius: var(--meu-radius-control);
+}
+
+.portal-contract-results dt {
+  color: var(--meu-color-muted);
+  font-size: 12px;
+}
+
+.portal-contract-results dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
 .input-contract-grid,
 .input-contract-card {
   display: grid;

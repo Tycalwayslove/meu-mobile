@@ -4,8 +4,8 @@ slug: icon-button
 package: "@meu/mobile"
 exports: [IconButton]
 status: verification
-localVerification: pending
-localGapIds: [LOC-ICON-BUTTON-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -140,8 +140,8 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2047 B / 32768 B 预算，组合 Brotli 1799 B；共享样式由应用单独导入一次。
 - SSR/hydration: 隔离 Next 16 App Router 首屏输出可访问名称，hydration 后 Enter 操作成功且 0 hydration/runtime error
-- RTL: 对称控件，方向性图标待矩阵验证
-- Reduced motion: CSS 静态降级已实现，待浏览器证明
+- RTL: 对称控件已进入全库 RTL 矩阵；方向性语义由调用方所选 Meu 图标负责
+- Reduced motion: CSS 降级已进入全库 reduced-motion 浏览器矩阵
 - Mobile Chromium/WebKit E2E: 专属场景在两种引擎断言可访问名称、Enter 激活、业务输出与 44×44px 最小目标
 - Chromatic Light/Dark: 现有 Story 可生成基线，待显式矩阵
 - Real device: 待补
@@ -150,9 +150,8 @@ ref 指向真实 `HTMLButtonElement`，可使用原生 focus/click。除非在�
 
 ### 待优化
 
-- 继续补 RTL 方向图标、高对比与 200% 字号专属证据；SSR/hydration 与基础键盘路径已完成。
-- 在真机读屏验证 labelledby、toggle pressed 和 loading 状态公告策略。
-- Figma 暂缺独立 IconButton node，设计补齐后更新 frontmatter。
+- 统一发布批次在真机读屏验证 labelledby、toggle pressed 和 loading 状态公告策略；RTL、高对比、200% 字号、SSR/hydration 与基础键盘路径已完成。
+- Figma 暂缺独立 IconButton node，设计补齐后更新 frontmatter；这不改变已验证的代码契约。
 
 ### 已完成
 

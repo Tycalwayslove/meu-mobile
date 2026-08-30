@@ -89,8 +89,12 @@ describe("Portal", () => {
     expect(content && content.parentElement).toBe(target);
   });
 
-  it("preserves React context and synthetic events in another document", () => {
-    const foreignDocument = document.implementation.createHTMLDocument("Portal destination");
+  it("preserves React context and synthetic events in an iframe document", () => {
+    const frame = document.createElement("iframe");
+    frame.title = "Portal destination";
+    document.body.append(frame);
+    const foreignDocument = frame.contentDocument;
+    if (!foreignDocument) throw new Error("Expected an iframe document");
     const target = foreignDocument.createElement("div");
     foreignDocument.body.append(target);
     const host = document.createElement("div");
@@ -129,6 +133,7 @@ describe("Portal", () => {
     roots.pop();
     expect(target.childNodes).toHaveLength(0);
     expect(target.parentNode).toBe(foreignDocument.body);
+    expect(frame.parentNode).toBe(document.body);
   });
 
   it("supports lazy, fragment and inline destinations and cleans up on unmount", () => {

@@ -4,8 +4,8 @@ slug: portal
 package: "@meu/primitives-react"
 exports: [Portal, useBodyScrollLock, useFocusTrap]
 status: verification
-localVerification: pending
-localGapIds: [LOC-PORTAL-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -13,7 +13,12 @@ lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "428:4"
-storyIds: [foundation-portal--custom-container, foundation-portal--lazy-ref-container]
+storyIds:
+  [
+    foundation-portal--custom-container,
+    foundation-portal--lazy-ref-container,
+    foundation-portal--cross-document
+  ]
 source: packages/primitives-react/src/Portal
 ---
 
@@ -30,7 +35,7 @@ source: packages/primitives-react/src/Portal
 - React Context 与合成事件沿逻辑 React 树保持连接；跨 Document 目标不会切断 Provider 数据或 React 事件冒泡。
 - 同页归档两个公开 Overlay Hook：`useBodyScrollLock` 使用引用计数锁定 body 并按 LTR/RTL 补偿滚动条；`useFocusTrap` 只让栈顶模态圈定焦点，支持初始焦点、Escape、焦点分支与恢复。
 
-当前状态为 `verification`；尚未完成嵌套模态、真实 iframe、移动 WebView 与 Chromatic 全矩阵验收，不能标记为 commercial。
+本地自动化已经完成真实同源 iframe/跨 Document、嵌套模态和移动 Chromium/WebKit 验收。当前状态仍为 `verification`；真实 iOS/Android WebView、读屏浏览模式与 Chromatic 基线审批尚未完成，不能标记为 commercial。
 
 ## 何时使用
 
@@ -125,7 +130,7 @@ Portal 没有 Token 或内部 class。渲染到 `body` 或另一个 Document 后
 
 ## 浏览器与 WebView
 
-实现使用 React 19 Portal、`useSyncExternalStore`、Element/DocumentFragment 和 `nodeType`，源码未引入 Chrome 70 禁止语法。跨 realm 容器不再依赖 `instanceof HTMLElement`。真实 iOS 13 WKWebView、Android Chrome 70 和 iframe 仍待设备验证。
+实现使用 React 19 Portal、`useSyncExternalStore`、Element/DocumentFragment 和 `nodeType`，源码未引入 Chrome 70 禁止语法。跨 realm 容器不再依赖 `instanceof HTMLElement`。同源 iframe 已在桌面宿主的移动 Chromium/WebKit 项目中自动验证；真实 iOS 13 WKWebView 与 Android Chrome 70 仍待设备验证。
 
 ## 边界情况与已知限制
 
@@ -143,16 +148,16 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。只有�
 
 ## 测试证据
 
-- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、ref-backed 提交后重试、目标切换、卸载清理、SSR resolver 隔离、hydration recoverable error，以及跨 Document Context/合成事件；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、原生 tabbable 顺序、可操作 Toast 键盘分支、背景 inert/aria-hidden 隔离与精确恢复。
-- Story interaction: `CustomContainer` 验证内容移动到调用方提供的目标容器；`LazyRefContainer` 验证同次提交 ref-backed resolver。
-- 本次定向 Storybook 扫描：Portal 2 个 Story × Light/Dark，共 4 个场景，play 与 axe WCAG A/AA 均通过。
+- Unit: `Portal.test.tsx` 覆盖默认/惰性/Fragment/原地目标、ref-backed 提交后重试、目标切换、卸载清理、SSR resolver 隔离、hydration recoverable error，以及真实 iframe `contentDocument` 中的 ownerDocument、Context、合成事件与精确清理；`overlayHooks.test.tsx` 覆盖嵌套滚动锁、RTL 补偿、栈顶 Escape、原生 tabbable 顺序、可操作 Toast 键盘分支、背景 inert/aria-hidden 隔离与精确恢复。
+- Story interaction: `CustomContainer` 验证内容移动到调用方提供的目标容器；`LazyRefContainer` 验证同次提交 ref-backed resolver；`CrossDocument` 在真实 iframe Document 中验证 ownerDocument、Provider Context 与逻辑 React 事件冒泡。
+- 本次定向 Storybook 扫描：Portal 3 个 Story × Light/Dark，共 6 个场景，play 与 axe WCAG A/AA 均通过。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 4426 B / 32768 B 预算；最大单值 `useFocusTrap` 为 3012 B / 32768 B 预算，组合 Brotli 3840 B；共享样式由应用单独导入一次。
-- SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记、SSR 不执行 resolver、hydration 后移动和零 recoverable error
+- SSR/hydration: `Portal.test.tsx` 覆盖服务端原地标记、SSR 不执行 resolver、hydration 后移动和零 recoverable error；Next 专项直接读取 production 响应确认 Portal child 与 Provider 值存在于服务端 HTML，再验证 hydration 后移入 iframe
 - RTL: 无视觉方向逻辑；跨容器 `dir` 同步待 E2E
 - Reduced motion: 不适用，无动画
-- Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 hydration 后内容位于调用方 custom container；独立 `overlay-lifecycle.spec.ts` 通过 Popup 组合验证打开时切换目标不会留下重复 Portal children，退出中断后旧 presence timer 不会误删重开的内容，并保持单一焦点圈定与 body lock
+- Mobile Chromium/WebKit E2E: `composes layout, icon action, custom portal and hidden accessible text` 在两种引擎断言 hydration 后内容位于调用方 custom container；独立 `overlay-lifecycle.spec.ts` 通过 Popup 组合验证打开时切换目标不会留下重复 Portal children，退出中断后旧 presence timer 不会误删重开的内容，并保持单一焦点圈定与 body lock；`portal-cross-document.spec.ts` 的两项契约在两种引擎共 4/4 通过，覆盖真实 iframe container/ownerDocument、Provider、React 与原生事件边界、焦点、目标切换、卸载只清 child、保留调用方 target 与重新挂载
 - Chromatic Light/Dark: 已有 CustomContainer Story，更新基线待 CI 发布
 - Real device: 待补
 
@@ -160,8 +165,7 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。只有�
 
 ### 待优化
 
-- 增加真实 iframe/跨 Document 样式、焦点与事件验证。
-- 与 Popup/Dialog 批次继续验证跨 iframe Portal、退出动画和真实读屏浏览模式。
+- 与 Popup/Dialog 批次继续验证跨 iframe 的 focus trap、滚动锁、退出动画和真实读屏浏览模式；基础 Portal 跨 Document 已完成自动化。
 - 在真实 iOS/Android WebView 复验 custom container、跨 iframe 和退出动画；移动 Chromium/WebKit custom-container E2E 已完成。
 
 ### 已完成
@@ -170,7 +174,8 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。只有�
 - container 扩展到 Element/DocumentFragment、惰性 nullable 回调，并支持跨 realm 判断。
 - 增加目标切换、Fragment、SSR/hydration 与卸载清理单测。
 - ref-backed resolver 首次为空时在 refs 提交后重试一次，避免客户端首次挂载永久原地降级。
-- 增加跨 Document Context、React 合成事件和精确清理单测；真实 iframe 仍保留为设备/浏览器风险。
+- 增加真实 iframe Document 的 Context、React 合成事件、ownerDocument 和精确清理单测。
+- 增加真实同源 iframe 的 Story 与 Next H5 双引擎专项，覆盖 Provider、原生/React 事件、焦点、目标切换、SSR 原地输出和卸载清理。
 - 补齐公开 Props、容器类型 TSDoc 和 release tag。
 - focus trap 补齐正 tabindex/radio/disabled fieldset 过滤、嵌套栈顶背景隔离、自定义容器与关联非模态分支。
 - 可操作 Toast 纳入栈顶模态键盘循环，与既有 inert 例外保持同一可达性契约。
@@ -185,3 +190,4 @@ Portal 本身不创建 DOM wrapper、observer、timer 或全局监听。只有�
 | 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 custom-container/hydration 证据                   | 无                                             |
 | 2026-08-29 | 未发布 | accessibility | 模态键盘循环纳入可操作 Toast 分支                                     | API 兼容；Toast action 不再被焦点圈定排除      |
 | 2026-08-29 | 未发布 | hardening     | ref-backed resolver 提交后重试；补跨 Document Context、事件与清理证据 | API 兼容，无迁移                               |
+| 2026-08-30 | 未发布 | verification  | 补真实 iframe Story 与 Next 双引擎 ownerDocument/事件/焦点/清理证据   | 无                                             |

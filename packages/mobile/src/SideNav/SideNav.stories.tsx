@@ -115,5 +115,35 @@ export const LongScrollableRTL: Story = {
         stickyOffset={16}
       />
     </div>
-  )
+  ),
+  play: async ({ canvasElement }) => {
+    await new Promise<void>((resolve) => {
+      const ownerWindow = canvasElement.ownerDocument.defaultView;
+      if (!ownerWindow) {
+        resolve();
+        return;
+      }
+      ownerWindow.requestAnimationFrame(() => {
+        ownerWindow.requestAnimationFrame(() => resolve());
+      });
+    });
+
+    const rail = canvasElement.querySelector<HTMLElement>('[role="tablist"]');
+    const active = canvasElement.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
+    if (!rail || !active) {
+      throw new window.Error("Long SideNav did not render an active tab inside its rail");
+    }
+
+    const railBox = rail.getBoundingClientRect();
+    const activeBox = active.getBoundingClientRect();
+    if (rail.scrollHeight <= rail.clientHeight) {
+      throw new window.Error("Long SideNav rail is not independently scrollable");
+    }
+    if (activeBox.top < railBox.top - 1 || activeBox.bottom > railBox.bottom + 1) {
+      throw new window.Error("Long SideNav did not scroll its active tab into view");
+    }
+    if (getComputedStyle(rail).position !== "sticky") {
+      throw new window.Error("Sticky SideNav rail lost its sticky positioning contract");
+    }
+  }
 };

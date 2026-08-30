@@ -4,8 +4,8 @@ slug: icon
 package: "@meu/icons-react"
 exports: [MeuIcon, MeuIconChevronLeft, MeuIconCheck, MeuIconPlus, MeuIconSearch, MeuIconX]
 status: verification
-localVerification: pending
-localGapIds: [LOC-ICON-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -154,8 +154,7 @@ ref 指向 `SVGSVGElement`，只提供原生 DOM 能力。
 
 ### 待优化
 
-- 每次新增或升级图标都需重新完成人工来源和法务评审；修改过的上游几何必须走独立准入路径。
-- 记录 bundle 与 tree-shaking 证据，并补真实 VoiceOver/TalkBack 验收。
+- 每次新增或升级图标都需重新完成人工来源和法务评审；修改过的上游几何必须走独立准入路径。当前 bundle/tree-shaking、来源、许可与分发清单已进入本地门禁；统一发布批次补真实 VoiceOver/TalkBack 验收。
 
 ### 已完成
 

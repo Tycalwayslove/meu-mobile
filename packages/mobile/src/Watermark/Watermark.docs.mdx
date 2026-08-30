@@ -4,8 +4,8 @@ slug: watermark
 package: "@meu/mobile"
 exports: [Watermark]
 status: verification
-localVerification: pending
-localGapIds: [LOC-WATERMARK-01]
+localVerification: complete
+localGapIds: []
 priority: P2
 since: 0.1.0
 implementedVersion: null
@@ -127,10 +127,10 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3225 B / 32768 B 预算，组合 Brotli 2829 B；共享样式由应用单独导入一次。
-- SSR/hydration: 本轮 jsdom 定向测试覆盖 stable pattern markup 和 hydrateRoot 节点复用；隔离 Next 16 浏览器路径需在冻结候选重跑。
+- SSR/hydration: jsdom 定向测试覆盖 stable pattern markup 和 hydrateRoot 节点复用；隔离 Next 16 生产构建浏览器路径已在本地完整门禁通过。
 - RTL: 无方向性布局；bidi 内容待真机。
 - Reduced motion: 不适用，无动画。
-- Mobile Chromium/WebKit E2E: 仓库已有 `renders a non-interactive watermark and restores its removed overlay` 双引擎场景；本轮变更后的执行结果由最终冻结流程记录，不把场景存在等同于当前通过。
+- Mobile Chromium/WebKit E2E: `renders a non-interactive watermark and restores its removed overlay` 已在本地完整门禁的两种引擎通过，验证 overlay 不拦截交互、移除恢复与属性篡改恢复。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 未执行。
 
@@ -138,7 +138,7 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 
 ### 待优化
 
-补打印/PDF、跨域 SVG image、bidi、移动端截图和完整支持档真机；无 MutationObserver 单元降级已完成，基础篡改恢复双引擎场景已存在但需随冻结候选重跑。
+发布批次补打印/PDF、跨域 SVG image、bidi、移动端截图和完整支持档真机集成验收；这些依赖目标宿主、外部资源和真实设备，不是本地组件实现的未完成项。无 MutationObserver 降级和基础篡改恢复双引擎证据已完成。
 
 ### 已完成
 

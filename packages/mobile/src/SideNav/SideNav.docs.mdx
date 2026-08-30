@@ -4,8 +4,8 @@ slug: side-nav
 package: "@meu/mobile"
 exports: [SideNav]
 status: verification
-localVerification: pending
-localGapIds: [LOC-SIDE-NAV-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -31,7 +31,7 @@ source: packages/mobile/src/SideNav
 
 SideNav 用一套数据 API 覆盖两种明确语义：存在任一 `content` 时渲染 APG vertical tabs；全部 item 都没有 `content` 时渲染原生侧边导航。当前版本支持受控/非受控选择、automatic/manual tab 激活、禁用项、动态 items、重复 key 归一、激活项入视、长 rail、sticky 边界、RTL、badge、root ref、SSR 与 hydration。
 
-本组件仍处于 `verification`，代码和自动化契约已完成 V2 加固，Chromatic 最终基线及 iOS/Android 真机读屏记录留到全库统一验收。
+本组件仍处于 `verification`；代码、长 rail 几何、交互、SSR/hydration 和本地多环境视觉契约已完成 V2 加固，Chromatic 最终基线及 iOS/Android 真机读屏记录留到全库统一验收。
 
 ## 何时使用
 
@@ -248,15 +248,15 @@ rail 边界、padding 与 sticky offset 使用逻辑属性，DOM `dir="rtl"` 时
 - SSR：`SideNav.ssr.test.tsx` 在无 DOM 环境验证 vertical tab 关系与确定性初始状态。
 - Hydration：`SideNav.hydration.test.tsx` 覆盖 navigation anchor identity、disabled 无 href、root ref、sticky style、manual keyboard tabs、0 recoverable error 与 0 React console error。
 - 本批组件 Unit/SSR/hydration 定向套件与源码/测试 ESLint 通过；回归包含 key 重排稳定 ID、DOM 元素替换焦点恢复和 href 动态切换后的 observer 重绑。
-- Story：Default、ManualActivation、KeyboardInteraction、DestroyInactive、NavigationLinks、LongScrollableRTL；长列表 Story 同时覆盖 RTL、长阿拉伯文案、badge 与 sticky。
+- Story：Default、ManualActivation、KeyboardInteraction、DestroyInactive、NavigationLinks、LongScrollableRTL；长列表 Story 同时覆盖 RTL、长阿拉伯文案、badge 与 sticky，play 几何断言验证 rail 独立滚动、sticky 位置与活动项自动入视。
 - 隔离 Next H5：production build 后，移动 Chromium/WebKit 定点验证 vertical tab 方向键、disabled skip、panel 切换和受控业务输出。
-- 全库 Storybook/Chromatic、完整 Next H5 矩阵和真机结果在全部组件完成后统一执行，不把当前定点自动化冒充最终商用验收。
+- Storybook 本地矩阵已覆盖 Light/Dark、RTL、reduced-motion、200% 字号和 forced-colors；Chromatic 与真机结果在全部组件完成后统一执行，不把当前定点自动化冒充最终商用验收。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 全库收口时补 Chromium/WebKit 长 rail + sticky 的真实布局 E2E、200% 字号和 forced-colors 截图证据。
+- 全库收口时补 Chromatic 长 rail + sticky 的最终视觉基线；本地真实布局 play 断言和 200%/forced-colors 矩阵已完成。
 - 补 iOS Safari/VoiceOver 与 Android WebView/TalkBack 真机记录。
 - 根据首个真实路由消费者评估是否需要公开 Link adapter；在此之前保留标准 href + onChange 契约。
 

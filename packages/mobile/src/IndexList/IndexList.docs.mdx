@@ -4,8 +4,8 @@ slug: index-list
 package: "@meu/mobile"
 exports: [IndexList]
 status: verification
-localVerification: pending
-localGapIds: [LOC-INDEX-LIST-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -35,7 +35,7 @@ source: packages/mobile/src/IndexList
 - `ref.scrollTo` 支持定位和可选焦点移动；平滑滚动跟踪可被用户输入取消，并尊重 ConfigProvider/系统低动态偏好。
 - RTL、forced-colors、空列表、SSR 与中英文内置文案已处理。
 
-状态为 `verification`；浏览器交互、视觉和真机证据仍需在发布批次统一执行。
+本地可自动化的实现、交互、SSR、无障碍与多环境视觉验证已完成；状态仍为 `verification`，等待发布批次的 Chromatic 基线与 iOS/Android 真机手势竞争验收。
 
 ## 何时使用
 
@@ -137,14 +137,14 @@ rail 使用逻辑 `border-inline-start`，随 direction 移到布局的 inline-e
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 6041 B / 32768 B 预算，组合 Brotli 5323 B；共享样式由应用单独导入一次。
 - SSR/hydration: `IndexList.ssr.test.tsx` 覆盖确定性结构、重复 identity、受控归一化与空列表；隔离 Next 16 hydration 后索引按钮、活动分组与业务输出保持一致，0 hydration/runtime error。
-- RTL / Reduced motion / forced-colors: 逻辑边界、运行时 motion 降级与系统色 active/focus 契约完成，视觉矩阵待补。
+- RTL / Reduced motion / forced-colors: 逻辑边界、运行时 motion 降级与系统色 active/focus 契约完成，并已纳入 Storybook 本地全量视觉矩阵。
 - Mobile Chromium/WebKit E2E: `navigates indexed sections and vertical category panels` 在两种引擎点击 B 索引并断言 `aria-current=location`、活动内容和业务输出。Chromatic Light/Dark 与 real device 待最终批次。
 
 ## V2 优化记录
 
 ### 待优化
 
-- 补 rail 连续滑动与页面滚动竞争的 iOS/Android 真机证据和主题视觉基线。
+- 发布批次补 Chromatic 主题基线，并在 iOS/Android 真机上验收 rail 连续滑动与页面滚动竞争；本地 pointer/touch 连续定位、cancel/capture 后备和双引擎点击链路已完成。
 
 ### 已完成
 

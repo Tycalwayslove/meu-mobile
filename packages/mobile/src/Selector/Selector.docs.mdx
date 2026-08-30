@@ -4,8 +4,8 @@ slug: selector
 package: "@meu/mobile"
 exports: [Selector]
 status: verification
-localVerification: pending
-localGapIds: [LOC-SELECTOR-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -222,8 +222,7 @@ render 的选择归一化为 O(options + selected values)，建议可见规模�
 
 ### 待优化
 
-- 完成 Light/Dark/forced-colors/200% 字号的最终视觉审批，并在目标 WebView 复核 single clear、multiple 键盘、readOnly 和 maxCount 公告。
-- 在真机确认 iOS VoiceOver 与 Android TalkBack 对 radio group、option description 和 clear 动作的公告。
+- 统一发布批次完成 Chromatic 最终视觉审批，并在目标 WebView、iOS VoiceOver 与 Android TalkBack 复核 single clear、multiple 键盘、readOnly、maxCount、radio group、option description 和 clear 公告；本地对应矩阵已完成。
 - 若真实业务出现 20+ options，另立 searchable/virtualized 组件，不向 Selector 叠加复杂检索。
 
 ### 已完成

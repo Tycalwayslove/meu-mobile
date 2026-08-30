@@ -4,12 +4,12 @@ slug: avatar
 package: "@meu/mobile"
 exports: [Avatar]
 status: verification
-localVerification: pending
-localGapIds: [LOC-AVATAR-01]
+localVerification: complete
+localGapIds: []
 priority: P1
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "83:88"
@@ -39,7 +39,7 @@ source: packages/mobile/src/Avatar
 - 可选 fallbackSrc 在主源失败后尝试一次备用图片，再落到内容 fallback；源变化由 Image 状态机重新开始，不自行循环重试或缓存失败。
 - 32px small 不再继承通用 Image 状态层的 44px 最小尺寸与 padding；RTL 无方向性布局；forced-colors 只保留 Avatar 外轮廓，避免双边框。图片淡入的 reduced-motion 降级由 Image 实现。
 
-状态为 `verification`；Next H5 移动 Chromium/WebKit 已覆盖图片与 initials fallback，最终 Chromatic 视觉审批和真机读屏尚未完成。
+状态为 `verification`；本地 Unit/SSR/hydration、Story 和 Next H5 移动 Chromium/WebKit 已覆盖基础、慢加载、失败与换源恢复边界，最终 Chromatic 视觉审批和真机读屏尚未完成。
 
 ## 何时使用
 
@@ -147,7 +147,7 @@ render 不读取浏览器全局、随机值或布局信息。空源服务端直�
 
 ## 浏览器与 WebView
 
-正式支持 React 19、iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；Chrome 70 / iOS 13 仅是构建语法扫描和观察档，不构成完整运行时承诺。组件依赖原生 img/alt/srcSet/sizes/object-fit、CSS Grid 与自定义属性；旧 WKWebView 的 lazy loading 可能退化为 eager，decoding/loading 也只是浏览器提示。跨域是否成功仍由图片服务器 CORS/Referrer 配置决定。
+正式支持 React 19、iOS Safari/WKWebView 15+ 与 Android Chrome/WebView 89+；Chrome 70 / iOS 13 仅是构建语法扫描和观察档，不构成完整运行时承诺。组件依赖原生 img/alt/srcSet/sizes/object-fit、CSS Grid 与自定义属性；旧 WKWebView 的 lazy loading 可能退化为 eager，decoding/loading 也只是浏览器提示。当前 Playwright mobile Chromium/WebKit 在 10,000px 视口外均延迟 lazy Avatar 请求，滚入视口后才发起；该结果验证当前支持引擎，但不把浏览器提示提升为组件强制调度保证。跨域是否成功仍由图片服务器 CORS/Referrer 配置决定。
 
 ## 边界情况与已知限制
 
@@ -172,7 +172,7 @@ render 不读取浏览器全局、随机值或布局信息。空源服务端直�
 - SSR/hydration: 组件目录 3 个测试文件共 12 项通过；隔离 Next 16 hydration 后图片与 initials fallback 均保持可访问名称，0 hydration/runtime error。
 - RTL: 逻辑无关；专属自动化不适用。
 - Reduced motion: 继承 Image CSS，截图待补。
-- Mobile Chromium/WebKit E2E: `renders atomic display components with native actions and fallbacks` 已在两种引擎通过，覆盖正常图片、空源 initials、备用头像来源与 objectPosition，运行时 0 `pageerror` / `console.error`。
+- Mobile Chromium/WebKit E2E: 基础原子展示场景覆盖正常图片、空源 initials、备用头像来源与 objectPosition；新增 `avatar-contract.spec.ts` 以受控网络闸门在两种引擎各覆盖 2 个场景：视口外 lazy 不提前请求，滚入后慢响应期间保持 initials、`aria-busy` 与 `data-pending`，成功后 native `decode()` 返回且 naturalWidth=88；不可解码响应进入具名 error，调用方换源后在慢响应期间恢复 loading，最终 error/load 各回调一次。共 4 次引擎执行通过。
 - Chromatic Light/Dark: Story 已建立，基线待执行。
 - Real device: 待补。
 
@@ -180,7 +180,7 @@ render 不读取浏览器全局、随机值或布局信息。空源服务端直�
 
 ### 待优化
 
-- 补 Chromatic、慢网 lazy loading 与 VoiceOver/TalkBack 真机验证；基础图片/fallback 双引擎路径已完成。
+- 补 Chromatic 与 VoiceOver/TalkBack 真机验证；本地慢网 lazy loading、解码、失败与换源恢复的双引擎路径已完成。
 
 ### 已完成
 
@@ -189,6 +189,7 @@ render 不读取浏览器全局、随机值或布局信息。空源服务端直�
 - 增加换源恢复、严格 SSR 和真实 hydrateRoot 的组件内回归测试，并扩展 shape/size/RTL/custom fallback Story。
 - 增加 forced-colors、Unit、SSR、交互与 Light/Dark Story。
 - 在隔离 Next H5 中补图片、fallback 与 hydration 双引擎证据。
+- 在 Avatar 专属 Next H5 合同页中补受控慢响应、视口外 lazy、native decode、不可解码失败和换源恢复的 Chromium/WebKit 确定性证据，关闭 `LOC-AVATAR-01`。
 
 ## 未来变更规则
 
@@ -206,3 +207,4 @@ render 不读取浏览器全局、随机值或布局信息。空源服务端直�
 | 2026-08-29 | 未发布 | additive API | 增加备用源、响应式/请求属性与 objectPosition    | 全部可选，默认视觉和请求策略保持兼容   |
 | 2026-08-29 | 未发布 | fix          | small fallback 去除通用 44px 状态层约束         | 无                                     |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎图片/fallback/hydration 证据 | 无                                     |
+| 2026-08-30 | 未发布 | verification | 增加慢网 lazy/decode/失败恢复双引擎合同测试     | 无                                     |
