@@ -139,7 +139,7 @@ describe("Ellipsis", () => {
 
     await waitFor(() => expect(getRoot().getAttribute("data-state")).toBe("complete"));
     expect(screen.queryByRole("button")).toBeNull();
-    expect(onEllipsisChange).toHaveBeenCalledOnce();
+    await waitFor(() => expect(onEllipsisChange).toHaveBeenCalledOnce());
     expect(onEllipsisChange).toHaveBeenLastCalledWith(false);
     act(() => {
       if (notifyResize) notifyResize();
