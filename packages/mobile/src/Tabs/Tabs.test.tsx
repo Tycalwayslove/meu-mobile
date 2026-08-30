@@ -57,6 +57,51 @@ describe("Tabs", () => {
     expect(onChange).toHaveBeenCalledTimes(1);
   });
 
+  it("supports Space activation in manual mode", () => {
+    const onChange = vi.fn();
+    render(<Tabs items={items} activationMode="manual" onChange={onChange} />);
+    const overview = screen.getByRole("tab", { name: "概览" });
+    act(() => overview.focus());
+    fireEvent.keyDown(overview, { key: "End" });
+    const settings = screen.getByRole("tab", { name: "设置" });
+
+    expect(settings.getAttribute("aria-selected")).toBe("false");
+    expect(fireEvent.keyDown(settings, { key: " " })).toBe(false);
+    expect(settings.getAttribute("aria-selected")).toBe("true");
+    expect(onChange).toHaveBeenCalledWith("settings", expect.anything());
+  });
+
+  it("keeps controlled activation caller-owned while roving focus advances", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<Tabs items={items} value="overview" onChange={onChange} />);
+    const overview = screen.getByRole("tab", { name: "概览" });
+    act(() => overview.focus());
+    fireEvent.keyDown(overview, { key: "ArrowRight" });
+    const settings = screen.getByRole("tab", { name: "设置" });
+
+    expect(document.activeElement).toBe(settings);
+    expect(settings.getAttribute("tabindex")).toBe("0");
+    expect(settings.getAttribute("aria-selected")).toBe("false");
+    expect(overview.getAttribute("aria-selected")).toBe("true");
+    expect(onChange).toHaveBeenCalledWith("settings", expect.anything());
+
+    rerender(<Tabs items={items} value="settings" onChange={onChange} />);
+    expect(screen.getByRole("tab", { name: "设置" }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("renders no active or sequentially focusable tab when every item is disabled", () => {
+    render(
+      <Tabs items={items.map((item) => ({ ...item, disabled: true }))} aria-label="全部不可用" />
+    );
+
+    expect(document.querySelector('[role="tab"][aria-selected="true"]')).toBeNull();
+    expect(screen.queryByRole("tabpanel")).toBeNull();
+    for (const disabledTab of screen.getAllByRole("tab")) {
+      expect(disabledTab.getAttribute("tabindex")).toBe("-1");
+      expect(disabledTab.hasAttribute("disabled")).toBe(true);
+    }
+  });
+
   it("supports a controlled null value and optional panel destruction", () => {
     const { rerender } = render(<Tabs items={items} value={null} destroyInactive />);
     expect(screen.queryByRole("tabpanel")).toBeNull();
@@ -207,6 +252,39 @@ describe("Tabs", () => {
     fireEvent.scroll(list);
     expect(list.getAttribute("data-overflow-left")).toBe("true");
     expect(list.getAttribute("data-overflow-right")).toBe("false");
+  });
+
+  it("remeasures horizontal overflow with ResizeObserver and disconnects on unmount", () => {
+    let notifyResize: (() => void) | undefined;
+    const observe = vi.fn();
+    const disconnect = vi.fn();
+    class MockResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        notifyResize = () => callback([], this);
+      }
+      disconnect = disconnect;
+      observe = observe;
+      unobserve() {}
+    }
+    vi.stubGlobal("ResizeObserver", MockResizeObserver);
+    const { unmount } = render(<Tabs items={items} stretch={false} />);
+    const list = screen.getByRole("tablist");
+    const tabs = screen.getAllByRole("tab");
+    list.getBoundingClientRect = () => ({ left: 0, right: 100, width: 100 }) as DOMRect;
+    tabs[0]!.getBoundingClientRect = () => ({ left: -20, right: 20, width: 40 }) as DOMRect;
+    tabs[tabs.length - 1]!.getBoundingClientRect = () =>
+      ({ left: 120, right: 160, width: 40 }) as DOMRect;
+
+    act(() => {
+      if (notifyResize) notifyResize();
+    });
+    expect(observe).toHaveBeenCalledTimes(tabs.length + 1);
+    expect(list.getAttribute("data-overflow-left")).toBe("true");
+    expect(list.getAttribute("data-overflow-right")).toBe("true");
+
+    unmount();
+    expect(disconnect).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
   });
 
   it("exposes its root ref under React 19 StrictMode", () => {

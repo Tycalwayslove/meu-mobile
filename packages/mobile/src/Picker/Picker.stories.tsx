@@ -184,3 +184,33 @@ export const LongLabelsRTL: Story = {
     </ConfigProvider>
   )
 };
+
+export const LongLocalizedActions: Story = {
+  args: {
+    title: "Choose the preferred delivery window for this order",
+    cancelText: "Keep current choice",
+    confirmText: "Confirm selection",
+    columns: [deliveryColumn]
+  },
+  render: (args) => (
+    <ConfigProvider locale="en-US">
+      <Picker {...args} lockScroll={false} open restoreFocus={false} />
+    </ConfigProvider>
+  ),
+  play: ({ canvasElement }) => {
+    const picker = canvasElement.ownerDocument.body.querySelector<HTMLElement>(
+      '[data-meu-component="picker"]'
+    );
+    if (!picker) throw new window.Error("Expected open Picker");
+    const buttons = Array.from(picker.querySelectorAll<HTMLButtonElement>("button"));
+    if (buttons.length !== 2) throw new window.Error("Expected Picker header actions");
+    if (picker.scrollWidth > picker.clientWidth + 1) {
+      throw new window.Error("Picker overflowed horizontally with localized actions");
+    }
+    for (const button of buttons) {
+      if (button.getBoundingClientRect().height < 44) {
+        throw new window.Error("Picker header action is below the 44px touch target");
+      }
+    }
+  }
+};

@@ -4,12 +4,12 @@ slug: list
 package: "@meu/mobile"
 exports: [List]
 status: verification
-localVerification: pending
-localGapIds: [LOC-LIST-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "70:589"
@@ -28,7 +28,7 @@ source: packages/mobile/src/List
 
 ## 当前能力
 
-List 提供具名 `role=list`、header/footer、plain/card 表面和三种分隔线，并组合独立文档化、支持 loading 的 Cell。
+List 提供具名 `role=list`、header/footer、plain/card 表面和三种分隔线，并组合独立文档化、支持 loading 的 Cell。开发构建会诊断缺少 listitem 语义的直接子节点，以及整行交互 Cell 内的嵌套交互内容；生产 DOM 与事件不受诊断影响。
 
 ## 何时使用
 
@@ -60,7 +60,7 @@ action Cell 默认 `type=button`，不会意外提交表单；显式传 `type=su
 
 ## Props
 
-API 由 `ListProps` / `CellProps` 生成。非空 href 优先为 anchor；否则 clickable/onClick 为 button。header、footer、description、prefix、extra、suffix 保留数值 0。`aria-label` 优先于 header 的自动 `aria-labelledby`；显式 `aria-describedby` 会落在真正的 `role=list` body。Cell 的 `loading/loadingLabel` 提供本地化忙碌状态并阻止重复激活。
+API 由 `ListProps` / `CellProps` 生成。非空 href 优先为 anchor；否则 clickable/onClick 为 button。header、footer、description、prefix、extra、suffix 保留数值 0。`aria-label` 优先于 header 的自动 `aria-labelledby`；显式 `aria-describedby` 会落在真正的 `role=list` body。Cell 的 `loading/loadingLabel` 提供本地化忙碌状态并阻止重复激活。扩展行必须显式提供 `role="listitem"`；Fragment 会在开发期检查时展开，不产生额外 DOM。
 
 ## Events
 
@@ -84,7 +84,7 @@ List ref 指向外层 div；Cell ref 是实际 a/button/div。无额外命令式
 
 ## 无障碍
 
-body 与 Cell frame 提供 list/listitem；真实交互节点保留原生语义。header 自动命名 list，外部说明可用 `aria-describedby` 关联。箭头与 spinner 图形隐藏；loading 通过本地化 polite status 和 `aria-busy` 暴露。自定义前后槽内容若传语义节点会进入 accessible name。
+body 与 Cell frame 提供 list/listitem；真实交互节点保留原生语义。header 自动命名 list，外部说明可用 `aria-describedby` 关联。空 List 仍保留具名 list，不伪造 listitem、busy 或 status；loading/ready/reorder 更新保持同一个 list 语义根。箭头与 spinner 图形隐藏；loading 通过本地化 polite status 和 `aria-busy` 暴露。自定义前后槽内容若传语义节点会进入 accessible name。
 
 ## 动效
 
@@ -96,7 +96,7 @@ body 与 Cell frame 提供 list/listitem；真实交互节点保留原生语义�
 
 ## SSR 与 Next.js
 
-useId 只用于 header 关联且 SSR/hydration 稳定；无 effect/browser API。Next Link 可通过业务组合，不由组件导入路由库。
+useId 只用于 header 关联且 SSR/hydration 稳定；无 effect/browser API。空列表可服务端输出并原位 hydrate，后续填充静态行、anchor 和 button 时保持同一个 `role=list` 节点；loading link hydrate 后恢复 href 也不更换 anchor。Next Link 可通过业务组合，不由组件导入路由库。
 
 ## RTL 与国际化
 
@@ -108,7 +108,7 @@ useId 只用于 header 关联且 SSR/hydration 稳定；无 effect/browser API�
 
 ## 边界情况与已知限制
 
-List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获得 listitem。Cell 空 href 不视为导航。复杂尾部控件应放在静态 Cell，避免嵌套交互。loading 不启动、取消或重试请求；调用方必须在 Promise settle、路由失败和卸载路径中收敛状态。
+开发构建会递归展开 Fragment，检查每个直接子节点是 Cell 或显式 `role=listitem`，但不会猜测自定义组件最终渲染出的角色，也不会自动补 listitem。整行可点击 Cell 的 title/description/prefix/extra/suffix/arrow 中若出现原生控件、交互 role、href/onClick、contentEditable 或可顺序聚焦节点会告警；复杂尾部控件应放在静态 Cell。该诊断不在 production 执行，且不改变 DOM。Cell 空 href 不视为导航。loading 不启动、取消或重试请求；调用方必须在 Promise settle、路由失败和卸载路径中收敛状态。
 
 ## 性能预算
 
@@ -116,12 +116,12 @@ List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获
 
 ## 测试证据
 
-- 本轮 Unit/SSR/hydration：`pnpm --filter @meu/mobile exec vitest run src/List --maxWorkers=1`，3 files / 15 tests 通过；覆盖静态/按钮/链接、disabled/loading、交互锁、live status 位于 disabled action 外、本地化与显式静默、系统/config reduced motion、ConfigProvider RTL 与显式 Cell direction override、list 命名/描述、0 值 slots、SSR 与真实 hydrateRoot。
+- 本轮 Unit/SSR/hydration：`pnpm --filter @meu/mobile exec vitest run src/List --maxWorkers=1`，3 files / 21 tests 通过；覆盖静态/按钮/链接、disabled/loading、交互锁、live status 位于 disabled action 外、本地化与显式静默、系统/config reduced motion、ConfigProvider RTL 与显式 Cell direction override、list 命名/描述、0 值 slots、empty → loading → ready/reorder、开发期直接子节点/嵌套交互告警及 production 静默、SSR 与真实 hydrateRoot。
 - Story interaction: `Card.play` 验证 action Cell 到业务 output 的事件链；当前 `check-storybook-links` 已验证 81/81 个 Storybook title 均至少包含一项关键 play，Loading Story 已纳入全量矩阵。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本轮定向扫描覆盖 `List` 匹配集 17 个 Story × 7 场景；其中 `Information/Cell & List` 的 5 个 Story 为 35/35 组合通过。play、axe WCAG A/AA 与运行时检查结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；Chromium/WebKit 共 8 个批次定向场景通过，其中 List/Cell 用例验证命名 list、原生 button/link、disabled/loading、status、ready 后动作恢复与业务事件，批次整页 Light/Dark axe WCAG A/AA 也通过。loading link 的 href 恢复由共置 hydration 测试证明；当前 68 页 × Light/Dark、共 136 场景全量通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2110 B / 32768 B 预算，组合 Brotli 1872 B；共享样式由应用单独导入一次。
-- SSR/hydration: `List.ssr.test.tsx` 覆盖原生结构；`List.hydration.test.tsx` 覆盖 useId 命名稳定、loading 到 ready 和 hydration 0 mismatch；隔离 Next 16 hydration 后 list/listitem 与 Cell 原生节点保持一致，0 hydration/runtime error
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3114 B / 32768 B 预算，组合 Brotli 2764 B；共享样式由应用单独导入一次。
+- SSR/hydration: `List.ssr.test.tsx` 覆盖具名空列表、原生结构与 loading；`List.hydration.test.tsx` 覆盖 useId 命名稳定、具名 empty SSR → hydrate → populated、loading 到 ready、list/anchor 节点身份和 hydration 0 mismatch；隔离 Next 16 hydration 后 list/listitem 与 Cell 原生节点保持一致，0 hydration/runtime error
 - RTL: LongContentAndRTL Story；自动视觉回归待补
 - Reduced motion: 系统媒体查询与 ConfigProvider `motion="reduced"` 均停止 spinner；unit 已覆盖显式策略，真实浏览器视觉留到最终矩阵。
 - Mobile Chromium/WebKit E2E: `keeps Cell actions, links and List semantics native` 在两种引擎断言命名 list、原生 button/link、href、disabled/loading、status 与业务输出；本轮两种引擎均通过。
@@ -132,11 +132,13 @@ List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获
 
 ### 待优化
 
-补真机与嵌套内容开发期警告证据；loading 和基础双引擎原生节点路径已完成。
+补真机与 Chromatic 最终视觉审批；本地结构、动态状态、SSR/hydration 与开发期组合诊断已完成。
 
 ### 已完成
 
 冻结原生根语义、disabled/loading 链接、0 值槽位、逻辑方向、长内容、forced-colors 和 SSR 边界；补独立 hydration 与隔离 Next H5 证据。
+
+增加开发期直接子节点与嵌套交互诊断，保留 production 静默；补具名空列表、empty → loading → ready/reorder 及 SSR empty → hydrate → populated 自动化，关闭 `LOC-LIST-01`。
 
 ## 变更记录
 
@@ -146,3 +148,4 @@ List 不验证任意 children 是否为 Cell；非 Cell 子节点不会自动获
 | 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 list/原生节点/hydration 证据              | 无                              |
 | 2026-08-29 | 未发布 | feature       | 增加 Cell loading、状态公告和 List 描述关联                   | 异步状态仍由业务控制            |
 | 2026-08-29 | 未发布 | accessibility | `aria-describedby` 落到真实 `role=list`，箭头方向改为配置驱动 | List ref 仍指向外层容器         |
+| 2026-08-30 | 未发布 | hardening     | 增加组合告警、空列表与动态 hydration 证据                     | production DOM 与事件保持不变   |

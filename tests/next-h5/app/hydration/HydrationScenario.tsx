@@ -7,6 +7,7 @@ import {
   ConfigProvider,
   FloatingPanel,
   ImageViewer,
+  Picker,
   Popover,
   Popup,
   SwipeActions,
@@ -65,6 +66,7 @@ export function HydrationScenario({
   );
   const [hydrationTree, setHydrationTree] = useState(initialHydrationTree);
   const [treeAsyncStatus, setTreeAsyncStatus] = useState("idle");
+  const [pickerSelection, setPickerSelection] = useState("today:idle");
 
   let content;
   switch (kind) {
@@ -156,6 +158,28 @@ export function HydrationScenario({
         />
       );
       break;
+    case "picker":
+      content = (
+        <Picker
+          lockScroll={false}
+          open
+          title="Hydration delivery window"
+          columnLabels={["Hydration day"]}
+          columns={[
+            [
+              { label: "Today", value: "today" },
+              { disabled: true, label: "Unavailable", value: "unavailable" },
+              { label: "Tomorrow", value: "tomorrow" },
+              { label: "Later", value: "later" }
+            ]
+          ]}
+          defaultValue={["today"]}
+          onSelect={(value, _options, details) =>
+            setPickerSelection(`${String(value[0])}:${details.reason}`)
+          }
+        />
+      );
+      break;
     case "floating-panel":
       content = (
         <div style={{ position: "relative", minHeight: 480 }}>
@@ -201,6 +225,9 @@ export function HydrationScenario({
         {content}
         {kind === "tree-select" ? (
           <output aria-label="Hydration tree async status">{treeAsyncStatus}</output>
+        ) : null}
+        {kind === "picker" ? (
+          <output aria-label="Hydration picker selection">{pickerSelection}</output>
         ) : null}
       </section>
     </ConfigProvider>

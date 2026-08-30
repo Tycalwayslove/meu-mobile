@@ -141,7 +141,7 @@ type ActionMenuBaseProps = Omit<
   onOpenChange?: (open: boolean, details: ActionMenuOpenChangeDetails) => void;
   /** Controlled open state; pair with `onOpenChange` to accept dismissal requests. */
   open?: boolean;
-  /** Ref to the popup panel element. */
+  /** Ref to the ActionMenu content root inside the popup panel. */
   ref?: Ref<HTMLDivElement>;
   /** Returns focus to the prior or explicit return target after the menu closes. @defaultValue true */
   restoreFocus?: boolean;

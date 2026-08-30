@@ -77,10 +77,15 @@ describe("ActionMenuProvider", () => {
     await waitFor(() => expect(screen.getByRole("dialog", { name: "订单操作" })).toBeTruthy());
     await waitFor(() => expect(screen.queryByRole("button", { name: "关闭菜单" })).toBeNull());
     act(() => {
-      if (consumerRef.current) consumerRef.current.close();
+      if (consumerRef.current) {
+        consumerRef.current.close();
+        consumerRef.current.close();
+        consumerRef.current.clear();
+      }
     });
     expect(screen.queryByRole("dialog", { name: "订单操作" })).toBeNull();
     expect(onClose).toHaveBeenLastCalledWith({ reason: "programmatic" });
+    expect(onClose).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole("button", { name: "打开多个菜单" }));
     await waitFor(() => expect(screen.getAllByRole("dialog")).toHaveLength(2));
@@ -90,6 +95,7 @@ describe("ActionMenuProvider", () => {
     });
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(onClose).toHaveBeenCalledWith({ reason: "clear" });
+    expect(onClose).toHaveBeenCalledTimes(3);
   });
 
   it("settles active controller callbacks when the provider unmounts", async () => {

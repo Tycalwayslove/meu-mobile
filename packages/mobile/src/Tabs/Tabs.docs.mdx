@@ -4,12 +4,12 @@ slug: tabs
 package: "@meu/mobile"
 exports: [Tabs]
 status: verification
-localVerification: pending
-localGapIds: [LOC-TABS-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "122:794"
@@ -21,7 +21,10 @@ storyIds:
     navigation-tabs--manual-activation,
     navigation-tabs--lazy-panels,
     navigation-tabs--keyboard-interaction,
-    navigation-tabs--rtl
+    navigation-tabs--rtl,
+    navigation-tabs--controlled-activation,
+    navigation-tabs--adaptive-modes,
+    navigation-tabs--zoom-200-percent-equivalent
   ]
 source: packages/mobile/src/Tabs
 ---
@@ -130,23 +133,23 @@ item.key 必须唯一稳定。内部 ref 使用 Map，因此 `__proto__` 等任�
 
 ## 测试证据
 
-- 本轮 Unit/SSR/hydration：2 files / 19 tests 通过。覆盖 APG 关联、禁用跳过、Home/End/方向键、automatic/manual、controlled null/无效值、外部受控值的 roving tab stop、destroy、受控/非受控 lazy retain、动态 remove/disable 的真实焦点恢复、外部焦点不抢占、并发 transition + StrictMode、RTL/LTR、scrollIntoView、物理双边 overflow、特殊字符串 key、React 19 ref、SSR 与真实 hydrateRoot。
+- 本轮 Unit/SSR/hydration：2 files / 23 tests 通过。覆盖 APG 关联、禁用跳过与全禁用、Home/End/方向键、automatic/manual Enter/Space、受控激活保持调用方权威、controlled null/无效值、外部受控值的 roving tab stop、destroy、受控/非受控 lazy retain、动态 remove/disable 的真实焦点恢复、外部焦点不抢占、并发 transition + StrictMode、RTL/LTR、scrollIntoView、物理双边 overflow、ResizeObserver 重测/清理、特殊字符串 key、React 19 ref、SSR 与真实 hydrateRoot。
 - SSR/hydration (`Tabs.ssr.test.tsx`)：SSR role/选择/lazy 结构；真实 `hydrateRoot` 验证 useId 关联、ref、键盘交互与 0 recoverable error。
-- Story interaction：`KeyboardInteraction` 验证 End 后的焦点、automatic selection 与可见 panel；`OverflowAndDisabled` 保留窄屏、长标签、badge、disabled 的人工/视觉入口。
-- CSS 静态契约：reduced-motion 缩短 tab/indicator transition；forced-colors 取消 mask、恢复 scrollbar 并使用系统色。
+- Story interaction：`KeyboardInteraction` 验证 End 后的焦点、automatic selection 与可见 panel；`OverflowAndDisabled` 在真实窄容器验证右侧初始溢出、disabled 跳过、roving automatic activation、滚动入视后的左侧物理溢出；`ManualActivation` 验证移动焦点不选中及 Space 激活；`ControlledActivation` 验证调用方提交后 panel/selection 同步。
+- Storybook Chromium extended：目标构建后扫描 10 Stories × 7 场景（Light、Dark、RTL、en-US、reduced-motion、200% 字号、forced-colors），70/70 play/axe 通过，0 违规与 0 render error。`AdaptiveModes` 在匹配媒体环境中读取真实 computed style，断言 reduced-motion transition ≤1ms、forced-colors 取消 mask/恢复边界；`Zoom200PercentEquivalent` 以 195 CSS px 验证 390px 视口在 200% 缩放等效布局下仍横向可操作并保持 48px 高度。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4867 B / 32768 B 预算，组合 Brotli 4300 B；共享样式由应用单独导入一次。
-- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖外部受控切换、panel 关联与溢出状态；批次整页 Light/Dark axe WCAG A/AA 也通过。
-- 本轮未执行/不可声称：Storybook 全矩阵、Storybook axe/截图扫描、Chromatic、真机读屏、真实 iOS/Android WebView、全量 E2E。
+- 历史隔离 Next 运行时：`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖外部受控切换、panel 关联与溢出状态；本次按目录约束未改动或重跑共享 Next H5 场景。
+- 本轮未执行/不可声称：Chromatic、真机读屏、真实 iOS/Android WebView、触摸横向滑动、全量 E2E。
 
 ## V2 优化记录
 
 ### 待优化
 
-补真机读屏、触摸横向滚动与完整支持档/观察档运行时证据；补 Storybook axe/forced-colors/reduced-motion 浏览器门禁与发布后 Chromatic。
+补真机读屏、触摸横向滚动与完整支持档/观察档运行时证据；发布批次补 Chromatic。以上外部/真机项不阻塞本地自动化完成态。
 
 ### 已完成
 
-冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约；修复外部受控值的 resting tab stop、任意字符串 key ref 注册、双边溢出提示；增加真实 hydrateRoot、StrictMode/transition/ref 单测。
+冻结 APG、激活模式、挂载边界、RTL 键盘、入视与高对比契约；修复外部受控值的 resting tab stop、任意字符串 key ref 注册、双边溢出提示；增加真实 hydrateRoot、StrictMode/transition/ref 单测，并以共置 Story extended 浏览器矩阵补齐受控激活、真实横向溢出、200% 等效窄宽、forced-colors 与 reduced-motion 本地证据。
 
 ## 变更记录
 
@@ -155,3 +158,4 @@ item.key 必须唯一稳定。内部 ref 使用 Map，因此 `__proto__` 等任�
 | 2026-08-29 | 未发布 | fix          | roving focus、特殊 key ref、overflow indicator | 无               |
 | 2026-08-29 | 未发布 | verification | 真实 hydration、React 19 StrictMode/transition | 无               |
 | 2026-08-29 | 未发布 | feature      | lazy retain、RTL 键盘与 scrollIntoView         | 默认挂载行为不变 |
+| 2026-08-30 | 未发布 | verification | 补受控/溢出/适应模式 Story 浏览器矩阵          | 无 API 变化      |

@@ -4,12 +4,12 @@ slug: action-menu
 package: "@meu/mobile"
 exports: [ActionMenu, ActionMenuProvider, useActionMenu]
 status: verification
-localVerification: pending
-localGapIds: [LOC-ACTION-MENU-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "187:123"
@@ -86,7 +86,7 @@ Tab 在最上层模态内循环；原生按钮支持 Enter/Space；Escape 在无
 
 ## 无障碍
 
-外层为有名称的 modal dialog，操作项为 native button 而非 menuitem；图标装饰，描述为可读文本。pending 使用 aria-busy 并禁用其他按钮。
+外层为有名称的 modal dialog，操作项为 native button 而非 menuitem；图标装饰。每项使用稳定 `aria-labelledby`/`aria-describedby` 把标签与描述分离，极长追踪标识不会污染或无分隔拼接按钮名称。pending 使用 aria-busy 并禁用其他按钮。
 
 ## 动效
 
@@ -118,23 +118,23 @@ O(actions) 分组；关闭 Provider 记录仅为退出动画短暂保留。confi
 
 ## 测试证据
 
-- Unit: 语义/分组/焦点、pending 跨关闭重开隔离、Popup Portal RTL/motion、回调顺序、false/reject、强制确认提交后焦点、受控取消、forceMount、确认随关闭清理、Provider close/clear/unmount 与模态背景隔离
+- Unit: 语义/分组/焦点、动作 label/description IDREF 与极长无断点内容、pending 跨关闭重开隔离、Popup Portal RTL/motion、回调顺序/原始索引/关闭 opt-out、false/reject、慢失败后二级确认保持可重试、强制确认提交后焦点、受控取消、forceMount、确认随关闭清理、Provider 多栈 close/clear 幂等结算/unmount 与模态背景隔离
 - Story interaction: `Default` 验证打开、首操作聚焦、动作关闭与触发器焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本轮定向扫描 5 个 ActionMenu Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），35/35 组合通过；有 play 的 Story 先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 13820 B / 32768 B 预算；最大单值 `ActionMenuProvider` 为 13734 B / 32768 B 预算，组合 Brotli 12141 B；共享样式由应用单独导入一次。
-- SSR/hydration: `ActionMenu.ssr.test.tsx`；隔离 Next 16 hydration 后触发器稳定，打开菜单与二级确认 Portal 无 hydration/runtime error
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 13878 B / 32768 B 预算；最大单值 `ActionMenuProvider` 为 13792 B / 32768 B 预算，组合 Brotli 12199 B；共享样式由应用单独导入一次。
+- SSR/hydration: `ActionMenu.ssr.test.tsx` 验证 Node SSR 分组；共置 `ActionMenu.hydration.test.tsx` 验证首屏打开菜单从 inline SSR 移入 Portal 时 IDREF/Context/RTL/motion 稳定且 recoverable error 为 0，并验证 Provider hydration 后打开二级确认；隔离 Next 16 hydration 后触发器稳定，打开菜单与二级确认 Portal 无 hydration/runtime error
 - Mobile Chromium/WebKit E2E: `runs ActionMenu actions with danger confirmation` 在两种引擎断言三分组、首操作焦点、async busy/关闭、危险二级 alertdialog、安全焦点、scroll lock 和最终焦点恢复。Chromatic / 真机读屏仍属最终门禁。
 
 ## V2 优化记录
 
 ### 待优化
 
-补 VoiceOver/TalkBack 双层模态、极长描述、Provider 多栈和慢网失败；基础异步/危险确认双引擎路径已完成。
+保留 VoiceOver/TalkBack 双层模态、真机移动 WebKit 焦点切换及 Chromatic 长内容/双层视觉最终门禁；这些不能由本地 DOM 测试代替。
 
 ### 已完成
 
-冻结底部动作面板而非 menu 语义，补危险确认、pending 全路径阻断、关闭同步清理、Provider 卸载结算、RTL、SSR、隔离 Next H5 与永久文档。
+冻结底部动作面板而非 menu 语义，补危险确认、pending 全路径阻断、慢失败可重试、动作标签/描述 IDREF、极长内容 Story、关闭同步清理、Provider 多栈幂等结算、RTL、SSR/hydration、隔离 Next H5 与永久文档。
 
 危险确认的返回焦点改在 confirmation 状态提交后执行；Provider 多菜单测试不再依赖背景 inert effect 的时序窗口。
 
@@ -145,3 +145,4 @@ O(actions) 分组；关闭 Provider 记录仅为退出动画短暂保留。confi
 | 2026-08-29 | 未发布 | behavior     | 动作、确认、生命周期与文档加固                           | 无 API 破坏 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 async/confirm/focus/scroll-lock 证据 | 无          |
 | 2026-08-29 | 未发布 | hardening    | 消除确认返回焦点与 Provider 模态隔离测试竞态             | API 兼容    |
+| 2026-08-30 | 未发布 | a11y/test    | 分离动作名称/描述并补 SSR hydration、慢失败及多栈证据    | API 兼容    |

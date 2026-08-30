@@ -228,10 +228,14 @@ export function ActionMenu({
 
   const renderAction = ({ action, index }: { action: ActionMenuAction; index: number }) => {
     const needsConfirmation = action.tone === "danger" || action.confirmation !== undefined;
+    const actionLabelId = `meu-action-menu-action-${generatedId}-${index}-label`;
+    const actionDescriptionId = `meu-action-menu-action-${generatedId}-${index}-description`;
     return (
       <Button
         ref={action.key === preferredActionKey ? initialActionRef : undefined}
         block
+        aria-describedby={action.description === undefined ? undefined : actionDescriptionId}
+        aria-labelledby={actionLabelId}
         className={actionButton}
         disabled={action.disabled || dismissBlocked}
         key={action.key}
@@ -248,9 +252,13 @@ export function ActionMenu({
         }}
       >
         <span className={actionContent}>
-          <span className={actionLabel}>{action.label}</span>
+          <span className={actionLabel} id={actionLabelId}>
+            {action.label}
+          </span>
           {action.description === undefined ? null : (
-            <span className={actionDescription}>{action.description}</span>
+            <span className={actionDescription} id={actionDescriptionId}>
+              {action.description}
+            </span>
           )}
         </span>
       </Button>

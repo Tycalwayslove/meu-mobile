@@ -79,6 +79,28 @@ describe("TabBar", () => {
     expect(ref.current).toBe(navigation);
   });
 
+  it("runs React 19 callback-ref cleanup without synthesizing a legacy null call", () => {
+    const cleanup = vi.fn();
+    const ref = vi.fn(() => cleanup);
+    const { unmount } = render(<TabBar ref={ref} items={items} />);
+    const navigation = screen.getByRole("navigation", { name: "主导航" });
+
+    expect(ref).toHaveBeenCalledOnce();
+    expect(ref).toHaveBeenCalledWith(navigation);
+    unmount();
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(ref).toHaveBeenCalledOnce();
+  });
+
+  it("clears a legacy callback ref with null on unmount", () => {
+    const ref = vi.fn();
+    const { unmount } = render(<TabBar ref={ref} items={items} />);
+    expect(ref).toHaveBeenCalledWith(screen.getByRole("navigation", { name: "主导航" }));
+
+    unmount();
+    expect(ref).toHaveBeenLastCalledWith(null);
+  });
+
   it("retains local focus across ordinary and multi-instance rerenders without stealing external focus", () => {
     const outsideItems = items.map((item) =>
       item.key === "orders" ? { ...item, disabled: true } : item
@@ -213,6 +235,28 @@ describe("TabBar", () => {
     expect(screen.getByRole("button", { name: "首页" }).getAttribute("aria-current")).toBe("page");
   });
 
+  it("keeps controlled routing authoritative while onChange cancels native navigation", () => {
+    const onChange = vi.fn(
+      (_key: string, event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+        event.preventDefault();
+      }
+    );
+    const routes = [
+      { key: "home", label: "首页", icon: <span>H</span>, href: "/home" },
+      { key: "search", label: "搜索", icon: <span>S</span>, href: "/search" }
+    ];
+    const { rerender } = render(<TabBar items={routes} value="home" onChange={onChange} />);
+    const search = screen.getByRole("link", { name: "搜索" });
+
+    expect(fireEvent.click(search)).toBe(false);
+    expect(onChange).toHaveBeenCalledWith("search", expect.anything());
+    expect(screen.getByRole("link", { name: "首页" }).getAttribute("aria-current")).toBe("page");
+    expect(search.hasAttribute("aria-current")).toBe(false);
+
+    rerender(<TabBar items={routes} value="search" onChange={onChange} />);
+    expect(screen.getByRole("link", { name: "搜索" }).getAttribute("aria-current")).toBe("page");
+  });
+
   it("keeps native Tab and Enter behavior while skipping disabled destinations", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -286,5 +330,29 @@ describe("TabBar", () => {
     );
     rerender(<TabBar items={disabledOrders} defaultValue="orders" />);
     expect(document.activeElement).toBe(screen.getByRole("link", { name: /首页/ }));
+  });
+
+  it("restores focus when a route adapter replaces a focused button with an anchor", () => {
+    const buttonRoutes = [
+      { key: "home", label: "首页", icon: <span>H</span> },
+      { key: "orders", label: "订单", icon: <span>O</span> }
+    ];
+    const { rerender } = render(
+      <TabBar items={buttonRoutes} defaultValue="orders" aria-label="路由适配" />
+    );
+    const ordersButton = screen.getByRole("button", { name: "订单" });
+    ordersButton.focus();
+
+    rerender(
+      <TabBar
+        aria-label="路由适配"
+        defaultValue="orders"
+        items={[buttonRoutes[0]!, { ...buttonRoutes[1]!, href: "/orders" }]}
+      />
+    );
+
+    const ordersLink = screen.getByRole("link", { name: "订单" });
+    expect(ordersLink.getAttribute("aria-current")).toBe("page");
+    expect(document.activeElement).toBe(ordersLink);
   });
 });

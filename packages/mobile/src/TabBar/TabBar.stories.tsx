@@ -118,7 +118,19 @@ export const NarrowLongLabels: Story = {
         ]}
       />
     </div>
-  )
+  ),
+  play: ({ canvasElement }) => {
+    const destinations = canvasElement.querySelectorAll<HTMLElement>("[data-tab-bar-key]");
+    if (destinations.length !== 4) {
+      throw new window.Error("Expected all narrow TabBar destinations");
+    }
+    for (const destination of destinations) {
+      const bounds = destination.getBoundingClientRect();
+      if (bounds.width < 44 || bounds.height < 44) {
+        throw new window.Error("Narrow TabBar destination fell below 44×44 CSS px");
+      }
+    }
+  }
 };
 
 export const RTL: Story = {
@@ -136,4 +148,51 @@ export const Landscape: Story = {
     </div>
   ),
   globals: { viewport: { value: "meuMobile", isRotated: true } }
+};
+
+export const AdaptiveModes: Story = {
+  play: ({ canvasElement }) => {
+    const current = canvasElement.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!current || current.getBoundingClientRect().height < 44) {
+      throw new window.Error("TabBar lost its minimum interaction geometry");
+    }
+    const currentStyle = window.getComputedStyle(current);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const durations = currentStyle.transitionDuration
+        .split(",")
+        .map((duration) => Number.parseFloat(duration));
+      if (durations.some((duration) => duration > 0.001)) {
+        throw new window.Error("TabBar retained a visible transition under reduced motion");
+      }
+    }
+    if (
+      window.matchMedia("(forced-colors: active)").matches &&
+      Number.parseFloat(currentStyle.borderTopWidth) < 1
+    ) {
+      throw new window.Error("TabBar did not expose its forced-colors boundary");
+    }
+  }
+};
+
+export const Zoom200PercentEquivalent: Story = {
+  render: () => (
+    <div style={{ width: 195 }}>
+      <TabBar
+        aria-label="200% 缩放主导航"
+        items={items.map((item) => ({ ...item, label: `${item.label}目的地` }))}
+      />
+    </div>
+  ),
+  play: ({ canvasElement }) => {
+    const destinations = canvasElement.querySelectorAll<HTMLElement>("[data-tab-bar-key]");
+    if (destinations.length !== 4) {
+      throw new window.Error("Expected all zoom-equivalent TabBar destinations");
+    }
+    for (const destination of destinations) {
+      const bounds = destination.getBoundingClientRect();
+      if (bounds.width < 44 || bounds.height < 44) {
+        throw new window.Error("TabBar lost 44×44 geometry at a 200% zoom-equivalent width");
+      }
+    }
+  }
 };

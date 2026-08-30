@@ -6,6 +6,14 @@ import { Cell } from "./Cell";
 import { List } from "./List";
 
 describe("List SSR", () => {
+  it("renders a named empty list without inventing items or status", () => {
+    const html = renderToString(<List aria-label="空订单" />);
+    expect(html).toContain('role="list"');
+    expect(html).toContain('aria-label="空订单"');
+    expect(html).not.toContain('role="listitem"');
+    expect(html).not.toContain('role="status"');
+  });
+
   it("renders stable native list, link and button semantics", () => {
     const html = renderToString(
       <List header="账户">

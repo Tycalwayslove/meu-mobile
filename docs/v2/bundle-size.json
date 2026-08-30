@@ -294,9 +294,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 12141,
-      "gzipBytes": 13820,
-      "rawBytes": 62863,
+      "brotliBytes": 12199,
+      "gzipBytes": 13878,
+      "rawBytes": 63213,
       "docsPath": "packages/mobile/src/ActionMenu/ActionMenu.docs.mdx",
       "name": "ActionMenu",
       "packageName": "@meu/mobile",
@@ -305,17 +305,17 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 11561,
-          "gzipBytes": 13142,
-          "rawBytes": 59908,
+          "brotliBytes": 11621,
+          "gzipBytes": 13200,
+          "rawBytes": 60258,
           "name": "ActionMenu",
           "passesBudget": true
         },
         {
           "budgetBytes": 32768,
-          "brotliBytes": 12082,
-          "gzipBytes": 13734,
-          "rawBytes": 62526,
+          "brotliBytes": 12135,
+          "gzipBytes": 13792,
+          "rawBytes": 62876,
           "name": "ActionMenuProvider",
           "passesBudget": true
         },
@@ -1005,9 +1005,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 1872,
-      "gzipBytes": 2110,
-      "rawBytes": 7042,
+      "brotliBytes": 2764,
+      "gzipBytes": 3114,
+      "rawBytes": 10816,
       "docsPath": "packages/mobile/src/List/List.docs.mdx",
       "name": "List",
       "packageName": "@meu/mobile",
@@ -1016,9 +1016,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 1872,
-          "gzipBytes": 2110,
-          "rawBytes": 7042,
+          "brotliBytes": 2764,
+          "gzipBytes": 3114,
+          "rawBytes": 10816,
           "name": "List",
           "passesBudget": true
         }
@@ -1575,9 +1575,9 @@
     },
     {
       "budgetBytes": 32768,
-      "brotliBytes": 4308,
-      "gzipBytes": 4860,
-      "rawBytes": 17899,
+      "brotliBytes": 4359,
+      "gzipBytes": 4913,
+      "rawBytes": 18191,
       "docsPath": "packages/mobile/src/TabBar/TabBar.docs.mdx",
       "name": "TabBar",
       "packageName": "@meu/mobile",
@@ -1586,9 +1586,9 @@
       "valueBundles": [
         {
           "budgetBytes": 32768,
-          "brotliBytes": 4308,
-          "gzipBytes": 4860,
-          "rawBytes": 17899,
+          "brotliBytes": 4359,
+          "gzipBytes": 4913,
+          "rawBytes": 18191,
           "name": "TabBar",
           "passesBudget": true
         }

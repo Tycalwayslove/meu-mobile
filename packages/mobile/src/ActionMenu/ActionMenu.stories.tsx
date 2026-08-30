@@ -94,7 +94,12 @@ export const Default: Story = {
 export const WithDescriptionAndDanger: Story = {
   args: {
     actions: [
-      { key: "copy", label: "复制订单号", description: "MEU-2026-0828" },
+      {
+        key: "copy",
+        label: "复制订单号（含完整跨系统追踪标识）",
+        description:
+          "MEU-2026-0828-FULFILLMENT-CROSS-BORDER-TRACE-REFERENCE-WITHOUT-BREAK-OPPORTUNITIES"
+      },
       { key: "share", label: "分享订单" },
       {
         key: "delete",

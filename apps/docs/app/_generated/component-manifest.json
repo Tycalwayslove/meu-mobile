@@ -2618,10 +2618,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ActionMenu/ActionMenu.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-ACTION-MENU-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4544,10 +4542,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/List/List.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-LIST-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -4840,10 +4836,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Picker/Picker.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-PICKER-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5900,10 +5894,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TabBar/TabBar.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-TAB-BAR-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5940,10 +5932,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Tabs/Tabs.docs.mdx",
       "hasDocs": true,
-      "localGapIds": [
-        "LOC-TABS-01"
-      ],
-      "localVerification": "pending",
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -6533,10 +6523,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
-    "locallyVerifiedProducts": 48,
+    "locallyVerifiedProducts": 53,
     "packages": 4,
     "products": 68,
-    "productsWithLocalGaps": 20,
+    "productsWithLocalGaps": 15,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

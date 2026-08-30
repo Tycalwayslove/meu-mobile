@@ -21,6 +21,44 @@ afterEach(async () => {
 });
 
 describe("List hydration", () => {
+  it("hydrates a named empty list and preserves its semantic root while rows arrive", async () => {
+    const emptyElement = createElement(List, { "aria-label": "动态订单" });
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(emptyElement);
+    document.body.append(container);
+    containers.push(container);
+    const serverList = container.querySelector<HTMLElement>("[role='list']");
+    expect(serverList).toBeTruthy();
+    expect(serverList ? serverList.children : []).toHaveLength(0);
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const recoverableErrors: unknown[] = [];
+
+    const root = hydrateRoot(container, emptyElement, {
+      onRecoverableError: (error) => recoverableErrors.push(error)
+    });
+    roots.push(root);
+    await act(() => Promise.resolve());
+    expect(container.querySelector("[role='list']")).toBe(serverList);
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(recoverableErrors).toEqual([]);
+
+    const populatedElement = createElement(
+      List,
+      { "aria-label": "动态订单" },
+      createElement(Cell, { key: "summary", title: "订单摘要" }),
+      createElement(Cell, { href: "/orders/1", key: "details", title: "订单详情" }),
+      createElement(Cell, { key: "pay", onClick: () => undefined, title: "支付订单" })
+    );
+    await act(() => {
+      root.render(populatedElement);
+      return Promise.resolve();
+    });
+    expect(container.querySelector("[role='list']")).toBe(serverList);
+    expect(serverList ? serverList.querySelectorAll("[role='listitem']") : []).toHaveLength(3);
+    expect(serverList ? serverList.querySelector("a[href='/orders/1']") : null).toBeTruthy();
+    expect(serverList ? serverList.querySelector("button[type='button']") : null).toBeTruthy();
+  });
+
   it("preserves generated naming and restores a loading Cell after hydration", async () => {
     const onClick = vi.fn();
     const serverElement = createElement(

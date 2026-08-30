@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ConfigProvider } from "../ConfigProvider";
 import { Cell } from "./Cell";
 import { List } from "./List";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
 
 describe("Cell", () => {
   it("keeps static information non-interactive", () => {
@@ -195,5 +200,95 @@ describe("List", () => {
     expect(
       list.parentElement ? list.parentElement.getAttribute("aria-describedby") : null
     ).toBeNull();
+  });
+
+  it("keeps an empty list named and preserves native semantics through dynamic updates", () => {
+    const { rerender } = render(<List aria-label="订单列表" />);
+    const list = screen.getByRole("list", { name: "订单列表" });
+    expect(list.children).toHaveLength(0);
+    expect(list.getAttribute("aria-busy")).toBeNull();
+    expect(list.parentElement ? list.parentElement.getAttribute("role") : null).toBeNull();
+
+    rerender(
+      <List aria-label="订单列表">
+        <Cell key="details" title="订单详情" href="/orders/1" loading />
+        <Cell key="pay" title="支付订单" loading onClick={() => undefined} />
+      </List>
+    );
+    expect(screen.getByRole("list", { name: "订单列表" })).toBe(list);
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "订单详情" }).hasAttribute("href")).toBe(false);
+    expect(screen.getByRole("button", { name: "支付订单" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getAllByRole("status")).toHaveLength(2);
+
+    rerender(
+      <List aria-label="订单列表">
+        <Cell key="pay" title="支付订单" onClick={() => undefined} />
+        <Cell key="details" title="订单详情" href="/orders/1" />
+        <Cell key="refund" title="退款记录" />
+      </List>
+    );
+    expect(screen.getByRole("list", { name: "订单列表" })).toBe(list);
+    expect(screen.getAllByRole("listitem")).toHaveLength(3);
+    expect(screen.getByRole("link", { name: "订单详情" }).getAttribute("href")).toBe("/orders/1");
+    expect(screen.getByRole("button", { name: "支付订单" }).hasAttribute("disabled")).toBe(false);
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "支付订单",
+      "订单详情",
+      "退款记录"
+    ]);
+  });
+
+  it("warns in development for unframed rows and nested interactive Cell content", () => {
+    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    render(
+      <List aria-label="错误组合">
+        <div>缺少行语义</div>
+        <Cell
+          title={
+            <span role="button" tabIndex={0}>
+              嵌套操作
+            </span>
+          }
+          onClick={() => undefined}
+        />
+      </List>
+    );
+
+    expect(consoleWarn).toHaveBeenCalledWith(
+      '[Meu List] Every rendered direct child must be a Cell or explicitly declare role="listitem".'
+    );
+    expect(consoleWarn).toHaveBeenCalledWith(
+      "[Meu List] An interactive Cell must not contain nested interactive content. Use a static Cell for nested controls or make the whole row the only action."
+    );
+    expect(consoleWarn).toHaveBeenCalledTimes(2);
+  });
+
+  it("accepts fragments of Cells and caller-owned explicit listitems without warnings", () => {
+    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    render(
+      <List aria-label="扩展行">
+        <>
+          <Cell title="标准行" />
+          <div role="listitem">业务行</div>
+        </>
+      </List>
+    );
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(consoleWarn).not.toHaveBeenCalled();
+  });
+
+  it("does not ship composition warnings in production", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    render(
+      <List aria-label="生产列表">
+        <div>业务自定义行</div>
+      </List>
+    );
+
+    expect(consoleWarn).not.toHaveBeenCalled();
   });
 });

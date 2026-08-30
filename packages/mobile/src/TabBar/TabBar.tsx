@@ -18,8 +18,9 @@ import type { TabBarItem, TabBarProps } from "./types";
 type TabBarItemElement = HTMLAnchorElement | HTMLButtonElement;
 
 function assignRef<T>(ref: Ref<T> | undefined, value: T | null) {
-  if (typeof ref === "function") ref(value);
+  if (typeof ref === "function") return ref(value);
   else if (ref) ref.current = value;
+  return undefined;
 }
 
 function uniqueItems(items: readonly TabBarItem[]): TabBarItem[] {
@@ -82,7 +83,13 @@ export function TabBar({
   const setNavRef = useCallback(
     (node: HTMLElement | null) => {
       navRef.current = node;
-      assignRef(ref, node);
+      const cleanup = assignRef(ref, node);
+      if (!node) return undefined;
+      return () => {
+        navRef.current = null;
+        if (typeof cleanup === "function") cleanup();
+        else assignRef(ref, null);
+      };
     },
     [ref]
   );

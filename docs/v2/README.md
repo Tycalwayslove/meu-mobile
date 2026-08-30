@@ -15,15 +15,15 @@ V2 不是扩充组件数量，而是把现有组件从“能展示”提升为�
 
 - Manifest 登记 68 个组件族、125 个公开值、384 个公开类型和 68 份源码共置留存文档；未认领公开值与文档覆盖问题均为 0。
 - Figma 已为 68/68 个组件族建立永久组件集链接；本批最后补齐 Button、Checkbox、Radio、Rate、SegmentedControl、Selector、Slider、Stepper、Switch，并完成 Light/Dark 与 Token/触控目标 QA。
-- 68/68 个组件族均处于 `verification`；其中 48/68 已完成本地可自动化验证，20 个仍有显式本地缺口。该状态不代表已越过真机、Chromatic 和发布门禁。
+- 68/68 个组件族均处于 `verification`；其中 53/68 已完成本地可自动化验证，15 个仍有显式本地缺口。该状态不代表已越过真机、Chromatic 和发布门禁。
 - API 属性清单已覆盖 226 个结构化类型、2361 个字段与 242 个事件；2361/2361 个字段均有 TSDoc，四个运行时包的 API Extractor strict gate 为 0 warning，所有公开声明均有明确 release tag。
-- Storybook 当前包含 81 个标题、451 个 Story；68 个官网组件链接、422 个留存文档 Story ID 与对应 Autodocs entry 均通过本地静态构建校验。
-- 81 个 Storybook 标题均至少包含一项关键 `play` 交互。最近完整浏览器矩阵基线覆盖 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合且为 0 违规、0 `pageerror`；Portal、SideNav 及本批 Calendar、Ellipsis、NavBar、TreeSelect 已定向执行同等矩阵，本批 33 个 Story 共 231 个组合通过。
+- Storybook 当前包含 81 个标题、457 个 Story；68 个官网组件链接、428 个留存文档 Story ID 与对应 Autodocs entry 均通过本地静态构建校验。
+- 81 个 Storybook 标题均至少包含一项关键 `play` 交互。最近完整浏览器矩阵基线覆盖 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合且为 0 违规、0 `pageerror`；本批 ActionMenu、Tabs、TabBar、List、Picker 的 35 个直属 Story 已定向执行同等矩阵，共 245 个组合通过，匹配扫描还覆盖相关 List/Picker 组合 Story。
 - 官网预览已改为按组件 slug 呈现组件专属状态和交互，不再让 50 个页面只复用分类级相同画面；Props / Events 来自完整的生成 API 模型。
 - 官网生产构建由独立本地门禁验证 68 个组件页面和 8 个公共页面的 Light/Dark、主题恢复、页面结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA；当前 152 个页面/主题场景全部通过。
 - Bundle 门禁对 68 个产品族和 125 个公开运行时值分别执行 Rollup tree-shaking；当前全部在分级 gzip 预算内，共享 CSS 为 25,136 B / 32 KiB 预算。
 - `@meu/test-utils` 已提供 a11y、SSR/hydration、表单、手势、locale/RTL 与 reduced-motion 辅助能力；单元、隔离 Next H5 Chromium/WebKit 与旧语法扫描已有本地门禁。
-- 隔离 Next H5 已在移动 Chromium/WebKit 完成 176/176 条全量 E2E，并为初始 open Portal、测量与手势边界建立专项 hydration；本批新增 Ellipsis 字体替换/后加载 4/4、NavBar 真实 Next Router/sticky/不可用状态 4/4、TreeSelect 完整 SSR → 虚拟窗口与异步取消/重试 2/2。既有输入生命周期 8/8、嵌套 Portal/Popup 生命周期与全直接浮层边界矩阵 8/8、Popover 12-placement/嵌套滚动容器 2/2、ImageViewer RTL/取消恢复 4/4、Avatar 慢网/lazy/换源 4/4、Portal 真实 iframe 跨 Document 4/4、SafeArea viewport/旋转/键盘边界 6/6、布局测量/hydration/CLS/系统低动态/RTL 几何/结果焦点专项 16/16；性能/恢复专页 14/14、三轮重复 42/42，覆盖 10,000 行 VirtualList、1,500 节点 TreeSelect、高频/取消手势，以及 Image、InfiniteList、ImageUploader 的确定性失败、重试与取消；`/verification` 的 5 秒工具自检 2/2 通过，可供最终候选执行 60 秒真机采样与导出结构化证据。
+- 隔离 Next H5 已在移动 Chromium/WebKit 完成 178/178 条全量 E2E，并为初始 open Portal、测量与手势边界建立专项 hydration；本批新增 Picker 完整服务端语义、Portal hydration 与原生滚轮 settle 2/2。既有 Ellipsis 字体替换/后加载、NavBar 真实 Next Router/sticky/不可用状态、TreeSelect 完整 SSR → 虚拟窗口与异步取消/重试、输入生命周期、嵌套 Portal/Popup 生命周期与全直接浮层边界矩阵、Popover 12-placement/嵌套滚动容器、ImageViewer RTL/取消恢复、Avatar 慢网/lazy/换源、Portal 真实 iframe 跨 Document、SafeArea viewport/旋转/键盘边界及布局测量/hydration/CLS/系统低动态/RTL 几何/结果焦点继续通过；性能/恢复专页 14/14、三轮重复 42/42，覆盖 10,000 行 VirtualList、1,500 节点 TreeSelect、高频/取消手势，以及 Image、InfiniteList、ImageUploader 的确定性失败、重试与取消；`/verification` 的 5 秒工具自检 2/2 通过，可供最终候选执行 60 秒真机采样与导出结构化证据。
 - 真实 iOS Safari/VoiceOver、Android Chrome/TalkBack、旧 WebView 运行时、持续手势帧率/内存/弱网专项，以及最终 Chromatic 视觉审批仍是发布阻断项。
 
 这些数字是当前仓库可重复生成的证据，不等同于组件已经达到 `commercial`。每个组件仍需按模板补齐剩余适用项并完成最终发布验收。

@@ -8336,7 +8336,7 @@
           "type": "Ref<HTMLDivElement>",
           "required": false,
           "event": false,
-          "description": "Ref to the popup panel element."
+          "description": "Ref to the ActionMenu content root inside the popup panel."
         },
         {
           "name": "restoreFocus",
@@ -8502,7 +8502,7 @@
           "type": "Ref<HTMLDivElement>",
           "required": false,
           "event": false,
-          "description": "Ref to the popup panel element."
+          "description": "Ref to the ActionMenu content root inside the popup panel."
         },
         {
           "name": "restoreFocus",

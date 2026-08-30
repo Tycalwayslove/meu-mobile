@@ -4,12 +4,12 @@ slug: tab-bar
 package: "@meu/mobile"
 exports: [TabBar]
 status: verification
-localVerification: pending
-localGapIds: [LOC-TAB-BAR-01]
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "123:767"
@@ -22,7 +22,9 @@ storyIds:
     navigation-tabbar--disabled-destination,
     navigation-tabbar--narrow-long-labels,
     navigation-tabbar--rtl,
-    navigation-tabbar--landscape
+    navigation-tabbar--landscape,
+    navigation-tabbar--adaptive-modes,
+    navigation-tabbar--zoom-200-percent-equivalent
   ]
 source: packages/mobile/src/TabBar
 ---
@@ -89,7 +91,7 @@ source: packages/mobile/src/TabBar
 
 ## Ref 与命令式方法
 
-React 19 `ref` prop 指向稳定的 `nav`；支持 object/callback ref，无命令式路由 API。需要聚焦具体目的地时由路由层管理，不公开内部 item ref。
+React 19 `ref` prop 指向稳定的 `nav`；支持 object/callback ref，并透传 callback ref 返回的 cleanup；旧式 callback ref 在卸载时仍收到 null。无命令式路由 API。需要聚焦具体目的地时由路由层管理，不公开内部 item ref。
 
 ## 键盘操作
 
@@ -139,13 +141,14 @@ flex 与逻辑 Badge 偏移继承最近的 `dir`；Safe Area 使用物理 left/r
 
 ## 测试证据
 
-- 本轮 Unit/SSR/hydration：`pnpm --filter @meu/mobile exec vitest run src/TabBar/TabBar.test.tsx src/TabBar/TabBar.ssr.test.tsx src/TabBar/TabBar.hydration.test.tsx --maxWorkers=1`，3 files / 15 tests 通过。覆盖 link/button/current、受控 null、aria-labelledby、React 19 ref、Badge 名称、可取消事件、disabled link/button、原生 Tab/Enter、dynamic remove/disable/reorder、duplicate first-wins、普通重渲染/多实例/外部焦点不抢占、locale、SafeArea、SSR 与真实 hydrateRoot。
-- 构建与客户端兼容：`pnpm --filter @meu/mobile build` 通过；随后 `pnpm compat:check` 对 199 个构建文件通过 Chrome 70 / iOS 13 静态基线检查。发布 CSS 不含 TabBar 的 `:focus-visible` 选择器。
-- Story/play 源码：`RouteInteraction`、`ControlledRouter`、`DisabledDestination` 含交互断言；`WithSafeArea`、`NarrowLongLabels`、`RTL`、旋转 viewport 的 `Landscape` 覆盖表现面。本轮未运行 Storybook 浏览器 runner、axe 或截图矩阵，需在合入候选上复验。
+- 本轮 Unit/SSR/hydration：`pnpm --filter @meu/mobile exec vitest run src/TabBar --maxWorkers=1`，3 files / 20 tests 通过。覆盖 link/button/current、受控 null、受控路由 onChange 取消原生导航并等待调用方提交、aria-labelledby、React 19 callback-ref cleanup 与旧式 null 清理、Badge 名称、可取消事件、disabled link/button、原生 Tab/Enter、dynamic remove/disable/reorder、button↔anchor 路由适配替换后的焦点恢复、duplicate first-wins、普通重渲染/多实例/外部焦点不抢占、locale、SafeArea、SSR 与真实 hydrateRoot。
+- 构建与客户端兼容：`pnpm --filter @meu/mobile build` 通过；随后 `pnpm compat:check` 对 200 个构建文件通过 Chrome 70 / iOS 13 静态基线检查。发布 CSS 不含 TabBar 的 `:focus-visible` 选择器。
+- Story/play：`RouteInteraction`、`ControlledRouter`、`DisabledDestination` 覆盖原生与受控路由、禁用目的地；`NarrowLongLabels` 和 `Zoom200PercentEquivalent` 分别在 320px 与 195px 容器对每个目的地断言至少 44×44 CSS px；`WithSafeArea`、`RTL`、旋转 viewport 的 `Landscape` 覆盖表现面。
+- Storybook Chromium extended：目标构建后扫描 10 Stories × 7 场景（Light、Dark、RTL、en-US、reduced-motion、200% 字号、forced-colors），70/70 play/axe 通过，0 违规与 0 render error。`AdaptiveModes` 在匹配媒体环境中读取真实 computed style，断言 reduced-motion transition ≤1ms 与 forced-colors 边界；195 CSS px 场景提供 390px 视口在 200% 缩放下的等效布局证据。
 - 包级 typecheck：`pnpm --filter @meu/mobile typecheck` 最终重跑通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4860 B / 32768 B 预算，组合 Brotli 4308 B；共享样式由应用单独导入一次。
-- 官网 Next 运行时：Next 16 production build 与 typecheck 本轮通过；`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖 current、原生目标与动态切换，批次整页 Light/Dark axe WCAG A/AA 也通过。
-- Reduced motion / forced-colors / RTL / Safe Area：有代码与 Story 覆盖，本轮没有真实浏览器视觉证据。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4913 B / 32768 B 预算，组合 Brotli 4359 B；共享样式由应用单独导入一次。
+- 历史隔离 Next 运行时：`connects tab panels, primary navigation and read-only progress semantics` 在 Chromium/WebKit 均通过，覆盖 current、原生目标与动态切换；本次按目录约束未改动或重跑共享 Next H5 场景。
+- Reduced motion / forced-colors / RTL / 200% / Safe Area：均进入上述真实 Chromium extended 场景；真机平台差异仍保留为发布项。
 - Chromatic Light/Dark：本轮按统一部署策略不运行；全部组件冻结后集中验证。
 - iOS Safari/VoiceOver、Android Chrome/TalkBack、横屏刘海与 200% 字号真机：待验证。
 
@@ -153,11 +156,11 @@ flex 与逻辑 Badge 偏移继承最近的 `dir`；Safe Area 使用物理 left/r
 
 ### 待优化
 
-运行 Storybook axe/视觉矩阵与隔离 Next 路由示例；补横屏刘海、200% 字号、iOS Safari/VoiceOver 与 Android Chrome/TalkBack 真机证据。
+补横屏刘海、iOS Safari/VoiceOver 与 Android Chrome/TalkBack 真机证据，并在发布批次补 Chromatic；这些外部/真机项不阻塞本地自动化完成态。
 
 ### 已完成
 
-冻结稳定 link/button 根语义、`aria-current`、Badge、Safe Area、dynamic identity、duplicate first-wins、焦点接管、44px、横屏、RTL、forced-colors、reduced-motion 与 React 19 ref 契约；补 Node SSR 与真实 hydration 证据及受控/禁用 Story play。
+冻结稳定 link/button 根语义、`aria-current`、Badge、Safe Area、dynamic identity、duplicate first-wins、焦点接管、44px、横屏、RTL、forced-colors、reduced-motion 与 React 19 ref 契约；修复 callback-ref cleanup 丢失；补 Node SSR、真实 hydration、受控路由/元素类型替换单测与 200%/适应模式 Story 浏览器矩阵。
 
 ## 变更记录
 
@@ -169,3 +172,5 @@ flex 与逻辑 Badge 偏移继承最近的 `dir`；Safe Area 使用物理 left/r
 | 2026-08-29 | 未发布 | verification | 增加真实 hydrateRoot、语义/键盘/ref/动态 identity 测试与 Story play                | 无                                                                 |
 | 2026-08-29 | 未发布 | feature      | badgeLabel/ariaLabel 与横屏高对比                                                  | 新属性可选，无破坏                                                 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎导航/current/target 证据                                        | 无                                                                 |
+| 2026-08-30 | 未发布 | fix          | 透传 React 19 callback ref cleanup                                                 | API 兼容；cleanup 现按 React 19 契约执行                           |
+| 2026-08-30 | 未发布 | verification | 补受控路由、200% 与适应模式 Story 浏览器矩阵                                       | 无                                                                 |

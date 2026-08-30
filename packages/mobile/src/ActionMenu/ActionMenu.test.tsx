@@ -67,6 +67,21 @@ describe("ActionMenu", () => {
     trigger.remove();
   });
 
+  it("preserves long unbroken action content without semantic truncation", () => {
+    const label = "复制订单号（含完整跨系统追踪标识）";
+    const description =
+      "MEU-2026-0828-FULFILLMENT-CROSS-BORDER-TRACE-REFERENCE-WITHOUT-BREAK-OPPORTUNITIES";
+    render(<ActionMenu open title="订单操作" actions={[{ key: "copy", label, description }]} />);
+
+    const button = screen.getByRole("button", { name: label });
+    const describedBy = button.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    const descriptionElement = document.getElementById(describedBy || "");
+    expect(descriptionElement === null ? null : descriptionElement.textContent).toBe(description);
+    expect(button.textContent).toContain(label);
+    expect(button.textContent).toContain(description);
+  });
+
   it("runs async callbacks in order and blocks every dismiss path while pending", async () => {
     const deferred = createDeferred<void>();
     const calls: string[] = [];
@@ -145,6 +160,77 @@ describe("ActionMenu", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存失败" }));
     await waitFor(() => expect(onActionError).toHaveBeenCalledWith(failure, expect.any(Object)));
     expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it("keeps a slow failed danger confirmation open and retryable", async () => {
+    const deferred = createDeferred<void>();
+    const failure = new Error("delete failed");
+    const onActionError = vi.fn();
+    const onOpenChange = vi.fn();
+    render(
+      <ActionMenu
+        open
+        title="订单操作"
+        actions={[
+          {
+            key: "delete",
+            label: "永久删除",
+            onPress: () => deferred.promise,
+            tone: "danger"
+          }
+        ]}
+        onActionError={onActionError}
+        onOpenChange={onOpenChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "永久删除" }));
+    const confirmation = screen.getByRole("alertdialog");
+    fireEvent.click(within(confirmation).getByRole("button", { name: "继续操作" }));
+    expect(confirmation.getAttribute("aria-busy")).toBe("true");
+    expect(
+      within(confirmation).getByRole<HTMLButtonElement>("button", { name: "取消" }).disabled
+    ).toBe(true);
+    expect(
+      within(confirmation).getByRole<HTMLButtonElement>("button", { name: "继续操作" }).disabled
+    ).toBe(true);
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.getByRole("alertdialog")).toBeTruthy();
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    deferred.reject(failure);
+    await waitFor(() => expect(onActionError).toHaveBeenCalledWith(failure, expect.any(Object)));
+    expect(screen.getByRole("alertdialog").hasAttribute("aria-busy")).toBe(false);
+    expect(
+      within(screen.getByRole("alertdialog")).getByRole<HTMLButtonElement>("button", {
+        name: "继续操作"
+      }).disabled
+    ).toBe(false);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it("preserves source indexes after regrouping and honors action close opt-out", async () => {
+    const onAction = vi.fn();
+    const onOpenChange = vi.fn();
+    render(
+      <ActionMenu
+        open
+        title="订单操作"
+        actions={[
+          { key: "delete", label: "删除订单", tone: "danger" },
+          { key: "copy", label: "复制订单号", closeOnPress: false }
+        ]}
+        onAction={onAction}
+        onOpenChange={onOpenChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "复制订单号" }));
+    await waitFor(() => expect(onAction).toHaveBeenCalledWith(expect.any(Object), 1));
+    expect(onAction.mock.calls[0]![0]).toMatchObject({ key: "copy" });
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog", { name: "订单操作" })).toBeTruthy();
   });
 
   it("invalidates a pending action when a controlled menu closes and reopens", async () => {

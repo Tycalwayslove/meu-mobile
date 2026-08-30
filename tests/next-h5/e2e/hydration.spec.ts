@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 const cases = [
   ["virtual-list", '[data-meu-component="virtual-list"]'],
   ["tree-select", '[data-meu-component="tree-select"]'],
+  ["picker", '[data-meu-component="picker"]'],
   ["popup", '[data-meu-overlay-layer="popup"]'],
   ["bottom-sheet", '[data-meu-overlay-layer="bottom-sheet"]'],
   ["popover", '[data-meu-component="popover"]'],
@@ -44,6 +45,50 @@ test("hydrates measurement, portal and gesture boundaries without runtime errors
       expect(runtimeErrors, `${kind} runtime errors`).toEqual([]);
     });
   }
+});
+
+test("hydrates Picker server semantics and settles native wheel scrolling", async ({
+  page,
+  request
+}) => {
+  const response = await request.get("/hydration?case=picker");
+  expect(response.ok()).toBe(true);
+  const serverHtml = await response.text();
+  expect(serverHtml).toContain('role="dialog"');
+  expect(serverHtml).toContain('role="listbox"');
+  expect(serverHtml).toContain('aria-selected="true"');
+  expect(serverHtml).toContain("Hydration delivery window");
+
+  const runtimeErrors: string[] = [];
+  page.on("pageerror", (error) => runtimeErrors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") runtimeErrors.push(message.text());
+  });
+  await page.goto("/hydration?case=picker");
+  await expect(page.locator('[data-case="picker"]')).toHaveAttribute("data-hydrated", "true");
+
+  const wheel = page.getByRole("listbox", { name: "Hydration day" });
+  await expect(wheel).toBeVisible();
+  await expect(page.getByRole("option", { name: "Today" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await wheel.evaluate((element) => {
+    element.scrollTop = 48;
+    element.dispatchEvent(new Event("scroll", { bubbles: true }));
+  });
+  await expect(page.getByRole("option", { name: "Tomorrow" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  await expect(page.getByRole("option", { name: "Unavailable" })).toHaveAttribute(
+    "aria-disabled",
+    "true"
+  );
+  await expect(page.locator('output[aria-label="Hydration picker selection"]')).toHaveText(
+    "tomorrow:scroll"
+  );
+  expect(runtimeErrors).toEqual([]);
 });
 
 test("hydrates TreeSelect from complete SSR into a semantic virtual tree and aborts stale loads", async ({
