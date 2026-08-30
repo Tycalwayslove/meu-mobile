@@ -10,13 +10,11 @@
 
 | 字段            | 记录                                     |
 | --------------- | ---------------------------------------- |
-| 候选 commit SHA | f10b9bd28b0e72f2af9c802e397d1b1a4ac8f95a |
-| 冻结日期        | 2026-08-30                               |
-| 候选负责人      | Tycalwayslove                            |
+| 候选 commit SHA | 待定                                     |
+| 冻结日期        | 待定                                     |
+| 候选负责人      | 待定                                     |
 | 变更范围        | 68 个组件、官网、Storybook、表单与图标包 |
 | npm             | 不发布                                   |
-
-冻结依据：同一候选 SHA 的本地 `pnpm verify:release` 全链路通过；GitHub [`Quality #62`](https://github.com/Tycalwayslove/meu-mobile/actions/runs/33297598811) 的 `quality` 与 `next-h5-e2e` 均通过，其中远端移动双引擎为 180/180。
 
 候选 SHA 一旦进入人工验收，不允许静默替换。任何代码、样式、Token、Story 或组件契约变更都必须生成新候选，并重跑受影响的自动化与人工场景。候选冻结后只允许提交验收记录、性能/设备证据和组件文档的 `status` 字段；`commercial:check` 会拒绝其他文件变化。
 
@@ -45,21 +43,21 @@
 
 每项只允许 `pending`、`pass`、`fail` 或 `waived`。`waived` 必须写明批准人、风险、支持范围变化和对应留存文档；不能只写“已知问题”。
 
-| ID       | 验收项                   | 最低范围                                                                                                     | 状态    | 执行人/日期 | 证据或问题                                                         |
-| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ | ------- | ----------- | ------------------------------------------------------------------ |
-| DEV-01   | iOS 当前主版本真机       | Safari、WKWebView、VoiceOver；D-01 至 D-06                                                                   | pending | —           | —                                                                  |
-| DEV-02   | iOS 支持下限附近真机     | iOS 15.x Safari 与 WKWebView；核心表单、Overlay、手势                                                        | pending | —           | —                                                                  |
-| DEV-03   | Android 当前主版本真机   | Chrome、Android WebView、TalkBack；D-01 至 D-06                                                              | pending | —           | —                                                                  |
-| DEV-04   | Android 支持下限附近真机 | Chrome/WebView 89 附近；核心表单、Overlay、手势                                                              | pending | —           | —                                                                  |
-| DEV-05   | 观察档运行时抽测         | iOS 13–14、Chromium/WebView 79–88；记录允许的降级                                                            | pending | —           | —                                                                  |
-| PERF-01  | 持续手势性能             | Carousel、BottomSheet、ImageViewer、SwipeActions、FloatingPanel 连续 60 秒；记录 FPS、长任务、失控或滚动阻塞 | pending | —           | `/verification` 已可采样并导出；仍缺真实设备 60 秒结果             |
-| PERF-02  | 图片与集合内存           | ImageUploader/ImageViewer 大图、删除、重试、卸载；VirtualList/TreeSelect 长时间滚动；记录峰值和回落          | pending | —           | 自动化已有 VirtualList 40 次往返及上传 retry/Abort；仍缺峰值与回落 |
-| NET-01   | 弱网与恢复               | 慢 3G、离线、丢包；Image/InfiniteList/ImageUploader 的取消、重试、恢复和重复请求                             | pending | —           | 双引擎确定性失败/重试/取消通过；仍缺慢 3G、离线与丢包实测          |
-| LEGAL-01 | Meu 自有代码分发方式     | 复核 `UNLICENSED` 是否符合私有仓库、未来制品和客户交付方式                                                   | pending | —           | —                                                                  |
-| LEGAL-02 | 第三方图标许可           | 复核 Lucide ISC、Feather MIT、完整许可文本与 notices 随实际分发制品保留                                      | pending | —           | 工程门禁与官网披露已通过；待按实际交付方式签字                     |
-| LEGAL-03 | 图标来源与命名           | 复核 `icons.lock.json` 的版本、commit、SHA-512/SHA-256、Meu ID 与上游名称映射；确认 Meu 命名不暗示原创几何   | pending | —           | 5 条映射、未修改几何及 Meu 命名声明已自动验证；待负责人签字        |
-| VIS-01   | 最终人工视觉审批         | 冻结 SHA 上运行一次 Chromatic；Light/Dark、移动视口、差异全部批准或记录                                      | pending | —           | —                                                                  |
-| WEB-01   | 官网正式发布             | VIS-01 完成后触发 Vercel；首页、68 个页面、Storybook 链接与移动视口 smoke test                               | pending | —           | —                                                                  |
+| ID       | 验收项                   | 最低范围                                                                                                     | 状态    | 执行人/日期 | 证据或问题                                                              |
+| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ | ------- | ----------- | ----------------------------------------------------------------------- |
+| DEV-01   | iOS 当前主版本真机       | Safari、WKWebView、VoiceOver；D-01 至 D-06                                                                   | pending | —           | —                                                                       |
+| DEV-02   | iOS 支持下限附近真机     | iOS 15.x Safari 与 WKWebView；核心表单、Overlay、手势                                                        | pending | —           | —                                                                       |
+| DEV-03   | Android 当前主版本真机   | Chrome、Android WebView、TalkBack；D-01 至 D-06                                                              | pending | —           | —                                                                       |
+| DEV-04   | Android 支持下限附近真机 | Chrome/WebView 89 附近；核心表单、Overlay、手势                                                              | pending | —           | —                                                                       |
+| DEV-05   | 观察档运行时抽测         | iOS 13–14、Chromium/WebView 79–88；记录允许的降级                                                            | pending | —           | —                                                                       |
+| PERF-01  | 持续手势性能             | Carousel、BottomSheet、ImageViewer、SwipeActions、FloatingPanel 连续 60 秒；记录 FPS、长任务、失控或滚动阻塞 | pending | —           | `/verification` 已可采样并导出；仍缺真实设备 60 秒结果                  |
+| PERF-02  | 图片与集合内存           | ImageUploader/ImageViewer 大图、删除、重试、卸载；VirtualList/TreeSelect 长时间滚动；记录峰值和回落          | pending | —           | 自动化已有 VirtualList 40 次往返及上传 retry/Abort；仍缺峰值与回落      |
+| NET-01   | 弱网与恢复               | 慢 3G、离线、丢包；Image/InfiniteList/ImageUploader 的取消、重试、恢复和重复请求                             | pending | —           | 双引擎确定性失败/重试/取消通过；仍缺慢 3G、离线与丢包实测               |
+| LEGAL-01 | Meu 自有代码分发方式     | 复核公共源码仓库、`UNLICENSED`、未来制品和客户交付方式是否一致                                               | pending | —           | 当前仓库可公开读取且无根级 Meu 许可证；需决定保持公开并补条款或改为私有 |
+| LEGAL-02 | 第三方图标许可           | 复核 Lucide ISC、Feather MIT、完整许可文本与 notices 随实际分发制品保留                                      | pending | —           | 工程门禁与官网披露已通过；待按实际交付方式签字                          |
+| LEGAL-03 | 图标来源与命名           | 复核 `icons.lock.json` 的版本、commit、SHA-512/SHA-256、Meu ID 与上游名称映射；确认 Meu 命名不暗示原创几何   | pending | —           | 5 条映射、未修改几何及 Meu 命名声明已自动验证；待负责人签字             |
+| VIS-01   | 最终人工视觉审批         | 冻结 SHA 上运行一次 Chromatic；Light/Dark、移动视口、差异全部批准或记录                                      | pending | —           | —                                                                       |
+| WEB-01   | 官网正式发布             | VIS-01 完成后触发 Vercel；首页、68 个页面、Storybook 链接与移动视口 smoke test                               | pending | —           | —                                                                       |
 
 图标检查不是法律意见。工程证据位于 `packages/icons-core/icons.lock.json`、`THIRD_PARTY_NOTICES.md`、`licenses/` 与上游 SVG 快照；最终可分发性必须由有授权的法务或负责人确认，并记录在 [`LEGAL_REVIEW.md`](./LEGAL_REVIEW.md)。
 

@@ -123,6 +123,7 @@ if (candidateIsSha && headSha) {
       const evidenceOnlyPaths = new Set([
         "docs/v2/RELEASE_ACCEPTANCE.md",
         "docs/v2/DEVICE_VERIFICATION.md",
+        "docs/v2/LEGAL_REVIEW.md",
         "docs/v2/PERFORMANCE.md"
       ]);
       const changedPaths = new Set(
