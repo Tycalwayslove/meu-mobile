@@ -129,7 +129,7 @@ header gap 与 extra 使用逻辑方向；actions footer 的 flex-wrap 在 RTL �
 - Unit: `Card.test.tsx` 覆盖静态根、0/空字符串与空 ReactNode、media、任意 footer 和独立 action。
 - SSR/hydration: `Card.ssr.test.tsx` 直接断言服务端 slots，并在 jsdom hydrate 后检查 0 recoverable error、div 根和独立 button。
 - Story: `Outlined` 有结构 play；`NarrowRtlContent` 提供 RTL、长词、窄宽、长 extra 和换行 actions 的人工/视觉检查场景。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、hydration/runtime error 和 axe WCAG A/AA 均通过。
 - Reduced motion: Card 本身无动画。
 - 尚无 Chromatic 基线和真机读屏记录；iOS 13/Chrome 70 仍只是观察档，不从静态兼容扫描推导运行时支持结论。

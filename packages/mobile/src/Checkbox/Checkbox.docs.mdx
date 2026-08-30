@@ -160,7 +160,7 @@ Checkbox ref 指向 `HTMLInputElement`，可调用 `focus()`、`checkValidity()`
 - SSR: `Checkbox.ssr.test.tsx` 覆盖稳定 group/name/value/checked 与 group ARIA invalid token markup
 - Hydration: `Checkbox.hydration.test.tsx` 覆盖节点复用、受控 Group 激活和零 recoverable error
 - Story interaction: `Indeterminate` 覆盖 accepted click 后 checked、DOM mixed property 与 ARIA 一致；`NativeFormContract` 覆盖点击、重复 FormData 与 reset；`MixedConstraintAndFormData` 同时覆盖 mixed、required、readOnly、disabled 与提交语义；本批 `Forms/Checkbox` 12/12 stories × Light/Dark 共 24/24 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 2880 B / 32768 B 预算；最大单值 `Checkbox` 为 2369 B / 32768 B 预算，组合 Brotli 2533 B；共享样式由应用单独导入一次。
 - Figma：canonical Medium set `50:125`，Small `50:65`、Large `50:185`；36 variants。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；Checkbox/Radio/Switch 合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。

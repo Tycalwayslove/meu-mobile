@@ -211,7 +211,7 @@ RTL Story 提供阿拉伯语与 `dir=rtl` 的人工/自动检查入口；阿拉�
 
 - Unit: `SearchField.test.tsx` 直接覆盖旧首参兼容性和 details 的 `source/event`，并验证 ARIA invalid token/Field 优先级、调用方/Field describedby 合并去重、原生 ref/属性、clear 请求空值后恢复焦点、loading 替换 clear 的焦点移交、readOnly/disabled 原生 FormData、模拟 composition、repeat Enter、Escape 非所有权、consumer cancellation 与受控 live native value。它还证明 Enter 单一所有权，以及祖先/外部 form reset、取消 reset、受控 reset、reset 后 IME 状态和不发布 change。
 - Story interaction: `ClearAndFocusContract.play` 验证空值与焦点恢复；`NativeFormReset.play` 验证 clear 后恢复默认值及 FormData。RTL Story 提供方向与阿拉伯语检查入口。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3206 B / 32768 B 预算，组合 Brotli 2871 B；共享样式由应用单独导入一次。
 - SSR/hydration: `SearchField.ssr.test.tsx` 覆盖 native searchbox、ARIA invalid、loading 与 disabled；`SearchField.hydration.test.tsx` 直接覆盖无 mismatch 及 hydration 后 clear/focus。

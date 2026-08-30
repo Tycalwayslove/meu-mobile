@@ -141,7 +141,7 @@ close 间距使用 margin-inline-start，inline-flex 自动遵循 RTL。默认 c
 - Unit: `Tag.test.tsx` 覆盖静态/filter/selected、selected 静态降级、button attributes、双按钮键盘、disabled 事件抑制、root props/ref 和动态模式切换。
 - SSR/hydration: `Tag.ssr.test.tsx` 覆盖三种服务端 DOM，并实际 hydrate closable filter，断言 0 recoverable error、两个同级按钮且无嵌套。
 - Story interaction: `Filter` 验证受控 pressed；`FilterClosable` 验证两按钮同级；`LongText` 提供 160px RTL 长翻译场景。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合，结果为 0 axe A/AA 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合，结果为 0 axe A/AA 违规、0 `pageerror`。
 - Reduced motion / forced-colors: CSS 分别移除 press transition，并使用系统 Highlight/GrayText，均已进入全库浏览器矩阵。
 - 构建产物已通过 Chrome 70 / iOS 13 静态兼容门禁；Chromatic 与真机读屏仍留到统一发布批次，不能由静态门禁推导真实设备体验。
 

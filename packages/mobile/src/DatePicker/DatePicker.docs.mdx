@@ -121,7 +121,7 @@ min 大于 max、边界之间没有可表示网格点、所有 option 被 filter
 
 - Unit/SSR/hydration：DatePicker 目录 3 个测试文件共 17 项通过，覆盖精度、月末、bounds 上下取整、step 网格与空网格、filter、自定义 DST adapter 的无效小时、locales、富标签读屏名称、取消/确认、受控、动态 adapter、动态受控模式、矛盾边界、falsy adapter 值，以及跨午夜 initially-open hydration 与 Portal 语义。
 - Story interaction：`DefaultDate` 验证打开、日期选择、确认提交、关闭与触发器焦点恢复；`LongLocalizedRTL` 验证 RTL 下 year→minute 顺序、长标题/操作文案无横向溢出、44px 操作目标、active-descendant 完整性与富标签的本地化读屏名称。
-- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 `DatePicker` 匹配集 5 个 Story × 7 场景共 35/35 通过，其中 `Data Entry/DatePicker` 当前 4 个 Story 为 28/28。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：历史完整基线为 490 个 Story × 7 场景；本轮 `DatePicker` 匹配集 5 个 Story × 7 场景共 35/35 通过，其中 `Data Entry/DatePicker` 当前 4 个 Story 为 28/28。覆盖 Light、Dark、en-US、RTL、reduced-motion、200% 字体与 forced-colors，0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 11941 B / 49152 B 预算；最大单值 `DatePicker` 为 11932 B / 49152 B 预算，组合 Brotli 10787 B；共享样式由应用单独导入一次。
 - SSR/hydration：DatePicker.ssr.test.tsx 覆盖 dialog、列名与选中值；DatePicker.hydration.test.tsx 覆盖显式边界下 server/client anchor 跨午夜、initially-open Portal 迁移、五列命名与 active-descendant 完整性。

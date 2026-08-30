@@ -134,7 +134,7 @@ start/end 依赖 flex 的逻辑主轴，在 RTL 中自动交换视觉侧；DOM �
 
 - Unit/SSR（本轮 7/7）: `Divider.test.tsx` 覆盖方向语义、vertical children、零值、空 ReactNode、原生属性与 ref；`Divider.ssr.test.tsx` 覆盖确定性 separator 标记、真实 hydrateRoot 根节点复用和 0 recoverable error
 - Story interaction: `WithContent` 验证 separator 的可访问名称与方向；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：当前 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1283 B / 32768 B 预算，组合 Brotli 1140 B；共享样式由应用单独导入一次。
 - SSR/hydration: 共置测试直接验证 horizontal/vertical 语义与根节点复用；既有隔离 Next 16 场景存在，本轮未重复执行该全局场景

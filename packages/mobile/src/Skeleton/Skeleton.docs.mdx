@@ -122,7 +122,7 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 
 - Unit: 6 项，覆盖多行、circle 尺寸、非法行数、非有限尺寸回退、非法 aspect ratio 与 aria-hidden。
 - Story interaction: `ComposedCard` 验证 loading boundary、装饰性隐藏与占位结构；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1419 B / 32768 B 预算，组合 Brotli 1290 B；共享样式由应用单独导入一次。
 - SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后两种组合占位保持装饰性隐藏且无 hydration/runtime error。独立 `layout-contract.spec.ts` 还在替换前后读取真实 bounding box，验证 300×180 rectangle 与最终媒体内容的 x/y/width/height 一致；支持 Layout Shift API 的引擎同时要求非输入 CLS 为 0。

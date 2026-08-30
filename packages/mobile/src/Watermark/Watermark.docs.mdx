@@ -124,7 +124,7 @@ useId 生成稳定 pattern id；render 不读取 window/document。MutationObser
 - Unit（本轮定向通过）: `Watermark.test.tsx` 14 项覆盖文本/多行、图片 load/error 去重与 URL 变化、几何归一、对象/callback ref、篡改逆序恢复、外部节点边界、observer 缺失/关闭、动态 children、SSR markup 与 hydration；另有 1 项 node-environment SSR 覆盖无 window/document 输出。
 - Story interaction: `DynamicContent` 验证业务内容更新且水印 overlay 保持稳定；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
 - `ImageWithFallback` Story 主动派发 error 并等待文本 fallback；`HostBoundary` 固化 wrapper + overlay 双重裁界与 Figma `clipsContent=true` 一致。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2276 B / 32768 B 预算，组合 Brotli 2050 B；共享样式由应用单独导入一次。
 - SSR/hydration: jsdom 定向测试覆盖 stable pattern markup 和 hydrateRoot 节点复用；隔离 Next 16 生产构建浏览器路径已在本地完整门禁通过。

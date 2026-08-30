@@ -123,7 +123,7 @@ left/right 是物理屏幕方向，不随 `dir` 重命名；正 offset 显示物
 
 - Unit: `SwipeActions.test.tsx`（键盘与完成焦点、阈值、纵向仲裁、受控拒绝/切侧、动态动作归一、ResizeObserver 后开态 rail 宽度/offset 同步、capture 获取/释放 fallback、兼容 click 过期、取消、outside/Escape、异步陈旧完成、disabled，以及父表单中固定 `type=button` 与富标签 accessible name）。
 - Story interaction: `Default` 验证 reveal 按钮与操作区状态；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
-- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 490 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,430 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4281 B / 32768 B 预算，组合 Brotli 3842 B；共享样式由应用单独导入一次。
 - SSR/hydration: `SwipeActions.ssr.test.tsx` 覆盖关闭 markup 与未测宽 default-open 的隐藏语义；`SwipeActions.hydration.test.tsx` 以 RTL、Dark、reduced-motion 和富标签直接验证同一服务端根复用、测宽后物理右轨显现、0 recoverable/console error；隔离 Next production 以服务端 `defaultOpenSide=right` 状态在 Chromium/WebKit 完成 hydration，0 `pageerror`、0 `console.error`。

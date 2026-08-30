@@ -123,7 +123,7 @@ ref 指向复用的 Picker panel 根 div。组件没有命令式加载、选路�
 
 - Unit/SSR/hydration：CascadePicker 目录 3 个测试文件共 11 项通过，覆盖路径归一、换支丢弃后缀、叶子缩短、取消回滚、受控确认/外部替换、显式空子级、连续不可变 options 更新、disabled fallback、循环引用截断、Node SSR 与真实 hydrateRoot。
 - Story interaction: `RegionPath` 验证换支、确认、触发器值与焦点恢复；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
-- Storybook 浏览器矩阵：历史完整基线为 444 个 Story × 7 场景；本轮 `CascadePicker` 匹配集 4 个 Story × 7 场景共 28/28 通过，其中 `Data Entry/CascadePicker` 当前 3 个 Story 为 21/21。新增 `FiveLevelLocalizedPath` 以五级长路径、长标题和长操作文案断言无横向溢出、每列存在有效 active descendant、操作目标高度不少于 44px；0 axe WCAG A/AA 违规、0 `pageerror`。
+- Storybook 浏览器矩阵：历史完整基线为 490 个 Story × 7 场景；本轮 `CascadePicker` 匹配集 4 个 Story × 7 场景共 28/28 通过，其中 `Data Entry/CascadePicker` 当前 3 个 Story 为 21/21。新增 `FiveLevelLocalizedPath` 以五级长路径、长标题和长操作文案断言无横向溢出、每列存在有效 active descendant、操作目标高度不少于 44px；0 axe WCAG A/AA 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 9058 B / 49152 B 预算，组合 Brotli 8123 B；共享样式由应用单独导入一次。
 - SSR/hydration: `CascadePicker.ssr.test.tsx` 验证确定性路径；`CascadePicker.hydration.test.tsx` 验证 open 空子级 SSR → body Portal hydration → 后续不可变分支加载，0 recoverable/console error，所有 active descendant 均有真实 option。
