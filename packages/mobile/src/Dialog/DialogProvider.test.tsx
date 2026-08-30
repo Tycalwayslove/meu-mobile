@@ -197,14 +197,16 @@ describe("DialogProvider", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open managed" }));
     await waitFor(() => expect(screen.getByRole("alertdialog")).toBeTruthy());
     fireEvent.click(closeManaged);
-    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
 
     fireEvent.click(screen.getByRole("button", { name: "Open stack" }));
     await waitFor(() => expect(screen.getAllByRole("alertdialog")).toHaveLength(2));
     expect(document.body.getAttribute("data-meu-scroll-locked")).toBe("true");
     fireEvent.click(clearDialogs);
-    expect(screen.queryByRole("alertdialog")).toBeNull();
-    expect(document.body.hasAttribute("data-meu-scroll-locked")).toBe(false);
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).toBeNull();
+      expect(document.body.hasAttribute("data-meu-scroll-locked")).toBe(false);
+    });
   });
 
   it("contains a rejected confirm handler and leaves its decision pending", async () => {
