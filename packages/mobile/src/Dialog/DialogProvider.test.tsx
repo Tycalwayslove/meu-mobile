@@ -192,15 +192,17 @@ describe("DialogProvider", () => {
         <DialogControllerConsumer />
       </DialogProvider>
     );
+    const closeManaged = screen.getByRole("button", { name: "Close managed" });
+    const clearDialogs = screen.getByRole("button", { name: "Clear dialogs" });
     fireEvent.click(screen.getByRole("button", { name: "Open managed" }));
     await waitFor(() => expect(screen.getByRole("alertdialog")).toBeTruthy());
-    fireEvent.click(screen.getByRole("button", { name: "Close managed" }));
+    fireEvent.click(closeManaged);
     expect(screen.queryByRole("alertdialog")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "Open stack" }));
     await waitFor(() => expect(screen.getAllByRole("alertdialog")).toHaveLength(2));
     expect(document.body.getAttribute("data-meu-scroll-locked")).toBe("true");
-    fireEvent.click(screen.getByRole("button", { name: "Clear dialogs" }));
+    fireEvent.click(clearDialogs);
     expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(document.body.hasAttribute("data-meu-scroll-locked")).toBe(false);
   });
