@@ -17,7 +17,7 @@
 
 ## 当前可复查状态
 
-- 移动 Chromium/WebKit 隔离 Next H5：128/128 通过，逐用例断言 0 `pageerror`、0 `console.error`；其中性能/恢复专页 14/14，并完成 3 轮重复共 42/42；输入生命周期 8/8、嵌套浮层生命周期 6/6、真机验收工作台自检 2/2。
+- 移动 Chromium/WebKit 隔离 Next H5：136/136 通过，逐用例断言 0 `pageerror`、0 `console.error`；其中性能/恢复专页 14/14，并完成 3 轮重复共 42/42；输入生命周期 8/8、嵌套浮层生命周期 6/6、布局测量/hydration/CLS 8/8、真机验收工作台自检 2/2。
 - Storybook：444 个 Story × 7 场景，共 3,108 个组合通过。
 - 官网：68 个组件页和 8 个公共页面 × Light/Dark，共 152 个 axe WCAG A/AA、主题恢复与页面运行时场景通过。
 - 客户端静态兼容扫描：199 个 production 构建文件通过 Chrome 70 / iOS 13 语法和选择器基线；该结果不代替真实旧 WebView 运行时抽测。

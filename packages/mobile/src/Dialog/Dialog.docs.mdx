@@ -4,6 +4,8 @@ slug: dialog
 package: "@meu/mobile"
 exports: [Dialog, DialogProvider, useDialog]
 status: verification
+localVerification: pending
+localGapIds: [LOC-DIALOG-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -114,7 +116,7 @@ O(actions)，无布局测量；关闭记录仅为退出动画短暂保留。
 - Story interaction source: `Confirm` 包含 alertdialog 语义、初始焦点、Shift+Tab 圈定、scroll lock、确认关闭与触发器焦点恢复断言；静态链接校验覆盖 story ID、title 与 play 入口。本轮新增断言尚未重新执行浏览器扫描。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 10473 B / 32768 B 预算；最大单值 `DialogProvider` 为 10392 B / 32768 B 预算，组合 Brotli 9250 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）3 个公开值组合 gzip 10534 B / 32768 B 预算；最大单值 `DialogProvider` 为 10453 B / 32768 B 预算，组合 Brotli 9312 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Dialog.ssr.test.tsx` 覆盖 open/closed/forceMount/lazy container；jsdom `hydrateRoot` 断言打开 Portal 无 recoverable error；隔离 Next 16 hydration 后 declarative/Provider 触发器稳定，打开 Portal 无 hydration/runtime error
 - Mobile Chromium/WebKit E2E: `runs accessible declarative and provider-scoped Dialog flows` 在两种引擎断言 alertdialog、初始安全焦点、异步 busy/禁用、scroll lock、业务结果与焦点恢复。Chromatic / 真机读屏仍属最终门禁。
 

@@ -55,6 +55,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
     onPointerCancel,
     onPointerDown,
     readOnly = false,
+    required = false,
     size = "medium",
     status = "default",
     style,
@@ -83,8 +84,9 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
   );
   const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
   const labelledBy = hasExplicitAriaLabel
-    ? ariaLabelledBy
+    ? undefined
     : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
+  const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -227,6 +229,7 @@ export const Rate = forwardRef<HTMLInputElement, RateProps>(function Rate(
           step={increment}
           value={currentValue}
           disabled={disabled}
+          required={resolvedRequired}
           dir={dir}
           onChange={handleChange}
           onPointerDown={handlePointerDown}

@@ -44,6 +44,12 @@ type InternalTask = ImageUploaderTask & { controller: AbortController; objectUrl
 type RootStyle = CSSProperties & { "--meu-image-uploader-columns"?: number };
 type ProgressStyle = CSSProperties & { "--meu-image-uploader-progress"?: number };
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
+
 function normalizeColumns(columns: number | undefined) {
   if (!columns || !Number.isFinite(columns)) return 4;
   return Math.min(8, Math.max(1, Math.floor(columns)));
@@ -176,8 +182,13 @@ export const ImageUploader = forwardRef<ImageUploaderRef, ImageUploaderProps>(
     const [nativeInputFocused, setNativeInputFocused] = useState(false);
     const resolvedId =
       id || (fieldContext ? fieldContext.controlId : `meu-image-uploader-${generatedId}`);
-    const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
-    const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
+    const describedBy = mergeIdReferences(
+      ariaDescribedBy,
+      fieldContext ? fieldContext.describedBy : undefined
+    );
+    const labelledBy = ariaLabel
+      ? undefined
+      : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
     const callerInvalid =
       ariaInvalid === true ||
       ariaInvalid === "true" ||

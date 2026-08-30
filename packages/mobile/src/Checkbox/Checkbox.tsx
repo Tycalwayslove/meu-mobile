@@ -28,6 +28,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     checked,
     children,
     className,
@@ -87,6 +89,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
     ariaDescribedBy,
     fieldContext ? fieldContext.describedBy : undefined
   );
+  const labelledBy = ariaLabel
+    ? undefined
+    : mergeIdReferences(
+        ariaLabelledBy,
+        fieldContext && !inGroup ? fieldContext.labelId : undefined
+      );
   const resolvedName = name || (groupContext ? groupContext.name : undefined);
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required && !inGroup);
   const resetChecked =
@@ -208,6 +216,8 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
         aria-checked={indeterminate ? "mixed" : currentChecked}
         aria-describedby={describedBy}
         aria-invalid={resolvedAriaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         aria-readonly={resolvedReadOnly || undefined}
       />
       <span

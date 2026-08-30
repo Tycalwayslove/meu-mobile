@@ -9,6 +9,8 @@ slug: component-name
 package: "@meu/mobile"
 exports: [ComponentName]
 status: audit
+localVerification: pending
+localGapIds: [LOC-COMPONENT-NAME-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -107,6 +109,12 @@ source: packages/mobile/src/ComponentName
 | 日期 | 版本 | 类型 | 内容 | 迁移说明 |
 | ---- | ---- | ---- | ---- | -------- |
 ```
+
+`localVerification` 只能是 `pending` 或 `complete`：
+
+- `pending` 必须列出至少一个稳定的 `LOC-<SLUG>-NN` 缺口编号；每关闭一个缺口就同步删除。
+- `complete` 必须使用空数组 `localGapIds: []`，表示该组件当前规划内的本地自动化验证已全部通过。
+- `status: commercial` 只允许与 `localVerification: complete` 同时出现；真机、许可、视觉回归等发布级验证仍由发布验收清单单独约束。
 
 ## 更新规则
 

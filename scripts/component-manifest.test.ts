@@ -72,6 +72,8 @@ exports:
     MeuButton
   ]
 status: audit
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 lastReviewed: 2026-08-28
@@ -89,7 +91,12 @@ ${validHeadings}
     },
     [{ kind: "value", name: "MeuButton" }]
   );
-  assert.deepEqual(valid, { declaredExports: ["MeuButton"], issues: [] });
+  assert.deepEqual(valid, {
+    declaredExports: ["MeuButton"],
+    issues: [],
+    localGapIds: [],
+    localVerification: "complete"
+  });
 
   const invalid = parseComponentDocs(
     `---
@@ -98,6 +105,8 @@ slug: button
 package: "@meu/example"
 exports: [MissingButton]
 status: audit
+localVerification: pending
+localGapIds: [LOC-WRONG-01]
 priority: P0
 since: 0.1.0
 lastReviewed: 2026-08-28
@@ -123,6 +132,50 @@ source: packages/example/src/Button
   );
   assert.equal(
     invalid.issues.some((issue) => issue.includes("当前能力")),
+    true
+  );
+  assert.equal(
+    invalid.issues.some((issue) => issue.includes("another component")),
+    true
+  );
+});
+
+test("parseComponentDocs blocks commercial status until local verification is complete", () => {
+  const headings = requiredDocsSections
+    .map((section) => {
+      if (section === "基础用法") return `## ${section}\n\n\`\`\`tsx\n<MeuButton />\n\`\`\``;
+      return `## ${section}\n\n\`value\` 已记录。`;
+    })
+    .join("\n\n");
+  const parsed = parseComponentDocs(
+    `---
+name: Button
+slug: button
+package: "@meu/example"
+exports: [MeuButton]
+status: commercial
+localVerification: pending
+localGapIds: [LOC-BUTTON-01]
+priority: P0
+since: 0.1.0
+lastReviewed: 2026-08-30
+source: packages/example/src/Button
+---
+# Button
+
+${headings}
+`,
+    {
+      name: "Button",
+      packageName: "@meu/example",
+      slug: "button",
+      sourcePath: "packages/example/src/Button"
+    },
+    [{ kind: "value", name: "MeuButton" }]
+  );
+
+  assert.equal(
+    parsed.issues.includes("frontmatter status commercial requires localVerification complete"),
     true
   );
 });
@@ -201,6 +254,14 @@ test("workspace manifest covers the four packages and all declared product entri
 
   assert.equal(manifest.packages.length, 4);
   assert.equal(manifest.products.length, 68);
+  assert.equal(
+    manifest.summary.locallyVerifiedProducts,
+    manifest.products.filter((item) => item.localVerification === "complete").length
+  );
+  assert.equal(
+    manifest.summary.productsWithLocalGaps,
+    manifest.products.filter((item) => item.localVerification === "pending").length
+  );
   const button = manifest.products.find((item) => item.slug === "button");
   const cell = manifest.products.find((item) => item.slug === "cell");
   const configProvider = manifest.products.find((item) => item.slug === "config-provider");

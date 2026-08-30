@@ -33,6 +33,22 @@ function NativeFormDemo() {
   );
 }
 
+function NativeConstraintDemo() {
+  return (
+    <form aria-label="协议确认表单" style={{ display: "grid", gap: 12 }}>
+      <Checkbox indeterminate name="terms" required value="accepted">
+        同意服务协议
+      </Checkbox>
+      <Checkbox defaultChecked readOnly name="locked" value="yes">
+        已锁定选项
+      </Checkbox>
+      <Checkbox defaultChecked disabled name="disabled" value="yes">
+        已禁用选项
+      </Checkbox>
+    </form>
+  );
+}
+
 const meta = {
   title: "Forms/Checkbox",
   component: Checkbox,
@@ -107,6 +123,33 @@ export const NativeFormContract: Story = {
     await Promise.resolve();
     await Promise.resolve();
     if (pickup.checked) throw new window.Error("CheckboxGroup did not restore defaultValue");
+  }
+};
+export const MixedConstraintAndFormData: Story = {
+  render: () => <NativeConstraintDemo />,
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector("form");
+    const terms = canvasElement.querySelector<HTMLInputElement>("input[name='terms']");
+    if (!(form instanceof HTMLFormElement) || !terms) {
+      throw new window.Error("Expected Checkbox constraint controls");
+    }
+    if (!terms.indeterminate || form.checkValidity() || new FormData(form).has("terms")) {
+      throw new window.Error("Mixed unchecked Checkbox did not keep native validation semantics");
+    }
+
+    terms.click();
+    await Promise.resolve();
+    const data = new FormData(form);
+    if (
+      !terms.checked ||
+      !terms.indeterminate ||
+      !form.checkValidity() ||
+      data.get("terms") !== "accepted" ||
+      data.get("locked") !== "yes" ||
+      data.has("disabled")
+    ) {
+      throw new window.Error("Checkbox lifecycle FormData or constraint contract failed");
+    }
   }
 };
 export const RTL: Story = {

@@ -4,10 +4,12 @@ slug: field
 package: "@meu/mobile"
 exports: [Field]
 status: verification
+localVerification: pending
+localGapIds: [LOC-FIELD-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "444:3183"
@@ -32,6 +34,7 @@ source: packages/mobile/src/Field
 - 原生 labelable HTML 元素默认使用 `label[for]`；React 组件默认使用 `aria-labelledby`，避免把 `label[for]` 指向 `div`、`role=group` 等非 labelable 节点。
 - `required` 与 `invalid` 同时进入 Field context；native 关联以及 Field-aware 原生控件收到真实 `required`，不支持 required 的 ARIA/按钮路径通过本地化隐藏说明表达，避免输出无效属性。
 - 根节点支持标准 div 属性、`style`、`className`、`id`、事件与 `HTMLDivElement` ref。
+- 18 个公开 Field-aware 控件统一按 token 合并 caller 与 Field 的 labelledby/describedby，Field invalid 优先；非空显式 `aria-label` 会移除冲突 labelledby，避免旧引用反向覆盖明确名称。
 
 这些能力已进入 `verification`。Next H5 移动 Chromium/WebKit 已覆盖 TextInput/TextArea 的 Field 归属、invalid/error 与修正后提交；最终 Chromatic Light/Dark 审批和真机读屏记录尚未完成，不能标记为 commercial。
 
@@ -165,7 +168,6 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 
 - 自动属性注入只适用于一个可关联的直接 React element。Fragment、多个控件或原生中间布局组件不会被递归克隆；内部控件必须调用 `useFieldContext` 并合并自身 ARIA。一个 Field 仍只能拥有一个主要控件。
 - `auto` 无法从 React 组件类型可靠判断最终 DOM，因此默认使用更安全的 ARIA 组合语义。单一 input wrapper 若需要 native label 点击和 constraint validation，必须设置 `labelAssociation="native"`。
-- Field-aware 旧组件中仍有使用 `callerAria || fieldAria` 的实现；Field 对直接子元素的合并已避免丢失，但深层包装组件需要在各自 V2 批次改为 token 合并。
 - 首次错误自动聚焦与整表 error summary 由 Form 层负责，Field 不自行抢焦点。
 
 ## 性能预算
@@ -174,11 +176,11 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 
 ## 测试证据
 
-- Unit: `Field.test.tsx`，覆盖显式 id、说明合并/去重、native/composite 标签、嵌套布局无重复 id、required/invalid context、ARIA 命名合并、空结构内容、根 DOM/ref
+- Unit: `Field.test.tsx` 与 `FieldAwareContract.test.tsx`。后者以 73 个参数化断言覆盖 18/18 公开 FieldContext 消费控件：caller + Field labelledby/describedby 全保留去重、Field invalid 优先、显式 accessible name 优先，以及 native / ARIA / 隐藏必填说明三类 required 契约。
 - Story interaction: `Default` 验证原生 label、required 与说明 IDREF；`NestedLayout` 验证嵌套关联与唯一 id。对应 Story 已纳入中央生成的链接、关键 play 和浏览器矩阵门禁，组件文档不复制易漂移的全局计数。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2118 B / 32768 B 预算，组合 Brotli 1854 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2114 B / 32768 B 预算，组合 Brotli 1851 B；共享样式由应用单独导入一次。
 - SSR/hydration: `Field.ssr.test.tsx` 覆盖稳定原生关联；隔离 Next 16 表单 hydration 后 description/error IDREF、invalid 与首次错误路径无运行时异常
 - RTL: 使用逻辑属性，待专属自动化证明
 - Reduced motion: 不适用，无动效
@@ -191,8 +193,6 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 ### 待优化
 
 - 继续补 RTL、200% 字号、强制色彩与真机读屏；基础 hydration 和移动双引擎表单错误关联已完成。
-- Field-aware 深层包装组件逐个改为无损合并调用方与 context 的 ARIA idrefs。
-- 继续扩展全部 Field-aware 控件的 IDREF 合并矩阵；Form 首错聚焦、服务端错误及核心 RHF touched/disabled/ref 路径已经完成。
 
 ### 已完成
 
@@ -205,11 +205,13 @@ Field 服务端渲染不读取 `window/document`。`useId` 在服务端与 hydra
 - 在隔离 Next H5 中补两个真实 Field 的 invalid、错误修正、提交与 hydration 双引擎证据。
 - 修复原生布局 wrapper 被误克隆导致的重复 id；Field-aware 输入可在嵌套布局中继承 label 与 required。
 - 忽略空字符串、空数组和空 Fragment，避免生成空 label/alert 与伪 invalid 状态；原生 `aria-labelledby` 会保留可见 Field label。
+- 完成全部 18 个公开 Field-aware 控件的参数化 IDREF/invalid/name/required 商用门禁；布局 wrapper 不再削弱 caller 与 Field 语义。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                    | 迁移说明                                                                                                                                                      |
-| ---------- | ------ | ------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior     | 修复关联、ARIA 合并、required/invalid 与根 DOM/ref 契约 | React 单控件 wrapper 如需 native label 点击与原生 required，设置 `labelAssociation="native"`；组合控件使用 `aria`，仅在其 role 合法时自行声明 `aria-required` |
-| 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎 Field invalid/submit/hydration 证据 | 无                                                                                                                                                            |
-| 2026-08-29 | 未发布 | hardening    | 修复布局 wrapper 重复 id、嵌套关联、空内容与命名链      | 空字符串/空数组/空 Fragment 不再创建 label、description 或 error；如依赖空节点占位，请改用样式布局                                                            |
+| 日期       | 版本   | 类型          | 内容                                                    | 迁移说明                                                                                                                                                      |
+| ---------- | ------ | ------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior      | 修复关联、ARIA 合并、required/invalid 与根 DOM/ref 契约 | React 单控件 wrapper 如需 native label 点击与原生 required，设置 `labelAssociation="native"`；组合控件使用 `aria`，仅在其 role 合法时自行声明 `aria-required` |
+| 2026-08-29 | 未发布 | verification  | 增加 Next H5 双引擎 Field invalid/submit/hydration 证据 | 无                                                                                                                                                            |
+| 2026-08-29 | 未发布 | hardening     | 修复布局 wrapper 重复 id、嵌套关联、空内容与命名链      | 空字符串/空数组/空 Fragment 不再创建 label、description 或 error；如依赖空节点占位，请改用样式布局                                                            |
+| 2026-08-30 | 未发布 | accessibility | 建立 18 个 Field-aware 公开控件的参数化 IDREF 商用门禁  | 显式 `aria-label` 现在优先于同控件遗留的 `aria-labelledby`；非空 IDREF 改为无损合并去重                                                                       |

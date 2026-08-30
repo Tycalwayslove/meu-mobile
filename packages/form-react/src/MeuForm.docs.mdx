@@ -30,6 +30,8 @@ exports:
     useMeuForm
   ]
 status: verification
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -214,11 +216,12 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 - Story interaction: `check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play；Form 的关键提交、校验与确认 play 在本地扫描中返回 `storyFinished=success`。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 115249 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38319 B / 65536 B 预算，组合 Brotli 90260 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）24 个公开值组合 gzip 115534 B / 115712 B 预算；最大单值 `MeuFormImageUploader` 为 38415 B / 65536 B 预算，组合 Brotli 90452 B；共享样式由应用单独导入一次。
 - SSR/hydration: `MeuForm.ssr.test.tsx` 验证确定性原生 form shell 与 React 19 hydration 0 mismatch；隔离 Next H5 专项页面将服务端序列化的默认值传入 Client Component，客户端 `reset(nextDefaults)` 后原生 reset 恢复新的客户端默认值而不是旧服务端值
 - RTL: 隔离 Next H5 的 Form hydration 场景在 `dir="rtl"` 下验证输入方向继承、默认值与 reset 行为；adapter 继续依赖底层组件的逻辑属性
 - Reduced motion: Form 无自有动效；同一专项场景在 `motion="reduced"` Provider 下完成 hydration 与交互，Form 不新增 transition/animation
 - Mobile Chromium/WebKit E2E: `consumer.spec.ts` 在 Pixel 5 与 iPhone 13 项目中直接覆盖空提交后的错误与 `aria-invalid`、TextInput 清除、有效值提交；原生 reset 恢复默认值并清除 dirty/touched/error；服务端错误即使按非 DOM 顺序传入，也会聚焦并滚动显示表单内第一个字段。Picker、CascadePicker、DatePicker、DateRangePicker、TimePicker 覆盖取消不提交草稿、确认提交值和关闭后恢复焦点；DateRangePicker 还验证自定义 JSON serializer 在确认前后都只生成一个合法 `FormData` 条目。ImageUploader 路径断言 hidden `productImages` 初始序列化、删除后省略、上传完成后恢复，以及必填错误聚焦真实 file input。
+- Figma: 永久组件集 `Meu/MeuForm`（node `446:3770`）固定 7 个生命周期视觉状态、Light/Dark 实例与 contract-first 文档；组件集 90/90 solid fills、23/23 strokes、31/31 relevant radii 全部绑定 Token，21/21 表单目标最小尺寸为 342×48，整板无未命名、文本溢出、裁剪或兄弟重叠，Light/Dark ink、muted、accent 对 surface 对比度均通过 AA。运行时契约仍以代码和自动化测试为事实源，不把提交并发、原生 action 等非视觉行为伪造成额外 variant。
 - Chromatic Light/Dark: 有静态 Story，待交互矩阵
 - Real device: 待补 iOS Safari/VoiceOver 与 Android Chrome/TalkBack
 
@@ -239,11 +242,13 @@ Form 不应在每次按键时遍历整棵 DOM。只有客户端提交失败或�
 - 服务端错误首次聚焦按 DOM 顺序执行；MeuForm 支持原生 form ref。
 - NumberKeyboard、PasscodeInput、Picker、CascadePicker、DatePicker、DateRangePicker、Calendar、TimePicker、TreeSelect 与 ImageUploader 已进入原生 FormData；复杂集合使用同名重复条目，调用方也可显式序列化为 JSON。
 - 22 个 adapter 已按 native input、group、overlay trigger 与 complex value 分类，参数化冻结 touched、RHF ref、required，以及 14 个适用 adapter 的 readOnly/FormData 契约；其余 8 个明确记录为未定义 readOnly。
+- Figma `Meu/MeuForm` 已补齐 Idle、FirstError、Submitting、Success、ServerError replace/merge 与 DynamicFieldRemoved 视觉状态，验证 Light/Dark Token、AA 对比度、44px 目标和无布局缺陷。
 
 ## 变更记录
 
 | 日期       | 版本   | 类型         | 内容                                                                                | 迁移说明                                                                    |
 | ---------- | ------ | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 2026-08-30 | 未发布 | design       | 固化 MeuForm 7 状态组件集、Light/Dark 预览与精确 Token/尺寸/布局 QA                 | 无；运行时行为继续以代码测试为事实源                                        |
 | 2026-08-30 | 未发布 | verification | 增加 22 个 adapter 的商用契约参数化矩阵与分类文档                                   | 状态保持 `verification`；真机 IME、VoiceOver 与 TalkBack 仍待验证           |
 | 2026-08-28 | 未发布 | behavior     | disabled、required 与复合控件 touched 契约统一                                      | 全局 disabled 现在会真实禁用 adapter；required 进入原生语义                 |
 | 2026-08-28 | 未发布 | types        | 字段 path 按值类型收紧，支持 Zod transform 输入/输出                                | 误绑定到不兼容字段的代码会出现类型错误                                      |

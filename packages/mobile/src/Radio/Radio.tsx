@@ -9,6 +9,7 @@ import { useRadioGroupContext } from "./RadioGroupContext";
 import type { RadioProps } from "./types";
 
 const RADIO_SYNC_EVENT = "meu:radio-sync";
+const RADIO_RESTORE_EVENT = "meu:radio-restore";
 
 function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
   if (typeof ref === "function") ref(value);
@@ -21,6 +22,29 @@ function mergeIdReferences(...values: Array<string | undefined>): string | undef
   return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
 }
 
+function getNativeRadioPeers(element: HTMLInputElement): HTMLInputElement[] {
+  const view = element.ownerDocument.defaultView;
+  if (!view || !element.name) return [element];
+  const candidates = element.form
+    ? Array.from(element.form.elements)
+    : Array.from(element.ownerDocument.querySelectorAll("input[type='radio']"));
+  return candidates.filter(
+    (candidate): candidate is HTMLInputElement =>
+      candidate instanceof view.HTMLInputElement &&
+      candidate.type === "radio" &&
+      candidate.name === element.name &&
+      candidate.form === element.form
+  );
+}
+
+function dispatchNativeRadioEvent(element: HTMLInputElement, eventName: string) {
+  const view = element.ownerDocument.defaultView;
+  if (!view) return;
+  for (const peer of getNativeRadioPeers(element)) {
+    peer.dispatchEvent(new view.Event(eventName));
+  }
+}
+
 /**
  * Renders a native radio input with Meu styling and Field integration.
  *
@@ -30,6 +54,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     checked,
     children,
     className,
@@ -88,6 +114,12 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     ariaDescribedBy,
     fieldContext ? fieldContext.describedBy : undefined
   );
+  const labelledBy = ariaLabel
+    ? undefined
+    : mergeIdReferences(
+        ariaLabelledBy,
+        fieldContext && !inGroup ? fieldContext.labelId : undefined
+      );
   const resolvedName = name || (groupContext ? groupContext.name : undefined);
   const resolvedRequired =
     required ||
@@ -111,6 +143,16 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     element.addEventListener(RADIO_SYNC_EVENT, handleNativeGroupSync);
     return () => element.removeEventListener(RADIO_SYNC_EVENT, handleNativeGroupSync);
   }, [checked, controlled, inGroup, resolvedName]);
+
+  useEffect(() => {
+    const element = inputRef.current;
+    if (!element) return;
+    const restoreControlledSelection = () => {
+      element.checked = currentChecked;
+    };
+    element.addEventListener(RADIO_RESTORE_EVENT, restoreControlledSelection);
+    return () => element.removeEventListener(RADIO_RESTORE_EVENT, restoreControlledSelection);
+  }, [currentChecked]);
 
   useEffect(() => {
     const element = inputRef.current;
@@ -143,9 +185,11 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     if (resolvedDisabled || resolvedReadOnly) {
       event.preventDefault();
       const element = event.currentTarget;
-      element.checked = currentChecked;
+      dispatchNativeRadioEvent(element, RADIO_RESTORE_EVENT);
       void Promise.resolve().then(() => {
-        if (inputRef.current === element) element.checked = currentChecked;
+        if (inputRef.current === element) {
+          dispatchNativeRadioEvent(element, RADIO_RESTORE_EVENT);
+        }
       });
       return;
     }
@@ -157,22 +201,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     }
     if (!inGroup && resolvedName) {
       const element = event.currentTarget;
-      const candidates = element.form
-        ? Array.from(element.form.elements)
-        : Array.from(element.ownerDocument.querySelectorAll("input[type='radio']"));
-      const view = element.ownerDocument.defaultView;
-      if (view) {
-        for (const candidate of candidates) {
-          if (
-            candidate instanceof view.HTMLInputElement &&
-            candidate.type === "radio" &&
-            candidate.name === element.name &&
-            candidate.form === element.form
-          ) {
-            candidate.dispatchEvent(new view.Event(RADIO_SYNC_EVENT));
-          }
-        }
-      }
+      dispatchNativeRadioEvent(element, RADIO_SYNC_EVENT);
     }
     if (onChange) onChange(nextChecked, event);
   }
@@ -181,9 +210,11 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
     if (resolvedReadOnly) {
       event.preventDefault();
       const element = event.currentTarget;
-      element.checked = currentChecked;
+      dispatchNativeRadioEvent(element, RADIO_RESTORE_EVENT);
       void Promise.resolve().then(() => {
-        if (inputRef.current === element) element.checked = currentChecked;
+        if (inputRef.current === element) {
+          dispatchNativeRadioEvent(element, RADIO_RESTORE_EVENT);
+        }
       });
     }
     if (onClick) onClick(event);
@@ -232,6 +263,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
         aria-describedby={describedBy}
         aria-disabled={!inGroup && resolvedReadOnly ? true : undefined}
         aria-invalid={resolvedAriaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
       />
       <span
         className={indicator({

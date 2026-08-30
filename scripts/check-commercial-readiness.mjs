@@ -52,8 +52,31 @@ for (const product of products) {
   const document = await readFile(resolve(workspaceRoot, product.docsPath), "utf8");
   const frontmatter = document.match(/^---\n([\s\S]*?)\n---/)?.[1] || "";
   const status = frontmatter.match(/^status:\s*(\S+)\s*$/m)?.[1];
+  const localVerification = frontmatter.match(/^localVerification:\s*(\S+)\s*$/m)?.[1];
+  const localGapIds =
+    frontmatter
+      .match(/^localGapIds:\s*\[([^\]]*)\]\s*$/m)?.[1]
+      ?.split(",")
+      .map((item) => item.trim())
+      .filter(Boolean) || [];
   if (!status) failures.push(`${product.docsPath}: missing frontmatter status`);
-  componentStatuses.push({ name: product.name, status });
+  if (!localVerification) {
+    failures.push(`${product.docsPath}: missing frontmatter localVerification`);
+  } else if (localVerification !== "pending" && localVerification !== "complete") {
+    failures.push(
+      `${product.docsPath}: unsupported frontmatter localVerification ${localVerification}`
+    );
+  } else if (localVerification === "pending" && localGapIds.length === 0) {
+    failures.push(`${product.docsPath}: pending local verification requires a gap id`);
+  } else if (localVerification === "complete" && localGapIds.length > 0) {
+    failures.push(`${product.docsPath}: complete local verification must not retain gap ids`);
+  }
+  componentStatuses.push({
+    localGapIds,
+    localVerification,
+    name: product.name,
+    status
+  });
 }
 
 const candidateSha =
@@ -63,6 +86,12 @@ const incompleteBlockers = requiredBlockers.filter(
   (id) => !completedStatuses.has(blockers.get(id))
 );
 const commercialComponents = componentStatuses.filter(({ status }) => status === "commercial");
+const locallyVerifiedComponents = componentStatuses.filter(
+  ({ localVerification }) => localVerification === "complete"
+);
+const invalidCommercialComponents = commercialComponents.filter(
+  ({ localVerification }) => localVerification !== "complete"
+);
 const headResult = spawnSync("git", ["rev-parse", "HEAD"], {
   cwd: workspaceRoot,
   encoding: "utf8"
@@ -132,6 +161,13 @@ if (commercialComponents.length > 0 && incompleteBlockers.length > 0) {
     `${commercialComponents.length} component(s) are commercial while blockers remain: ${incompleteBlockers.join(", ")}`
   );
 }
+if (invalidCommercialComponents.length > 0) {
+  failures.push(
+    `commercial components must complete local verification: ${invalidCommercialComponents
+      .map(({ name }) => name)
+      .join(", ")}`
+  );
+}
 if (candidateIsSha && !candidateIsAncestor) {
   failures.push("candidate SHA must be an ancestor of HEAD");
 }
@@ -152,6 +188,11 @@ if (strict) {
       `strict commercial check requires ${products.length}/${products.length} commercial components, received ${commercialComponents.length}`
     );
   }
+  if (locallyVerifiedComponents.length !== products.length) {
+    failures.push(
+      `strict commercial check requires ${products.length}/${products.length} locally verified components, received ${locallyVerifiedComponents.length}`
+    );
+  }
   if (!candidateIsSha) failures.push("strict commercial check requires a frozen candidate SHA");
   const worktreeResult = spawnSync("git", ["status", "--porcelain"], {
     cwd: workspaceRoot,
@@ -168,7 +209,7 @@ if (failures.length > 0) {
   );
   process.exitCode = 1;
 } else {
-  const summary = `${commercialComponents.length}/${products.length} commercial components · ${requiredBlockers.length - incompleteBlockers.length}/${requiredBlockers.length} manual blockers complete`;
+  const summary = `${commercialComponents.length}/${products.length} commercial components · ${locallyVerifiedComponents.length}/${products.length} locally verified · ${requiredBlockers.length - incompleteBlockers.length}/${requiredBlockers.length} manual blockers complete`;
   if (strict) {
     process.stdout.write(`Commercial release candidate passed: ${summary} · ${headSha}.\n`);
   } else {

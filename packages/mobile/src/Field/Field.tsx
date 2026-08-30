@@ -65,7 +65,7 @@ type AssociableChildProps = {
   "aria-describedby"?: string;
   "aria-invalid"?: HTMLAttributes<HTMLElement>["aria-invalid"];
   "aria-label"?: string;
-  "aria-labelledby"?: string;
+  "aria-labelledby"?: string | undefined;
   "aria-required"?: HTMLAttributes<HTMLElement>["aria-required"];
   contentEditable?: HTMLAttributes<HTMLElement>["contentEditable"];
   id?: string;
@@ -184,16 +184,16 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
     const childDescribedBy = mergeIdReferences(child.props["aria-describedby"], fieldDescribedBy);
     const childAriaLabel = child.props["aria-label"];
     const hasExplicitAriaLabel = Boolean(childAriaLabel && childAriaLabel.trim());
-    const childLabelledBy =
-      !hasExplicitAriaLabel &&
-      (resolvedAssociation === "aria" || child.props["aria-labelledby"] !== undefined)
+    const childLabelledBy = hasExplicitAriaLabel
+      ? undefined
+      : resolvedAssociation === "aria" || child.props["aria-labelledby"] !== undefined
         ? mergeIdReferences(child.props["aria-labelledby"], labelId)
         : child.props["aria-labelledby"];
     const accessibilityProps: AssociableChildProps = { id: controlId };
 
     if (childDescribedBy) accessibilityProps["aria-describedby"] = childDescribedBy;
     if (resolvedInvalid) accessibilityProps["aria-invalid"] = true;
-    if (childLabelledBy) accessibilityProps["aria-labelledby"] = childLabelledBy;
+    accessibilityProps["aria-labelledby"] = childLabelledBy;
 
     if (required) {
       if (resolvedAssociation === "native") accessibilityProps.required = true;

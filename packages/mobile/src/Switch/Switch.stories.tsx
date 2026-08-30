@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 
 import { Field } from "../Field";
+import { waitForStory } from "../storyTestUtils";
 import { Switch } from "./Switch";
 
 function ControlledSwitch() {
@@ -27,6 +28,44 @@ function NativeFormDemo() {
   );
 }
 
+function OptimisticFailureDemo() {
+  const [attempts, setAttempts] = useState(0);
+  const [checked, setChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState("idle");
+
+  return (
+    <div style={{ display: "grid", gap: 12, justifyItems: "start" }}>
+      <Switch
+        aria-label="自动续费"
+        checked={checked}
+        loading={loading}
+        onChange={(nextChecked) => {
+          setAttempts((count) => count + 1);
+          setChecked(nextChecked);
+          setLoading(true);
+          setResult("saving");
+        }}
+      />
+      <button
+        type="button"
+        data-action="fail"
+        style={{ minHeight: 44 }}
+        onClick={() => {
+          setChecked(false);
+          setLoading(false);
+          setResult("failed");
+        }}
+      >
+        模拟失败并回滚
+      </button>
+      <output>
+        {result}; attempts={attempts}; checked={String(checked)}
+      </output>
+    </div>
+  );
+}
+
 const meta = {
   title: "Forms/Switch",
   component: Switch,
@@ -41,6 +80,35 @@ export const Default: Story = {};
 export const Checked: Story = { args: { defaultChecked: true } };
 export const Controlled: Story = { render: () => <ControlledSwitch /> };
 export const Loading: Story = { args: { defaultChecked: true, loading: true } };
+export const OptimisticFailureLifecycle: Story = {
+  render: () => <OptimisticFailureDemo />,
+  play: async ({ canvasElement }) => {
+    const control = canvasElement.querySelector<HTMLInputElement>("input[role='switch']");
+    const fail = canvasElement.querySelector<HTMLButtonElement>("[data-action='fail']");
+    const output = canvasElement.querySelector("output");
+    if (!control || !fail || !output) {
+      throw new window.Error("Expected Switch lifecycle controls");
+    }
+
+    control.click();
+    await waitForStory(() => control.getAttribute("aria-busy") === "true", "Switch did not load");
+    control.click();
+    if (output.textContent !== "saving; attempts=1; checked=true") {
+      throw new window.Error("Switch loading state did not suppress a rapid repeat change");
+    }
+
+    fail.click();
+    await waitForStory(
+      () => !control.checked && control.getAttribute("aria-busy") === "false",
+      "Switch did not roll back after failure"
+    );
+    control.click();
+    await waitForStory(
+      () => output.textContent === "saving; attempts=2; checked=true",
+      "Switch could not retry after rollback"
+    );
+  }
+};
 export const Disabled: Story = { args: { disabled: true } };
 export const ReadOnly: Story = { args: { defaultChecked: true, readOnly: true } };
 export const NativeFormContract: Story = {

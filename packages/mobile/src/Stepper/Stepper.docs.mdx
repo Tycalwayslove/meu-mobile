@@ -4,6 +4,8 @@ slug: stepper
 package: "@meu/mobile"
 exports: [Stepper]
 status: verification
+localVerification: pending
+localGapIds: [LOC-STEPPER-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -177,7 +179,7 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 - Story interaction: `NativeFormReset` 验证增量和恢复；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5823 B / 32768 B 预算，组合 Brotli 5138 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 5820 B / 32768 B 预算，组合 Brotli 5135 B；共享样式由应用单独导入一次。
 - Figma：canonical `Meu/Stepper` set `54:74`，Min `54:147`、Max `54:220`；36 variants。Light `451:79`、Dark `451:129`、QA `451:179`；合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：软键盘/IME/粘贴与物理长按移动 E2E、系统 pointercancel/滚动竞争、forced-colors 聚焦截图、Light/Dark 视觉基线、VoiceOver/TalkBack。
 
@@ -214,3 +216,4 @@ surface/subtle/ink/muted/border/accent/danger。稳定入口为 size、status、
 | 2026-08-29 | 未发布 | behavior      | inputMode 透传、严格十进制输入、precision 防停滞与可选长按重复  | 新能力默认关闭，既有单击兼容     |
 | 2026-08-29 | 未发布 | verification  | 增加 paste/IME、长按取消/卸载、disabled 与 RTL hydration 自动化 | 无                               |
 | 2026-08-29 | 未发布 | accessibility | 嵌套 Field 合并 label/description idref，adapter 保留显式错误态 | 无                               |
+| 2026-08-30 | 未发布 | accessibility | 显式 accessible name 抑制冲突 labelledby 的参数化门禁           | 无                               |

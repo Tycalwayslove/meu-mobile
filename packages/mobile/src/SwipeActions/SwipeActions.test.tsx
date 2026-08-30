@@ -12,21 +12,31 @@ const rightActions: SwipeActionsAction[] = [
   { key: "archive", label: "归档" },
   { key: "delete", label: "删除", tone: "danger" }
 ];
+let rightRailWidth = 160;
+let triggerResizeObserver: (() => void) | null = null;
 
 beforeEach(() => {
+  rightRailWidth = 160;
+  triggerResizeObserver = null;
   vi.stubGlobal(
     "ResizeObserver",
     class MockResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        triggerResizeObserver = () => callback([], this);
+      }
       observe() {}
       disconnect() {}
       unobserve() {}
+      takeRecords() {
+        return [];
+      }
     }
   );
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
     this: HTMLElement
   ) {
     const side = this.getAttribute("data-meu-swipe-actions-group");
-    const width = side === "left" ? 80 : side === "right" ? 160 : 320;
+    const width = side === "left" ? 80 : side === "right" ? rightRailWidth : 320;
     return {
       bottom: 64,
       height: 64,
@@ -91,6 +101,22 @@ function drag(root: HTMLElement, fromX: number, toX: number, deltaY = 0) {
 }
 
 describe("SwipeActions", () => {
+  it("tracks an open action rail when ResizeObserver reports a dynamic width", async () => {
+    const { container } = renderSwipeActions({ defaultOpenSide: "right" });
+    const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;
+    await waitFor(() => expect(root.getAttribute("data-offset")).toBe("-160"));
+    expect(root.getAttribute("data-open-side")).toBe("right");
+
+    rightRailWidth = 248;
+    const notifyResizeObserver = triggerResizeObserver;
+    if (!notifyResizeObserver) throw new Error("Expected ResizeObserver callback");
+    act(() => notifyResizeObserver());
+
+    await waitFor(() => expect(root.getAttribute("data-offset")).toBe("-248"));
+    expect(root.getAttribute("data-open-side")).toBe("right");
+    expect(screen.getByRole("button", { name: "归档" }).getAttribute("tabindex")).toBe("0");
+  });
+
   it("keeps closed actions out of the tab order and exposes native reveal controls", () => {
     const { container } = renderSwipeActions();
     const root = container.querySelector<HTMLElement>('[data-meu-component="swipe-actions"]')!;

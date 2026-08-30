@@ -4,10 +4,12 @@ slug: button
 package: "@meu/mobile"
 exports: [Button]
 status: verification
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "27:74"
@@ -16,6 +18,7 @@ storyIds:
     actions-button--solid,
     actions-button--outline,
     actions-button--loading,
+    actions-button--async-failure-lifecycle,
     actions-button--danger,
     actions-button--mobile-state-matrix
   ]
@@ -28,7 +31,7 @@ source: packages/mobile/src/Button
 
 - 原生 `button`，默认 `type="button"`，支持 ref 和原生 button 属性。
 - `solid | outline | ghost | text`、三种 tone、三档 size、block、前后图标和 loading。
-- loading 时保留内容宽度、设置 `aria-busy` 并禁用点击。
+- loading 时保留完整 authored content 的布局盒和 accessible name，以居中 overlay spinner 替代视觉内容，因此前后图标、长文案和纯文字按钮切换 busy 前后宽度稳定；同时设置 `aria-busy` 并禁用点击。
 - leading/trailing icon 明确定义为装饰槽，不进入 accessible name；语义由可见 label 或调用方 ARIA 名称提供。
 - 使用兼容 WebView 70 的焦点环、逻辑间距、`touch-action: manipulation` 与长文案换行，并在 reduced-motion 下显示静态 loading ring。
 - forced-colors 下恢复系统按钮边框，避免 solid/ghost 外观只靠背景色区分。
@@ -47,7 +50,7 @@ source: packages/mobile/src/Button
 
 ## 结构与状态
 
-结构为 leading icon、label、trailing icon。现有状态包括 default、hover/active/focus、disabled、loading；长文本允许换行并保持 44px 最小高度。异步失败恢复仍由业务状态负责。
+结构为 content（leading icon、label、trailing icon）+ loading overlay。现有状态包括 default、hover/active/focus、disabled、loading；长文本允许换行并保持 44px 最小高度。loading 只把 content 设为透明而不移出布局或无障碍树；异步失败恢复仍由业务状态负责。
 
 ## 基础用法
 
@@ -59,7 +62,7 @@ source: packages/mobile/src/Button
 
 ## 受控与非受控
 
-不适用。Button 不持有业务状态；loading 和 disabled 由调用方控制。
+不适用。Button 不持有业务状态；loading 和 disabled 由调用方控制。调用方必须在首次 activation 中同步进入 loading，原生 disabled 会抑制随后 click、Enter 与 Space；请求失败时撤销 loading 后可再次操作。
 
 ## 表单集成
 
@@ -71,7 +74,7 @@ API 表最终由 TypeScript/TSDoc 和 API Extractor生成。当前专有 Props�
 
 ## Events
 
-透传原生 button 事件。loading 或 disabled 时原生 `click` 不触发。组件不负责 debounce、请求、成功提示或错误处理。
+透传原生 button 事件。loading 或 disabled 时原生 `click` 不触发。组件不负责 debounce、请求、成功提示或错误处理；页面卸载时应由请求所有者通过 AbortController 或等价机制取消工作，不能在 Button 内隐藏请求生命周期。
 
 ## Ref 与命令式方法
 
@@ -116,6 +119,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 - loading 会使按钮 disabled，因此按钮本身不能接收焦点或再次公告状态。
 - 当前没有内建防抖、请求所有权、成功/失败状态。loading 通过 native disabled 阻止 click、Enter/Space 与 submitter 参与。
+- loading content 通过 opacity 保留尺寸和 accessible name；不要用 CSS 覆盖内部 opacity/position。业务若需要显示进度文案，应更新 children 或邻近 live region，并接受该文案本身可能改变宽度。
 - 所有公开专有 Props 均有逐字段 TSDoc；继承的原生 button 属性以 React DOM 类型为准。
 
 ## 性能预算
@@ -124,12 +128,12 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 
 ## 测试证据
 
-- Unit: `Button.test.tsx` 覆盖安全默认 type、loading 交互阻断、busy 状态与装饰图标命名边界
+- Unit: `Button.test.tsx` 覆盖安全默认 type、loading 交互阻断、busy 状态与装饰图标命名边界；`Button.lifecycle.test.tsx` 覆盖 loading DOM 尺寸事实源、重复激活抑制、失败恢复/重试和卸载 AbortController 竞态
 - SSR/hydration: `Button.hydration.test.tsx` 验证服务端原生 button 在 hydration 中不替换、无 recoverable error 且 hydration 后可激活
-- Story interaction: `Solid` 验证按钮激活、焦点保持与状态更新；`check-storybook-links` 已验证全库 81/81 title 各至少一项关键 play，本 title 的 play 在本地扫描中返回 `storyFinished=success`。
+- Story interaction: `Solid` 验证按钮激活、焦点保持与状态更新；`AsyncFailureLifecycle` 在真实布局环境测量 loading 前后宽度、重复激活、失败恢复和再次操作；本批 `Actions/Button` 6/6 stories × Light/Dark 共 12/12 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 1969 B / 32768 B 预算，组合 Brotli 1751 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2036 B / 32768 B 预算，组合 Brotli 1809 B；共享样式由应用单独导入一次。
 - Figma：canonical `Meu/Button/Solid` 为 `27:74`，同页 sibling sets `27:75` / `27:76` / `27:77` 覆盖 outline/ghost/text；共 108 variants，Light `450:75`、Dark `450:99`、QA `450:123`。可见 fills 195/195、strokes 105/105、radii 122/122 全绑定，最小高度 44px，未命名节点 0。
 - SSR/hydration: Next 16 隔离消费者完成 production SSR/hydration；hydration 后 Button 可切换主题并提交表单，且全程无 `pageerror` / `console.error`
 - RTL: 已改用 flex gap，待浏览器视觉证明
@@ -143,7 +147,7 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 ### 待优化
 
 - 继续验证各 size 的字号放大、RTL 视觉细节和真机触控反馈。
-- 明确 loading 的读屏策略、宽度稳定性和异步错误恢复示例。
+- 在最终目标 WebView/真机矩阵复验 loading 宽度、快速连点、失败恢复和卸载取消。
 - 评估是否需要 `loadingText`，没有真实场景证据前不新增 API。
 
 ### 已完成
@@ -151,11 +155,13 @@ ref 指向 `HTMLButtonElement`，只提供原生 `focus()`、`click()` 等能力
 - V1 已采用原生 button、默认安全 type、loading 禁用与 ref 转发。
 - V2 已补 Props TSDoc、兼容旧 WebView 的焦点环、逻辑间距与 reduced-motion 静态 loading。
 - V2 已补装饰图标命名边界、长文案换行、移动 tap 优化、forced-colors 边框与 hydration 回归。
+- loading 改为保留完整内容布局与 accessible name 的 overlay spinner；新增失败、重试、重复激活和卸载竞态本地场景。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                       |
-| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | ------------------------------ |
-| 2026-08-29 | 未发布 | hardening    | 补齐图标命名、移动触控、强制色彩、长文案与 hydration 契约                    | 无；图标槽原本已定义为装饰内容 |
-| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的按钮激活、提交、hydration 与触控目标证据 | 无                             |
-| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                                         | 无                             |
+| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                                             |
+| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening    | 补齐图标命名、移动触控、强制色彩、长文案与 hydration 契约                    | 无；图标槽原本已定义为装饰内容                       |
+| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的按钮激活、提交、hydration 与触控目标证据 | 无                                                   |
+| 2026-08-28 | 0.1.0  | docs         | 建立 V2 留存文档基线                                                         | 无                                                   |
+| 2026-08-30 | 未发布 | hardening    | loading overlay 保持宽度；补重复激活、失败重试与卸载竞态本地生命周期         | 若快照依赖 loading 时图标被移除需更新；公开 API 不变 |

@@ -4,6 +4,8 @@ slug: number-keyboard
 package: "@meu/mobile"
 exports: [NumberKeyboard, NumberKeyboardTrigger]
 status: verification
+localVerification: pending
+localGapIds: [LOC-NUMBER-KEYBOARD-01]
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -139,7 +141,7 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 - Story interaction: `Numeric.play` 验证输入、删除、关闭、外置值和焦点；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 6376 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 5604 B / 32768 B 预算，组合 Brotli 5598 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 6424 B / 32768 B 预算；最大单值 `NumberKeyboard` 为 5604 B / 32768 B 预算，组合 Brotli 5635 B；共享样式由应用单独导入一次。
 - SSR/hydration: `NumberKeyboard.hydration.test.tsx` 使用真实 `hydrateRoot` 覆盖 initial-open Portal 移动、Provider 边界、输入事件与 0 hydration error
 - RTL: `RtlReducedMotion` Story 与 Unit 覆盖 Portal `dir`、逻辑关闭按钮和稳定数字顺序；最终视觉审批留到冻结候选
 - Reduced motion: ConfigProvider 显式策略会进入 Portal boundary；Story play 断言 panel computed transition 为 0s
@@ -164,10 +166,11 @@ closed 状态服务端不输出 Portal 内容；客户端打开。initial-open �
 
 ## 变更记录
 
-| 日期       | 版本   | 类型     | 内容                                                    | 迁移说明                                                    |
-| ---------- | ------ | -------- | ------------------------------------------------------- | ----------------------------------------------------------- |
-| 2026-08-28 | 未发布 | behavior | Trigger 合并 Field 语义并移除无效 required              | 不再向 Trigger 传 `aria-required`；在 Field 上声明 required |
-| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                                    | 无                                                          |
-| 2026-08-29 | 未发布 | behavior | Escape 仅由最后开放的顶层实例响应                       | 无                                                          |
-| 2026-08-29 | 未发布 | a11y     | Trigger 保留原生 invalid token，错误上下文优先输出 true | 无                                                          |
-| 2026-08-29 | 未发布 | behavior | Portal 配置边界、关闭期隔离、连删取消与 hydration 加固  | 空白 confirmLabel 现在与 null 一样不渲染；其他用法无需迁移  |
+| 日期       | 版本   | 类型     | 内容                                                         | 迁移说明                                                    |
+| ---------- | ------ | -------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| 2026-08-28 | 未发布 | behavior | Trigger 合并 Field 语义并移除无效 required                   | 不再向 Trigger 传 `aria-required`；在 Field 上声明 required |
+| 2026-08-28 | 0.1.0  | docs     | 建立 V2 留存文档基线                                         | 无                                                          |
+| 2026-08-29 | 未发布 | behavior | Escape 仅由最后开放的顶层实例响应                            | 无                                                          |
+| 2026-08-29 | 未发布 | a11y     | Trigger 保留原生 invalid token，错误上下文优先输出 true      | 无                                                          |
+| 2026-08-29 | 未发布 | behavior | Portal 配置边界、关闭期隔离、连删取消与 hydration 加固       | 空白 confirmLabel 现在与 null 一样不渲染；其他用法无需迁移  |
+| 2026-08-30 | 未发布 | a11y     | Trigger caller/Field labelledby 合并去重并固定显式名称优先级 | 无                                                          |

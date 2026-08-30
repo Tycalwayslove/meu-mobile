@@ -12,6 +12,7 @@ import {
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 
 import { useMeuConfig } from "../ConfigProvider";
+import { getConfigBoundaryProps } from "../internal/configBoundary";
 import { VisuallyHidden } from "../internal/VisuallyHidden";
 import { body, handle, panel } from "./FloatingPanel.css";
 import type {
@@ -498,25 +499,23 @@ export function FloatingPanel({
     "--meu-floating-panel-translate": `${translate}px`,
     height: maximumHeight > 0 ? `${maximumHeight}px` : "50vh"
   } as FloatingPanelStyle;
+  const configBoundary = getConfigBoundaryProps(config);
 
   return (
     <div
       {...props}
+      {...configBoundary}
       ref={rootRef}
-      className={
-        className
-          ? `${panel({ placement, safeArea })} ${className}`
-          : panel({ placement, safeArea })
-      }
+      className={[panel({ placement, safeArea }), configBoundary.className, className]
+        .filter(Boolean)
+        .join(" ")}
       style={panelStyle}
-      lang={config.locale}
       data-anchor-index={activeIndex}
       data-current-height={Math.round(activeHeight * 1000) / 1000}
       data-disabled={disabled ? "true" : undefined}
       data-dragging={effectiveDragging ? "true" : undefined}
       data-immediate={immediate ? "true" : undefined}
       data-meu-component="floating-panel"
-      data-meu-theme={config.theme}
       data-measured={availableHeight > 0 ? "true" : "false"}
       data-placement={placement}
     >

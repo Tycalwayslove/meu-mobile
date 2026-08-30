@@ -142,9 +142,12 @@ describe("Field", () => {
 
   it("lets an explicit accessible name take precedence over the visible ARIA label", () => {
     render(
-      <Field label="订单操作">
-        <CompositeControl aria-label="批量订单操作" />
-      </Field>
+      <>
+        <span id="legacy-operation-label">旧操作名称</span>
+        <Field label="订单操作">
+          <CompositeControl aria-label="批量订单操作" aria-labelledby="legacy-operation-label" />
+        </Field>
+      </>
     );
 
     const control = screen.getByRole("group", { name: "批量订单操作" });

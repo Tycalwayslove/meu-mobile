@@ -2618,6 +2618,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ActionMenu/ActionMenu.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-ACTION-MENU-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -2694,6 +2698,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Avatar/Avatar.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-AVATAR-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -2738,6 +2746,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Badge/Badge.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-BADGE-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -2774,6 +2786,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/BottomSheet/BottomSheet.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-BOTTOM-SHEET-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -2826,6 +2842,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Button/Button.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -2878,6 +2896,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Calendar/Calendar.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-CALENDAR-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -2998,6 +3020,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Card/Card.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-CARD-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3038,6 +3064,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Carousel/Carousel.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-CAROUSEL-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3082,6 +3112,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/CascadePicker/CascadePicker.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-CASCADE-PICKER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3123,6 +3157,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/List/Cell.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-CELL-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3160,6 +3198,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Checkbox/Checkbox.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -3212,6 +3252,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Collapse/Collapse.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-COLLAPSE-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3269,6 +3313,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ConfigProvider/ConfigProvider.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-CONFIG-PROVIDER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3318,6 +3366,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/DatePicker/DatePicker.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-DATE-PICKER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "type",
@@ -3389,6 +3441,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/DateRangePicker/DateRangePicker.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-DATE-RANGE-PICKER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3459,6 +3515,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Dialog/Dialog.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-DIALOG-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3539,6 +3599,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Divider/Divider.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-DIVIDER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3571,6 +3635,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Ellipsis/Ellipsis.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-ELLIPSIS-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3607,6 +3675,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Empty/Empty.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-EMPTY-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3639,6 +3711,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Field/Field.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-FIELD-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3675,6 +3751,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/FloatingPanel/FloatingPanel.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-FLOATING-PANEL-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -3753,6 +3833,8 @@
       "docsIssues": [],
       "docsPath": "packages/form-react/src/MeuForm.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "type",
@@ -4078,6 +4160,10 @@
       "docsIssues": [],
       "docsPath": "packages/icons-react/src/MeuIcon.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-ICON-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4130,6 +4216,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/IconButton/IconButton.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-ICON-BUTTON-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4174,6 +4264,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Image/Image.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-IMAGE-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4226,6 +4320,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ImageUploader/ImageUploader.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-IMAGE-UPLOADER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4298,6 +4396,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ImageViewer/ImageViewer.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-IMAGE-VIEWER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4366,6 +4468,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/IndexList/IndexList.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-INDEX-LIST-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4418,6 +4524,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/InfiniteList/InfiniteList.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-INFINITE-LIST-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4468,6 +4578,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/List/List.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-LIST-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4508,6 +4622,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Mask/Mask.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-MASK-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4544,6 +4662,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/NavBar/NavBar.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-NAV-BAR-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4581,6 +4703,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/NumberKeyboard/NumberKeyboard.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-NUMBER-KEYBOARD-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4653,6 +4779,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PaginationDots/PaginationDots.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-PAGINATION-DOTS-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4693,6 +4823,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PasscodeInput/PasscodeInput.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-PASSCODE-INPUT-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4750,6 +4884,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Picker/Picker.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-PICKER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4822,6 +4960,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Popover/Popover.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-POPOVER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -4877,6 +5019,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Popup/Popup.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-POPUP-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "type",
@@ -4931,6 +5077,10 @@
       "docsIssues": [],
       "docsPath": "packages/primitives-react/src/Portal.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-PORTAL-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "type",
@@ -4979,6 +5129,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Progress/Progress.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-PROGRESS-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5019,6 +5173,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/PullToRefresh/PullToRefresh.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-PULL-TO-REFRESH-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5068,6 +5226,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Radio/Radio.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5120,6 +5280,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Rate/Rate.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-RATE-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5160,6 +5324,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Result/Result.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-RESULT-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5196,6 +5364,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SafeArea/SafeArea.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SAFE-AREA-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5228,6 +5400,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SearchField/SearchField.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5288,6 +5462,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SegmentedControl/SegmentedControl.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SEGMENTED-CONTROL-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5356,6 +5534,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Selector/Selector.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SELECTOR-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5408,6 +5590,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SideNav/SideNav.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SIDE-NAV-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5452,6 +5638,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Skeleton/Skeleton.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SKELETON-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5488,6 +5678,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Slider/Slider.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SLIDER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5532,6 +5726,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Space/Space.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SPACE-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5568,6 +5766,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Stepper/Stepper.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-STEPPER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5608,6 +5810,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Steps/Steps.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-STEPS-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "type",
@@ -5660,6 +5866,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/SwipeActions/SwipeActions.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-SWIPE-ACTIONS-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5716,6 +5926,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Switch/Switch.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5756,6 +5968,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TabBar/TabBar.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-TAB-BAR-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5792,6 +6008,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Tabs/Tabs.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-TABS-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5832,6 +6052,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Tag/Tag.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-TAG-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5880,6 +6104,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TextArea/TextArea.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5924,6 +6150,8 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TextInput/TextInput.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [],
+      "localVerification": "complete",
       "publicExports": [
         {
           "kind": "value",
@@ -5959,6 +6187,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/ConfigProvider/ThemeProvider.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-THEME-PROVIDER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -5991,6 +6223,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TimePicker/TimePicker.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-TIME-PICKER-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -6089,6 +6325,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Toast/Toast.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-TOAST-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -6173,6 +6413,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/TreeSelect/TreeSelect.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-TREE-SELECT-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -6249,6 +6493,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/VirtualList/VirtualList.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-VIRTUAL-LIST-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -6305,6 +6553,10 @@
       "docsIssues": [],
       "docsPath": "packages/primitives-react/src/VisuallyHidden.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-VISUALLY-HIDDEN-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -6337,6 +6589,10 @@
       "docsIssues": [],
       "docsPath": "packages/mobile/src/Watermark/Watermark.docs.mdx",
       "hasDocs": true,
+      "localGapIds": [
+        "LOC-WATERMARK-01"
+      ],
+      "localVerification": "pending",
       "publicExports": [
         {
           "kind": "value",
@@ -6357,8 +6613,10 @@
   "summary": {
     "documentedProducts": 68,
     "externalWildcardExports": 0,
+    "locallyVerifiedProducts": 8,
     "packages": 4,
     "products": 68,
+    "productsWithLocalGaps": 60,
     "productsWithoutPublicExports": 0,
     "publicExports": 509,
     "publicTypes": 384,

@@ -4,6 +4,8 @@ slug: skeleton
 package: "@meu/mobile"
 exports: [Skeleton]
 status: verification
+localVerification: pending
+localGapIds: [LOC-SKELETON-01]
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -123,7 +125,7 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2042 B / 32768 B 预算，组合 Brotli 1817 B；共享样式由应用单独导入一次。
-- SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后两种组合占位保持装饰性隐藏且无 hydration/runtime error。
+- SSR/hydration: Node SSR 1 项；隔离 Next 16 hydration 后两种组合占位保持装饰性隐藏且无 hydration/runtime error。独立 `layout-contract.spec.ts` 还在替换前后读取真实 bounding box，验证 300×180 rectangle 与最终媒体内容的 x/y/width/height 一致；支持 Layout Shift API 的引擎同时要求非输入 CLS 为 0。
 - RTL: 结构无方向依赖；未做 E2E。
 - Reduced motion: 系统媒体查询与 ConfigProvider 分支均存在；隔离 Next H5 在 Chromium/WebKit 中验证显式 reduced 配置的伪元素 animation-name=none。
 - Mobile Chromium/WebKit E2E: 反馈场景在两种引擎断言命名 loading boundary、`aria-busy=true`、rectangle/lines 两个 Skeleton 及各自 `aria-hidden=true`。
@@ -134,7 +136,7 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 
 ### 待优化
 
-- 验证 CLS 指标、浏览器媒体查询、Chromatic 和旧 WebView 回退；基础组合/隐藏双引擎路径已完成。
+- 补浏览器媒体查询、Chromatic 和旧 WebView 回退；固定几何替换与支持 Layout Shift API 引擎的 CLS 自动化已完成。
 
 ### 已完成
 
@@ -142,6 +144,7 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 - 新增 `aspectRatio` 和 SSR 证据。
 - 在隔离 Next H5 中补 loading boundary、组合占位与 hydration 双引擎证据。
 - 补齐 ConfigProvider 低动态分支并拒绝无效数值比例，避免无限 shimmer 与非法 CSS。
+- 增加独立浏览器 Skeleton → 真实内容等几何替换与非输入 CLS 自动化证据。
 
 ## 变更记录
 
@@ -150,3 +153,4 @@ Skeleton 始终从无障碍树隐藏。调用方在稳定容器上设置 `aria-b
 | 2026-08-29 | 未发布 | 兼容增强     | 新增 `aspectRatio`，完善 CLS、组合与无障碍边界     | 旧调用无需迁移 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎组合/aria-hidden/hydration 证据 | 无             |
 | 2026-08-29 | 未发布 | hardening    | 同步 Provider 低动态并归一非法数值比例             | API 兼容       |
+| 2026-08-30 | 未发布 | verification | 增加 300×180 等几何替换与非输入 CLS 浏览器证据     | 无             |

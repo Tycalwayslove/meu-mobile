@@ -118,7 +118,7 @@ export const Stepper = forwardRef<HTMLInputElement, StepperProps>(function Stepp
   );
   const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
   const labelledBy = hasExplicitAriaLabel
-    ? ariaLabelledBy
+    ? undefined
     : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||

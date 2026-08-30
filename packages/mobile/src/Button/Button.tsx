@@ -2,7 +2,7 @@
 
 import { forwardRef } from "react";
 
-import { button, buttonItem, spinner } from "./Button.css";
+import { button, buttonContent, buttonItem, spinner } from "./Button.css";
 import type { ButtonProps } from "./types";
 
 /**
@@ -42,19 +42,24 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-tone={tone}
       data-state={loading ? "loading" : disabled ? "disabled" : "default"}
     >
-      {loading ? (
-        <span className={`${buttonItem} ${spinner}`} aria-hidden="true" />
-      ) : leadingIcon ? (
-        <span className={buttonItem} aria-hidden="true">
-          {leadingIcon}
-        </span>
-      ) : null}
-      <span className={buttonItem}>{children}</span>
-      {loading || !trailingIcon ? null : (
-        <span className={buttonItem} aria-hidden="true">
-          {trailingIcon}
-        </span>
-      )}
+      <span
+        className={buttonContent({ loading })}
+        data-meu-slot="content"
+        data-loading={loading || undefined}
+      >
+        {leadingIcon ? (
+          <span className={buttonItem} aria-hidden="true">
+            {leadingIcon}
+          </span>
+        ) : null}
+        <span className={buttonItem}>{children}</span>
+        {trailingIcon ? (
+          <span className={buttonItem} aria-hidden="true">
+            {trailingIcon}
+          </span>
+        ) : null}
+      </span>
+      {loading ? <span className={spinner} data-meu-slot="spinner" aria-hidden="true" /> : null}
     </button>
   );
 });

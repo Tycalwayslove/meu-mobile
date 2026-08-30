@@ -4,6 +4,8 @@ slug: config-provider
 package: "@meu/mobile"
 exports: [ConfigProvider, useMeuConfig]
 status: verification
+localVerification: pending
+localGapIds: [LOC-CONFIG-PROVIDER-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -182,7 +184,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 769 B / 32768 B 预算；最大单值 `ConfigProvider` 为 720 B / 32768 B 预算，组合 Brotli 668 B；共享样式由应用单独导入一次。
 - SSR/hydration: `ConfigProvider.ssr.test.tsx` 与 `ConfigProvider.test.tsx` 覆盖无浏览器全局 SSR、惰性 Portal 和 system hydration 无 recoverable error。
 - RTL: 单元测试和 `NestedConfiguration` Story 覆盖 Context/DOM 方向；全组件视觉镜像待逐批验证。
-- Reduced motion: 单元测试覆盖嵌套策略，CSS media/reduced class 已实现；真实浏览器 computed style 待 E2E。
+- Reduced motion: 单元测试覆盖嵌套策略；Next H5 双引擎验证 system media query 与显式 reduced class 的 computed duration。FloatingPanel 专项同时证明带自身 theme 属性的非 Portal 固定层也必须复制 motion boundary，进入时长为 0ms。
 - Mobile Chromium/WebKit E2E: Next production consumer 已在双引擎直接验证 Provider 初始 `theme="light"` 边界、受控切换为 `dark`、两种固定主题下全页 axe WCAG A/AA 0 违规；独立 `theme="system"` / `motion="system"` 边界会随模拟系统 Light/Dark 切换 ink/canvas Token，并在 `prefers-reduced-motion: reduce` 下把 enter duration 从 180ms 解析为 0ms。隔离的 `overlay-lifecycle.spec.ts` 进一步覆盖嵌套 ConfigProvider/ThemeProvider 下 Popup Portal 的 locale、dir、theme、motion、颜色与时长 Token 及 `color-scheme`；所有路径 hydration 后保持 0 `pageerror` / `console.error`。
 - Chromatic Light/Dark: Story 可生成快照；基线接受状态由 Chromatic 构建记录决定。
 - Real device: 待补 Android WebView 与 iOS Safari。
@@ -208,6 +210,7 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 - 为公开类型、Props、函数和 ThemeProvider alias 补充 TSDoc/release tag；新增 Context 字段在公开类型中保持 optional，以兼容已有 `MeuConfig` 对象字面量，运行时始终解析为具体值。
 - Next H5 production consumer 已在 Chromium/WebKit 验证固定 light/dark 受控切换、system 主题/动效媒体查询、实际 Token 计算值、全页无障碍与无运行时错误；该证据不替代真机验收。
 - 新增隔离 Next H5 嵌套 Provider → Popup Portal 生命周期矩阵，并让统一 Portal boundary 保留主题 `color-scheme` class。
+- FloatingPanel 根复用统一配置边界，补齐非 Portal 固定层的显式 reduced-motion Token 传播。
 
 ## 变更记录
 
@@ -220,3 +223,4 @@ Provider 自身没有视觉动画。它控制两个稳定时长 Token：`--meu-m
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎固定/system 主题、motion、computed Token、axe 与 hydration 证据 | 无                                         |
 | 2026-08-29 | 未发布 | hardening    | 增加原生控件 `color-scheme` 与 React 19 DOM ref                                    | API 仅新增可选 ref，无迁移                 |
 | 2026-08-30 | 未发布 | hardening    | Portal 配置边界同步主题 class，并增加嵌套 Provider 浏览器生命周期矩阵              | 无                                         |
+| 2026-08-30 | 未发布 | bugfix       | FloatingPanel 同步完整 theme/motion boundary，避免主题属性重置 reduced Token       | 无                                         |

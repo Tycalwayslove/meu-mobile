@@ -4,6 +4,8 @@ slug: pull-to-refresh
 package: "@meu/mobile"
 exports: [PullToRefresh]
 status: verification
+localVerification: pending
+localGapIds: [LOC-PULL-TO-REFRESH-01]
 priority: P1
 since: 0.1.0
 implementedVersion: null
@@ -121,7 +123,7 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 2819 B / 32768 B 预算，组合 Brotli 2438 B；共享样式由应用单独导入一次。
-- SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；Next production consumer 的真实 hydration 路径在 Chromium/WebKit 刷新场景中保持 0 `pageerror` / `console.error`，独立最小化 hydration 专测仍待补。
+- SSR/hydration: `PullToRefresh.ssr.test.tsx` 覆盖 idle markup；独立 `PullToRefresh.hydration.test.tsx` 使用真实 `hydrateRoot` 证明服务端 idle 根节点复用、content id/`aria-controls` 稳定、en-US action 保留、0 recoverable error，且 hydration 后键盘 action 能进入 refreshing/busy。隔离 `layout-contract.spec.ts` 提供对应移动浏览器路径。
 - RTL: 纵向手势不适用；文案/排版待矩阵。
 - Reduced motion: CSS 契约已实现，浏览器断言待补。
 - Mobile Chromium/WebKit E2E: Next production consumer 在双引擎使用真实可滚动 DOM 祖先（并断言 `scrollHeight > clientHeight`）与合成 Touch Events：`scrollTop > 0` 时向下手势不被阻止且不刷新；顶部横向意图不被阻止；4px 内横向/反向落指抖动后仍可锁定纵向；顶部纵向越过阈值会 `preventDefault` 并刷新；可控 pending 请求期间第二次 pull 被忽略且请求开始次数保持 1；`touchcancel` 复位距离且不刷新。原生替代按钮在请求中禁用，完成后经焦点 + Enter 触发下一次刷新并进入 `aria-busy=true`。这些是跨引擎可重复的 synthetic event 证据，不代表 trusted 真机触摸、iOS rubber-band 或 60 秒持续手势结果。
@@ -132,13 +134,14 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 
 ### 待优化
 
-- 补独立最小化 hydration 专测，以及 trusted 触摸/滚动自动化可用时的浏览器路径。
+- 补 trusted 触摸/滚动自动化可用时的浏览器路径。
 - 验证目标 iOS WKWebView 的 overscroll/rubber-band 和 60 秒持续手势。
 
 ### 已完成
 
 - 固化 root/外层滚动边界、4px slop 后方向锁、异常参数、请求锁、失败/取消/卸载清理、原生替代、live/busy、reduced-motion 与 SSR。
 - 增加 Next H5 双引擎真实可滚动祖先、顶部边界、落指抖动、横向 handoff、纵向阻止默认、可控 pending 请求锁、touchcancel、键盘替代、busy 与刷新计数证据；事件输入仍为 synthetic，rubber-band 不在该证据范围内。
+- 增加独立真实 hydrateRoot 与最小 Next H5 页面，固定 idle 根复用、ID/控制关系和 hydration 后刷新状态契约。
 
 ## 变更记录
 
@@ -147,3 +150,4 @@ indicator/content 仅 transform；拖动期间过渡 0ms，复位使用 motion t
 | 2026-08-29 | 0.1.0  | hardening    | 完成触摸仲裁、请求状态、键盘替代与兼容事实源                                     | 无破坏性变更 |
 | 2026-08-29 | 未发布 | verification | 增加 Next H5 双引擎滚动竞争、方向仲裁、请求锁、cancel、键盘替代与 hydration 证据 | 无           |
 | 2026-08-29 | 未发布 | bugfix       | 方向判定移到 4px slop 之后，并支持 root 自身作为滚动边界                         | 无破坏性变更 |
+| 2026-08-30 | 未发布 | verification | 增加独立根节点复用、ID 稳定和 hydration 后 keyboard refresh 证据                 | 无           |

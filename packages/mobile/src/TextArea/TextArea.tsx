@@ -91,6 +91,8 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     autoSize = false,
     className,
     defaultValue,
@@ -101,6 +103,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     maxLength,
     onChange,
     readOnly = false,
+    required = false,
     rows,
     showCount = false,
     size = "medium",
@@ -129,6 +132,10 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
     fieldDescribedBy,
     showCount ? countId : undefined
   );
+  const labelledBy = ariaLabel
+    ? undefined
+    : mergeDescriptionIds(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
+  const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -298,11 +305,14 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
         maxLength={maxLength}
         onChange={handleChange}
         readOnly={readOnly}
+        required={resolvedRequired}
         rows={rows || minRows || 3}
         style={style}
         value={controlled ? value : undefined}
         aria-describedby={describedBy}
         aria-invalid={resolvedAriaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         data-auto-size={autoSize ? "true" : "false"}
         data-meu-component="text-area"
         data-size={size}

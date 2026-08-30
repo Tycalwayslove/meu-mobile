@@ -79,6 +79,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
     onPointerDown,
     onPointerUp,
     readOnly = false,
+    required = false,
     showValue = false,
     size = "medium",
     status = "default",
@@ -117,8 +118,9 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
   );
   const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
   const labelledBy = hasExplicitAriaLabel
-    ? ariaLabelledBy
+    ? undefined
     : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
+  const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -311,6 +313,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
             step={safeStep}
             value={currentValue}
             disabled={disabled}
+            required={resolvedRequired}
             dir={dir}
             onChange={handleChange}
             onBlur={handleBlur}

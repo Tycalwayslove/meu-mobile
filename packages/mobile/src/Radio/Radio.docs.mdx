@@ -4,10 +4,12 @@ slug: radio-group
 package: "@meu/mobile"
 exports: [Radio, RadioGroup]
 status: verification
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "50:263"
@@ -17,6 +19,7 @@ storyIds:
     forms-radio--checked,
     forms-radio--read-only,
     forms-radio--native-form-contract,
+    forms-radio--read-only-keyboard-rollback,
     forms-radio--rtl
   ]
 source: packages/mobile/src/Radio
@@ -33,6 +36,7 @@ source: packages/mobile/src/Radio
 - Field label/description/error/required 与调用方 IDREF 无损组合。
 - 没有 Field/status 错误时，`aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`。Group 错误只在语义根输出，子 Radio 继承错误视觉。
 - 选择目标至少 44×44，并使用移动 tap 优化；RTL 使用自然文档流；forced-colors（含 disabled GrayText）和 reduced-motion 有静态降级。
+- readOnly 拒绝 click/Space/方向键选择后会同步恢复同名原生 radio 的完整 checked 集合，而不只恢复事件目标，避免旧选项被浏览器方向键先取消后残留错误 DOM/FormData。
 
 状态为 `verification`；Unit/SSR/Story contract、本地 axe 与 Next H5 移动 Chromium/WebKit 的基础选择路径已建立，Chromatic 主题最终审批和真机读屏尚未达到发布证据线。
 
@@ -74,7 +78,7 @@ Radio DOM 为 input → indicator → label。根暴露 `data-meu-component="rad
 - Group 的所有 Radio 共享调用方 name；省略 name 时使用 React useId 生成同一 SSR/hydration 树内稳定的名称。
 - 选中项以 `name=value` 进入 FormData；disabled 原生排除。
 - required 同时位于 radiogroup (`aria-required`) 与原生 radio name group，触发浏览器 constraint validation。
-- readOnly 保持当前值可聚焦、可提交并阻断选择。radiogroup 使用 `aria-readonly`；HTML radio 没有 native readonly，组内子项由组传达，standalone 以 `aria-disabled` 表达不可修改并通过事件回滚保证值不变。
+- readOnly 保持当前值可聚焦、可提交并阻断选择。radiogroup 使用 `aria-readonly`；HTML radio 没有 native readonly，组内子项由组传达，standalone 以 `aria-disabled` 表达不可修改。事件回滚会通知同一 form/name 的全部 Meu Radio，各自按 React 事实源恢复 checked。
 - 官方 `MeuFormRadioGroup` 以 RHF 标量值为受控事实源，并合并 RHF invalid 与调用方显式 `status="error"`；任一来源判错都保留错误呈现。
 
 ## Props
@@ -147,13 +151,13 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 
 ## 测试证据
 
-- Unit: `Radio.test.tsx` 覆盖单项、同名 standalone 原生互斥、受控同伴、controlled empty、ARIA invalid token、disabled/readOnly、Field、required、FormData 与 reset
+- Unit: `Radio.test.tsx` 覆盖单项、同名 standalone 原生互斥、受控同伴、controlled empty、ARIA invalid token、disabled/readOnly、Field、required、FormData 与 reset；`Radio.lifecycle.test.tsx` 覆盖 readOnly 方向键式整组回滚、native required invalid/FormData 和 disabled 验证/提交排除
 - SSR: `Radio.ssr.test.tsx` 覆盖 generated name、radiogroup、required、checked 和 group ARIA invalid token markup
 - Hydration: `Radio.hydration.test.tsx` 覆盖 useId name 稳定、节点复用、hydration 后选择与零 recoverable error
-- Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`check-storybook-links` 本地验证 play-fn 为 81/81（按 Storybook title 计）
+- Story interaction: `NativeFormContract.play` 覆盖原生提交、选择与 reset；`ReadOnlyKeyboardRollback` 模拟浏览器方向键先改变 native name group 后的完整恢复；本批 `Forms/Radio` 11/11 stories × Light/Dark 共 22/22 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 4191 B / 32768 B 预算；最大单值 `Radio` 为 3580 B / 32768 B 预算，组合 Brotli 3732 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）2 个公开值组合 gzip 4343 B / 32768 B 预算；最大单值 `Radio` 为 3750 B / 32768 B 预算，组合 Brotli 3856 B；共享样式由应用单独导入一次。
 - Figma：canonical Medium set `50:263`，Small `50:224`、Large `50:302`；24 variants。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；Checkbox/Radio/Switch 合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: CSS `minWidth/minHeight: 44`
 - RTL/reduced-motion/forced-colors：实现和 Story 已建，浏览器视觉证据待补
@@ -165,7 +169,7 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 ### 待优化
 
 - 完成 200% 字号、强制色彩、Chromatic 最终视觉审批与真机读屏验收。
-- 验证各目标 WebView 对只读方向键回滚和原生 validation bubble 的一致性。
+- 在最终目标 WebView/真机矩阵复验只读方向键回滚和原生 validation bubble 的一致性。
 
 ### 已完成
 
@@ -173,11 +177,14 @@ render 不读取浏览器全局。useId 生成的 name 在相同服务端/客户
 - 增加 controlled empty、readOnly、FormData 和原生 reset 契约。
 - 补齐 44×44、WebView 兼容焦点环、RTL、forced-colors、reduced-motion、SSR 与 Story contract。
 - 修复 standalone 同名原生互斥后的旧视觉状态，并补跨 document reset、移动 tap、disabled 强制色彩与 hydration 回归。
+- readOnly 回滚改为通知同 form/name 的完整 Meu Radio 集合，并补 required validation/FormData 生命周期测试和 Story。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                                           | 迁移说明                                      |
-| ---------- | ------ | ------------ | ------------------------------------------------------------------------------ | --------------------------------------------- |
-| 2026-08-29 | 未发布 | hardening    | 同步 standalone 同名互斥状态；补移动 tap、跨 document reset 与 hydration       | 无；关联选项仍推荐使用 RadioGroup             |
-| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的方向键选择、表单值、hydration 与 44px 证据 | 无                                            |
-| 2026-08-28 | 未发布 | behavior     | required/invalid、reset、readOnly 与兼容性细节完善                             | 无破坏；只读场景可用 `readOnly` 替代 disabled |
+| 日期       | 版本   | 类型          | 内容                                                                           | 迁移说明                                      |
+| ---------- | ------ | ------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| 2026-08-29 | 未发布 | hardening     | 同步 standalone 同名互斥状态；补移动 tap、跨 document reset 与 hydration       | 无；关联选项仍推荐使用 RadioGroup             |
+| 2026-08-29 | 未发布 | verification  | 记录 Next H5 移动 Chromium/WebKit 的方向键选择、表单值、hydration 与 44px 证据 | 无                                            |
+| 2026-08-28 | 未发布 | behavior      | required/invalid、reset、readOnly 与兼容性细节完善                             | 无破坏；只读场景可用 `readOnly` 替代 disabled |
+| 2026-08-30 | 未发布 | accessibility | standalone caller/Field labelledby 合并并固定显式名称优先级                    | 无                                            |
+| 2026-08-30 | 未发布 | hardening     | 修复 readOnly 方向键式原生互斥只恢复目标项；补 validation/FormData 生命周期    | 无公开 API 变化                               |

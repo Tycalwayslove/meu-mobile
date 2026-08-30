@@ -32,8 +32,12 @@ export function NumberKeyboardTrigger({
       .flatMap((item) => (item ? item.trim().split(/\s+/) : []))
       .filter((item, index, items) => items.indexOf(item) === index)
       .join(" ") || undefined;
-  const labelledBy =
-    ariaLabelledBy || (!ariaLabel && fieldContext ? fieldContext.labelId : undefined);
+  const labelledBy = ariaLabel
+    ? undefined
+    : [ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined]
+        .flatMap((value) => (value ? value.trim().split(/\s+/) : []))
+        .filter((value, index, values) => values.indexOf(value) === index)
+        .join(" ") || undefined;
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||

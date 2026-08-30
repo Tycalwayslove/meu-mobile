@@ -44,10 +44,20 @@ console.log(
     `${manifest.summary.publicValues} public values`,
     `${manifest.summary.publicTypes} public types`,
     `${manifest.summary.documentedProducts} colocated docs`,
+    `${manifest.summary.locallyVerifiedProducts}/${manifest.summary.products} locally verified`,
+    `${manifest.summary.productsWithLocalGaps} products with local gaps`,
     `${manifest.summary.unclaimedPublicValues} unclaimed public values`,
     `${issues.length} coverage issues`
   ].join(" · ")
 );
+
+if (report && manifest.summary.productsWithLocalGaps > 0) {
+  console.log("Local verification gaps:");
+  for (const product of manifest.products) {
+    if (product.localVerification !== "pending") continue;
+    console.log(`- ${product.slug}: ${product.localGapIds.join(", ")}`);
+  }
+}
 
 if (report && issues.length > 0) {
   console.log("Coverage report:");

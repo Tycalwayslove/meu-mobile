@@ -71,6 +71,8 @@ type ProductManifest = ProductComponent & {
   docsIssues: string[];
   docsPath: string;
   hasDocs: boolean;
+  localGapIds: string[];
+  localVerification: "complete" | "pending" | null;
   publicExports: Array<Pick<PublicExport, "kind" | "name">>;
 };
 
@@ -81,8 +83,10 @@ export type ComponentManifest = {
   summary: {
     documentedProducts: number;
     externalWildcardExports: number;
+    locallyVerifiedProducts: number;
     packages: number;
     products: number;
+    productsWithLocalGaps: number;
     productsWithoutPublicExports: number;
     publicExports: number;
     publicTypes: number;
@@ -330,6 +334,8 @@ function productOwnsExport(component: ProductComponent, publicExport: PublicExpo
 type ParsedDocs = {
   declaredExports: string[];
   issues: string[];
+  localGapIds: string[];
+  localVerification: "complete" | "pending" | null;
 };
 
 function parseInlineList(value: string) {
@@ -362,7 +368,12 @@ export function parseComponentDocs(
   const issues: string[] = [];
   const frontmatterMatch = sourceText.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
   if (!frontmatterMatch) {
-    return { declaredExports: [], issues: ["missing YAML frontmatter"] };
+    return {
+      declaredExports: [],
+      issues: ["missing YAML frontmatter"],
+      localGapIds: [],
+      localVerification: null
+    };
   }
 
   const frontmatter = new Map<string, string>();
@@ -393,6 +404,8 @@ export function parseComponentDocs(
     "package",
     "exports",
     "status",
+    "localVerification",
+    "localGapIds",
     "priority",
     "since",
     "lastReviewed",
@@ -427,6 +440,40 @@ export function parseComponentDocs(
       issues.push(`frontmatter exports contains non-public value: ${item}`);
   }
 
+  const rawLocalVerification = frontmatter.get("localVerification");
+  const localVerification =
+    rawLocalVerification === "complete" || rawLocalVerification === "pending"
+      ? rawLocalVerification
+      : null;
+  if (rawLocalVerification && !localVerification) {
+    issues.push(
+      `frontmatter localVerification is ${rawLocalVerification}; expected pending or complete`
+    );
+  }
+  const localGapIds = parseInlineList(frontmatter.get("localGapIds") || "");
+  const expectedGapPrefix = `LOC-${expected.slug.toUpperCase()}-`;
+  for (const id of localGapIds) {
+    if (!/^LOC-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d{2}$/.test(id)) {
+      issues.push(`frontmatter localGapIds contains invalid id: ${id}`);
+    } else if (!id.startsWith(expectedGapPrefix)) {
+      issues.push(
+        `frontmatter localGapIds contains id for another component: ${id}; expected prefix ${expectedGapPrefix}`
+      );
+    }
+  }
+  if (new Set(localGapIds).size !== localGapIds.length) {
+    issues.push("frontmatter localGapIds must not contain duplicates");
+  }
+  if (localVerification === "pending" && localGapIds.length === 0) {
+    issues.push("frontmatter localVerification pending requires at least one localGapIds entry");
+  }
+  if (localVerification === "complete" && localGapIds.length > 0) {
+    issues.push("frontmatter localVerification complete requires an empty localGapIds list");
+  }
+  if (frontmatter.get("status") === "commercial" && localVerification !== "complete") {
+    issues.push("frontmatter status commercial requires localVerification complete");
+  }
+
   const sections = collectH2Sections(sourceText);
   for (const section of requiredDocsSections) {
     const body = sections.get(section);
@@ -453,7 +500,7 @@ export function parseComponentDocs(
     }
   }
 
-  return { declaredExports, issues };
+  return { declaredExports, issues, localGapIds, localVerification };
 }
 
 export function buildComponentManifest(
@@ -477,13 +524,20 @@ export function buildComponentManifest(
       const hasDocs = existsSync(absoluteDocsPath) && statSync(absoluteDocsPath).isFile();
       const parsedDocs = hasDocs
         ? parseComponentDocs(readFileSync(absoluteDocsPath, "utf8"), component, publicExports)
-        : { declaredExports: [], issues: [] };
+        : {
+            declaredExports: [],
+            issues: [],
+            localGapIds: [],
+            localVerification: null
+          };
       return {
         ...component,
         declaredExports: parsedDocs.declaredExports,
         docsIssues: parsedDocs.issues,
         docsPath,
         hasDocs,
+        localGapIds: parsedDocs.localGapIds,
+        localVerification: parsedDocs.localVerification,
         publicExports
       };
     });
@@ -532,8 +586,14 @@ export function buildComponentManifest(
         (total, item) => total + item.externalWildcardExports.length,
         0
       ),
+      locallyVerifiedProducts: products.filter(
+        (item) => item.localVerification === "complete"
+      ).length,
       packages: packages.length,
       products: products.length,
+      productsWithLocalGaps: products.filter(
+        (item) => item.localVerification === "pending"
+      ).length,
       productsWithoutPublicExports: products.filter((item) => item.publicExports.length === 0)
         .length,
       publicExports: publicValues + publicTypes,

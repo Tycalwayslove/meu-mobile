@@ -33,6 +33,17 @@ function NativeFormDemo() {
   );
 }
 
+function ReadOnlyKeyboardDemo() {
+  return (
+    <form aria-label="只读配送表单">
+      <RadioGroup defaultValue="standard" name="shipping" readOnly>
+        <Radio value="standard">标准配送</Radio>
+        <Radio value="express">急速配送</Radio>
+      </RadioGroup>
+    </form>
+  );
+}
+
 const meta = {
   title: "Forms/Radio",
   component: Radio,
@@ -88,6 +99,29 @@ export const NativeFormContract: Story = {
     await Promise.resolve();
     await Promise.resolve();
     if (!standard.checked) throw new window.Error("RadioGroup did not restore defaultValue");
+  }
+};
+export const ReadOnlyKeyboardRollback: Story = {
+  render: () => <ReadOnlyKeyboardDemo />,
+  play: async ({ canvasElement }) => {
+    const form = canvasElement.querySelector("form");
+    const options = canvasElement.querySelectorAll<HTMLInputElement>("input[type='radio']");
+    if (!(form instanceof HTMLFormElement) || options.length !== 2) {
+      throw new window.Error("Expected read-only Radio controls");
+    }
+    const standard = options.item(0);
+    const express = options.item(1);
+    if (!standard || !express) throw new window.Error("Expected read-only Radio options");
+
+    standard.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "ArrowRight" }));
+    standard.checked = false;
+    express.checked = true;
+    express.click();
+    await Promise.resolve();
+    await Promise.resolve();
+    if (!standard.checked || express.checked || new FormData(form).get("shipping") !== "standard") {
+      throw new window.Error("Read-only RadioGroup did not restore its native selection");
+    }
   }
 };
 export const RTL: Story = {

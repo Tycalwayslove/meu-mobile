@@ -128,7 +128,9 @@ export const PasscodeInput = forwardRef<PasscodeInputRef, PasscodeInputProps>(
       ariaDescribedBy,
       fieldContext ? fieldContext.describedBy : undefined
     );
-    const labelledBy = ariaLabelledby || (fieldContext ? fieldContext.labelId : undefined);
+    const labelledBy = ariaLabel
+      ? undefined
+      : mergeDescriptionIds(ariaLabelledby, fieldContext ? fieldContext.labelId : undefined);
     const required =
       requiredProp === undefined ? (fieldContext ? fieldContext.required : false) : requiredProp;
     const callerInvalid =

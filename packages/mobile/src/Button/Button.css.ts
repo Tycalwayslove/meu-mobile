@@ -2,7 +2,8 @@ import { keyframes, style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 
 const spin = keyframes({
-  to: { transform: "rotate(360deg)" }
+  from: { transform: "translate(-50%, -50%) rotate(0deg)" },
+  to: { transform: "translate(-50%, -50%) rotate(360deg)" }
 });
 
 export const button = recipe({
@@ -11,7 +12,6 @@ export const button = recipe({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "var(--meu-space-2)",
     border: 0,
     borderRadius: "var(--meu-radius-control)",
     boxSizing: "border-box",
@@ -146,14 +146,41 @@ export const buttonItem = style({
   minWidth: 0
 });
 
+export const buttonContent = recipe({
+  base: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "var(--meu-space-2)",
+    minWidth: 0
+  },
+  variants: {
+    loading: {
+      // Opacity preserves layout and the accessible label while the visual spinner is overlaid.
+      true: { opacity: 0 },
+      false: { opacity: 1 }
+    }
+  },
+  defaultVariants: { loading: false }
+});
+
 export const spinner = style({
+  position: "absolute",
+  left: "50%",
+  top: "50%",
   width: "1em",
   height: "1em",
+  boxSizing: "border-box",
   border: "2px solid currentColor",
   borderRightColor: "transparent",
   borderRadius: "50%",
   animation: `${spin} 700ms linear infinite`,
+  transform: "translate(-50%, -50%)",
   "@media": {
-    "(prefers-reduced-motion: reduce)": { animation: "none" }
+    "(prefers-reduced-motion: reduce)": { animation: "none" },
+    "(forced-colors: active)": {
+      borderColor: "ButtonText",
+      borderRightColor: "transparent"
+    }
   }
 });

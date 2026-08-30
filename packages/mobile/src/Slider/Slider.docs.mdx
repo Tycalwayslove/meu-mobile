@@ -4,6 +4,8 @@ slug: slider
 package: "@meu/mobile"
 exports: [Slider]
 status: verification
+localVerification: pending
+localGapIds: [LOC-SLIDER-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -180,7 +182,7 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
 - Next-H5 交互 E2E：`binds stepper, slider, rate and selector values` 在 mobile Chromium 与 mobile WebKit 中聚焦 `MeuFormSlider` 的原生 slider，以 ArrowRight 改值，并通过最终表单结果验证 `volume:41`；该证据覆盖键盘、hydration 和受控表单链路，不覆盖 pointer。
 - Next-H5 pointer E2E：`drags slider and rate with browser pointer events and resets cancelled sessions` 在两种移动引擎、390×844 视口中通过 `page.mouse` 产生 `isTrusted=true` 的 pointerdown，将原生 range 从 40 拖至至少 75，并验证 `onChangeComplete` 只触发一次；随后在可信 pointerdown 会话中派发 `isTrusted=false` 的 pointercancel，验证取消回调触发且不会补发完成回调。该证据不等同于物理触摸或系统级取消。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4759 B / 32768 B 预算，组合 Brotli 4269 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 4789 B / 32768 B 预算，组合 Brotli 4297 B；共享样式由应用单独导入一次。
 - Figma：`Meu/Slider` set `56:134`，12 variants；Light `451:89`、Dark `451:139`、QA `451:179`。readOnly 仅记录为 non-interactive meter 契约，不伪造可拖视觉；合并审计 fills 658/658、strokes 77/77、radii 209/209 全绑定，最小高度 44px，未命名节点 0。
 - 待补：iOS/Android 物理触摸 drag、系统 pointercancel 与滚动竞争；forced-colors 聚焦截图、Chromatic Light/Dark 视觉基线、iOS VoiceOver 与 Android TalkBack。
 
@@ -207,12 +209,13 @@ Slider 没有持续动画；数值变化直接更新 track。reduced-motion 不�
 
 ## 变更记录
 
-| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                           |
-| ---------- | ------ | ------------- | ---------------------------------------------------------- | ---------------------------------- |
-| 2026-08-28 | 未发布 | behavior      | 值统一按 bounds/step 规范化，complete 改为交互结束单次     | 非法/不对齐受控值将显示规范值      |
-| 2026-08-28 | 未发布 | compatibility | 增加 reset、RTL、forced-colors 与 SSR 证明                 | 无                                 |
-| 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                                  | README 改为仅指向本文件            |
-| 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification              |
-| 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、单次完成与合成 cancel 双引擎证据         | 状态仍为 verification              |
-| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级   | 无                                 |
-| 2026-08-29 | 未发布 | behavior      | readOnly 改为 meter + hidden form value，并补 hydration    | readOnly ref 现在指向 hidden input |
+| 日期       | 版本   | 类型          | 内容                                                       | 迁移说明                             |
+| ---------- | ------ | ------------- | ---------------------------------------------------------- | ------------------------------------ |
+| 2026-08-28 | 未发布 | behavior      | 值统一按 bounds/step 规范化，complete 改为交互结束单次     | 非法/不对齐受控值将显示规范值        |
+| 2026-08-28 | 未发布 | compatibility | 增加 reset、RTL、forced-colors 与 SSR 证明                 | 无                                   |
+| 2026-08-28 | 未发布 | docs          | 建立 Slider V2 永久事实源                                  | README 改为仅指向本文件              |
+| 2026-08-29 | 未发布 | verification  | 记录 Next-H5 双引擎键盘与表单链路，收窄 pointer 待验收范围 | 状态仍为 verification                |
+| 2026-08-29 | 未发布 | verification  | 增加可信鼠标拖动、单次完成与合成 cancel 双引擎证据         | 状态仍为 verification                |
+| 2026-08-29 | 未发布 | accessibility | 保留 ARIA invalid token 并统一 Field/status error 优先级   | 无                                   |
+| 2026-08-29 | 未发布 | behavior      | readOnly 改为 meter + hidden form value，并补 hydration    | readOnly ref 现在指向 hidden input   |
+| 2026-08-30 | 未发布 | accessibility | 显式名称优先并补 Field native required 参数化门禁          | required 对 range 的业务值无额外约束 |

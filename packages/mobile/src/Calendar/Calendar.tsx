@@ -68,6 +68,12 @@ const monthNames = [
   "December"
 ] as const;
 
+function mergeIdReferences(...values: Array<string | undefined>): string | undefined {
+  const tokens = values.flatMap((value) => (value ? value.trim().split(/\s+/) : []));
+  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
+  return uniqueTokens.length > 0 ? uniqueTokens.join(" ") : undefined;
+}
+
 function modeOf<TDate>(props: CalendarProps<TDate>): CalendarSelectionMode {
   return props.selectionMode || "single";
 }
@@ -195,8 +201,13 @@ export function Calendar<TDate = Date>(props: CalendarProps<TDate>) {
   const normalizedMin = min === undefined ? null : normalizeCalendarDay(resolvedAdapter, min);
   const normalizedMax = max === undefined ? null : normalizeCalendarDay(resolvedAdapter, max);
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
-  const describedBy = ariaDescribedBy || (fieldContext ? fieldContext.describedBy : undefined);
-  const labelledBy = ariaLabelledBy || (fieldContext ? fieldContext.labelId : undefined);
+  const describedBy = mergeIdReferences(
+    ariaDescribedBy,
+    fieldContext ? fieldContext.describedBy : undefined
+  );
+  const labelledBy = ariaLabel
+    ? undefined
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||

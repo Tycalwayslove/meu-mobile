@@ -27,6 +27,8 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   {
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     checked,
     className,
     defaultChecked = false,
@@ -56,6 +58,9 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
     ariaDescribedBy,
     fieldContext ? fieldContext.describedBy : undefined
   );
+  const labelledBy = ariaLabel
+    ? undefined
+    : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const callerInvalid =
     ariaInvalid === true ||
@@ -173,6 +178,8 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
         aria-describedby={describedBy}
         aria-disabled={loading || undefined}
         aria-invalid={resolvedAriaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
         aria-readonly={readOnly || undefined}
       />
       <span

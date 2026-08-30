@@ -46,6 +46,8 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
     "aria-busy": ariaBusy,
     "aria-describedby": ariaDescribedBy,
     "aria-invalid": ariaInvalid,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledBy,
     className,
     clearLabel: clearLabelProp,
     clearable = true,
@@ -65,6 +67,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
     onKeyDown,
     onSearch,
     readOnly = false,
+    required = false,
     size = "medium",
     status = "default",
     style,
@@ -87,6 +90,10 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
     ariaDescribedBy,
     fieldContext ? fieldContext.describedBy : undefined
   );
+  const labelledBy = ariaLabel
+    ? undefined
+    : mergeDescriptionIds(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
+  const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const callerInvalid =
     ariaInvalid === true ||
     ariaInvalid === "true" ||
@@ -243,6 +250,7 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
         form={form}
         disabled={disabled}
         readOnly={readOnly}
+        required={resolvedRequired}
         enterKeyHint={enterKeyHint}
         value={currentValue}
         onBlur={handleBlur}
@@ -253,6 +261,8 @@ export const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(functi
         aria-busy={loading ? true : ariaBusy}
         aria-describedby={describedBy}
         aria-invalid={resolvedAriaInvalid}
+        aria-label={ariaLabel}
+        aria-labelledby={labelledBy}
       />
       {loading ? (
         <span

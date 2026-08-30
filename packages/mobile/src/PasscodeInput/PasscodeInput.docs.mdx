@@ -4,6 +4,8 @@ slug: passcode-input
 package: "@meu/mobile"
 exports: [PasscodeInput]
 status: verification
+localVerification: pending
+localGapIds: [LOC-PASSCODE-INPUT-01]
 priority: P0
 since: 0.1.0
 implementedVersion: null
@@ -260,7 +262,7 @@ SMS autofill 属浏览器策略，不能仅凭桌面模拟证明。`inputMode="n
 - Story states: connected/separated、partial/complete、native/custom keyboard、plain/error/readOnly/disabled/RTL。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 8817 B / 32768 B 预算，组合 Brotli 7761 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 8830 B / 32768 B 预算，组合 Brotli 7772 B；共享样式由应用单独导入一次。
 - Mobile Chromium/WebKit E2E: 通用 H5 表单已覆盖，OTP autofill/paste/系统键盘仍需专属真机记录。
 - Chromatic Light/Dark: Story 发布后建立视觉基线；Figma 组件集已通过 Light/Dark AA 与目标尺寸 QA。
 - Real device: iOS Safari/WKWebView、Android Chrome/WebView、VoiceOver/TalkBack 待记录。
@@ -297,3 +299,4 @@ frontmatter `status` 改为 `commercial`。
 | 2026-08-28 | 未发布 | API      | `inputMode` 收窄为 numeric/text，移除无效 `maxLength/minLength` 自定义入口 | 使用 `length` 控制格数；其他 inputMode 过去也会被实现静默当作 numeric |
 | 2026-08-28 | 0.1.0  | docs     | 建立 V2 永久事实源                                                         | 后续相关改动必须同步本文                                              |
 | 2026-08-29 | 未发布 | a11y     | 原生 input 保留 invalid token，错误上下文优先输出 true                     | 无                                                                    |
+| 2026-08-30 | 未发布 | a11y     | caller/Field labelledby 合并去重并固定显式名称优先级                       | 无                                                                    |

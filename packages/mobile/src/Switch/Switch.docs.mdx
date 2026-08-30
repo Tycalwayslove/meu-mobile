@@ -4,10 +4,12 @@ slug: switch
 package: "@meu/mobile"
 exports: [Switch]
 status: verification
+localVerification: complete
+localGapIds: []
 priority: P0
 since: 0.1.0
 implementedVersion: null
-lastReviewed: 2026-08-29
+lastReviewed: 2026-08-30
 figma:
   fileKey: 1EjHFQkfyM4FNsfIuhFF1v
   nodeId: "50:414"
@@ -17,6 +19,7 @@ storyIds:
     forms-switch--checked,
     forms-switch--controlled,
     forms-switch--loading,
+    forms-switch--optimistic-failure-lifecycle,
     forms-switch--read-only,
     forms-switch--native-form-contract,
     forms-switch--rtl
@@ -31,6 +34,7 @@ source: packages/mobile/src/Switch
 - 基于原生 checkbox，暴露 `role="switch"`、checked/required/disabled/name/value/ref 和 constraint validation。
 - 支持受控/非受控、loading、readOnly、error 与三档尺寸，所有尺寸触控目标至少 44×44 CSS px。
 - 非受控值随原生 form reset 恢复；loading/readOnly 冻结交互但保留 checked 值进入 FormData，reset 使用所属 document 的计时器。
+- 受控异步场景已建立独立乐观更新生命周期：首次 change 同步进入 loading，快速重复操作被抑制；失败由调用方回滚 checked 并退出 loading，随后可以重试。
 - 调用方与 Field IDREF 合并，Field invalid/required 进入原生控件。
 - 没有 Field/status 错误时，显式 `aria-invalid="false"`、`grammar` 和 `spelling` 保持原 token；上下文错误优先输出 `true`，后两种 token 本身也进入错误视觉态。
 - thumb 使用逻辑 margin 移动，RTL 自动镜像；移动 tap、reduced-motion、forced-colors（含 disabled GrayText）和兼容旧 WebView 的焦点环有明确降级。
@@ -68,7 +72,7 @@ V2 对照了 [Ant Design Mobile Switch](https://mobile.ant.design/components/swi
 
 ## 受控与非受控
 
-`checked !== undefined` 时受控，onChange 只报告意图；否则由 defaultChecked 初始化并在 change 后更新。非受控 form reset 回到 defaultChecked。服务端保存失败时，受控调用方应回滚 checked 并提供可读错误。
+`checked !== undefined` 时受控，onChange 只报告意图；否则由 defaultChecked 初始化并在 change 后更新。非受控 form reset 回到 defaultChecked。受控调用方可以拒绝某个 nextChecked 而不产生视觉提交；乐观保存失败时应回滚旧 checked、退出 loading 并提供可读错误。
 
 ## 表单集成
 
@@ -146,13 +150,13 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 
 ## 测试证据
 
-- Unit: `Switch.test.tsx` 覆盖受控/非受控、Field、ARIA invalid token、loading/readOnly、`onClick` 抑制、FormData、reset、required 与 IDREF
+- Unit: `Switch.test.tsx` 覆盖受控/非受控、Field、ARIA invalid token、loading/readOnly、`onClick` 抑制、FormData、reset、required 与 IDREF；`Switch.lifecycle.test.tsx` 覆盖快速重复操作、loading、受控拒绝、失败回滚与再次操作
 - SSR: `Switch.ssr.test.tsx` 覆盖 role/checked/name/value 与显式 ARIA invalid token markup
 - Hydration: `Switch.hydration.test.tsx` 覆盖节点复用、受控切换与零 recoverable error
-- Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset；仓库门禁 `check-storybook-links` 本地验证 `play-fn 81/81`（81 个 Storybook title 均至少一个有意义 play）。
+- Story interaction: `NativeFormContract` 覆盖切换、FormData 与 reset；`OptimisticFailureLifecycle` 覆盖 loading 去重、失败回滚与再次操作；本批 `Forms/Switch` 12/12 stories × Light/Dark 共 24/24 本地浏览器扫描通过，play 均成功且 axe WCAG A/AA 为 0 违规。
 - Storybook 浏览器矩阵：本地扫描器在 390×844 视口验证 444 个 Story × 7 场景（Light、Dark、en-US、RTL、reduced-motion、200% 字体、forced-colors），共 3,108 个组合；有 play 的 Story 必须先返回 `storyFinished=success`，再运行 axe WCAG A/AA，结果为 0 违规、0 `pageerror`。
 - 官网 Next 运行时：本地 production build 在 390×844 下逐页验证 68 个组件页的 Light/Dark（136 场景）；主题恢复、H1/预览/API 结构、React `pageerror` / `console.error`（含 hydration mismatch）和 axe WCAG A/AA 均通过。
-- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3167 B / 32768 B 预算，组合 Brotli 2808 B；共享样式由应用单独导入一次。
+- Bundle：Rollup tree-shaken ESM（React 与包 peer dependencies external）单一公开值 gzip 3214 B / 32768 B 预算，组合 Brotli 2847 B；共享样式由应用单独导入一次。
 - Figma：canonical Medium set `50:414`，Small `50:359`、Large `50:469`；30 variants，含 loading。Selection Controls Light `450:3350`、Dark `450:3367`、QA `450:3384`；合并审计 fills 320/320、strokes 126/126、radii 103/103 全绑定，最小高度 44px，未命名节点 0。
 - Touch target: 三尺寸 root 最小 44×44
 - RTL/reduced-motion/forced-colors：CSS 和 Story 已建；浏览器视觉证据待补
@@ -164,7 +168,7 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 ### 待优化
 
 - 完成 200% 字号、强制色彩、Chromatic 最终视觉审批与真机读屏验证。
-- 用隔离 H5 请求场景验证快速点击、loading 切换、失败回滚和页面卸载竞态。
+- 在最终目标 WebView/真机矩阵复验快速点击、loading 切换、失败回滚和页面卸载竞态。
 
 ### 已完成
 
@@ -172,11 +176,14 @@ thumb 用 `margin-inline-start`，无需 JS 读取 direction，LTR checked 向�
 - 增加 readOnly、原生 form reset、Field required 与 IDREF 合并。
 - thumb 改用逻辑属性支持 RTL；补齐焦点环、forced-colors、reduced-motion、SSR 和 Story contract。
 - loading 现在同时抑制消费方 `onClick`；补移动 tap、disabled 强制色彩、跨 document reset 与 hydration 回归。
+- 增加受控拒绝、乐观失败回滚、快速重复操作和重试的独立 lifecycle 测试/Story。
 
 ## 变更记录
 
-| 日期       | 版本   | 类型         | 内容                                                                         | 迁移说明                                                             |
-| ---------- | ------ | ------------ | ---------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| 2026-08-29 | 未发布 | behavior     | loading 抑制业务 click；补移动 tap、强制色彩、跨 document reset 与 hydration | 如依赖 loading 期间 onClick 观察，请改为邻近状态或 loading prop 变化 |
-| 2026-08-29 | 未发布 | verification | 记录 Next H5 移动 Chromium/WebKit 的布尔切换、表单值、hydration 与 44px 证据 | 无                                                                   |
-| 2026-08-28 | 未发布 | behavior     | loading 表单语义、readOnly、reset、RTL 与兼容性细化                          | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled`     |
+| 日期       | 版本   | 类型          | 内容                                                                         | 迁移说明                                                             |
+| ---------- | ------ | ------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 2026-08-29 | 未发布 | behavior      | loading 抑制业务 click；补移动 tap、强制色彩、跨 document reset 与 hydration | 如依赖 loading 期间 onClick 观察，请改为邻近状态或 loading prop 变化 |
+| 2026-08-29 | 未发布 | verification  | 记录 Next H5 移动 Chromium/WebKit 的布尔切换、表单值、hydration 与 44px 证据 | 无                                                                   |
+| 2026-08-28 | 未发布 | behavior      | loading 表单语义、readOnly、reset、RTL 与兼容性细化                          | loading 时值现在保留在 FormData；需排除时显式同时设置 `disabled`     |
+| 2026-08-30 | 未发布 | accessibility | caller/Field labelledby 合并去重并固定显式名称优先级                         | 无                                                                   |
+| 2026-08-30 | 未发布 | verification  | 增加 loading 快速去重、受控拒绝、失败回滚与重试的独立生命周期证据            | 无；请求与回滚仍由受控调用方持有                                     |

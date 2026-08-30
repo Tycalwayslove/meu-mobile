@@ -104,14 +104,12 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function T
   const resolvedId = id || (fieldContext ? fieldContext.controlId : undefined);
   const resolvedRequired = required || Boolean(fieldContext && fieldContext.required);
   const describedBy =
-    ariaDescribedBy !== undefined
-      ? ariaDescribedBy
-      : fieldContext
-        ? fieldContext.describedBy
-        : undefined;
+    ariaDescribedBy === ""
+      ? ""
+      : mergeIdReferences(ariaDescribedBy, fieldContext ? fieldContext.describedBy : undefined);
   const hasExplicitAriaLabel = Boolean(ariaLabel && ariaLabel.trim());
   const labelledBy = hasExplicitAriaLabel
-    ? ariaLabelledBy
+    ? undefined
     : mergeIdReferences(ariaLabelledBy, fieldContext ? fieldContext.labelId : undefined);
   const callerInvalid =
     ariaInvalid === true ||
