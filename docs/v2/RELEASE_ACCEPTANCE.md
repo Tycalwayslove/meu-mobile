@@ -22,20 +22,20 @@
 
 下表混合当前工作树的生成式/定向证据与本批前历史全量基线；每项明确标注口径，不能把历史快照当作当前候选证明。候选冻结后仍需对同一 SHA 运行 `pnpm verify:release` 统一复验：
 
-| 门禁         | 当前证据                                                                                                                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 文档映射     | 68 个产品、125 个公开值、384 个公开类型、68 份共置文档；68/68 已完成本地验证，显式本地缺口为 0；0 未认领、0 覆盖问题                                                                             |
-| Figma        | 68/68 个组件族已建立永久组件集链接；最后 9 项已完成 Light/Dark、Token 绑定、44px 触控目标与结构 QA                                                                                               |
-| API          | 226 个结构化类型、2361/2361 个字段有说明、242 个事件；API Extractor 公开契约已同步                                                                                                               |
-| Storybook    | 当前本地构建含 490 个 Story，文档引用 461 个 Story ID 且无失配；81/81 个标题含关键交互或语义断言；当前完整矩阵 490 × 7、共 3,430 个组合通过，0 axe 违规、0 `pageerror`                           |
-| 官网         | 68 个组件页与 8 个公共页面 × Light/Dark、共 152 个场景为最近全量浏览器基线；本批 Next 16 production build 与 82 个静态页面生成通过                                                               |
-| 单元与集成   | 当前工作树 `pnpm check` 全链路通过：测试任务 19/19；mobile 167 个文件、1150/1150 tests；form-react 20 个文件、153/153 tests；Next H5 production build 与移动双引擎 180/180 通过                  |
-| 兼容静态扫描 | 202 个 production 构建文件通过 Chrome 70 / iOS 13 基线                                                                                                                                           |
-| 体积         | 68/68 产品与 125/125 公开值在预算内；共享 CSS 25,329 B gzip / 32 KiB                                                                                                                             |
-| 运行时基准   | 性能/恢复专页 14/14、三轮重复 42/42：VirtualList 10,000 行与 40 次往返、TreeSelect 1,500 节点、SwipeActions/FloatingPanel 取消恢复，以及 Image/InfiniteList/ImageUploader 确定性失败、重试与取消 |
-| 真机留证工具 | `/verification` 5 秒工具自检在移动 Chromium/WebKit 2/2 通过；可导出 60 秒性能、网络与 D-01～D-06 JSON，尚未形成任何真机 pass 记录                                                                |
-| 支持矩阵     | React 19 / Next.js 16 App Router、运行时 peer、私有发布边界与隔离消费者版本由 `pnpm support:check` 固定                                                                                          |
-| 许可工程门禁 | `pnpm legal:check` 校验许可副本、5 条图标来源、官网披露和 `@meu/icons-core` 实际 pack 文件清单；法律结论仍需人工签字                                                                             |
+| 门禁         | 当前证据                                                                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 文档映射     | 68 个产品、125 个公开值、384 个公开类型、68 份共置文档；68/68 已完成本地验证，显式本地缺口为 0；0 未认领、0 覆盖问题                                                                                   |
+| Figma        | 68/68 个组件族已建立永久组件集链接；最后 9 项已完成 Light/Dark、Token 绑定、44px 触控目标与结构 QA                                                                                                     |
+| API          | 226 个结构化类型、2361/2361 个字段有说明、242 个事件；API Extractor 公开契约已同步                                                                                                                     |
+| Storybook    | 当前本地构建含 490 个 Story，文档引用 461 个 Story ID 且无失配；81/81 个标题含关键交互或语义断言；当前完整矩阵 490 × 7、共 3,430 个组合通过，0 axe 违规、0 `pageerror`                                 |
+| 官网         | 68 个组件页与 8 个公共页面 × Light/Dark、共 152 个场景为最近全量浏览器基线；本批 Next 16 production build 与 82 个静态页面生成通过                                                                     |
+| 单元与集成   | 当前工作树 `pnpm check` 全链路通过：测试任务 19/19；mobile 167 个文件、1150/1150 tests；form-react 20 个文件、153/153 tests；Next H5 production build 与移动双引擎 180/180 通过                        |
+| 兼容静态扫描 | 202 个 production 构建文件通过 Chrome 70 / iOS 13 基线                                                                                                                                                 |
+| 体积         | 68/68 产品与 125/125 公开值在预算内；共享 CSS 25,329 B gzip / 32 KiB                                                                                                                                   |
+| 运行时基准   | 性能/恢复专页 14/14、三轮重复 42/42：VirtualList 10,000 行与 40 次往返、TreeSelect 1,500 节点、SwipeActions/FloatingPanel 取消恢复，以及 Image/InfiniteList/ImageUploader 确定性失败、重试与取消       |
+| 真机留证工具 | `/verification` 5 秒工具自检在移动 Chromium/WebKit 2/2 通过；可导出 60 秒性能、网络与 D-01～D-06 JSON，尚未形成任何真机 pass 记录                                                                      |
+| 支持矩阵     | React 19 / Next.js 16 App Router、运行时 peer、私有发布边界与隔离消费者版本由 `pnpm support:check` 固定                                                                                                |
+| 许可工程门禁 | `pnpm legal:check` 校验 7 个可分发包的 9 个第三方直接运行时依赖、锁定版本、MIT 元数据、外部化边界与官网披露，并校验许可副本、5 条图标来源和 `@meu/icons-core` 实际 pack 文件清单；法律结论仍需人工签字 |
 
 这些结果不自动把组件标记为 `commercial`。真机、旧 WebView、持续性能、法务和人工视觉仍为阻断项。
 
@@ -54,12 +54,12 @@
 | PERF-02  | 图片与集合内存           | ImageUploader/ImageViewer 大图、删除、重试、卸载；VirtualList/TreeSelect 长时间滚动；记录峰值和回落          | pending | —           | 自动化已有 VirtualList 40 次往返及上传 retry/Abort；仍缺峰值与回落      |
 | NET-01   | 弱网与恢复               | 慢 3G、离线、丢包；Image/InfiniteList/ImageUploader 的取消、重试、恢复和重复请求                             | pending | —           | 双引擎确定性失败/重试/取消通过；仍缺慢 3G、离线与丢包实测               |
 | LEGAL-01 | Meu 自有代码分发方式     | 复核公共源码仓库、`UNLICENSED`、未来制品和客户交付方式是否一致                                               | pending | —           | 当前仓库可公开读取且无根级 Meu 许可证；需决定保持公开并补条款或改为私有 |
-| LEGAL-02 | 第三方图标许可           | 复核 Lucide ISC、Feather MIT、完整许可文本与 notices 随实际分发制品保留                                      | pending | —           | 工程门禁与官网披露已通过；待按实际交付方式签字                          |
+| LEGAL-02 | 第三方许可随制品保留     | 复核 9 个直接运行时依赖、Lucide/Feather 图标、完整许可文本与 notices 随实际分发制品保留                      | pending | —           | 依赖清单、外部化边界、许可副本与官网披露已通过；待按实际交付方式签字    |
 | LEGAL-03 | 图标来源与命名           | 复核 `icons.lock.json` 的版本、commit、SHA-512/SHA-256、Meu ID 与上游名称映射；确认 Meu 命名不暗示原创几何   | pending | —           | 5 条映射、未修改几何及 Meu 命名声明已自动验证；待负责人签字             |
 | VIS-01   | 最终人工视觉审批         | 冻结 SHA 上运行一次 Chromatic；Light/Dark、移动视口、差异全部批准或记录                                      | pending | —           | —                                                                       |
 | WEB-01   | 官网正式发布             | VIS-01 完成后触发 Vercel；首页、68 个页面、Storybook 链接与移动视口 smoke test                               | pending | —           | —                                                                       |
 
-图标检查不是法律意见。工程证据位于 `packages/icons-core/icons.lock.json`、`THIRD_PARTY_NOTICES.md`、`licenses/` 与上游 SVG 快照；最终可分发性必须由有授权的法务或负责人确认，并记录在 [`LEGAL_REVIEW.md`](./LEGAL_REVIEW.md)。
+许可证检查不是法律意见。工程证据位于 `runtime-dependencies.json`、`packages/icons-core/icons.lock.json`、`THIRD_PARTY_NOTICES.md`、`licenses/` 与上游 SVG 快照；最终可分发性必须由有授权的法务或负责人确认，并记录在 [`LEGAL_REVIEW.md`](./LEGAL_REVIEW.md)。
 
 `pnpm commercial:guard` 已接入日常 `pnpm check`：它验证 13 个阻断项结构完整，并禁止在阻断项未完成时提前把任意组件标为 `commercial`。所有人工记录和组件状态提交后，使用 `pnpm commercial:check` 严格校验 68/68 状态、候选 SHA、全部阻断项和干净工作树；候选 SHA 必须是当前提交的祖先，且候选之后只能存在上述验收证据文件，不能夹带运行时或契约变化。
 

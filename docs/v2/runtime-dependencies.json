@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "scope": "direct runtime dependencies and peer dependencies of distributable Meu packages",
+  "deliveryModel": "external-package",
+  "entries": [
+    {
+      "name": "@floating-ui/react",
+      "resolvedVersion": "0.27.20",
+      "license": "MIT",
+      "licenseFile": "licenses/floating-ui-mit.txt",
+      "sourceLicenseUrl": "https://www.npmjs.com/package/@floating-ui/react/v/0.27.20",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/mobile",
+          "kind": "dependency",
+          "range": "0.27.20"
+        }
+      ]
+    },
+    {
+      "name": "@hookform/resolvers",
+      "resolvedVersion": "5.9.1",
+      "license": "MIT",
+      "licenseFile": "licenses/react-hook-form-mit.txt",
+      "sourceLicenseUrl": "https://github.com/react-hook-form/resolvers/blob/v5.9.1/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/form-react",
+          "kind": "dependency",
+          "range": "5.9.1"
+        }
+      ]
+    },
+    {
+      "name": "@tanstack/react-virtual",
+      "resolvedVersion": "3.14.10",
+      "license": "MIT",
+      "licenseFile": "licenses/tanstack-virtual-mit.txt",
+      "sourceLicenseUrl": "https://www.npmjs.com/package/@tanstack/react-virtual/v/3.14.10",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/mobile",
+          "kind": "dependency",
+          "range": "3.14.10"
+        }
+      ]
+    },
+    {
+      "name": "@vanilla-extract/recipes",
+      "resolvedVersion": "0.5.7",
+      "license": "MIT",
+      "licenseFile": "licenses/vanilla-extract-mit.txt",
+      "sourceLicenseUrl": "https://github.com/vanilla-extract-css/vanilla-extract/blob/%40vanilla-extract/recipes%400.5.7/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/mobile",
+          "kind": "dependency",
+          "range": "0.5.7"
+        }
+      ]
+    },
+    {
+      "name": "embla-carousel-react",
+      "resolvedVersion": "8.6.0",
+      "license": "MIT",
+      "licenseFile": "licenses/embla-carousel-mit.txt",
+      "sourceLicenseUrl": "https://github.com/davidjerleke/embla-carousel/blob/v8.6.0/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/mobile",
+          "kind": "dependency",
+          "range": "8.6.0"
+        }
+      ]
+    },
+    {
+      "name": "react",
+      "resolvedVersion": "19.2.8",
+      "license": "MIT",
+      "licenseFile": "licenses/react-mit.txt",
+      "sourceLicenseUrl": "https://github.com/facebook/react/blob/v19.2.8/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/form-react",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        },
+        {
+          "package": "@meu/icons-react",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        },
+        {
+          "package": "@meu/mobile",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        },
+        {
+          "package": "@meu/primitives-react",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        }
+      ]
+    },
+    {
+      "name": "react-dom",
+      "resolvedVersion": "19.2.8",
+      "license": "MIT",
+      "licenseFile": "licenses/react-mit.txt",
+      "sourceLicenseUrl": "https://github.com/facebook/react/blob/v19.2.8/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/form-react",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        },
+        {
+          "package": "@meu/mobile",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        },
+        {
+          "package": "@meu/primitives-react",
+          "kind": "peerDependency",
+          "range": ">=19.0.0 <20.0.0"
+        }
+      ]
+    },
+    {
+      "name": "react-hook-form",
+      "resolvedVersion": "7.86.0",
+      "license": "MIT",
+      "licenseFile": "licenses/react-hook-form-mit.txt",
+      "sourceLicenseUrl": "https://github.com/react-hook-form/react-hook-form/blob/v7.86.0/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/form-react",
+          "kind": "peerDependency",
+          "range": ">=7.55.0 <8.0.0"
+        }
+      ]
+    },
+    {
+      "name": "zod",
+      "resolvedVersion": "4.4.3",
+      "license": "MIT",
+      "licenseFile": "licenses/zod-mit.txt",
+      "sourceLicenseUrl": "https://github.com/colinhacks/zod/blob/v4.4.3/LICENSE",
+      "bundled": false,
+      "declarations": [
+        {
+          "package": "@meu/form-react",
+          "kind": "peerDependency",
+          "range": ">=4.0.0 <5.0.0"
+        }
+      ]
+    }
+  ]
+}

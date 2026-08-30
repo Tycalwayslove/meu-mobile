@@ -27,7 +27,13 @@ const licenseCopies = [
   ["licenses/lucide-isc.txt", "apps/docs/public/licenses/lucide-isc.txt"],
   ["licenses/feather-mit.txt", "packages/icons-core/licenses/feather-mit.txt"],
   ["licenses/feather-mit.txt", "apps/docs/public/licenses/feather-mit.txt"],
-  ["licenses/tanstack-virtual-mit.txt", "apps/docs/public/licenses/tanstack-virtual-mit.txt"]
+  ["licenses/tanstack-virtual-mit.txt", "apps/docs/public/licenses/tanstack-virtual-mit.txt"],
+  ["licenses/floating-ui-mit.txt", "apps/docs/public/licenses/floating-ui-mit.txt"],
+  ["licenses/vanilla-extract-mit.txt", "apps/docs/public/licenses/vanilla-extract-mit.txt"],
+  ["licenses/embla-carousel-mit.txt", "apps/docs/public/licenses/embla-carousel-mit.txt"],
+  ["licenses/react-hook-form-mit.txt", "apps/docs/public/licenses/react-hook-form-mit.txt"],
+  ["licenses/zod-mit.txt", "apps/docs/public/licenses/zod-mit.txt"],
+  ["licenses/react-mit.txt", "apps/docs/public/licenses/react-mit.txt"]
 ];
 
 for (const [canonicalPath, distributedPath] of licenseCopies) {
@@ -38,21 +44,159 @@ for (const [canonicalPath, distributedPath] of licenseCopies) {
   );
 }
 
-const [rootNotices, iconPackage, iconManifest, licensePage, footer, sitemap, mobilePackage] =
-  await Promise.all([
-    read("THIRD_PARTY_NOTICES.md"),
-    readJson("packages/icons-core/package.json"),
-    readJson("packages/icons-core/src/icons.manifest.json"),
-    read("apps/docs/app/licenses/page.tsx"),
-    read("apps/docs/app/_components/SiteFooter.tsx"),
-    read("apps/docs/app/sitemap.ts"),
-    readJson("packages/mobile/package.json")
-  ]);
+const [
+  rootNotices,
+  iconPackage,
+  iconManifest,
+  licensePage,
+  footer,
+  sitemap,
+  mobilePackage,
+  runtimeInventory,
+  rollupConfig
+] = await Promise.all([
+  read("THIRD_PARTY_NOTICES.md"),
+  readJson("packages/icons-core/package.json"),
+  readJson("packages/icons-core/src/icons.manifest.json"),
+  read("apps/docs/app/licenses/page.tsx"),
+  read("apps/docs/app/_components/SiteFooter.tsx"),
+  read("apps/docs/app/sitemap.ts"),
+  readJson("packages/mobile/package.json"),
+  readJson("docs/v2/runtime-dependencies.json"),
+  read("tooling/rollup-config/index.mjs")
+]);
 
 expectIncludes(rootNotices, "Lucide Icons 1.34.0", "root third-party notices");
 expectIncludes(rootNotices, "Feather Icons", "root third-party notices");
 expectIncludes(rootNotices, "@tanstack/react-virtual` 3.14.10", "root third-party notices");
 expectIncludes(rootNotices, "@tanstack/virtual-core` 3.17.8", "root third-party notices");
+
+const shippingPackagePaths = [
+  "packages/date-adapter",
+  "packages/form-react",
+  "packages/icons-core",
+  "packages/icons-react",
+  "packages/mobile",
+  "packages/primitives-react",
+  "packages/tokens"
+];
+const packagePathByName = new Map();
+const declaredRuntime = new Map();
+const dependencySections = [
+  ["dependencies", "dependency"],
+  ["peerDependencies", "peerDependency"],
+  ["optionalDependencies", "optionalDependency"]
+];
+
+for (const packagePath of shippingPackagePaths) {
+  const packageJson = await readJson(`${packagePath}/package.json`);
+  packagePathByName.set(packageJson.name, packagePath);
+
+  for (const [section, kind] of dependencySections) {
+    for (const [name, range] of Object.entries(packageJson[section] ?? {})) {
+      if (name.startsWith("@meu/")) continue;
+      const declarations = declaredRuntime.get(name) ?? [];
+      declarations.push({ package: packageJson.name, kind, range });
+      declaredRuntime.set(name, declarations);
+    }
+  }
+}
+
+const sortDeclarations = (declarations) =>
+  [...declarations].sort((left, right) =>
+    `${left.package}:${left.kind}:${left.range}`.localeCompare(
+      `${right.package}:${right.kind}:${right.range}`
+    )
+  );
+const expectedRuntimeNames = [...declaredRuntime.keys()].sort();
+const inventoryNames = (runtimeInventory.entries ?? []).map((entry) => entry.name);
+
+expect(runtimeInventory.schemaVersion === 1, "runtime dependency inventory schema drifted");
+expect(
+  runtimeInventory.deliveryModel === "external-package",
+  "runtime dependency delivery model must remain external-package"
+);
+expect(
+  JSON.stringify(inventoryNames) === JSON.stringify(expectedRuntimeNames),
+  `runtime dependency inventory names drifted: expected ${expectedRuntimeNames.join(", ")}`
+);
+expectIncludes(
+  rollupConfig,
+  "Object.keys(packageJson.dependencies ?? {})",
+  "Rollup dependency externalization"
+);
+expectIncludes(
+  rollupConfig,
+  "Object.keys(packageJson.peerDependencies ?? {})",
+  "Rollup peer dependency externalization"
+);
+expectIncludes(
+  rollupConfig,
+  "Object.keys(packageJson.optionalDependencies ?? {})",
+  "Rollup optional dependency externalization"
+);
+
+for (const entry of runtimeInventory.entries ?? []) {
+  const expectedDeclarations = sortDeclarations(declaredRuntime.get(entry.name) ?? []);
+  expect(
+    JSON.stringify(sortDeclarations(entry.declarations ?? [])) ===
+      JSON.stringify(expectedDeclarations),
+    `${entry.name}: declaration list drifted`
+  );
+  expect(entry.license === "MIT", `${entry.name}: expected reviewed MIT license`);
+  expect(entry.bundled === false, `${entry.name}: must remain external to Meu JavaScript output`);
+  expect(
+    typeof entry.sourceLicenseUrl === "string" && entry.sourceLicenseUrl.startsWith("https://"),
+    `${entry.name}: missing authoritative license source URL`
+  );
+
+  const declaration = expectedDeclarations[0];
+  if (!declaration) continue;
+  const installedPackage = JSON.parse(
+    await readFile(
+      resolve(
+        workspaceRoot,
+        packagePathByName.get(declaration.package),
+        "node_modules",
+        entry.name,
+        "package.json"
+      ),
+      "utf8"
+    )
+  );
+  expect(
+    installedPackage.version === entry.resolvedVersion,
+    `${entry.name}: resolved version ${installedPackage.version} != ${entry.resolvedVersion}`
+  );
+  expect(installedPackage.license === entry.license, `${entry.name}: installed license drifted`);
+
+  const canonicalLicense = await read(entry.licenseFile);
+  expectIncludes(canonicalLicense, "MIT License", `${entry.name} canonical license`);
+  expectIncludes(rootNotices, `\`${entry.name}\``, "root third-party notices");
+  expectIncludes(rootNotices, entry.resolvedVersion, "root third-party notices");
+  expectIncludes(
+    licensePage,
+    `/licenses/${entry.licenseFile.split("/").at(-1)}`,
+    "docs license page"
+  );
+
+  const installedLicensePath = resolve(
+    workspaceRoot,
+    packagePathByName.get(declaration.package),
+    "node_modules",
+    entry.name,
+    "LICENSE"
+  );
+  if (entry.name === "embla-carousel-react") {
+    expectIncludes(canonicalLicense, "Copyright (c) David Jerleke.", "Embla canonical license");
+  } else {
+    const installedLicense = await readFile(installedLicensePath, "utf8");
+    expect(
+      installedLicense.trim() === canonicalLicense.trim(),
+      `${entry.name}: canonical license differs from installed package`
+    );
+  }
+}
 
 expect(iconPackage.private === true, "@meu/icons-core must remain private before npm launch");
 expect(
@@ -97,7 +241,13 @@ expect(
 for (const href of [
   "/licenses/lucide-isc.txt",
   "/licenses/feather-mit.txt",
-  "/licenses/tanstack-virtual-mit.txt"
+  "/licenses/tanstack-virtual-mit.txt",
+  "/licenses/floating-ui-mit.txt",
+  "/licenses/vanilla-extract-mit.txt",
+  "/licenses/embla-carousel-mit.txt",
+  "/licenses/react-hook-form-mit.txt",
+  "/licenses/zod-mit.txt",
+  "/licenses/react-mit.txt"
 ]) {
   expectIncludes(licensePage, href, "docs license page");
 }
@@ -141,6 +291,6 @@ if (failures.length > 0) {
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    "Third-party notice gate passed: canonical license copies, 5 icon provenance records, docs disclosure, and packed notices verified.\n"
+    "Third-party notice gate passed: direct runtime inventory, externalization, canonical license copies, 5 icon provenance records, docs disclosure, and packed notices verified.\n"
   );
 }

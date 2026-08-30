@@ -4,13 +4,14 @@
 
 ## 当前可核验的交付事实
 
-| 项目                    | 当前事实                                                                                                                                            |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 源码与设计资产          | `Tycalwayslove/meu-mobile` 当前可公开读取，且仓库内包含 `meu-design/`；公开可读不等于授予复制、修改或再分发许可                                     |
-| 工作区包                | 根工作区及 8 个 `packages/*` 包均为 `private: true`；当前不发布 npm                                                                                 |
-| 线上展示                | 官网通过 Vercel、Storybook 通过 Chromatic 对外展示；它们是文档与演示站，不是软件包授权                                                              |
-| Meu 自有代码条款        | 仓库根目录没有 Meu 自有代码的统一 `LICENSE`；只有 `packages/icons-core/LICENSE` 明示 Meu 自有内容为 `UNLICENSED`                                    |
-| 第三方 notices 放置位置 | 根目录与 `packages/icons-core` 均保留 `THIRD_PARTY_NOTICES.md` 和完整许可副本；官网 `/licenses` 同步展示 Lucide、Feather 与 TanStack Virtual 的许可 |
+| 项目                    | 当前事实                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 源码与设计资产          | `Tycalwayslove/meu-mobile` 当前可公开读取，且仓库内包含 `meu-design/`；公开可读不等于授予复制、修改或再分发许可                                   |
+| 工作区包                | 根工作区及 8 个 `packages/*` 包均为 `private: true`；当前不发布 npm                                                                               |
+| 线上展示                | 官网通过 Vercel、Storybook 通过 Chromatic 对外展示；它们是文档与演示站，不是软件包授权                                                            |
+| Meu 自有代码条款        | 仓库根目录没有 Meu 自有代码的统一 `LICENSE`；只有 `packages/icons-core/LICENSE` 明示 Meu 自有内容为 `UNLICENSED`                                  |
+| 第三方 notices 放置位置 | 根目录保留完整直接运行时依赖清单、notices 与许可副本；`packages/icons-core` 随包保留图标 notices；官网 `/licenses` 同步展示全部直接运行时依赖许可 |
+| 运行时依赖交付边界      | 7 个可分发包共有 9 个第三方直接 dependency / peer dependency；Rollup 将声明依赖全部保持为外部包，不嵌入 Meu JavaScript 输出                       |
 
 ## 待负责人确认的交付范围
 
@@ -34,14 +35,15 @@
 
 ## LEGAL-02 · 第三方许可随制品保留
 
-工程门禁 `pnpm legal:check` 已验证 Lucide/Feather 许可副本一致、图标来源记录完整、官网披露可访问，并通过 `npm pack --dry-run` 检查 `@meu/icons-core` 的许可文件清单。审核人仍需根据最终交付载体确认 notices 是否随实际制品保留。
+工程门禁 `pnpm legal:check` 已验证 7 个可分发 Meu 包的 9 个第三方直接运行时依赖声明、锁定版本、MIT 元数据、外部化构建边界、规范许可副本和官网披露；同时验证 Lucide/Feather 许可副本一致、图标来源记录完整，并通过 `npm pack --dry-run` 检查 `@meu/icons-core` 的许可文件清单。审核人仍需根据最终交付载体确认 notices 是否随实际制品保留。
 
 审核范围至少包括：
 
 - `THIRD_PARTY_NOTICES.md` 与 `licenses/`；
+- `runtime-dependencies.json` 中 dependency / peer dependency 到锁定版本、许可文本和交付方式的映射；
 - `packages/icons-core/icons.lock.json`、上游 SVG 快照和实际 pack 清单；
 - 最终应用 bundle、源码压缩包、私有包或客户交付目录中的许可文件位置；
-- 其他运行时依赖由各依赖包携带的许可，以及最终打包方式是否改变其保留要求。
+- 外部运行时依赖由各依赖包携带的许可，以及最终应用打包方式是否改变其保留要求。
 
 ## LEGAL-03 · 图标来源与 Meu 命名
 
