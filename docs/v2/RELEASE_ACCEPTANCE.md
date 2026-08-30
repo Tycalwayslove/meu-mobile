@@ -10,11 +10,13 @@
 
 | 字段            | 记录                                     |
 | --------------- | ---------------------------------------- |
-| 候选 commit SHA | 待定                                     |
-| 冻结日期        | 待定                                     |
-| 候选负责人      | 待定                                     |
+| 候选 commit SHA | 21f717baeef22fb48fdd76224168f7aaab12d947 |
+| 冻结日期        | 2026-08-30                               |
+| 候选负责人      | Tycalwayslove                            |
 | 变更范围        | 68 个组件、官网、Storybook、表单与图标包 |
 | npm             | 不发布                                   |
+
+冻结依据：同一候选 SHA 的本地 `pnpm verify:release` 全链路通过；GitHub [`Quality #66`](https://github.com/Tycalwayslove/meu-mobile/actions/runs/33299319546) 的 `quality` 与 `next-h5-e2e` 均通过，其中远端移动双引擎为 180/180。
 
 候选 SHA 一旦进入人工验收，不允许静默替换。任何代码、样式、Token、Story 或组件契约变更都必须生成新候选，并重跑受影响的自动化与人工场景。候选冻结后只允许提交验收记录、性能/设备证据和组件文档的 `status` 字段；`commercial:check` 会拒绝其他文件变化。
 
