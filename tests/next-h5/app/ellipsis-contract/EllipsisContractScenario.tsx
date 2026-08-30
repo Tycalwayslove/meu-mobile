@@ -4,7 +4,7 @@ import { Ellipsis } from "@meu/mobile";
 import { useRef, useState } from "react";
 
 const content =
-  "Commercial typography must remain accurately measured after every replacement and font load.";
+  "iiiiiiiiiiiiiiiiiiiiiiii WWWWWWWWWW typography must remain accurately measured after every replacement and font load.";
 const loadedFontFamily = "MeuEllipsisLoadedMono";
 
 export function EllipsisContractScenario() {

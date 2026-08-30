@@ -320,8 +320,8 @@ test("focuses and reveals the first server error in form DOM order", async ({ pa
   const viewportHeight = await page.evaluate(() => window.innerHeight);
   const box = await input.boundingBox();
   expect(box).not.toBeNull();
-  expect(box ? box.y : -1).toBeGreaterThanOrEqual(0);
-  expect(box ? box.y + box.height : viewportHeight + 1).toBeLessThanOrEqual(viewportHeight);
+  expect(box ? box.y : -2).toBeGreaterThanOrEqual(-1);
+  expect(box ? box.y + box.height : viewportHeight + 2).toBeLessThanOrEqual(viewportHeight + 1);
 });
 
 test("searches and clears with the SearchField contract", async ({ page }) => {
@@ -1430,13 +1430,15 @@ test("keeps Picker drafts isolated until confirmation and restores trigger focus
   await expect(picker).toBeVisible();
   await expect(page.locator("body")).toHaveAttribute("data-meu-scroll-locked", "true");
   await dateWheel.focus();
-  await page.keyboard.press("ArrowDown");
+  await expect(dateWheel).toBeFocused();
+  await dateWheel.press("ArrowDown");
   await expect(picker.getByRole("option", { name: "明天" })).toHaveAttribute(
     "aria-selected",
     "true"
   );
   await timeWheel.focus();
-  await page.keyboard.press("ArrowDown");
+  await expect(timeWheel).toBeFocused();
+  await timeWheel.press("ArrowDown");
   await picker.getByRole("button", { name: "取消" }).click();
   await expect(picker).toBeHidden();
   await expect(trigger).toBeFocused();

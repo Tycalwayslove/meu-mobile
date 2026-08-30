@@ -243,12 +243,21 @@ describe("MeuForm advanced integration", () => {
 
   it("maps server errors and focuses the first invalid field", async () => {
     render(<ServerErrorsExample />);
+    const input = screen.getByRole("textbox", { name: "店铺名称" });
+    const scrollIntoView = vi.fn();
+    vi.spyOn(input, "getBoundingClientRect").mockReturnValue({
+      bottom: 40,
+      top: -12
+    } as DOMRect);
+    Object.defineProperty(input, "scrollIntoView", { configurable: true, value: scrollIntoView });
+
     fireEvent.click(screen.getByRole("button", { name: "模拟服务端错误" }));
 
     const errors = await screen.findAllByRole("alert");
     expect(errors.map((error) => error.textContent)).toEqual(["店铺名称已存在", "联系人不可用"]);
+    await waitFor(() => expect(document.activeElement).toBe(input));
     await waitFor(() =>
-      expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "店铺名称" }))
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest", inline: "nearest" })
     );
   });
 

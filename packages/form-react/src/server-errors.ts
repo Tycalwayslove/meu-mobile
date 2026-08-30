@@ -4,6 +4,22 @@ import { firstFieldInMeuForm, getMeuFormRoot } from "./form-root-registry";
 
 const appliedServerFields = new WeakMap<object, Set<string>>();
 
+function revealFocusedField(form: object) {
+  const root = getMeuFormRoot(form);
+  if (!root) return;
+  const view = root.ownerDocument.defaultView;
+  if (!view) return;
+
+  view.requestAnimationFrame(() => {
+    const focused = root.ownerDocument.activeElement;
+    if (!(focused instanceof view.HTMLElement) || !root.contains(focused)) return;
+    const { bottom, top } = focused.getBoundingClientRect();
+    if (top < 0 || bottom > view.innerHeight) {
+      focused.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  });
+}
+
 /** @public */
 export type MeuFormServerErrors<TFieldValues extends FieldValues> = Partial<
   Record<Path<TFieldValues>, string>
@@ -65,6 +81,9 @@ export function applyMeuFormErrors<TFieldValues extends FieldValues>(
     else if (getMeuFormRoot(form)) firstField = undefined;
   }
 
-  if (shouldFocusFirst && firstField) form.setFocus(firstField);
+  if (shouldFocusFirst && firstField) {
+    form.setFocus(firstField);
+    revealFocusedField(form);
+  }
   return firstField;
 }
